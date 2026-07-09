@@ -1,4 +1,5 @@
 import type {
+  FlatList as FlatListRef,
   LayoutChangeEvent,
   ListRenderItemInfo,
   StyleProp,
@@ -40,6 +41,7 @@ type NftFolderProps = {
   contentContainerStyle?: StyleProp<ViewStyle>;
   ListHeaderComponent?: ListHeaderComponentProperty<unknown>;
   scrollHandler?: ScrollHandlerProcessed<Record<string, unknown>>;
+  listRef?: React.RefObject<FlatListRef | null>;
 };
 
 export const NftFolder = ({
@@ -51,6 +53,7 @@ export const NftFolder = ({
   contentContainerStyle,
   ListHeaderComponent,
   scrollHandler,
+  listRef,
 }: NftFolderProps) => {
   const { theme } = useTheme();
   const nfts = useLaceSelector('tokens.selectNFTsByFolderId', folderId);
@@ -171,7 +174,7 @@ export const NftFolder = ({
               style={componentStyles.thumbnailContainer}
               testID={`nft-thumbnail-${index}`}
               onPress={() => {
-                NavigationControls.sheets.navigate(
+                NavigationControls.navigate(
                   SheetRoutes.AssetDetailBottomSheet,
                   {
                     token: item.token,
@@ -198,6 +201,7 @@ export const NftFolder = ({
 
   return (
     <Animated.FlatList
+      ref={listRef}
       testID="nft-folder-container"
       data={gridItems}
       keyExtractor={keyExtractor}

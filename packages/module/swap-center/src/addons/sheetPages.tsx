@@ -13,17 +13,19 @@ import { SwapSlippage } from '../pages/SwapSlippage';
 import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
 
+const swapSheetOptions = { detents: [1], scrollable: true };
+
 const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
   <React.Fragment key="swap-center-sheet-pages-addons">
     <SheetStack.Screen
       name={SheetRoutes.SwapSelectSellToken}
       component={SwapSelectSellToken}
-      options={{ snapPoints: ['80%'] }}
+      options={swapSheetOptions}
     />
     <SheetStack.Screen
       name={SheetRoutes.SwapSelectBuyToken}
       component={SwapSelectBuyToken}
-      options={{ snapPoints: ['80%'] }}
+      options={swapSheetOptions}
     />
     <SheetStack.Screen
       name={SheetRoutes.SwapSlippage}
@@ -32,17 +34,17 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
     <SheetStack.Screen
       name={SheetRoutes.SwapLiquiditySources}
       component={SwapLiquiditySources}
-      options={{ snapPoints: ['80%'] }}
+      options={swapSheetOptions}
     />
     <SheetStack.Screen
       name={SheetRoutes.SwapReview}
       component={SwapReview}
-      options={{ snapPoints: ['80%'] }}
+      options={swapSheetOptions}
     />
     <SheetStack.Screen
       name={SheetRoutes.SwapResult}
       component={SwapResult}
-      options={{ snapPoints: ['80%'] }}
+      options={swapSheetOptions}
     />
   </React.Fragment>
 );

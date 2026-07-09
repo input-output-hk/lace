@@ -12,7 +12,6 @@ export const useSupportProps = () => {
 
   const title = t('v2.pages.support.title');
   const subtitle = t('v2.pages.support.subtitle');
-  const searchPlaceholder = t('v2.pages.support.search-placeholder');
 
   const handleAiSupport = useCallback(() => {
     if (!GET_AI_SUPPORT_URL) {
@@ -64,6 +63,5 @@ export const useSupportProps = () => {
     supportOptions,
     title,
     subtitle,
-    searchPlaceholder,
   };
 };

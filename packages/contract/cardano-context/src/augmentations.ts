@@ -16,6 +16,35 @@ type CardanoDependencies = CardanoInMemorySigningDependencies &
   CardanoProviderDependencies &
   CardanoSideEffectsDependencies;
 
+export type CardanoActivitySecurityMetadata = {
+  exploits?: {
+    /**
+     * SecondFi/Yoroi June 2026 wallet compromise — Ed25519 private-key
+     * disclosure via deterministic public nonce. See
+     * src/security/exploits/deterministicNonce202606/.
+     */
+    deterministicNonce202606?: boolean;
+  };
+};
+
+export type CardanoInFlightUtxoActivityMetadata = {
+  consumedInputs: Cardano.TxIn[];
+  producedOutputs: Cardano.Utxo[];
+  /**
+   * Slot of the block that included the on-chain tx behind this activity.
+   * Absent on Pending activities and on activities persisted before this
+   * field was introduced.
+   */
+  slot?: Cardano.Slot;
+  security?: CardanoActivitySecurityMetadata;
+};
+
+declare module '@lace-contract/activities' {
+  interface BlockchainSpecificActivityMetadata {
+    Cardano?: CardanoInFlightUtxoActivityMetadata;
+  }
+}
+
 declare module '@lace-contract/module' {
   interface AppConfig {
     defaultTestnetChainId: Cardano.ChainId;

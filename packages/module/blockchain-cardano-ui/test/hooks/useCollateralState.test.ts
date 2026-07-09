@@ -8,9 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
-    sheets: {
-      close: vi.fn(),
-    },
+    closeSheet: vi.fn(),
   },
 }));
 
@@ -30,7 +28,7 @@ vi.mock('@lace-contract/i18n', async importOriginal => {
 import * as hooksModule from '../../src/hooks';
 import { useCollateralState } from '../../src/hooks/useCollateralState';
 
-const mockSheetsClose = vi.mocked(NavigationControls.sheets.close);
+const mockSheetsClose = vi.mocked(NavigationControls.closeSheet);
 
 vi.mock('@lace-lib/ui-toolkit', () => ({
   useTheme: () => ({ theme: { brand: { white: '#fff' } } }),

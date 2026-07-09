@@ -24,12 +24,7 @@ module.exports = {
       '..',
       'src/content-scripts/injected-script.ts',
     ),
-    'ledger-usb-picker': path.join(
-      __dirname,
-      '..',
-      '..',
-      'src/ledger-usb-picker.ts',
-    ),
+    'hw-usb-picker': path.join(__dirname, '..', '..', 'src/hw-usb-picker.ts'),
   },
   output: {
     // required for content scripts
@@ -40,8 +35,8 @@ module.exports = {
       patterns: [
         { from: 'assets/img', to: path.join(outputDirectory, 'img') },
         {
-          from: 'assets/html/ledger-usb-picker.html',
-          to: path.join(outputDirectory, 'ledger-usb-picker.html'),
+          from: 'assets/html/hw-usb-picker.html',
+          to: path.join(outputDirectory, 'hw-usb-picker.html'),
         },
         {
           // @trezor/connect-webextension bridges postMessage between its
@@ -52,6 +47,10 @@ module.exports = {
             '@trezor/connect-webextension/build/content-script.js',
           ),
           to: path.join(outputDirectory, 'js', 'trezor-content-script.js'),
+        },
+        {
+          from: 'assets/_locales',
+          to: path.join(outputDirectory, '_locales'),
         },
       ],
     }),

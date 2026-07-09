@@ -2,7 +2,7 @@ import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { Sheet } from '../../..';
+import { footerHeight, Sheet } from '../../..';
 import { spacing } from '../../../../design-tokens';
 import {
   Button,
@@ -14,13 +14,7 @@ import {
   Box,
   Divider,
 } from '../../../atoms';
-import {
-  DropdownMenu,
-  SheetFooter,
-  SheetHeader,
-  Tabs,
-  useFooterHeight,
-} from '../../../molecules';
+import { DropdownMenu, Tabs } from '../../../molecules';
 
 import type { Theme } from '../../../../design-tokens';
 import type { AvatarContent } from '../../../../utils/avatarUtils';
@@ -63,21 +57,21 @@ interface ReceiveSheetTemplateProps {
   index: number;
   items: DropdownItem[];
   onSelectItem: (index: number) => void;
-  footerButtonText: string;
   aliasEntries?: AddressAliasEntry[];
   theme: Theme;
   fallback: string;
   actionText: string;
   copyAddressText: string;
-  headerTitle: string;
   onCopyAddressPress: (address: string) => void;
   qrCodeBgColor?: string;
-  onSharePress: (address: string) => void;
   getAddressInfo?: (address: AnyAddress) => TranslationKey | undefined;
-  buyAssetsButtonText?: string;
-  onBuyAssetsPress?: () => void;
   selectedAddressTabIndex: number;
   onSelectAddressTab: (index: number) => void;
+  /** Optional node rendered inside Sheet.Scroll immediately after the
+   *  account dropdown and before the QR code / address block. Used by the
+   *  wallet app to surface an inline security-alert (chip + disclosure)
+   *  for a compromised account without navigating away from the sheet. */
+  belowAccountSlot?: React.ReactNode;
 }
 
 export const ReceiveSheet = ({
@@ -86,34 +80,22 @@ export const ReceiveSheet = ({
   index,
   items,
   onSelectItem,
-  footerButtonText,
   aliasEntries,
   theme,
   fallback,
   actionText,
   copyAddressText,
-  headerTitle,
   onCopyAddressPress,
   qrCodeBgColor,
-  onSharePress,
   getAddressInfo,
-  buyAssetsButtonText,
-  onBuyAssetsPress,
   selectedAddressTabIndex,
   onSelectAddressTab,
+  belowAccountSlot,
 }: ReceiveSheetTemplateProps) => {
   const { t } = useTranslation();
   const selectedItem = items[index];
   const isDarkMode = theme.name === 'dark';
   const tagColor = isDarkMode ? 'black' : 'white';
-  const areFooterButtonsVertical = !!(buyAssetsButtonText && onBuyAssetsPress);
-  const footerHeight = useFooterHeight({
-    vertical: areFooterButtonsVertical,
-  });
-  const containerStyle = useMemo(
-    () => [styles.container, { paddingBottom: footerHeight }],
-    [footerHeight, areFooterButtonsVertical],
-  );
 
   const tabbedItems = useMemo(
     () => (isTabbedAddressData(addressData) ? addressData : undefined),
@@ -135,127 +117,90 @@ export const ReceiveSheet = ({
   const addressInfo = getAddressInfo?.(currentAddress);
 
   return (
-    <>
-      <SheetHeader title={headerTitle} testID="receive-sheet-header" />
+    <Sheet.Scroll style={styles.container}>
+      <DropdownMenu
+        title={accountName}
+        items={items}
+        selectedItemId={selectedItem.id}
+        onSelectItem={onSelectItem}
+        titleAvatar={{
+          fallback,
+        }}
+        actionText={actionText}
+        testID="receive-sheet-account-dropdown-menu"
+      />
+      {belowAccountSlot}
 
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={containerStyle}>
-        <DropdownMenu
-          title={accountName}
-          items={items}
-          selectedItemId={selectedItem.id}
-          onSelectItem={onSelectItem}
-          titleAvatar={{
-            fallback,
-          }}
-          actionText={actionText}
-          testID="receive-sheet-account-dropdown-menu"
+      <Column alignItems="center" gap={spacing.M} style={styles.contentWrapper}>
+        <QrCode
+          data={currentAddress.address}
+          chainType={currentAddress.blockchainName}
+          backgroundColor={qrCodeBgColor}
+          testID="receive-sheet-qr-code"
+          logoSize={60}
         />
 
-        <Column
-          alignItems="center"
-          gap={spacing.M}
-          style={styles.contentWrapper}>
-          <QrCode
-            data={currentAddress.address}
-            chainType={currentAddress.blockchainName}
-            backgroundColor={qrCodeBgColor}
-            testID="receive-sheet-qr-code"
-          />
-
-          {tabbedItems && tabbedItems.length > 0 && (
-            <Box style={styles.tabsContainer}>
-              <Tabs
-                tabs={tabbedItems.map(item => t(item.key))}
-                selectedTab={t(tabbedItems[selectedAddressTabIndex]?.key ?? '')}
-                onSelectTab={onSelectAddressTab}
-              />
-            </Box>
-          )}
-
-          <Text.XS
-            align="center"
-            style={styles.address}
-            testID="receive-sheet-address">
-            {currentAddress.address}
-          </Text.XS>
-
-          {aliases && aliases.length > 0 && (
-            <Row gap={spacing.S} style={styles.aliases}>
-              {aliases.map(alias => (
-                <CustomTag
-                  key={alias}
-                  size="S"
-                  label={alias}
-                  color={tagColor}
-                  backgroundType="colored"
-                  testID="receive-sheet-alias"
-                />
-              ))}
-            </Row>
-          )}
-
-          <Button.Secondary
-            label={copyAddressText}
-            onPress={() => {
-              onCopyAddressPress(currentAddress.address);
-            }}
-            preIconName="Copy"
-            iconColor={theme.text.primary}
-            testID="receive-sheet-copy-address-button"
-          />
-        </Column>
-
-        {addressInfo && (
-          <>
-            <Divider />
-            <Column gap={spacing.S}>
-              <Text.S variant="secondary" testID="receive-sheet-address-info">
-                {t(addressInfo)}
-              </Text.S>
-            </Column>
-          </>
+        {tabbedItems && tabbedItems.length > 0 && (
+          <Box style={styles.tabsContainer}>
+            <Tabs
+              tabs={tabbedItems.map(item => t(item.key))}
+              selectedTab={t(tabbedItems[selectedAddressTabIndex]?.key ?? '')}
+              onSelectTab={onSelectAddressTab}
+            />
+          </Box>
         )}
-      </Sheet.Scroll>
-      <SheetFooter
-        vertical={areFooterButtonsVertical}
-        primaryButton={
-          areFooterButtonsVertical
-            ? {
-                label: buyAssetsButtonText,
-                onPress: onBuyAssetsPress,
-                testID: 'receive-sheet-buy-assets-button',
-              }
-            : {
-                label: footerButtonText,
-                onPress: () => {
-                  onSharePress(currentAddress.address);
-                },
-                preIconName: 'Share',
-                testID: 'receive-sheet-share-button',
-              }
-        }
-        secondaryButton={
-          areFooterButtonsVertical
-            ? {
-                label: footerButtonText,
-                onPress: () => {
-                  onSharePress(currentAddress.address);
-                },
-                preIconName: 'Share',
-                testID: 'receive-sheet-share-button',
-              }
-            : undefined
-        }
-      />
-    </>
+
+        <Text.XS
+          align="center"
+          style={styles.address}
+          testID="receive-sheet-address">
+          {currentAddress.address}
+        </Text.XS>
+
+        {aliases && aliases.length > 0 && (
+          <Row gap={spacing.S} style={styles.aliases}>
+            {aliases.map(alias => (
+              <CustomTag
+                key={alias}
+                size="S"
+                label={alias}
+                color={tagColor}
+                backgroundType="colored"
+                testID="receive-sheet-alias"
+              />
+            ))}
+          </Row>
+        )}
+
+        <Button.Secondary
+          label={copyAddressText}
+          onPress={() => {
+            onCopyAddressPress(currentAddress.address);
+          }}
+          preIconName="Copy"
+          iconColor={theme.text.primary}
+          testID="receive-sheet-copy-address-button"
+        />
+      </Column>
+
+      {addressInfo && (
+        <>
+          <Divider />
+          <Column gap={spacing.S}>
+            <Text.S variant="secondary" testID="receive-sheet-address-info">
+              {t(addressInfo)}
+            </Text.S>
+          </Column>
+        </>
+      )}
+    </Sheet.Scroll>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: spacing.L,
+    padding: spacing.M,
+    paddingBottom: footerHeight.vertical,
     gap: spacing.M,
   },
   contentWrapper: {

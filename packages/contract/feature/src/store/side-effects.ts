@@ -2,7 +2,11 @@ import { deepEquals } from '@cardano-sdk/util';
 import isEqual from 'lodash/isEqual';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
 
-import { createFeatureFlagStorage, featureFlagsToFeatures } from '../util';
+import {
+  createFeatureFlagStorage,
+  featureFlagSetEquals,
+  featureFlagsToFeatures,
+} from '../util';
 
 import type { ActionCreators, Selectors } from '../contract';
 import type { FeatureFlag, RuntimeFeatures } from '../types';
@@ -32,7 +36,7 @@ const featureFlagsChanged =
 
 export const updateFeatures =
   (
-    { availableModules, loaded }: Readonly<RuntimeFeatures>,
+    { availableModules, loaded, fallback }: Readonly<RuntimeFeatures>,
     { env, config: { extraFeatureFlags } }: Pick<Runtime, 'config' | 'env'>,
   ): SideEffect =>
   (_, __, { featureFlags$, createDocumentStorage, actions }) => {
@@ -40,17 +44,24 @@ export const updateFeatures =
     const loadedFeatureFlagsWithoutExtra = withoutExtraFeatureFlags(
       extraFeatureFlags,
     )(loaded.featureFlags);
+    const fallbackFlagsWithoutExtra = fallback
+      ? withoutExtraFeatureFlags(extraFeatureFlags)(fallback.incompatibleFlags)
+      : undefined;
     return featureFlags$.pipe(
       map(withoutExtraFeatureFlags(extraFeatureFlags)),
+      filter(
+        featureFlags =>
+          !featureFlagSetEquals(featureFlags, fallbackFlagsWithoutExtra),
+      ),
       filter(featureFlagsChanged(loadedFeatureFlagsWithoutExtra)),
+      distinctUntilChanged(deepEquals),
       switchMap(featureFlags =>
         storage.set({ featureFlags }).pipe(map(() => featureFlags)),
       ),
-      map(featureFlags => {
-        return featureFlagsToFeatures(availableModules)(featureFlags, env);
-      }),
+      map(featureFlags =>
+        featureFlagsToFeatures(availableModules)(featureFlags, env),
+      ),
       map(actions.features.updateFeatures),
-      distinctUntilChanged(deepEquals),
     );
   };
 

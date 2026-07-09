@@ -8,6 +8,7 @@
   "dependencies": {
     "@cardano-sdk/key-management": "0.29.13",
     "@lace-contract/address-book": "*",
+    "@lace-contract/analytics": "*",
     "@lace-contract/app-lock": "*",
     "@lace-contract/dapp-connector": "*",
     "@lace-contract/i18n": "*",

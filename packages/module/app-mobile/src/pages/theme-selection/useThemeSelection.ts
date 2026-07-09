@@ -12,6 +12,9 @@ export const useThemeSelection = () => {
 
   const currentThemePreference = useLaceSelector('ui.getThemePreference');
   const setThemePreference = useDispatchLaceAction('ui.setThemePreference');
+  const setViewsThemePreference = useDispatchLaceAction(
+    'views.setThemePreference',
+  );
 
   const [selectedTheme, setSelectedTheme] = useState<ThemePreference>(
     currentThemePreference,
@@ -44,15 +47,21 @@ export const useThemeSelection = () => {
   ];
 
   const onClose = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const onConfirm = useCallback(() => {
     if (selectedTheme !== currentThemePreference) {
       setThemePreference(selectedTheme);
+      setViewsThemePreference(selectedTheme);
     }
-    NavigationControls.sheets.close();
-  }, [selectedTheme, currentThemePreference, setThemePreference]);
+    NavigationControls.closeSheet();
+  }, [
+    selectedTheme,
+    currentThemePreference,
+    setThemePreference,
+    setViewsThemePreference,
+  ]);
 
   const handleThemeChange = useCallback((value: string) => {
     setSelectedTheme(value as ThemePreference);

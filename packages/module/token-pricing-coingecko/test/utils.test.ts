@@ -13,7 +13,7 @@ describe('extractPriceData', () => {
     const priceInfo = { usd: 0.5, usd_24h_change: 2.5 };
     const result = extractPriceData(priceInfo);
 
-    expect(result).toEqual({ price: 0.5, change24h: 2.5 });
+    expect(result).toEqual({ price: 0.5, change24h: 2.5, priceInUsd: 0.5 });
   });
 
   it('should extract price data for different currencies', () => {
@@ -27,10 +27,12 @@ describe('extractPriceData', () => {
     expect(extractPriceData(priceInfo, 'EUR')).toEqual({
       price: 0.45,
       change24h: 1.2,
+      priceInUsd: undefined,
     });
     expect(extractPriceData(priceInfo, 'GBP')).toEqual({
       price: 0.38,
       change24h: -0.5,
+      priceInUsd: undefined,
     });
   });
 
@@ -45,7 +47,11 @@ describe('extractPriceData', () => {
     const priceInfo = { usd: 1.0 }; // No usd_24h_change
     const result = extractPriceData(priceInfo);
 
-    expect(result).toEqual({ price: 1.0, change24h: undefined });
+    expect(result).toEqual({
+      price: 1.0,
+      change24h: undefined,
+      priceInUsd: 1.0,
+    });
   });
 });
 

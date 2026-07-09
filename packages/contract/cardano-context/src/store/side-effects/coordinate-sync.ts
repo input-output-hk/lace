@@ -19,6 +19,7 @@ import {
 import { isCardanoAccount, isCardanoAddress } from '../../util';
 import { CardanoSyncFailureId } from '../../value-objects';
 
+import { syncAccountStateOperations } from './sync-account-state-operations';
 import {
   CardanoSyncOperationType,
   createSyncOperationId,
@@ -124,7 +125,10 @@ export const coordinateCardanoSync: SideEffect = (
         // Add address discovery operation if account has no addresses
         if (!hasAddresses) {
           // 1st account's sync operation is always address discovery
-          // we start syncing other account state only when discovery completes at least once
+          // we start syncing other account state only when discovery completes at least once.
+          // Account-state operations are chained onto the round by
+          // addressDiscoverySync's chainAccountStateOperations after a
+          // successful discovery, so we do not enqueue them here.
           operations.push({
             operationId: createSyncOperationId(
               account.accountId,
@@ -136,7 +140,12 @@ export const coordinateCardanoSync: SideEffect = (
             startedAt: now,
           });
         } else {
-          // TODO: sync account state, e.g. transactions total
+          operations.push(
+            ...syncAccountStateOperations({
+              accountId: account.accountId,
+              tipHash,
+            }),
+          );
         }
 
         // Return actions to add all operations for this sync round
@@ -153,7 +162,15 @@ export const coordinateCardanoSync: SideEffect = (
         return EMPTY;
       }
 
-      // Extract operation IDs from actions for tracking
+      // Extract operation IDs from actions for tracking.
+      // For first-time sync (no addresses yet), this contains ONLY the
+      // ADDRESS_DISCOVERY op; the TRANSACTION_POLLING op is chained later
+      // by addressDiscoverySync and intentionally not tracked here. The
+      // dispatch order in addressDiscoverySync (upsertAddresses ->
+      // addSyncOp(TXP) -> completeSyncOp(AD)) ensures the natural-trigger
+      // emission caused by upsertAddresses is dropped by exhaustMap before
+      // discovery completion releases the round lock, so no duplicate TXP
+      // op is enqueued in a second round. See chainAccountStateOperations.
       const operationIds: SyncOperationId[] = allActions.map(
         action => action.payload.operation.operationId,
       );

@@ -1,3 +1,4 @@
+import { useAnalytics } from '@lace-contract/analytics';
 import {
   useAccountSupportsNfts,
   useNftViewReset,
@@ -6,6 +7,7 @@ import {
 import {
   convertLovelacesToAda,
   DEFAULT_DECIMALS,
+  resolveAccountNameSuffix,
 } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import {
@@ -36,9 +38,11 @@ import { usePriceHistory } from './usePriceHistory';
 import { useScrollAnimation } from './useScrollAnimation';
 
 import type { AccountView, AssetView } from './types';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 import type { TimeRange } from '@lace-lib/ui-toolkit';
+import type { SharedValue } from 'react-native-reanimated';
 
 /**
  * Returns the per-token fiat value truncated to 2 dp, matching the arithmetic
@@ -67,6 +71,7 @@ const WALLET_ICONS = {
   [WalletType.HardwareLedger]: <Icon name="HardwareWallet" size={15} />,
   [WalletType.HardwareTrezor]: <Icon name="HardwareWallet" size={15} />,
   [WalletType.InMemory]: <Icon name="Wallet" size={15} />,
+  [WalletType.LazyInMemory]: <Icon name="Wallet" size={15} />,
   [WalletType.MultiSig]: <Icon name="HardwareWallet" size={15} />,
 } as const;
 
@@ -80,11 +85,17 @@ const BLOCKCHAIN_ICONS = {
 interface UsePortfolioOptions {
   headerHeight: number;
   headerTopInset: number;
+  externalScrollOffset?: SharedValue<number>;
+  focusAccountId?: string;
+  clearFocusAccount?: () => void;
 }
 
 export const usePortfolio = ({
   headerHeight,
   headerTopInset,
+  externalScrollOffset,
+  focusAccountId,
+  clearFocusAccount,
 }: UsePortfolioOptions) => {
   const { t } = useTranslation();
   const { isSideMenu } = useTheme();
@@ -113,6 +124,7 @@ export const usePortfolio = ({
   const currency = useLaceSelector('tokenPricing.selectCurrencyPreference');
   const syncStatus = useLaceSelector('sync.selectGlobalSyncStatus');
   const hasEverSynced = useLaceSelector('sync.selectHasEverSynced');
+  const { trackEvent } = useAnalytics();
   const setActiveAccount = useDispatchLaceAction(
     'wallets.setActiveAccountContext',
   );
@@ -214,6 +226,7 @@ export const usePortfolio = ({
     selectedAssetView,
     activeIndex,
     headerTopInset,
+    externalScrollOffset,
   });
 
   // Wallet and account icons
@@ -281,6 +294,34 @@ export const usePortfolio = ({
     return result;
   }, [isTokenPricingEnabled, accounts, rewardAccountDetails]);
 
+  const getNativeTokenInfo = useCallback(
+    (blockchainName: string) =>
+      accountCardCustomisations
+        .find(c => c.uiCustomisationSelector({ blockchainName }))
+        ?.nativeTokenInfo({ networkType }),
+    [accountCardCustomisations, networkType],
+  );
+
+  const flaggedExploitsByAccount = useLaceSelector(
+    'cardanoContext.selectFlaggedExploitsByAccount',
+  );
+
+  const compromisedSuffixByAccount = useMemo(() => {
+    const result: Record<string, string> = {};
+    for (const account of accounts) {
+      const suffixInfo = resolveAccountNameSuffix(
+        flaggedExploitsByAccount[account.accountId] ?? [],
+        featureFlags,
+      );
+      if (suffixInfo) {
+        result[account.accountId] = ` ${
+          suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey)
+        }`;
+      }
+    }
+    return result;
+  }, [accounts, flaggedExploitsByAccount, featureFlags, t]);
+
   const accountCards = useMemo(
     () =>
       transformAccountsToCards({
@@ -297,6 +338,8 @@ export const usePortfolio = ({
         prices: allPrices,
         timeRange,
         rewardsByAccount,
+        compromisedSuffixByAccount,
+        getNativeTokenInfo,
       }),
     [
       accounts,
@@ -312,6 +355,8 @@ export const usePortfolio = ({
       allPrices,
       timeRange,
       rewardsByAccount,
+      compromisedSuffixByAccount,
+      getNativeTokenInfo,
     ],
   );
 
@@ -342,6 +387,14 @@ export const usePortfolio = ({
   const handleIndexChange = useCallback(
     (index: number) => {
       setActiveIndex(index);
+      // The portfolio carousel index 0 is the aggregate "all wallets" view;
+      // any non-zero index is a specific account card. Track the destination
+      // type (rather than the literal index, which is not stable across
+      // wallet/account additions) so the dashboard can answer "do users
+      // navigate via the carousel or the accounts tab?"
+      trackEvent('portfolio | account carousel | pagination | press', {
+        destination: index === 0 ? 'aggregate' : 'account',
+      });
       const isAccountView = index > 0;
       if (!isAccountView) return;
 
@@ -353,7 +406,7 @@ export const usePortfolio = ({
         });
       }
     },
-    [accounts, setActiveAccount],
+    [accounts, setActiveAccount, trackEvent],
   );
 
   // If the active account is no longer visible after a network switch, reset it.
@@ -371,6 +424,30 @@ export const usePortfolio = ({
     clearActiveAccount();
   }, [networkKey, accounts, activeAccountContext, clearActiveAccount]);
 
+  // One-shot: when navigated in with a focusAccountId, open the carousel on that
+  // account's card. The useCarouselManagement effect scrolls to activeIndex.
+  // Clearing the param makes this one-shot; we must NOT also guard on a ref,
+  // because the Portfolio tab never unmounts — a ref would permanently block
+  // re-focusing the same account on a later visit (LW-15090 regression).
+  useEffect(() => {
+    if (!focusAccountId) return;
+    if (accounts.length === 0) return;
+
+    const accountPosition = accounts.findIndex(
+      account => account.accountId === focusAccountId,
+    );
+    if (accountPosition === -1) return;
+
+    const account = accounts[accountPosition];
+    // Carousel index 0 is the aggregate view; account N lives at index N + 1.
+    setActiveIndex(accountPosition + 1);
+    setActiveAccount({
+      walletId: account.walletId,
+      accountId: account.accountId,
+    });
+    clearFocusAccount?.();
+  }, [focusAccountId, accounts, setActiveAccount, clearFocusAccount]);
+
   // Use extracted carousel management hook
   const carouselManagement = useCarouselManagement({
     containerWidth: contentWidth,
@@ -384,12 +461,15 @@ export const usePortfolio = ({
 
   const handleTimeRangeChange = useCallback(
     (newTimeRange: TimeRange) => {
+      trackEvent('portfolio | chart | time range | press', {
+        timeRange: newTimeRange,
+      });
       setTimeRange(newTimeRange);
       if (isTokenPricingEnabled) {
         requestPriceHistory({ timeRange: newTimeRange });
       }
     },
-    [isTokenPricingEnabled, requestPriceHistory],
+    [isTokenPricingEnabled, requestPriceHistory, trackEvent],
   );
 
   const tabs = useMemo(() => {

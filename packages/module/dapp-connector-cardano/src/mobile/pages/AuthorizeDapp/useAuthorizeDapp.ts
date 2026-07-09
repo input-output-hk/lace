@@ -1,4 +1,5 @@
 import { useAnalytics } from '@lace-contract/analytics';
+import { extractDappDomain } from '@lace-contract/dapp-connector';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls } from '@lace-lib/navigation';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -83,43 +84,66 @@ export const useAuthorizeDapp = ({
   const headerTitle =
     title ?? t('dapp-connector.cardano.authorize.title', 'Authorize DApp');
 
+  const dappPayload = useMemo(
+    () =>
+      pendingRequest
+        ? {
+            dappDomain: extractDappDomain(pendingRequest.dapp.origin),
+            dappName: pendingRequest.dapp.name,
+            blockchain: 'Cardano',
+          }
+        : undefined,
+    [pendingRequest],
+  );
+
   const handleAuthorize = useCallback(() => {
-    trackEvent('dapp connector | authorize dapp | authorize | press');
+    trackEvent(
+      'dapp connector | authorize dapp | authorize | press',
+      dappPayload,
+    );
     hasRespondedRef.current = true;
     dispatchConfirmAuth({ authorized: true, account: selectedAccount });
-    NavigationControls.sheets.close();
-  }, [selectedAccount, dispatchConfirmAuth, trackEvent]);
+    NavigationControls.closeSheet();
+  }, [selectedAccount, dispatchConfirmAuth, trackEvent, dappPayload]);
 
   const handleReject = useCallback(() => {
-    trackEvent('dapp connector | authorize dapp | reject | press');
+    trackEvent('dapp connector | authorize dapp | reject | press', dappPayload);
     hasRespondedRef.current = true;
     dispatchRejectAuth();
-    NavigationControls.sheets.close();
-  }, [dispatchRejectAuth, trackEvent]);
+    NavigationControls.closeSheet();
+  }, [dispatchRejectAuth, trackEvent, dappPayload]);
 
   const handleSetAccountId = useCallback(
     (account: AnyAccount) => {
       trackEvent('dapp connector | authorize dapp | select account | press', {
-        account: account.accountId,
+        ...dappPayload,
+        walletType: account.accountType,
+        networkType: account.networkType,
       });
       setSelectAccount(account);
     },
-    [trackEvent],
+    [trackEvent, dappPayload],
   );
 
   useEffect(() => {
     if (!pendingRequest && !dapp) {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     }
   }, [pendingRequest, dapp]);
 
+  // Hold the latest dispatcher in a ref so the unmount-only effect below can
+  // call it without re-running on every render (which would auto-reject on
+  // pendingRequest supersession).
+  const dispatchRejectAuthRef = useRef(dispatchRejectAuth);
+  dispatchRejectAuthRef.current = dispatchRejectAuth;
+
   useEffect(() => {
     return () => {
-      if (!hasRespondedRef.current && pendingRequest) {
-        dispatchRejectAuth();
+      if (!hasRespondedRef.current) {
+        dispatchRejectAuthRef.current();
       }
     };
-  }, [dispatchRejectAuth, pendingRequest]);
+  }, []);
 
   return {
     headerTitle,

@@ -1,10 +1,8 @@
 import type { ReactNode } from 'react';
 
-import { useTheme, spacing, getOverlayColor } from '@lace-lib/ui-toolkit';
+import { backdropStyle, spacing } from '@lace-lib/ui-toolkit';
 import React from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-
-import type { Theme } from '@lace-lib/ui-toolkit';
+import { StyleSheet, View } from 'react-native';
 
 type AuthenticationPromptOverlayPrompt = {
   children: ReactNode;
@@ -12,37 +10,19 @@ type AuthenticationPromptOverlayPrompt = {
 
 export const AuthenticationPromptOverlay = ({
   children,
-}: AuthenticationPromptOverlayPrompt) => {
-  const { theme } = useTheme();
-  const styles = createStyles(theme);
+}: AuthenticationPromptOverlayPrompt) => (
+  <View style={styles.container}>
+    <View style={styles.content}>{children}</View>
+  </View>
+);
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.content}>{children}</View>
-    </View>
-  );
-};
-
-const { height: viewportHeight, width: viewportWidth } =
-  Dimensions.get('window');
-
-const createStyles = (theme: Theme) => {
-  const overlayColor = getOverlayColor(theme);
-
-  return StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      backgroundColor: overlayColor,
-      display: 'flex',
-      height: viewportHeight,
-      justifyContent: 'center',
-      left: 0,
-      position: 'absolute',
-      top: 0,
-      width: viewportWidth,
-    },
-    content: {
-      margin: spacing.XL,
-    },
-  });
-};
+const styles = StyleSheet.create({
+  container: {
+    ...backdropStyle,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  content: {
+    margin: spacing.XL,
+  },
+});

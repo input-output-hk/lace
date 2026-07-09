@@ -22,7 +22,7 @@ export const useRemoveWalletSuccess = () => {
 
   const buttonAction = useCallback(() => {
     clearActiveSheetPage(null);
-    NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+    NavigationControls.navigate(StackRoutes.Home, {
       screen: TabRoutes.AccountCenter,
     });
   }, [clearActiveSheetPage]);

@@ -3,11 +3,6 @@ import './reset.css';
 // otherwise ENV variables have an "any" type, causing lint errors
 import { ConfigProvider } from '@lace-contract/app';
 import './util/navigation-augmentation';
-// eslint-disable-next-line import/order -- app must load before toolkit for ENV types
-import {
-  ThemeColorScheme,
-  ThemeProvider as LaceUiThemeProvider,
-} from '@input-output-hk/lace-ui-toolkit';
 import { viewsSelectors } from '@lace-contract/views';
 import {
   ThemeProvider,
@@ -73,30 +68,23 @@ export const App = ({ moduleInitProps, viewId }: AppProps) => {
       <ConfigProvider
         viewId={moduleInitProps.viewId!}
         appConfig={moduleInitProps.runtime.config}>
-        <LaceUiThemeProvider
-          colorScheme={
-            colorScheme === 'dark'
-              ? ThemeColorScheme.Dark
-              : ThemeColorScheme.Light
-          }>
-          <SafeAreaProvider>
-            <ThemeProvider
-              defaultTheme={colorScheme}
-              featureFlags={typographyFeatureFlag}>
-              <ContentPortalProvider>
-                <LoadModulesProvider loadModules={moduleInitProps.loadModules}>
-                  <ActivityDetector>
-                    <LaceRenderRoot
-                      moduleInitProps={moduleInitProps}
-                      dependencies={{ logger }}
-                      view={view}
-                    />
-                  </ActivityDetector>
-                </LoadModulesProvider>
-              </ContentPortalProvider>
-            </ThemeProvider>
-          </SafeAreaProvider>
-        </LaceUiThemeProvider>
+        <SafeAreaProvider>
+          <ThemeProvider
+            defaultTheme={colorScheme}
+            featureFlags={typographyFeatureFlag}>
+            <ContentPortalProvider>
+              <LoadModulesProvider loadModules={moduleInitProps.loadModules}>
+                <ActivityDetector>
+                  <LaceRenderRoot
+                    moduleInitProps={moduleInitProps}
+                    dependencies={{ logger }}
+                    view={view}
+                  />
+                </ActivityDetector>
+              </LoadModulesProvider>
+            </ContentPortalProvider>
+          </ThemeProvider>
+        </SafeAreaProvider>
       </ConfigProvider>
     );
   }

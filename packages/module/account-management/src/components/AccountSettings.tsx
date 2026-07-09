@@ -31,14 +31,14 @@ export const AccountSettings = ({ account }: { account: AnyAccount }) => {
   );
 
   const handleOpenSheet = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.CustomizeAccount, {
+    NavigationControls.navigate(SheetRoutes.CustomizeAccount, {
       walletId: account.walletId,
       accountId: account.accountId,
     });
   }, [account.walletId, account.accountId]);
 
   const handleNavigateToYourKeys = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.AccountKey, {
+    NavigationControls.navigate(SheetRoutes.AccountKey, {
       walletId: account.walletId,
       accountId: account.accountId,
     });

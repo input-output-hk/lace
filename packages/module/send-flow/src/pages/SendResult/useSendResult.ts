@@ -83,7 +83,9 @@ export const useSendResult = (
     sendFlowSheetUICustomisation?.isProcessingResultSheetClosable === false;
 
   useEffect(() => {
-    props.navigation.setOptions({ preventClose: shouldPreventClose });
+    props.navigation.setOptions({
+      preventClose: shouldPreventClose,
+    } as Parameters<typeof props.navigation.setOptions>[0]);
   }, [props.navigation, shouldPreventClose]);
 
   const isHardwareWalletFlow =
@@ -189,7 +191,7 @@ export const useSendResult = (
         primaryButtonPress: () => {
           resetSendFlow();
           trackEvent('send | result | success | primary button | press');
-          NavigationControls.sheets.navigate(SheetRoutes.ComingSoon, {
+          NavigationControls.navigate(SheetRoutes.ComingSoon, {
             featureName: copies.success.primaryButtonLabel,
           });
         },
@@ -216,7 +218,7 @@ export const useSendResult = (
           closeButtonLabel: copies.closeButtonLabel,
           closeButtonPress: () => {
             resetSendFlow();
-            NavigationControls.sheets.close();
+            NavigationControls.closeSheet();
           },
         },
     primaryButton,

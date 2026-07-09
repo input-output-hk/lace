@@ -1,6 +1,7 @@
 import { CardanoLedgerDataSigner } from './cardano-ledger-data-signer';
 import { CardanoLedgerTransactionSigner } from './cardano-ledger-transaction-signer';
 
+import type { LedgerCardanoTransport } from '../ledger-cardano-transport';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type {
@@ -16,9 +17,30 @@ import type {
   AnyAccount,
   AnyWallet,
   HardwareWalletAccount,
+  HardwareWalletLedger,
 } from '@lace-contract/wallet-repo';
+import type { DeviceDescriptor } from '@lace-lib/util-hw';
+
+export interface CardanoLedgerSignerFactoryDependencies {
+  transport: LedgerCardanoTransport;
+  resolveLegacyDevice?: () => Promise<DeviceDescriptor>;
+}
+
+type CardanoTransactionLedgerSignerContext = CardanoTransactionSignerContext & {
+  wallet: HardwareWalletLedger;
+};
+
+type CardanoDataLedgerSignerContext = CardanoSignerContext & {
+  wallet: HardwareWalletLedger;
+};
 
 export class CardanoLedgerSignerFactory implements CardanoSignerFactory {
+  readonly #dependencies: CardanoLedgerSignerFactoryDependencies;
+
+  public constructor(dependencies: CardanoLedgerSignerFactoryDependencies) {
+    this.#dependencies = dependencies;
+  }
+
   public canSign(account: AnyAccount): boolean {
     return (
       account.accountType === 'HardwareLedger' &&
@@ -27,32 +49,42 @@ export class CardanoLedgerSignerFactory implements CardanoSignerFactory {
   }
 
   public createTransactionSigner(
-    context: CardanoTransactionSignerContext,
+    context: CardanoTransactionLedgerSignerContext,
   ): CardanoTransactionSigner {
     this.#assertSupported(context);
     const { accountIndex, chainId, extendedAccountPublicKey } =
       this.#extractAccountProps(context);
 
-    return new CardanoLedgerTransactionSigner({
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey,
-      knownAddresses: context.knownAddresses,
-      utxo: context.utxo,
-    });
+    return new CardanoLedgerTransactionSigner(
+      {
+        accountIndex,
+        chainId,
+        extendedAccountPublicKey,
+        knownAddresses: context.knownAddresses,
+        utxo: context.utxo,
+        wallet: context.wallet,
+      },
+      this.#dependencies,
+    );
   }
 
-  public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {
+  public createDataSigner(
+    context: CardanoDataLedgerSignerContext,
+  ): CardanoDataSigner {
     this.#assertSupported(context);
     const { accountIndex, chainId, extendedAccountPublicKey } =
       this.#extractAccountProps(context);
 
-    return new CardanoLedgerDataSigner({
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey,
-      knownAddresses: context.knownAddresses,
-    });
+    return new CardanoLedgerDataSigner(
+      {
+        accountIndex,
+        chainId,
+        extendedAccountPublicKey,
+        knownAddresses: context.knownAddresses,
+        wallet: context.wallet,
+      },
+      this.#dependencies,
+    );
   }
 
   #assertSupported(context: CardanoSignerContext): void {

@@ -1,9 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { createAction } from '@reduxjs/toolkit';
+import { createSlice, createAction } from '@reduxjs/toolkit';
 
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { WalletId, AccountId } from '@lace-contract/wallet-repo';
+import type {
+  WalletId,
+  AccountId,
+  WalletType,
+} from '@lace-contract/wallet-repo';
 import type {
   AttemptCreateHardwareWalletPayload,
   HardwareErrorCategory,
@@ -13,12 +16,13 @@ import type {
   PayloadAction,
   StateFromReducersMapObject,
 } from '@reduxjs/toolkit';
-import type * as _immer from 'immer';
+import type * as _immer from 'immer'; // NOSONAR: required so immer's WritableDraft types are referenceable in emitted .d.ts files
 
 export type LastAddedAccount = {
   walletId: WalletId;
   blockchain: BlockchainName;
   accountIndex: number;
+  walletType: WalletType;
   shouldSuppressAccountStatus?: boolean;
 };
 

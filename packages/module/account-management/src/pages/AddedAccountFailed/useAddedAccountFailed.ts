@@ -1,6 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls } from '@lace-lib/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -19,9 +19,15 @@ export const useAddedAccountFailed = () => {
     'accountManagement.getLastFailedErrorDescription',
   );
 
+  useEffect(() => {
+    return () => {
+      clearActiveSheetPage(null);
+    };
+  }, [clearActiveSheetPage]);
+
   const buttonAction = useCallback(() => {
     clearActiveSheetPage(null);
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [clearActiveSheetPage]);
 
   const title = errorTitle

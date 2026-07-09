@@ -1,9 +1,15 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import {
+  ADA_DECIMALS,
   type CardanoAddressData,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
+import {
+  bucketUsdValue,
+  CardanoTokenPriceId,
+  priceAmountInUsd,
+} from '@lace-contract/token-pricing';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { NavigationControls } from '@lace-lib/navigation';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -60,6 +66,19 @@ export const useNewDelegation = (
   const stakePoolRef = useRef(stakePool);
   stakePoolRef.current = stakePool;
 
+  const rewardAccountDetailsMap = useLaceSelector(
+    'cardanoContext.selectRewardAccountDetails',
+  );
+  const rewardAccountInfoRef = useRef(
+    rewardAccountDetailsMap[accountId]?.rewardAccountInfo,
+  );
+  rewardAccountInfoRef.current =
+    rewardAccountDetailsMap[accountId]?.rewardAccountInfo;
+
+  const tokenPrices = useLaceSelector('tokenPricing.selectPrices');
+  const tokenPricesRef = useRef(tokenPrices);
+  tokenPricesRef.current = tokenPrices;
+
   const { adaPrice, currency } = useAdaPrice();
 
   const networkType = useLaceSelector('network.selectNetworkType');
@@ -88,10 +107,23 @@ export const useNewDelegation = (
   useEffect(() => {
     if (delegationFlowState.status === 'Success') {
       const ticker = stakePoolRef.current?.ticker;
-      trackEvent(
-        'staking | delegation | confirmed',
-        ticker ? { ticker } : undefined,
-      );
+      const previousPoolId = rewardAccountInfoRef.current?.poolId;
+      const controlledAmount = rewardAccountInfoRef.current?.controlledAmount;
+      const usd = controlledAmount
+        ? priceAmountInUsd({
+            amount: controlledAmount,
+            decimals: ADA_DECIMALS,
+            priceId: CardanoTokenPriceId('ada'),
+            prices: tokenPricesRef.current,
+          })
+        : undefined;
+      trackEvent('staking | delegation | confirmed', {
+        poolId,
+        isFirstDelegation: !previousPoolId,
+        ...(previousPoolId && { previousPoolId }),
+        delegatedValue: usd === undefined ? 'UNKNOWN' : bucketUsdValue(usd),
+        ...(ticker && { ticker }),
+      });
       resetDelegationFlow();
       return;
     }
@@ -134,7 +166,7 @@ export const useNewDelegation = (
 
   const handleCancelPress = useCallback(() => {
     resetDelegationFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [resetDelegationFlow]);
 
   const areFeesReady = delegationFlowState.status === 'Summary';

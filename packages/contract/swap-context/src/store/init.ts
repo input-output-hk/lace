@@ -1,6 +1,9 @@
 import { makeConfirmTx, makeSubmitTx } from '@lace-contract/tx-executor';
+import { createMigrate } from 'redux-persist';
 import { merge } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
+import { addUkFcaDisclaimerAcknowledged } from './migrations';
 import {
   makeAwaitConfirmation,
   makeProcessing,
@@ -11,6 +14,7 @@ import { swapContextReducers } from './slice';
 import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';
 
 const store: LaceInit<LaceModuleStoreInit> = () => ({
+  sideEffectDependencies: { uuid: uuidv4 },
   sideEffects: [
     ...swapContextSideEffects,
     (actionObservables, stateObservables, dependencies) =>
@@ -26,8 +30,11 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
   reducers: swapContextReducers,
   persistConfig: {
     swapConfig: {
-      version: 1,
+      version: 2,
       blacklist: ['tradableTokenIds'],
+      migrate: createMigrate({
+        2: addUkFcaDisclaimerAcknowledged,
+      }),
     },
   },
 });

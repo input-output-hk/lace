@@ -14,6 +14,7 @@ import '@lace-contract/posthog';
 import '@lace-module/bitcoin-provider-maestro';
 import '@lace-module/cardano-provider-blockfrost';
 import '@lace-module/feature-posthog';
+import '@lace-module/dapp-explorer';
 import '@lace-module/swap-provider-steelswap';
 
 export const ENV = Environment(
@@ -120,6 +121,8 @@ const validateEnvironment = (): AppConfig | null => {
           .EXPO_PUBLIC_COINGECKO_API_BASE_URL as string,
         STEELSWAP_API_BASE_URL: process.env
           .EXPO_PUBLIC_STEELSWAP_API_BASE_URL as string,
+        CARDANO_CUBE_BASE_URL: process.env
+          .EXPO_PUBLIC_CARDANO_CUBE_BASE_URL as string,
       },
       {
         POSTHOG_API_URL: str({ desc: 'URL for PostHog analytics' }),
@@ -239,6 +242,7 @@ const validateEnvironment = (): AppConfig | null => {
           desc: 'Steelswap API base URL',
           default: 'https://apidev.steelswap.io',
         }),
+        CARDANO_CUBE_BASE_URL: str({ desc: 'Cardano Cube API base URL' }),
       },
       // In vitest, disable the default reporter to avoid process.exit and stderr noise
       process.env.VITEST ? { reporter: null } : undefined,
@@ -322,7 +326,6 @@ const validateEnvironment = (): AppConfig | null => {
       },
       cardanoProvider: {
         tipPollFrequency: Milliseconds(30_000),
-        transactionHistoryPollingIntervalSeconds: Milliseconds(30_000),
         blockfrostConfigs: {
           [1]: {
             clientConfig: {
@@ -365,6 +368,7 @@ const validateEnvironment = (): AppConfig | null => {
       nftCdnUrl: validatedEnvironment.NFT_CDN_URL,
       coinGeckoApiBaseUrl: validatedEnvironment.COINGECKO_API_BASE_URL,
       steelswapApiBaseUrl: validatedEnvironment.STEELSWAP_API_BASE_URL,
+      cardanoCubeBaseUrl: validatedEnvironment.CARDANO_CUBE_BASE_URL,
     };
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -396,6 +400,7 @@ const validateEnvironment = (): AppConfig | null => {
       'EXPO_PUBLIC_LEARN_MORE_URL',
       'EXPO_PUBLIC_URL_LACE_PAGE',
       'EXPO_PUBLIC_NFT_CDN_URL',
+      'EXPO_PUBLIC_CARDANO_CUBE_BASE_URL',
       // Conditionally required: SENTRY_DSN required in production, optional in development
       ...(ENV === 'production' ? ['EXPO_PUBLIC_SENTRY_DSN'] : []),
     ];

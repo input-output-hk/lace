@@ -1,193 +1,336 @@
+import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { retryBackoff } from 'backoff-rxjs';
 import {
   catchError,
-  EMPTY,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
   forkJoin,
   map,
   merge as rxMerge,
+  mergeMap,
   of,
-  type Observable,
-  type OperatorFunction,
   switchMap,
+  withLatestFrom,
 } from 'rxjs';
 
-import { extractUniqueStakeKeys } from '../helpers';
+import { UTXO_SYNC_CONFIRMATION_DEPTH } from '../../const';
+import { isCardanoAccount } from '../../util';
+import { CardanoUtxoFetchFailureId, UtxoCacheKey } from '../../value-objects';
+import { extractUniqueStakeKeys } from '../helpers/extract-unique-stake-keys';
 import {
   extractOwnedPaymentCredentials,
   filterFrankenUtxos,
 } from '../helpers/filter-franken-utxos';
-import { prepareCardanoAccountsData } from '../helpers/prepareCardanoAccountsData';
+import { getTopOnChainActivity } from '../helpers/get-top-on-chain-activity-id';
+import { groupCardanoAddressesByAccount } from '../helpers/group-cardano-addresses-by-account';
 
-import type { SideEffect, Action } from '../../contract';
-import type { AccountMetadata } from '../helpers/prepareCardanoAccountsData';
+import type { CardanoContextAction, SideEffect } from '../../contract';
 import type {
-  Cardano,
-  ProviderError,
-  ProviderFailure,
-} from '@cardano-sdk/core';
+  CardanoAddressData,
+  CardanoRewardAccount as CardanoRewardAccountType,
+} from '../../types';
+import type { TopOnChainActivity } from '../helpers/get-top-on-chain-activity-id';
+import type { Cardano } from '@cardano-sdk/core';
+import type { AnyAddress } from '@lace-contract/addresses';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { Observable } from 'rxjs';
 
-type FetchResult = {
-  utxos: Cardano.Utxo[];
-  error?: {
-    accountId: AccountId;
-    chainId: Cardano.ChainId;
-    failure: ProviderFailure;
-  };
+type FetchParams = {
+  accountAddresses: AnyAddress<CardanoAddressData>[];
+  stakeKeys: CardanoRewardAccountType[];
+  cacheKey: UtxoCacheKey;
+  topActivity: TopOnChainActivity | undefined;
+  tip: Cardano.Tip | undefined;
 };
 
 /**
- * Fetches UTxOs for all unique stake keys in an account using parallel requests.
- * Merges successful results and handles errors.
- *
- * Retries retriable provider errors with exponential backoff before surfacing
- * a failure. The Err result is returned as a ProviderError so
- * `PROVIDER_REQUEST_RETRY_CONFIG.shouldRetry` can classify it; after retries
- * are exhausted, `catchError` converts it back into a FetchResult value so
- * sibling accounts in the outer `rxMerge` are not cancelled.
+ * Sentinel `topOnChainActivityId` for the cache key when an account has no
+ * on-chain (non-Rewards, non-Pending) activity loaded yet. Real activity ids
+ * are tx hashes, so it cannot collide. See the `trackAccountUtxos` JSDoc for
+ * the bootstrap behaviour.
  */
-const fetchUtxosForAllStakeKeys = (
-  account: AccountMetadata,
-  dependencies: Parameters<SideEffect>[2],
-): Observable<FetchResult> => {
-  const { accountAddresses, chainId, accountId } = account;
-  const {
-    cardanoProvider: { getAccountUtxos },
-  } = dependencies;
+const NO_ACTIVITY_CACHE_KEY_SENTINEL = 'no-activity';
 
-  // Extract all unique stake keys
-  const stakeKeys = extractUniqueStakeKeys(accountAddresses);
+const utxoKey = (utxo: Cardano.Utxo): string =>
+  `${utxo[0].txId}#${utxo[0].index}`;
 
-  // Edge case: no stake keys found
-  if (stakeKeys.length === 0) return EMPTY;
+/** Order-insensitive equality by outpoint (`txId#index`). */
+const utxoSetsEqual = (a: Cardano.Utxo[], b: Cardano.Utxo[]): boolean => {
+  if (a.length !== b.length) return false;
+  const aKeys = new Set(a.map(utxoKey));
+  for (const utxo of b) if (!aKeys.has(utxoKey(utxo))) return false;
+  return true;
+};
 
-  // Parallel fetch UTxOs for all stake keys
-  return forkJoin(
-    stakeKeys.map(rewardAccount =>
-      getAccountUtxos({ rewardAccount }, { chainId }),
-    ),
-  ).pipe(
-    // Convert Err results to thrown errors so retryBackoff can see them
-    map(results => {
-      const firstError = results.find(r => r.isErr());
-      if (firstError) throw firstError.unwrapErr();
-      return { utxos: results.flatMap(r => r.unwrap()) };
-    }),
-    retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
-    // After retries exhausted, convert thrown error back to FetchResult shape
-    catchError((error: ProviderError) =>
-      of<FetchResult>({
-        utxos: [],
-        error: {
-          accountId,
-          chainId,
-          failure: error.reason,
-        },
-      }),
-    ),
-  );
+const isTipBeyondConfirmationDepth = (
+  topActivity: TopOnChainActivity | undefined,
+  tip: Cardano.Tip | undefined,
+): boolean => {
+  if (!tip) return false;
+  // No anchoring activity at all (first fetch before any transaction is
+  // loaded), or an activity persisted before the slot field was introduced:
+  // there is nothing to wait on, so treat as already settled to avoid an
+  // unbounded refetch loop when fetched UTxOs match stored ones.
+  if (topActivity?.slot === undefined) return true;
+  return tip.slot - topActivity.slot >= UTXO_SYNC_CONFIRMATION_DEPTH;
 };
 
 /**
- * Filters franken addresses from fetched UTxOs and logs filtered count.
- */
-const filterFrankenAddresses = (
-  account: AccountMetadata,
-  dependencies: Parameters<SideEffect>[2],
-): OperatorFunction<FetchResult, FetchResult> =>
-  map(fetchResult => {
-    const { logger } = dependencies;
-
-    // Pass through errors unchanged
-    if (fetchResult.error) {
-      return {
-        utxos: [],
-        error: fetchResult.error,
-      };
-    }
-
-    // Extract owned payment credentials for filtering franken addresses
-    const ownedCredentials = extractOwnedPaymentCredentials(
-      account.accountAddresses,
-    );
-
-    // Filter out franken address UTxOs (addresses with payment credentials we don't own)
-    const { legitimate, franken } = filterFrankenUtxos(
-      fetchResult.utxos,
-      ownedCredentials,
-    );
-
-    // Log filtered franken addresses for debugging
-    if (franken.length > 0) {
-      logger.warn(
-        `Filtered ${franken.length} franken UTxOs for account ${account.accountId}`,
-      );
-    }
-
-    return { utxos: legitimate };
-  });
-
-/**
- * Emits appropriate Redux action based on fetch result.
- */
-const emitUtxosActions = (
-  account: AccountMetadata,
-  dependencies: Parameters<SideEffect>[2],
-): OperatorFunction<FetchResult, Action> =>
-  map(result => {
-    const { actions } = dependencies;
-
-    if (result.error) {
-      return actions.cardanoContext.getAccountUtxosFailed(result.error);
-    }
-
-    return actions.cardanoContext.setAccountUtxos({
-      accountId: account.accountId,
-      utxos: result.utxos,
-    });
-  });
-
-/**
- * Orchestrates the complete UTxO fetching and processing pipeline for a single account.
- * Note: Concurrency control (exhaustMap) is handled in trackAndFetchAccountUtxos.
- */
-const fetchAndProcessAccountUtxos = (
-  account: AccountMetadata,
-  dependencies: Parameters<SideEffect>[2],
-): Observable<Action> =>
-  fetchUtxosForAllStakeKeys(account, dependencies).pipe(
-    filterFrankenAddresses(account, dependencies),
-    emitUtxosActions(account, dependencies),
-  );
-
-/**
- * Side effect that tracks UTxOs for all Cardano accounts.
+ * Refetches UTxOs per account.
  *
- * Uses `switchMap` on the accounts array so that when the set of active
- * accounts changes (e.g. wallet removed then restored with the same
- * recovery phrase), previous per-account fetch subscriptions are cancelled
- * and new ones are created.
+ * Natural trigger:
+ * - Combines activities + addresses + tip per account. Top non-Rewards,
+ *   non-Pending activityId and sorted stake-key set form a cache key. Fetch
+ *   runs only when the cache key differs from the persisted one, so healthy
+ *   (already-settled) accounts skip the fetch entirely. Tip is part of the
+ *   `distinctUntilChanged` comparator so each tip update can drive a refetch
+ *   while the persisted cacheKey is still behind — once the cacheKey is
+ *   advanced (see below) subsequent tip ticks no-op at the cacheKey gate.
+ * - Bootstrap (no on-chain activity yet): the fetch is NOT gated on a
+ *   `topActivity`. As soon as addresses + stake keys are known the fetch runs
+ *   with `NO_ACTIVITY_CACHE_KEY_SENTINEL` as the activity component of the
+ *   cache key. Balances are independent of the activity feed; gating on
+ *   `topActivity` previously meant an account whose first activities page is
+ *   entirely Rewards (more recent rewards than its newest tx) never fetched
+ *   UTxOs until enough transactions were paged in. When a real `topActivity`
+ *   later materialises the cache key flips to the activity-id-based key,
+ *   triggering one refetch, after which the steady-state logic applies.
  *
- * Supports multi-delegation by extracting all unique stake keys from an account's
- * addresses and fetching UTxOs for each in parallel. Results are merged into a
- * single UTxO set for the account.
+ * Cache key advancement (per fetch):
+ * - The UTxOs are dispatched on every successful fetch.
+ * - The persisted cacheKey is advanced (via `setLastFetchedUtxoCacheKey`)
+ *   only when either the just-fetched UTxO set differs from what we had
+ *   stored, or the tip is at least `UTXO_SYNC_CONFIRMATION_DEPTH` slots
+ *   beyond the anchoring activity's slot. While neither holds, the cacheKey
+ *   stays behind and the natural trigger keeps re-fetching as the tip
+ *   advances — this is what unblocks the indexer-lag stall.
  *
- * Filters out "franken addresses" - UTxOs where the address combines the user's
- * stake credential with a payment credential they don't own. Only UTxOs with
- * payment credentials matching the account's discovered addresses are stored.
+ * Manual retry trigger:
+ * - On `retrySyncRound` dispatches, refetches only accounts that currently
+ *   hold a `CardanoUtxoFetchFailureId` in the failures store, bypassing the
+ *   cache-key gate and unconditionally advancing the persisted cacheKey on
+ *   success.
+ *
+ * Transient provider errors are retried with exponential backoff. After
+ * exhaustion a failure keyed by `CardanoUtxoFetchFailureId(accountId)` is
+ * surfaced; a subsequent successful fetch auto-dismisses it.
  */
 export const trackAccountUtxos: SideEffect = (
-  _,
-  stateObservables,
-  dependencies,
+  { cardanoContext: { retrySyncRound$ } },
+  {
+    wallets: { selectActiveNetworkAccounts$ },
+    addresses: { selectAllAddresses$ },
+    activities: { selectAllMap$ },
+    cardanoContext: {
+      selectLastFetchedUtxoCacheKeyByAccount$,
+      selectAccountUtxos$,
+      selectTip$,
+    },
+    failures: { selectFailureById$, selectAllFailures$ },
+  },
+  { actions, cardanoProvider: { getAccountUtxos }, logger },
 ) =>
-  prepareCardanoAccountsData(stateObservables).pipe(
+  selectActiveNetworkAccounts$.pipe(
+    map(accounts => accounts.filter(isCardanoAccount)),
     switchMap(accounts =>
       rxMerge(
-        ...accounts.map(account =>
-          fetchAndProcessAccountUtxos(account, dependencies),
-        ),
+        ...accounts.map(account => {
+          const { accountId } = account;
+          const { chainId } = account.blockchainSpecific;
+
+          const computeAccountAddresses = (
+            allAddresses: Parameters<typeof groupCardanoAddressesByAccount>[0],
+          ) =>
+            groupCardanoAddressesByAccount(allAddresses, chainId)[accountId] ??
+            [];
+
+          const naturalTrigger$: Observable<FetchParams> = combineLatest([
+            selectAllMap$.pipe(
+              map(activitiesByAccount =>
+                getTopOnChainActivity(activitiesByAccount, accountId),
+              ),
+            ),
+            selectAllAddresses$,
+            selectTip$,
+          ]).pipe(
+            map(([topActivity, allAddresses, tip]) => {
+              const accountAddresses = computeAccountAddresses(allAddresses);
+              const stakeKeys = extractUniqueStakeKeys(accountAddresses);
+              return { topActivity, accountAddresses, stakeKeys, tip };
+            }),
+            // Not gated on `topActivity` — fetch once addresses + stake keys
+            // exist (see the bootstrap note in the JSDoc above).
+            filter(p => p.stakeKeys.length > 0),
+            map(({ accountAddresses, stakeKeys, topActivity, tip }) => ({
+              accountAddresses,
+              stakeKeys,
+              topActivity,
+              tip,
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId:
+                  topActivity?.activityId ?? NO_ACTIVITY_CACHE_KEY_SENTINEL,
+                stakeKeys,
+                accountAddressCount: accountAddresses.length,
+              }),
+            })),
+            distinctUntilChanged(
+              (a, b) =>
+                a.cacheKey === b.cacheKey && a.tip?.slot === b.tip?.slot,
+            ),
+            withLatestFrom(selectLastFetchedUtxoCacheKeyByAccount$),
+            filter(
+              ([{ cacheKey }, persisted]) => cacheKey !== persisted[accountId],
+            ),
+            map(([params]) => params),
+          );
+
+          const retryTrigger$: Observable<FetchParams> = retrySyncRound$.pipe(
+            withLatestFrom(
+              selectAllFailures$,
+              selectAllMap$,
+              selectAllAddresses$,
+              selectTip$,
+            ),
+            filter(
+              ([, allFailures]) =>
+                CardanoUtxoFetchFailureId(accountId) in allFailures,
+            ),
+            map(
+              ([, , activitiesByAccount, allAddresses, tip]):
+                | FetchParams
+                | undefined => {
+                const topActivity = getTopOnChainActivity(
+                  activitiesByAccount,
+                  accountId,
+                );
+                const accountAddresses = computeAccountAddresses(allAddresses);
+                const stakeKeys = extractUniqueStakeKeys(accountAddresses);
+                if (stakeKeys.length === 0) return undefined;
+                return {
+                  accountAddresses,
+                  stakeKeys,
+                  topActivity,
+                  tip,
+                  cacheKey: UtxoCacheKey({
+                    topOnChainActivityId:
+                      topActivity?.activityId ?? NO_ACTIVITY_CACHE_KEY_SENTINEL,
+                    stakeKeys,
+                    accountAddressCount: accountAddresses.length,
+                  }),
+                };
+              },
+            ),
+            filter((params): params is FetchParams => !!params),
+          );
+
+          return rxMerge(
+            naturalTrigger$.pipe(
+              map(params => ({ params, isRetry: false as const })),
+            ),
+            retryTrigger$.pipe(
+              map(params => ({ params, isRetry: true as const })),
+            ),
+          ).pipe(
+            switchMap(
+              ({ params, isRetry }): Observable<CardanoContextAction> => {
+                const {
+                  accountAddresses,
+                  stakeKeys,
+                  cacheKey,
+                  topActivity,
+                  tip,
+                } = params;
+                return forkJoin(
+                  stakeKeys.map(rewardAccount =>
+                    getAccountUtxos({ rewardAccount }, { chainId }),
+                  ),
+                ).pipe(
+                  map(results => {
+                    const firstError = results.find(r => r.isErr());
+                    if (firstError) throw firstError.unwrapErr();
+                    return results.flatMap(r => r.unwrap());
+                  }),
+                  retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+                  map(utxos =>
+                    filterLegitimateUtxos({
+                      utxos,
+                      accountAddresses,
+                      logger,
+                      accountId,
+                    }),
+                  ),
+                  withLatestFrom(selectAccountUtxos$),
+                  mergeMap(([utxos, storedUtxosByAccount]) => {
+                    const storedEntry = storedUtxosByAccount[accountId];
+                    const hasUtxosChanged =
+                      storedEntry === undefined ||
+                      !utxoSetsEqual(utxos, storedEntry);
+                    const isTipBeyondDepth = isTipBeyondConfirmationDepth(
+                      topActivity,
+                      tip,
+                    );
+                    const shouldAdvanceCacheKey =
+                      isRetry || hasUtxosChanged || isTipBeyondDepth;
+
+                    const emissions: Observable<CardanoContextAction>[] = [
+                      of(
+                        actions.cardanoContext.setAccountUtxos({
+                          accountId,
+                          utxos,
+                        }),
+                      ),
+                    ];
+                    if (shouldAdvanceCacheKey) {
+                      emissions.push(
+                        of(
+                          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+                            accountId,
+                            cacheKey,
+                          }),
+                        ),
+                      );
+                    }
+                    emissions.push(
+                      of(CardanoUtxoFetchFailureId(accountId)).pipe(
+                        autoDismissFailureOnSuccess(selectFailureById$),
+                      ),
+                    );
+                    return rxMerge(...emissions);
+                  }),
+                  catchError(() =>
+                    of(
+                      actions.failures.addFailure({
+                        failureId: CardanoUtxoFetchFailureId(accountId),
+                        message:
+                          'sync.error.cardano-utxo-fetch-failed' as TranslationKey,
+                      }),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        }),
       ),
     ),
   );
+
+const filterLegitimateUtxos = (params: {
+  utxos: Cardano.Utxo[];
+  accountAddresses: AnyAddress<CardanoAddressData>[];
+  logger: Parameters<SideEffect>[2]['logger'];
+  accountId: AccountId;
+}): Cardano.Utxo[] => {
+  const { utxos, accountAddresses, logger, accountId } = params;
+  const ownedCredentials = extractOwnedPaymentCredentials(accountAddresses);
+  const { legitimate, franken } = filterFrankenUtxos(utxos, ownedCredentials);
+  if (franken.length > 0) {
+    logger.warn(
+      `Filtered ${franken.length} franken UTxOs for account ${accountId}`,
+    );
+  }
+  return legitimate;
+};

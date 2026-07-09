@@ -10,7 +10,7 @@ import {
   laceStackNavigatorProps,
   navigationRef,
   navigationTheme,
-  sheetNavigationRef,
+  sheetStackScreenListeners,
   SheetRoutes,
   SheetStack,
   Stack,
@@ -21,8 +21,11 @@ import {
   BaseTemplate,
   GlobalToast,
   isAndroid,
+  spacing,
   Splash,
+  useTheme,
 } from '@lace-lib/ui-toolkit';
+import { TrueSheetProvider } from '@lodev09/react-native-true-sheet';
 import React, {
   useCallback,
   useEffect,
@@ -30,7 +33,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { BackHandler, Platform, StyleSheet, View } from 'react-native';
+import {
+  BackHandler,
+  Platform,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 
@@ -43,12 +52,11 @@ import type {
   LinkingOptions,
   NavigationState,
   ParamListBase,
+  SheetNavigationOptions,
   StackParameterList,
   StackScreenProps,
 } from '@lace-lib/navigation';
 import type { EdgeInsets } from 'react-native-safe-area-context';
-
-const InitialSheet = () => <></>;
 
 export const Router = ({
   moduleInitProps,
@@ -67,7 +75,7 @@ export const Router = ({
     sheetPages: undefined,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [currentRouteName, setCurrentRouteName] = useState<string>('');
+  const { isSideMenu, theme } = useTheme();
 
   const toast = useLaceSelector('ui.getToast');
   const hideToast = useDispatchLaceAction('ui.hideToast');
@@ -84,76 +92,77 @@ export const Router = ({
   const activePage = useSelector(viewsSelectors.views.getActivePage);
   const activeSheetPageRef = useRef(activeSheetPage);
   const dialogs = useUICustomisation('addons.loadDialogs');
-  const {
-    stackContainerProps,
-    sheetContainerProps,
-    stackScreenListeners,
-    sheetScreenListeners,
-  } = useNavigationObservability(navigationRef, sheetNavigationRef);
 
-  const renderHomeScreen = useCallback(
-    (props: StackScreenProps<StackRoutes.Home>) => (
-      <Home {...props}>{pages.tabPages}</Home>
-    ),
-    [pages.tabPages],
+  const {
+    onNavigationReady: trackNavigationReady,
+    onNavigationStateChange: trackNavigationStateChange,
+  } = useNavigationObservability(navigationRef);
+
+  const [currentRouteNameForDialogs, setCurrentRouteNameForDialogs] = useState<
+    string | undefined
+  >();
+
+  const syncDialogRouteFromNavigationRef = useCallback(() => {
+    if (!navigationRef.isReady()) {
+      return;
+    }
+    const route = navigationRef.getCurrentRoute();
+    const next = route?.name as string | undefined;
+    setCurrentRouteNameForDialogs(previous =>
+      previous === next ? previous : next,
+    );
+  }, []);
+
+  const onNavigationReady = useCallback(() => {
+    trackNavigationReady();
+    syncDialogRouteFromNavigationRef();
+  }, [trackNavigationReady, syncDialogRouteFromNavigationRef]);
+
+  const onNavigationStateChange = useCallback(
+    (state: Readonly<NavigationState> | undefined) => {
+      trackNavigationStateChange(state);
+      syncDialogRouteFromNavigationRef();
+    },
+    [trackNavigationStateChange, syncDialogRouteFromNavigationRef],
   );
 
   useEffect(() => {
     activeSheetPageRef.current = activeSheetPage;
   }, [activeSheetPage]);
 
-  useEffect(() => {
-    if (activeSheetPage === null) {
-      NavigationControls.sheets.close();
-    }
-    if (activeSheetPage && activeSheetPage.route in SheetRoutes) {
-      const { route, params } = activeSheetPage;
-      NavigationControls.sheets.navigate(route as SheetRoutes, params);
-    }
-  }, [activeSheetPage]);
-
-  const handleStackReady = () => {
-    stackContainerProps.onReady?.();
-    setCurrentRouteName(navigationRef.getCurrentRoute()?.name ?? '');
-  };
-  const handleStackStateChange = (
-    state: Readonly<NavigationState> | undefined,
-  ) => {
-    stackContainerProps.onStateChange?.(state);
-    setCurrentRouteName(navigationRef.getCurrentRoute()?.name ?? '');
-  };
-
+  // ORDER-SENSITIVE: the activePage (stack) effect MUST run before the
+  // activeSheetPage (sheet) effect below. NavigationControls.navigate(stackRoute)
+  // branches on what's currently on top: a sheet on top forces the
+  // "dismiss-then-navigate" path. If the sheet opens first, the stack navigate
+  // then tries to dismiss a sheet that's still animating open — the native
+  // dismiss is dropped, the sheet wedges open, and closeSheet() (e.g. the
+  // remove-account success footer button) can't recover it. Navigating the
+  // stack first means no sheet is up yet (clean immediate navigate); the sheet
+  // then opens on top in a dismissible state. See LW-15012.
   useEffect(() => {
     if (activePage && activePage.route in StackRoutes) {
       const { route, params } = activePage;
-      // Shallow-clone params before passing to navigationRef.navigate directly,
-      // since NavigationControls.closeAndNavigate handles its own cloning but
-      // the typedNavigate path below bypasses it.
+
       const clonedParams = params ? { ...params } : params;
       // TODO: Centralize immutable-safe params cloning in NavigationControls and
       // consider deep cloning nested params if routes start passing structured objects.
 
-      // If a sheet is being opened in the same tick, navigate without closing sheets to avoid
-      // resetting the sheet navigator back to Initial (e.g., RemoveAccountSuccess flow).
-      if (activeSheetPageRef.current !== null && navigationRef.isReady()) {
-        const typedNavigate = navigationRef.navigate as unknown as (
-          screen: StackRoutes,
-          params?: StackParameterList[StackRoutes],
-        ) => void;
-
-        typedNavigate(
-          route as StackRoutes,
-          clonedParams as StackParameterList[StackRoutes],
-        );
-        return;
-      }
-
-      NavigationControls.actions.closeAndNavigate(
+      NavigationControls.navigate(
         route as StackRoutes,
         clonedParams as StackParameterList[StackRoutes],
       );
     }
   }, [activePage]);
+
+  useEffect(() => {
+    if (activeSheetPage === null) {
+      NavigationControls.closeSheet();
+    }
+    if (activeSheetPage && activeSheetPage.route in SheetRoutes) {
+      const { route, params } = activeSheetPage;
+      NavigationControls.navigate(route as SheetRoutes, params);
+    }
+  }, [activeSheetPage]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -197,13 +206,14 @@ export const Router = ({
 
     const handleBackPress = (): boolean => {
       try {
-        const currentRoute = sheetNavigationRef.getCurrentRoute?.();
-        const navigationState = sheetNavigationRef.getState?.();
+        const currentRoute = navigationRef.getCurrentRoute?.();
+        const navigationState = navigationRef.getState?.();
+        const currentRouteName = currentRoute?.name as string | undefined;
+        const isRootStackRoute = currentRouteName === SheetRoutes.RootStack;
         const isOnSheetPage =
-          currentRoute?.name !== SheetRoutes.Initial &&
-          currentRoute?.name !== undefined;
+          currentRouteName !== undefined && !isRootStackRoute;
 
-        // If we're on a sheet page (not Initial), handle the back press
+        // If we're on a sheet page (not RootStack), handle the back press
         if (isOnSheetPage) {
           // Check if there's a navigation history (multiple sheets in stack)
           const canGoBack =
@@ -211,12 +221,12 @@ export const Router = ({
 
           if (canGoBack) {
             // Navigate back to previous sheet
-            sheetNavigationRef.goBack();
+            navigationRef.goBack();
             return true;
           }
 
           // Only one sheet in stack, close entire sheet navigation
-          NavigationControls.sheets.close();
+          NavigationControls.closeSheet();
           return true;
         }
 
@@ -238,68 +248,107 @@ export const Router = ({
   }, [isLoading]);
 
   const insets = useSafeAreaInsets();
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const styles = getStyles({ insets });
 
   const dialogsToRender = useMemo(() => {
+    if (!currentRouteNameForDialogs) return null;
     return dialogs
-      .filter(({ location }) => !location || location.test(currentRouteName))
+      .filter(
+        ({ location }) =>
+          !location || location.test(currentRouteNameForDialogs),
+      )
       .map(({ key, Dialog }) => <Dialog key={key} />);
-  }, [dialogs, currentRouteName]);
+  }, [dialogs, currentRouteNameForDialogs]);
+
+  // Capture the initial route exactly once. `initialRouteName` is only honored
+  // on first mount of the Stack.Navigator, and recomputing it would change the
+  // `RootStack` identity and force React Navigation to remount the entire stack
+  // mid-transition (e.g. when removing the last wallet), which can cause a
+  // crash in `getRehydratedState` reading `.stale` on an undefined state.
+  // After mount, navigation is driven by `setActivePage` side effects.
+  const initialRouteRef = useRef<StackRoutes | null>(null);
+  if (initialRouteRef.current === null) {
+    initialRouteRef.current =
+      walletNumber === 0 ? StackRoutes.OnboardingStart : StackRoutes.Home;
+  }
+
+  const RootStack = useCallback(
+    () => (
+      <Stack.Navigator
+        initialRouteName={initialRouteRef.current ?? StackRoutes.Home}
+        {...laceStackNavigatorProps}>
+        {!!pages.tabPages && (
+          <Stack.Screen name={StackRoutes.Home}>
+            {(props: StackScreenProps<StackRoutes.Home>) => (
+              <Home {...props}>{pages.tabPages}</Home>
+            )}
+          </Stack.Screen>
+        )}
+        {pages.stackPages}
+      </Stack.Navigator>
+    ),
+    [pages.tabPages, pages.stackPages],
+  );
+
+  const sheetGroupScreenOptions: SheetNavigationOptions = useMemo(
+    () => ({
+      anchor: isSideMenu ? 'right' : 'center',
+      backgroundColor: theme.background.page,
+      cornerRadius: spacing.L,
+      detents: isSideMenu ? [1] : ['auto'],
+      dimmed: true,
+      grabber: !isSideMenu,
+      anchorOffset: spacing.S,
+      detachedOffset: spacing.S,
+      dismissible: true,
+      detached: isSideMenu,
+      maxContentHeight: isSideMenu ? windowHeight - spacing.S * 2 : undefined,
+      maxContentWidth: isSideMenu ? windowWidth * 0.5 : undefined,
+    }),
+    [isSideMenu, theme.background.page, windowHeight, windowWidth],
+  );
 
   if (isLoading) return <Splash />;
 
-  const initialRoute =
-    walletNumber === 0 ? StackRoutes.OnboardingStart : StackRoutes.Home;
-
   return (
-    <ConfigProvider
-      viewId={moduleInitProps.viewId!}
-      appConfig={moduleInitProps.runtime.config}>
-      <>
-        {dialogsToRender}
-        <BaseTemplate>
-          <View style={styles.insetsWrapper}>
-            <NavigationContainer
-              theme={navigationTheme}
-              ref={navigationRef}
-              onReady={handleStackReady}
-              onStateChange={handleStackStateChange}
-              linking={deepLinks}>
-              <Stack.Navigator
-                initialRouteName={initialRoute}
-                screenListeners={stackScreenListeners}
-                {...laceStackNavigatorProps}>
-                {!!pages.tabPages && (
-                  <Stack.Screen name={StackRoutes.Home}>
-                    {renderHomeScreen}
-                  </Stack.Screen>
-                )}
-                {pages.stackPages}
-              </Stack.Navigator>
-            </NavigationContainer>
-          </View>
-        </BaseTemplate>
-        <NavigationContainer
-          ref={sheetNavigationRef}
-          onReady={sheetContainerProps.onReady}
-          onStateChange={sheetContainerProps.onStateChange}>
-          <SendProvider>
-            <SheetStack.Navigator screenListeners={sheetScreenListeners}>
-              <>
-                <SheetStack.Screen
-                  name={SheetRoutes.Initial}
-                  component={InitialSheet}
-                  key="initial-sheet-page"
-                />
-                {pages.sheetPages}
-              </>
-            </SheetStack.Navigator>
-          </SendProvider>
-        </NavigationContainer>
-        {pages.globalOverlays}
-        <GlobalToast toast={toast} onHide={hideToast} />
-      </>
-    </ConfigProvider>
+    <SendProvider>
+      <ConfigProvider
+        viewId={moduleInitProps.viewId!}
+        appConfig={moduleInitProps.runtime.config}>
+        <>
+          {dialogsToRender}
+          <TrueSheetProvider>
+            <BaseTemplate>
+              <View style={styles.insetsWrapper}>
+                <NavigationContainer
+                  theme={navigationTheme}
+                  ref={navigationRef}
+                  documentTitle={{ enabled: false }}
+                  onReady={onNavigationReady}
+                  onStateChange={onNavigationStateChange}
+                  linking={deepLinks}>
+                  <SheetStack.Navigator
+                    screenListeners={sheetStackScreenListeners}>
+                    <>
+                      <SheetStack.Screen
+                        name={SheetRoutes.RootStack}
+                        component={RootStack}
+                      />
+                      <SheetStack.Group screenOptions={sheetGroupScreenOptions}>
+                        {pages.sheetPages}
+                      </SheetStack.Group>
+                    </>
+                  </SheetStack.Navigator>
+                </NavigationContainer>
+              </View>
+            </BaseTemplate>
+          </TrueSheetProvider>
+          {pages.globalOverlays}
+          <GlobalToast toast={toast} onHide={hideToast} />
+        </>
+      </ConfigProvider>
+    </SendProvider>
   );
 };
 

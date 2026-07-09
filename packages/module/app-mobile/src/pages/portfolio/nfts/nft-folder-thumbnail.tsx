@@ -10,8 +10,12 @@ import {
 } from '@lace-lib/ui-toolkit';
 import { Image } from 'expo-image';
 import React, { useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import {
+  StyleSheet,
+  View,
+  Pressable,
+  type LayoutChangeEvent,
+} from 'react-native';
 
 import { useLaceSelector } from '../../../hooks';
 

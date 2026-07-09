@@ -3,13 +3,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Column, Row, Text } from '../../../atoms';
-import {
-  DropdownMenu,
-  SheetFooter,
-  SheetHeader,
-  useFooterHeight,
-} from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { DropdownMenu, DropdownMenuViewport } from '../../../molecules';
+import { footerHeight } from '../../../organisms';
 
 import type { IconName } from '../../../atoms/icons/Icon';
 import type { DropdownMenuItem } from '../../../molecules/dropdownMenu/dropdownMenu';
@@ -19,6 +14,7 @@ export interface FilterDropdownConfig {
   rightNode?: React.ReactNode;
   items: (DropdownMenuItem | string)[];
   selectedItemId?: string;
+  shouldOpenUpwards?: boolean;
   onSelectItem: (index: number) => void;
   onClear?: () => void;
   selectedItemIcon?: IconName;
@@ -27,12 +23,12 @@ export interface FilterDropdownConfig {
 }
 
 export interface FilterSheetProps {
-  title: string;
+  title?: string;
   dropdowns: FilterDropdownConfig[];
-  onConfirm: () => void;
-  onCancel: () => void;
-  cancelButtonLabel: string;
-  confirmButtonLabel: string;
+  onConfirm?: () => void;
+  onCancel?: () => void;
+  cancelButtonLabel?: string;
+  confirmButtonLabel?: string;
   testID?: string;
 }
 
@@ -82,7 +78,7 @@ const FilterDropdownItem = ({
   );
 
   return (
-    <Column gap={spacing.S}>
+    <Column gap={spacing.XL}>
       <Row justifyContent="space-between" alignItems="center">
         <Text.S
           variant="secondary"
@@ -99,6 +95,7 @@ const FilterDropdownItem = ({
           items={dropdown.items}
           title={selectedItemText || dropdown.selectedItemId || dropdown.label}
           selectedItemId={dropdown.selectedItemId}
+          shouldOpenUpwards={dropdown.shouldOpenUpwards}
           onSelectItem={handleSelectItem}
           titleLeftIcon={
             selectedItemData?.leftIcon || dropdown.selectedItemIcon
@@ -116,57 +113,41 @@ const FilterDropdownItem = ({
 };
 
 export const FilterSheet = ({
-  title,
   dropdowns,
-  onConfirm,
-  onCancel,
-  cancelButtonLabel,
-  confirmButtonLabel,
   testID = 'filter-sheet',
 }: FilterSheetProps) => {
-  const footerHeight = useFooterHeight();
-  const containerStyle = useMemo(
-    () => [styles.container, { paddingBottom: footerHeight }],
-    [footerHeight],
+  const boundaryInsets = useMemo(
+    () => ({ top: spacing.M, bottom: footerHeight.horizontal }),
+    [],
   );
 
   return (
-    <>
-      <SheetHeader title={title} testID={`${testID}-header`} />
-      <Sheet.Scroll testID={testID} contentContainerStyle={containerStyle}>
-        <Column gap={spacing.L} style={styles.content}>
-          {dropdowns.map((dropdown, index) => (
-            <FilterDropdownItem
-              key={index}
-              dropdown={dropdown}
-              index={index}
-              testID={testID}
-            />
-          ))}
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: cancelButtonLabel,
-          onPress: onCancel,
-          testID: `${testID}-cancel`,
-        }}
-        primaryButton={{
-          label: confirmButtonLabel,
-          onPress: onConfirm,
-          testID: `${testID}-confirm`,
-        }}
-      />
-    </>
+    <DropdownMenuViewport
+      style={styles.content}
+      testID={testID}
+      boundaryInsets={boundaryInsets}>
+      <Column gap={spacing.L} style={styles.contentWrapper}>
+        {dropdowns.map((dropdown, index) => (
+          <FilterDropdownItem
+            key={index}
+            dropdown={dropdown}
+            index={index}
+            testID={testID}
+          />
+        ))}
+      </Column>
+    </DropdownMenuViewport>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: spacing.M,
+  contentWrapper: {
+    minHeight: 400,
   },
   content: {
     paddingTop: spacing.M,
+    paddingBottom: footerHeight.horizontal,
+    paddingHorizontal: spacing.M,
   },
   label: {
     marginBottom: spacing.XS,

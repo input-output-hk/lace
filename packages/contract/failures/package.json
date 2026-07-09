@@ -6,6 +6,8 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/analytics": "*",
+    "@lace-contract/i18n": "*",
     "@lace-contract/module": "*"
   },
   "devDependencies": {

@@ -13,7 +13,7 @@ const { fetchTermsAndConditionsMock } = vi.hoisted(() => ({
   fetchTermsAndConditionsMock: vi.fn(),
 }));
 
-vi.mock('@midnight-ntwrk/wallet-sdk-facade', () => ({
+vi.mock('@midnight-ntwrk/wallet-sdk/facade', () => ({
   WalletFacade: {
     fetchTermsAndConditions: fetchTermsAndConditionsMock,
   },

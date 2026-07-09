@@ -1,0 +1,1 @@
+export { SecurityAlertsBanner } from './SecurityAlertsBanner';

@@ -117,12 +117,12 @@ export const IdentityCenterPage = ({
 
   //TODO: Remove this once we complete phase1
   const handleDebugSheetScreen = useCallback((route: SheetRoutes) => {
-    NavigationControls.sheets.navigate(route);
+    NavigationControls.navigate(route);
   }, []);
 
   //TODO: Remove this once we complete phase1
   const handleDebugStackScreen = useCallback((route: StackRoutes) => {
-    NavigationControls.actions.closeAndNavigate(route, {}, { merge: true });
+    NavigationControls.navigate(route, {}, { merge: true });
   }, []);
 
   return (

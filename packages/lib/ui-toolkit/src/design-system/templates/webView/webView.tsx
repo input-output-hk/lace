@@ -32,11 +32,19 @@ export type WebViewRef = {
   stopLoading: () => void;
 };
 
+export interface WebViewNavBarFavorite {
+  isSaved: boolean;
+  onToggle: () => void;
+  accessibilityLabel: string;
+}
+
 export interface WebViewNavBarProps {
   /** The base URL or hostname to display in the nav bar */
   displayUrl: string;
   /** Callback when the Done button is pressed */
   onDone: () => void;
+  /** Optional favourite/bookmark button rendered left of the Done button. */
+  favorite?: WebViewNavBarFavorite;
 }
 
 export interface WebViewTemplateProps {

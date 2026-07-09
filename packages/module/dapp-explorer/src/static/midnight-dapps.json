@@ -1,0 +1,40 @@
+[
+  {
+    "name": "Midnames",
+    "slug": "midnames",
+    "short_description": ".night Domain Names for Midnight blockchain",
+    "logos": {
+      "small": null,
+      "medium": null,
+      "large": null
+    },
+    "rating": {
+      "vote_count": 0,
+      "average_rating": null,
+      "star_count": 0
+    },
+    "website": "https://midnight.domains/",
+    "active_status": "active",
+    "scam_status": "clean",
+    "twitter": null,
+    "github": null,
+    "discord": null,
+    "telegram": null,
+    "facebook": null,
+    "reddit": null,
+    "linkedin": null,
+    "updated_at": "2025-01-01T00:00:00.000Z",
+    "main_category": {
+      "id": 1,
+      "parent_id": null,
+      "name": "Other",
+      "slug": "other",
+      "description": null,
+      "projects_count": 0,
+      "ancestry_depth": null,
+      "ancestry": "",
+      "updated_at": "2025-01-01T00:00:00.000Z"
+    },
+    "additional_categories": []
+  }
+]

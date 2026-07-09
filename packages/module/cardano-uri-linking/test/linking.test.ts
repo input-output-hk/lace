@@ -16,7 +16,7 @@ vi.mock('@lace-lib/navigation', async () => {
     // Keep this mock minimal + deterministic for unit tests.
     // We only need the parts consumed by `src/linking.ts` and assertions below.
     getStateFromPath: vi.fn(),
-    NavigationControls: { sheets: { navigate: vi.fn() } },
+    NavigationControls: { navigate: vi.fn() },
     SheetRoutes: { Send: 'Send' },
     StackRoutes: { ClaimPayload: 'ClaimPayload', Home: 'Home' },
   };
@@ -92,7 +92,7 @@ describe('linking configuration', () => {
       >[1];
       const result = linkingConfig.getStateFromPath?.(validAddress, options);
 
-      expect(NavigationControls.sheets.navigate).toHaveBeenCalledWith(
+      expect(NavigationControls.navigate).toHaveBeenCalledWith(
         SheetRoutes.Send,
         { recipientAddress: validAddress },
       );
@@ -109,7 +109,7 @@ describe('linking configuration', () => {
       >[1];
       const result = linkingConfig.getStateFromPath?.(invalidAddress, options);
 
-      expect(NavigationControls.sheets.navigate).not.toHaveBeenCalled();
+      expect(NavigationControls.navigate).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
     });
 
@@ -144,7 +144,7 @@ describe('linking configuration', () => {
       const result = linkingConfig.getStateFromPath?.(path, options);
 
       expect(result).toBeUndefined();
-      expect(NavigationControls.sheets.navigate).not.toHaveBeenCalled();
+      expect(NavigationControls.navigate).not.toHaveBeenCalled();
     });
   });
 });

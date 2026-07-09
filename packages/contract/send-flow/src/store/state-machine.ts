@@ -202,6 +202,12 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
     },
   },
   FormPendingValidation: {
+    // Form changes can arrive while validation is in flight (e.g. the amount
+    // sync dispatches one event per token); apply them instead of dropping
+    // them so the machine validates the latest form data
+    formDataChanged: (previousState, { data }: { data: FormChangeData }) =>
+      applyFormDataChange(previousState, data),
+
     txBuildResulted: (previousState, _event: { result: TxBuildResult }) =>
       previousState,
 

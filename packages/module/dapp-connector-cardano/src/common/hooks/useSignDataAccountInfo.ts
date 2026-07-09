@@ -8,6 +8,10 @@ import type { SignDataAccountInfo } from '../types/sign-data-account';
  * Resolves account info for the Sign Data UI from the per-dApp session mapping.
  * Returns undefined when the origin has no session entry or the account is not
  * found in the active network accounts.
+ *
+ * `name` here is the raw account name — no concatenated "[At risk]" suffix.
+ * The compromise indicator surfaces via `<AccountSecurityAlertInline>` in the
+ * SignDataContent JSX, keyed off `accountId`.
  */
 export const useSignDataAccountInfo = (
   dappOrigin?: string,
@@ -26,6 +30,7 @@ export const useSignDataAccountInfo = (
     return {
       name: account.metadata.name,
       avatarUri: account.metadata.avatarUri,
+      accountId: account.accountId,
     };
   }, [dappOrigin, allAccounts, sessionAccountByOrigin]);
 };

@@ -50,6 +50,7 @@ describe('config validation', () => {
     EXPO_PUBLIC_LEARN_MORE_URL: 'https://example.com/learn-more',
     EXPO_PUBLIC_URL_LACE_PAGE: 'https://example.com/lace-link',
     EXPO_PUBLIC_NFT_CDN_URL: 'https://example.com/nft-cdn',
+    EXPO_PUBLIC_CARDANO_CUBE_BASE_URL: 'https://example.com/cardano-cube',
     ...overrides,
   });
 

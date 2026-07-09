@@ -26,6 +26,7 @@
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
     "@lace-contract/views": "*",
+    "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/ui-extension": "*",
     "@lace-lib/ui-toolkit": "*",

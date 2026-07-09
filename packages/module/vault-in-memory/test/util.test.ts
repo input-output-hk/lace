@@ -22,7 +22,7 @@ describe('vault-in-memory/util', () => {
         accountId: AccountId('midnight-acc'),
       } as InMemoryWalletAccount;
       const cardanoBlockchainSpecificProps = {
-        prop: 1,
+        encryptedRootPrivateKey: 'beef' as HexBytes,
       };
       const midnightBlockchainSpecificProps = {
         otherProp: 2,
@@ -72,7 +72,7 @@ describe('vault-in-memory/util', () => {
         blockchainSpecific: {
           Cardano: cardanoBlockchainSpecificProps,
           Midnight: midnightBlockchainSpecificProps,
-        },
+        } as InMemoryWallet['blockchainSpecific'],
         encryptedRecoveryPhrase: expect.any(String) as HexBytes,
         metadata: {
           name: walletName,

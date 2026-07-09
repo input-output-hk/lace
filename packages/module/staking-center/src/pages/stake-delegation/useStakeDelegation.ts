@@ -1,7 +1,8 @@
 import { useAnalytics } from '@lace-contract/analytics';
-import { useUICustomisation } from '@lace-contract/app';
+import { useConfig, useUICustomisation } from '@lace-contract/app';
 import {
   ADA_DECIMALS,
+  CardanoDelegationFailureId,
   DEFAULT_DECIMALS,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
@@ -216,7 +217,7 @@ export const useStakeDelegation = ({
 
   const handleDeRegisterPress = useCallback(() => {
     trackEvent('staking | deregister | press');
-    NavigationControls.sheets.navigate(SheetRoutes.DeregisterPool, {
+    NavigationControls.navigate(SheetRoutes.DeregisterPool, {
       accountId: accountId.toString(),
     });
   }, [accountId, trackEvent]);
@@ -224,7 +225,7 @@ export const useStakeDelegation = ({
   const handleDelegatePress = useCallback(() => {
     trackEvent('staking | stake | press');
     // TODO: Implement delegate logic https://input-output.atlassian.net/browse/LW-14123
-    NavigationControls.sheets.navigate(SheetRoutes.BrowsePool, {
+    NavigationControls.navigate(SheetRoutes.BrowsePool, {
       accountId: accountId.toString(),
     });
   }, [accountId, trackEvent]);
@@ -254,6 +255,26 @@ export const useStakeDelegation = ({
   const [activitiesItemUICustomisation] = useUICustomisation(
     'addons.loadActivitiesItemUICustomisations',
     { blockchainName: address?.blockchainName },
+  );
+  const { appConfig } = useConfig();
+
+  const handleActivityPress = useCallback(
+    (id: string) => {
+      if (activitiesItemUICustomisation?.onActivityClick) {
+        activitiesItemUICustomisation.onActivityClick({
+          activityId: id,
+          address,
+          config: appConfig,
+        });
+        return;
+      }
+      const activity = activities.find(a => a.activityId === id);
+      NavigationControls.navigate(SheetRoutes.ActivityDetail, {
+        activityId: id,
+        activity,
+      });
+    },
+    [activitiesItemUICustomisation, address, appConfig, activities],
   );
 
   // Get tokens metadata for activities formatting
@@ -345,6 +366,7 @@ export const useStakeDelegation = ({
       secondaryButtonLabel: t('v2.sheets.stake-delegation.deregister-button'),
       onPrimaryPress: handleDelegatePress,
       onSecondaryPress: handleDeRegisterPress,
+      onActivityPress: handleActivityPress,
       isLoadingActivities,
       isSecondaryButtonDisabled: isDeregisterDisabled,
     };
@@ -360,6 +382,7 @@ export const useStakeDelegation = ({
     activitySections,
     handleDeRegisterPress,
     handleDelegatePress,
+    handleActivityPress,
     isDeregisterDisabled,
     t,
     isLoadingActivities,
@@ -387,9 +410,14 @@ export const useStakeDelegationActivities = (
     params,
   );
 
+  const delegationFailureId = useMemo(
+    () => CardanoDelegationFailureId(accountId, rewardAccount),
+    [accountId, rewardAccount],
+  );
+
   const delegationError = useLaceSelector(
-    'cardanoContext.selectDelegationError',
-    params,
+    'failures.selectFailureById',
+    delegationFailureId,
   );
 
   const showToast = useDispatchLaceAction('ui.showToast');

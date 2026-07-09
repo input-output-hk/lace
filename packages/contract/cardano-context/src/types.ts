@@ -1,4 +1,5 @@
-import type { CardanoNetworkId } from './value-objects/cardano-network-id.vo';
+import type { CARDANO_TOKEN_METADATA_SCHEMA_VERSION } from './const';
+import type { CardanoNetworkId } from './value-objects';
 import type {
   Asset,
   Cardano,
@@ -22,6 +23,7 @@ import type {
   RawTokenWithoutContext,
   TokenId,
   TokenMetadata,
+  TokenMetadataValue,
 } from '@lace-contract/tokens';
 import type { FeeEntry } from '@lace-contract/tx-executor';
 import type { AccountId, InMemoryWallet } from '@lace-contract/wallet-repo';
@@ -65,7 +67,7 @@ export type CardanoTokenMetadataFile = {
   mediaType: Asset.MediaType;
   src: Asset.Uri;
   name?: string;
-  additionalProperties?: Record<string, string>;
+  additionalProperties?: Record<string, TokenMetadataValue>;
 };
 
 export type CoinItemProps = {
@@ -136,6 +138,7 @@ export type CardanoRewardActivity = RewardActivity<Omit<Reward, 'rewards'>>;
 
 export type CardanoTokenMetadata = {
   files?: CardanoTokenMetadataFile[];
+  metadataSchemaVersion?: typeof CARDANO_TOKEN_METADATA_SCHEMA_VERSION;
   updatedAt: Timestamp;
   policyId?: string;
 };
@@ -250,6 +253,12 @@ export type AccountRewardAccountDetailsMap = Record<
 export type DiscoverAddressesProps = {
   xpub: Bip32PublicKeyHex;
   accountIndex: number;
+  /**
+   * When true, run thorough discovery: gap-limit termination is augmented with
+   * set-driven exhaustion and a hard upper bound. Reserved for user-triggered
+   * sync; defaults to false (automatic discovery uses the standard predicate).
+   */
+  thorough?: boolean;
 };
 
 export type ExtendedTxDetails = Cardano.HydratedTx & {
@@ -365,14 +374,6 @@ export interface CardanoProvider {
   ) => Observable<Result<RewardAccountInfo, ProviderError>>;
 
   /**
-   * @return Observable that emits the total number of transactions for the given stake address once and completes
-   */
-  getTotalAccountTransactionCount: (
-    props: GetAccountRewardsProps,
-    context: CardanoProviderContext,
-  ) => Observable<Result<number, ProviderError>>;
-
-  /**
    * @return Observable that emits transaction details for given id once and completes
    */
   getTransactionDetails: (
@@ -414,7 +415,6 @@ export interface CardanoProviderDependencies {
 
 export interface CardanoProviderConfig {
   tipPollFrequency: Milliseconds;
-  transactionHistoryPollingIntervalSeconds: Milliseconds;
 }
 
 type CommonCardanoAccountProps = {

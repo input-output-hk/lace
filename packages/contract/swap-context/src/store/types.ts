@@ -139,6 +139,7 @@ export type SwapProviderToken = {
 
 export type SwapConfigState = {
   disclaimerAcknowledged: boolean;
+  ukFcaDisclaimerAcknowledged: boolean;
   slippage: number;
   excludedDexes: string[];
   availableDexes: SwapDexEntry[] | null;

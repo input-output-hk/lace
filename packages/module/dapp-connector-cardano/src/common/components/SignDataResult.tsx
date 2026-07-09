@@ -3,14 +3,12 @@ import {
   Column,
   Icon,
   Sheet,
-  SheetFooter,
-  SheetHeader,
   spacing,
   Text,
-  useFooterHeight,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { IconName } from '@lace-lib/ui-toolkit';
@@ -82,72 +80,69 @@ export const SignDataResult = ({
 }: SignDataResultProps): React.ReactElement => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const navigation = useNavigation();
+  const styles = getStyles(theme);
 
   const config = RESULT_STATE_CONFIGS[state];
   const iconColor = config.getIconColor(theme);
   const resolvedTitleKey = titleKey ?? config.titleKey;
   const resolvedDescriptionKey = descriptionKey ?? config.descriptionKey;
 
+  useEffect(() => {
+    navigation.setOptions({
+      header: <Sheet.Header title={t(resolvedTitleKey)} showDivider={true} />,
+      footer: (
+        <Sheet.Footer
+          secondaryButton={
+            state === 'signing'
+              ? undefined
+              : {
+                  label: t('dapp-connector.cardano.sign-data.result.close'),
+                  onPress: onClose,
+                  testID: testID ? `${testID}-close-button` : undefined,
+                }
+          }
+          showDivider={true}
+        />
+      ),
+    });
+  }, [navigation, t, resolvedTitleKey, state, onClose, testID]);
+
   return (
-    <>
-      <SheetHeader title={t(resolvedTitleKey)} showDivider={true} />
-      <Sheet.Scroll contentContainerStyle={styles.contentWrapper}>
-        <Column>
-          <Column
-            gap={spacing.M}
-            alignItems="center"
-            style={styles.content}
-            justifyContent="center"
-            testID={testID ? `${testID}-content` : undefined}>
-            <View
-              style={styles.iconContainer}
-              testID={testID ? `${testID}-icon` : undefined}>
-              <Icon
-                name={config.icon}
-                size={64}
-                variant={config.iconVariant}
-                color={iconColor}
-              />
-            </View>
+    <Sheet.Scroll contentContainerStyle={styles.contentWrapper}>
+      <Column>
+        <Column
+          gap={spacing.M}
+          alignItems="center"
+          style={styles.content}
+          justifyContent="center"
+          testID={testID ? `${testID}-content` : undefined}>
+          <View
+            style={styles.iconContainer}
+            testID={testID ? `${testID}-icon` : undefined}>
+            <Icon
+              name={config.icon}
+              size={64}
+              variant={config.iconVariant}
+              color={iconColor}
+            />
+          </View>
 
-            <Text.M
-              variant="secondary"
-              align="center"
-              testID={testID ? `${testID}-description` : undefined}>
-              {t(resolvedDescriptionKey)}
-            </Text.M>
-          </Column>
+          <Text.M
+            variant="secondary"
+            align="center"
+            testID={testID ? `${testID}-description` : undefined}>
+            {t(resolvedDescriptionKey)}
+          </Text.M>
         </Column>
-      </Sheet.Scroll>
-
-      <SheetFooter
-        secondaryButton={
-          state === 'signing'
-            ? undefined
-            : {
-                label: t('dapp-connector.cardano.sign-data.result.close'),
-                onPress: onClose,
-                testID: testID ? `${testID}-close-button` : undefined,
-              }
-        }
-        showDivider={true}
-      />
-    </>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
-const getStyles = (
-  _theme: ReturnType<typeof useTheme>['theme'],
-  footerHeight: number,
-) =>
+const getStyles = (_theme: ReturnType<typeof useTheme>['theme']) =>
   StyleSheet.create({
     contentWrapper: {
-      paddingBottom: footerHeight,
       paddingHorizontal: spacing.L,
     },
     content: {

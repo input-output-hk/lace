@@ -70,8 +70,9 @@ export const useReviewTransaction = (
     amount: BigNumber(BigInt('0')),
   };
 
-  const proprietaryState: 'Foreign' | 'Own' = addresses.find(
-    address => address.address === form?.address.value,
+  const recipientAddress = form?.address.resolvedAddress ?? form?.address.value;
+  const proprietaryState: 'Foreign' | 'Own' = addresses.some(
+    address => address.address === recipientAddress,
   )
     ? 'Own'
     : 'Foreign';
@@ -105,6 +106,7 @@ export const useReviewTransaction = (
     },
     recipientsAddressValue: {
       value: form?.address.value || '',
+      resolvedValue: form?.address.resolvedAddress,
       proprietaryState,
     },
     // TODO: add expires by date (specific to blockchain)

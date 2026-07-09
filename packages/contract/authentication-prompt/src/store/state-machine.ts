@@ -1,6 +1,10 @@
 import { createStateMachine } from '@lace-lib/util-store';
 
-import type { Config, AuthenticationPromptSliceState } from './types';
+import type {
+  AuthenticationPromptSliceState,
+  BiometricFailureReason,
+  Config,
+} from './types';
 import type { EventOf } from '@lace-lib/util-store';
 
 export type AuthenticationPromptEvent = EventOf<typeof stateMachine>;
@@ -135,6 +139,7 @@ export const stateMachine = createStateMachine(
           androidKeystoreRecovery,
         }: {
           success: boolean;
+          failureReason?: BiometricFailureReason;
           androidKeystoreRecovery?: {
             attemptNumber: number;
             maxAttempts: number;

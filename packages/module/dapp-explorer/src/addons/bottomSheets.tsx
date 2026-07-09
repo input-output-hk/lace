@@ -15,6 +15,7 @@ const bottomSheets: ContextualLaceInit<
       <SheetStack.Screen
         name={SheetRoutes.DappDetail}
         component={DappDetailSheet}
+        options={{ detents: [1], scrollable: true }}
       />
       <SheetStack.Screen
         name={SheetRoutes.DappFilterControls}

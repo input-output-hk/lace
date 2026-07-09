@@ -1,8 +1,8 @@
 import type { TextStyle, ViewStyle } from 'react-native';
+import type { PressableProps } from 'react-native';
 
 import React, { useMemo } from 'react';
-import { StyleSheet } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, Pressable } from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
 import { BlurView } from '../blur-view/blur-view';
@@ -12,7 +12,6 @@ import { Text } from '../text/text';
 
 import type { Theme } from '../../../design-tokens';
 import type { IconName } from '../icons/Icon';
-import type { PressableProps } from 'react-native-gesture-handler';
 
 export type ActionButtonProps = Omit<PressableProps, 'style'> & {
   icon: IconName | React.ReactElement;

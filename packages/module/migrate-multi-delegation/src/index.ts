@@ -61,7 +61,7 @@ export default moduleMap;
 
 export type Selectors = ModuleSelectors<typeof multiPlatformModule>;
 export type ActionCreators = ModuleActionCreators<typeof multiPlatformModule>;
-export type Action = ActionType<ActionCreators>;
+export type MigrateMultiDelegationAction = ActionType<ActionCreators>;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 export type AvailableAddons = ModuleAddons<
   typeof implementsContracts,

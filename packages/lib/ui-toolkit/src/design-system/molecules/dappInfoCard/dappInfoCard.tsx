@@ -1,9 +1,8 @@
-import type { CSSProperties } from 'react';
-import type { ImageStyle, ViewStyle } from 'react-native';
-
-import { Flex, Text, useTheme } from '@input-output-hk/lace-ui-toolkit';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
+
+import { spacing, useTheme } from '../../../design-tokens';
+import { Row, Text } from '../../atoms';
 
 /**
  * Props for the DappInfoCard component.
@@ -24,20 +23,30 @@ interface DappInfoCardProps {
   url: string;
 }
 
-const logoStyle: ImageStyle = {
-  width: 36,
-  height: 36,
-  borderRadius: 18,
-};
-
-const textContainerStyle: ViewStyle = {
-  flex: 1,
-  marginLeft: 8,
-};
+const LOGO_SIZE = 36;
+const LOGO_CONTAINER_SIZE = 40;
 
 const styles = StyleSheet.create({
-  logo: logoStyle,
-  textContainer: textContainerStyle,
+  container: {
+    marginBottom: spacing.M,
+  },
+  logo: {
+    width: LOGO_SIZE,
+    height: LOGO_SIZE,
+    borderRadius: LOGO_SIZE / 2,
+  },
+  logoContainer: {
+    width: LOGO_CONTAINER_SIZE,
+    height: LOGO_CONTAINER_SIZE,
+    borderRadius: LOGO_CONTAINER_SIZE / 2,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  textContainer: {
+    flex: 1,
+  },
 });
 
 /**
@@ -48,54 +57,45 @@ const styles = StyleSheet.create({
  * @returns React element containing the dApp info card
  */
 export const DappInfoCard = ({ imageUrl, name, url }: DappInfoCardProps) => {
-  const { vars } = useTheme();
+  const { theme } = useTheme();
+  const [hasImgError, setImgError] = useState(false);
 
-  const logoContainerStyle: CSSProperties = useMemo(
-    () => ({
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: vars.colors.$card_elevated_backgroundColor,
-      border: `1px solid ${vars.colors.$card_outlined_borderColor}`,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      overflow: 'hidden',
-    }),
-    [vars],
-  );
-
-  const fallbackTextStyle: CSSProperties = useMemo(
-    () => ({
-      fontSize: 16,
-      fontWeight: 600,
-      color: vars.colors.$text_primary,
-    }),
-    [vars],
+  const logoContainerStyle = useMemo(
+    () => [
+      styles.logoContainer,
+      {
+        backgroundColor: theme.background.secondary,
+        borderColor: theme.border.middle,
+      },
+    ],
+    [theme],
   );
 
   return (
-    <Flex alignItems="center" gap="$8" mb="$16">
-      <div style={logoContainerStyle} data-testid="dapp-info-logo-container">
-        {imageUrl ? (
+    <Row alignItems="center" gap={spacing.S} style={styles.container}>
+      <View style={logoContainerStyle} testID="dapp-info-logo-container">
+        {imageUrl && !hasImgError ? (
           <Image
             source={{ uri: imageUrl }}
             style={styles.logo}
             resizeMode="cover"
             testID="dapp-info-logo"
+            onError={() => {
+              setImgError(true);
+            }}
           />
         ) : (
-          <span style={fallbackTextStyle} data-testid="dapp-info-logo-fallback">
+          <Text.S testID="dapp-info-logo-fallback">
             {name.charAt(0).toUpperCase()}
-          </span>
+          </Text.S>
         )}
-      </div>
-      <View style={styles.textContainer}>
-        <Text.Body.Normal weight="$semibold" data-testid="dapp-info-name">
-          {name}
-        </Text.Body.Normal>
-        <Text.Body.Small data-testid="dapp-info-url">{url}</Text.Body.Small>
       </View>
-    </Flex>
+      <View style={styles.textContainer}>
+        <Text.S testID="dapp-info-name">{name}</Text.S>
+        <Text.XS variant="secondary" testID="dapp-info-url">
+          {url}
+        </Text.XS>
+      </View>
+    </Row>
   );
 };

@@ -1,5 +1,6 @@
 import { util } from '@cardano-sdk/key-management';
 import { createSecureStorePasswordManager } from '@lace-contract/authentication-prompt';
+import { stampWalletOnboardedAt } from '@lace-contract/wallet-repo';
 import { classifyHardwareError } from '@lace-lib/util-hw';
 import {
   catchError,
@@ -84,10 +85,11 @@ const createWalletAndEmitActions = ({
     }),
   ).pipe(
     mergeMap(wallet => {
-      const walletToAdd =
+      const confirmedWallet =
         isRecoveryFlow && !wallet.isPassphraseConfirmed
           ? { ...wallet, isPassphraseConfirmed: true }
           : wallet;
+      const walletToAdd = stampWalletOnboardedAt(confirmedWallet);
 
       // For newly created (not restored) Midnight wallets,
       // mark accounts as synced immediately so the portfolio
@@ -117,6 +119,10 @@ const createWalletAndEmitActions = ({
           actions.onboardingV2.createWalletSuccess({
             walletId: walletToAdd.walletId,
             isRecovery: isRecoveryFlow,
+            walletType: walletToAdd.type,
+            blockchains: [
+              ...new Set(walletToAdd.accounts.map(a => a.blockchainName)),
+            ].sort(),
           }),
         ]),
       );
@@ -375,10 +381,18 @@ export const createHwWalletCreationSideEffect =
                         );
                       }
                       return of(
-                        actions.wallets.addWallet(wallet),
+                        actions.wallets.addWallet(
+                          stampWalletOnboardedAt(wallet),
+                        ),
                         actions.onboardingV2.createWalletSuccess({
                           walletId: wallet.walletId,
                           isRecovery: false,
+                          walletType: wallet.type,
+                          blockchains: [
+                            ...new Set(
+                              wallet.accounts.map(a => a.blockchainName),
+                            ),
+                          ].sort(),
                         }),
                       );
                     }),

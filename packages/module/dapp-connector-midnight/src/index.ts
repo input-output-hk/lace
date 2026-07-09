@@ -1,5 +1,6 @@
 import './augmentations';
 
+import { activitiesStoreContract } from '@lace-contract/activities';
 import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appLockStoreContract } from '@lace-contract/app-lock';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
@@ -41,6 +42,7 @@ const implementsContracts = combineContracts([
   renderRootAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([
+  activitiesStoreContract,
   analyticsStoreContract,
   appLockStoreContract,
   featureStoreContract,

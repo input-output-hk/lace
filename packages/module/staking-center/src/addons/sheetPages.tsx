@@ -21,18 +21,22 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
     <SheetStack.Screen
       name={SheetRoutes.BrowsePool}
       component={BrowsePoolSheet}
+      options={{ detents: [1], scrollable: true }}
     />
     <SheetStack.Screen
       name={SheetRoutes.BrowsePoolFilterControls}
       component={BrowsePoolFiltersSheet}
+      options={{ stackBehavior: 'push' }}
     />
     <SheetStack.Screen
       name={SheetRoutes.StakePoolDetails}
       component={StakePoolDetailsSheet}
+      options={{ detents: [1], scrollable: true }}
     />
     <SheetStack.Screen
       name={SheetRoutes.StakeDelegation}
       component={StakeDelegationSheet}
+      options={{ detents: [1], scrollable: true }}
     />
     <SheetStack.Screen
       name={SheetRoutes.StakingIssue}
@@ -41,6 +45,7 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
     <SheetStack.Screen
       name={SheetRoutes.NewDelegation}
       component={NewDelegationSheet}
+      options={{ detents: [1], scrollable: true }}
     />
     <SheetStack.Screen
       name={SheetRoutes.DelegationSuccess}

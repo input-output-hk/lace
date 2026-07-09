@@ -8,12 +8,10 @@ import {
   Row,
   Text,
   Sheet,
-  SheetHeader,
-  SheetFooter,
-  useFooterHeight,
+  footerHeight,
 } from '@lace-lib/ui-toolkit';
 import { spacing, useTheme } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
@@ -28,17 +26,14 @@ const MAX_INPUT_LENGTH = 10;
 const NUMERIC_INPUT_REGEX = /^\d*\.?\d*$/;
 
 export const SwapSlippage = (
-  _props: SheetScreenProps<SheetRoutes.SwapSlippage>,
+  props: SheetScreenProps<SheetRoutes.SwapSlippage>,
 ) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const styles = useMemo(() => getStyles(theme), [theme]);
 
   const currentSlippage = useLaceSelector('swapConfig.selectSlippage');
+  const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
   const dispatchSetSlippage = useDispatchLaceAction('swapConfig.setSlippage');
   const { trackEvent } = useAnalytics();
   const [inputValue, setInputValue] = useState(String(currentSlippage));
@@ -68,67 +63,76 @@ export const SwapSlippage = (
     if (!isSlippageValid) return;
     trackEvent('swaps | adjust slippage', {
       customSlippage: parsedSlippage.toString(),
+      ...(swapSessionId && { swapSessionId }),
     });
     dispatchSetSlippage(parsedSlippage);
-    NavigationControls.sheets.close();
-  }, [isSlippageValid, parsedSlippage, dispatchSetSlippage, trackEvent]);
+    NavigationControls.closeSheet();
+  }, [
+    isSlippageValid,
+    parsedSlippage,
+    dispatchSetSlippage,
+    trackEvent,
+    swapSessionId,
+  ]);
+
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: <Sheet.Header title={t('v2.swap.slippage.title')} />,
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('v2.swap.slippage.confirm'),
+            onPress: handleConfirm,
+            disabled: !isSlippageValid,
+            testID: 'swap-slippage-confirm',
+          }}
+        />
+      ),
+    });
+  }, [props.navigation, t, handleConfirm, isSlippageValid]);
 
   return (
-    <>
-      <SheetHeader title={t('v2.swap.slippage.title')} />
-      <Sheet.Scroll
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
-        overScrollMode="never">
-        <Text.XS variant="secondary" testID="swap-slippage-description">
-          {t('v2.swap.slippage.description')}
-        </Text.XS>
-        <CustomTextInput
-          value={inputValue}
-          onChangeText={handleInputChange}
-          keyboardType="decimal-pad"
-          inputMode="decimal"
-          maxLength={MAX_INPUT_LENGTH}
-          placeholder={t('v2.swap.slippage.percentage')}
-          inputError={slippageError}
-          testID="swap-slippage-input"
-        />
-        <Row gap={spacing.S} justifyContent="space-between">
-          {SLIPPAGE_PRESETS.map(preset => {
-            const ButtonComponent =
-              inputValue === String(preset) ? Button.Primary : Button.Secondary;
-            return (
-              <Column key={preset} style={{ flex: 1 }}>
-                <ButtonComponent
-                  size="small"
-                  label={`${preset}%`}
-                  onPress={() => {
-                    handlePresetPress(preset);
-                  }}
-                  testID={`swap-slippage-preset-${preset}`}
-                />
-              </Column>
-            );
-          })}
-        </Row>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.swap.slippage.confirm'),
-          onPress: handleConfirm,
-          disabled: !isSlippageValid,
-          testID: 'swap-slippage-confirm',
-        }}
+    <Column style={styles.container}>
+      <Text.XS variant="secondary" testID="swap-slippage-description">
+        {t('v2.swap.slippage.description')}
+      </Text.XS>
+      <CustomTextInput
+        value={inputValue}
+        onChangeText={handleInputChange}
+        keyboardType="decimal-pad"
+        inputMode="decimal"
+        maxLength={MAX_INPUT_LENGTH}
+        placeholder={t('v2.swap.slippage.percentage')}
+        inputError={slippageError}
+        testID="swap-slippage-input"
       />
-    </>
+      <Row gap={spacing.S} justifyContent="space-between">
+        {SLIPPAGE_PRESETS.map(preset => {
+          const ButtonComponent =
+            inputValue === String(preset) ? Button.Primary : Button.Secondary;
+          return (
+            <Column key={preset} style={{ flex: 1 }}>
+              <ButtonComponent
+                size="small"
+                label={`${preset}%`}
+                onPress={() => {
+                  handlePresetPress(preset);
+                }}
+                testID={`swap-slippage-preset-${preset}`}
+              />
+            </Column>
+          );
+        })}
+      </Row>
+    </Column>
   );
 };
 
-const getStyles = (_theme: Theme, footerHeight: number) =>
+const getStyles = (_theme: Theme) =>
   StyleSheet.create({
     container: {
       padding: spacing.M,
       gap: spacing.M,
-      paddingBottom: footerHeight,
+      paddingBottom: footerHeight.horizontal,
     },
   });

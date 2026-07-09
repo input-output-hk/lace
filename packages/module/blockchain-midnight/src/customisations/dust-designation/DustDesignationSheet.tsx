@@ -1,5 +1,5 @@
-import { Sheet, SheetHeader } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { Sheet } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { DustDesignationForm } from './DustDesignationForm';
 import { DustDesignationReview } from './DustDesignationReview';
@@ -37,13 +37,39 @@ export const DustDesignationSheet = (
 
   const shouldShowFormStep = currentStep === 'form';
 
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={shouldShowFormStep ? copies.sheetTitle : copies.reviewTitle}
+          leftIconOnPress={shouldShowFormStep ? handleClose : handleBackToForm}
+          testID="dust-designation-sheet-header"
+        />
+      ),
+      footer: shouldShowFormStep ? undefined : (
+        <Sheet.Footer
+          primaryButton={{
+            label: copies.nextButtonLabel,
+            onPress: handleConfirm,
+            disabled: !isReviewReady,
+            loading: !isReviewReady,
+            testID: 'confirm-designation-button',
+          }}
+        />
+      ),
+    });
+  }, [
+    props.navigation,
+    shouldShowFormStep,
+    copies,
+    handleClose,
+    handleBackToForm,
+    handleConfirm,
+    isReviewReady,
+  ]);
+
   return (
     <>
-      <SheetHeader
-        title={shouldShowFormStep ? copies.sheetTitle : copies.reviewTitle}
-        leftIconOnPress={shouldShowFormStep ? handleClose : handleBackToForm}
-        testID="dust-designation-sheet-header"
-      />
       {shouldShowFormStep ? (
         <Sheet.Scroll showsVerticalScrollIndicator={false}>
           <DustDesignationForm

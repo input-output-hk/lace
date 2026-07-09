@@ -14,6 +14,7 @@ import type { SelectedAssetView } from './types';
 import type {
   ScrollHandlerProcessed,
   AnimatedStyle,
+  SharedValue,
 } from 'react-native-reanimated';
 
 const baseTopLockThreshold = 8;
@@ -23,6 +24,7 @@ interface UseScrollAnimationProps {
   selectedAssetView: SelectedAssetView;
   activeIndex: number;
   headerTopInset: number;
+  externalScrollOffset?: SharedValue<number>;
 }
 
 interface UseScrollAnimationReturn {
@@ -37,6 +39,7 @@ export const useScrollAnimation = ({
   selectedAssetView,
   activeIndex,
   headerTopInset,
+  externalScrollOffset,
 }: UseScrollAnimationProps): UseScrollAnimationReturn => {
   const pixelRatio = PixelRatio.get();
 
@@ -56,12 +59,21 @@ export const useScrollAnimation = ({
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: event => {
       setScrollY(event.contentOffset.y);
+      if (externalScrollOffset) {
+        externalScrollOffset.value = event.contentOffset.y;
+      }
     },
     onEndDrag: event => {
       setScrollY(event.contentOffset.y);
+      if (externalScrollOffset) {
+        externalScrollOffset.value = event.contentOffset.y;
+      }
     },
     onMomentumEnd: event => {
       setScrollY(event.contentOffset.y);
+      if (externalScrollOffset) {
+        externalScrollOffset.value = event.contentOffset.y;
+      }
     },
   });
 

@@ -1,3 +1,5 @@
+import type { StyleProp, ViewStyle } from 'react-native';
+
 import { useTranslation } from '@lace-contract/i18n';
 import React, {
   useCallback,
@@ -10,8 +12,13 @@ import { StyleSheet, View } from 'react-native';
 import { WebView as RNWebView } from 'react-native-webview';
 
 import { spacing, useTheme } from '../../../design-tokens';
-import { Button, Column, Icon, Loader, Row, Text } from '../../atoms';
-import { LaceLogo } from '../../atoms/logo/logo';
+import {
+  Column,
+  Icon,
+  IconButton,
+  LaceLogoMulticolor,
+  Text,
+} from '../../atoms';
 import { isIOS } from '../../util/commons';
 
 import { isValidUrlScheme } from './webView';
@@ -23,6 +30,7 @@ import type {
   WebViewNavigationEvent,
   WebViewErrorEvent,
   WebViewHttpErrorEvent,
+  WebViewProgressEvent,
   ShouldStartLoadRequest,
 } from 'react-native-webview/lib/WebViewTypes';
 
@@ -39,6 +47,24 @@ const InternalWebView = forwardRef<WebViewRef, RNWebViewProps>(
 );
 
 InternalWebView.displayName = 'InternalWebView';
+
+interface WebViewProgressBarProps {
+  progress: number;
+  style: StyleProp<ViewStyle>;
+  testID: string;
+}
+
+// Thin loading strip under the nav bar; hidden while idle (0) or complete (1).
+const WebViewProgressBar = ({
+  progress,
+  style,
+  testID,
+}: WebViewProgressBarProps) => {
+  if (progress <= 0 || progress >= 1) return null;
+  return (
+    <View style={[style, { width: `${progress * 100}%` }]} testID={testID} />
+  );
+};
 
 const webViewProps = {
   javaScriptEnabled: true,
@@ -143,7 +169,7 @@ const consoleForwardingScript = `
     info: console.info.bind(console),
     debug: console.debug.bind(console),
   };
-  
+
   const forward = (level) => (...args) => {
     originalConsole[level](...args);
     try {
@@ -156,7 +182,7 @@ const consoleForwardingScript = `
       }
     } catch(e) {}
   };
-  
+
   console.log = forward('log');
   console.warn = forward('warn');
   console.error = forward('error');
@@ -188,7 +214,7 @@ export const WebViewTemplateMobile = ({
   // Hooks must be called unconditionally before any early returns
   const webViewRef = useRef<WebViewRef>(null);
   const hasForcedInitialNavigationRef = useRef(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
 
   // Create a stable injectJavaScript function that forwards to the WebView ref
   const injectJavaScript = useCallback((script: string) => {
@@ -217,7 +243,15 @@ export const WebViewTemplateMobile = ({
 
   useEffect(() => {
     hasForcedInitialNavigationRef.current = false;
+    setProgress(0);
   }, [url]);
+
+  const handleWebViewLoadProgress = useCallback(
+    (event: WebViewProgressEvent) => {
+      setProgress(event.nativeEvent.progress);
+    },
+    [],
+  );
 
   // Handler to intercept navigation attempts and validate URLs
   const handleShouldStartLoadWithRequest = useCallback(
@@ -241,7 +275,7 @@ export const WebViewTemplateMobile = ({
 
   const handleWebViewLoadStart = useCallback(
     (event: WebViewNavigationEvent) => {
-      setIsLoading(true);
+      setProgress(0);
       handleLoadStart(event);
     },
     [handleLoadStart],
@@ -263,7 +297,7 @@ export const WebViewTemplateMobile = ({
         return;
       }
 
-      setIsLoading(false);
+      setProgress(1);
       handleLoadEnd(event);
     },
     [handleLoadEnd, url],
@@ -271,7 +305,7 @@ export const WebViewTemplateMobile = ({
 
   const handleWebViewError = useCallback(
     (event: WebViewErrorEvent) => {
-      setIsLoading(false);
+      setProgress(1);
       handleError(event);
     },
     [handleError],
@@ -283,29 +317,6 @@ export const WebViewTemplateMobile = ({
     },
     [handleHttpError],
   );
-
-  // Render error view if URL is invalid or uses dangerous scheme
-  if (!isValidUrl) {
-    return (
-      <View style={styles.container} testID={testID}>
-        <Column
-          style={styles.errorContainer}
-          alignItems="center"
-          justifyContent="center"
-          gap={spacing.M}
-          testID={`${testID}-error`}>
-          <Icon
-            name="AlertSquare"
-            size={64}
-            color={theme.background.negative}
-          />
-          <Text.M align="center" style={styles.errorText}>
-            {errorMessage || t('v2.webview.error.noUrl')}
-          </Text.M>
-        </Column>
-      </View>
-    );
-  }
 
   // Handle messages from the WebView (for dApp connector communication)
   const tryHandleConsoleMessage = useCallback(
@@ -349,6 +360,29 @@ export const WebViewTemplateMobile = ({
     [debugMode, tryHandleConsoleMessage, onMessage],
   );
 
+  // Render error view if URL is invalid or uses dangerous scheme
+  if (!isValidUrl) {
+    return (
+      <View style={styles.container} testID={testID}>
+        <Column
+          style={styles.errorContainer}
+          alignItems="center"
+          justifyContent="center"
+          gap={spacing.M}
+          testID={`${testID}-error`}>
+          <Icon
+            name="AlertSquare"
+            size={64}
+            color={theme.background.negative}
+          />
+          <Text.M align="center" style={styles.errorText}>
+            {errorMessage || t('v2.webview.error.noUrl')}
+          </Text.M>
+        </Column>
+      </View>
+    );
+  }
+
   // Combine injection scripts - console forwarding first in debug mode
   const combinedInjectionScript = debugMode
     ? `${consoleForwardingScript}\n${
@@ -359,29 +393,45 @@ export const WebViewTemplateMobile = ({
   return (
     <View style={styles.container} testID={testID}>
       {navBar ? (
-        <View style={styles.navBar} testID={`${testID}-nav-bar`}>
-          {/* Absolutely positioned so the URL stays centred regardless of sidebar widths */}
-          <View style={styles.navBarUrlContainer} pointerEvents="none">
-            <Text.M
-              variant="secondary"
-              numberOfLines={1}
-              style={styles.navBarUrl}>
-              {navBar.displayUrl}
-            </Text.M>
-          </View>
-          <LaceLogo />
-          <View style={styles.navBarSpacer} />
-          <Row gap={spacing.S} alignItems="center">
-            {isLoading ? (
-              <Loader size={20} testID={`${testID}-nav-bar-loader`} />
+        <View style={styles.navBarContainer}>
+          <View style={styles.navBar} testID={`${testID}-nav-bar`}>
+            {/* Absolutely positioned so the URL stays centred regardless of sidebar widths */}
+            <View style={styles.navBarUrlContainer} pointerEvents="none">
+              <Text.M weight="700" numberOfLines={1} style={styles.navBarUrl}>
+                {navBar.displayUrl}
+              </Text.M>
+            </View>
+            <LaceLogoMulticolor size={40} />
+            <View style={styles.navBarSpacer} />
+            {navBar.favorite ? (
+              <IconButton.Static
+                accessibilityLabel={navBar.favorite.accessibilityLabel}
+                containerStyle={styles.navBarFavoriteButton}
+                icon={
+                  <Icon
+                    name="Star"
+                    size={24}
+                    variant={navBar.favorite.isSaved ? 'solid' : 'stroke'}
+                    color={theme.text.primary}
+                  />
+                }
+                onPress={navBar.favorite.onToggle}
+                testID={`${testID}-favorite-button`}
+              />
             ) : null}
-            <Button.Secondary
-              size="small"
-              label={t('v2.webview.navBar.done')}
+            <IconButton.Static
+              accessibilityLabel={String(t('v2.webview.navBar.done'))}
+              containerStyle={styles.navBarCloseButton}
+              icon={<Icon name="Cancel" size={24} color={theme.text.primary} />}
               onPress={navBar.onDone}
               testID={`${testID}-done-button`}
             />
-          </Row>
+          </View>
+          <WebViewProgressBar
+            progress={progress}
+            style={styles.navBarProgress}
+            testID={`${testID}-nav-bar-progress`}
+          />
         </View>
       ) : null}
       <View style={styles.webViewContainer}>
@@ -392,6 +442,7 @@ export const WebViewTemplateMobile = ({
           style={styles.webView}
           onLoadStart={handleWebViewLoadStart}
           onLoadEnd={handleWebViewLoadEnd}
+          onLoadProgress={handleWebViewLoadProgress}
           onError={handleWebViewError}
           onHttpError={handleWebViewHttpError}
           onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
@@ -410,12 +461,17 @@ const getStyles = (theme: Theme) =>
     container: {
       flex: 1,
     },
+    navBarContainer: {
+      position: 'relative',
+      zIndex: 1,
+      elevation: 1,
+    },
     navBar: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.S,
       padding: spacing.S,
-      backgroundColor: theme.background.page,
+      backgroundColor: 'transparent',
     },
     navBarUrlContainer: {
       ...StyleSheet.absoluteFillObject,
@@ -424,7 +480,20 @@ const getStyles = (theme: Theme) =>
       paddingHorizontal: spacing.XL * 3,
     },
     navBarUrl: {
-      color: theme.text.secondary,
+      color: theme.text.primary,
+    },
+    navBarCloseButton: {
+      backgroundColor: theme.background.primary,
+    },
+    navBarFavoriteButton: {
+      backgroundColor: theme.background.primary,
+    },
+    navBarProgress: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      height: 2,
+      backgroundColor: theme.brand.ascending,
     },
     navBarSpacer: {
       flex: 1,

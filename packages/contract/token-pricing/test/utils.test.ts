@@ -48,6 +48,7 @@ const createMockPrice = (lastUpdated: number): TokenPrice => ({
   blockchain: 'Cardano',
   identifier: 'ada',
   price: 0.5,
+  priceInUsd: 0.5,
   fiatCurrency: 'USD',
   lastUpdated,
 });
@@ -112,6 +113,7 @@ describe('utils', () => {
       blockchain: 'Cardano',
       identifier: 'ada',
       price: 0.5,
+      priceInUsd: 0.5,
       fiatCurrency: 'USD',
       lastUpdated,
     });

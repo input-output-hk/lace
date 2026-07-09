@@ -16,7 +16,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 
-import { useTheme, spacing } from '../../../design-tokens';
+import { useTheme, spacing, type Theme } from '../../../design-tokens';
 import {
   getLeftGapOnSideMenu,
   getMinContentPortfolioWidth,
@@ -326,6 +326,70 @@ export const PortfolioSkeleton = () => {
     </ScrollView>
   );
 };
+
+const DAPP_CARD_HEIGHT = 80;
+const DAPP_AVATAR_SIZE = 42;
+const DAPP_SKELETON_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
+
+export const DappExplorerSkeleton = () => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => getDappExplorerSkeletonStyles(theme), [theme]);
+  return (
+    <Column gap={spacing.S} style={styles.container}>
+      {DAPP_SKELETON_ROWS.map(index => (
+        <Row
+          key={index}
+          alignItems="center"
+          gap={spacing.M}
+          style={styles.card}>
+          <Shimmer
+            width={DAPP_AVATAR_SIZE}
+            height={DAPP_AVATAR_SIZE}
+            borderRadius={8}
+            backgroundColor={theme.background.tertiary}
+          />
+          <Column gap={spacing.XS} style={styles.content}>
+            <Shimmer
+              height={14}
+              width={140}
+              borderRadius={4}
+              backgroundColor={theme.background.tertiary}
+            />
+            <Shimmer
+              height={10}
+              width={90}
+              borderRadius={4}
+              backgroundColor={theme.background.tertiary}
+            />
+          </Column>
+          <Shimmer
+            width={16}
+            height={16}
+            borderRadius={8}
+            backgroundColor={theme.background.tertiary}
+          />
+        </Row>
+      ))}
+    </Column>
+  );
+};
+
+const getDappExplorerSkeletonStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      paddingTop: spacing.S,
+      paddingHorizontal: spacing.XS,
+    },
+    card: {
+      height: DAPP_CARD_HEIGHT,
+      paddingHorizontal: spacing.M,
+      backgroundColor: theme.background.primary,
+      borderRadius: 12,
+    },
+    content: {
+      flex: 1,
+    },
+  });
 
 export const CompactPortfolioSkeleton = () => {
   const { isSideMenu } = useTheme();

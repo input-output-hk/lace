@@ -1,3 +1,4 @@
+import { runInitializers } from '@lace-contract/app';
 import {
   createReduxPersistStorage,
   createStore,
@@ -28,9 +29,7 @@ export const initializeStore = async (
 
   logger.debug('Loaded features', createStoreProps.runtime.features.loaded);
 
-  for (const init of initializers) {
-    init();
-  }
+  await runInitializers(initializers);
 
   const { store } = await createStore(createStoreProps, {
     logger,

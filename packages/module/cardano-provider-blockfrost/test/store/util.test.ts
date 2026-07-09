@@ -1,6 +1,7 @@
 import { Asset, Cardano } from '@cardano-sdk/core';
 import { AddressType, KeyRole } from '@cardano-sdk/key-management';
 import {
+  CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
   CardanoRewardAccount,
   CardanoPaymentAddress,
   toContractAddress,
@@ -61,7 +62,16 @@ describe('blockfrost provider sideEffectDependencies utils', () => {
       src: Asset.Uri('https://img.com/other-img.png'),
       mediaType,
       name: 'Puppy',
-      otherProperties: new Map([['good-boy', 'yes']]),
+      otherProperties: new Map<string, Cardano.Metadatum>([
+        ['good-boy', 'yes'],
+        [
+          'traits',
+          new Map<string, Cardano.Metadatum>([
+            ['rarity', 'legendary'],
+            ['levels', [1n, 2n]],
+          ]),
+        ],
+      ]),
     };
     const assetInfo = {
       assetId: Cardano.AssetId(
@@ -92,6 +102,7 @@ describe('blockfrost provider sideEffectDependencies utils', () => {
         TokenMetadata<CardanoTokenMetadata>
       >({
         blockchainSpecific: {
+          metadataSchemaVersion: CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           updatedAt: expect.any(Number),
           policyId: assetInfo.policyId.toString(),
@@ -99,13 +110,114 @@ describe('blockfrost provider sideEffectDependencies utils', () => {
             {
               mediaType: file.mediaType,
               src: file.src,
-              additionalProperties: { 'good-boy': 'yes' },
+              additionalProperties: {
+                'good-boy': 'yes',
+                traits: {
+                  rarity: 'legendary',
+                  levels: ['1', '2'],
+                },
+              },
               name: file.name,
             },
           ],
         },
         decimals: 0,
-        additionalProperties: { hungry: 'yes' },
+        additionalProperties: {
+          description: assetInfo.nftMetadata.description,
+          hungry: 'yes',
+        },
+        image: assetInfo.nftMetadata.image,
+        isNft: true,
+        name: assetInfo.nftMetadata.name,
+        ticker: undefined,
+      });
+    });
+
+    it('decodes UTF-8 byte-string metadata values', () => {
+      const assetInfoWithBytes = {
+        ...assetInfo,
+        nftMetadata: {
+          ...assetInfo.nftMetadata,
+          otherProperties: new Map([
+            ['caption', new Uint8Array(Buffer.from('hello world', 'utf8'))],
+          ]),
+        },
+      };
+
+      expect(toContractTokenMetadata(assetInfoWithBytes)).toEqual<
+        TokenMetadata<CardanoTokenMetadata>
+      >({
+        blockchainSpecific: {
+          metadataSchemaVersion: CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          updatedAt: expect.any(Number),
+          policyId: assetInfo.policyId.toString(),
+          files: [
+            {
+              mediaType: file.mediaType,
+              src: file.src,
+              additionalProperties: {
+                'good-boy': 'yes',
+                traits: {
+                  rarity: 'legendary',
+                  levels: ['1', '2'],
+                },
+              },
+              name: file.name,
+            },
+          ],
+        },
+        decimals: 0,
+        additionalProperties: {
+          description: assetInfo.nftMetadata.description,
+          caption: 'hello world',
+        },
+        image: assetInfo.nftMetadata.image,
+        isNft: true,
+        name: assetInfo.nftMetadata.name,
+        ticker: undefined,
+      });
+    });
+
+    it('preserves a readable fallback for invalid UTF-8 byte strings', () => {
+      const assetInfoWithInvalidBytes = {
+        ...assetInfo,
+        nftMetadata: {
+          ...assetInfo.nftMetadata,
+          otherProperties: new Map([
+            ['caption', new Uint8Array([0xff, 0xfe, 0x00, 0x01])],
+          ]),
+        },
+      };
+
+      expect(toContractTokenMetadata(assetInfoWithInvalidBytes)).toEqual<
+        TokenMetadata<CardanoTokenMetadata>
+      >({
+        blockchainSpecific: {
+          metadataSchemaVersion: CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          updatedAt: expect.any(Number),
+          policyId: assetInfo.policyId.toString(),
+          files: [
+            {
+              mediaType: file.mediaType,
+              src: file.src,
+              additionalProperties: {
+                'good-boy': 'yes',
+                traits: {
+                  rarity: 'legendary',
+                  levels: ['1', '2'],
+                },
+              },
+              name: file.name,
+            },
+          ],
+        },
+        decimals: 0,
+        additionalProperties: {
+          description: assetInfo.nftMetadata.description,
+          caption: '[Invalid UTF-8: 4 bytes]',
+        },
         image: assetInfo.nftMetadata.image,
         isNft: true,
         name: assetInfo.nftMetadata.name,

@@ -112,6 +112,14 @@ export const tabMenuItemsAddonContract = inferContractContext({
   },
 });
 
+// Provides platform-specific app reload (mobile: `Updates.reloadAsync`; extension: `runtime.reload`)
+// SideEffectDependencies: performAppReload
+export const performAppReloadDependencyContract = inferContractContext({
+  contractType: 'sideEffectDependency',
+  name: ContractName('perform-app-reload-dependency'),
+  instance: 'exactly-one',
+});
+
 export const appStoreContract = inferContractContext({
   name: ContractName('app-store'),
   instance: 'exactly-one',
@@ -124,18 +132,11 @@ export const appStoreContract = inferContractContext({
     analyticsStoreContract,
     featureStoreContract,
     tokensStoreContract,
+    performAppReloadDependencyContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),
   })),
-});
-
-// Provides app runtime dependencies to side effects
-// SideEffectDependencies: reloadExtension
-export const appRuntimeDependencyContract = inferContractContext({
-  contractType: 'sideEffectDependency',
-  name: ContractName('app-runtime-dependency'),
-  instance: 'exactly-one',
 });
 
 export type Selectors = ContractSelectors<typeof appStoreContract>;

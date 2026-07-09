@@ -29,7 +29,11 @@ import type {
   InitializeInMemoryWallet,
 } from '@lace-contract/in-memory';
 import type { ContextualLaceInit } from '@lace-contract/module';
-import type { InMemoryWalletAccount } from '@lace-contract/wallet-repo';
+import type {
+  InMemoryWalletAccount,
+  LazyInMemoryWalletAccount,
+  WalletId,
+} from '@lace-contract/wallet-repo';
 
 const defaultAccountName = (accountIndex: number) => `Cardano #${accountIndex}`;
 
@@ -37,6 +41,46 @@ const resolveTargetNetworks = createBlockchainNetworkTargetResolver(
   supportedNetworkIds,
   supportedNetworkMagics,
 );
+
+type CardanoAccountFor<T extends 'InMemory' | 'LazyInMemory'> =
+  T extends 'InMemory'
+    ? InMemoryWalletAccount<CardanoBip32AccountProps>
+    : LazyInMemoryWalletAccount<CardanoBip32AccountProps>;
+
+const buildAccountsForNetworks = <T extends 'InMemory' | 'LazyInMemory'>({
+  walletId,
+  accountIndex,
+  accountName,
+  targetNetworks,
+  extendedAccountPublicKey,
+  accountType,
+}: {
+  walletId: WalletId;
+  accountIndex: number;
+  accountName?: string;
+  targetNetworks?: Parameters<typeof resolveTargetNetworks>[0];
+  extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
+  accountType: T;
+}): CardanoAccountFor<T>[] =>
+  resolveTargetNetworks(targetNetworks).map(networkMagic => {
+    const networkId = CardanoNetworkId(networkMagic);
+    return {
+      accountId: CardanoAccountId(walletId, accountIndex, networkMagic),
+      accountType,
+      blockchainName: 'Cardano',
+      blockchainNetworkId: networkId,
+      blockchainSpecific: {
+        accountIndex,
+        chainId: CardanoNetworkId.getChainId(networkId),
+        extendedAccountPublicKey,
+        networkId,
+      },
+      metadata: { name: accountName || defaultAccountName(accountIndex) },
+      networkType:
+        networkMagic === Cardano.NetworkMagics.Mainnet ? 'mainnet' : 'testnet',
+      walletId,
+    } as CardanoAccountFor<T>;
+  });
 
 export const createAccounts: CreateInMemoryWalletAccounts<
   CardanoBip32AccountProps,
@@ -49,7 +93,6 @@ export const createAccounts: CreateInMemoryWalletAccounts<
   accountName,
   targetNetworks,
 }) => {
-  const targetNetworkMagics = resolveTargetNetworks(targetNetworks);
   const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
 
   const rootPrivateKey = await emip3decrypt(
@@ -73,24 +116,13 @@ export const createAccounts: CreateInMemoryWalletAccounts<
   const extendedAccountPublicKey =
     bip32Ed25519.getBip32PublicKey(accountPrivateKey);
 
-  return targetNetworkMagics.map(networkMagic => {
-    const networkId = CardanoNetworkId(networkMagic);
-    return {
-      blockchainName: 'Cardano',
-      networkType:
-        networkMagic === Cardano.NetworkMagics.Mainnet ? 'mainnet' : 'testnet',
-      blockchainNetworkId: networkId,
-      blockchainSpecific: {
-        accountIndex,
-        chainId: CardanoNetworkId.getChainId(networkId),
-        networkId,
-        extendedAccountPublicKey,
-      },
-      accountId: CardanoAccountId(walletId, accountIndex, networkMagic),
-      accountType: 'InMemory',
-      walletId,
-      metadata: { name: accountName || defaultAccountName(accountIndex) },
-    } satisfies InMemoryWalletAccount<CardanoBip32AccountProps>;
+  return buildAccountsForNetworks({
+    accountIndex,
+    accountName,
+    accountType: 'InMemory',
+    extendedAccountPublicKey,
+    targetNetworks,
+    walletId,
   });
 };
 
@@ -99,6 +131,37 @@ export const initializeWallet: InitializeInMemoryWallet<
   CardanoSpecificInMemoryWalletData
 > = async ({ walletId, password, recoveryPhrase }, dependencies) => {
   const accountIndex = 0;
+
+  if (!password) {
+    // Lazy path: derive extendedAccountPublicKey from the mnemonic using a
+    // single-use session passphrase. The encrypted root is discarded along
+    // with the agent — Lace persists no seed material.
+    const sessionPassphrase = crypto.getRandomValues(new Uint8Array(32));
+    const keyAgent = await InMemoryKeyAgent.fromBip39MnemonicWords(
+      {
+        accountIndex,
+        chainId: Cardano.ChainIds.Mainnet,
+        getPassphrase: async () => sessionPassphrase,
+        mnemonicWords: recoveryPhrase,
+      },
+      {
+        bip32Ed25519: await Crypto.SodiumBip32Ed25519.create(),
+        logger: dependencies.logger,
+      },
+    );
+    const { extendedAccountPublicKey } =
+      keyAgent.serializableData as SerializableInMemoryKeyAgentData;
+
+    return {
+      accounts: buildAccountsForNetworks({
+        accountIndex,
+        accountType: 'LazyInMemory',
+        extendedAccountPublicKey,
+        walletId,
+      }),
+    };
+  }
+
   const blockchainSpecificWalletData = await createBlockchainSpecificWalletData(
     { walletId, password, recoveryPhrase },
     dependencies,

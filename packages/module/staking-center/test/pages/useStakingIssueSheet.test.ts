@@ -21,12 +21,20 @@ vi.mock('../../src/hooks', async importOriginal => {
   };
 });
 
-vi.mock('@lace-contract/i18n', () => ({
-  DEFAULT_LANGUAGE: 'en',
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
+vi.mock('@lace-contract/i18n', async () => {
+  const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    await vi.importActual<typeof import('@lace-contract/i18n')>(
+      '@lace-contract/i18n',
+    );
+  return {
+    ...actual,
+    DEFAULT_LANGUAGE: 'en',
+    useTranslation: () => ({
+      t: (key: string) => key,
+    }),
+  };
+});
 
 vi.mock('@lace-lib/ui-toolkit', () => ({
   isWeb: false,

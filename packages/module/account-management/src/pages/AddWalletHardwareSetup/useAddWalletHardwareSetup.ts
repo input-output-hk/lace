@@ -62,7 +62,7 @@ export const useAddWalletHardwareSetup = ({
 
   const handleBackPress = useCallback(() => {
     if (isCreating) return;
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [isCreating]);
 
   return {

@@ -1,36 +1,32 @@
-import { useBottomSheetScrollableCreator } from '@gorhom/bottom-sheet';
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
+import { SheetRoutes } from '@lace-lib/navigation';
 import {
   Column,
   EmptyStateMessage,
   GenericFlashList,
+  Icon,
+  IconButton,
+  Row,
   SearchBar,
   Text,
   TokenItem,
   getAssetImageUrl,
   isWeb,
   spacing,
-  useScrollEventsHandlers,
+  useTheme,
 } from '@lace-lib/ui-toolkit';
 import { formatAmountToLocale } from '@lace-lib/util-render';
-import React, { useCallback, useMemo, useState } from 'react';
-import {
-  StyleSheet,
-  useWindowDimensions,
-  View,
-  type ScrollViewProps,
-} from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
 import type { Token } from '@lace-contract/tokens';
 import type { SheetScreenProps } from '@lace-lib/navigation';
-
-const SHEET_HEIGHT_RATIO = 0.9;
+import type { Theme } from '@lace-lib/ui-toolkit';
 
 type DisplayToken = {
   tokenId: TokenId;
@@ -55,6 +51,7 @@ export const SwapSelectBuyToken = (
 ) => <SwapSelectToken {...props} />;
 
 const SwapSelectToken = ({
+  navigation,
   route,
 }: SheetScreenProps<
   SheetRoutes.SwapSelectBuyToken | SheetRoutes.SwapSelectSellToken
@@ -75,6 +72,7 @@ const SwapSelectToken = ({
 
   const tradableTokenIds = useLaceSelector('swapConfig.selectTradableTokenIds');
   const providerTokens = useLaceSelector('swapConfig.selectProviderTokens');
+  const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
 
   const tradableSet = useMemo(
     () => new Set(tradableTokenIds ?? []),
@@ -98,6 +96,10 @@ const SwapSelectToken = ({
     'swapFlow.buyTokenSelected',
   );
   const { trackEvent } = useAnalytics();
+
+  const { theme } = useTheme();
+
+  const styles = getStyles(theme);
 
   // Build unified display token list
   const displayTokens = useMemo((): DisplayToken[] => {
@@ -170,6 +172,7 @@ const SwapSelectToken = ({
       trackEvent('swaps | select token', {
         selectionType: mode === 'sell' ? 'tokenA' : 'tokenB',
         selectedToken: token.displayName,
+        ...(swapSessionId && { swapSessionId }),
       });
       if (mode === 'sell') {
         dispatchSellTokenSelected({
@@ -181,9 +184,16 @@ const SwapSelectToken = ({
           buyTokenId: token.tokenId,
         });
       }
-      NavigationControls.sheets.close();
+      navigation.goBack();
     },
-    [mode, dispatchSellTokenSelected, dispatchBuyTokenSelected, trackEvent],
+    [
+      mode,
+      dispatchSellTokenSelected,
+      dispatchBuyTokenSelected,
+      trackEvent,
+      navigation,
+      swapSessionId,
+    ],
   );
 
   const title =
@@ -210,68 +220,84 @@ const SwapSelectToken = ({
     [handleTokenPress],
   );
 
-  const ListHeaderComponent = useMemo(
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Column style={styles.header}>
+          <Row alignItems="center" justifyContent="center">
+            <Text.M
+              weight="bold"
+              align="center"
+              testID="swap-select-token-title">
+              {title}
+            </Text.M>
+            {isWeb && (
+              <IconButton.Static
+                icon={<Icon name="Cancel" size={20} />}
+                onPress={navigation.goBack}
+                containerStyle={styles.closeButton}
+                testID={'side-sheet-close-button'}
+              />
+            )}
+          </Row>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder={t('v2.swap.search')}
+            testID="swap-token-search"
+          />
+        </Column>
+      ),
+    });
+  }, [title, searchQuery, t, navigation, theme, isWeb]);
+
+  const ListEmptyComponent = useMemo(
     () => (
-      <Column style={styles.header}>
-        <Text.M weight="bold" align="center" testID="swap-select-token-title">
-          {title}
-        </Text.M>
-        <SearchBar
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholder={t('v2.swap.search')}
-          testID="swap-token-search"
+      <Column justifyContent="center" style={styles.listEmptyComponent}>
+        <EmptyStateMessage
+          message={
+            searchQuery
+              ? t('v2.swap.no-matching-tokens', { searchTerm: searchQuery })
+              : t('v2.swap.no-tokens')
+          }
         />
       </Column>
     ),
-    [title, searchQuery, t],
-  );
-
-  const ListEmptyComponent = useMemo(
-    () => <EmptyStateMessage message={t('v2.swap.no-tokens')} />,
-    [t],
-  );
-
-  const renderScrollComponent =
-    useBottomSheetScrollableCreator<ScrollViewProps>({
-      scrollEventsHandlersHook: useScrollEventsHandlers,
-    });
-
-  const { height: windowHeight } = useWindowDimensions();
-
-  const wrapperStyle = useMemo(
-    () => [styles.wrapper, { height: windowHeight * SHEET_HEIGHT_RATIO }],
-    [windowHeight],
+    [t, searchQuery, styles.listEmptyComponent],
   );
 
   return (
-    <View style={wrapperStyle}>
-      <GenericFlashList<DisplayToken>
-        data={displayTokens}
-        renderItem={renderItem}
-        keyExtractor={item => item.tokenId}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        contentContainerStyle={styles.listContent}
-        renderScrollComponent={isWeb ? undefined : renderScrollComponent}
-        keyboardShouldPersistTaps="handled"
-      />
-    </View>
+    <GenericFlashList<DisplayToken>
+      data={displayTokens}
+      renderItem={renderItem}
+      keyExtractor={item => item.tokenId}
+      ListEmptyComponent={ListEmptyComponent}
+      contentContainerStyle={styles.listContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    />
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    width: '100%',
-  },
-  header: {
-    gap: spacing.M,
-    paddingBottom: spacing.M,
-  },
-  listContent: {
-    paddingBottom: spacing.XL,
-  },
-  tokenItem: {
-    marginTop: spacing.S,
-  },
-});
+const getStyles = (theme: Theme) =>
+  StyleSheet.create({
+    closeButton: {
+      backgroundColor: theme.background.primary,
+      position: 'absolute',
+      right: spacing.M,
+      zIndex: 1,
+    },
+    header: {
+      gap: spacing.XL,
+      paddingHorizontal: spacing.M,
+      paddingTop: spacing.XXL,
+    },
+    listContent: {
+      paddingHorizontal: spacing.M,
+      paddingBottom: spacing.XL,
+    },
+    tokenItem: {
+      marginTop: spacing.S,
+    },
+    listEmptyComponent: { marginTop: spacing.XXXL },
+  });

@@ -1,4 +1,5 @@
 import { useAnalytics } from '@lace-contract/analytics';
+import { extractDappDomain } from '@lace-contract/dapp-connector';
 import React, { useCallback } from 'react';
 
 import { SignDataV2 } from './components';
@@ -19,15 +20,23 @@ export const SignMidnightDataV2 = () => {
     'midnightDappConnector.selectSignDataRequest',
   );
 
+  const dappPayload = request
+    ? {
+        dappDomain: extractDappDomain(request.dapp.origin),
+        dappName: request.dapp.name,
+        blockchain: 'Midnight',
+      }
+    : undefined;
+
   const handleRejectSignData = useCallback(() => {
     rejectSignData();
-    trackEvent('dapp connector | sign data | reject | press');
-  }, [rejectSignData, trackEvent]);
+    trackEvent('dapp connector | sign data | reject | press', dappPayload);
+  }, [rejectSignData, trackEvent, dappPayload]);
 
   const handleConfirmSignData = useCallback(() => {
     confirmSignData();
-    trackEvent('dapp connector | sign data | confirm | press');
-  }, [confirmSignData, trackEvent]);
+    trackEvent('dapp connector | sign data | confirm | press', dappPayload);
+  }, [confirmSignData, trackEvent, dappPayload]);
 
   return (
     <SignDataV2

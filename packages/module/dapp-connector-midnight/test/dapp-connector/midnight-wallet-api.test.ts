@@ -81,6 +81,7 @@ describe('MidnightWalletApi', () => {
       expect(decodedApi).toHaveProperty('getShieldedAddresses');
       expect(decodedApi).toHaveProperty('getUnshieldedAddress');
       expect(decodedApi).toHaveProperty('getDustAddress');
+      expect(decodedApi).toHaveProperty('getProvingProvider');
       expect(decodedApi).toHaveProperty('getTxHistory');
       expect(decodedApi).toHaveProperty('balanceUnsealedTransaction');
       expect(decodedApi).toHaveProperty('balanceSealedTransaction');

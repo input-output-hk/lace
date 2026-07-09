@@ -1,7 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { Button, useTheme } from '@input-output-hk/lace-ui-toolkit';
+import { Button, spacing, useTheme } from '@lace-lib/ui-toolkit';
 import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 import LaceLogo from '../../assets/images/lace-logo.component.svg';
 
@@ -10,7 +11,7 @@ import LaceLogo from '../../assets/images/lace-logo.component.svg';
  */
 type ButtonProps = {
   /**
-   * Handler called when the button is clicked.
+   * Handler called when the button is pressed.
    */
   action: () => void;
   /**
@@ -59,14 +60,58 @@ interface LayoutProps {
 
 const CONTAINER_WIDTH = 360;
 const CONTAINER_HEIGHT = 650;
-const PADDING = 16;
+const FOOTER_PADDING_BOTTOM_VERTICAL = 50;
+
+const staticStyles = StyleSheet.create({
+  fixedContainer: {
+    width: CONTAINER_WIDTH,
+    height: CONTAINER_HEIGHT,
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  fillContainer: {
+    // 'fixed' pins to the viewport regardless of any wrapping RN Web shell.
+    // Cast to 'absolute' to satisfy RN's PositionValue type — RN Web renders it as CSS position:fixed.
+    position: 'fixed' as 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+  header: {
+    flexShrink: 0,
+    padding: spacing.M,
+    paddingBottom: spacing.S,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  footerBase: {
+    flexShrink: 0,
+    borderTopWidth: 1,
+    padding: spacing.M,
+    gap: spacing.S,
+  },
+  footerHorizontal: {
+    flexDirection: 'row',
+    paddingBottom: spacing.M,
+  },
+  footerVertical: {
+    flexDirection: 'column',
+    paddingBottom: FOOTER_PADDING_BOTTOM_VERTICAL,
+  },
+  buttonWrapperFlex: {
+    flex: 1,
+  },
+});
 
 /**
  * Theme-aware dApp connector layout for Lace-Extension.
- * Uses vanilla-extract CSS variables from lace-ui-toolkit for proper
- * dark/light mode support in the Expo web context.
+ * Uses theme tokens from @lace-lib/ui-toolkit for dark/light mode support.
  *
- * The layout has a fixed header (Lace logo + title), scrollable content area,
+ * The layout has a fixed header (Lace logo), scrollable content area,
  * and fixed footer (action buttons) - matching Lace V1 behavior.
  *
  * @param props - Component props
@@ -80,114 +125,84 @@ export const DappConnectorLayoutV2 = ({
   showHeader = true,
   fillViewport = false,
 }: LayoutProps) => {
-  const { vars } = useTheme();
+  const { theme } = useTheme();
   const isHorizontalFooter = footerOrientation === 'horizontal';
 
-  const containerStyle: CSSProperties = useMemo(
-    () =>
-      fillViewport
-        ? {
-            // Pin to the viewport so the layout fills the popupWindow exactly,
-            // independent of any wrapping React Native Web / Expo shell layout.
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: vars.colors.$dialog_container_bgColor,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }
-        : {
-            width: CONTAINER_WIDTH,
-            height: CONTAINER_HEIGHT,
-            backgroundColor: vars.colors.$dialog_container_bgColor,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          },
-    [fillViewport, vars],
+  const containerStyle = useMemo(
+    () => [
+      fillViewport ? staticStyles.fillContainer : staticStyles.fixedContainer,
+      { backgroundColor: theme.background.page },
+    ],
+    [fillViewport, theme],
   );
 
-  const headerStyle: CSSProperties = useMemo(
+  const contentStyle = useMemo(
     () => ({
-      flexShrink: 0,
-      padding: PADDING,
-      paddingBottom: 8,
-    }),
-    [],
-  );
-
-  const contentStyle: CSSProperties = useMemo(
-    () => ({
-      flex: 1,
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      paddingTop: showHeader ? 8 : PADDING,
-      paddingLeft: PADDING,
-      paddingRight: PADDING,
-      paddingBottom: PADDING,
+      paddingTop: showHeader ? spacing.S : spacing.M,
+      paddingHorizontal: spacing.M,
+      paddingBottom: spacing.M,
     }),
     [showHeader],
   );
 
-  const footerStyle: CSSProperties = useMemo(
-    () => ({
-      flexShrink: 0,
-      borderTop: `1px solid ${vars.colors.$divider_bgColor}`,
-      backgroundColor: vars.colors.$dialog_container_bgColor,
-      padding: PADDING,
-      paddingBottom: isHorizontalFooter ? PADDING : 50,
-      display: 'flex',
-      flexDirection: isHorizontalFooter ? 'row' : 'column',
-      gap: 8,
-    }),
-    [isHorizontalFooter, vars],
+  const footerStyle = useMemo(
+    () => [
+      staticStyles.footerBase,
+      isHorizontalFooter
+        ? staticStyles.footerHorizontal
+        : staticStyles.footerVertical,
+      {
+        borderTopColor: theme.border.top,
+        backgroundColor: theme.background.page,
+      },
+    ],
+    [isHorizontalFooter, theme],
   );
 
-  const buttonWrapperStyle: CSSProperties | undefined = useMemo(
-    () => (isHorizontalFooter ? { flex: 1 } : undefined),
-    [isHorizontalFooter],
-  );
+  const buttonWrapper = isHorizontalFooter
+    ? staticStyles.buttonWrapperFlex
+    : undefined;
 
   const secondaryButtonElement = secondaryButton ? (
-    <div style={buttonWrapperStyle}>
+    <View style={buttonWrapper}>
       <Button.Secondary
+        fullWidth
         label={secondaryButton.label}
-        w="$fill"
-        onClick={secondaryButton.action}
-        data-testid="dapp-connector-secondary-button"
+        onPress={secondaryButton.action}
+        testID="dapp-connector-secondary-button"
       />
-    </div>
+    </View>
   ) : null;
 
   const primaryButtonElement = primaryButton ? (
-    <div style={buttonWrapperStyle}>
-      <Button.CallToAction
+    <View style={buttonWrapper}>
+      <Button.Primary
+        fullWidth
         label={primaryButton.label}
-        w="$fill"
-        onClick={primaryButton.action}
+        onPress={primaryButton.action}
         disabled={primaryButton.disabled}
-        data-testid="dapp-connector-primary-button"
+        testID="dapp-connector-primary-button"
       />
-    </div>
+    </View>
   ) : null;
 
   return (
-    <div style={containerStyle}>
+    <View style={containerStyle}>
       {showHeader && (
-        <div style={headerStyle}>
+        <View style={staticStyles.header}>
           <LaceLogo height={40} width={40} data-testid="dapp-connector-logo" />
-        </div>
+        </View>
       )}
-
-      <div style={contentStyle}>{children}</div>
-
-      <div style={footerStyle}>
+      <ScrollView
+        style={staticStyles.scrollView}
+        contentContainerStyle={contentStyle}
+        showsVerticalScrollIndicator={false}>
+        {children}
+      </ScrollView>
+      <View style={footerStyle}>
         {isHorizontalFooter ? secondaryButtonElement : primaryButtonElement}
         {isHorizontalFooter ? primaryButtonElement : secondaryButtonElement}
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };

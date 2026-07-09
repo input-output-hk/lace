@@ -4,7 +4,7 @@ import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo, useEffect, useRef } from 'react';
 import Animated from 'react-native-reanimated';
 
-import { Icon, Toast, useTriggerToast } from '../..';
+import { FloatingOverlay, Icon, Toast, useTriggerToast } from '../..';
 
 import type { IconName } from '../..';
 
@@ -115,16 +115,18 @@ export const GlobalToast = ({ toast, onHide }: GlobalToastProps) => {
   }
 
   return (
-    <Animated.View style={triggerToast.animatedStyle}>
-      <Toast
-        text={translatedText ?? toast.text}
-        subtitle={translatedSubtitle}
-        color={toast.color}
-        backgroundType={toast.backgroundType}
-        leftIcon={leftIcon}
-        leftImage={toast.leftImage}
-        rightIcon={rightIcon}
-      />
-    </Animated.View>
+    <FloatingOverlay>
+      <Animated.View style={triggerToast.animatedStyle} pointerEvents="none">
+        <Toast
+          text={translatedText ?? toast.text}
+          subtitle={translatedSubtitle}
+          color={toast.color}
+          backgroundType={toast.backgroundType}
+          leftIcon={leftIcon}
+          leftImage={toast.leftImage}
+          rightIcon={rightIcon}
+        />
+      </Animated.View>
+    </FloatingOverlay>
   );
 };

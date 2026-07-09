@@ -29,6 +29,7 @@ import type {
   ExtendedDAppConnectorWalletAPI,
   WithSenderContext,
 } from '../../types';
+import type { Activity } from '@lace-contract/activities';
 import type { AuthorizedDappsDataSlice } from '@lace-contract/dapp-connector';
 import type {
   MidnightWalletsByAccountId,
@@ -49,6 +50,7 @@ type ConnectMidnightDappConnectorParams<T> = {
   wallets$: Observable<MidnightWalletsByAccountId>;
   supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   isUnlocked$: Observable<boolean>;
+  onPendingActivity?: (activity: Activity) => void;
 };
 
 const ensureWalletUnlocked = async (isUnlocked$: Observable<boolean>) => {
@@ -96,6 +98,7 @@ export const initializeMidnightDappConnectorSideEffectDependencies = ({
     handleRequests,
     supportedNetworksIds$,
     isUnlocked$,
+    onPendingActivity,
   }: ConnectMidnightDappConnectorParams<T>): Observable<T> =>
     new Observable(_subscriber => {
       const walletApi: WithSenderContext<ConnectedAPI> =
@@ -108,6 +111,8 @@ export const initializeMidnightDappConnectorSideEffectDependencies = ({
           ),
           supportedNetworksIds$,
           isUnlocked$,
+          onPendingActivity,
+          logger,
         });
 
       const api = exposeApi(

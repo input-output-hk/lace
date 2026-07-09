@@ -12,18 +12,15 @@ import {
   Row,
 } from '../../../atoms';
 import {
-  SheetFooter,
-  SheetHeader,
   RadioGroup,
   DropdownMenu,
-  useFooterHeight,
+  DropdownMenuViewport,
 } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { footerHeight } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 import type { Theme } from '../../../../design-tokens';
 import type { IconName } from '../../../atoms';
-import type { ButtonConfig } from '../../../molecules/sheetFooter/sheetFooter.types';
 import type { BlockchainName } from '@lace-lib/util-store';
 
 interface DropdownItem {
@@ -34,7 +31,6 @@ interface DropdownItem {
 }
 
 interface AddAccountSheetProps {
-  title: string;
   description: string;
   walletLabel: string;
   accountNameInputLabel: string;
@@ -44,8 +40,6 @@ interface AddAccountSheetProps {
   selectedBlockchain: string;
   onBlockchainChange: (value: string) => void;
   blockchainOptions: BlockchainName[];
-  secondaryButton: ButtonConfig;
-  primaryButton?: ButtonConfig;
   testID?: string;
   accountNameInputTestID?: string;
   accountIndexInputLabel?: string;
@@ -58,7 +52,6 @@ interface AddAccountSheetProps {
 }
 
 export const AddAccountSheet = ({
-  title,
   description,
   walletLabel,
   accountNameInputLabel,
@@ -68,8 +61,6 @@ export const AddAccountSheet = ({
   selectedBlockchain,
   onBlockchainChange,
   blockchainOptions,
-  secondaryButton,
-  primaryButton,
   testID = 'add-account-sheet',
   accountNameInputTestID = 'add-account-sheet-name-input',
   accountIndexInputTestID = 'add-account-sheet-index-input',
@@ -81,11 +72,7 @@ export const AddAccountSheet = ({
   allIndicesUsedMessage = '',
 }: AddAccountSheetProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const styles = useMemo(() => getStyles(theme), [theme]);
 
   const handleAccountIndexSelect = useCallback(
     (index: number) => {
@@ -106,94 +93,82 @@ export const AddAccountSheet = ({
   }, [accountIndex, accountIndexDropdownItems]);
 
   return (
-    <>
-      <SheetHeader title={title} testID={`${testID}-header`} />
-      <Sheet.Scroll
-        testID={testID}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.contentContainer}>
-        <Column gap={spacing.M} alignItems="flex-start">
-          <Row alignItems="center" gap={spacing.S}>
+    <DropdownMenuViewport
+      testID={testID}
+      style={styles.contentContainer}
+      boundaryInsets={{ top: spacing.M, bottom: footerHeight.horizontal }}>
+      <Column gap={spacing.M} alignItems="flex-start">
+        <Row alignItems="center" gap={spacing.S}>
+          <Icon name="InformationCircle" size={16} testID={`${testID}-icon`} />
+          <Text.XS testID={`${testID}-description`}>{description}</Text.XS>
+        </Row>
+        <CustomTag
+          size="S"
+          icon={<Icon name="Wallet" size={16} />}
+          label={walletLabel}
+          color="white"
+          testID={`${testID}-wallet-tag`}
+        />
+      </Column>
+
+      <Divider />
+      <Column gap={spacing.L}>
+        <CustomTextInput
+          animatedLabel
+          label={accountNameInputLabel}
+          testID={accountNameInputTestID}
+          onChangeText={onAccountNameChange}
+          value={accountName}
+          inputError={accountNameError}
+          editable={hasAvailableIndices}
+          maxLength={NAME_MAX_LENGTH}
+        />
+        <RadioGroup
+          options={blockchainOptions.map(blockchain => ({
+            value: blockchain,
+            label: blockchain,
+            preIcon: blockchain as IconName,
+          }))}
+          value={selectedBlockchain}
+          onChange={onBlockchainChange}
+          direction="column"
+        />
+        {!hasAvailableIndices ? (
+          <Row
+            alignItems="center"
+            gap={spacing.M}
+            style={styles.errorMessageContainer}>
             <Icon
               name="InformationCircle"
-              size={16}
-              testID={`${testID}-icon`}
+              size={24}
+              testID={`${testID}-error-icon`}
             />
-            <Text.XS testID={`${testID}-description`}>{description}</Text.XS>
+            <Text.M
+              style={styles.errorMessageText}
+              testID={`${testID}-error-message`}>
+              {allIndicesUsedMessage}
+            </Text.M>
           </Row>
-          <CustomTag
-            size="S"
-            icon={<Icon name="Wallet" size={16} />}
-            label={walletLabel}
-            color="white"
-            testID={`${testID}-wallet-tag`}
+        ) : (
+          <DropdownMenu
+            title={accountIndexInputLabel}
+            items={accountIndexDropdownItems}
+            selectedItemId={selectedAccountId}
+            onSelectItem={handleAccountIndexSelect}
+            testID={accountIndexInputTestID}
           />
-        </Column>
-
-        <Divider />
-        <Column gap={spacing.L}>
-          <CustomTextInput
-            isWithinBottomSheet
-            animatedLabel
-            label={accountNameInputLabel}
-            testID={accountNameInputTestID}
-            onChangeText={onAccountNameChange}
-            value={accountName}
-            inputError={accountNameError}
-            editable={hasAvailableIndices}
-            maxLength={NAME_MAX_LENGTH}
-          />
-          <RadioGroup
-            options={blockchainOptions.map(blockchain => ({
-              value: blockchain,
-              label: blockchain,
-              preIcon: blockchain as IconName,
-            }))}
-            value={selectedBlockchain}
-            onChange={onBlockchainChange}
-            direction="column"
-          />
-          {!hasAvailableIndices ? (
-            <Row
-              alignItems="center"
-              gap={spacing.M}
-              style={styles.errorMessageContainer}>
-              <Icon
-                name="InformationCircle"
-                size={24}
-                testID={`${testID}-error-icon`}
-              />
-              <Text.M
-                style={styles.errorMessageText}
-                testID={`${testID}-error-message`}>
-                {allIndicesUsedMessage}
-              </Text.M>
-            </Row>
-          ) : (
-            <DropdownMenu
-              title={accountIndexInputLabel}
-              items={accountIndexDropdownItems}
-              selectedItemId={selectedAccountId}
-              onSelectItem={handleAccountIndexSelect}
-              testID={accountIndexInputTestID}
-            />
-          )}
-        </Column>
-      </Sheet.Scroll>
-
-      <SheetFooter
-        secondaryButton={secondaryButton}
-        primaryButton={primaryButton}
-      />
-    </>
+        )}
+      </Column>
+    </DropdownMenuViewport>
   );
 };
 
-const getStyles = (theme: Theme, footerHeight: number) =>
+const getStyles = (theme: Theme) =>
   StyleSheet.create({
     contentContainer: {
+      padding: spacing.M,
+      paddingBottom: footerHeight.horizontal,
       gap: spacing.L,
-      paddingBottom: footerHeight,
     },
     errorMessageContainer: {
       padding: spacing.L,

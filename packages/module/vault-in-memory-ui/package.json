@@ -8,6 +8,7 @@
   "dependencies": {
     "@cardano-sdk/key-management": "0.29.13",
     "@lace-contract/account-management": "*",
+    "@lace-contract/analytics": "*",
     "@lace-contract/authentication-prompt": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",

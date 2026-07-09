@@ -7,3 +7,7 @@ export type * from './types';
 export { BitcoinNetwork, BitcoinAddress } from './types';
 export * from './value-objects';
 export type * from './signing';
+export type {
+  BitcoinInFlightOutpoint,
+  BitcoinInFlightUtxoActivityMetadata,
+} from './augmentations';

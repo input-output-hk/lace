@@ -10,7 +10,11 @@ import {
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
+import { networkStoreContract } from '@lace-contract/network';
 import { posthogDependencyContract } from '@lace-contract/posthog';
+import { tokenPricingStoreContract } from '@lace-contract/token-pricing';
+import { viewsStoreContract } from '@lace-contract/views';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_ANALYTICS_POSTHOG } from './const';
 import store from './store';
@@ -33,6 +37,10 @@ const analyticsPosthogModule = inferModuleContext({
   dependsOn: combineContracts([
     featureStoreContract,
     posthogDependencyContract,
+    walletRepoStoreContract,
+    networkStoreContract,
+    viewsStoreContract,
+    tokenPricingStoreContract,
   ] as const),
   store,
   feature: {

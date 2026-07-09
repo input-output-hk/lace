@@ -34,7 +34,16 @@ const STAKE_KEY_GAP = 5;
  * How far we search for payment addresses under a single stake key
  * before concluding that no more addresses exist (or that they are “franken”).
  */
-const PAYMENT_CREDENTIAL_GAP = 20;
+const PAYMENT_CREDENTIAL_GAP = 100;
+
+/**
+ * Safety cap for thorough discovery. The thorough predicate continues past
+ * the gap when the Blockfrost-returned address set still has unmatched
+ * entries; this bound ensures the loop cannot run forever when an unmatched
+ * entry is structurally undiscoverable (true "franken" cases).
+ */
+// 10_000 dwarfs any realistic HD wallet (CIP-1852 wallets stay in the low thousands) while keeping the worst-case scan bounded.
+const HARD_UPPER_BOUND = 10_000;
 
 /**
  * Fetch size for Blockfrost addresses per page.
@@ -96,8 +105,12 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
    */
   public discover(
     manager: Bip32Account,
+    options: { thorough?: boolean } = {},
   ): Observable<Result<GroupedAddress, ProviderError>> {
-    this.logger.debug('Discovering addresses using Blockfrost...');
+    const isThorough = options.thorough ?? false;
+    this.logger.debug(
+      `Discovering addresses using Blockfrost (thorough=${isThorough})...`,
+    );
 
     const firstAddress$ = from(
       manager.deriveAddress({ index: 0, type: AddressType.External }, 0),
@@ -105,7 +118,7 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
 
     return forkJoin({
       firstAddress: firstAddress$,
-      discovered: this.#discoverAddresses(manager).pipe(toArray()),
+      discovered: this.#discoverAddresses(manager, isThorough).pipe(toArray()),
     }).pipe(
       mergeMap(({ firstAddress, discovered }) =>
         from([firstAddress, ...discovered]),
@@ -130,8 +143,13 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
    *      STAKE_KEY_GAP consecutive stake keys that yield zero discovered addresses.
    *   2. Payment credential gap: for each stake key, we stop deriving
    *      payment addresses once we have PAYMENT_CREDENTIAL_GAP consecutive misses.
+   *      In thorough mode, termination additionally requires the Blockfrost
+   *      address set to be drained (bounded by HARD_UPPER_BOUND).
    */
-  #discoverAddresses(account: Bip32Account): Observable<GroupedAddress> {
+  #discoverAddresses(
+    account: Bip32Account,
+    thorough: boolean,
+  ): Observable<GroupedAddress> {
     return new Observable(subscriber => {
       let isUnsubscribed = false;
 
@@ -168,6 +186,7 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
                 account,
                 stakeIndex,
                 allAddressesForStake,
+                thorough,
               );
 
             for (const address of discovered.sort(compareAddresses)) {
@@ -198,9 +217,15 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
   }
 
   /**
-   * Discover addresses under a single stake key, up to the payment gap.
-   * - We keep deriving external & internal addresses for paymentIndex=0..∞,
-   *   stopping once we hit PAYMENT_CREDENTIAL_GAP misses in a row.
+   * Discover addresses under a single stake key.
+   *
+   * Standard mode (thorough=false): stop once we hit PAYMENT_CREDENTIAL_GAP
+   * consecutive misses. Matches the BIP-44 gap-limit convention.
+   *
+   * Thorough mode (thorough=true): also require the Blockfrost address set to
+   * be drained before stopping, so high-index entries past the gap can still
+   * be discovered. Bounded by HARD_UPPER_BOUND to guarantee termination when
+   * an entry is structurally undiscoverable.
    *
    * @returns Array of discovered (matched) addresses + leftover “unknown/franken” addresses
    */
@@ -208,6 +233,7 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
     account: Bip32Account,
     stakeIndex: number,
     allAddressesForStake: CardanoPaymentAddress[],
+    thorough: boolean,
   ): Promise<{
     discovered: GroupedAddress[];
     unknown: CardanoPaymentAddress[];
@@ -218,11 +244,16 @@ export class BlockfrostAddressDiscovery extends BlockfrostProvider {
     let gapCount = 0;
     let paymentIndex = 0;
 
-    // Keep deriving payment addresses until we reach PAYMENT_CREDENTIAL_GAP consecutive misses
     while (true) {
-      if (gapCount >= PAYMENT_CREDENTIAL_GAP) {
+      const hasHitGap = gapCount >= PAYMENT_CREDENTIAL_GAP;
+      const shouldStop = thorough
+        ? (hasHitGap && uniqueAddressesForStake.size === 0) ||
+          paymentIndex >= HARD_UPPER_BOUND
+        : hasHitGap;
+
+      if (shouldStop) {
         this.logger.debug(
-          `Hit payment gap of ${PAYMENT_CREDENTIAL_GAP} for stakeIndex ${stakeIndex}. Stopping.`,
+          `Stopping payment discovery for stakeIndex ${stakeIndex} at paymentIndex ${paymentIndex} (gap=${gapCount}, remaining=${uniqueAddressesForStake.size}, thorough=${thorough}).`,
         );
         break;
       }

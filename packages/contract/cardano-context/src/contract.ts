@@ -1,5 +1,7 @@
 import { activitiesStoreContract } from '@lace-contract/activities';
 import { addressesStoreContract } from '@lace-contract/addresses';
+import { analyticsStoreContract } from '@lace-contract/analytics';
+import { appStoreContract } from '@lace-contract/app';
 import { failuresStoreContract } from '@lace-contract/failures';
 import {
   combineContracts,
@@ -11,6 +13,7 @@ import {
 import { networkStoreContract } from '@lace-contract/network';
 import { syncStoreContract } from '@lace-contract/sync';
 import { tokensStoreContract } from '@lace-contract/tokens';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import store from './store';
@@ -49,11 +52,14 @@ export const cardanoProviderStoreContract = inferContractContext({
     networkStoreContract,
     activitiesStoreContract,
     addressesStoreContract,
+    appStoreContract,
     tokensStoreContract,
+    walletActiveStateDependencyContract,
     walletRepoStoreContract,
     cardanoProviderDependencyContract,
     syncStoreContract,
     failuresStoreContract,
+    analyticsStoreContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),
@@ -85,4 +91,4 @@ export type ActionCreators = ContractActionCreators<
   typeof cardanoProviderStoreContract
 >;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
-export type Action = ActionType<ActionCreators>;
+export type CardanoContextAction = ActionType<ActionCreators>;

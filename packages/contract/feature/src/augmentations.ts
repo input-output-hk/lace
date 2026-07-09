@@ -3,6 +3,7 @@ import type {
   Feature,
   FeatureFlag,
   FeatureFlagProvider,
+  FeatureFlagRefreshTrigger,
   RuntimeFeatures,
 } from './types';
 import type { FeatureFlagKey } from './value-objects';
@@ -20,5 +21,7 @@ declare module '@lace-contract/module' {
     extraFeatureFlags: FeatureFlagKey[];
   }
   interface State extends StateFromReducersMapObject<typeof featuresReducers> {}
-  interface SideEffectDependencies extends FeatureFlagProvider {}
+  interface SideEffectDependencies
+    extends FeatureFlagProvider,
+      FeatureFlagRefreshTrigger {}
 }

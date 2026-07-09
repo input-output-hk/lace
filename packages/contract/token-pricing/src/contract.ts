@@ -9,6 +9,7 @@ import { networkStoreContract } from '@lace-contract/network';
 import { storageDependencyContract } from '@lace-contract/storage';
 import { syncStoreContract } from '@lace-contract/sync';
 import { tokensStoreContract } from '@lace-contract/tokens';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 
 import store from './store';
 
@@ -50,6 +51,7 @@ export const tokenPricingStoreContract = inferContractContext({
     syncStoreContract,
     tokenPricingProviderDependencyContract,
     tokenIdMapperAddonContract,
+    walletActiveStateDependencyContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),

@@ -129,6 +129,42 @@ describe('trackAppLockEvents', () => {
         expectObservable(sideEffect$).toBe('a', {
           a: actions.analytics.trackEvent({
             eventName: 'app lock | biometric | failed',
+            payload: {},
+          }),
+        });
+      },
+    }));
+  });
+
+  it('forwards failureReason and androidKeystoreAttemptNumber on biometric failures', () => {
+    testSideEffect(trackAppLockEvents, ({ cold, expectObservable }) => ({
+      dependencies: { actions },
+      actionObservables: {
+        authenticationPrompt: {
+          confirmedBiometric$: cold(''),
+          confirmedPassword$: cold(''),
+          switchToPassword$: cold(''),
+          verifiedBiometric$: cold('a', {
+            a: actions.authenticationPrompt.verifiedBiometric({
+              success: false,
+              failureReason: 'pre_auth_failed',
+              androidKeystoreRecovery: {
+                attemptNumber: 2,
+                maxAttempts: 3,
+              },
+            }),
+          }),
+          verifiedPassword$: cold(''),
+        },
+      },
+      assertion: sideEffect$ => {
+        expectObservable(sideEffect$).toBe('a', {
+          a: actions.analytics.trackEvent({
+            eventName: 'app lock | biometric | failed',
+            payload: {
+              failureReason: 'pre_auth_failed',
+              androidKeystoreAttemptNumber: 2,
+            },
           }),
         });
       },

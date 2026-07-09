@@ -1,4 +1,3 @@
-import { onSheetClose } from '@lace-lib/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../common/hooks';
@@ -178,17 +177,25 @@ export const useDappPopupFlow = <T extends 'signData' | 'signTx'>({
     onReject?.();
   }, [dispatchReject, onReject]);
 
-  // Reject when sheet is dismissed (X button, swipe down, click outside).
-  // The sheet host uses reset() which doesn't fire blur/beforeRemove events,
-  // so we listen for the onSheetClose callback from SheetControls.close().
+  // Reject on any unhandled dismissal (X button, swipe down, click outside,
+  // navigation away). On web/extension, gorhom's BottomSheetModal unmounts
+  // children before React Navigation processes REMOVE, so the previously
+  // registered onSheetClose listener was already gone by the time the
+  // navigation state event fired. The unmount cleanup is the only signal
+  // that reliably runs on every dismissal path. Hold the latest dispatcher
+  // in a ref so the effect can be unmount-only without going stale.
+  const dispatchRejectRef = useRef(dispatchReject);
+  dispatchRejectRef.current = dispatchReject;
+  const onRejectRef = useRef(onReject);
+  onRejectRef.current = onReject;
   useEffect(() => {
-    return onSheetClose(() => {
-      if (!hasRespondedRef.current && request) {
-        dispatchReject();
-        onReject?.();
+    return () => {
+      if (!hasRespondedRef.current) {
+        dispatchRejectRef.current();
+        onRejectRef.current?.();
       }
-    });
-  }, [dispatchReject, onReject, request]);
+    };
+  }, []);
 
   const hadRequest = useRef(false);
   if (request) {

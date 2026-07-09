@@ -106,6 +106,80 @@ describe('Side Effects', () => {
       });
     });
 
+    describe('runtime fallback', () => {
+      const compatibleFlags: FeatureFlag[] = [{ key: FeatureFlagKey('flag1') }];
+      const incompatibleFlags: FeatureFlag[] = [
+        { key: FeatureFlagKey('nonexistent') },
+      ];
+
+      it('skips emissions equal to runtime fallback.incompatibleFlags', () => {
+        const mockStorage = { set: vi.fn(of), get: vi.fn(() => of([])) };
+        const mockCreateDocumentStorage = vi.fn().mockReturnValue(mockStorage);
+
+        const effect = updateFeatures(
+          {
+            availableModules: [],
+            loaded: { featureFlags: compatibleFlags, modules: [] },
+            fallback: { incompatibleFlags },
+          },
+          {
+            env: developmentEnvironment,
+            config: { extraFeatureFlags: [], defaultFeatureFlags },
+          },
+        );
+
+        testSideEffect(effect, ({ flush, expectObservable }) => ({
+          dependencies: {
+            featureFlags$: of(incompatibleFlags),
+            createDocumentStorage: mockCreateDocumentStorage,
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('|');
+            flush();
+            expect(mockStorage.set).not.toHaveBeenCalled();
+          },
+        }));
+      });
+
+      it('persists and dispatches updateFeatures when a non-equal set arrives even with runtime fallback recorded', () => {
+        const mockStorage = { set: vi.fn(of), get: vi.fn(() => of([])) };
+        const mockCreateDocumentStorage = vi.fn().mockReturnValue(mockStorage);
+
+        const effect = updateFeatures(
+          {
+            availableModules: [],
+            loaded: { featureFlags: [], modules: [] },
+            fallback: { incompatibleFlags },
+          },
+          {
+            env: developmentEnvironment,
+            config: { extraFeatureFlags: [], defaultFeatureFlags },
+          },
+        );
+
+        testSideEffect(effect, ({ flush, expectObservable }) => ({
+          dependencies: {
+            featureFlags$: of(compatibleFlags),
+            createDocumentStorage: mockCreateDocumentStorage,
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(a|)', {
+              a: actions.features.updateFeatures({
+                featureFlags: compatibleFlags,
+                modules: [],
+              }),
+            });
+            flush();
+            expect(mockStorage.set).toHaveBeenCalledWith({
+              featureFlags: compatibleFlags,
+            });
+          },
+        }));
+      });
+    });
+
     describe('extraFeatureFlags', () => {
       it('should filter out extra feature flags when checking for changes', () => {
         const extraFlag = FeatureFlagKey('extraFlag');

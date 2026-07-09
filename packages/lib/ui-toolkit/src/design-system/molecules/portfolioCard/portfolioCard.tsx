@@ -1,3 +1,5 @@
+import type { StyleProp, ViewStyle } from 'react-native';
+
 import { useTranslation } from '@lace-contract/i18n';
 import noop from 'lodash/noop';
 import React, { memo, useCallback, useMemo } from 'react';
@@ -65,6 +67,7 @@ interface PortfolioCardProps {
   testID?: string;
   arePricesAvailable?: boolean;
   formatChartValue?: (value: number) => string;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 // ============================================================================
@@ -272,6 +275,7 @@ export const PortfolioCard = ({
   testID,
   arePricesAvailable = true,
   formatChartValue,
+  containerStyle,
 }: PortfolioCardProps) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -461,9 +465,9 @@ export const PortfolioCard = ({
   const cardStyle = useMemo(
     () =>
       variant === 'ultraLight'
-        ? [styles.card, styles.ultraLightCard]
-        : styles.card,
-    [variant, styles.card, styles.ultraLightCard],
+        ? [styles.card, styles.ultraLightCard, containerStyle]
+        : [styles.card, containerStyle],
+    [variant, styles.card, styles.ultraLightCard, containerStyle],
   );
 
   const renderContent = () => {
@@ -524,13 +528,16 @@ export const PortfolioCard = ({
 
   const renderMinimalContent = () => {
     return (
-      <Column style={styles.minimalContent} alignItems="center">
-        <Text.M>{portfolioTitle}</Text.M>
-        <AccountInfo
-          wallets={data?.wallets || []}
-          accounts={data?.accounts || []}
-          showLabels
-        />
+      <Column style={styles.minimalContent}>
+        <Column style={styles.minimalInfo} alignItems="center">
+          <Text.M>{portfolioTitle}</Text.M>
+          <AccountInfo
+            wallets={data?.wallets || []}
+            accounts={data?.accounts || []}
+            showLabels
+          />
+        </Column>
+        <View style={styles.minimalSpacer} />
         <Row justifyContent="space-between" style={styles.minimalActionsRow}>
           {renderCompactActions()}
         </Row>
@@ -620,8 +627,15 @@ const getStyles = (theme: Theme, isEnhanced: boolean) =>
       flex: 1,
     },
     minimalContent: {
-      gap: spacing.S,
+      flex: 1,
       width: '100%',
+    },
+    minimalInfo: {
+      gap: spacing.S,
+    },
+    minimalSpacer: {
+      flex: 1,
+      minHeight: spacing.XXXL,
     },
     minimalActionsRow: {
       width: '100%',

@@ -1,11 +1,13 @@
 export type HardwareErrorCategory =
+  | 'already-added'
   | 'app-not-open'
   | 'device-disconnected'
   | 'device-locked'
   | 'device-picker-rejected'
   | 'generic'
   | 'not-supported'
-  | 'unauthorized';
+  | 'unauthorized'
+  | 'version-unsupported';
 
 /**
  * Collect error messages and error names from the full error chain.
@@ -39,11 +41,34 @@ export const classifyHardwareError = (
   error: unknown,
 ): HardwareErrorCategory => {
   // WebUSB picker cancelled
-  if (error instanceof DOMException && error.name === 'NotFoundError') {
+  if (
+    typeof DOMException !== 'undefined' &&
+    error instanceof DOMException &&
+    error.name === 'NotFoundError'
+  ) {
     return 'device-picker-rejected';
   }
 
   const { message, names } = collectChainInfo(error);
+
+  // Mobile BLE discovery sheet dismissed by the user
+  if (names.has('HwConnectionCancelledError')) {
+    return 'device-picker-rejected';
+  }
+
+  // Mobile BLE search failed (BLE permissions denied, BT off, etc.)
+  if (
+    names.has('HwSearchFailedError') ||
+    names.has('LedgerBlePermissionError')
+  ) {
+    return 'unauthorized';
+  }
+
+  // Ledger Cardano app version outside the supported range (too old, e.g.
+  // below v2.2, or too new, e.g. v8.x)
+  if (names.has('DeviceVersionUnsupported')) {
+    return 'version-unsupported';
+  }
 
   // Ledger: "Cannot communicate with Ledger Cardano App"
   // with "General error 0x5515" = device locked, "General error 0x6e01" = app not open

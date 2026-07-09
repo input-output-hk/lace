@@ -1,4 +1,5 @@
 import { useUICustomisation } from '@lace-contract/app';
+import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import {
@@ -13,7 +14,7 @@ import {
   Modal,
   PageContainerTemplate,
   PageHeader,
-  renderLaceFooterLogo,
+  LaceFooterLogo,
   Row,
   SettingsCard,
   spacing,
@@ -89,13 +90,13 @@ export const WalletSettings = ({
 
   // Handle recovery phrase verification with authentication prompt
   const handleRecoveryPhraseVerification = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.RecoveryPhraseVerification, {
+    NavigationControls.navigate(SheetRoutes.RecoveryPhraseVerification, {
       walletId,
     });
   }, [walletId]);
 
   const handleEditWallet = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.EditWallet, {
+    NavigationControls.navigate(SheetRoutes.EditWallet, {
       walletId: walletId,
     });
   }, [navigation, walletId]);
@@ -126,7 +127,7 @@ export const WalletSettings = ({
   }, [attemptRemoveWallet, walletId]);
 
   const handleNavigateToAddAccount = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.AddAccount, {
+    NavigationControls.navigate(SheetRoutes.AddAccount, {
       walletId: walletId,
       hasNestedScrolling: true,
     });
@@ -145,6 +146,49 @@ export const WalletSettings = ({
         : 'v2.wallet-settings.accounts-count.multiple';
     return t(key, { count: accountsCount });
   }, [accountsCount, t]);
+
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+  const isSecurityAlertsEnabled = useMemo(
+    () =>
+      featureFlags.some(
+        ({ key }) => key === FEATURE_FLAG_WALLET_SECURITY_ALERTS,
+      ),
+    [featureFlags],
+  );
+
+  const requestSecurityRescan = useDispatchLaceAction(
+    'cardanoContext.requestSecurityRescan',
+  );
+  const showToast = useDispatchLaceAction('ui.showToast');
+
+  const handleRecheckWalletKeys = useCallback(() => {
+    if (!wallet) return;
+    let dispatched = 0;
+    for (const account of wallet.accounts) {
+      if (account.blockchainName !== 'Cardano') continue;
+      requestSecurityRescan({ accountId: account.accountId });
+      dispatched += 1;
+    }
+    if (dispatched === 0) return;
+    showToast({
+      text: t('wallet-security-alerts.settings.toast-scan-started'),
+      color: 'positive',
+      duration: 3,
+      leftIcon: {
+        name: 'Shield',
+        size: 20,
+        color: theme.brand.white,
+      },
+    });
+    navigation.goBack();
+  }, [
+    wallet,
+    requestSecurityRescan,
+    showToast,
+    t,
+    theme.brand.white,
+    navigation,
+  ]);
 
   // Standard component mapping for common wallet settings
   const createStandardComponent = useCallback(
@@ -165,11 +209,34 @@ export const WalletSettings = ({
               iconWrapperStyle={{}}
             />
           );
+        case 'wallet-security-check':
+          if (!isSecurityAlertsEnabled) return null;
+          return (
+            <SettingsCard
+              iconName="Shield"
+              key="wallet-security-check"
+              testID="wallet-settings-wallet-security-check"
+              title={t('wallet-security-alerts.settings.title')}
+              description={t('wallet-security-alerts.settings.description')}
+              rightNode={<Icon name="CaretRight" />}
+              quickActions={{
+                onCardPress: handleRecheckWalletKeys,
+              }}
+              isCritical={false}
+              iconWrapperStyle={{}}
+            />
+          );
         default:
           return null;
       }
     },
-    [t, handleEditWallet, openRemoveWalletModal],
+    [
+      t,
+      handleEditWallet,
+      openRemoveWalletModal,
+      handleRecheckWalletKeys,
+      isSecurityAlertsEnabled,
+    ],
   );
 
   // Get settings list from customisations or use default
@@ -181,7 +248,11 @@ export const WalletSettings = ({
       customSettings = firstCustomisation.settings || [];
     } else {
       // Default settings for wallet types without customisations
-      customSettings = ['customise-wallet', 'remove-wallet'];
+      customSettings = [
+        'customise-wallet',
+        'wallet-security-check',
+        'remove-wallet',
+      ];
     }
 
     // Filter out show-recovery-phrase if passphrase is not confirmed
@@ -300,7 +371,7 @@ export const WalletSettings = ({
             />
           </View>
         </View>
-        {renderLaceFooterLogo()}
+        <LaceFooterLogo />
       </ScrollView>
 
       <Modal

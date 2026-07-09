@@ -8,7 +8,7 @@ import {
   PageHeader,
   getIsWideLayout,
 } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -114,6 +114,16 @@ export const AccountDetails = ({
       },
     });
   }, [attemptRemoveAccount, walletId, accountId]);
+
+  // Pop the screen if the account it points to no longer exists in state —
+  // e.g. after the user confirms removal. Without this, the screen stays
+  // mounted on the navigation stack rendering null, and the user sees a
+  // blank page once the RemoveAccountSuccess sheet is dismissed.
+  useEffect(() => {
+    if (!account && navigation.canGoBack()) {
+      navigation.goBack();
+    }
+  }, [account, navigation]);
 
   if (!account) {
     return null;

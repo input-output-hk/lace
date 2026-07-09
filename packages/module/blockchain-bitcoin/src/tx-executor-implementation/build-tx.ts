@@ -1,13 +1,23 @@
+import { ActivityType } from '@lace-contract/activities';
 import { BITCOIN_TOKEN_ID } from '@lace-contract/bitcoin-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-sdk/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { encodeUnsignedTxToString } from '../common';
-import { TransactionBuilder } from '../tx-builder';
+import { DUST_THRESHOLD, encodeUnsignedTxToString } from '../common';
+import { buildErrorTranslationKey, TransactionBuilder } from '../tx-builder';
 
-import type { BitcoinBlockchainSpecificTxData } from '@lace-contract/bitcoin-context';
+import type {
+  Activity,
+  BlockchainSpecificActivityMetadata,
+  PendingActivitiesByAccount,
+} from '@lace-contract/activities';
+import type {
+  BitcoinBlockchainSpecificTxData,
+  BitcoinInFlightUtxoActivityMetadata,
+  BitcoinUTxO,
+} from '@lace-contract/bitcoin-context';
 import type { SideEffectDependencies } from '@lace-contract/module';
 import type {
   TokenTransfer,
@@ -15,6 +25,7 @@ import type {
   TxExecutorImplementation,
   TxParams,
 } from '@lace-contract/tx-executor';
+import type { Observable } from 'rxjs';
 
 /**
  * Case-insensitive Bitcoin detection.
@@ -55,16 +66,46 @@ export const txParamsToAmount = (txp: TxParams): number => {
   return Number(tokenTransferToValue(txp.tokenTransfers[0]));
 };
 
-/**
- * Build a Bitcoin transaction.
- * @param bitcoinAccountWallets$ Observable of Bitcoin account wallets.
- * @param logger Logger instance for logging.
- */
+const getBitcoinInFlight = (
+  activity: Activity,
+): BitcoinInFlightUtxoActivityMetadata | undefined => {
+  if (activity.type !== ActivityType.Pending) return undefined;
+  const blockchainSpecific = activity.blockchainSpecific as
+    | BlockchainSpecificActivityMetadata
+    | undefined;
+  return blockchainSpecific?.Bitcoin;
+};
+
+const outpointKey = (ref: { txId: string; index: number }) =>
+  `${ref.txId}#${ref.index}`;
+
+// Bitcoin: only drop outpoints consumed by pending txs. Unconfirmed produced
+// outputs are not added to the spendable set — spending unconfirmed Bitcoin
+// outputs is unsafe under RBF and bounded by mempool ancestor limits.
+export const applyInFlightUtxoAdjustments = (
+  utxos: readonly BitcoinUTxO[],
+  _accountAddresses: ReadonlySet<string>,
+  pendingActivities: readonly Activity[],
+): BitcoinUTxO[] => {
+  const spent = new Set<string>();
+  for (const activity of pendingActivities) {
+    const inFlight = getBitcoinInFlight(activity);
+    if (!inFlight) continue;
+    for (const input of inFlight.consumedInputs) {
+      spent.add(outpointKey(input));
+    }
+  }
+
+  if (spent.size === 0) return [...utxos];
+
+  return utxos.filter(utxo => !spent.has(outpointKey(utxo)));
+};
+
 export const makeBuildTx =
-  ({
-    bitcoinAccountWallets$,
-    logger,
-  }: SideEffectDependencies): TxExecutorImplementation['buildTx'] =>
+  (
+    { bitcoinAccountWallets$, logger }: SideEffectDependencies,
+    pendingActivitiesByAccount$: Observable<PendingActivitiesByAccount>,
+  ): TxExecutorImplementation['buildTx'] =>
   ({ txParams }) => {
     return defer(async (): Promise<TxBuildResult> => {
       const firstTokenTransfer = txParams[0]?.tokenTransfers[0];
@@ -92,6 +133,9 @@ export const makeBuildTx =
       const network = bitcoinAccountWallet.network;
       const utxos = await firstValueFrom(bitcoinAccountWallet.utxos$);
       const addresses = await firstValueFrom(bitcoinAccountWallet.addresses$);
+      const pendingActivitiesByAccount = await firstValueFrom(
+        pendingActivitiesByAccount$,
+      );
 
       if (!txParams[0].blockchainSpecific) {
         logger.error(`Bitcoin buildTx: Missing blockchain specific data`);
@@ -122,9 +166,16 @@ export const makeBuildTx =
       logger.debug(`Bitcoin buildTx: Using fee rate of ${rateToUse} sat/vB`);
       const txBuilder = new TransactionBuilder(network, rateToUse, addresses);
 
+      const ownAddresses = new Set(addresses.map(a => a.address));
+      const adjustedUtxos = applyInFlightUtxoAdjustments(
+        utxos,
+        ownAddresses,
+        pendingActivitiesByAccount[firstTokenTransfer.token.accountId] ?? [],
+      );
+
       txBuilder
         .setChangeAddress(bitcoinAccountWallet.address.address)
-        .setUtxoSet(utxos);
+        .setUtxoSet(adjustedUtxos);
 
       for (const txp of txParams) {
         const amount = txParamsToAmount(txp);
@@ -151,12 +202,21 @@ export const makeBuildTx =
         success: true,
       };
     }).pipe(
-      catchError((error: Error) => of(genericErrorResults.buildTx({ error }))),
+      catchError((error: Error) =>
+        // `genericErrorResults.buildTx` drops the error and always returns the
+        // generic key, so map the (blockchain-specific) build error to a
+        // precise translation key here. The generic, blockchain-agnostic send
+        // flow renders whatever key we put on the result — keeping the mapping
+        // in this module preserves that separation of concerns.
+        of({
+          success: false as const,
+          errorTranslationKey: buildErrorTranslationKey(error),
+        }),
+      ),
     );
   };
 
-// TODO LW-14768
 export const makePreviewTx =
   (_: SideEffectDependencies): TxExecutorImplementation['previewTx'] =>
   () =>
-    of({ minimumAmount: BigNumber(1n), success: true });
+    of({ minimumAmount: BigNumber(BigInt(DUST_THRESHOLD)), success: true });

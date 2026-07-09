@@ -11,7 +11,7 @@ export type PostHogClient = {
     featureFlags?: Record<string, boolean | string>;
     featureFlagPayloads?: Record<string, JsonType>;
   }>;
-  identify: (distinctId: string) => void;
+  identify: (distinctId: string, properties?: Record<string, JsonType>) => void;
 };
 
 export type GetDefaultPostHogEventProperties = () => Record<string, JsonType>;

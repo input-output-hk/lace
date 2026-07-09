@@ -1,4 +1,9 @@
-import type { LayoutChangeEvent, StyleProp, ViewStyle } from 'react-native';
+import type {
+  FlatList as FlatListRef,
+  LayoutChangeEvent,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
 import { getTokenPriceId } from '@lace-contract/token-pricing';
@@ -24,6 +29,18 @@ import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
 import { PortfolioEmptyState } from './empty-state';
 import { getListHeaderNode } from './utils/getListHeaderNode';
+import {
+  applyAscendingSortOrder,
+  applySortOrder,
+  compareNumbersDesc,
+  compareTokensByQuantity,
+  compareTokensByTicker,
+  DEFAULT_TOKEN_SORT_OPTION,
+  getDefaultTokenSortOrder,
+  getTokenSortValue,
+  type TokenSortOption,
+  type TokenSortOrder,
+} from './utils/portfolioSort';
 
 import type { ListHeaderComponentProperty, SelectedAssetView } from './types';
 import type { MidnightSpecificTokenMetadata } from '@lace-contract/midnight-context';
@@ -43,6 +60,10 @@ type TokensListProps = {
   scrollHandler: ScrollHandlerProcessed<Record<string, unknown>>;
   ifFromPortfolio?: boolean;
   isTokenPricingEnabled: boolean;
+  sortOption?: TokenSortOption;
+  sortOrder: TokenSortOrder;
+  listRef?: React.RefObject<FlatListRef | null>;
+  onEmptyStateChange?: (isEmpty: boolean) => void;
 };
 
 export const TokensList = ({
@@ -56,13 +77,18 @@ export const TokensList = ({
   scrollHandler,
   ifFromPortfolio,
   isTokenPricingEnabled,
+  sortOption,
+  sortOrder,
+  listRef,
+  onEmptyStateChange,
 }: TokensListProps) => {
   const { t } = useTranslation();
-  const listRef = useRef<FlatList>(null);
+  const internalListRef = useRef<FlatList>(null);
+  const resolvedListRef = listRef ?? internalListRef;
 
   useEffect(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [activeIndex, selectedAssetView]);
+    resolvedListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [activeIndex, selectedAssetView, resolvedListRef]);
   const accountAssets = useLaceSelector(
     'tokens.selectAggregatedFungibleTokensByAccountId',
     accountId,
@@ -102,15 +128,69 @@ export const TokensList = ({
     const assetsToDisplay = isPortfolioView
       ? aggregatedAssetsForVisibleAccounts
       : accountAssets;
-    // Display unnamed assets first in the list
-    const unnamedAssets = assetsToDisplay.filter(a => a.unnamed);
-    const namedTokens = assetsToDisplay.filter(a => !a.unnamed);
-    return [...unnamedAssets, ...namedTokens];
-  }, [isPortfolioView, accountAssets, aggregatedAssetsForVisibleAccounts]);
+    const prices = isTokenPricingEnabled ? allPrices : undefined;
+    const effectiveSortOption = sortOption ?? DEFAULT_TOKEN_SORT_OPTION;
+    const effectiveSortOrder = sortOption
+      ? sortOrder
+      : getDefaultTokenSortOrder(DEFAULT_TOKEN_SORT_OPTION);
+    const valueByTokenId =
+      effectiveSortOption === 'value'
+        ? new Map(
+            assetsToDisplay.map(asset => [
+              asset.tokenId,
+              getTokenSortValue(asset, prices),
+            ]),
+          )
+        : undefined;
+
+    return [...assetsToDisplay].sort((left, right) => {
+      switch (effectiveSortOption) {
+        case 'quantity':
+          return (
+            applySortOrder(
+              compareTokensByQuantity(left, right),
+              effectiveSortOrder,
+            ) || compareTokensByTicker(left, right)
+          );
+        case 'value':
+          return (
+            applySortOrder(
+              compareNumbersDesc(
+                valueByTokenId?.get(left.tokenId) ?? 0,
+                valueByTokenId?.get(right.tokenId) ?? 0,
+              ),
+              effectiveSortOrder,
+            ) ||
+            compareTokensByQuantity(left, right) ||
+            compareTokensByTicker(left, right)
+          );
+        case 'ticker':
+        default:
+          return (
+            applyAscendingSortOrder(
+              compareTokensByTicker(left, right),
+              effectiveSortOrder,
+            ) || compareTokensByQuantity(left, right)
+          );
+      }
+    });
+  }, [
+    isPortfolioView,
+    accountAssets,
+    aggregatedAssetsForVisibleAccounts,
+    sortOption,
+    sortOrder,
+    allPrices,
+    isTokenPricingEnabled,
+  ]);
 
   const isEmpty = assets.length === 0;
   const overScrollMode = isAndroid && isEmpty ? 'never' : undefined;
   const [listHeight, setListHeight] = useState(0);
+
+  useEffect(() => {
+    onEmptyStateChange?.(isEmpty);
+  }, [isEmpty, onEmptyStateChange]);
 
   const onListLayout = useCallback(
     (event: LayoutChangeEvent) => {
@@ -147,7 +227,7 @@ export const TokensList = ({
 
   const handleAssetPress = useCallback(
     (asset: Token) => {
-      NavigationControls.sheets.navigate(SheetRoutes.AssetDetailBottomSheet, {
+      NavigationControls.navigate(SheetRoutes.AssetDetailBottomSheet, {
         token: asset,
         isFromPortfolio: !!ifFromPortfolio,
       });
@@ -250,7 +330,7 @@ export const TokensList = ({
 
   return (
     <Animated.FlatList
-      ref={listRef as React.RefObject<FlatList>}
+      ref={resolvedListRef}
       data={isEmpty ? [] : assets}
       testID="asset-list-container"
       style={style}

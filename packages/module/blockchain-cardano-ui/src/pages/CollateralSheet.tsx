@@ -10,9 +10,10 @@ import {
   StatusSheet,
   Loader,
   Column,
+  Sheet,
 } from '@lace-lib/ui-toolkit';
-import React, { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { useCollateralState } from '../hooks/useCollateralState';
 
@@ -40,20 +41,118 @@ export const CollateralSheet = (
     // Close the state machine and discard transaction if needed
     handleCloseFlow();
     // Close the sheet
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [handleCloseFlow]);
 
   const handleBuy = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.Buy);
+    NavigationControls.navigate(SheetRoutes.Buy);
   }, []);
+
+  useEffect(() => {
+    if (state === 'failure') {
+      props.navigation.setOptions({
+        header: (
+          <Sheet.Header
+            title={t('collateral.sheet.failure.title')}
+            testID="collateral-failure-status-header"
+          />
+        ),
+        footer: (
+          <Sheet.Footer
+            primaryButton={{
+              label: t('collateral.sheet.failure.button.close'),
+              onPress: handleClose,
+              testID: 'collateral-failure-status-button',
+            }}
+          />
+        ),
+      });
+      return;
+    }
+
+    if (state === 'not-enough-balance') {
+      props.navigation.setOptions({
+        header: (
+          <Sheet.Header
+            title={t('collateral.sheet.header')}
+            subtitle={t('collateral.sheet.not-set.description', {
+              amount: collateralAmount,
+            })}
+            testID="collateral-not-enough-balance-status-header"
+          />
+        ),
+        footer: (
+          <Sheet.Footer
+            secondaryButton={{
+              label: t('collateral.sheet.not-enough-balance.button.cancel'),
+              onPress: handleClose,
+              testID: 'collateral-not-enough-balance-status-secondary-button',
+            }}
+            primaryButton={{
+              label: t('collateral.sheet.not-enough-balance.button.buy'),
+              onPress: handleBuy,
+              testID: 'collateral-not-enough-balance-status-button',
+            }}
+          />
+        ),
+      });
+      return;
+    }
+
+    if (state === 'not-set') {
+      props.navigation.setOptions({
+        header: <Sheet.Header title={t('collateral.sheet.header')} />,
+        footer: (
+          <Sheet.Footer
+            primaryButton={{
+              label: collateralAmount
+                ? t('collateral.sheet.not-set.button.confirm')
+                : t('collateral.sheet.not-set.button.confirm.no-amount'),
+              onPress: handleSetCollateral,
+              loading: isProcessing,
+            }}
+          />
+        ),
+      });
+      return;
+    }
+
+    if (state === 'set') {
+      props.navigation.setOptions({
+        header: <Sheet.Header title={t('collateral.sheet.header')} />,
+        footer: (
+          <Sheet.Footer
+            primaryButton={{
+              label: collateralAmount
+                ? t('collateral.sheet.set.button.confirm')
+                : t('collateral.sheet.set.button.confirm.no-amount'),
+              onPress: handleReclaimCollateral,
+              loading: isProcessing,
+            }}
+          />
+        ),
+      });
+    }
+  }, [
+    props.navigation,
+    state,
+    t,
+    collateralAmount,
+    handleClose,
+    handleBuy,
+    handleSetCollateral,
+    handleReclaimCollateral,
+    isProcessing,
+  ]);
 
   if (state === 'initializing') {
     return (
-      <View style={styles.loadingContainer}>
-        <Column justifyContent="center" alignItems="center" gap={16}>
-          <Loader size={48} />
-        </Column>
-      </View>
+      <Column
+        justifyContent="center"
+        alignItems="center"
+        style={styles.loadingContainer}>
+        <Loader />
+      </Column>
     );
   }
 
@@ -61,15 +160,11 @@ export const CollateralSheet = (
   if (state === 'failure') {
     return (
       <StatusSheet
-        title={t('collateral.sheet.failure.title')}
         body={t('collateral.sheet.failure.subtitle')}
         icon={{
           name: 'Sad',
           variant: 'solid',
-          size: 64,
         }}
-        buttonText={t('collateral.sheet.failure.button.close')}
-        buttonAction={handleClose}
         testID="collateral-failure-status"
       />
     );
@@ -79,22 +174,10 @@ export const CollateralSheet = (
   if (state === 'not-enough-balance') {
     return (
       <StatusSheet
-        title={t('collateral.sheet.header')}
-        description={t('collateral.sheet.not-set.description', {
-          amount: collateralAmount,
-        })}
         body={t('collateral.sheet.not-enough-balance.subtitle')}
         icon={{
           name: 'Sad',
-          variant: 'stroke',
-          size: 64,
         }}
-        secondaryButtonText={t(
-          'collateral.sheet.not-enough-balance.button.cancel',
-        )}
-        secondaryButtonAction={handleClose}
-        buttonText={t('collateral.sheet.not-enough-balance.button.buy')}
-        buttonAction={handleBuy}
         testID="collateral-not-enough-balance-status"
       />
     );
@@ -104,7 +187,6 @@ export const CollateralSheet = (
   if (state === 'not-set') {
     return (
       <CollateralTemplate
-        headerTitle={t('collateral.sheet.header')}
         description={t('collateral.sheet.not-set.description', {
           amount: collateralAmount,
         })}
@@ -131,15 +213,6 @@ export const CollateralSheet = (
               }
             : undefined
         }
-        footer={{
-          primaryButton: {
-            label: collateralAmount
-              ? t('collateral.sheet.not-set.button.confirm')
-              : t('collateral.sheet.not-set.button.confirm.no-amount'),
-            onPress: handleSetCollateral,
-            loading: isProcessing,
-          },
-        }}
         testID="collateral-not-set-sheet"
       />
     );
@@ -149,25 +222,14 @@ export const CollateralSheet = (
   if (state === 'set') {
     return (
       <CollateralTemplate
-        headerTitle={t('collateral.sheet.header')}
         description={t('collateral.sheet.set.description', {
           amount: collateralAmount,
         })}
         icon={{
           name: 'MoneyReceive01',
           variant: 'stroke',
-          size: 64,
         }}
         body={t('collateral.sheet.set.warning-card')}
-        footer={{
-          primaryButton: {
-            label: collateralAmount
-              ? t('collateral.sheet.set.button.confirm')
-              : t('collateral.sheet.set.button.confirm.no-amount'),
-            onPress: handleReclaimCollateral,
-            loading: isProcessing,
-          },
-        }}
         testID="collateral-set-sheet"
       />
     );
@@ -178,8 +240,6 @@ export const CollateralSheet = (
 
 const styles = StyleSheet.create({
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 200,
   },
 });

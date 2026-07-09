@@ -76,9 +76,17 @@ export const transformTokenMap = (
 
   for (const [id, amount] of tokenMap) {
     const token = assetMetadataMap.get(id);
-    // Do not display token if we don't have the info yet
     if (token) {
       transformed.push(assetToCoinItemTransformer(token, [id, amount]));
+    } else {
+      const { fingerprint } = getFallbackAsset(id);
+      transformed.push({
+        id: id.toString(),
+        amount: amount.toString(),
+        name: fingerprint.toString(),
+        symbol: fingerprint.toString(),
+        logo: '',
+      });
     }
   }
 

@@ -3,17 +3,22 @@ import { useTranslation } from '@lace-contract/i18n';
 import {
   Accordion,
   Column,
+  Row,
   spacing,
   Text,
   truncateText,
 } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
 
 import { useAddressTag } from '../../utils/address-utils';
 
 import { ActivityDetailItem } from './ActivityDetailItem';
 
-import type { TxOutputInput } from '@lace-contract/cardano-context';
+import type {
+  CoinItemProps,
+  TxOutputInput,
+} from '@lace-contract/cardano-context';
 
 export const ActivityDetailsInputOutput = ({
   inputOutput,
@@ -49,18 +54,21 @@ export const ActivityDetailsInputOutput = ({
               shouldShowDivider={index !== inputOutput.length - 1}
               label={t('v2.activity-details.sheet.amount')}
               value={
-                <Column alignItems="flex-end">
+                <Column
+                  alignItems="flex-end"
+                  gap={spacing.XS}
+                  style={styles.amountColumn}>
                   <Text.M>
                     {convertLovelacesToAda(input.amount)}
                     {` ${coinSymbol}`}
                   </Text.M>
-                  {input.assetList &&
-                    input.assetList.length > 0 &&
-                    input.assetList.map((asset, index) => (
-                      <Text.M key={`${asset.name}-${index}`}>
-                        {asset.amount} {asset.name}
-                      </Text.M>
-                    ))}
+                  {input.assetList?.map((asset, assetIndex) => (
+                    <AssetRow
+                      key={`${asset.name}-${assetIndex}`}
+                      asset={asset}
+                      testID={`activity-details-asset-${asset.name}`}
+                    />
+                  ))}
                 </Column>
               }
             />
@@ -70,3 +78,51 @@ export const ActivityDetailsInputOutput = ({
     </Accordion.Root>
   );
 };
+
+const ASSET_NAME_MAX_LENGTH = 20;
+
+const AssetRow = ({
+  asset,
+  testID,
+}: {
+  asset: CoinItemProps;
+  testID?: string;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded(value => !value);
+  }, []);
+
+  const displayedName = isExpanded
+    ? asset.name
+    : truncateText(asset.name, ASSET_NAME_MAX_LENGTH);
+
+  return (
+    <Pressable testID={testID} onPress={toggleExpanded} style={styles.assetRow}>
+      <Row gap={spacing.XS} alignItems="flex-start">
+        <Text.M style={styles.assetAmount}>{asset.amount}</Text.M>
+        <Text.M variant="secondary" style={styles.assetName}>
+          {displayedName}
+        </Text.M>
+      </Row>
+    </Pressable>
+  );
+};
+
+const styles = StyleSheet.create({
+  amountColumn: {
+    flex: 1,
+  },
+  assetRow: {
+    alignSelf: 'flex-end',
+    paddingVertical: spacing.S,
+  },
+  assetAmount: {
+    flexShrink: 0,
+  },
+  assetName: {
+    flexShrink: 1,
+    minWidth: 0,
+    textAlign: 'right',
+  },
+});

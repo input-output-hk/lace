@@ -11,6 +11,7 @@ export const BITCOIN_MEMPOOL_FEE_MARKET_FEATURE_FLAG =
   'BITCOIN_MEMPOOL_FEE_MARKET' as FeatureFlagKey;
 
 export const BITCOIN_TOKEN_ID = TokenId('bitcoin');
+export const BITCOIN_DECIMALS = 8;
 
 export const allSupportedNetworks = [
   BitcoinNetwork.Mainnet,

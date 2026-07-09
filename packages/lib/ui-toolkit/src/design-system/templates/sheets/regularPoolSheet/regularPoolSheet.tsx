@@ -1,12 +1,8 @@
-import { useBottomSheetScrollableCreator } from '@gorhom/bottom-sheet';
-import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo } from 'react';
 import { StyleSheet, View, type ScrollViewProps } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { useScrollEventsHandlers } from '../../../organisms/sheet/useScrollEventsHandlers';
-import { isWeb } from '../../../util/commons';
+import { footerHeight } from '../../../organisms';
 
 import { ActivityHistory } from './ActivityHistory';
 import { EpochsRewards } from './EpochsRewards';
@@ -16,7 +12,7 @@ import { PoolStatistics } from './PoolStatistics';
 import type { RegularPoolSheetProps } from './regularPoolSheet.types';
 import type { Theme } from '../../../../design-tokens';
 
-const RegularPoolSheetTemplate = ({
+export const RegularPoolSheetTemplate = ({
   poolName,
   poolTicker,
   totalStaked,
@@ -39,11 +35,6 @@ const RegularPoolSheetTemplate = ({
   selectedEpochFilter,
   onEpochFilterChange,
   activitySections,
-  primaryButtonLabel,
-  secondaryButtonLabel,
-  onPrimaryPress,
-  onSecondaryPress,
-  isSecondaryButtonDisabled,
   onActivityPress,
   isLoadingActivities,
   renderScrollComponent,
@@ -52,22 +43,16 @@ const RegularPoolSheetTemplate = ({
     | ((props: ScrollViewProps) => React.ReactElement)
     | undefined;
 }) => {
-  const { t } = useTranslation();
   const { theme } = useTheme();
 
-  const hasFooter = Boolean(
-    (primaryButtonLabel && onPrimaryPress) ||
-      (secondaryButtonLabel && onSecondaryPress),
-  );
-
-  const footerHeight = useFooterHeight();
   const styles = useMemo(() => getStyles(theme), [theme]);
 
   const contentContainerStyle = useMemo(
     () => ({
-      paddingBottom: hasFooter ? footerHeight : spacing.XL,
+      paddingBottom: footerHeight.horizontal,
+      marginHorizontal: spacing.M,
     }),
-    [hasFooter, footerHeight],
+    [],
   );
 
   const ListHeaderComponent = useMemo(
@@ -132,82 +117,21 @@ const RegularPoolSheetTemplate = ({
   );
 
   return (
-    <>
-      <SheetHeader
-        testID="regular-pool-sheet-header"
-        title={t('v2.regular-pool.title')}
-      />
-      <View style={styles.listWrapper}>
-        <ActivityHistory
-          activitySections={activitySections}
-          onActivityPress={onActivityPress}
-          isLoadingActivities={isLoadingActivities}
-          ListHeaderComponent={ListHeaderComponent}
-          renderScrollComponent={renderScrollComponent}
-          contentContainerStyle={contentContainerStyle}
-        />
-      </View>
-      {hasFooter && (
-        <SheetFooter
-          testID="regular-pool-sheet-footer"
-          showDivider
-          secondaryButton={
-            secondaryButtonLabel && onSecondaryPress
-              ? {
-                  label: secondaryButtonLabel,
-                  onPress: onSecondaryPress,
-                  disabled: isSecondaryButtonDisabled,
-                }
-              : undefined
-          }
-          primaryButton={
-            primaryButtonLabel && onPrimaryPress
-              ? {
-                  label: primaryButtonLabel,
-                  onPress: onPrimaryPress,
-                }
-              : undefined
-          }
-        />
-      )}
-    </>
-  );
-};
-
-/**
- * Native variant: integrates with BottomSheet scroll via useBottomSheetScrollableCreator.
- */
-const RegularPoolSheetNative = (props: RegularPoolSheetProps) => {
-  const renderScrollComponent = useBottomSheetScrollableCreator({
-    scrollEventsHandlersHook: useScrollEventsHandlers,
-  });
-  return (
-    <RegularPoolSheetTemplate
-      {...props}
+    <ActivityHistory
+      activitySections={activitySections}
+      onActivityPress={onActivityPress}
+      isLoadingActivities={isLoadingActivities}
+      ListHeaderComponent={ListHeaderComponent}
       renderScrollComponent={renderScrollComponent}
+      contentContainerStyle={contentContainerStyle}
     />
   );
 };
 
-/**
- * Web variant: uses default ScrollView (no BottomSheet integration).
- */
-const RegularPoolSheetWeb = (props: RegularPoolSheetProps) => (
-  <RegularPoolSheetTemplate {...props} />
-);
-
-export const RegularPoolSheet = isWeb
-  ? RegularPoolSheetWeb
-  : RegularPoolSheetNative;
-
 const getStyles = (_theme: Theme) =>
   StyleSheet.create({
-    listWrapper: {
-      flex: 1,
-    },
     container: {
       alignItems: 'center',
-      marginRight: spacing.S,
       paddingTop: spacing.M,
     },
   });

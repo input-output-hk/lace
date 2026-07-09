@@ -1,4 +1,5 @@
 import { walletSettingsUICustomisationAddonContract } from '@lace-contract/account-management';
+import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
 import { i18nDependencyContract } from '@lace-contract/i18n';
 import {
@@ -29,6 +30,7 @@ const implementsContracts = combineContracts([
   sheetPagesAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([
+  analyticsStoreContract,
   appStoreContract,
   i18nDependencyContract,
   recoveryPhraseChannelExtensionContract,

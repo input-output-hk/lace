@@ -21,7 +21,7 @@ export const useRestoreWalletSuccessSheet = ({
   );
 
   const handleViewWallet = useCallback(() => {
-    NavigationControls.actions.closeAndNavigate(StackRoutes.WalletSettings, {
+    NavigationControls.navigate(StackRoutes.WalletSettings, {
       walletId,
       origin: 'add-wallet',
     });

@@ -1,10 +1,19 @@
+import { CustomDappId, normalizeUrlForId } from '@lace-contract/custom-dapps';
+import { useTranslation } from '@lace-contract/i18n';
+import * as Haptics from 'expo-haptics';
+import { useCallback, useMemo } from 'react';
+
+import { useDispatchLaceAction, useLaceSelector } from '../../../common/hooks';
 import {
   useDappConnectorBridge,
   type DappConnectorBridgeResult,
 } from '../../hooks';
 
 import type { StackRoutes, StackScreenProps } from '@lace-lib/navigation';
-import type { WebViewTemplateProps } from '@lace-lib/ui-toolkit';
+import type {
+  WebViewNavBarFavorite,
+  WebViewTemplateProps,
+} from '@lace-lib/ui-toolkit';
 
 /**
  * Props returned by the useDappExternalWebView hook.
@@ -13,6 +22,7 @@ export interface DappExternalWebViewProps extends WebViewTemplateProps {
   isAuthorizationPending: boolean;
   setInjectJavaScript: DappConnectorBridgeResult['setInjectJavaScript'];
   dappOrigin: string;
+  favorite?: WebViewNavBarFavorite;
 }
 
 /**
@@ -29,8 +39,10 @@ export interface DappExternalWebViewProps extends WebViewTemplateProps {
 export const useDappExternalWebView = (
   props: StackScreenProps<StackRoutes.DappExternalWebView>,
 ): DappExternalWebViewProps => {
+  const { t } = useTranslation();
   const params = props.route.params;
   const dappUrl = params.buttonUrl;
+  const canFavorite = params.canFavorite !== false;
 
   let dappOrigin = '';
   try {
@@ -47,6 +59,48 @@ export const useDappExternalWebView = (
       },
     });
 
+  const isSaved = useLaceSelector('customDapps.selectIsUrlSaved', dappUrl);
+  const addCustomDapp = useDispatchLaceAction('customDapps.addCustomDapp');
+  const removeCustomDapp = useDispatchLaceAction(
+    'customDapps.removeCustomDapp',
+  );
+  const showToast = useDispatchLaceAction('ui.showToast');
+
+  const onToggleFavorite = useCallback(() => {
+    void Haptics.selectionAsync();
+    if (isSaved) {
+      removeCustomDapp(CustomDappId(normalizeUrlForId(dappUrl)));
+      showToast({
+        text: String(t('v2.webview.toast.removed')),
+        position: 'bottom',
+      });
+    } else {
+      addCustomDapp({ url: dappUrl });
+      showToast({
+        text: String(t('v2.webview.toast.saved')),
+        position: 'bottom',
+      });
+    }
+  }, [isSaved, dappUrl, addCustomDapp, removeCustomDapp, showToast, t]);
+
+  const favorite = useMemo<WebViewNavBarFavorite | undefined>(
+    () =>
+      canFavorite
+        ? {
+            isSaved,
+            onToggle: onToggleFavorite,
+            accessibilityLabel: String(
+              t(
+                isSaved
+                  ? 'v2.webview.favourite.accessibility-label.remove'
+                  : 'v2.webview.favourite.accessibility-label.save',
+              ),
+            ),
+          }
+        : undefined,
+    [canFavorite, isSaved, onToggleFavorite, t],
+  );
+
   return {
     url: dappUrl,
     errorMessage: 'Error loading dApp',
@@ -58,5 +112,6 @@ export const useDappExternalWebView = (
     isAuthorizationPending,
     setInjectJavaScript,
     dappOrigin,
+    favorite,
   };
 };

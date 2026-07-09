@@ -1,7 +1,8 @@
+import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls } from '@lace-lib/navigation';
 import { useCopyToClipboard, useTheme } from '@lace-lib/ui-toolkit';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useDispatchLaceAction, useRequestMnemonic } from '../../hooks';
 import { isDevelopmentEnvironment, mnemonicToString } from '../../utils';
@@ -9,10 +10,9 @@ import { isDevelopmentEnvironment, mnemonicToString } from '../../utils';
 import type { UseRequestMnemonicParams } from '../../hooks/useRequestMnemonic';
 import type { WalletId } from '@lace-contract/wallet-repo';
 
-const noop = () => undefined;
-
 export const useRecoveryPhrase = (walletId: WalletId) => {
   const { t } = useTranslation();
+  const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
   const [isBlurred, setIsBlurred] = useState(true);
   const showToast = useDispatchLaceAction('ui.showToast');
@@ -23,8 +23,17 @@ export const useRecoveryPhrase = (walletId: WalletId) => {
     }),
   );
 
+  // Fire a single `display | viewed` event per mount, regardless of mnemonic
+  // resolution — we care that the user reached this screen.
+  useEffect(() => {
+    trackEvent('recovery phrase | display | viewed', { flow: 'view' });
+  }, [trackEvent]);
+
   const closeSheet = useCallback(() => {
-    NavigationControls.sheets.close();
+    trackEvent('recovery phrase | display | continue | press', {
+      flow: 'view',
+    });
+    NavigationControls.closeSheet();
   }, []);
 
   const onFailure = useCallback<UseRequestMnemonicParams['onFailure']>(
@@ -38,7 +47,7 @@ export const useRecoveryPhrase = (walletId: WalletId) => {
             duration: 3,
           });
         }
-        NavigationControls.sheets.close();
+        NavigationControls.closeSheet();
       })();
     },
     [showToast, t],
@@ -58,39 +67,43 @@ export const useRecoveryPhrase = (walletId: WalletId) => {
     setIsBlurred(previous => !previous);
   }, []);
 
-  const { copyToClipboard } = isDevelopmentEnvironment
-    ? useCopyToClipboard({
-        onSuccess: () => {
-          showToast({
-            text: t('v2.recovery-phrase.verification.copy-success'),
-            color: 'positive',
-            duration: 3,
-            leftIcon: {
-              name: 'Checkmark',
-              size: 20,
-              color: theme.brand.white,
-            },
-          });
+  // Copy-to-clipboard is only exposed in development environments, but the
+  // hook itself must be called unconditionally to comply with the Rules of Hooks.
+  const { copyToClipboard } = useCopyToClipboard({
+    onSuccess: () => {
+      showToast({
+        text: t('v2.recovery-phrase.verification.copy-success'),
+        color: 'positive',
+        duration: 3,
+        leftIcon: {
+          name: 'Checkmark',
+          size: 20,
+          color: theme.brand.white,
         },
-        onError: () => {
-          showToast({
-            text: t('v2.recovery-phrase.verification.copy-error'),
-            color: 'negative',
-            duration: 3,
-            leftIcon: {
-              name: 'AlertTriangle',
-              size: 20,
-              color: theme.brand.white,
-            },
-          });
+      });
+    },
+    onError: () => {
+      showToast({
+        text: t('v2.recovery-phrase.verification.copy-error'),
+        color: 'negative',
+        duration: 3,
+        leftIcon: {
+          name: 'AlertTriangle',
+          size: 20,
+          color: theme.brand.white,
         },
-      })
-    : { copyToClipboard: noop };
+      });
+    },
+  });
 
   const handleCopy = useCallback(() => {
-    if (!(mnemonicState.status === 'Ready')) return;
+    if (!isDevelopmentEnvironment) return;
+    if (mnemonicState.status !== 'Ready') return;
+    trackEvent('recovery phrase | display | copied | press', {
+      flow: 'view',
+    });
     copyToClipboard(mnemonicToString(mnemonicState.mnemonicWords));
-  }, [mnemonicState, copyToClipboard]);
+  }, [mnemonicState, copyToClipboard, trackEvent]);
 
   const title = t('v2.recovery-phrase.verification.title');
   const showPassphraseLabel = isBlurred

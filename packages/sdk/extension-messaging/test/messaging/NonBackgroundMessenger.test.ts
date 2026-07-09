@@ -1,9 +1,14 @@
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ChannelName, createNonBackgroundMessenger } from '../../src';
+import {
+  ChannelName,
+  KEEP_ALIVE_MESSAGE,
+  KEEP_ALIVE_PING_INTERVAL_MS,
+  createNonBackgroundMessenger,
+} from '../../src';
 
-import type { MessengerPort, MinimalRuntime } from '../../src';
+import type { MessengerPort, MinimalRuntime, PortMessage } from '../../src';
 import type { MockedFunction } from 'vitest';
 
 const createMockRuntime = (): MinimalRuntime & {
@@ -34,6 +39,10 @@ const createMockRuntime = (): MinimalRuntime & {
       removeListener: vi.fn(),
     },
   };
+};
+
+type MockListenerAddListener<Callback extends (...args: never[]) => unknown> = {
+  mock: { calls: Array<[Callback]> };
 };
 
 describe('createNonBackgroundMessenger', () => {
@@ -310,6 +319,131 @@ describe('createNonBackgroundMessenger', () => {
 
       vi.runAllTimers();
       expect(runtime.connect).toHaveBeenCalledTimes(1);
+      vi.useRealTimers();
+    });
+
+    it('reconnects on postMessage after clean disconnect without a runtime.lastError', () => {
+      vi.useFakeTimers();
+      const channel = ChannelName('test-channel');
+
+      const messenger = createNonBackgroundMessenger(
+        { baseChannel: channel },
+        { logger, runtime },
+      );
+      expect(runtime.connect).toHaveBeenCalledTimes(1);
+
+      // Simulate clean disconnect (e.g., SW idle-terminated; no runtime error)
+      const onDisconnectCb = (
+        runtime.mockPort.onDisconnect.addListener as MockDisconnectListener
+      ).mock.calls[0][0];
+      onDisconnectCb(runtime.mockPort);
+
+      messenger.postMessage({ test: 'message' }).subscribe();
+
+      vi.runAllTimers();
+      expect(runtime.connect).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+  });
+
+  describe('keepAlive transport message', () => {
+    it('does NOT forward keepAlive ack to message$', () => {
+      const channel = ChannelName('test-channel');
+      const runtime = createMockRuntime();
+      const messenger = createNonBackgroundMessenger(
+        { baseChannel: channel },
+        { logger, runtime },
+      );
+      const received: PortMessage[] = [];
+      messenger.message$.subscribe(message => received.push(message));
+
+      const onMessageCb = (
+        runtime.mockPort.onMessage
+          .addListener as unknown as MockListenerAddListener<
+          (data: unknown, port: MessengerPort) => void
+        >
+      ).mock.calls[0][0];
+
+      onMessageCb(KEEP_ALIVE_MESSAGE, runtime.mockPort);
+      onMessageCb({ messageId: '1', response: 5 }, runtime.mockPort);
+
+      expect(received).toHaveLength(1);
+      expect(received[0].data).toEqual({ messageId: '1', response: 5 });
+    });
+  });
+
+  describe('keepAlivePingPong option', () => {
+    it('posts the reserved ping on the port at KEEP_ALIVE_PING_INTERVAL_MS', () => {
+      vi.useFakeTimers();
+      const runtime = createMockRuntime();
+      const channel = ChannelName('test-channel');
+
+      const messenger = createNonBackgroundMessenger(
+        { baseChannel: channel, keepAlivePingPong: true },
+        { logger, runtime },
+      );
+
+      expect(runtime.mockPort.postMessage).not.toHaveBeenCalled();
+
+      // Fire setInterval @ KEEP_ALIVE_PING_INTERVAL_MS, then drain debounceTime(10) in connect$.
+      vi.advanceTimersByTime(KEEP_ALIVE_PING_INTERVAL_MS);
+      vi.advanceTimersByTime(10);
+      expect(runtime.mockPort.postMessage).toHaveBeenCalledTimes(1);
+      expect(runtime.mockPort.postMessage).toHaveBeenLastCalledWith(
+        KEEP_ALIVE_MESSAGE,
+      );
+
+      vi.advanceTimersByTime(KEEP_ALIVE_PING_INTERVAL_MS);
+      vi.advanceTimersByTime(10);
+      expect(runtime.mockPort.postMessage).toHaveBeenCalledTimes(2);
+
+      messenger.shutdown();
+      vi.advanceTimersByTime(KEEP_ALIVE_PING_INTERVAL_MS * 3);
+      expect(runtime.mockPort.postMessage).toHaveBeenCalledTimes(2);
+      vi.useRealTimers();
+    });
+
+    it('does NOT start an interval when the flag is omitted', () => {
+      vi.useFakeTimers();
+      const runtime = createMockRuntime();
+      const channel = ChannelName('test-channel');
+
+      const messenger = createNonBackgroundMessenger(
+        { baseChannel: channel },
+        { logger, runtime },
+      );
+      vi.advanceTimersByTime(KEEP_ALIVE_PING_INTERVAL_MS * 5);
+
+      expect(runtime.mockPort.postMessage).not.toHaveBeenCalled();
+      messenger.shutdown();
+      vi.useRealTimers();
+    });
+
+    it('does NOT inherit the flag on derived channels', () => {
+      vi.useFakeTimers();
+      const runtime = createMockRuntime();
+      const channel = ChannelName('test-channel');
+
+      const messenger = createNonBackgroundMessenger(
+        { baseChannel: channel, keepAlivePingPong: true },
+        { logger, runtime },
+      );
+      // runtime.connect is shared; derived messenger reuses the same mockPort.
+      const derivedPort = runtime.mockPort;
+      messenger.deriveChannel('derived');
+
+      vi.advanceTimersByTime(KEEP_ALIVE_PING_INTERVAL_MS);
+      vi.advanceTimersByTime(10);
+
+      // Exactly one ping in total — base channel only. Derived channel must not
+      // start its own interval (one ping per worker is sufficient; SW idle
+      // timer is global).
+      expect(derivedPort.postMessage).toHaveBeenCalledTimes(1);
+      expect(derivedPort.postMessage).toHaveBeenLastCalledWith(
+        KEEP_ALIVE_MESSAGE,
+      );
+
+      messenger.shutdown();
       vi.useRealTimers();
     });
   });

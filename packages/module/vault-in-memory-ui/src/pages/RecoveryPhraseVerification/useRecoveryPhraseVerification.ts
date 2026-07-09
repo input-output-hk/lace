@@ -1,10 +1,10 @@
 import { deepEquals } from '@cardano-sdk/util';
+import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { useCopyToClipboard } from '@lace-lib/ui-toolkit';
 import { createStateMachine } from '@lace-lib/util-store';
 import { ByteArray } from '@lace-sdk/util';
-import noop from 'lodash/noop';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 
 import {
@@ -83,11 +83,25 @@ export const useRecoveryPhraseVerification = ({
 }: SheetScreenProps<SheetRoutes.RecoveryPhraseVerification>) => {
   const { walletId } = route.params;
   const { t } = useTranslation();
+  const { trackEvent } = useAnalytics();
 
   const inMemoryWallet = useLaceSelector('wallets.selectWalletById', walletId);
   const updateWallet = useDispatchLaceAction('wallets.updateWallet');
   const showToast = useDispatchLaceAction('ui.showToast');
   const [state, dispatch] = useReducer(transition, initialState);
+
+  // Funnel step 1: the user reached the phrase-display screen.
+  useEffect(() => {
+    trackEvent('recovery phrase | display | viewed', { flow: 'onboarding' });
+  }, [trackEvent]);
+
+  // Funnel step 2: the user has entered the verify step (transitioned from
+  // Display → Verify). Fires once per entry of Verify status.
+  useEffect(() => {
+    if (state.status === 'Verify') {
+      trackEvent('recovery phrase | verification | started');
+    }
+  }, [state.status, trackEvent]);
 
   const isMinimalDisplayTimeSatisfied = useRef(
     new Promise(resolve => {
@@ -96,7 +110,7 @@ export const useRecoveryPhraseVerification = ({
   );
 
   const closeSheet = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const onFailure = useCallback<UseRequestMnemonicParams['onFailure']>(
@@ -110,7 +124,7 @@ export const useRecoveryPhraseVerification = ({
             duration: 3,
           });
         }
-        NavigationControls.sheets.close();
+        NavigationControls.closeSheet();
       })();
     },
     [showToast, t],
@@ -126,27 +140,21 @@ export const useRecoveryPhraseVerification = ({
     onFailure,
   });
 
-  const { copyToClipboard } = isDevelopmentEnvironment
-    ? useCopyToClipboard({
-        onSuccess: () => {
-          // TODO: Show success toast notification
-        },
-        onError: () => {
-          // TODO: Show error toast
-        },
-      })
-    : { copyToClipboard: noop };
+  // Clipboard helpers are only exposed in development environments, but the
+  // hook itself must be called unconditionally to comply with the Rules of Hooks.
+  const { copyToClipboard, pasteFromClipboard } = useCopyToClipboard({
+    onPasteSuccess: (value: string) => {
+      dispatch(events.inputChanged({ value }));
+    },
+    onError: () => {
+      // TODO: Show error toast
+    },
+  });
 
-  const { pasteFromClipboard } = isDevelopmentEnvironment
-    ? useCopyToClipboard({
-        onPasteSuccess: (value: string) => {
-          dispatch(events.inputChanged({ value }));
-        },
-        onError: () => {
-          // TODO: Show error toast
-        },
-      })
-    : { pasteFromClipboard: noop };
+  const handlePaste = useCallback(() => {
+    if (!isDevelopmentEnvironment) return;
+    pasteFromClipboard();
+  }, [pasteFromClipboard]);
 
   useEffect(() => {
     if (inMemoryWallet) return;
@@ -211,15 +219,22 @@ export const useRecoveryPhraseVerification = ({
         dispatch(events.toggleBlur());
       }, [dispatch]),
       handleContinue: useCallback(() => {
+        trackEvent('recovery phrase | display | continue | press', {
+          flow: 'onboarding',
+        });
         dispatch(events.proceed());
-      }, [dispatch]),
+      }, [dispatch, trackEvent]),
       handleCopy: useCallback(() => {
+        if (!isDevelopmentEnvironment) return;
         if (state.status !== 'Display' || mnemonicState.status !== 'Ready') {
           return;
         }
+        trackEvent('recovery phrase | display | copied | press', {
+          flow: 'onboarding',
+        });
         const recoveryPhrase = mnemonicToString(mnemonicState.mnemonicWords);
         copyToClipboard(recoveryPhrase);
-      }, [state, mnemonicState, copyToClipboard]),
+      }, [state, mnemonicState, copyToClipboard, trackEvent]),
     },
     verify: {
       copies: {
@@ -229,7 +244,7 @@ export const useRecoveryPhraseVerification = ({
         finishButtonLabel: t('v2.recovery-phrase.verification.finish'),
         pasteButtonLabel: t('v2.recovery-phrase.verification.paste'),
       },
-      handlePaste: pasteFromClipboard,
+      handlePaste,
       handleFinish: displayHandleFinish,
       handleSheetClose: closeSheet,
       handleInputChange: useCallback(

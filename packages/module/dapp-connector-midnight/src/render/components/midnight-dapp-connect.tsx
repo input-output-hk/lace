@@ -1,9 +1,14 @@
-import type { CSSProperties } from 'react';
-
-import { Box, InfoBar, Text, useTheme } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from '@lace-contract/i18n';
 import { DappConnectorLayoutV2 } from '@lace-lib/ui-extension';
-import { DappInfoCard } from '@lace-lib/ui-toolkit';
+import {
+  Column,
+  DappInfoCard,
+  Row,
+  Text,
+  radius,
+  spacing,
+  useTheme,
+} from '@lace-lib/ui-toolkit';
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -18,11 +23,20 @@ export interface MidnightDappConnectProps {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    width: '100%',
-    marginBottom: 16,
+  titleContainer: { width: '100%', marginBottom: spacing.M },
+  infoBar: {
+    padding: spacing.S,
+    borderRadius: radius.XS,
+    marginBottom: spacing.M,
   },
+  section: { marginVertical: spacing.M },
 });
+
+const PERMISSION_KEYS = [
+  'dapp-connector.connect-dapp.description1',
+  'dapp-connector.connect-dapp.description2',
+  'dapp-connector.connect-dapp.description3',
+] as const;
 
 export const MidnightDappConnect = ({
   onAuthorize,
@@ -32,15 +46,11 @@ export const MidnightDappConnect = ({
   url,
 }: MidnightDappConnectProps) => {
   const { t } = useTranslation();
-  const { vars } = useTheme();
+  const { theme } = useTheme();
 
-  const listStyle: CSSProperties = useMemo(
-    () => ({
-      color: vars.colors.$text_primary,
-      paddingLeft: 20,
-      margin: 0,
-    }),
-    [vars],
+  const infoBarStyle = useMemo(
+    () => [styles.infoBar, { backgroundColor: theme.background.secondary }],
+    [theme],
   );
 
   return (
@@ -54,36 +64,34 @@ export const MidnightDappConnect = ({
         action: onCancel,
       }}>
       <View style={styles.titleContainer}>
-        <Text.Body.Large weight="$bold">
-          {t('dapp-connector.connect-dapp.title')}
-        </Text.Body.Large>
+        <Text.M>{t('dapp-connector.connect-dapp.title')}</Text.M>
       </View>
       <DappInfoCard imageUrl={imageUrl} name={name} url={url} />
-      <InfoBar
-        message={t('dapp-connector.connect-dapp.info')}
-        icon={<ShieldExclamation />}
-        testId="midnight-dapp-connector-info-bar"
-      />
-      <Box my="$16">
-        <Text.Body.Large
-          weight="$bold"
-          data-testid="midnight-dapp-connect-description-heading">
+      <Row
+        alignItems="flex-start"
+        gap={spacing.S}
+        style={infoBarStyle}
+        testID="midnight-dapp-connector-info-bar">
+        <ShieldExclamation />
+        <Text.S>{t('dapp-connector.connect-dapp.info')}</Text.S>
+      </Row>
+      <View style={styles.section}>
+        <Text.M testID="midnight-dapp-connect-description-heading">
           {t('dapp-connector.connect-dapp.description-heading')}
-        </Text.Body.Large>
-      </Box>
-      <ul
-        data-testid="midnight-dapp-connect-description-list"
-        style={listStyle}>
-        <li data-testid="midnight-dapp-connect-permission-1">
-          {t('dapp-connector.connect-dapp.description1')}
-        </li>
-        <li data-testid="midnight-dapp-connect-permission-2">
-          {t('dapp-connector.connect-dapp.description2')}
-        </li>
-        <li data-testid="midnight-dapp-connect-permission-3">
-          {t('dapp-connector.connect-dapp.description3')}
-        </li>
-      </ul>
+        </Text.M>
+      </View>
+      <Column gap={spacing.S} testID="midnight-dapp-connect-description-list">
+        {PERMISSION_KEYS.map((key, index) => (
+          <Row
+            key={key}
+            alignItems="flex-start"
+            gap={spacing.S}
+            testID={`midnight-dapp-connect-permission-${index + 1}`}>
+            <Text.S>{'\u2022'}</Text.S>
+            <Text.S>{t(key)}</Text.S>
+          </Row>
+        ))}
+      </Column>
     </DappConnectorLayoutV2>
   );
 };

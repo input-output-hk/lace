@@ -1,4 +1,4 @@
-import { EMPTY, of, switchMap } from 'rxjs';
+import { EMPTY, merge, of, Subject, switchMap } from 'rxjs';
 
 import {
   proveTransaction$,
@@ -6,11 +6,12 @@ import {
   unlockWallet$,
 } from './dapp-connector-util';
 
-import type { SideEffect } from '../index';
+import type { ActionCreators, SideEffect } from '../index';
 import type {
   ConfirmationRequest,
   RequestType,
 } from './dependencies/create-confirmation-callback';
+import type { ActionType } from '@lace-contract/module';
 import type { LaceInitSync } from '@lace-contract/module';
 
 const isRequestOfType = <R extends RequestType>(
@@ -43,13 +44,23 @@ export const connectDappConnectorApi: SideEffect = (
     authenticate,
     accessAuthSecret,
   },
-) =>
-  connectMidnightDappConnector({
+) => {
+  const pendingActivityDispatch$ = new Subject<ActionType<ActionCreators>>();
+
+  const connector$ = connectMidnightDappConnector({
     wallets$: midnightWallets$,
     authorizedDapps$: selectAuthorizedDapps$,
     network$: selectCurrentNetwork$,
     supportedNetworksIds$: selectSupportedNetworksIds$,
     isUnlocked$,
+    onPendingActivity: activity => {
+      pendingActivityDispatch$.next(
+        actions.activities.upsertActivities({
+          accountId: activity.accountId,
+          activities: [activity],
+        }),
+      );
+    },
     handleRequests: request$ => {
       return request$.pipe(
         switchMap(request => {
@@ -91,6 +102,9 @@ export const connectDappConnectorApi: SideEffect = (
       );
     },
   });
+
+  return merge(connector$, pendingActivityDispatch$);
+};
 
 export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
   return [connectDappConnectorApi];

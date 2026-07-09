@@ -1,13 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { DAppRadarItem, DappCategory } from '../types';
+import type { DappCategory, DappItem } from '../types';
 import type { BlockchainName } from '@lace-lib/util-store';
-import type {
-  PayloadAction,
-  StateFromReducersMapObject,
-} from '@reduxjs/toolkit';
+import type { PayloadAction } from '@reduxjs/toolkit';
 
-type DataFetchStatus = 'error' | 'idle' | 'loading' | 'success'; // very generic, potentially move to a contract, maybe useful if we want to defer anything in mobile, but not for the others
+type DataFetchStatus = 'error' | 'idle' | 'loading' | 'success';
 
 type SearchParams = {
   category: DappCategory;
@@ -16,11 +13,13 @@ type SearchParams = {
 };
 
 export type DappExplorerState = {
-  selectedDapp: DAppRadarItem | null;
+  selectedDapp: DappItem | null;
   search: SearchParams;
   categories: DappCategory[] | null;
-  dappList: DAppRadarItem[];
+  dappList: DappItem[];
   status: DataFetchStatus;
+  ukFcaDisclaimerAcknowledged: boolean;
+  lastFetchedAt: number | null;
 };
 
 const initialState: DappExplorerState = {
@@ -33,15 +32,22 @@ const initialState: DappExplorerState = {
   categories: [],
   dappList: [],
   status: 'loading',
+  ukFcaDisclaimerAcknowledged: false,
+  lastFetchedAt: null,
 };
 
 const slice = createSlice({
   name: 'dappExplorer',
   initialState,
   reducers: {
-    setExplorerList: (state, { payload }: PayloadAction<DAppRadarItem[]>) => {
+    setExplorerList: (state, { payload }: PayloadAction<DappItem[]>) => {
       state.dappList = payload;
-      state.status = 'success';
+    },
+    appendToExplorerList: (state, { payload }: PayloadAction<DappItem[]>) => {
+      const existing = new Set(state.dappList.map(d => d.slug));
+      for (const dapp of payload) {
+        if (!existing.has(dapp.slug)) state.dappList.push(dapp);
+      }
     },
     setAvailableCategories: (
       state,
@@ -53,48 +59,45 @@ const slice = createSlice({
       state,
       { payload }: PayloadAction<Partial<SearchParams>>,
     ) => {
-      state.search = {
-        ...state.search,
-        ...payload,
-      };
+      state.search = { ...state.search, ...payload };
     },
     setSearchChain: (state, { payload }: PayloadAction<BlockchainName>) => {
       state.search.chain = payload;
     },
     setFetchStatus: (state, { payload }: PayloadAction<DataFetchStatus>) => {
-      {
-        state.status = payload;
-      }
+      state.status = payload;
     },
     resetSearchParams: state => {
       state.search = initialState.search;
     },
+    acknowledgeUkFcaDisclaimer: state => {
+      state.ukFcaDisclaimerAcknowledged = true;
+    },
+    setLastFetchedAt: (state, { payload }: PayloadAction<number>) => {
+      state.lastFetchedAt = payload;
+    },
+    loadDappsRequested: () => {},
   },
   selectors: {
     getAvailableDappCategories: (state: Readonly<DappExplorerState>) =>
       state.categories,
-    getDappById: (state: Readonly<DappExplorerState>, dappItem: number) =>
-      state.dappList.find(dapp => dapp.dappId === dappItem),
+    getDappById: (state: Readonly<DappExplorerState>, slug: string) =>
+      state.dappList.find(dapp => dapp.slug === slug),
     getSearchParams: (state: Readonly<DappExplorerState>) => state.search,
     getSelectedDapp: (state: Readonly<DappExplorerState>) => state.selectedDapp,
     getFetchStatus: (state: Readonly<DappExplorerState>) => state.status,
     getDappList: (state: Readonly<DappExplorerState>) => state.dappList,
+    getLastFetchedAt: (state: Readonly<DappExplorerState>) =>
+      state.lastFetchedAt,
+    selectUkFcaDisclaimerAcknowledged: (state: Readonly<DappExplorerState>) =>
+      state.ukFcaDisclaimerAcknowledged,
   },
 });
 
-export const dappCenterReducers = {
-  [slice.name]: slice.reducer,
-};
+export const dappCenterReducers = { [slice.name]: slice.reducer };
 
 export const dappExplorerActions = {
-  dappExplorer: {
-    ...slice.actions,
-  },
+  dappExplorer: { ...slice.actions },
 };
 
 export const dappExplorerSelectors = { dappExplorer: slice.selectors };
-
-declare module '@lace-contract/module' {
-  interface State
-    extends StateFromReducersMapObject<typeof dappCenterReducers> {}
-}

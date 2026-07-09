@@ -1,4 +1,4 @@
-// TODO: LW-12363 jest fails to load react native, but it is likely to work with esm
+import { CARDANO_TOKEN_METADATA_SCHEMA_VERSION } from '@lace-contract/cardano-context';
 import { Blockchains } from '@lace-lib/ui-toolkit/src/design-system/atoms/icons/urls';
 import { Timestamp } from '@lace-sdk/util';
 
@@ -7,31 +7,93 @@ import type {
   CardanoTokenMetadata,
   CardanoTokenMetadataFile,
 } from '@lace-contract/cardano-context';
-import type { TokenMetadata } from '@lace-contract/tokens';
+import type { TokenMetadata, TokenMetadataValue } from '@lace-contract/tokens';
+
+type SerializeMetadatum = {
+  (value: Cardano.Metadatum, stringifyComposite: true): string;
+  (value: Cardano.Metadatum, stringifyComposite?: false): TokenMetadataValue;
+};
+
+const serializeMetadatum = ((value, stringifyComposite = false) => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+
+  if (Array.isArray(value)) {
+    const serializedItems = value.map(item => serializeMetadatum(item));
+    return stringifyComposite
+      ? JSON.stringify(serializedItems)
+      : serializedItems;
+  }
+
+  if (value instanceof Map) {
+    const serializedEntries = Object.fromEntries(
+      [...value.entries()].map(([key, nestedValue]) => [
+        metadatumKeyToString(key),
+        serializeMetadatum(nestedValue),
+      ]),
+    );
+    return stringifyComposite
+      ? JSON.stringify(serializedEntries)
+      : serializedEntries;
+  }
+
+  if (value instanceof Uint8Array) {
+    try {
+      return new TextDecoder('utf-8', { fatal: true }).decode(value);
+    } catch {
+      return `[Invalid UTF-8: ${value.length} bytes]`;
+    }
+  }
+
+  return String(value);
+}) as SerializeMetadatum;
+
+const metadatumKeyToString = (value: Cardano.Metadatum): string =>
+  serializeMetadatum(value, true);
+
+const metadatumToSerializableValue = (
+  value: Cardano.Metadatum,
+): TokenMetadataValue => serializeMetadatum(value);
 
 const mapToRecord = (
   map?: Map<string, Cardano.Metadatum>,
-): Record<string, string> | undefined =>
+): Record<string, TokenMetadataValue> | undefined =>
   [...(map?.entries() || [])]
-    .map(([key, value]): [string, string | null] => [
+    .map(([key, value]): [string, TokenMetadataValue] => [
       key,
-      typeof value === 'string'
-        ? value
-        : typeof value === 'bigint'
-        ? value.toString()
-        : // currently only support string or number additional properties
-          null,
+      metadatumToSerializableValue(value),
     ])
-    .filter((kv): kv is [string, string] => !!kv[1])
     .reduce((result, [key, value]) => {
       result[key] = value;
       return result;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, TokenMetadataValue>);
+
+const mergeDefinedProperties = (
+  properties: Array<[string, TokenMetadataValue | undefined]>,
+): Record<string, TokenMetadataValue> | undefined => {
+  const definedProperties = properties.filter(
+    (property): property is [string, TokenMetadataValue] =>
+      // Tuple index 1 is the property value. Filters out tuples whose value slot is undefined
+      property[1] !== undefined,
+  );
+
+  if (definedProperties.length === 0) {
+    return undefined;
+  }
+
+  return Object.fromEntries(definedProperties);
+};
 
 export const toContractTokenMetadata = (
   assetInfo: Asset.AssetInfo,
 ): TokenMetadata<CardanoTokenMetadata> => ({
   blockchainSpecific: {
+    metadataSchemaVersion: CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
     updatedAt: Timestamp.now(),
     policyId: assetInfo.policyId.toString(),
     files: assetInfo.nftMetadata?.files?.map(
@@ -44,7 +106,12 @@ export const toContractTokenMetadata = (
     ),
   },
   decimals: assetInfo.tokenMetadata?.decimals || 0,
-  additionalProperties: mapToRecord(assetInfo.nftMetadata?.otherProperties),
+  additionalProperties: mergeDefinedProperties([
+    ['description', assetInfo.nftMetadata?.description],
+    ...Object.entries(
+      mapToRecord(assetInfo.nftMetadata?.otherProperties) ?? {},
+    ),
+  ]),
   image: assetInfo.nftMetadata?.image || assetInfo.tokenMetadata?.icon,
   isNft: assetInfo.supply === 1n,
   name:
@@ -61,6 +128,7 @@ export const LOVELACE_METADATA: TokenMetadata<CardanoTokenMetadata> = {
   ticker: 'ADA',
   image: Blockchains.Cardano,
   blockchainSpecific: {
+    metadataSchemaVersion: CARDANO_TOKEN_METADATA_SCHEMA_VERSION,
     updatedAt: Timestamp.now(),
   },
 };

@@ -12,7 +12,7 @@ import {
   radius,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { AccountCardCustomisationProps } from '@lace-contract/app';
@@ -68,26 +68,29 @@ export const AccountCardBitcoin = ({
     [styles.chartContainer],
   );
 
-  const renderActions = () => (
-    <Row
-      justifyContent="space-between"
-      alignItems="center"
-      style={styles.actionsWrapper}>
-      <ActionButton
-        icon="ArrowUp"
-        title={t('v2.menu.send')}
-        onPress={onSendPress}
-        containerStyle={styles.actionButton}
-        testID="account-card-send-button"
-      />
-      <ActionButton
-        icon="ArrowDown"
-        title={t('v2.menu.receive')}
-        onPress={onReceivePress}
-        containerStyle={styles.actionButton}
-        testID="account-card-receive-button"
-      />
-    </Row>
+  const renderActions = useCallback(
+    () => (
+      <Row
+        justifyContent="space-between"
+        alignItems="center"
+        style={styles.actionsWrapper}>
+        <ActionButton
+          icon="ArrowUp"
+          title={t('v2.menu.send')}
+          onPress={onSendPress}
+          containerStyle={styles.actionButton}
+          testID="account-card-send-button"
+        />
+        <ActionButton
+          icon="ArrowDown"
+          title={t('v2.menu.receive')}
+          onPress={onReceivePress}
+          containerStyle={styles.actionButton}
+          testID="account-card-receive-button"
+        />
+      </Row>
+    ),
+    [t, onSendPress, onReceivePress, styles],
   );
 
   if (!arePricesAvailable) {
@@ -100,6 +103,7 @@ export const AccountCardBitcoin = ({
           trailing={accountsButton}
         />
         <Divider />
+        <View style={styles.fillSpace} />
         {renderActions()}
       </Card>
     );
@@ -120,7 +124,7 @@ export const AccountCardBitcoin = ({
         balanceCoin={balanceCurrency ?? '0'}
         coin={currency}
         chart={balanceChart}
-        style={styles.chartGrow}
+        style={styles.fillSpace}
       />
 
       <Divider />
@@ -151,7 +155,7 @@ const getStyles = (theme: Theme) => ({
     actionsWrapper: {
       width: '100%',
     },
-    chartGrow: {
+    fillSpace: {
       flex: 1,
     },
     chartContainer: {

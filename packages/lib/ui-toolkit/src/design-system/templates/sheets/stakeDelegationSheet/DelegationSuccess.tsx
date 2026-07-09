@@ -1,11 +1,10 @@
 import { useTranslation } from '@lace-contract/i18n';
-import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
-import { Text, Icon } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { Text, Icon, Column } from '../../../atoms';
+import { footerHeight } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens/theme/types';
 
@@ -14,19 +13,17 @@ export interface DelegationSuccessProps {
   testID?: string;
 }
 
-const getStyles = (theme: Theme, footerHeight: number) =>
+const getStyles = (theme: Theme) =>
   StyleSheet.create({
     headerTitle: {
       color: theme.text.primary,
       textAlign: 'center',
     },
-    contentContainer: {
-      paddingBottom: footerHeight,
-    },
     content: {
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: spacing.XL,
+      padding: spacing.XL,
+      paddingBottom: footerHeight.horizontal,
     },
     icon: {
       marginBottom: spacing.L,
@@ -38,42 +35,18 @@ const getStyles = (theme: Theme, footerHeight: number) =>
   });
 
 export const DelegationSuccess = ({
-  onGoToStakingCenter,
   testID = 'delegation-success-sheet',
 }: DelegationSuccessProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, footerHeight),
-    [theme, footerHeight],
-  );
+  const styles = getStyles(theme);
   const { t } = useTranslation();
 
   return (
-    <>
-      <SheetHeader title={t('v2.generic.staking.delegation-success.title')} />
-      <Sheet.Scroll
-        testID={testID}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.content}>
-          <Icon
-            name="RelievedFace"
-            variant="solid"
-            size={60}
-            style={styles.icon}
-          />
-          <Text.M style={styles.message}>
-            {t('v2.generic.staking.delegation-success.subtitle')}
-          </Text.M>
-        </View>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.generic.staking.delegation-success.button'),
-          onPress: onGoToStakingCenter,
-          testID: `${testID}-go-to-staking-center-button`,
-        }}
-      />
-    </>
+    <Column style={styles.content} testID={testID}>
+      <Icon name="RelievedFace" variant="solid" size={60} style={styles.icon} />
+      <Text.M style={styles.message}>
+        {t('v2.generic.staking.delegation-success.subtitle')}
+      </Text.M>
+    </Column>
   );
 };

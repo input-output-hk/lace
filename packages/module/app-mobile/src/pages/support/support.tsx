@@ -1,24 +1,12 @@
 import { OptionList } from '@lace-lib/ui-toolkit';
 import React from 'react';
 
-import { useCommonOptionListProps } from '../common';
-
 import { useSupportProps } from './useSupportProps';
 
 export const SupportPage = () => {
-  const { supportOptions, title, subtitle, searchPlaceholder } =
-    useSupportProps();
-
-  const { colors, isTablet } = useCommonOptionListProps();
+  const { supportOptions, title, subtitle } = useSupportProps();
 
   return (
-    <OptionList
-      searchPlaceholder={searchPlaceholder}
-      isTablet={isTablet}
-      colors={colors}
-      options={supportOptions}
-      title={title}
-      subtitle={subtitle}
-    />
+    <OptionList options={supportOptions} title={title} subtitle={subtitle} />
   );
 };

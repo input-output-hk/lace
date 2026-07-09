@@ -100,7 +100,7 @@ export const PasswordFieldInput = ({
               onSubmitEditing={onSubmitEditing}
               placeholderTextColor={theme.text.tertiary}
               secureTextEntry={secureTextEntry}
-              style={styles.textInput}
+              style={[styles.textInput, styles.textInputWeb]}
               value={value}
               testID={valueTestID}
               underlineColorAndroid="transparent"
@@ -180,6 +180,10 @@ const getStyles = (
       paddingVertical: 2,
       fontSize: 16,
       color: isDisabled ? theme.text.tertiary : theme.text.primary,
+    },
+    textInputWeb: {
+      outlineStyle: 'solid',
+      outlineWidth: 0,
     },
     toggle: {
       alignSelf: 'center',

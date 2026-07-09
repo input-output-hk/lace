@@ -17,8 +17,7 @@ import {
 import { tokensActions } from '@lace-contract/tokens';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
-import { Err, Ok } from '@lace-sdk/util';
+import { BigNumber, Milliseconds, Timestamp, Err, Ok } from '@lace-sdk/util';
 import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import * as rxjs from 'rxjs';
 import { dummyLogger } from 'ts-log';
@@ -31,14 +30,17 @@ import {
   deriveBitcoinTestnetOptions,
   mapBitcoinTxToActivity,
 } from '../../src/store';
+import { trackTip } from '../../src/store/side-effects';
 import { BitcoinWallet } from '../../src/wallet';
 
 import type { DerivedAddress } from '../../src/common';
 import type { Address } from '@lace-contract/addresses';
 import type {
   BitcoinBip32AccountProps,
+  BitcoinInFlightUtxoActivityMetadata,
   BitcoinTransactionHistoryEntry,
   BitcoinProvider,
+  BitcoinUTxO,
 } from '@lace-contract/bitcoin-context';
 import type { InMemoryWalletAccount } from '@lace-contract/wallet-repo';
 
@@ -56,6 +58,7 @@ vi.mock('../../src/wallet', () => {
 const mockBitcoinWalletInstance = {
   addresses$: new BehaviorSubject<DerivedAddress[]>([]),
   balance$: new BehaviorSubject<number>(0),
+  utxos$: new BehaviorSubject<BitcoinUTxO[]>([]),
   transactionHistory$: new BehaviorSubject<BitcoinTransactionHistoryEntry[]>(
     [],
   ),
@@ -780,6 +783,78 @@ describe('side effects', () => {
           BigInt(0),
         );
       });
+
+      it('attaches in-flight consumedInputs for pending (unconfirmed) txs', () => {
+        const rawTx: BitcoinTransactionHistoryEntry = {
+          ...baseTx,
+          confirmations: 0,
+          status: BitcoinTransactionStatus.Pending,
+          inputs: [
+            {
+              address: 'my_address_1',
+              satoshis: 200_000,
+              txId: 'spent_tx',
+              index: 1,
+              isCoinbase: false,
+            },
+            {
+              address: 'my_address_2',
+              satoshis: 50_000,
+              txId: 'spent_tx_2',
+              index: 0,
+              isCoinbase: false,
+            },
+          ],
+          outputs: [
+            { address: 'external_recipient', satoshis: 100_000 },
+            { address: 'my_address_1', satoshis: 149_000 },
+          ],
+        };
+
+        const activity = mapBitcoinTxToActivity(
+          rawTx,
+          userAddresses,
+          accountId,
+        );
+
+        expect(activity.type).toBe(ActivityType.Pending);
+        const inFlight = (
+          activity.blockchainSpecific as
+            | { Bitcoin?: BitcoinInFlightUtxoActivityMetadata }
+            | undefined
+        )?.Bitcoin;
+        expect(inFlight?.consumedInputs).toEqual([
+          { txId: 'spent_tx', index: 1 },
+          { txId: 'spent_tx_2', index: 0 },
+        ]);
+        expect(inFlight?.producedOutputs).toEqual([]);
+      });
+
+      it('does not attach in-flight metadata for confirmed txs', () => {
+        const rawTx: BitcoinTransactionHistoryEntry = {
+          ...baseTx,
+          confirmations: 3,
+          inputs: [
+            {
+              address: 'external_sender',
+              satoshis: 150_000,
+              txId: 'tx1',
+              index: 0,
+              isCoinbase: false,
+            },
+          ],
+          outputs: [{ address: 'my_address_1', satoshis: 150_000 }],
+        };
+
+        const activity = mapBitcoinTxToActivity(
+          rawTx,
+          userAddresses,
+          accountId,
+        );
+
+        expect(activity.type).toBe(ActivityType.Receive);
+        expect(activity.blockchainSpecific).toBeUndefined();
+      });
     });
   });
 
@@ -787,6 +862,10 @@ describe('side effects', () => {
     const bitcoinAccountForTip = {
       blockchainName: 'Bitcoin' as const,
     } as InMemoryWalletAccount;
+
+    beforeEach(() => {
+      vi.restoreAllMocks();
+    });
 
     it('dispatches setTip(undefined) when network is undefined', () => {
       const getLastKnownBlock = vi.fn();
@@ -813,6 +892,7 @@ describe('side effects', () => {
               getLastKnownBlock,
             } as unknown as BitcoinProvider,
             actions,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
@@ -848,6 +928,7 @@ describe('side effects', () => {
               getLastKnownBlock,
             } as unknown as BitcoinProvider,
             actions,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             const emissions: unknown[] = [];
@@ -892,6 +973,7 @@ describe('side effects', () => {
               getLastKnownBlock,
             } as unknown as BitcoinProvider,
             actions,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
@@ -936,6 +1018,7 @@ describe('side effects', () => {
               getLastKnownBlock,
             } as unknown as BitcoinProvider,
             actions,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
@@ -983,6 +1066,7 @@ describe('side effects', () => {
               getLastKnownBlock,
             } as unknown as BitcoinProvider,
             actions,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a-b', {
@@ -994,6 +1078,142 @@ describe('side effects', () => {
       });
 
       expect(getLastKnownBlock).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not call getLastKnownBlock while wallet is inactive', () => {
+      const getLastKnownBlock = vi.fn();
+
+      vi.spyOn(rxjs, 'interval').mockReturnValue(EMPTY);
+
+      testSideEffect(trackTipSideEffect, ({ hot, expectObservable, flush }) => {
+        const selectNetwork$ = hot<BitcoinNetwork | undefined>('a', {
+          a: BitcoinNetwork.Testnet,
+        });
+        const selectActiveNetworkAccounts$ = hot('a', {
+          a: [bitcoinAccountForTip],
+        });
+
+        return {
+          stateObservables: {
+            bitcoinContext: { selectNetwork$ },
+            wallets: { selectActiveNetworkAccounts$ },
+            // `hot` (no `|`) so the gate stays subscribed across the window
+            // — `of(false)` would complete and propagate completion through
+            // `whileActive`'s `switchMap`, ending the side effect early.
+          },
+          dependencies: {
+            bitcoinProvider: {
+              getLastKnownBlock,
+            } as unknown as BitcoinProvider,
+            actions,
+            isWalletActive$: hot('f', { f: false }),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$, '^----!').toBe('-----');
+            flush();
+            expect(getLastKnownBlock).not.toHaveBeenCalled();
+          },
+        };
+      });
+    });
+
+    it('resumes polling with an immediate request when wallet becomes active', () => {
+      const fakeTip = { hash: 'tip-on-unlock', height: 100 };
+      const getLastKnownBlock = vi.fn().mockReturnValue(of(Ok(fakeTip)));
+
+      vi.spyOn(rxjs, 'interval').mockReturnValue(EMPTY);
+
+      testSideEffect(trackTipSideEffect, ({ cold, hot, expectObservable }) => {
+        // Cold so the source replays its current value when `whileActive`
+        // resubscribes after the gate flips. Hot would not replay the frame-0
+        // emission, leaving `combineLatest` waiting forever.
+        const selectNetwork$ = cold<BitcoinNetwork | undefined>('a', {
+          a: BitcoinNetwork.Testnet,
+        });
+        const selectActiveNetworkAccounts$ = cold('a', {
+          a: [bitcoinAccountForTip],
+        });
+        return {
+          stateObservables: {
+            bitcoinContext: { selectNetwork$ },
+            wallets: { selectActiveNetworkAccounts$ },
+            // Inactive at frame 0, becomes active at frame 4
+          },
+          dependencies: {
+            bitcoinProvider: {
+              getLastKnownBlock,
+            } as unknown as BitcoinProvider,
+            actions,
+            isWalletActive$: hot('f---t', { f: false, t: true }),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$, '^----!').toBe('----a', {
+              a: actions.bitcoinContext.setTip(fakeTip),
+            });
+          },
+        };
+      });
+
+      expect(getLastKnownBlock).toHaveBeenCalledWith({
+        network: BitcoinNetwork.Testnet,
+      });
+    });
+
+    // Regression guard: this test fails if `whileActive` is moved
+    // mid-pipeline — the leaked `interval` keeps polling and
+    // `getLastKnownBlock` is called past the lock.
+    it('stops polling when wallet transitions from active to inactive', () => {
+      const tipPollFrequency = Milliseconds(2);
+      const fakeTip = { hash: 'tip-frozen', height: 200 };
+      // Identical responses: distinctUntilChanged-style dedup happens via the
+      // setTip action emission, but call count is what we assert.
+      const getLastKnownBlock = vi.fn().mockReturnValue(of(Ok(fakeTip)));
+
+      testSideEffect(
+        trackTip(tipPollFrequency),
+        ({ cold, hot, expectObservable, flush }) => {
+          const selectNetwork$ = cold<BitcoinNetwork | undefined>('a', {
+            a: BitcoinNetwork.Testnet,
+          });
+          const selectActiveNetworkAccounts$ = cold('a', {
+            a: [bitcoinAccountForTip],
+          });
+          return {
+            stateObservables: {
+              bitcoinContext: { selectNetwork$ },
+              wallets: { selectActiveNetworkAccounts$ },
+              // Active at frame 0, locked at frame 5; long idle window after.
+            },
+            dependencies: {
+              bitcoinProvider: {
+                getLastKnownBlock,
+              } as unknown as BitcoinProvider,
+              actions,
+              isWalletActive$: hot('t----f', { t: true, f: false }),
+            },
+            assertion: sideEffect$ => {
+              // Bitcoin's trackTip has no `distinctUntilChanged` over the
+              // poll result (unlike Cardano's), so identical `fakeTip`
+              // responses produce a `setTip` emission per call. Lock at
+              // frame 5 tears down the pipeline so no further emissions
+              // appear in the long idle window after.
+              expectObservable(sideEffect$, '^------------------!').toBe(
+                'a-a-a',
+                {
+                  a: actions.bitcoinContext.setTip(fakeTip),
+                },
+              );
+              flush();
+              // Calls at frames 0, 2, 4 with 2ms interval; lock at frame 5
+              // unsubscribes the pipeline so no further calls fire.
+              const expectedCallsBeforeLock = 3;
+              expect(getLastKnownBlock.mock.calls.length).toBe(
+                expectedCallsBeforeLock,
+              );
+            },
+          };
+        },
+      );
     });
   });
 });

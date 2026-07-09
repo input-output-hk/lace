@@ -10,7 +10,7 @@ import {
 } from '../helpers/transaction-processors';
 import { extractAccountInfo } from '../helpers/transformers';
 
-import type { Action, SideEffect } from '../../contract';
+import type { CardanoContextAction, SideEffect } from '../../contract';
 import type { CardanoProvider, RequiredProtocolParameters } from '../../types';
 import type { GetTokenMetadataWrapper } from '../helpers/transaction-processors';
 import type { Activity } from '@lace-contract/activities';
@@ -129,7 +129,7 @@ export const createTrackTransactionDetails =
             });
           }),
           map(result =>
-            result.mapOrElse<Action>(
+            result.mapOrElse<CardanoContextAction>(
               _error => setActivityDetails({ activityDetails: undefined }),
               activityDetails => setActivityDetails({ activityDetails }),
             ),

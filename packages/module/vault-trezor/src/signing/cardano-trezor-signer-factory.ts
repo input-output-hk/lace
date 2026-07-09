@@ -1,6 +1,6 @@
 import { CardanoTrezorDataSigner } from './cardano-trezor-data-signer';
-import { CardanoTrezorTransactionSigner } from './cardano-trezor-transaction-signer';
 
+import type { CardanoTrezorTransactionSignerProps } from './cardano-trezor-transaction-signer';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type {
@@ -20,7 +20,29 @@ import type {
   HardwareWalletTrezor,
 } from '@lace-contract/wallet-repo';
 
+/**
+ * Creates the platform-specific transaction signer. Web uses the in-process
+ * `@trezor/connect-web` transport; mobile uses the deep-link `@trezor/connect-mobile`
+ * round-trip. Both signers share the same prop shape and implement
+ * `CardanoTransactionSigner`, so the factory only needs to know how to build one.
+ */
+export type CreateTrezorTransactionSigner = (
+  props: CardanoTrezorTransactionSignerProps,
+) => CardanoTransactionSigner;
+
+export interface CardanoTrezorSignerFactoryDependencies {
+  createTransactionSigner: CreateTrezorTransactionSigner;
+}
+
 export class CardanoTrezorSignerFactory implements CardanoSignerFactory {
+  readonly #createTransactionSigner: CreateTrezorTransactionSigner;
+
+  public constructor({
+    createTransactionSigner,
+  }: CardanoTrezorSignerFactoryDependencies) {
+    this.#createTransactionSigner = createTransactionSigner;
+  }
+
   public canSign(account: AnyAccount): boolean {
     return (
       account.accountType === 'HardwareTrezor' &&
@@ -35,7 +57,7 @@ export class CardanoTrezorSignerFactory implements CardanoSignerFactory {
     const { accountIndex, chainId, extendedAccountPublicKey, derivationType } =
       this.#extractAccountProps(context);
 
-    return new CardanoTrezorTransactionSigner({
+    return this.#createTransactionSigner({
       accountIndex,
       chainId,
       extendedAccountPublicKey,

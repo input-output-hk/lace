@@ -5,12 +5,10 @@ import {
   Icon,
   Row,
   Sheet,
-  SheetFooter,
   spacing,
   Text,
-  useFooterHeight,
 } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import type { FeeEntry } from '@lace-lib/ui-toolkit';
@@ -43,86 +41,65 @@ export const DustDesignationReview = ({
   accountName,
   addressLabel,
   copies,
-  isReviewReady,
-  onConfirm,
 }: DustDesignationReviewProps) => {
   const feeDisplay =
     estimatedFee.length > 0
       ? `-${estimatedFee[0].amount} ${estimatedFee[0].token.displayShortName}`
       : `0 ${dustTokenTicker}`;
 
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
-
   return (
-    <>
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={scrollContainerStyle}>
-        <Column style={styles.container} gap={spacing.L}>
-          <Row justifyContent="space-between">
+    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+      <Column style={styles.container} gap={spacing.L}>
+        <Row justifyContent="space-between">
+          <Text.M
+            variant="secondary"
+            testID="dust-designation-review-designating-label">
+            {copies.designatingLabel}
+          </Text.M>
+          <Text.M testID="dust-designation-review-amount">
+            {formattedNightBalance} {nightTokenTicker}
+          </Text.M>
+        </Row>
+        <Divider />
+        {isOwnAddress ? (
+          <Row justifyContent="space-between" alignItems="center">
             <Text.M
               variant="secondary"
-              testID="dust-designation-review-designating-label">
-              {copies.designatingLabel}
+              testID="dust-designation-review-recipient-label">
+              {addressLabel}
             </Text.M>
-            <Text.M testID="dust-designation-review-amount">
-              {formattedNightBalance} {nightTokenTicker}
-            </Text.M>
+            <CustomTag
+              label={accountName}
+              icon={<Icon name="Midnight" size={16} />}
+              color="white"
+              testID="dust-designation-review-account-tag"
+            />
           </Row>
-          <Divider />
-          {isOwnAddress ? (
-            <Row justifyContent="space-between" alignItems="center">
-              <Text.M
-                variant="secondary"
-                testID="dust-designation-review-recipient-label">
-                {addressLabel}
-              </Text.M>
-              <CustomTag
-                label={accountName}
-                icon={<Icon name="Midnight" size={16} />}
-                color="white"
-                testID="dust-designation-review-account-tag"
-              />
-            </Row>
-          ) : (
-            <Column gap={spacing.XS}>
-              <Text.M
-                variant="secondary"
-                testID="dust-designation-review-recipient-label">
-                {addressLabel}
-              </Text.M>
-              <Text.M testID="dust-designation-review-external-address">
-                {dustAddress}
-              </Text.M>
-            </Column>
-          )}
-          <Divider />
-          <Row justifyContent="space-between">
+        ) : (
+          <Column gap={spacing.XS}>
             <Text.M
               variant="secondary"
-              testID="dust-designation-review-fee-label">
-              {copies.estimatedFeeLabel}
+              testID="dust-designation-review-recipient-label">
+              {addressLabel}
             </Text.M>
-            <Text.M testID="dust-designation-review-fee-value">
-              {feeDisplay}
+            <Text.M testID="dust-designation-review-external-address">
+              {dustAddress}
             </Text.M>
-          </Row>
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: copies.nextButtonLabel,
-          onPress: onConfirm,
-          disabled: !isReviewReady,
-          loading: !isReviewReady,
-          testID: 'confirm-designation-button',
-        }}
-      />
-    </>
+          </Column>
+        )}
+        <Divider />
+        <Row justifyContent="space-between">
+          <Text.M
+            variant="secondary"
+            testID="dust-designation-review-fee-label">
+            {copies.estimatedFeeLabel}
+          </Text.M>
+          <Text.M testID="dust-designation-review-fee-value">
+            {feeDisplay}
+          </Text.M>
+        </Row>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 

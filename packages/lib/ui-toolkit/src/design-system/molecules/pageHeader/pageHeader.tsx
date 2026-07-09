@@ -1,7 +1,10 @@
-import type { ImageSourcePropType } from 'react-native';
-
-import React, { useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  type LayoutChangeEvent,
+  type ImageSourcePropType,
+} from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
@@ -15,11 +18,9 @@ import { SearchBar, type SearchBarAction } from '..';
 import { radius, spacing, useTheme } from '../../../design-tokens';
 import { Text, Column, Row, Icon, Button } from '../../atoms';
 import { IconButton } from '../../atoms/iconButton/iconButton';
-import { isWeb } from '../../util';
+import { isWeb, PAGE_HEADER_COLLAPSE_SCROLL_RANGE } from '../../util';
 
 import type { Theme } from '../../../design-tokens';
-
-const COLLAPSE_SCROLL_RANGE = 72;
 
 const BACKGROUND_HEIGHT_WEB = {
   WITH_SUBTITLE: 200,
@@ -28,6 +29,21 @@ const BACKGROUND_HEIGHT_WEB = {
 const BACKGROUND_HEIGHT_NATIVE = {
   WITH_SUBTITLE: 120,
   WITHOUT_SUBTITLE: 88,
+};
+
+export const getPageHeaderBackgroundHeights = (hasSubtitleSpace: boolean) => {
+  const backgroundHeights = isWeb
+    ? BACKGROUND_HEIGHT_WEB
+    : BACKGROUND_HEIGHT_NATIVE;
+
+  const fullBackground = hasSubtitleSpace
+    ? backgroundHeights.WITH_SUBTITLE
+    : backgroundHeights.WITHOUT_SUBTITLE;
+
+  return {
+    fullBackground,
+    collapsedBackground: fullBackground * 0.62,
+  };
 };
 
 export interface PageHeaderProps {
@@ -42,13 +58,21 @@ export interface PageHeaderProps {
   onBackPress?: () => void;
   onClosePress?: () => void;
   testID?: string;
-  isTablet?: boolean;
   isDark?: boolean;
   compact?: boolean;
   searchBarActions?: SearchBarAction[];
   collapseScrollYProp?: SharedValue<number>;
   stickyInScrollParent?: boolean;
+  stableCollapseLayout?: boolean;
 }
+
+const SubtitleComponent = ({
+  testID,
+  subtitle,
+}: {
+  testID: string;
+  subtitle: string;
+}) => <Text.XS testID={`${testID}-subtitle`}>{subtitle}</Text.XS>;
 
 export const PageHeader = ({
   title,
@@ -65,6 +89,7 @@ export const PageHeader = ({
   searchBarActions,
   collapseScrollYProp,
   stickyInScrollParent = false,
+  stableCollapseLayout = false,
 }: PageHeaderProps) => {
   const { theme } = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
@@ -72,21 +97,29 @@ export const PageHeader = ({
   const fallbackScrollY = useSharedValue(0);
   const collapseScrollY = collapseScrollYProp ?? fallbackScrollY;
 
-  const backgroundHeightWeb = hasSubtitleSpace
-    ? BACKGROUND_HEIGHT_WEB.WITH_SUBTITLE
-    : BACKGROUND_HEIGHT_WEB.WITHOUT_SUBTITLE;
+  const { fullBackground, collapsedBackground } =
+    getPageHeaderBackgroundHeights(hasSubtitleSpace);
+  const shouldUseStableCollapseLayout =
+    stableCollapseLayout || stickyInScrollParent;
+  const [stickyMeasuredHeight, setStickyMeasuredHeight] = useState<
+    number | null
+  >(null);
 
-  const backgroundHeightMobile = hasSubtitleSpace
-    ? BACKGROUND_HEIGHT_NATIVE.WITH_SUBTITLE
-    : BACKGROUND_HEIGHT_NATIVE.WITHOUT_SUBTITLE;
-
-  const fullBackground = isWeb ? backgroundHeightWeb : backgroundHeightMobile;
-  const collapsedBackground = fullBackground * 0.62;
+  const handleStickyLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = event.nativeEvent.layout.height;
+    // Ignore zero/invalid measurements: a hidden/transitioning screen can
+    // report height 0, which would lock the sticky header collapsed with no
+    // re-measure path. Keep measuring until a real height arrives.
+    if (nextHeight <= 0) return;
+    setStickyMeasuredHeight(currentHeight =>
+      currentHeight === nextHeight ? currentHeight : nextHeight,
+    );
+  }, []);
 
   const collapseProgress = useDerivedValue(() =>
     interpolate(
       collapseScrollY.value,
-      [0, COLLAPSE_SCROLL_RANGE],
+      [0, PAGE_HEADER_COLLAPSE_SCROLL_RANGE],
       [0, 1],
       Extrapolation.CLAMP,
     ),
@@ -127,7 +160,7 @@ export const PageHeader = ({
     };
   }, [collapseProgress]);
 
-  const headerBgAnimated = useAnimatedStyle(() => {
+  const headerFrameAnimated = useAnimatedStyle(() => {
     const progress = collapseProgress.value;
     return {
       height: interpolate(
@@ -139,43 +172,19 @@ export const PageHeader = ({
     };
   }, [collapseProgress, fullBackground, collapsedBackground]);
 
-  const overlayAnimated = useAnimatedStyle(() => {
-    const progress = collapseProgress.value;
-    const padY = interpolate(
-      progress,
-      [0, 1],
-      [spacing.L, spacing.S],
-      Extrapolation.CLAMP,
-    );
-    const gapY = interpolate(
-      progress,
-      [0, 1],
-      [spacing.L, spacing.XS],
-      Extrapolation.CLAMP,
-    );
-    return {
-      paddingTop: padY,
-      paddingBottom: showSearch
-        ? interpolate(
-            progress,
-            [0, 1],
-            [spacing.S, spacing.XS],
-            Extrapolation.CLAMP,
-          )
-        : padY,
-      gap: gapY,
-    };
-  }, [collapseProgress, showSearch]);
-
   const controlsAnimated = useAnimatedStyle(() => {
     const progress = collapseProgress.value;
     return {
-      top: interpolate(
-        progress,
-        [0, 1],
-        [spacing.L, spacing.S],
-        Extrapolation.CLAMP,
-      ),
+      transform: [
+        {
+          translateY: interpolate(
+            progress,
+            [0, 1],
+            [0, spacing.S - spacing.L],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
     };
   }, [collapseProgress]);
 
@@ -184,18 +193,69 @@ export const PageHeader = ({
     return {
       transform: [
         {
-          scale: interpolate(progress, [0, 1], [1, 0.9], Extrapolation.CLAMP),
+          scale: interpolate(
+            progress,
+            [0, 1],
+            [1, isWeb ? 1 : 0.94],
+            Extrapolation.CLAMP,
+          ),
         },
       ],
     };
   }, [collapseProgress]);
 
-  const wrapSticky = (node: React.ReactElement) =>
-    stickyInScrollParent ? (
-      <Animated.View style={styles.stickyWrapper}>{node}</Animated.View>
-    ) : (
-      node
+  const headerContentAnimated = useAnimatedStyle(() => {
+    const progress = collapseProgress.value;
+
+    const collapsedTranslateY =
+      !showSearch && hasSubtitleSpace ? -spacing.M : -spacing.S;
+
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            progress,
+            [0, 1],
+            [0, collapsedTranslateY],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    };
+  }, [collapseProgress, hasSubtitleSpace, showSearch]);
+
+  const searchBarAnimated = useAnimatedStyle(() => {
+    const progress = collapseProgress.value;
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            progress,
+            [0, 1],
+            [0, -spacing.XS],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    };
+  }, [collapseProgress]);
+
+  const wrapSticky = (node: React.ReactElement) => {
+    if (!stickyInScrollParent) {
+      return node;
+    }
+
+    if (stickyMeasuredHeight === null) {
+      return <View onLayout={handleStickyLayout}>{node}</View>;
+    }
+
+    return (
+      <View style={styles.stickyContainer}>
+        <View style={{ height: stickyMeasuredHeight }} />
+        <Animated.View style={styles.stickyWrapper}>{node}</Animated.View>
+      </View>
     );
+  };
 
   if (compact) {
     return wrapSticky(
@@ -218,7 +278,7 @@ export const PageHeader = ({
                 {title}
               </Text.M>
               {!!subtitle && (
-                <Text.XS testID={`${testID}-subtitle`}>{subtitle}</Text.XS>
+                <SubtitleComponent testID={testID} subtitle={subtitle} />
               )}
             </Column>
           </Animated.View>
@@ -248,80 +308,81 @@ export const PageHeader = ({
     );
   }
 
-  const renderBackground = () => (
-    <Animated.View
-      style={[
-        styles.headerBackground,
-        !hasSubtitleSpace ? styles.headerBackgroundWithoutSubtitle : undefined,
-        headerBgAnimated,
-      ]}
-    />
-  );
+  const renderBackground = () => <View style={styles.headerBackground} />;
 
   return wrapSticky(
-    <View style={styles.headerContainer} testID={testID}>
-      {renderBackground()}
-      <Animated.View
-        style={[
-          styles.overlay,
-          !hasSubtitleSpace ? styles.overlayWithoutSubtitle : undefined,
-          showSearch ? styles.overlayWithSearch : undefined,
-          overlayAnimated,
-        ]}>
-        <Animated.View style={[styles.controlsRow, controlsAnimated]}>
-          {onBackPress ? (
-            <IconButton.Static
-              icon={<Icon name="CaretLeft" />}
-              onPress={onBackPress}
-              testID={`${testID}-back-button`}
-              containerStyle={styles.iconButton}
-            />
-          ) : (
-            <View style={styles.iconButtonPlaceholder} />
-          )}
-          {onClosePress ? (
-            <IconButton.Static
-              icon={<Icon name="Cancel" />}
-              onPress={onClosePress}
-              testID={`${testID}-close-button`}
-              containerStyle={styles.iconButton}
-            />
-          ) : (
-            <View style={styles.iconButtonPlaceholder} />
+    <View
+      style={[
+        styles.headerContainer,
+        shouldUseStableCollapseLayout ? { height: fullBackground } : undefined,
+      ]}
+      testID={testID}>
+      <Animated.View style={[styles.headerFrame, headerFrameAnimated]}>
+        {renderBackground()}
+        <Animated.View
+          style={[
+            styles.overlay,
+            !hasSubtitleSpace ? styles.overlayWithoutSubtitle : undefined,
+            showSearch ? styles.overlayWithSearch : undefined,
+          ]}>
+          <Animated.View style={[styles.controlsRow, controlsAnimated]}>
+            {onBackPress ? (
+              <IconButton.Static
+                icon={<Icon name="CaretLeft" />}
+                onPress={onBackPress}
+                testID={`${testID}-back-button`}
+                containerStyle={styles.iconButton}
+              />
+            ) : (
+              <View style={styles.iconButtonPlaceholder} />
+            )}
+            {onClosePress ? (
+              <IconButton.Static
+                icon={<Icon name="Cancel" />}
+                onPress={onClosePress}
+                testID={`${testID}-close-button`}
+                containerStyle={styles.iconButton}
+              />
+            ) : (
+              <View style={styles.iconButtonPlaceholder} />
+            )}
+          </Animated.View>
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              styles.headerContentWrapper,
+              showSearch ? styles.headerContentWrapperWithSearch : undefined,
+              headerContentAnimated,
+            ]}>
+            <Column
+              style={[
+                styles.headerContent,
+                !subtitle ? styles.headerContentWithoutSubtitle : undefined,
+              ]}>
+              <Animated.View style={titleScaleStyle}>
+                <Text.L testID={`${testID}-title`}>{title}</Text.L>
+              </Animated.View>
+              {!!subtitle && (
+                <Text.M align="center" testID={`${testID}-subtitle`}>
+                  {subtitle}
+                </Text.M>
+              )}
+            </Column>
+          </Animated.View>
+          {showSearch && (
+            <Animated.View
+              style={[styles.searchBarContainer, searchBarAnimated]}>
+              <SearchBar
+                value={searchValue}
+                onChangeText={onSearchChange}
+                placeholder={searchPlaceholder}
+                testID={`${testID}-search`}
+                extraStyle={styles.searchBar}
+                actions={searchBarActions}
+              />
+            </Animated.View>
           )}
         </Animated.View>
-        <View
-          style={[
-            styles.headerContentWrapper,
-            showSearch ? styles.headerContentWrapperWithSearch : undefined,
-          ]}>
-          <Column
-            style={[
-              styles.headerContent,
-              !subtitle ? styles.headerContentWithoutSubtitle : undefined,
-            ]}>
-            <Animated.View style={titleScaleStyle}>
-              <Text.L testID={`${testID}-title`}>{title}</Text.L>
-            </Animated.View>
-            {!!subtitle && (
-              <Text.M align="center" testID={`${testID}-subtitle`}>
-                {subtitle}
-              </Text.M>
-            )}
-          </Column>
-        </View>
-        {showSearch && (
-          <Row style={styles.searchBarContainer}>
-            <SearchBar
-              value={searchValue}
-              onChangeText={onSearchChange}
-              placeholder={searchPlaceholder}
-              testID={`${testID}-search`}
-              extraStyle={styles.searchBar}
-              actions={searchBarActions}
-            />
-          </Row>
-        )}
       </Animated.View>
     </View>,
   );
@@ -329,15 +390,20 @@ export const PageHeader = ({
 
 const getStyles = (theme: Theme) =>
   StyleSheet.create({
+    stickyContainer: {
+      position: 'relative',
+    },
     stickyWrapper: {
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       zIndex: 2,
-      backgroundColor: theme.background.page,
     },
     headerContainer: {
+      position: 'relative',
+    },
+    headerFrame: {
       position: 'relative',
       overflow: 'hidden',
     },
@@ -360,18 +426,10 @@ const getStyles = (theme: Theme) =>
       width: '100%',
     },
     headerBackground: {
-      width: '100%',
-      height: isWeb ? 200 : 120,
-    },
-    headerBackgroundWithoutSubtitle: {
-      height: isWeb ? 168 : 88,
+      ...StyleSheet.absoluteFillObject,
     },
     overlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
+      ...StyleSheet.absoluteFillObject,
       paddingTop: spacing.L,
       paddingBottom: spacing.L,
       justifyContent: 'center',
@@ -397,6 +455,7 @@ const getStyles = (theme: Theme) =>
     headerContent: {
       alignItems: 'center',
       gap: spacing.XS,
+      minHeight: 40,
     },
     headerContentWithoutSubtitle: {
       paddingBottom: 0,
@@ -413,6 +472,7 @@ const getStyles = (theme: Theme) =>
       top: spacing.L,
       left: spacing.L,
       right: spacing.L,
+      zIndex: 1,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',

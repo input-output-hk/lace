@@ -1,5 +1,8 @@
 import { activitiesStoreContract } from '@lace-contract/activities';
-import { addressAliasResolverAddonContract } from '@lace-contract/addresses';
+import {
+  addressAliasResolverAddonContract,
+  addressesStoreContract,
+} from '@lace-contract/addresses';
 import { analyticsStoreContract } from '@lace-contract/analytics';
 import {
   ContractName,
@@ -9,6 +12,10 @@ import {
   inferContractContext,
 } from '@lace-contract/module';
 import { networkStoreContract } from '@lace-contract/network';
+import {
+  tokenIdMapperAddonContract,
+  tokenPricingStoreContract,
+} from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorStoreContract } from '@lace-contract/tx-executor';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
@@ -41,6 +48,17 @@ export const baseTokenAddonContract = inferContractContext({
   },
 });
 
+export const chainMinimumAmountTokenValidatorAddonContract =
+  inferContractContext({
+    name: ContractName('chain-minimum-amount-token-validator-addon'),
+    instance: 'at-least-one',
+    contractType: 'addon',
+    preloadInServiceWorker: true,
+    provides: {
+      addons: ['loadChainMinimumAmountTokenValidator'],
+    },
+  });
+
 export const sendFlowAnalyticsEnhancerAddonContract = inferContractContext({
   name: ContractName('send-flow-analytics-enhancer-addon'),
   instance: 'zero-or-more',
@@ -63,8 +81,12 @@ export const sendFlowStoreContract = inferContractContext({
     txExecutorStoreContract,
     addressValidatorAddonContract,
     addressAliasResolverAddonContract,
+    chainMinimumAmountTokenValidatorAddonContract,
     sendFlowAnalyticsEnhancerAddonContract,
     walletRepoStoreContract,
+    tokenPricingStoreContract,
+    tokenIdMapperAddonContract,
+    addressesStoreContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),

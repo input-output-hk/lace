@@ -4,12 +4,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
 import { Avatar, Button, Divider, Row, Shimmer, Text } from '../../../atoms';
-import {
-  ProgressBar,
-  SheetFooter,
-  SheetHeader,
-  useFooterHeight,
-} from '../../../molecules';
+import { ProgressBar } from '../../../molecules';
 import { Sheet } from '../../../organisms';
 
 import type {
@@ -56,11 +51,6 @@ export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
     saturationWarningMessage,
     stakeKey,
     saturationPercentage,
-    primaryButtonLabel,
-    secondaryButtonLabel,
-    isSecondaryButtonDisabled,
-    onPrimaryPress,
-    onSecondaryPress,
   } = props;
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -68,248 +58,185 @@ export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
   const warningColor = getWarningColorForState(state, theme);
   const progressBarColor = getProgressBarColorForState(state);
 
-  const hasFooterButtons = Boolean(
-    (primaryButtonLabel && onPrimaryPress) ||
-      (secondaryButtonLabel && onSecondaryPress),
-  );
-
-  const footerHeight = useFooterHeight();
   const styles = useMemo(
-    () => getStyles(theme, warningColor, hasFooterButtons ? footerHeight : 0),
-    [theme, warningColor, hasFooterButtons, footerHeight],
+    () => getStyles(theme, warningColor),
+    [theme, warningColor],
   );
 
   return (
-    <>
-      <SheetHeader title={t('v2.pool-status.title')} />
-      <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
-        <View
-          style={styles.container}
-          testID={poolStatusSheetTestIds.container}>
-          {/* Avatar with initials */}
-          <View style={styles.avatarContainer}>
-            <Avatar
-              size={64}
-              content={{ fallback: poolTicker.substring(0, 2) }}
-              shape="rounded"
-            />
-          </View>
-
-          {/* Pool name - 16px primary */}
-          <Text.M variant="primary" testID={poolStatusSheetTestIds.poolName}>
-            {poolName}
-          </Text.M>
-
-          {/* Pool ticker - 14px secondary */}
-          <Text.S
-            variant="secondary"
-            testID={poolStatusSheetTestIds.poolTicker}>
-            {poolTicker}
-          </Text.S>
-
-          {/* Primary warning message */}
-          {primaryWarningMessage && (
-            <Text.S
-              style={styles.primaryWarning}
-              testID={poolStatusSheetTestIds.primaryWarning}>
-              {primaryWarningMessage}
-            </Text.S>
-          )}
-
-          {/* Divider above amounts */}
-          <View style={styles.dividerContainer}>
-            <Divider />
-          </View>
-
-          {/* Amounts section */}
-          <Row
-            style={styles.amountsRow}
-            justifyContent="space-between"
-            alignItems="flex-start">
-            {/* Total Staked */}
-            <View style={styles.amountColumn}>
-              <Text.XS>{t('v2.pool-status.total-staked')}</Text.XS>
-              <Row alignItems="center" gap={spacing.XS}>
-                <Text.L>{totalStaked}</Text.L>
-                <Text.XS>{coin}</Text.XS>
-              </Row>
-            </View>
-
-            {/* Vertical Divider */}
-            <View style={styles.verticalDivider} />
-
-            {/* Total Rewards */}
-            <View style={styles.amountColumn}>
-              <Text.XS>{t('v2.pool-status.total-rewards')}</Text.XS>
-              <Row alignItems="center" gap={spacing.XS}>
-                <Text.L>{totalRewards}</Text.L>
-                <Text.XS>{coin}</Text.XS>
-              </Row>
-            </View>
-          </Row>
-
-          {/* Divider below amounts */}
-          <View style={styles.dividerContainer}>
-            <Divider />
-          </View>
-
-          {/* Stake key */}
-          {stakeKey && (
-            <View style={styles.stakeKeySection}>
-              <Text.XS variant="secondary">
-                {t('v2.pool-status.stake-key')}
-              </Text.XS>
-              <Text.S variant="primary">{stakeKey}</Text.S>
-            </View>
-          )}
-
-          {/* Divider between stake key and saturation */}
-          {stakeKey && (
-            <View style={styles.dividerContainer}>
-              <Divider />
-            </View>
-          )}
-
-          {/* Saturation section */}
-          <View style={styles.saturationSection}>
-            <Text.S variant="secondary">
-              {t('v2.pool-status.saturation')}
-            </Text.S>
-            <ProgressBar
-              progress={saturationPercentage}
-              color={progressBarColor}
-              showPercentage={true}
-              style={styles.progressBar}
-            />
-
-            {/* Rewards Locked section - only for locked-rewards state */}
-            {state === 'locked-rewards' && (
-              <View
-                style={styles.rewardsLockedSection}
-                testID={poolStatusSheetTestIds.rewardsLockedSection}>
-                <Row
-                  alignItems="center"
-                  justifyContent="space-between"
-                  style={styles.rewardsLockedHeader}>
-                  <Text.M>{t('v2.pool-status.rewards-locked')}</Text.M>
-                </Row>
-                <Button.Critical
-                  label={t('v2.pool-status.delegate-vote')}
-                  size="large"
-                  onPress={props.onDelegateVote}
-                  testID={poolStatusSheetTestIds.delegateVoteButton}
-                />
-              </View>
-            )}
-
-            {saturationWarningMessage && (
-              <Text.S
-                style={styles.warningText}
-                testID={poolStatusSheetTestIds.saturationWarning}>
-                {saturationWarningMessage}
-              </Text.S>
-            )}
-          </View>
+    <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container} testID={poolStatusSheetTestIds.container}>
+        <View style={styles.avatarContainer}>
+          <Avatar
+            size={64}
+            content={{ fallback: poolTicker.substring(0, 2) }}
+            shape="rounded"
+          />
         </View>
-      </Sheet.Scroll>
-      {hasFooterButtons && (
-        <SheetFooter
-          showDivider={false}
-          secondaryButton={
-            secondaryButtonLabel && onSecondaryPress
-              ? {
-                  label: secondaryButtonLabel,
-                  onPress: onSecondaryPress,
-                  disabled: isSecondaryButtonDisabled,
-                  testID: poolStatusSheetTestIds.secondaryButton,
-                }
-              : undefined
-          }
-          primaryButton={
-            primaryButtonLabel && onPrimaryPress
-              ? {
-                  label: primaryButtonLabel,
-                  onPress: onPrimaryPress,
-                  testID: poolStatusSheetTestIds.primaryButton,
-                }
-              : undefined
-          }
-        />
-      )}
-    </>
+
+        <Text.M variant="primary" testID={poolStatusSheetTestIds.poolName}>
+          {poolName}
+        </Text.M>
+
+        <Text.S variant="secondary" testID={poolStatusSheetTestIds.poolTicker}>
+          {poolTicker}
+        </Text.S>
+
+        {primaryWarningMessage && (
+          <Text.S
+            style={styles.primaryWarning}
+            testID={poolStatusSheetTestIds.primaryWarning}>
+            {primaryWarningMessage}
+          </Text.S>
+        )}
+
+        <View style={styles.dividerContainer}>
+          <Divider />
+        </View>
+
+        <Row
+          style={styles.amountsRow}
+          justifyContent="space-between"
+          alignItems="flex-start">
+          <View style={styles.amountColumn}>
+            <Text.XS>{t('v2.pool-status.total-staked')}</Text.XS>
+            <Row alignItems="center" gap={spacing.XS}>
+              <Text.L>{totalStaked}</Text.L>
+              <Text.XS>{coin}</Text.XS>
+            </Row>
+          </View>
+
+          <View style={styles.verticalDivider} />
+
+          <View style={styles.amountColumn}>
+            <Text.XS>{t('v2.pool-status.total-rewards')}</Text.XS>
+            <Row alignItems="center" gap={spacing.XS}>
+              <Text.L>{totalRewards}</Text.L>
+              <Text.XS>{coin}</Text.XS>
+            </Row>
+          </View>
+        </Row>
+
+        <View style={styles.dividerContainer}>
+          <Divider />
+        </View>
+
+        {stakeKey && (
+          <View style={styles.stakeKeySection}>
+            <Text.XS variant="secondary">
+              {t('v2.pool-status.stake-key')}
+            </Text.XS>
+            <Text.S variant="primary">{stakeKey}</Text.S>
+          </View>
+        )}
+
+        {stakeKey && (
+          <View style={styles.dividerContainer}>
+            <Divider />
+          </View>
+        )}
+
+        <View style={styles.saturationSection}>
+          <Text.S variant="secondary">{t('v2.pool-status.saturation')}</Text.S>
+          <ProgressBar
+            progress={saturationPercentage}
+            color={progressBarColor}
+            showPercentage={true}
+            style={styles.progressBar}
+          />
+
+          {state === 'locked-rewards' && (
+            <View
+              style={styles.rewardsLockedSection}
+              testID={poolStatusSheetTestIds.rewardsLockedSection}>
+              <Row
+                alignItems="center"
+                justifyContent="space-between"
+                style={styles.rewardsLockedHeader}>
+                <Text.M>{t('v2.pool-status.rewards-locked')}</Text.M>
+              </Row>
+              <Button.Critical
+                label={t('v2.pool-status.delegate-vote')}
+                size="large"
+                onPress={props.onDelegateVote}
+                testID={poolStatusSheetTestIds.delegateVoteButton}
+              />
+            </View>
+          )}
+
+          {saturationWarningMessage && (
+            <Text.S
+              style={styles.warningText}
+              testID={poolStatusSheetTestIds.saturationWarning}>
+              {saturationWarningMessage}
+            </Text.S>
+          )}
+        </View>
+      </View>
+    </Sheet.Scroll>
   );
 };
 
 export const PoolStatusSheetSkeleton = () => {
-  const { t } = useTranslation();
   const { theme } = useTheme();
-  const styles = useMemo(
-    () => getStyles(theme, theme.text.secondary, 0),
-    [theme],
-  );
+  const styles = useMemo(() => getStyles(theme, theme.text.secondary), [theme]);
 
   return (
-    <>
-      <SheetHeader title={t('v2.pool-status.title')} />
-      <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
-        <View
-          style={styles.container}
-          testID={poolStatusSheetTestIds.container}>
-          <View style={styles.avatarContainer}>
-            <Shimmer width={64} height={64} borderRadius={16} />
-          </View>
-
-          <Shimmer.M width="long" />
-          <Shimmer.S width="short" />
-
-          <View style={styles.dividerContainer}>
-            <Divider />
-          </View>
-
-          <Row
-            style={styles.amountsRow}
-            justifyContent="space-between"
-            alignItems="flex-start">
-            <View style={styles.amountColumn}>
-              <Shimmer.XS width="medium" />
-              <Shimmer.L width="medium" />
-            </View>
-            <View style={styles.verticalDivider} />
-            <View style={styles.amountColumn}>
-              <Shimmer.XS width="medium" />
-              <Shimmer.L width="medium" />
-            </View>
-          </Row>
-
-          <View style={styles.dividerContainer}>
-            <Divider />
-          </View>
-
-          <View style={styles.stakeKeySection}>
-            <Shimmer.XS width="short" />
-            <Shimmer.S width="long" />
-          </View>
-
-          <View style={styles.dividerContainer}>
-            <Divider />
-          </View>
-
-          <View style={styles.saturationSection}>
-            <Shimmer.S width="short" />
-            <Shimmer width={320} height={18} borderRadius={8} />
-          </View>
+    <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container} testID={poolStatusSheetTestIds.container}>
+        <View style={styles.avatarContainer}>
+          <Shimmer width={64} height={64} borderRadius={16} />
         </View>
-      </Sheet.Scroll>
-    </>
+
+        <Shimmer.M width="long" />
+        <Shimmer.S width="short" />
+
+        <View style={styles.dividerContainer}>
+          <Divider />
+        </View>
+
+        <Row
+          style={styles.amountsRow}
+          justifyContent="space-between"
+          alignItems="flex-start">
+          <View style={styles.amountColumn}>
+            <Shimmer.XS width="medium" />
+            <Shimmer.L width="medium" />
+          </View>
+          <View style={styles.verticalDivider} />
+          <View style={styles.amountColumn}>
+            <Shimmer.XS width="medium" />
+            <Shimmer.L width="medium" />
+          </View>
+        </Row>
+
+        <View style={styles.dividerContainer}>
+          <Divider />
+        </View>
+
+        <View style={styles.stakeKeySection}>
+          <Shimmer.XS width="short" />
+          <Shimmer.S width="long" />
+        </View>
+
+        <View style={styles.dividerContainer}>
+          <Divider />
+        </View>
+
+        <View style={styles.saturationSection}>
+          <Shimmer.S width="short" />
+          <Shimmer width={320} height={18} borderRadius={8} />
+        </View>
+      </View>
+    </Sheet.Scroll>
   );
 };
 
-const getStyles = (theme: Theme, warningColor: string, paddingBottom: number) =>
+const getStyles = (theme: Theme, warningColor: string) =>
   StyleSheet.create({
     scrollContainer: {
-      marginLeft: spacing.S,
-      marginRight: spacing.S,
-      paddingBottom: paddingBottom || spacing.XL,
+      marginHorizontal: spacing.S,
+      paddingBottom: spacing.XL,
     },
     container: {
       alignItems: 'center',
@@ -320,8 +247,7 @@ const getStyles = (theme: Theme, warningColor: string, paddingBottom: number) =>
     },
     primaryWarning: {
       textAlign: 'center',
-      marginTop: spacing.M,
-      marginBottom: spacing.M,
+      marginVertical: spacing.M,
       color: warningColor,
     },
     warningText: {
@@ -333,8 +259,7 @@ const getStyles = (theme: Theme, warningColor: string, paddingBottom: number) =>
     },
     amountsRow: {
       width: '100%',
-      marginTop: spacing.M,
-      marginBottom: spacing.M,
+      marginVertical: spacing.M,
     },
     amountColumn: {
       flex: 1,
@@ -347,8 +272,7 @@ const getStyles = (theme: Theme, warningColor: string, paddingBottom: number) =>
     },
     stakeKeySection: {
       width: '100%',
-      marginTop: spacing.M,
-      marginBottom: spacing.M,
+      marginVertical: spacing.M,
       gap: spacing.XS,
     },
     saturationSection: {
@@ -363,8 +287,7 @@ const getStyles = (theme: Theme, warningColor: string, paddingBottom: number) =>
     },
     rewardsLockedSection: {
       width: '100%',
-      marginTop: spacing.M,
-      marginBottom: spacing.M,
+      marginVertical: spacing.M,
       gap: spacing.M,
     },
     rewardsLockedHeader: {

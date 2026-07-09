@@ -89,7 +89,7 @@ export const useBrowsePoolFiltersSheet = (
   );
 
   const navigate = (option?: BrowsePoolSortOption) => {
-    NavigationControls.sheets.navigate(
+    NavigationControls.navigate(
       SheetRoutes.BrowsePool,
       {
         accountId: params.accountId,
@@ -133,7 +133,10 @@ export const useBrowsePoolFiltersSheet = (
 
     onConfirm: () => {
       if (localOption) {
-        trackEvent('staking | pool | sort | press', { sortBy: localOption });
+        trackEvent('staking | pool | sort | press', {
+          sortBy: localOption,
+          sortOrder: localOrder,
+        });
       }
       navigate(localOption);
     },

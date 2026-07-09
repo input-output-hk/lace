@@ -1,5 +1,9 @@
 import type { TranslationKey } from '@lace-contract/i18n';
-import type { SideEffectDependencies } from '@lace-contract/module';
+import type {
+  ScopedSelectors,
+  SideEffectDependencies,
+  StateObservables,
+} from '@lace-contract/module';
 import type { Token, TokenId } from '@lace-contract/tokens';
 import type { AccountId, AnyWallet } from '@lace-contract/wallet-repo';
 import type { BlockchainAssigned, ErrorObject } from '@lace-lib/util-store';
@@ -105,7 +109,10 @@ export type SubmitTxParams<BSSendFlowData = unknown> = BlockchainAssigned<{
 }>;
 
 export type TxSubmissionResult = Result<
-  { txId: TxId },
+  {
+    txId: TxId;
+    blockchainSpecificActivityMetadata?: unknown;
+  },
   {
     error?: ErrorObject;
     errorTranslationKeys: TxErrorTranslationKeys;
@@ -137,6 +144,7 @@ export type MakeTxExecutorImplementation<
   BSTokenMetadata = unknown,
 > = (
   dependencies: SideEffectDependencies,
+  stateObservables: StateObservables<ScopedSelectors>,
 ) => TxExecutorImplementation<BSSendFlowData, BSTokenMetadata>;
 
 export type TxExecutorImplementationMethodName = keyof Omit<

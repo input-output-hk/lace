@@ -3,76 +3,51 @@ import { StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
 import { Text, Icon } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { footerHeight, Sheet } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens/theme/types';
 
 interface HardwareWalletDiscoveryErrorProps {
-  title: string;
-  errorCode: string;
+  errorMessage: string;
   instructionText: string;
   detailText: string;
   linkText: string;
-  cancelButtonLabel: string;
-  onClose?: () => void;
   testID?: string;
-  closeButtonTestID?: string;
 }
 
 export const HardwareWalletDiscoveryError = ({
-  title,
-  errorCode,
+  errorMessage,
   instructionText,
   detailText,
   linkText,
-  cancelButtonLabel,
-  onClose,
   testID = 'hardware-wallet-discovery-error-sheet',
-  closeButtonTestID = 'hardware-wallet-discovery-error-close-button',
 }: HardwareWalletDiscoveryErrorProps) => {
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(
-    () => getStyles(theme, onClose ? footerHeight : 0),
-    [theme, onClose, footerHeight],
-  );
+  const styles = useMemo(() => getStyles(theme), [theme, footerHeight]);
 
   return (
-    <>
-      <SheetHeader title={title} />
-      <Sheet.Scroll
-        testID={testID}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.content}>
-          <Icon name="UsbError" size={64} color={theme.background.negative} />
-          <Text.M style={styles.errorCode}>Error {errorCode}</Text.M>
-          <View style={styles.instructionContainer}>
-            <Icon name="InformationCircle" size={16} />
-            <Text.S style={styles.instructionText}>{instructionText}</Text.S>
-          </View>
-          <Text.S style={styles.detailText}>
-            {detailText} <Text.S style={styles.linkText}>{linkText}</Text.S>
-          </Text.S>
+    <Sheet.Scroll
+      testID={testID}
+      contentContainerStyle={styles.contentContainer}>
+      <View style={styles.content}>
+        <Icon name="UsbError" size={64} color={theme.background.negative} />
+        <Text.M style={styles.errorMessage}>{errorMessage}</Text.M>
+        <View style={styles.instructionContainer}>
+          <Icon name="InformationCircle" size={16} />
+          <Text.S style={styles.instructionText}>{instructionText}</Text.S>
         </View>
-      </Sheet.Scroll>
-      {onClose && (
-        <SheetFooter
-          primaryButton={{
-            label: cancelButtonLabel,
-            onPress: onClose,
-            testID: closeButtonTestID,
-          }}
-        />
-      )}
-    </>
+        <Text.S style={styles.detailText}>
+          {detailText} <Text.S style={styles.linkText}>{linkText}</Text.S>
+        </Text.S>
+      </View>
+    </Sheet.Scroll>
   );
 };
 
-const getStyles = (theme: Theme, paddingBottom: number) =>
+const getStyles = (theme: Theme) =>
   StyleSheet.create({
     contentContainer: {
-      paddingBottom,
+      paddingBottom: footerHeight.horizontal,
     },
     content: {
       flex: 1,
@@ -80,7 +55,7 @@ const getStyles = (theme: Theme, paddingBottom: number) =>
       alignItems: 'center',
       gap: spacing.M,
     },
-    errorCode: {
+    errorMessage: {
       textAlign: 'center',
     },
     instructionContainer: {

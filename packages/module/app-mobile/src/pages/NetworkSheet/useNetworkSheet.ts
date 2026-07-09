@@ -87,7 +87,7 @@ export const useNetworkSheet = () => {
   const handleNetworkTypeChange = useCallback(
     (value: string) => {
       trackEvent('network selection | network type | press', {
-        network: value,
+        networkType: value,
       });
       setNetworkTypeValue(value);
     },
@@ -97,7 +97,7 @@ export const useNetworkSheet = () => {
   const handleTestnetChange = useCallback(
     (blockchainName: string, value: string) => {
       trackEvent('testnet selection | testnet | press', {
-        blockchainName,
+        blockchain: blockchainName,
         network: value,
       });
       setSelectedTestnets(previous => ({
@@ -110,16 +110,16 @@ export const useNetworkSheet = () => {
 
   const handleCancel = useCallback(() => {
     trackEvent('network selection | cancel | press');
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [trackEvent]);
 
   const handleConfirm = useCallback(() => {
     trackEvent('network selection | confirm | press');
-    if (networkTypeValue !== currentNetworkType) {
-      setNetworkType(networkTypeValue as NetworkType);
-    }
 
-    // Persist selected testnets by updating blockchainNetworks
+    // Persist the per-blockchain testnet selections BEFORE flipping
+    // networkType, so the active chainId never resolves through a stale
+    // testnet selection (e.g. defaulting to preprod when the user picked
+    // preview) and triggers a sync for a chain the user never confirmed.
     for (const [blockchain, testnetId] of Object.entries(selectedTestnets)) {
       const existingConfig = blockchainNetworks?.[blockchain as BlockchainName];
       if (existingConfig) {
@@ -131,7 +131,11 @@ export const useNetworkSheet = () => {
       }
     }
 
-    NavigationControls.sheets.close();
+    if (networkTypeValue !== currentNetworkType) {
+      setNetworkType(networkTypeValue as NetworkType);
+    }
+
+    NavigationControls.closeSheet();
   }, [
     networkTypeValue,
     currentNetworkType,

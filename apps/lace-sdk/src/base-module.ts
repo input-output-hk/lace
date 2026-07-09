@@ -21,12 +21,16 @@ import { signerStoreContract } from '@lace-contract/signer';
 // TODO: re-add sendFlowStoreContract and txExecutorStoreContract once
 // @lace-contract/authentication-prompt is decoupled from react-native.
 // Chain: send-flow → tx-executor → authentication-prompt → react-native.
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
+
+import store from './base-module-store';
 
 const implementsContracts = combineContracts([
   activitiesStoreContract,
   networkStoreContract,
   failuresStoreContract,
+  walletActiveStateDependencyContract,
   walletRepoStoreContract,
   signerStoreContract,
 ] as const);
@@ -34,5 +38,6 @@ const implementsContracts = combineContracts([
 export const sdkBaseModule = inferModuleContext({
   moduleName: ModuleName('lace-sdk-base'),
   implements: implementsContracts,
+  store,
   addons: {},
 });

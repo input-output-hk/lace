@@ -104,7 +104,6 @@ export const AssetsSection = ({
 
         return (
           <CustomTextInput
-            isWithinBottomSheet
             key={asset.token.tokenId}
             testID={`send-amount-${index}`}
             avatar={{

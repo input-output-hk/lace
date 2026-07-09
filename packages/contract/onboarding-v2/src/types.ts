@@ -11,6 +11,7 @@ import type {
 import type {
   DerivationType,
   DeviceDescriptor,
+  HardwareDeviceBleFilter,
   HardwareDeviceUsbFilter,
   HardwareIntegrationId,
 } from '@lace-lib/util-hw';
@@ -21,8 +22,10 @@ export type {
   AttemptCreateHardwareWalletPayload,
   DerivationType,
   DeviceDescriptor,
+  HardwareDeviceBleFilter,
   HardwareDeviceUsbFilter,
   HardwareIntegrationId,
+  HardwareVendorName,
 } from '@lace-lib/util-hw';
 
 /** Advertises that a hardware wallet type supports a specific blockchain. */
@@ -97,6 +100,7 @@ export interface HardwareOnboardingOption {
   isHwDevice: true;
   device: HardwareWalletDeviceMetadata;
   usbFilters?: HardwareDeviceUsbFilter[];
+  bleFilters?: HardwareDeviceBleFilter[];
   /** If provided, show derivation type selector in setup step. */
   derivationTypes?: DerivationType[];
 }

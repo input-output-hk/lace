@@ -38,8 +38,13 @@ export type Features = {
 export type RuntimeFeatures = {
   availableModules: LaceModule[];
   loaded: Features;
+  fallback?: { incompatibleFlags: FeatureFlag[] };
 };
 
 export type FeatureFlagProvider = {
   featureFlags$: Observable<FeatureFlag[]>;
+};
+
+export type FeatureFlagRefreshTrigger = {
+  featureFlagRefreshTrigger$: Observable<void>;
 };

@@ -39,7 +39,7 @@ export const useLanguageSheet = () => {
   const handleCancel = useCallback(() => {
     trackEvent('language selection | cancel | press');
     setTemporarySelectedLanguage(selectedLanguage);
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [selectedLanguage, trackEvent]);
 
   const onConfirm = useCallback(() => {
@@ -47,7 +47,7 @@ export const useLanguageSheet = () => {
     trackEvent('language selection | confirm | press', {
       language: temporarySelectedLanguage,
     });
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [temporarySelectedLanguage, setLanguage, trackEvent]);
 
   const title = t('v2.pages.settings.options.language');

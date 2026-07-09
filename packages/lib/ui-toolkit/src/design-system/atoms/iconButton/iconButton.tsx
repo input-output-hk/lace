@@ -1,8 +1,8 @@
 import type { ViewStyle, TextStyle } from 'react-native';
+import type { PressableProps } from 'react-native';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Pressable } from 'react-native';
 import ReAnimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,7 +14,6 @@ import { Text } from '../';
 import { useTheme, radius, spacing } from '../../../design-tokens';
 
 import type { Theme } from '../../../design-tokens';
-import type { PressableProps } from 'react-native-gesture-handler';
 
 export type IconButtonProps = Omit<PressableProps, 'style'> & {
   icon?: React.ReactElement;

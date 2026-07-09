@@ -8,10 +8,10 @@ import {
   midnightWallets$,
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, ByteArray, Timestamp } from '@lace-sdk/util';
-import { HexBytes } from '@lace-sdk/util';
+import { whileActive } from '@lace-contract/wallet-active-state';
+import { BigNumber, ByteArray, HexBytes, Timestamp } from '@lace-sdk/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
-import { createKeystore } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import { createKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import isEqual from 'lodash/isEqual';
 import {
   catchError,
@@ -74,7 +74,7 @@ import type {
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
 
-type Action = ActionType<ActionCreators>;
+type MidnightWatchAction = ActionType<ActionCreators>;
 
 const filterMidnightAccounts =
   (network: MidnightNetwork) => (source$: Observable<AnyAccount[]>) =>
@@ -102,7 +102,9 @@ const getFeatureFlagByName = (
   featureFlags: FeatureFlag[],
   featureFlagName: string,
 ) =>
-  featureFlags.find(featureFlag => featureFlag.key === featureFlagName) || null;
+  featureFlags.find(featureFlag => featureFlag.key === featureFlagName) ?? null;
+
+const compareTokenIds = (a: string, b: string) => a.localeCompare(b);
 
 const sumCoinsValueByKind = (
   status: CoinStatus,
@@ -147,11 +149,18 @@ const buildAddressTokenData = ({
 // so this will emit as soon as the wallet is created/restored.
 // dustBalance is also persisted in Redux to show cached value on app restart
 // before the wallet observable chain is set up.
+//
+// Sum over totalCoins (not state.dust.balance) so a pending dust spend doesn't show as 0.
 export const updateDustBalance =
   (wallet: MidnightWallet): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
-      map(state => state.dust.balance(new Date())),
+      map(state =>
+        state.dust.totalCoins.reduce(
+          (sum, coin) => sum + coin.generatedNow,
+          0n,
+        ),
+      ),
       distinctUntilChanged(),
       map(BigNumber),
       map(dustBalance =>
@@ -197,8 +206,8 @@ const buildTokenMetadata = ({
     distinctUntilChanged(deepEquals),
     filter(({ balances, coinsMap }) => {
       const hasTokenIdsChanged = !isEqual(
-        Object.keys(balances).toSorted(),
-        Object.keys(existingTokenMetadata).toSorted(),
+        Object.keys(balances).toSorted(compareTokenIds),
+        Object.keys(existingTokenMetadata).toSorted(compareTokenIds),
       );
       if (hasTokenIdsChanged) return true;
 
@@ -217,7 +226,7 @@ const buildTokenMetadata = ({
           return {
             ...existingMetadata,
             blockchainSpecific: {
-              ...(existingMetadata.blockchainSpecific || {}),
+              ...(existingMetadata.blockchainSpecific as object),
               coins: coinsMap[tokenId],
             },
           };
@@ -319,12 +328,11 @@ export const updateSyncProgress =
           const existingOperation =
             accountSyncStatus?.pendingSync?.operations[operationId];
           if (
-            !accountSyncStatus ||
-            !accountSyncStatus.pendingSync ||
+            !accountSyncStatus?.pendingSync ||
             !existingOperation ||
             existingOperation.status === 'Pending'
           ) {
-            const syncActions: Action[] = [
+            const syncActions: MidnightWatchAction[] = [
               actions.sync.addSyncOperation({
                 accountId,
                 operation: {
@@ -352,7 +360,7 @@ export const updateSyncProgress =
           }
 
           // Update progress for existing operation
-          const progressActions: Action[] = [
+          const progressActions: MidnightWatchAction[] = [
             actions.sync.updateSyncProgress({
               accountId,
               operationId,
@@ -378,13 +386,13 @@ export const updateSyncProgress =
 // Dust generation details subscription - extracts full dust info from SDK.
 // This provides pre-computed values (currentValue, maxCap, rate, etc.)
 // directly from the SDK, eliminating the need for manual calculations.
+// totalCoins (not availableCoins) so a pending dust spend doesn't show as 0.
 export const updateDustGenerationDetails =
   (wallet: MidnightWallet): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
       map((state): DustGenerationDetails | undefined => {
-        const now = new Date();
-        const coinsWithFullInfo = state.dust.availableCoinsWithFullInfo(now);
+        const coinsWithFullInfo = state.dust.totalCoins;
         if (coinsWithFullInfo.length === 0) {
           return undefined;
         }
@@ -596,6 +604,45 @@ const decryptKey = async (
 ): Promise<ByteArray> =>
   ByteArray(await emip3decrypt(ByteArray.fromHex(encryptedKey), authSecret));
 
+/**
+ * Pre-computes ledger key objects from decrypted key buffers and assembles
+ * the AccountKeys structure. Extracted as a top-level helper to avoid
+ * deeply nested function expressions inside the requestKeys observable chain.
+ */
+const buildAccountKeys = (
+  [nightKeyBuffer, dustKeyBuffer, zswapKeyBuffer]: readonly [
+    ByteArray,
+    ByteArray,
+    ByteArray,
+  ],
+  networkId: MidnightSDKNetworkId,
+): AccountKeys => {
+  // Pre-compute ledger key objects once to avoid repeated fromSeed() calls
+  const dustSecretKey = ledger.DustSecretKey.fromSeed(dustKeyBuffer);
+  const zswapSecretKeys = ledger.ZswapSecretKeys.fromSeed(zswapKeyBuffer);
+
+  return {
+    unshieldedKeystore: createKeystore(nightKeyBuffer, networkId),
+    walletKeys: {
+      dustKeyBuffer,
+      zswapKeyBuffer,
+      dustSecretKey,
+      zswapSecretKeys,
+    },
+    clear: () => {
+      nightKeyBuffer.fill(0);
+      zswapKeyBuffer.fill(0);
+      // Dust key clearing is intentionally skipped: the Dust wallet
+      // is never stopped once started (destroying it would corrupt
+      // shared state), and clearing the key would invalidate any
+      // future signing. Pending the filtered dust wallet indexer.
+      // dustKeyBuffer.fill(0);
+      // dustSecretKey.clear();
+      zswapSecretKeys.clear();
+    },
+  };
+};
+
 type AccountKeyManagerResult = {
   keyManager: AccountKeyManager;
   destroyAccountKeyManager: () => void;
@@ -635,33 +682,7 @@ const createAccountKeyManager =
             ),
           ]),
         ),
-      ).pipe(
-        map(([nightKeyBuffer, dustKeyBuffer, zswapKeyBuffer]) => {
-          // Pre-compute ledger key objects once to avoid repeated fromSeed() calls
-          const dustSecretKey = ledger.DustSecretKey.fromSeed(dustKeyBuffer);
-          const zswapSecretKeys =
-            ledger.ZswapSecretKeys.fromSeed(zswapKeyBuffer);
-
-          return {
-            unshieldedKeystore: createKeystore(nightKeyBuffer, networkId),
-            walletKeys: {
-              dustKeyBuffer,
-              zswapKeyBuffer,
-              dustSecretKey,
-              zswapSecretKeys,
-            },
-            clear: () => {
-              nightKeyBuffer.fill(0);
-              zswapKeyBuffer.fill(0);
-              // TODO: uncomment this once filtered dust wallet indexer is available.
-              // We're never stopping Dust wallet once started because it would be 'destroyed' otherwise.
-              // dustKeyBuffer.fill(0);
-              // dustSecretKey.clear();
-              zswapSecretKeys.clear();
-            },
-          } satisfies AccountKeys;
-        }),
-      );
+      ).pipe(map(buffers => buildAccountKeys(buffers, networkId)));
 
     const keyManager = createAccountKeyManagerImpl({ requestKeys });
 
@@ -730,6 +751,71 @@ export const watchMidnightAccount =
       );
   };
 
+type WatchSingleMidnightAccountOptions = {
+  account: InMemoryWalletAccount<MidnightAccountProps>;
+  accounts$: Observable<InMemoryWalletAccount<MidnightAccountProps>[]>;
+  config: MidnightNetworkConfig;
+  store: CollectionStorage<SerializedMidnightWallet>;
+  watchAccount: typeof watchMidnightAccount;
+};
+
+const watchSingleMidnightAccount =
+  ({
+    account,
+    accounts$,
+    config,
+    store,
+    watchAccount,
+  }: WatchSingleMidnightAccountOptions): SideEffect =>
+  (actionObservables, selectorObservables, dependencies) =>
+    watchAccount(account, config, store)(
+      actionObservables,
+      selectorObservables,
+      dependencies,
+    ).pipe(
+      takeUntil(accounts$.pipe(noLongerHasAccount(account.accountId))),
+      catchError(error => {
+        dependencies.logger.error('Account watch failure:', error);
+        return EMPTY;
+      }),
+    );
+
+const watchMidnightAccountsInNetwork =
+  (
+    currentNetwork: MidnightNetwork,
+    store: CollectionStorage<SerializedMidnightWallet>,
+    watchAccount: typeof watchMidnightAccount,
+  ): SideEffect =>
+  (actionObservables, selectorObservables, dependencies) => {
+    const accounts$ = combineLatest([
+      selectorObservables.wallets.selectActiveNetworkAccounts$,
+      selectorObservables.wallets.selectIsWalletRepoMigrating$,
+    ]).pipe(
+      map(([accounts, isWalletRepoMigrating]) =>
+        isWalletRepoMigrating ? [] : accounts,
+      ),
+      filterMidnightAccounts(currentNetwork),
+      share(),
+    );
+    return accounts$.pipe(
+      mergeAll(),
+      groupBy(account => account.accountId),
+      mergeMap(group$ =>
+        group$.pipe(
+          exhaustMap(account =>
+            watchSingleMidnightAccount({
+              account,
+              accounts$,
+              config: currentNetwork.config,
+              store,
+              watchAccount,
+            })(actionObservables, selectorObservables, dependencies),
+          ),
+        ),
+      ),
+    );
+  };
+
 /**
  * Creates a side effect that manages watching all Midnight accounts.
  *
@@ -751,6 +837,16 @@ export const watchMidnightAccounts =
     watchAccount: typeof watchMidnightAccount,
   ): SideEffect =>
   (actionObservables, selectorObservables, dependencies) =>
+    // `whileActive` MUST stay at the end of the pipe. On lock, the upstream
+    // unsubscription propagates through `mergeMap`'s inner subscription which
+    // fires `watchMidnightAccount`'s nested `finalize` blocks: `wallet.stop()`
+    // closes the indexer + node-relay WebSocket connections, the wallet is
+    // removed from `midnightWallets$`, and `destroyAccountKeyManager` zeroizes
+    // cached keys. On unlock, a fresh subscription rebuilds via
+    // `startMidnightAccountWallet`, which restores from the persisted
+    // `SerializedMidnightWallet` (written every 5s by the SDK) — the SDK
+    // resumes from the stored `appliedIndex` rather than performing a full
+    // resync. See ADR 25.
     merge(of(0), actionObservables.midnight.restartWalletWatch$).pipe(
       switchMap(() =>
         selectorObservables.midnightContext.selectCurrentNetwork$.pipe(
@@ -758,39 +854,12 @@ export const watchMidnightAccounts =
           share(),
         ),
       ),
-      switchMap(currentNetwork => {
-        const accounts$ = combineLatest([
-          selectorObservables.wallets.selectActiveNetworkAccounts$,
-          selectorObservables.wallets.selectIsWalletRepoMigrating$,
-        ]).pipe(
-          map(([accounts, isWalletRepoMigrating]) =>
-            isWalletRepoMigrating ? [] : accounts,
-          ),
-          filterMidnightAccounts(currentNetwork),
-          share(),
-        );
-        return accounts$.pipe(
-          mergeAll(),
-          groupBy(account => account.accountId),
-          mergeMap(group$ =>
-            group$.pipe(
-              exhaustMap(account =>
-                watchAccount(account, currentNetwork.config, store)(
-                  actionObservables,
-                  selectorObservables,
-                  dependencies,
-                ).pipe(
-                  takeUntil(
-                    accounts$.pipe(noLongerHasAccount(account.accountId)),
-                  ),
-                  catchError(error => {
-                    dependencies.logger.error('Account watch failure:', error);
-                    return EMPTY;
-                  }),
-                ),
-              ),
-            ),
-          ),
-        );
-      }),
+      switchMap(currentNetwork =>
+        watchMidnightAccountsInNetwork(currentNetwork, store, watchAccount)(
+          actionObservables,
+          selectorObservables,
+          dependencies,
+        ),
+      ),
+      whileActive(dependencies.isWalletActive$),
     );

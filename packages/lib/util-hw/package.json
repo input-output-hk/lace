@@ -6,12 +6,16 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./extension": "./src/extension.ts",
-    "./extension-ui": "./src/extension-ui/index.ts"
+    "./extension": "./src/extension/index.ts",
+    "./extension-ui": "./src/extension-ui/index.ts",
+    "./mobile": "./src/mobile/index.ts"
   },
   "main": "src/index.ts",
   "dependencies": {
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "^7.1.4",
     "@lace-contract/i18n": "*",
-    "@lace-lib/util-store": "*"
+    "@lace-lib/util-store": "*",
+    "@ledgerhq/react-native-hw-transport-ble": "^6.40.1",
+    "react-native-ble-plx": "^3.5.1"
   }
 }

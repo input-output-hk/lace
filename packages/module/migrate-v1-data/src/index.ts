@@ -1,3 +1,4 @@
+import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appLockStoreContract } from '@lace-contract/app-lock';
 import { appLockSetupAddon } from '@lace-contract/app-lock';
 import { dappConnectorStoreContract } from '@lace-contract/dapp-connector';
@@ -30,6 +31,7 @@ const implementsContracts = combineContracts([
   globalOverlaysAddonContract,
 ] as const);
 const dependsOnContracts = combineContracts([
+  analyticsStoreContract,
   appLockStoreContract,
   dappConnectorStoreContract,
   viewsStoreContract,

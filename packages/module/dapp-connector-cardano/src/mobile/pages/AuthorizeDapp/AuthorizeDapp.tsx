@@ -1,4 +1,6 @@
-import React from 'react';
+import { useTranslation } from '@lace-contract/i18n';
+import { Sheet, useTheme } from '@lace-lib/ui-toolkit';
+import React, { useEffect, useMemo } from 'react';
 
 import { AuthorizeDappSheet } from '../../../common/components';
 import { useLaceSelector } from '../../../common/hooks';
@@ -18,6 +20,7 @@ const getImageUrlFromIcon = (
 export const AuthorizeDapp = (
   props: SheetScreenProps<SheetRoutes.AuthorizeDapp>,
 ) => {
+  const { t } = useTranslation();
   const {
     displayDapp,
     displayOrigin,
@@ -28,13 +31,51 @@ export const AuthorizeDapp = (
     handleSetAccountId,
     selectedAccount,
   } = useAuthorizeDapp(props);
+  const { theme } = useTheme();
 
   const cardanoAccounts = useLaceSelector(
     'wallets.selectActiveNetworkAccountsByBlockchainName',
     CARDANO_ACCOUNTS_PARAMS,
   );
+  const activeWallets = useLaceSelector('wallets.selectActiveNetworkWallets');
+  const walletNameByWalletId = useMemo(
+    () =>
+      Object.fromEntries(
+        activeWallets.map(wallet => [wallet.walletId, wallet.metadata.name]),
+      ),
+    [activeWallets],
+  );
 
   const selectedAccountBalance = useSelectedAccountBalance(selectedAccount);
+
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: <Sheet.Header title={headerTitle} />,
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            disabled: !selectedAccount,
+            label: t('dapp-connector.cardano.authorize.button'),
+            onPress: handleAuthorize,
+            iconColor: theme.brand.white,
+          }}
+          secondaryButton={{
+            label: t('dapp-connector.cardano.authorize.cancel'),
+            onPress: handleReject,
+          }}
+          showDivider={true}
+        />
+      ),
+    });
+  }, [
+    props.navigation,
+    headerTitle,
+    selectedAccount,
+    handleAuthorize,
+    handleReject,
+    theme.brand.white,
+    t,
+  ]);
 
   return (
     <AuthorizeDappSheet
@@ -43,6 +84,7 @@ export const AuthorizeDapp = (
       url={displayOrigin ?? ''}
       imageUrl={getImageUrlFromIcon(displayDapp?.icon)}
       accounts={cardanoAccounts}
+      walletNameByWalletId={walletNameByWalletId}
       selectedAccount={selectedAccount}
       onSelectAccount={handleSetAccountId}
       onAuthorize={handleAuthorize}

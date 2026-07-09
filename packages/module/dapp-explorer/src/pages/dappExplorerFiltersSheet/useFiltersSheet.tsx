@@ -12,7 +12,7 @@ import type { DappCategory } from '../../types';
 import type { FilterSheetProps } from '@lace-lib/ui-toolkit';
 import type { BlockchainName } from '@lace-lib/util-store';
 
-export const useFiltersSheet = (): FilterSheetProps => {
+export const useFiltersSheet = () => {
   const { t } = useTranslation();
   const activeBlockchains = useLaceSelector('wallets.selectActiveBlockchains');
   const dappSearchParams = useLaceSelector('dappExplorer.getSearchParams');
@@ -40,23 +40,12 @@ export const useFiltersSheet = (): FilterSheetProps => {
     setLocalCategory(dappSearchParams?.category);
   }, [dappSearchParams?.chain, dappSearchParams?.category]);
 
-  // Auto-select blockchain if only one is available and none is currently selected
-  useEffect(() => {
-    if (
-      activeBlockchains &&
-      activeBlockchains.length === 1 &&
-      dappSearchParams.chain === undefined
-    ) {
-      setSearchParams({ chain: activeBlockchains[0] });
-    }
-  }, [activeBlockchains, dappSearchParams.chain, setSearchParams]);
-
   const handleConfirm = () => {
     setSearchParams({
       chain: localChain,
       category: localCategory,
     });
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   };
 
   const handleCancel = () => {

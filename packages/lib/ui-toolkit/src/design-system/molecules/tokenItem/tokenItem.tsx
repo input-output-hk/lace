@@ -1,7 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
 import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,

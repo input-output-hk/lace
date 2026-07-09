@@ -1,9 +1,3 @@
-import {
-  createSlotTimeCalc,
-  epochSlotsCalc,
-  Cardano,
-  type EraSummary,
-} from '@cardano-sdk/core';
 import { useAnalytics } from '@lace-contract/analytics';
 import {
   convertLovelacesToAda,
@@ -14,15 +8,11 @@ import { NavigationControls } from '@lace-lib/navigation';
 import { SheetRoutes } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
 import { getOption, getOrder } from '@lace-lib/ui-toolkit';
-import {
-  compactNumberWithUnit,
-  formatEpochEnd,
-  UnitThreshold,
-} from '@lace-lib/util-render';
+import { compactNumberWithUnit, UnitThreshold } from '@lace-lib/util-render';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useLaceSelector, useSearchStakePools } from '../../hooks';
-import { formatPercentages } from '../../utils/formatting';
+import { useNetworkInfo } from '../../hooks/useNetworkInfo';
 
 import type { LacePartialStakePool } from '@lace-contract/cardano-stake-pools';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -38,44 +28,6 @@ const GRID_COLUMNS: Record<LayoutSize, number> = {
   compact: 2,
   medium: 3,
   large: 4,
-};
-
-const calculateEpochFromSlot = (
-  slot: Cardano.Slot,
-  eraSummaries: readonly EraSummary[],
-): Cardano.EpochNo => {
-  const mutableEraSummaries = eraSummaries as EraSummary[];
-  // Find the era that contains this slot
-  for (let index = mutableEraSummaries.length - 1; index >= 0; index--) {
-    const era = mutableEraSummaries[index];
-    if (slot >= era.start.slot) {
-      const slotsSinceEraStart = slot - era.start.slot;
-      const epochLength = era.parameters.epochLength;
-      const epoch = Math.floor(slotsSinceEraStart / epochLength);
-      // Find the starting epoch of this era
-      let startingEpoch = 0;
-      for (let index_ = 0; index_ < index; index_++) {
-        const previousEra = mutableEraSummaries[index_];
-        const previousEpochLength = previousEra.parameters.epochLength;
-        const previousEraSlots =
-          (mutableEraSummaries[index_ + 1]?.start.slot ?? Infinity) -
-          previousEra.start.slot;
-        startingEpoch += Math.floor(previousEraSlots / previousEpochLength);
-      }
-      return Cardano.EpochNo(startingEpoch + epoch);
-    }
-  }
-  return Cardano.EpochNo(0);
-};
-
-const calculateEpochEnd = (
-  currentEpoch: Cardano.EpochNo,
-  eraSummaries: readonly EraSummary[],
-): Date => {
-  const nextEpoch = (currentEpoch + 1) as Cardano.EpochNo;
-  const mutableEraSummaries = eraSummaries as EraSummary[];
-  const slotTimeCalc = createSlotTimeCalc(mutableEraSummaries);
-  return slotTimeCalc(epochSlotsCalc(nextEpoch, mutableEraSummaries).firstSlot);
 };
 
 type PoolComparator = (
@@ -139,8 +91,7 @@ export const useBrowsePool = ({
   const [searchValue, setSearchValue] = useState(searchQuery || '');
   const networkType = useLaceSelector('network.selectNetworkType');
 
-  const { pools, isLoading, totalPoolsCount } =
-    useSearchStakePools(searchValue);
+  const { pools, isLoading } = useSearchStakePools(searchValue);
 
   const accounts = useLaceSelector('cardanoContext.selectRewardAccountDetails');
   const poolId = accounts[accountId as AccountId]?.rewardAccountInfo.poolId;
@@ -156,74 +107,8 @@ export const useBrowsePool = ({
     return { selectedOption, selectedOrder, sortedPools: sorted };
   }, [browsePoolSortOption, browsePoolSortOrder, poolId, pools]);
 
-  const tip = useLaceSelector('cardanoContext.selectTip');
-  const networkData = useLaceSelector(
-    'cardanoStakePools.selectActiveNetworkData',
-  );
-  const eraSummaries = useLaceSelector('cardanoContext.selectEraSummaries');
-
   const numberOfColumns = useMemo(() => GRID_COLUMNS[layoutSize], [layoutSize]);
-
-  // Calculate epoch end timestamp
-  const epochEndTimestamp = useMemo<number | undefined>(() => {
-    if (!tip || !eraSummaries) return undefined;
-
-    const currentEpoch = calculateEpochFromSlot(tip.slot, eraSummaries);
-    const epochEndDate = calculateEpochEnd(currentEpoch, eraSummaries);
-    return epochEndDate.getTime();
-  }, [tip, eraSummaries]);
-
-  // Format endEpochValue with interval that updates every second
-  const [endEpochValueFormatted, setEndEpochValueFormatted] = useState<
-    string | undefined
-  >(undefined);
-
-  useEffect(() => {
-    if (epochEndTimestamp === undefined) {
-      setEndEpochValueFormatted(undefined);
-      return;
-    }
-
-    const timestamp = epochEndTimestamp;
-
-    // Format immediately
-    setEndEpochValueFormatted(formatEpochEnd(timestamp));
-
-    // Update every second
-    const interval = setInterval(() => {
-      setEndEpochValueFormatted(formatEpochEnd(timestamp));
-    }, 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [epochEndTimestamp]);
-
-  const networkInfoValues = useMemo(() => {
-    // Calculate currentEpochValue (require tip and eraSummaries)
-    const currentEpochValue =
-      !tip || !eraSummaries
-        ? undefined
-        : String(Number(calculateEpochFromSlot(tip.slot, eraSummaries)));
-
-    const totalPoolsValue = String(totalPoolsCount);
-
-    let stakedValue: string | undefined;
-    if (!networkData) stakedValue = undefined;
-    else {
-      const { liveStake, maxLovelaceSupply, reserves } = networkData;
-      const circulating = maxLovelaceSupply - reserves;
-      const stakedPercentage = circulating > 0 ? liveStake / circulating : 0;
-      stakedValue = `${formatPercentages(stakedPercentage)} %`;
-    }
-
-    return {
-      currentEpochValue,
-      endEpochValue: endEpochValueFormatted,
-      totalPoolsValue,
-      stakedValue,
-    };
-  }, [tip, networkData, eraSummaries, endEpochValueFormatted, totalPoolsCount]);
+  const networkInfoValues = useNetworkInfo();
 
   const { trackEvent } = useAnalytics();
   const sortedPoolsRef = useRef(sortedPools);
@@ -246,7 +131,7 @@ export const useBrowsePool = ({
   }, [searchValue, trackEvent]);
 
   const handleFilterPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.BrowsePoolFilterControls, {
+    NavigationControls.navigate(SheetRoutes.BrowsePoolFilterControls, {
       accountId,
       searchQuery: searchValue,
       browsePoolSortOption: selectedOption,
@@ -261,7 +146,7 @@ export const useBrowsePool = ({
         'staking | pool | press',
         pool?.ticker ? { ticker: pool.ticker } : undefined,
       );
-      NavigationControls.sheets.navigate(SheetRoutes.StakePoolDetails, {
+      NavigationControls.navigate(SheetRoutes.StakePoolDetails, {
         poolId,
         searchQuery: searchValue,
         accountId,

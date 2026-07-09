@@ -25,8 +25,16 @@ type RequiredMetadata<BlockchainSpecificMetadata = unknown> =
     displayDecimalPlaces?: number;
     image?: string;
     isNft?: boolean;
-    additionalProperties?: Record<string, string>;
+    additionalProperties?: Record<string, TokenMetadataValue>;
   };
+
+export type TokenMetadataValue =
+  | TokenMetadataValue[]
+  | boolean
+  | number
+  | string
+  | { [key: string]: TokenMetadataValue }
+  | null;
 
 export type TokenContextData = BlockchainAssigned<{
   accountId: AccountId;

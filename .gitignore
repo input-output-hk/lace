@@ -4,6 +4,8 @@
 .idea
 .vscode
 .cursor
+.claude/worktrees
+.claude/*.lock
 
 # dependencies
 node_modules
@@ -77,3 +79,4 @@ web-build/
 cache/
 apps/lace-mobile-e2e/artifacts
 .junie/
+/android/

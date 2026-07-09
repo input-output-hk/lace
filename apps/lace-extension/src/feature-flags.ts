@@ -94,6 +94,7 @@ const featureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('MD_MIGRATION') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SEND_FLOW') },
+  { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: FeatureFlagKey('STAKING_CENTER') },
   {
     key: FeatureFlagKey('SUPPORTED_CURRENCIES'),

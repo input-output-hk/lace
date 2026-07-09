@@ -4,6 +4,7 @@ import {
   WalletId,
   walletsActions,
 } from '@lace-contract/wallet-repo';
+import { Serializable } from '@lace-lib/util-store';
 import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { REHYDRATE } from 'redux-persist';
 import { describe, expect, it } from 'vitest';
@@ -11,12 +12,15 @@ import { describe, expect, it } from 'vitest';
 import {
   ACTIVITIES_PER_PAGE,
   activitiesActions as actions,
+  ActivitiesPaginationFailureId,
   ActivityType,
   MAX_ACTIVITIES_PER_ACCOUNT,
 } from '../../src/index';
 import { activitiesReducers, activitiesSelectors } from '../../src/store/slice';
 
 import type { ActivitiesSliceState } from '../../src/store/slice';
+import type { ActivityDetail } from '../../src/types';
+import type { Failure } from '@lace-contract/failures';
 
 describe('activities slice', () => {
   const initialState: ActivitiesSliceState = {
@@ -230,6 +234,57 @@ describe('activities slice', () => {
         expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({
           [accountId]: previousCount,
         });
+      });
+
+      it('anchors increment on loaded count when desired has drifted behind', () => {
+        // Newer-tx polling can populate `activities` before anyone has
+        // incremented `desired`; anchoring on the larger of the two ensures
+        // the first increment actually lifts desired above loaded and fires
+        // a fetch, rather than just catching desired up to loaded.
+        const state = activitiesReducers.activities(
+          {
+            ...initialState,
+            activities: {
+              [accountId]: [activity1, activity1, activity1],
+            },
+            desiredLoadedActivitiesCountPerAccount: {
+              [accountId]: 0,
+            },
+          },
+          actions.activities.incrementDesiredLoadedActivitiesCount({
+            accountId,
+          }),
+        );
+        expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({
+          [accountId]: 3 + ACTIVITIES_PER_PAGE,
+        });
+      });
+
+      // Immer must return the same state reference when the guard skips
+      // the mutation. createStateObservables (packages/contract/module)
+      // applies distinctUntilChanged to every selector, so consumers rely
+      // on this identity to avoid spurious re-emissions.
+      it('returns the same state reference when the guard skips the mutation', () => {
+        const previousCount = ACTIVITIES_PER_PAGE + 1;
+        const inputState = {
+          ...initialState,
+          desiredLoadedActivitiesCountPerAccount: {
+            [accountId]: previousCount,
+          },
+        };
+
+        const state = activitiesReducers.activities(
+          inputState,
+          actions.activities.incrementDesiredLoadedActivitiesCount({
+            accountId,
+            incrementBy: 0,
+          }),
+        );
+
+        expect(state).toBe(inputState);
+        expect(state.desiredLoadedActivitiesCountPerAccount).toBe(
+          inputState.desiredLoadedActivitiesCountPerAccount,
+        );
       });
     });
 
@@ -533,6 +588,77 @@ describe('activities slice', () => {
         ).toStrictEqual([activity1, activity3]);
       });
     });
+
+    describe('selectActivityDetails', () => {
+      const activityDetail: ActivityDetail = {
+        ...activity1,
+        address: 'addr_test1',
+        fee: '0',
+      };
+
+      it('returns the deserialized activity details', () => {
+        const state = {
+          activities: {
+            ...initialState,
+            activityDetails: Serializable.to<ActivityDetail>(activityDetail),
+          },
+        };
+
+        expect(
+          activitiesSelectors.activities.selectActivityDetails(state),
+        ).toStrictEqual(activityDetail);
+      });
+
+      it('returns undefined when no activity details are set', () => {
+        const state = { activities: initialState };
+
+        expect(
+          activitiesSelectors.activities.selectActivityDetails(state),
+        ).toBeUndefined();
+      });
+
+      it('returns the same reference across calls when the serialized payload is unchanged', () => {
+        const state = {
+          activities: {
+            ...initialState,
+            activityDetails: Serializable.to<ActivityDetail>(activityDetail),
+          },
+        };
+
+        const first =
+          activitiesSelectors.activities.selectActivityDetails(state);
+        const second =
+          activitiesSelectors.activities.selectActivityDetails(state);
+
+        expect(second).toBe(first);
+      });
+
+      it('returns a new reference when the serialized payload changes', () => {
+        const stateA = {
+          activities: {
+            ...initialState,
+            activityDetails: Serializable.to<ActivityDetail>(activityDetail),
+          },
+        };
+        const stateB = {
+          activities: {
+            ...initialState,
+            activityDetails: Serializable.to<ActivityDetail>({
+              ...activityDetail,
+              fee: '1',
+            }),
+          },
+        };
+
+        const first =
+          activitiesSelectors.activities.selectActivityDetails(stateA);
+        const second =
+          activitiesSelectors.activities.selectActivityDetails(stateB);
+
+        expect(second).not.toBe(first);
+        expect(second).toStrictEqual({ ...activityDetail, fee: '1' });
+      });
+    });
   });
 
   describe('selectHasLoadedOldestEntry', () => {
@@ -597,6 +723,7 @@ describe('activities slice', () => {
             [account2Id]: 5,
           },
         },
+        failures: { byId: {} },
       };
       expect(
         activitiesSelectors.activities.selectIsLoadingOlderActivitiesByAccount(
@@ -626,6 +753,7 @@ describe('activities slice', () => {
             [accountId]: true,
           },
         },
+        failures: { byId: {} },
       };
       expect(
         activitiesSelectors.activities.selectIsLoadingOlderActivitiesByAccount(
@@ -633,6 +761,129 @@ describe('activities slice', () => {
           accountId,
         ),
       ).toBe(false);
+    });
+
+    it('returns false when a pagination failure exists for the account even if desired count exceeds stored activities', () => {
+      const failureId = ActivitiesPaginationFailureId(accountId);
+      const failure: Failure = {
+        failureId,
+        message: 'sync.error.midnight-wallet-start-failed',
+      };
+      const state = {
+        activities: {
+          ...initialState,
+          activities: {
+            [accountId]: [activity1],
+          },
+          desiredLoadedActivitiesCountPerAccount: {
+            [accountId]: 10,
+          },
+        },
+        failures: {
+          byId: { [failureId]: failure },
+        },
+      };
+      expect(
+        activitiesSelectors.activities.selectIsLoadingOlderActivitiesByAccount(
+          state,
+          accountId,
+        ),
+      ).toBe(false);
+    });
+
+    it('returns true when no pagination failure exists for the account and desired count exceeds stored activities', () => {
+      const otherFailureId = ActivitiesPaginationFailureId(account2Id);
+      const failure: Failure = {
+        failureId: otherFailureId,
+        message: 'sync.error.midnight-wallet-start-failed',
+      };
+      const state = {
+        activities: {
+          ...initialState,
+          activities: {
+            [accountId]: [activity1],
+          },
+          desiredLoadedActivitiesCountPerAccount: {
+            [accountId]: 10,
+          },
+        },
+        failures: {
+          byId: { [otherFailureId]: failure },
+        },
+      };
+      expect(
+        activitiesSelectors.activities.selectIsLoadingOlderActivitiesByAccount(
+          state,
+          accountId,
+        ),
+      ).toBe(true);
+    });
+  });
+
+  describe('selectPendingActivitiesByAccount', () => {
+    const pendingActivity = (id: string, acct: AccountId) => ({
+      accountId: acct,
+      activityId: id,
+      timestamp: Timestamp(1_000_000_000),
+      tokenBalanceChanges: [],
+      type: ActivityType.Pending,
+    });
+
+    const confirmedActivity = (id: string, acct: AccountId) => ({
+      accountId: acct,
+      activityId: id,
+      timestamp: Timestamp(1_000_000_000),
+      tokenBalanceChanges: [],
+      type: ActivityType.Send,
+    });
+
+    const wrapState = (activities: ActivitiesSliceState['activities']) => ({
+      activities: {
+        ...initialState,
+        activities,
+      },
+    });
+
+    it('returns only pending activities grouped by account', () => {
+      const state = wrapState({
+        [accountId]: [
+          pendingActivity('tx1', accountId),
+          confirmedActivity('tx2', accountId),
+          pendingActivity('tx3', accountId),
+        ],
+        [account2Id]: [confirmedActivity('tx4', account2Id)],
+      });
+
+      expect(
+        activitiesSelectors.activities.selectPendingActivitiesByAccount(state),
+      ).toEqual({
+        [accountId]: [
+          pendingActivity('tx1', accountId),
+          pendingActivity('tx3', accountId),
+        ],
+      });
+    });
+
+    it('omits accounts with no pending activities', () => {
+      const state = wrapState({
+        [accountId]: [confirmedActivity('tx1', accountId)],
+      });
+
+      expect(
+        activitiesSelectors.activities.selectPendingActivitiesByAccount(state),
+      ).toEqual({});
+    });
+
+    it('memoizes output when the slice reference is unchanged', () => {
+      const state = wrapState({
+        [accountId]: [pendingActivity('tx1', accountId)],
+      });
+
+      const first =
+        activitiesSelectors.activities.selectPendingActivitiesByAccount(state);
+      const second =
+        activitiesSelectors.activities.selectPendingActivitiesByAccount(state);
+      expect(first).toBe(second);
     });
   });
 });

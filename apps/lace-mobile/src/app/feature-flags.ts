@@ -15,8 +15,6 @@ import type { FeatureFlag } from '@lace-contract/feature';
  *
  * When adding a new flag here, remove it from the experimental list in
  * `test/feature-flag-compatibility.test.ts`.
- *
- * Other options: VAULT_LEDGER
  */
 export const defaultFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('ACCOUNT_MANAGEMENT') },
@@ -108,9 +106,9 @@ export const defaultFeatureFlags: FeatureFlag[] = [
       steelswapApiUrl: 'https://steelswap.lw.iog.io',
     },
   },
-  {
-    key: FeatureFlagKey('TOKEN_PRICING'),
-  },
+  { key: FeatureFlagKey('TOKEN_PRICING') },
+  { key: FeatureFlagKey('VAULT_LEDGER') },
+  { key: FeatureFlagKey('VAULT_TREZOR') },
 ];
 
 export default defaultFeatureFlags;

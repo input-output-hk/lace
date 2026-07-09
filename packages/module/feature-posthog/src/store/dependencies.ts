@@ -23,6 +23,7 @@ export interface PostHogFeatureDependencies {
   initializePostHogFeatureDependencies: (
     posthog: PostHogClient,
     distinctId$: Observable<string>,
+    featureFlagRefreshTrigger$: Observable<void>,
   ) => void;
 }
 
@@ -39,20 +40,25 @@ export const initializeDependencies: LaceInitSync<
   const posthog$ = new BehaviorSubject<{
     distinctId: string;
     posthog: PostHogClient;
+    featureFlagRefreshTrigger$: Observable<void>;
   } | null>(null);
 
   const featureFlags$ = posthog$.pipe(
     filter(Boolean),
-    switchMap(({ distinctId, posthog }) =>
+    switchMap(({ distinctId, posthog, featureFlagRefreshTrigger$ }) =>
       merge(
         of(-1),
         interval(Seconds.toMilliseconds(featureFlagCheckFrequency)),
+        featureFlagRefreshTrigger$,
       ).pipe(
-        exhaustMap(() => from(posthog.getFeatureFlags(distinctId))),
-        catchError(error => {
-          logger.error('Failed to fetch feature flags', error);
-          return EMPTY;
-        }),
+        exhaustMap(() =>
+          from(posthog.getFeatureFlags(distinctId)).pipe(
+            catchError(error => {
+              logger.error('Failed to fetch feature flags', error);
+              return EMPTY;
+            }),
+          ),
+        ),
         map(posthogResponse => {
           if (!posthogResponse.featureFlags) {
             // PostHog v5 may return a partial response (e.g. cold start/no flags yet).
@@ -83,9 +89,19 @@ export const initializeDependencies: LaceInitSync<
 
   return {
     featureFlags$,
-    initializePostHogFeatureDependencies: (posthog, distinctId$) =>
+    initializePostHogFeatureDependencies: (
+      posthog,
+      distinctId$,
+      featureFlagRefreshTrigger$,
+    ) =>
       distinctId$
-        .pipe(map(distinctId => ({ posthog, distinctId })))
+        .pipe(
+          map(distinctId => ({
+            posthog,
+            distinctId,
+            featureFlagRefreshTrigger$,
+          })),
+        )
         .subscribe(posthog$),
   };
 };

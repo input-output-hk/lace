@@ -1,13 +1,15 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
+import { failuresActions } from '@lace-contract/failures';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Err, Ok } from '@lace-sdk/util';
-import { of } from 'rxjs';
-import { describe, it, vi } from 'vitest';
+import { BigNumber, Ok } from '@lace-sdk/util';
+import { defer, of } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 
 import { cardanoContextActions } from '../../../src';
 import { CardanoRewardAccount, CardanoPaymentAddress } from '../../../src';
 import { createTrackAccountRewardsHistory } from '../../../src/store/side-effects/track-account-reward-history';
+import { CardanoRewardsHistoryFailureId } from '../../../src/value-objects';
 import { account0Context, cardanoAccount0Addr, chainId } from '../../mocks';
 
 import type {
@@ -16,14 +18,22 @@ import type {
   CardanoRewardAccountToRewardMap,
 } from '../../../src';
 import type { AnyAddress } from '@lace-contract/addresses';
+import type { Failure, FailureId } from '@lace-contract/failures';
+import type { TranslationKey } from '@lace-contract/i18n';
 
 const actions = {
   ...cardanoContextActions,
+  ...failuresActions,
 };
+
+const noFailureSelector = (_id: FailureId): Failure | undefined => undefined;
 
 const accountId1 = account0Context.accountId;
 const accountId2 = AccountId('test-account-2');
 const accountId3 = AccountId('test-account-3');
+
+const failureId1 = CardanoRewardsHistoryFailureId(accountId1);
+const failureId3 = CardanoRewardsHistoryFailureId(accountId3);
 
 const rewardAccount1 = CardanoRewardAccount(
   'stake_test1urpklgzqsh9yqz8pkyuxcw9dlszpe5flnxjtl55epla6ftqktdyfz',
@@ -116,7 +126,7 @@ const mockRewards3 = [
   },
 ];
 
-const providerError = new ProviderError(ProviderFailure.Unhealthy);
+const retriableError = new ProviderError(ProviderFailure.Unhealthy);
 
 describe('createTrackAccountRewardsHistory', () => {
   const trackAccountRewardsHistory = createTrackAccountRewardsHistory(0);
@@ -133,6 +143,7 @@ describe('createTrackAccountRewardsHistory', () => {
         stateObservables: {
           addresses: { selectAllAddresses$: cold('a', { a: [mockAddress1] }) },
           cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
         },
         dependencies: {
           cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
@@ -170,6 +181,7 @@ describe('createTrackAccountRewardsHistory', () => {
             }),
           },
           cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
         },
         dependencies: {
           cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
@@ -196,26 +208,61 @@ describe('createTrackAccountRewardsHistory', () => {
     );
   });
 
-  it('handles partial failures when some reward accounts fail to load', () => {
-    const getAccountRewards = vi
-      .fn()
-      .mockImplementation(({ rewardAccount }) => {
-        if (rewardAccount === rewardAccount1) return of(Ok(mockRewards1));
-        if (rewardAccount === rewardAccount3) return of(Err(providerError));
-        if (rewardAccount === rewardAccount4) return of(Ok(mockRewards3));
-        return of(Ok([]));
-      });
+  it('retries transient errors with exponential backoff and emits addFailure after exhaustion', () => {
+    let subscriptions = 0;
+    const getAccountRewards = vi.fn().mockImplementation(() =>
+      defer(() => {
+        subscriptions += 1;
+        return defer(() => {
+          throw retriableError;
+        });
+      }),
+    );
 
     testSideEffect(
-      trackAccountRewardsHistory,
+      createTrackAccountRewardsHistory(0),
+      ({ cold, expectObservable, flush }) => ({
+        stateObservables: {
+          addresses: { selectAllAddresses$: cold('a', { a: [mockAddress1] }) },
+          cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
+        },
+        dependencies: {
+          cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
+          actions,
+        },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('2100ms a', {
+            a: actions.failures.addFailure({
+              failureId: failureId1,
+              message:
+                'sync.error.cardano-rewards-history-failed' as TranslationKey,
+            }),
+          });
+          flush();
+          expect(subscriptions).toBe(4);
+        },
+      }),
+    );
+  });
+
+  it('auto-dismisses an existing failure on successful fetch', () => {
+    const existingFailure: Failure = {
+      failureId: failureId1,
+      message: 'sync.error.cardano-rewards-history-failed' as TranslationKey,
+    };
+    const selectFailureById$ = of((id: FailureId): Failure | undefined =>
+      id === failureId1 ? existingFailure : undefined,
+    );
+    const getAccountRewards = vi.fn().mockReturnValue(of(Ok(mockRewards1)));
+
+    testSideEffect(
+      createTrackAccountRewardsHistory(0),
       ({ cold, expectObservable }) => ({
         stateObservables: {
-          addresses: {
-            selectAllAddresses$: cold('a', {
-              a: [mockAddress1, mockAddress3, mockAddress4],
-            }),
-          },
+          addresses: { selectAllAddresses$: cold('a', { a: [mockAddress1] }) },
           cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$ },
         },
         dependencies: {
           cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
@@ -225,41 +272,55 @@ describe('createTrackAccountRewardsHistory', () => {
           expectObservable(sideEffect$).toBe('(ab)', {
             a: actions.cardanoContext.setAccountRewardsHistory({
               accountId: accountId1,
-              rewardsHistory: {
-                [rewardAccount1]: mockRewards1,
-              },
+              rewardsHistory: { [rewardAccount1]: mockRewards1 },
             }),
-            b: actions.cardanoContext.getAccountRewardsHistoryFailed({
-              accountId: accountId3,
-              failure: providerError.reason,
-            }),
+            b: actions.failures.dismissFailure(failureId1),
           });
         },
       }),
     );
   });
 
-  it('dispatches a failure action when the provider fails', () => {
-    const getAccountRewards = vi.fn().mockReturnValue(of(Err(providerError)));
+  it('emits per-account failure when one of two accounts fails after retry exhaustion', () => {
+    const getAccountRewards = vi
+      .fn()
+      .mockImplementation(({ rewardAccount }) => {
+        if (rewardAccount === rewardAccount1) return of(Ok(mockRewards1));
+        if (rewardAccount === rewardAccount4) return of(Ok(mockRewards3));
+        return defer(() => {
+          throw retriableError;
+        });
+      });
 
     testSideEffect(
-      trackAccountRewardsHistory,
-      ({ cold, expectObservable }) => ({
+      createTrackAccountRewardsHistory(0),
+      ({ cold, expectObservable, flush }) => ({
         stateObservables: {
-          addresses: { selectAllAddresses$: cold('a', { a: [mockAddress1] }) },
+          addresses: {
+            selectAllAddresses$: cold('a', {
+              a: [mockAddress1, mockAddress3, mockAddress4],
+            }),
+          },
           cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
         },
         dependencies: {
           cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
           actions,
         },
         assertion: sideEffect$ => {
-          expectObservable(sideEffect$).toBe('a', {
-            a: actions.cardanoContext.getAccountRewardsHistoryFailed({
+          expectObservable(sideEffect$).toBe('a 2099ms b', {
+            a: actions.cardanoContext.setAccountRewardsHistory({
               accountId: accountId1,
-              failure: providerError.reason,
+              rewardsHistory: { [rewardAccount1]: mockRewards1 },
+            }),
+            b: actions.failures.addFailure({
+              failureId: failureId3,
+              message:
+                'sync.error.cardano-rewards-history-failed' as TranslationKey,
             }),
           });
+          flush();
         },
       }),
     );
@@ -282,6 +343,7 @@ describe('createTrackAccountRewardsHistory', () => {
             }),
           },
           cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+          failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
         },
         dependencies: {
           cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,
@@ -308,6 +370,7 @@ describe('createTrackAccountRewardsHistory', () => {
           }),
         },
         cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+        failures: { selectFailureById$: cold('a', { a: noFailureSelector }) },
       },
       dependencies: {
         cardanoProvider: { getAccountRewards } as unknown as CardanoProvider,

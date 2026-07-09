@@ -4,8 +4,8 @@ This document provides an overview of the contract and module architecture in th
 
 ## Statistics
 
-- **Total Contracts**: 98
-- **Total Modules**: 54
+- **Total Contracts**: 106
+- **Total Modules**: 55
 
 ## Contract Clusters
 
@@ -13,83 +13,48 @@ Contracts are automatically grouped based on their dependency relationships:
 
 ### Cluster Summary
 
-- **Wallet**: 57 contracts
+- **Cardano**: 61 contracts
 - **Signer**: 2 contracts
 - **Account Standalone**: 3 contracts
-- **Misc**: 22 contracts
+- **Misc**: 26 contracts
 - **Activities Standalone**: 3 contracts
 - **Address Standalone**: 2 contracts
-- **App Standalone**: 2 contracts
 - **Blockchain Standalone**: 2 contracts
 - **Bitcoin Standalone**: 2 contracts
+- **Feature Standalone**: 2 contracts
 - **Onboarding Standalone**: 3 contracts
 
-### Wallet Contracts (Part 1)
+### Cardano Contracts (Part 1)
 
 ```mermaid
 graph TD
-  views-store["views-store"]
-  analytics-store["analytics-store"]
-  initialize-extension-view-addon["initialize-extension-view-addon<br/>---<br/><i>loadInitializeExtensionView</i>"]
-  initialize-mobile-view-addon["initialize-mobile-view-addon<br/>---<br/><i>loadInitializeMobileView</i>"]
-  tab-pages-addon["tab-pages-addon<br/>---<br/><i>loadTabPages</i>"]
-  stack-pages-addon["stack-pages-addon<br/>---<br/><i>loadStackPages</i>"]
-  render-root-addon["render-root-addon<br/>---<br/><i>renderRoot</i>"]
-  sheet-pages-addon["sheet-pages-addon<br/>---<br/><i>loadSheetPages</i>"]
-  app-store["app-store"]
-  views-store --> analytics-store
-  views-store --> initialize-extension-view-addon
-  views-store --> initialize-mobile-view-addon
-  views-store --> tab-pages-addon
-  views-store --> stack-pages-addon
-  views-store --> render-root-addon
-  views-store --> sheet-pages-addon
-  app-store --> views-store
-  app-store --> analytics-store
-```
-
-### Wallet Contracts (Part 2)
-
-```mermaid
-graph TD
-  feature-store["feature-store"]
-  storage-dependency["storage-dependency"]
-  midnight-context-store["midnight-context-store"]
-  feature-store --> storage-dependency
-  midnight-context-store --> feature-store
-```
-
-### Wallet Contracts (Part 3)
-
-```mermaid
-graph TD
+  send-flow-store["send-flow-store"]
+  tx-executor-store["tx-executor-store"]
+  send-flow-address-validator-addon["send-flow-address-validator-addon<br/>---<br/><i>loadAddressValidator</i>"]
+  addresses-alias-resolver-addon["addresses-alias-resolver-addon<br/>---<br/><i>loadAddressAliasResolver</i>"]
+  chain-minimum-amount-token-validator-addon["chain-minimum-amount-token-validator-addon<br/>---<br/><i>loadChainMinimumAmountTokenValidator</i>"]
+  send-flow-analytics-enhancer-addon["send-flow-analytics-enhancer-addon<br/>---<br/><i>loadSendFlowAnalyticsEnhancers</i>"]
   token-pricing-store["token-pricing-store"]
-  tokens-store["tokens-store"]
-  sync-store["sync-store"]
-  token-pricing-provider-dependency["token-pricing-provider-dependency"]
   token-id-mapper-addon["token-id-mapper-addon<br/>---<br/><i>loadTokenIdMapper</i>"]
-  token-pricing-store --> tokens-store
-  token-pricing-store --> sync-store
-  token-pricing-store --> token-pricing-provider-dependency
+  send-flow-store --> tx-executor-store
+  send-flow-store --> send-flow-address-validator-addon
+  send-flow-store --> addresses-alias-resolver-addon
+  send-flow-store --> chain-minimum-amount-token-validator-addon
+  send-flow-store --> send-flow-analytics-enhancer-addon
+  send-flow-store --> token-pricing-store
+  send-flow-store --> token-id-mapper-addon
   token-pricing-store --> token-id-mapper-addon
 ```
 
-### Wallet Contracts (Part 4)
+### Cardano Contracts (Part 2)
 
 ```mermaid
 graph TD
-  cardano-stake-pools-store["cardano-stake-pools-store"]
-  cardano-provider-dependency["cardano-provider-dependency"]
-  cardano-stake-pools-store --> cardano-provider-dependency
-```
-
-### Wallet Contracts (Part 5)
-
-```mermaid
-graph TD
-  secure-store["secure-store"]
-  secure-store-dependency["secure-store-dependency"]
-  secure-store --> secure-store-dependency
+  dapp-connector-store["dapp-connector-store"]
+  dapp-connector-api-addon["dapp-connector-api-addon<br/>---<br/><i>dappConnectorApi</i>"]
+  dapp-connector-platform-dependency["dapp-connector-platform-dependency"]
+  dapp-connector-store --> dapp-connector-api-addon
+  dapp-connector-store --> dapp-connector-platform-dependency
 ```
 
 ### Signer Contracts and Dependencies
@@ -127,14 +92,6 @@ graph TD
   address-book-store["address-book-store"]
 ```
 
-### App Standalone Contracts and Dependencies
-
-```mermaid
-graph TD
-  app-runtime-dependency["app-runtime-dependency"]
-  app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannel</i>"]
-```
-
 ### Blockchain Standalone Contracts and Dependencies
 
 ```mermaid
@@ -149,6 +106,14 @@ graph TD
 graph TD
   bitcoin-fee-market-provider["bitcoin-fee-market-provider"]
   bitcoin-provider["bitcoin-provider"]
+```
+
+### Feature Standalone Contracts and Dependencies
+
+```mermaid
+graph TD
+  feature-dependency["feature-dependency"]
+  feature-flag-refresh-trigger-dependency["feature-flag-refresh-trigger-dependency"]
 ```
 
 ### Onboarding Standalone Contracts and Dependencies
@@ -173,49 +138,57 @@ graph LR
     tab-pages-addon["tab-pages-addon<br/>---<br/><i>loadTabPages</i>"]
     account-management-store["account-management-store"]
     sheet-pages-addon["sheet-pages-addon<br/>---<br/><i>loadSheetPages</i>"]
-    account-settings-ui-addon["account-settings-ui-addon<br/>---<br/><i>loadAccountSettingsUICustomisations</i>"]
-    activities-details-sheet-customizations-addon["activities-details-sheet-customizations-addon<br/>---<br/><i>loadActivityDetailsSheetUICustomisations</i>"]
     dapp-connector-platform-dependency["dapp-connector-platform-dependency"]
     load-deep-links-addon["load-deep-links-addon<br/>---<br/><i>loadMobileDeepLinks</i>"]
-    notification-center-store["notification-center-store"]
-    onboarding-v2-store["onboarding-v2-store"]
+    dialogs-addon["dialogs-addon<br/>---<br/><i>loadDialogs</i>"]
+    account-settings-ui-addon["account-settings-ui-addon<br/>---<br/><i>loadAccountSettingsUICustomisations</i>"]
+    activities-details-sheet-customizations-addon["activities-details-sheet-customizations-addon<br/>---<br/><i>loadActivityDetailsSheetUICustomisations</i>"]
+    global-overlays-addon["global-overlays-addon<br/>---<br/><i>loadGlobalOverlays</i>"]
+    authentication-prompt-store["authentication-prompt-store"]
+    auth-prompt-ui-component-addon["auth-prompt-ui-component-addon<br/>---<br/><i>loadRenderAuthPromptUI</i>"]
+    internal-auth-secret-api-addon["internal-auth-secret-api-addon<br/>---<br/><i>loadAuthenticationPromptInternalAuthSecretApiExtension</i>"]
     initialize-extension-view-addon["initialize-extension-view-addon<br/>---<br/><i>loadInitializeExtensionView</i>"]
     initialize-mobile-view-addon["initialize-mobile-view-addon<br/>---<br/><i>loadInitializeMobileView</i>"]
     swap-context-store["swap-context-store"]
-    dialogs-addon["dialogs-addon<br/>---<br/><i>loadDialogs</i>"]
     blockchain-specific-app-settings-page-customizations-addon["blockchain-specific-app-settings-page-customizations-addon<br/>---<br/><i>loadSettingsPageUICustomisations</i>"]
+    views-store["views-store"]
     app-lock-setup-addon["app-lock-setup-addon<br/>---<br/><i>loadSetupAppLock</i>"]
     app-lock-store["app-lock-store"]
     auth-secret-verifier-addon["auth-secret-verifier-addon<br/>---<br/><i>loadAuthSecretVerifier</i>"]
-    views-store["views-store"]
+    wallet-active-state-dependency["wallet-active-state-dependency"]
     dev["dev"]
     feature-store["feature-store"]
     feature-dependency["feature-dependency"]
     wallet-settings-ui-customisation-addon["wallet-settings-ui-customisation-addon<br/>---<br/><i>loadWalletSettingsUICustomisations</i>"]
     recovery-phrase-store["recovery-phrase-store"]
+    notification-center-store["notification-center-store"]
+    onboarding-v2-store["onboarding-v2-store"]
   end
   subgraph Modules
     module_0["account-management"]
     module_1["address-book"]
-    module_2["blockchain-cardano-ui"]
-    module_3["blockchain-bitcoin-ui"]
-    module_4["dapp-explorer"]
-    module_5["dapp-connector-cardano"]
-    module_6["cardano-uri-linking"]
-    module_7["identity-center"]
-    module_8["notification-center"]
-    module_9["onboarding"]
-    module_10["send-flow"]
-    module_11["staking-center"]
-    module_12["swap-center"]
-    module_13["app-lock"]
+    module_2["dapp-connector-cardano"]
+    module_3["cardano-uri-linking"]
+    module_4["identity-center"]
+    module_5["dapp-explorer"]
+    module_6["send-flow"]
+    module_7["blockchain-cardano-ui"]
+    module_8["blockchain-bitcoin-ui"]
+    module_9["migrate-multi-delegation"]
+    module_10["authentication-prompt-ui-v2-extension"]
+    module_11["migrate-v1-data"]
+    module_12["staking-center"]
+    module_13["swap-center"]
     module_14["views-extension"]
-    module_15["views-mobile"]
-    module_16["test-api"]
-    module_17["feature-dev"]
-    module_18["feature-posthog"]
-    module_19["vault-in-memory-ui"]
-    module_20["dapp-connector-extension"]
+    module_15["app-lock"]
+    module_16["views-mobile"]
+    module_17["test-api"]
+    module_18["feature-dev"]
+    module_19["feature-posthog"]
+    module_20["vault-in-memory-ui"]
+    module_21["notification-center"]
+    module_22["onboarding"]
+    module_23["dapp-connector-extension"]
   end
   module_0 -.->|implements| stack-pages-addon
   module_0 -.->|implements| tab-pages-addon
@@ -223,58 +196,67 @@ graph LR
   module_0 -.->|implements| sheet-pages-addon
   module_1 -.->|implements| tab-pages-addon
   module_1 -.->|implements| sheet-pages-addon
-  module_2 -.->|implements| account-settings-ui-addon
-  module_2 -.->|implements| activities-details-sheet-customizations-addon
+  module_2 -.->|implements| dapp-connector-platform-dependency
   module_2 -.->|implements| sheet-pages-addon
-  module_3 -.->|implements| account-settings-ui-addon
+  module_2 -.->|implements| stack-pages-addon
+  module_3 -.->|implements| stack-pages-addon
+  module_3 -.->|implements| load-deep-links-addon
+  module_4 -.->|implements| stack-pages-addon
   module_4 -.->|implements| tab-pages-addon
   module_4 -.->|implements| sheet-pages-addon
-  module_5 -.->|implements| dapp-connector-platform-dependency
+  module_5 -.->|implements| tab-pages-addon
   module_5 -.->|implements| sheet-pages-addon
-  module_5 -.->|implements| stack-pages-addon
-  module_6 -.->|implements| stack-pages-addon
-  module_6 -.->|implements| load-deep-links-addon
-  module_7 -.->|implements| stack-pages-addon
-  module_7 -.->|implements| tab-pages-addon
+  module_5 -.->|implements| dialogs-addon
+  module_6 -.->|implements| sheet-pages-addon
+  module_7 -.->|implements| account-settings-ui-addon
+  module_7 -.->|implements| activities-details-sheet-customizations-addon
+  module_7 -.->|implements| global-overlays-addon
   module_7 -.->|implements| sheet-pages-addon
-  module_8 -.->|implements| notification-center-store
-  module_8 -.->|implements| stack-pages-addon
-  module_8 -.->|implements| tab-pages-addon
-  module_9 -.->|implements| onboarding-v2-store
-  module_9 -.->|implements| stack-pages-addon
-  module_10 -.->|implements| sheet-pages-addon
-  module_11 -.->|implements| tab-pages-addon
-  module_11 -.->|implements| sheet-pages-addon
-  module_11 -.->|implements| initialize-extension-view-addon
-  module_11 -.->|implements| initialize-mobile-view-addon
+  module_8 -.->|implements| account-settings-ui-addon
+  module_9 -.->|implements| global-overlays-addon
+  module_10 -.->|implements| authentication-prompt-store
+  module_10 -.->|implements| auth-prompt-ui-component-addon
+  module_10 -.->|implements| global-overlays-addon
+  module_10 -.->|implements| internal-auth-secret-api-addon
+  module_11 -.->|implements| global-overlays-addon
   module_12 -.->|implements| tab-pages-addon
   module_12 -.->|implements| sheet-pages-addon
-  module_12 -.->|implements| swap-context-store
-  module_12 -.->|implements| dialogs-addon
-  module_12 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
-  module_13 -.->|implements| app-lock-setup-addon
-  module_13 -.->|implements| app-lock-store
-  module_13 -.->|implements| auth-secret-verifier-addon
+  module_12 -.->|implements| initialize-extension-view-addon
+  module_12 -.->|implements| initialize-mobile-view-addon
+  module_13 -.->|implements| tab-pages-addon
   module_13 -.->|implements| sheet-pages-addon
+  module_13 -.->|implements| swap-context-store
+  module_13 -.->|implements| dialogs-addon
   module_13 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
   module_14 -.->|implements| views-store
   module_14 -.->|implements| initialize-extension-view-addon
   module_14 -.->|implements| sheet-pages-addon
   module_14 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
-  module_15 -.->|implements| views-store
-  module_16 -.->|implements| dev
-  module_16 -.->|implements| initialize-extension-view-addon
-  module_16 -.->|implements| initialize-mobile-view-addon
-  module_17 -.->|implements| feature-store
-  module_17 -.->|implements| feature-dependency
+  module_15 -.->|implements| app-lock-setup-addon
+  module_15 -.->|implements| app-lock-store
+  module_15 -.->|implements| auth-secret-verifier-addon
+  module_15 -.->|implements| sheet-pages-addon
+  module_15 -.->|implements| blockchain-specific-app-settings-page-customizations-addon
+  module_15 -.->|implements| wallet-active-state-dependency
+  module_16 -.->|implements| views-store
   module_17 -.->|implements| dev
   module_17 -.->|implements| initialize-extension-view-addon
+  module_17 -.->|implements| initialize-mobile-view-addon
   module_18 -.->|implements| feature-store
   module_18 -.->|implements| feature-dependency
-  module_19 -.->|implements| wallet-settings-ui-customisation-addon
-  module_19 -.->|implements| recovery-phrase-store
-  module_19 -.->|implements| sheet-pages-addon
-  module_20 -.->|implements| dapp-connector-platform-dependency
+  module_18 -.->|implements| dev
+  module_18 -.->|implements| initialize-extension-view-addon
+  module_19 -.->|implements| feature-store
+  module_19 -.->|implements| feature-dependency
+  module_20 -.->|implements| wallet-settings-ui-customisation-addon
+  module_20 -.->|implements| recovery-phrase-store
+  module_20 -.->|implements| sheet-pages-addon
+  module_21 -.->|implements| notification-center-store
+  module_21 -.->|implements| stack-pages-addon
+  module_21 -.->|implements| tab-pages-addon
+  module_22 -.->|implements| onboarding-v2-store
+  module_22 -.->|implements| stack-pages-addon
+  module_23 -.->|implements| dapp-connector-platform-dependency
 ```
 
 ### Ada Module Implementations
@@ -315,6 +297,8 @@ graph LR
   subgraph Contracts
     authentication-prompt-defer-biometric-addon["authentication-prompt-defer-biometric-addon<br/>---<br/><i>loadDeferBiometricPromptUntilActive</i>"]
     app-lock-activity-channel-addon["app-lock-activity-channel-addon<br/>---<br/><i>loadActivityChannel</i>"]
+    feature-flag-refresh-trigger-dependency["feature-flag-refresh-trigger-dependency"]
+    perform-app-reload-dependency["perform-app-reload-dependency"]
   end
   subgraph Modules
     module_0["app-activity-mobile"]
@@ -322,7 +306,11 @@ graph LR
   end
   module_0 -.->|implements| authentication-prompt-defer-biometric-addon
   module_0 -.->|implements| app-lock-activity-channel-addon
+  module_0 -.->|implements| feature-flag-refresh-trigger-dependency
+  module_0 -.->|implements| perform-app-reload-dependency
   module_1 -.->|implements| app-lock-activity-channel-addon
+  module_1 -.->|implements| feature-flag-refresh-trigger-dependency
+  module_1 -.->|implements| perform-app-reload-dependency
 ```
 
 ### App Module Implementations
@@ -343,8 +331,10 @@ graph LR
     tokens-store["tokens-store"]
     tx-executor-store["tx-executor-store"]
     wallet-repo-store["wallet-repo-store"]
+    custom-dapps-store["custom-dapps-store"]
     dapp-connector-store["dapp-connector-store"]
     signer-store["signer-store"]
+    online-status-store["online-status-store"]
   end
   subgraph Modules
     module_0["app-mobile"]
@@ -362,31 +352,10 @@ graph LR
   module_0 -.->|implements| tokens-store
   module_0 -.->|implements| tx-executor-store
   module_0 -.->|implements| wallet-repo-store
+  module_0 -.->|implements| custom-dapps-store
   module_0 -.->|implements| dapp-connector-store
   module_0 -.->|implements| signer-store
-```
-
-### Global Overlays Addon Related Module Implementations
-
-```mermaid
-graph LR
-  subgraph Contracts
-    authentication-prompt-store["authentication-prompt-store"]
-    auth-prompt-ui-component-addon["auth-prompt-ui-component-addon<br/>---<br/><i>loadRenderAuthPromptUI</i>"]
-    global-overlays-addon["global-overlays-addon<br/>---<br/><i>loadGlobalOverlays</i>"]
-    internal-auth-secret-api-addon["internal-auth-secret-api-addon<br/>---<br/><i>loadAuthenticationPromptInternalAuthSecretApiExtension</i>"]
-  end
-  subgraph Modules
-    module_0["authentication-prompt-ui-v2-extension"]
-    module_1["migrate-multi-delegation"]
-    module_2["migrate-v1-data"]
-  end
-  module_0 -.->|implements| authentication-prompt-store
-  module_0 -.->|implements| auth-prompt-ui-component-addon
-  module_0 -.->|implements| global-overlays-addon
-  module_0 -.->|implements| internal-auth-secret-api-addon
-  module_1 -.->|implements| global-overlays-addon
-  module_2 -.->|implements| global-overlays-addon
+  module_0 -.->|implements| online-status-store
 ```
 
 ### Bitcoin Module Implementations
@@ -430,6 +399,7 @@ graph LR
     tx-executor-implementation-addon["tx-executor-implementation-addon<br/>---<br/><i>loadTxExecutorImplementation</i>"]
     send-flow-address-validator-addon["send-flow-address-validator-addon<br/>---<br/><i>loadAddressValidator</i>"]
     base-token-addon["base-token-addon<br/>---<br/><i>loadBaseToken</i>"]
+    chain-minimum-amount-token-validator-addon["chain-minimum-amount-token-validator-addon<br/>---<br/><i>loadChainMinimumAmountTokenValidator</i>"]
     address-book-address-validator-addon["address-book-address-validator-addon<br/>---<br/><i>loadAddressBookAddressValidators</i>"]
     token-id-mapper-addon["token-id-mapper-addon<br/>---<br/><i>loadTokenIdMapper</i>"]
     signer-factory-addon["signer-factory-addon<br/>---<br/><i>loadSignerFactory</i>"]
@@ -437,6 +407,7 @@ graph LR
     cardano-in-memory-signing-dependency["cardano-in-memory-signing-dependency"]
     deregistration-tx-builder-addon["deregistration-tx-builder-addon<br/>---<br/><i>loadDeregistrationTxBuilder</i>"]
     staking-center-store["staking-center-store"]
+    wallet-identity-addon["wallet-identity-addon<br/>---<br/><i>loadWalletIdentity</i>"]
     account-settings-ui-addon["account-settings-ui-addon<br/>---<br/><i>loadAccountSettingsUICustomisations</i>"]
     midnight-context-store["midnight-context-store"]
     midnight-dependency["midnight-dependency"]
@@ -462,6 +433,7 @@ graph LR
   module_0 -.->|implements| tx-executor-implementation-addon
   module_0 -.->|implements| send-flow-address-validator-addon
   module_0 -.->|implements| base-token-addon
+  module_0 -.->|implements| chain-minimum-amount-token-validator-addon
   module_0 -.->|implements| address-book-address-validator-addon
   module_0 -.->|implements| token-id-mapper-addon
   module_0 -.->|implements| signer-factory-addon
@@ -476,12 +448,14 @@ graph LR
   module_1 -.->|implements| activities-item-customizations-addon
   module_1 -.->|implements| sync-store
   module_1 -.->|implements| base-token-addon
+  module_1 -.->|implements| chain-minimum-amount-token-validator-addon
   module_1 -.->|implements| address-book-address-validator-addon
   module_1 -.->|implements| delegation-tx-builder-addon
   module_1 -.->|implements| cardano-in-memory-signing-dependency
   module_1 -.->|implements| token-id-mapper-addon
   module_1 -.->|implements| deregistration-tx-builder-addon
   module_1 -.->|implements| staking-center-store
+  module_1 -.->|implements| wallet-identity-addon
   module_2 -.->|implements| account-settings-ui-addon
   module_2 -.->|implements| in-memory-integration-addon
   module_2 -.->|implements| tokens-store
@@ -545,6 +519,19 @@ graph LR
   end
   module_0 -.->|implements| dapp-connector-api-addon
   module_0 -.->|implements| render-root-addon
+```
+
+### Hw Module Implementations
+
+```mermaid
+graph LR
+  subgraph Contracts
+    request-hw-connection-addon["request-hw-connection-addon<br/>---<br/><i>loadRequestHWConnections</i>"]
+  end
+  subgraph Modules
+    module_0["hw-connector"]
+  end
+  module_0 -.->|implements| request-hw-connection-addon
 ```
 
 ### I18n Module Implementations
@@ -679,19 +666,18 @@ graph LR
 ```mermaid
 graph LR
   subgraph Contracts
-    vault["vault"]
     onboarding-options-addon["onboarding-options-addon<br/>---<br/><i>loadOnboardingOptions</i>"]
     signer-factory-addon["signer-factory-addon<br/>---<br/><i>loadSignerFactory</i>"]
     hw-wallet-connector-addon["hw-wallet-connector-addon<br/>---<br/><i>loadHwWalletConnector</i>"]
     hw-blockchain-support-addon["hw-blockchain-support-addon<br/>---<br/><i>loadHwBlockchainSupport</i>"]
     ledger-hw-account-connector-addon["ledger-hw-account-connector-addon<br/>---<br/><i>loadLedgerHwAccountConnector</i>"]
+    vault["vault"]
     trezor-hw-account-connector-addon["trezor-hw-account-connector-addon<br/>---<br/><i>loadTrezorHwAccountConnector</i>"]
   end
   subgraph Modules
     module_0["vault-ledger"]
     module_1["vault-trezor"]
   end
-  module_0 -.->|implements| vault
   module_0 -.->|implements| onboarding-options-addon
   module_0 -.->|implements| signer-factory-addon
   module_0 -.->|implements| hw-wallet-connector-addon

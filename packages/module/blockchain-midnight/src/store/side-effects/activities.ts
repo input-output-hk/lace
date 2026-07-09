@@ -20,28 +20,25 @@ import {
 import type { SideEffect } from '../..';
 import type { Activity, ActivityDetail } from '@lace-contract/activities';
 import type {
+  MidnightSDKNetworkId,
   MidnightWallet,
   MidnightWalletsByAccountId,
 } from '@lace-contract/midnight-context';
-import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { TransactionHistoryEntry } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';
 
 export const mapTxHistoryEntryToActivity = ({
   accountId,
-  txHistoryEntry: {
-    hash,
-    timestamp,
-    status,
-    createdUtxos = [],
-    spentUtxos = [],
-  },
+  txHistoryEntry,
   networkId,
 }: {
   accountId: AccountId;
-  txHistoryEntry: TransactionHistoryEntry;
+  txHistoryEntry: WalletEntry;
   networkId?: MidnightSDKNetworkId;
 }): Activity => {
+  const { hash, timestamp, status } = txHistoryEntry;
+  const createdUtxos = txHistoryEntry.unshielded?.createdUtxos ?? [];
+  const spentUtxos = txHistoryEntry.unshielded?.spentUtxos ?? [];
   const tokenBalanceChanges = networkId
     ? buildTokenBalanceChangesFromUtxos(createdUtxos, spentUtxos, networkId)
     : [];
@@ -56,23 +53,25 @@ export const mapTxHistoryEntryToActivity = ({
 
 const mapTxHistoryEntryToActivityDetail = ({
   accountId,
-  txHistoryEntry: { createdUtxos = [], spentUtxos = [], ...rest },
+  txHistoryEntry,
   networkId,
 }: {
   accountId: AccountId;
-  txHistoryEntry: TransactionHistoryEntry;
+  txHistoryEntry: WalletEntry;
   networkId: MidnightSDKNetworkId;
 }): ActivityDetail => {
+  const createdUtxos = txHistoryEntry.unshielded?.createdUtxos ?? [];
+  const spentUtxos = txHistoryEntry.unshielded?.spentUtxos ?? [];
   const activity = mapTxHistoryEntryToActivity({
     accountId,
-    txHistoryEntry: { createdUtxos, spentUtxos, ...rest },
+    txHistoryEntry,
     networkId,
   });
   const address = getAddressFromUtxos(createdUtxos, spentUtxos);
   return {
     ...activity,
     address,
-    fee: formatFee(rest.fees),
+    fee: formatFee(txHistoryEntry.fees),
   };
 };
 

@@ -6,6 +6,8 @@ import { useCallback, useMemo } from 'react';
 
 import { useLaceSelector } from '../../hooks';
 
+import { getNftMetadataItems } from './getNftMetadataItems';
+
 import type { Folder, Token } from '@lace-contract/tokens';
 
 export const useNftDetail = (token?: Token | null, folders?: Folder[]) => {
@@ -31,17 +33,11 @@ export const useNftDetail = (token?: Token | null, folders?: Folder[]) => {
     'wallets.selectActiveAccountContext',
   )?.accountId;
 
-  const metadataItems = Object.entries(
-    selectedNft?.metadata?.additionalProperties ?? {},
-  ).map(([label, value]) => ({
-    label,
-    value,
-    testID: label.toLowerCase().replace(/\s+/g, '-'),
-  }));
+  const metadataItems = getNftMetadataItems(selectedNft?.metadata);
 
   const onSendPress = useCallback(() => {
     if (selectedNft) {
-      NavigationControls.sheets.navigate(SheetRoutes.Send, {
+      NavigationControls.navigate(SheetRoutes.Send, {
         accountId,
         assetsSelected: [selectedNft],
       });

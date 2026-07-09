@@ -12,7 +12,7 @@ const settingsPageUICustomisation = () =>
         titleKey: 'v2.app-lock.sources.title',
         icon: 'LockKey',
         onPress: () => {
-          NavigationControls.sheets.navigate(SheetRoutes.LockSettings);
+          NavigationControls.navigate(SheetRoutes.LockSettings);
         },
       },
     ],

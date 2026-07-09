@@ -2,7 +2,12 @@ import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 
-import { spacing, useTheme } from '../../../design-tokens';
+import {
+  getShadowStyle,
+  radius,
+  spacing,
+  useTheme,
+} from '../../../design-tokens';
 import { Card, Column, Row, Shimmer, Text } from '../../atoms';
 import { getAmountParts, getEarnedRewards } from '../../util';
 
@@ -161,11 +166,14 @@ const styles = (theme: Theme) =>
       backgroundColor: theme.background.primary,
       padding: spacing.L,
       gap: spacing.M,
-      boxShadow: `0 0 10px 0 ${theme.extra.shadowDrop}`,
-      shadowColor: theme.extra.shadowDrop,
-      shadowOpacity: 0.08,
-      shadowRadius: 8,
-      elevation: 2,
+      borderRadius: radius.M,
+      borderWidth: 0.5,
+      borderTopColor: theme.border.top,
+      borderBottomColor: theme.border.bottom,
+      borderLeftColor: theme.border.middle,
+      borderRightColor: theme.border.middle,
+      overflow: 'visible',
+      ...getShadowStyle({ theme, variant: 'card' }),
     },
     amountSection: {
       flex: 1,

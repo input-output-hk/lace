@@ -79,7 +79,7 @@ export const useFiatCurrencySheet = () => {
     trackEvent('currency sheet | cancel | press');
     const fallbackCurrency = initialCurrencyRef.current;
     setTemporarySelectedCurrency(fallbackCurrency);
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [trackEvent]);
 
   const onConfirm = useCallback(() => {
@@ -89,7 +89,7 @@ export const useFiatCurrencySheet = () => {
     if (temporarySelectedCurrency?.name !== resolvedSelectedCurrency?.name) {
       setCurrency(temporarySelectedCurrency);
     }
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [
     resolvedSelectedCurrency,
     setCurrency,

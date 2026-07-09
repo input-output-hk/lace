@@ -1,5 +1,6 @@
-import { InlineWindow, useTheme } from '@lace-lib/ui-toolkit';
+import { InlineWindow, spacing, useTheme } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
@@ -52,14 +53,22 @@ export const PortfolioBanner = ({ accountId }: PortfolioBannerProps) => {
   if (isDismissed) return null;
 
   return (
-    <InlineWindow
-      description={description}
-      leftIcon={leftIcon}
-      leftIconColor={leftIconColor}
-      action={() => {}}
-      progressValue={0}
-      onClose={handleDismiss}
-      cardStyle={cardStyle}
-    />
+    <View style={styles.container}>
+      <InlineWindow
+        description={description}
+        leftIcon={leftIcon}
+        leftIconColor={leftIconColor}
+        action={() => {}}
+        progressValue={0}
+        onClose={handleDismiss}
+        cardStyle={cardStyle}
+      />
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: spacing.M,
+  },
+});

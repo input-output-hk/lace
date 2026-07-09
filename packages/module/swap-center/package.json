@@ -22,7 +22,8 @@
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/navigation": "*",
     "@lace-lib/ui-toolkit": "*",
-    "@lace-lib/util-render": "*"
+    "@lace-lib/util-render": "*",
+    "@lace-module/app-mobile": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

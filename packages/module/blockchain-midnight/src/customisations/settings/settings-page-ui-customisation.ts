@@ -12,7 +12,7 @@ const settingsPageUICustomisation = () =>
         titleKey: 'v2.pages.settings.options.midnight',
         icon: 'Midnight',
         onPress: () => {
-          NavigationControls.sheets.navigate(SheetRoutes.MidnightSettings);
+          NavigationControls.navigate(SheetRoutes.MidnightSettings);
         },
       },
     ],

@@ -93,8 +93,6 @@ type ConnectCardanoDappConnectorParameters<T> = {
   authenticate?: Authenticate;
   /** Subject to signal signing completion to the popup flow */
   signingResult$?: Subject<{ type: 'cancelled' | 'error' | 'success' }>;
-  /** Observable of the app-wide lock state */
-  isUnlocked$: Observable<boolean>;
 };
 
 /**
@@ -109,15 +107,6 @@ const isAuthorizedRequest = (
   cardanoDappsOrigins?: string[],
 ) => origin && cardanoDappsOrigins?.includes(origin);
 
-const ensureWalletUnlocked = async (isUnlocked$: Observable<boolean>) => {
-  const isUnlocked = await firstValueFrom(isUnlocked$);
-  if (isUnlocked) return;
-  throw new APIError(
-    APIErrorCode.Refused,
-    'Wallet is locked. Please unlock the wallet first.',
-  );
-};
-
 /**
  * Validates that a request comes from an authorized dApp.
  *
@@ -126,15 +115,12 @@ const ensureWalletUnlocked = async (isUnlocked$: Observable<boolean>) => {
  *
  * @param sender - The message sender information from the extension
  * @param authorizedDapps$ - Observable of authorized dApps data
- * @param isUnlocked$ - Observable of wallet locked flag
  * @throws APIError with Refused code if the origin is not authorized
  */
 export const handleRequestValidation = async (
   sender: Runtime.MessageSender | undefined,
   authorizedDapps$: Observable<AuthorizedDappsDataSlice>,
-  isUnlocked$: Observable<boolean>,
 ): Promise<void> => {
-  await ensureWalletUnlocked(isUnlocked$);
   const origin = sender && senderOrigin(sender);
 
   const authorizedDapps = await firstValueFrom(authorizedDapps$);
@@ -190,7 +176,6 @@ export const initializeCardanoDappConnectorDependencies = ({
     accessAuthSecret,
     authenticate,
     signingResult$,
-    isUnlocked$,
   }: ConnectCardanoDappConnectorParameters<T>): Observable<T> =>
     new Observable(_subscriber => {
       const confirmationCallback = createCardanoConfirmationCallback(
@@ -232,11 +217,7 @@ export const initializeCardanoDappConnectorDependencies = ({
                     propType: RemoteApiPropertyType.MethodReturningPromise,
                     requestOptions: {
                       validate: async (_, sender) =>
-                        handleRequestValidation(
-                          sender,
-                          authorizedDapps$,
-                          isUnlocked$,
-                        ),
+                        handleRequestValidation(sender, authorizedDapps$),
                     },
                   },
                 ];
@@ -252,11 +233,7 @@ export const initializeCardanoDappConnectorDependencies = ({
                   propType: RemoteApiPropertyType.MethodReturningPromise,
                   requestOptions: {
                     validate: async (_, sender) =>
-                      handleRequestValidation(
-                        sender,
-                        authorizedDapps$,
-                        isUnlocked$,
-                      ),
+                      handleRequestValidation(sender, authorizedDapps$),
                     transform: shouldAddSenderContext
                       ? ({ method, args }, sender) => {
                           if (!sender) {

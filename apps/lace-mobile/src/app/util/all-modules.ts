@@ -22,6 +22,7 @@ import dappConnectorCardano from '@lace-module/dapp-connector-cardano';
 import dappExplorer from '@lace-module/dapp-explorer';
 import featureDev from '@lace-module/feature-dev';
 import featurePosthog from '@lace-module/feature-posthog';
+import hwConnector from '@lace-module/hw-connector';
 import i18n from '@lace-module/i18n';
 import identityCenter from '@lace-module/identity-center';
 import migrateMultiDelegation from '@lace-module/migrate-multi-delegation';
@@ -38,6 +39,8 @@ import testApi from '@lace-module/test-api';
 import tokenPricingCoinGecko from '@lace-module/token-pricing-coingecko';
 import vaultInMemory from '@lace-module/vault-in-memory';
 import vaultInMemoryUI from '@lace-module/vault-in-memory-ui';
+import vaultLedger from '@lace-module/vault-ledger';
+import vaultTrezor from '@lace-module/vault-trezor';
 import viewsMobile from '@lace-module/views-mobile';
 
 export const allModules = [
@@ -77,12 +80,15 @@ export const allModules = [
   appActivityMobile,
   vaultInMemory,
   vaultInMemoryUI,
+  vaultTrezor,
   viewsMobile,
   dappConnectorCardano,
   adaHandle,
   migrateMultiDelegation,
   swapCenter,
   swapProviderSteelswap,
+  vaultLedger,
+  hwConnector,
 ]
   .map(m => m['lace-mobile'])
   .filter(isNotNil);

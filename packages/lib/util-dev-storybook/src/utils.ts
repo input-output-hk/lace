@@ -28,19 +28,19 @@ export const createIntegrationModules = <
 >({
   modulesToLoad,
   storageModule,
-  bockfrostProviderModule,
+  stubModules,
   sideEffects,
   sideEffectDependencies,
 }: {
   modulesToLoad: LaceModule[];
   storageModule: LaceModule;
-  bockfrostProviderModule?: LaceModule;
+  stubModules: LaceModule[];
   sideEffects: LaceSideEffect<S, A>[];
   sideEffectDependencies: Partial<SideEffectDependencies>;
 }): LaceModule[] => [
   ...modulesToLoad,
   storageModule,
-  ...(bockfrostProviderModule ? [bockfrostProviderModule] : []),
+  ...stubModules,
   // an additional 'test' module is used to inject stub sideEffects and sideEffectDependencies
   {
     moduleName: ModuleName('test'),

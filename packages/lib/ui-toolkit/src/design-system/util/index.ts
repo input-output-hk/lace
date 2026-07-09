@@ -4,6 +4,7 @@ import type { ShareAction } from 'react-native';
 import * as ExpoClipboard from 'expo-clipboard';
 import { Platform, Linking, Share } from 'react-native';
 
+export * from './backdrop';
 export * from './commons';
 export * from './hooks';
 export * from './color-utils';
@@ -11,6 +12,7 @@ export type * from './types';
 export * from './text-utils';
 export * from './image-format';
 export * from './schedule-native-list-scroll-to-top';
+export * from './data-format';
 
 /**
  * Adds a platform-dependent abstraction

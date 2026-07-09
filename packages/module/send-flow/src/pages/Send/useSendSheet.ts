@@ -1,3 +1,4 @@
+import { getAccountIndex } from '@lace-contract/account-management';
 import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
@@ -12,7 +13,7 @@ import {
   TOKEN_PRICING_NETWORK_TYPE,
 } from '@lace-contract/token-pricing';
 import { TokenId, type Token } from '@lace-contract/tokens';
-import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
+import { navigationRef, SheetRoutes } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
 import {
   convertAmountToDenominated,
@@ -47,8 +48,9 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   const {
     assetsSelected,
     recipientAddress: initialRecipientAddress,
+    recipientSource: initialRecipientSource,
     accountId: initialAccountId,
-  } = props.route.params;
+  } = props.route.params ?? {};
   const pendingInitialAdditionalTokensRef = useRef<Token[] | null>(null);
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -58,6 +60,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     setNote,
     assetInputValues,
     setAssetInputValues,
+    resetSendFlow,
   } = useSendFlow();
 
   const { navigate } = useSendFlowNavigation();
@@ -73,6 +76,9 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     'sendFlow.formDataChanged',
   );
   const dispatchConfirm = useDispatchLaceAction('sendFlow.confirmed', true);
+  const dispatchRecipientSourceTracked = useDispatchLaceAction(
+    'sendFlowAnalytics.recipientSourceTracked',
+  );
 
   const accountsResult = useLaceSelector('wallets.selectActiveNetworkAccounts');
   const walletsResult = useLaceSelector('wallets.selectAll');
@@ -378,27 +384,46 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     );
   }, [assetsFromStateMachine, selectedToken]);
 
-  // Debounced dispatch to Redux for amount changes
-  const debouncedAmountDispatch = useMemo(
+  // Refs let the debounced sync read the latest snapshot instead of a stale closure,
+  // so quick successive updates (e.g. Max on multiple tokens) all reach Redux on a
+  // single trailing flush rather than overwriting each other.
+  const assetInputValuesRef = useRef(assetInputValues);
+  assetInputValuesRef.current = assetInputValues;
+  const tokenTransfersRef = useRef(transfers);
+  tokenTransfersRef.current = transfers;
+
+  const debouncedAmountsSync = useMemo(
     () =>
-      debounce(
-        500,
-        (tokenId: TokenId, localeValue: string, decimals: number) => {
-          const rawValue = parseLocaleNumber(localeValue || '0');
+      debounce(500, () => {
+        const currentValues = assetInputValuesRef.current;
+        const currentTransfers = tokenTransfersRef.current;
+
+        for (const entry of currentValues) {
+          const transfer = currentTransfers.find(
+            tt => tt.token.value.tokenId === entry.tokenId,
+          );
+          if (!transfer) continue;
+
+          const decimals = transfer.token.value.decimals || 0;
+          const rawValue = parseLocaleNumber(entry.value || '0');
           const bigintValue = rawToBigInt(rawValue || '0', decimals);
           const bigNumberValue = BigNumber(bigintValue);
 
           dispatchFormDataChanged({
             data: {
               fieldName: 'tokenTransfers.amount',
-              id: tokenId,
+              id: transfer.token.value.tokenId,
               value: bigNumberValue,
             },
           });
-        },
-      ),
+        }
+      }),
     [dispatchFormDataChanged],
   );
+
+  useEffect(() => {
+    debouncedAmountsSync();
+  }, [assetInputValues, debouncedAmountsSync]);
 
   const debouncedTrackAssetInputChange = useMemo(
     () =>
@@ -429,7 +454,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       if (!tokenId) return;
 
       const availableRaw = asset.token.available;
-      const decimals = transfer.token.value.decimals || 0;
 
       const availableLocaleFormatted = valueToLocale(availableRaw);
 
@@ -453,8 +477,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
         }
         return updated;
       });
-
-      debouncedAmountDispatch(tokenId, availableLocaleFormatted, decimals);
     },
     [
       assetsFromStateMachine,
@@ -462,7 +484,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       isFlowOpen,
       sendFlowState,
       setAssetInputValues,
-      debouncedAmountDispatch,
       trackEvent,
     ],
   );
@@ -470,7 +491,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   const handleQrCodePress = async () => {
     // Camera permission handled inside QrScanner screen
     trackEvent('send | qr code | press');
-    navigate(SheetRoutes.QrScanner, {});
+    navigate(SheetRoutes.QrScanner);
   };
 
   const handleContactsPress = useCallback(() => {
@@ -486,6 +507,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     () =>
       debounce(500, (value: string) => {
         trackEventRef.current('send | recipient address change');
+        dispatchRecipientSourceTracked('manual');
         dispatchFormDataChanged({
           data: {
             fieldName: 'address',
@@ -493,7 +515,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
           },
         });
       }),
-    [dispatchFormDataChanged],
+    [dispatchFormDataChanged, dispatchRecipientSourceTracked],
   );
 
   const debouncedFormatInput = useMemo(
@@ -591,14 +613,14 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   useEffect(() => {
     return () => {
       debouncedAddressDispatch.cancel();
-      debouncedAmountDispatch.cancel();
+      debouncedAmountsSync.cancel();
       debouncedNoteDispatch.cancel();
       debouncedFormatInput.cancel();
       debouncedTrackAssetInputChange.cancel();
     };
   }, [
     debouncedAddressDispatch,
-    debouncedAmountDispatch,
+    debouncedAmountsSync,
     debouncedNoteDispatch,
     debouncedFormatInput,
     debouncedTrackAssetInputChange,
@@ -645,8 +667,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       const tokenId = transfer?.token.value.tokenId;
       if (!tokenId) return;
 
-      const decimals = transfer.token.value.decimals || 0;
-
       setAssetInputValues(previous => {
         const updated = [...previous];
         const existingIndex = updated.findIndex(
@@ -661,7 +681,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
         return updated;
       });
 
-      debouncedAmountDispatch(tokenId, localeValue, decimals);
       debouncedTrackAssetInputChange(index); // Debounced analytics
       debouncedFormatInput(tokenId);
     },
@@ -669,15 +688,24 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       isFlowOpen,
       sendFlowState,
       setAssetInputValues,
-      debouncedAmountDispatch,
       debouncedTrackAssetInputChange,
       debouncedFormatInput,
     ],
   );
 
+  const isReviewTransactionEnabled = useMemo(
+    () => sendFlowState.status === 'Form' && sendFlowState.confirmButtonEnabled,
+    [sendFlowState],
+  );
+
   const handleReviewTransactionPress = () => {
-    // TODO: handle isFormValid
-    if (!selectedAccountId || !recipientAddress) return;
+    if (
+      !selectedAccountId ||
+      !recipientAddress ||
+      !isReviewTransactionEnabled
+    ) {
+      return;
+    }
 
     const account = accounts.find(
       accumulator => accumulator.accountId === selectedAccountId,
@@ -687,7 +715,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     trackEvent('send | review transaction | press');
     // this is to ensure state machine has latest values, otherwise the review transaction sheet won't properly update the token values
     debouncedAddressDispatch.flush();
-    debouncedAmountDispatch.flush();
+    debouncedAmountsSync.flush();
     debouncedNoteDispatch.flush();
 
     // Only dispatch confirm - navigation happens reactively via useEffect when state becomes 'Summary'
@@ -696,7 +724,8 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
 
   // Reactive navigation: navigate to ReviewTransaction when state machine transitions to Summary
   useEffect(() => {
-    const currentRoute = NavigationControls.sheets.getCurrentRoute();
+    const currentRoute = navigationRef.getCurrentRoute()?.name;
+    if (!currentRoute) return;
     const isAlreadyOnReview = currentRoute === SheetRoutes.ReviewTransaction;
 
     if (sendFlowState.status === 'Summary' && !isAlreadyOnReview) {
@@ -729,14 +758,41 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
 
   const onSelectAccount = useCallback(
     (accountId: AccountId) => {
-      trackEvent('send | select account', { accountId });
-      // Close current flow and reopen with new accountId
+      const account = accounts.find(a => a.accountId === accountId);
+      trackEvent(
+        'send | select account',
+        account
+          ? {
+              blockchain: account.blockchainName,
+              walletType: account.accountType,
+              accountIndex: getAccountIndex(account),
+            }
+          : undefined,
+      );
+      const isTheSameAccount = accountId === selectedAccountId;
+      if (isTheSameAccount) return;
+      // Account switch keeps the Send screen mounted, so (unlike sheet close)
+      // nothing discards the local form state — clear it explicitly.
+      // resetSendFlow wipes SendProvider state (amounts/token/note); stale
+      // assetInputValues would otherwise override the fresh form (see
+      // mergedAssetInputValues). setRecipientAddress clears the input now rather
+      // than after the Preparing→Form re-sync, where the old address would flash.
+      resetSendFlow();
+      setRecipientAddress('');
       dispatchClosed();
       dispatchOpenRequested({
         accountId: accountId,
       });
     },
-    [dispatchClosed, dispatchOpenRequested, trackEvent],
+    [
+      accounts,
+      selectedAccountId,
+      resetSendFlow,
+      setRecipientAddress,
+      dispatchClosed,
+      dispatchOpenRequested,
+      trackEvent,
+    ],
   );
 
   const accountText = useMemo(() => {
@@ -765,11 +821,6 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     addButtonLabel: t('v2.send-flow.form.add-asset-button-label'),
     maxButtonLabel: t('v2.send-flow.form.max-button-label'),
   };
-
-  const isReviewTransactionEnabled = useMemo(
-    () => sendFlowState.status === 'Form' && sendFlowState.confirmButtonEnabled,
-    [sendFlowState],
-  );
 
   const sheetFooterTitleRow = useMemo(() => {
     const SheetFooterTitleRowComponent =
@@ -853,6 +904,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
 
       // Dispatch to Redux state machine when flow is open
       if (isFlowOpen) {
+        dispatchRecipientSourceTracked(initialRecipientSource ?? 'navigation');
         dispatchFormDataChanged({
           data: {
             fieldName: 'address',
@@ -863,8 +915,10 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     }
   }, [
     initialRecipientAddress,
+    initialRecipientSource,
     isFlowOpen,
     dispatchFormDataChanged,
+    dispatchRecipientSourceTracked,
     setRecipientAddress,
   ]);
 
@@ -898,7 +952,10 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       estimatedFee,
       maxAmountAssetIndex,
       assetsToSend: assetsFromStateMachine,
-      addressSelected: recipientAddress || undefined,
+      // Never coerce '' to `undefined`: CustomTextInput ignores an undefined
+      // `value`, so a cleared address would stay frozen on screen when the input
+      // is not remounted (e.g. source-account switch).
+      addressSelected: recipientAddress,
       assetInputValues: mergedAssetInputValues,
     },
     utils: {

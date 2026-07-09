@@ -1,6 +1,14 @@
+import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
-import { type TabRoutes, type TabScreenProps } from '@lace-lib/navigation';
+import { useTranslation } from '@lace-contract/i18n';
 import {
+  NavigationControls,
+  SheetRoutes,
+  type TabRoutes,
+  type TabScreenProps,
+} from '@lace-lib/navigation';
+import {
+  getIsDark,
   spacing,
   Tabs,
   PortfolioCard,
@@ -10,27 +18,74 @@ import {
   CompactPortfolioSkeleton,
   isWeb,
   PageContainerTemplate,
+  Row,
+  IconButton,
+  Icon,
+  useTheme,
 } from '@lace-lib/ui-toolkit';
 import { valueToLocale } from '@lace-lib/util-render';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { type LayoutChangeEvent } from 'react-native';
 import { FlatList, StyleSheet, View } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
+
+import { SecurityAlertsBanner } from '../../components/security-alerts/SecurityAlertsBanner';
 
 import { ActivitiesFlatlist } from './activities';
 import { NftsList } from './nfts';
 import { TokensList } from './tokens-list';
 import { AccountViewType, SelectedAssetView } from './types';
 import { usePortfolio } from './usePortfolio';
+import { getTokenSortOption, getTokenSortOrder } from './utils/portfolioSort';
 
 import type { AccountView, AssetView } from './types';
+import type { TokenSortOption, TokenSortOrder } from './utils/portfolioSort';
+import type { Theme } from '@lace-lib/ui-toolkit';
 
-export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
+type WheelLikeEvent = {
+  deltaY?: number;
+  preventDefault?: () => void;
+  nativeEvent?: {
+    deltaY?: number;
+  };
+};
+
+export const Portfolio = ({
+  route,
+  navigation,
+}: TabScreenProps<TabRoutes.Portfolio>) => {
+  const { t } = useTranslation();
+  const { theme } = useTheme();
+  const initialSortOption = getTokenSortOption(route.params?.tokenSortOption);
   const [{ headerHeight, headerTopInset }, setHeaderLayout] = useState({
     headerHeight: 0,
     headerTopInset: 0,
   });
   const [carouselHeight, setCarouselHeight] = useState(0);
+  const [tokenSortOption, setTokenSortOption] = useState<
+    TokenSortOption | undefined
+  >(initialSortOption);
+  const [tokenSortOrder, setTokenSortOrder] = useState<TokenSortOrder>(() =>
+    getTokenSortOrder(route.params?.tokenSortOrder, initialSortOption),
+  );
+  const [isTokensListEmpty, setIsTokensListEmpty] = useState(false);
+  const tokensListRef = useRef<FlatList<unknown> | null>(null);
+  const nftsListRef = useRef<FlatList<unknown> | null>(null);
+  const activitiesListRef = useRef<FlatList<unknown> | null>(null);
+  const assetScrollOffset = useSharedValue(0);
+  const headerPanStartOffset = useSharedValue(0);
+  const { trackEvent } = useAnalytics();
+
+  const clearFocusAccount = useCallback(() => {
+    navigation.setParams({ focusAccountId: undefined });
+  }, [navigation]);
 
   const {
     activities,
@@ -73,7 +128,13 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
     totalPortfolioValue,
     currentAccount,
     networkType,
-  } = usePortfolio({ headerHeight, headerTopInset });
+  } = usePortfolio({
+    headerHeight,
+    headerTopInset,
+    externalScrollOffset: assetScrollOffset,
+    focusAccountId: route.params?.focusAccountId,
+    clearFocusAccount,
+  });
 
   useEffect(() => {
     // Reset carousel height on network switch (mainnet ↔ testnet) because
@@ -91,8 +152,8 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
     walletDropdownCustomisations[0]?.WalletDropdown;
 
   const styles = useMemo(
-    () => getStyles({ containerWidth, contentWidth }),
-    [containerWidth, contentWidth],
+    () => getStyles({ containerWidth, contentWidth, theme }),
+    [containerWidth, contentWidth, theme],
   );
 
   const headerBottomOffset = useMemo(
@@ -120,24 +181,47 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
     [],
   );
 
+  useEffect(() => {
+    const nextOption = getTokenSortOption(route.params?.tokenSortOption);
+    setTokenSortOption(nextOption);
+    setTokenSortOrder(
+      getTokenSortOrder(route.params?.tokenSortOrder, nextOption),
+    );
+  }, [route.params?.tokenSortOption, route.params?.tokenSortOrder]);
+
+  const handleTokenSortPress = useCallback(() => {
+    NavigationControls.navigate(SheetRoutes.PortfolioTokenSortControls, {
+      tokenSortOption,
+      tokenSortOrder,
+      isTokenPricingEnabled,
+    });
+  }, [isTokenPricingEnabled, tokenSortOption, tokenSortOrder]);
+
+  const activeBannerAccount = activeIndex > 0 ? currentAccount : null;
+
   // Portfolio banner customisation
   const [portfolioBannerCustomisation] = useUICustomisation(
     'addons.loadPortfolioBannerUICustomisations',
-    currentAccount?.blockchainName,
+    activeBannerAccount?.blockchainName,
   );
 
   const AssetListHeader = useCallback(
-    () =>
-      currentAccount && portfolioBannerCustomisation?.PortfolioBanner ? (
-        <Column style={styles.tabsAndPagination}>
+    () => (
+      <>
+        {currentAccount ? (
+          <SecurityAlertsBanner accountId={currentAccount.accountId} />
+        ) : null}
+        {activeBannerAccount &&
+        portfolioBannerCustomisation?.PortfolioBanner ? (
           <portfolioBannerCustomisation.PortfolioBanner
-            accountId={currentAccount?.accountId}
+            accountId={activeBannerAccount.accountId}
           />
-        </Column>
-      ) : null,
+        ) : null}
+      </>
+    ),
     [
-      styles.tabsAndPagination,
       currentAccount,
+      activeBannerAccount,
       portfolioBannerCustomisation?.PortfolioBanner,
     ],
   );
@@ -146,23 +230,88 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
     setCarouselHeight(event.nativeEvent.layout.height);
   }, []);
 
+  const getActiveAssetListRef = useCallback(() => {
+    switch (selectedAssetView) {
+      case SelectedAssetView.Nfts:
+        return nftsListRef;
+      case SelectedAssetView.Activities:
+        return activitiesListRef;
+      case SelectedAssetView.Assets:
+      default:
+        return tokensListRef;
+    }
+  }, [selectedAssetView]);
+
+  const scrollActiveAssetList = useCallback(
+    (offset: number) => {
+      const nextOffset = Math.max(0, offset);
+      const activeListRef = getActiveAssetListRef().current;
+      if (!activeListRef) return;
+      activeListRef.scrollToOffset({ offset: nextOffset, animated: false });
+    },
+    [getActiveAssetListRef],
+  );
+
+  const createPanGesture = useCallback(
+    () =>
+      Gesture.Pan()
+        .activeOffsetY([-6, 6])
+        .failOffsetX([-12, 12])
+        .onStart(() => {
+          headerPanStartOffset.value = assetScrollOffset.value;
+        })
+        .onUpdate(event => {
+          const nextOffset = Math.max(
+            0,
+            headerPanStartOffset.value - event.translationY,
+          );
+          runOnJS(scrollActiveAssetList)(nextOffset);
+        }),
+    [assetScrollOffset, headerPanStartOffset, scrollActiveAssetList],
+  );
+
+  const headerPanGesture = useMemo(
+    () => createPanGesture(),
+    [createPanGesture],
+  );
+
+  const assetPanGesture = useMemo(() => createPanGesture(), [createPanGesture]);
+
+  const handleHeaderWheel = useCallback(
+    (event: WheelLikeEvent) => {
+      const deltaY = event.nativeEvent?.deltaY ?? event.deltaY ?? 0;
+      if (deltaY === 0) return;
+      event.preventDefault?.();
+      scrollActiveAssetList(assetScrollOffset.value + deltaY);
+    },
+    [assetScrollOffset, scrollActiveAssetList],
+  );
+
+  const headerWheelProps = useMemo(
+    () =>
+      isWeb
+        ? ({
+            onWheel: handleHeaderWheel,
+          } as Record<string, unknown>)
+        : ({} as Record<string, unknown>),
+    [handleHeaderWheel],
+  );
+
+  useEffect(() => {
+    assetScrollOffset.value = 0;
+  }, [activeIndex, assetScrollOffset, selectedAssetView]);
+
   const pageStyle = useMemo(
     () =>
-      carouselHeight > 0 && isTokenPricingEnabled
+      carouselHeight > 0
         ? [styles.page, { height: carouselHeight }]
         : styles.page,
-    [styles.page, carouselHeight, isTokenPricingEnabled],
+    [styles.page, carouselHeight],
   );
 
-  const contentStyle = useMemo(
-    () => (isTokenPricingEnabled ? styles.content : styles.contentCompact),
-    [isTokenPricingEnabled, styles.content, styles.contentCompact],
-  );
+  const contentStyle = styles.content;
 
-  const cardContainerStyle = useMemo(
-    () => (isTokenPricingEnabled ? styles.fillCard : undefined),
-    [isTokenPricingEnabled, styles.fillCard],
-  );
+  const cardContainerStyle = styles.fillCard;
 
   const renderAccountItem = useCallback(
     ({ item }: { item: AccountView }) => {
@@ -174,6 +323,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 variant="alternative"
                 alternativeType="enhanced"
                 arePricesAvailable={isTokenPricingEnabled}
+                containerStyle={cardContainerStyle}
                 data={portfolioSummary}
                 price={portfolioValue}
                 currency={currency.name}
@@ -200,18 +350,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
           }),
       );
 
-      const nativeTokenInfoCustomisation = accountCardCustomisations.find(
-        c =>
-          !!c.nativeTokenInfo &&
-          c.uiCustomisationSelector({
-            blockchainName: account.blockchainName,
-          }),
-      );
-
-      const coin = nativeTokenInfoCustomisation?.nativeTokenInfo({
-        networkType,
-      })?.displayShortName;
-
       if (customisation?.AccountCard) {
         const CustomCard = customisation.AccountCard;
         const cardData = accountCards[item.accountIndex];
@@ -224,7 +362,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 accountId={account.accountId}
                 accountName={cardData.accountName}
                 accountIndex={item.accountIndex}
-                coin={coin ?? cardData.coin}
+                coin={cardData.coin}
                 currency={currency.name}
                 balanceCurrency={cardData.balanceCurrency}
                 onSendPress={
@@ -250,7 +388,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
           <View style={contentStyle}>
             <AccountCard
               {...accountData}
-              coin={coin ?? accountData.coin}
               containerStyle={cardContainerStyle}
               formatChartValue={formatChartValue}
             />
@@ -277,7 +414,6 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
       contentStyle,
       cardContainerStyle,
       formatChartValue,
-      networkType,
     ],
   );
 
@@ -306,6 +442,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 accountId={accountId}
                 activeIndex={activeIndex}
                 selectedAssetView={selectedAssetView}
+                listRef={tokensListRef}
                 containerStyle={listContainerStyle}
                 scrollHandler={scrollHandler}
                 ifFromPortfolio={isPortfolioView}
@@ -313,6 +450,9 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 ListHeaderComponent={AssetListHeader}
                 footerSpacerHeight={headerBottomOffset}
                 isTokenPricingEnabled={isTokenPricingEnabled}
+                sortOption={tokenSortOption}
+                sortOrder={tokenSortOrder}
+                onEmptyStateChange={setIsTokensListEmpty}
               />
             </View>
           );
@@ -323,6 +463,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 accountId={accountId}
                 activeIndex={activeIndex}
                 selectedAssetView={selectedAssetView}
+                listRef={nftsListRef}
                 scrollHandler={scrollHandler}
                 style={[styles.fillSpace, { width: contentWidth }]}
                 ListHeaderComponent={AssetListHeader}
@@ -340,6 +481,7 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
                 selectedAssetView={selectedAssetView}
                 isVisible={selectedAssetView === SelectedAssetView.Activities}
                 accountId={accountId}
+                listRef={activitiesListRef}
                 containerStyle={listContainerStyle}
                 scrollHandler={scrollHandler}
                 style={styles.fillSpace}
@@ -367,8 +509,16 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
       headerBottomOffset,
       listContentTopOffset,
       listContainerStyle,
+      tokenSortOption,
+      tokenSortOrder,
     ],
   );
+
+  const sortIconColor = useMemo(() => {
+    const shouldUseBlackIcon = !tokenSortOption && !getIsDark(theme);
+
+    return shouldUseBlackIcon ? theme.brand.black : theme.brand.white;
+  }, [tokenSortOption, theme]);
 
   if (isLoading) {
     return (
@@ -394,47 +544,87 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
         <Animated.View
           onLayout={onHeaderLayout}
           style={[styles.headerContainer, animatedContainerStyle]}>
-          <FlatList
-            ref={accountsCarouselRef}
-            data={accountsData}
-            scrollEventThrottle={100}
-            renderItem={renderAccountItem}
-            keyExtractor={accountsKeyExtractor}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            getItemLayout={getItemLayout}
-            onScroll={handleAccountScroll}
-            onLayout={onCarouselLayout}
-            initialScrollIndex={Math.max(
-              0,
-              Math.min(activeIndex, accountsData.length - 1),
-            )}
-            onScrollToIndexFailed={onAccountsScrollToIndexFailed}
-          />
-          <Column style={[styles.tabsAndPagination, { paddingTop: spacing.S }]}>
-            <Pagination
-              pages={accountsData.length}
-              activeIndex={activeIndex}
-              setActiveIndex={handleIndexChange}
-              withNavigation={true}
-              loop={false}
-              showPortfolioView={true}
-              testID="portfolio-carousel-pagination"
-            />
-            <Tabs
-              tabs={tabs}
-              value={selectedAssetView}
-              onChange={value => {
-                setSelectedAssetView(value as SelectedAssetView);
-              }}
-            />
-          </Column>
+          <View {...headerWheelProps} style={styles.headerContent}>
+            <GestureDetector gesture={headerPanGesture}>
+              <View>
+                <FlatList
+                  key={networkType}
+                  ref={accountsCarouselRef}
+                  data={accountsData}
+                  scrollEventThrottle={100}
+                  renderItem={renderAccountItem}
+                  keyExtractor={accountsKeyExtractor}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  getItemLayout={getItemLayout}
+                  onScroll={handleAccountScroll}
+                  onLayout={onCarouselLayout}
+                  initialScrollIndex={Math.max(
+                    0,
+                    Math.min(activeIndex, accountsData.length - 1),
+                  )}
+                  onScrollToIndexFailed={onAccountsScrollToIndexFailed}
+                />
+                <Column
+                  style={[styles.tabsAndPagination, { paddingTop: spacing.S }]}>
+                  <Pagination
+                    pages={accountsData.length}
+                    activeIndex={activeIndex}
+                    setActiveIndex={handleIndexChange}
+                    withNavigation={true}
+                    loop={false}
+                    showPortfolioView={true}
+                    testID="portfolio-carousel-pagination"
+                  />
+                  <Row
+                    alignItems="center"
+                    gap={spacing.S}
+                    style={styles.assetControls}>
+                    {selectedAssetView === SelectedAssetView.Assets &&
+                      !isTokensListEmpty && (
+                        <IconButton.Static
+                          icon={
+                            <Icon
+                              name="Sorting"
+                              size={18}
+                              color={sortIconColor}
+                            />
+                          }
+                          onPress={handleTokenSortPress}
+                          accessibilityLabel={t('v2.generic.btn.sortBy')}
+                          testID="portfolio-token-sort-button"
+                          containerStyle={
+                            tokenSortOption
+                              ? styles.ascendingActionColor
+                              : styles.regularActionColor
+                          }
+                        />
+                      )}
+                    <View style={styles.tabsWrapper}>
+                      <Tabs
+                        tabs={tabs}
+                        value={selectedAssetView}
+                        onChange={value => {
+                          trackEvent('portfolio | assets | tab | press', {
+                            tab: value,
+                          });
+                          setSelectedAssetView(value as SelectedAssetView);
+                        }}
+                      />
+                    </View>
+                  </Row>
+                </Column>
+              </View>
+            </GestureDetector>
+          </View>
         </Animated.View>
         {isWeb ? (
-          <View style={styles.fillSpace}>
-            {renderAssetItem({ item: { type: selectedAssetView } })}
-          </View>
+          <GestureDetector gesture={assetPanGesture}>
+            <View style={[styles.fillSpace, styles.assetsContainer]}>
+              {renderAssetItem({ item: { type: selectedAssetView } })}
+            </View>
+          </GestureDetector>
         ) : (
           <FlatList
             contentContainerStyle={styles.assetsContainer}
@@ -464,9 +654,11 @@ export const Portfolio = ({}: TabScreenProps<TabRoutes.Portfolio>) => {
 const getStyles = ({
   containerWidth,
   contentWidth,
+  theme,
 }: {
   containerWidth: number;
   contentWidth: number;
+  theme: Theme;
 }) =>
   StyleSheet.create({
     headerContainer: {
@@ -477,6 +669,9 @@ const getStyles = ({
       width: containerWidth,
       zIndex: 2,
       overflow: 'hidden',
+    },
+    headerContent: {
+      width: '100%',
     },
     topBarContainer: {
       flexDirection: 'row',
@@ -501,6 +696,13 @@ const getStyles = ({
       width: contentWidth,
       alignSelf: 'center',
     },
+    assetControls: {
+      width: '100%',
+    },
+    tabsWrapper: {
+      flex: 1,
+      minWidth: 0,
+    },
     listContainer: {
       gap: spacing.S,
       paddingHorizontal: spacing.M,
@@ -524,10 +726,6 @@ const getStyles = ({
       paddingHorizontal: spacing.M,
       flex: 1,
     },
-    contentCompact: {
-      width: contentWidth,
-      paddingHorizontal: spacing.M,
-    },
     fillCard: {
       flex: 1,
     },
@@ -536,6 +734,12 @@ const getStyles = ({
       minHeight: 0,
     },
     assetsContainer: {
-      paddingTop: spacing.M,
+      paddingTop: spacing.S,
+    },
+    ascendingActionColor: {
+      backgroundColor: theme.brand.ascending,
+    },
+    regularActionColor: {
+      backgroundColor: theme.background.tertiary,
     },
   });

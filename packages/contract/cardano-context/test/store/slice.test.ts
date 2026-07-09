@@ -16,6 +16,8 @@ import {
   CardanoPaymentAddress,
   CardanoNetworkId,
   CardanoAccountId,
+  RewardAccountDetailsCacheKey,
+  UtxoCacheKey,
 } from '../../src';
 import {
   cardanoContextActions as actions,
@@ -60,11 +62,13 @@ describe('cardanoContext slice', () => {
       networkInfo: {},
       accountUtxos: {},
       accountUnspendableUtxos: {},
-      accountTransactionsTotal: {},
       rewardAccountDetails: {},
+      lastFetchedRewardAccountDetailsCacheKey: {},
       accountDelegationsHistory: {},
       delegationActivities: {},
-      delegationErrors: {},
+      securityScanByAccount: {},
+      securityScanInProgress: {},
+      securityRescanDismissedByAccount: {},
     };
   });
 
@@ -1134,6 +1138,22 @@ describe('cardanoContext slice', () => {
   });
 
   describe('reducers (UTxOs)', () => {
+    const cacheKey1 = UtxoCacheKey({
+      topOnChainActivityId: 'tx-abc',
+      stakeKeys: [],
+      accountAddressCount: 0,
+    });
+    const cacheKey2 = UtxoCacheKey({
+      topOnChainActivityId: 'tx-def',
+      stakeKeys: [],
+      accountAddressCount: 0,
+    });
+    const cacheKey3 = UtxoCacheKey({
+      topOnChainActivityId: 'tx-ghi',
+      stakeKeys: [],
+      accountAddressCount: 0,
+    });
+
     it('setAccountUtxos sets utxos per account', () => {
       const accountId1 = AccountId('acc1');
       const accountId2 = AccountId('acc2');
@@ -1160,6 +1180,301 @@ describe('cardanoContext slice', () => {
       expect(result).toEqual({
         [accountId1]: [utxo1],
         [accountId2]: [utxo2],
+      });
+    });
+
+    describe('setLastFetchedUtxoCacheKey', () => {
+      it('preserves previously persisted utxos when only the cacheKey is advanced', () => {
+        const accountId = AccountId('acc1');
+        const state1 = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId,
+            utxos: [utxo1],
+          }),
+        );
+        const state2 = reducers.cardanoContext(
+          state1,
+          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+
+        expect(
+          selectors.cardanoContext.selectAccountUtxos({
+            cardanoContext: state2,
+          }),
+        ).toEqual({ [accountId]: [utxo1] });
+        expect(
+          selectors.cardanoContext.selectLastFetchedUtxoCacheKeyByAccount({
+            cardanoContext: state2,
+          }),
+        ).toEqual({ [accountId]: cacheKey1 });
+      });
+
+      it('setAccountUtxos preserves the previously persisted cacheKey', () => {
+        const accountId = AccountId('acc1');
+        const state1 = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId,
+            utxos: [utxo1],
+          }),
+        );
+        const state2 = reducers.cardanoContext(
+          state1,
+          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+        const state3 = reducers.cardanoContext(
+          state2,
+          actions.cardanoContext.setAccountUtxos({
+            accountId,
+            utxos: [utxo2],
+          }),
+        );
+
+        expect(
+          selectors.cardanoContext.selectAccountUtxos({
+            cardanoContext: state3,
+          }),
+        ).toEqual({ [accountId]: [utxo2] });
+        expect(
+          selectors.cardanoContext.selectLastFetchedUtxoCacheKeyByAccount({
+            cardanoContext: state3,
+          }),
+        ).toEqual({ [accountId]: cacheKey1 });
+      });
+
+      it('overwrites a previously advanced cacheKey', () => {
+        const accountId = AccountId('acc1');
+        let state = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId,
+            utxos: [utxo1],
+          }),
+        );
+        state = reducers.cardanoContext(
+          state,
+          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+        state = reducers.cardanoContext(
+          state,
+          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            accountId,
+            cacheKey: cacheKey2,
+          }),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedUtxoCacheKeyByAccount({
+            cardanoContext: state,
+          }),
+        ).toEqual({ [accountId]: cacheKey2 });
+      });
+
+      it('removeAccount clears the account entry', () => {
+        const accountId = AccountId('acc-rm');
+        const walletId = WalletId('wallet1');
+
+        let state = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId,
+            utxos: [utxo1],
+          }),
+        );
+        state = reducers.cardanoContext(
+          state,
+          actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+
+        const afterRemove = reducers.cardanoContext(
+          state,
+          walletsActions.wallets.removeAccount(walletId, accountId),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedUtxoCacheKeyByAccount({
+            cardanoContext: afterRemove,
+          }),
+        ).toEqual({});
+        expect(
+          selectors.cardanoContext.selectAccountUtxos({
+            cardanoContext: afterRemove,
+          }),
+        ).toEqual({});
+      });
+
+      it('removeWallet clears entries for all wallet accounts', () => {
+        const walletId = WalletId('wallet1');
+        const accountId1 = AccountId('acc1');
+        const accountId2 = AccountId('acc2');
+        const accountId3 = AccountId('acc3');
+
+        let state = initialState;
+        for (const [id, utxo, key] of [
+          [accountId1, utxo1, cacheKey1],
+          [accountId2, utxo2, cacheKey2],
+          [accountId3, utxo1, cacheKey3],
+        ] as const) {
+          state = reducers.cardanoContext(
+            state,
+            actions.cardanoContext.setAccountUtxos({
+              accountId: id,
+              utxos: [utxo],
+            }),
+          );
+          state = reducers.cardanoContext(
+            state,
+            actions.cardanoContext.setLastFetchedUtxoCacheKey({
+              accountId: id,
+              cacheKey: key,
+            }),
+          );
+        }
+
+        const afterRemove = reducers.cardanoContext(
+          state,
+          walletsActions.wallets.removeWallet(walletId, [
+            accountId1,
+            accountId2,
+          ]),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedUtxoCacheKeyByAccount({
+            cardanoContext: afterRemove,
+          }),
+        ).toEqual({ [accountId3]: cacheKey3 });
+      });
+    });
+
+    describe('setLastFetchedRewardAccountDetailsCacheKey', () => {
+      const stakeKey = CardanoRewardAccount(
+        'stake_test1urpklgzqsh9yqz8pkyuxcw9dlszpe5flnxjtl55epla6ftqktdyfz',
+      );
+      const cacheKey1 = RewardAccountDetailsCacheKey({
+        topNonPendingActivityId: 'tx-abc',
+        topOnChainTxActivityId: 'tx-abc',
+        stakeKey,
+      });
+      const cacheKey2 = RewardAccountDetailsCacheKey({
+        topNonPendingActivityId: 'tx-def',
+        topOnChainTxActivityId: 'tx-def',
+        stakeKey,
+      });
+
+      it('writes a cacheKey for the given account', () => {
+        const accountId = AccountId('acc1');
+
+        const state = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setLastFetchedRewardAccountDetailsCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedRewardAccountDetailsCacheKeyByAccount(
+            { cardanoContext: state },
+          ),
+        ).toEqual({ [accountId]: cacheKey1 });
+      });
+
+      it('overwrites a previously advanced cacheKey', () => {
+        const accountId = AccountId('acc1');
+        let state = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setLastFetchedRewardAccountDetailsCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+        state = reducers.cardanoContext(
+          state,
+          actions.cardanoContext.setLastFetchedRewardAccountDetailsCacheKey({
+            accountId,
+            cacheKey: cacheKey2,
+          }),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedRewardAccountDetailsCacheKeyByAccount(
+            { cardanoContext: state },
+          ),
+        ).toEqual({ [accountId]: cacheKey2 });
+      });
+
+      it('removeAccount clears the account entry', () => {
+        const accountId = AccountId('acc-rm');
+        const walletId = WalletId('wallet1');
+
+        const state = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setLastFetchedRewardAccountDetailsCacheKey({
+            accountId,
+            cacheKey: cacheKey1,
+          }),
+        );
+
+        const afterRemove = reducers.cardanoContext(
+          state,
+          walletsActions.wallets.removeAccount(walletId, accountId),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedRewardAccountDetailsCacheKeyByAccount(
+            { cardanoContext: afterRemove },
+          ),
+        ).toEqual({});
+      });
+
+      it('removeWallet clears entries for all wallet accounts', () => {
+        const walletId = WalletId('wallet1');
+        const accountId1 = AccountId('acc1');
+        const accountId2 = AccountId('acc2');
+        const accountId3 = AccountId('acc3');
+
+        let state = initialState;
+        for (const [id, key] of [
+          [accountId1, cacheKey1],
+          [accountId2, cacheKey2],
+          [accountId3, cacheKey1],
+        ] as const) {
+          state = reducers.cardanoContext(
+            state,
+            actions.cardanoContext.setLastFetchedRewardAccountDetailsCacheKey({
+              accountId: id,
+              cacheKey: key,
+            }),
+          );
+        }
+
+        const afterRemove = reducers.cardanoContext(
+          state,
+          walletsActions.wallets.removeWallet(walletId, [
+            accountId1,
+            accountId2,
+          ]),
+        );
+
+        expect(
+          selectors.cardanoContext.selectLastFetchedRewardAccountDetailsCacheKeyByAccount(
+            { cardanoContext: afterRemove },
+          ),
+        ).toEqual({ [accountId3]: cacheKey1 });
       });
     });
 
@@ -1285,70 +1600,6 @@ describe('cardanoContext slice', () => {
     });
   });
 
-  describe('reducers (AccountTransactionsTotal)', () => {
-    describe('setAccountTransactionsTotal', () => {
-      it('sets transactions total for multiple accounts', () => {
-        const accountId1 = AccountId('acc1');
-        const accountId2 = AccountId('acc2');
-        const total1 = 42;
-        const total2 = 100;
-
-        const state1 = reducers.cardanoContext(
-          initialState,
-          actions.cardanoContext.setAccountTransactionsTotal({
-            accountId: accountId1,
-            total: total1,
-          }),
-        );
-
-        const state2 = reducers.cardanoContext(
-          state1,
-          actions.cardanoContext.setAccountTransactionsTotal({
-            accountId: accountId2,
-            total: total2,
-          }),
-        );
-
-        expect(state2.accountTransactionsTotal).toEqual({
-          [accountId1]: total1,
-          [accountId2]: total2,
-        });
-      });
-
-      it('updates existing account transactions total with multiple accounts loaded', () => {
-        const accountId1 = AccountId('acc1');
-        const accountId2 = AccountId('acc2');
-        const accountId3 = AccountId('acc3');
-        const total1 = 42;
-        const total2 = 100;
-        const total3Updated = 200;
-
-        const stateWithMultipleAccounts = {
-          ...initialState,
-          accountTransactionsTotal: {
-            [accountId1]: total1,
-            [accountId2]: total2,
-            [accountId3]: 150,
-          },
-        };
-
-        const stateWithUpdatedTotal = reducers.cardanoContext(
-          stateWithMultipleAccounts,
-          actions.cardanoContext.setAccountTransactionsTotal({
-            accountId: accountId3,
-            total: total3Updated,
-          }),
-        );
-
-        expect(stateWithUpdatedTotal.accountTransactionsTotal).toEqual({
-          [accountId1]: total1,
-          [accountId2]: total2,
-          [accountId3]: total3Updated,
-        });
-      });
-    });
-  });
-
   describe('extraReducers', () => {
     describe('removeAccount', () => {
       it('should remove all the cardano context data for the account', () => {
@@ -1380,16 +1631,26 @@ describe('cardanoContext slice', () => {
             [accountId2]: [],
           },
           accountUtxos: {
-            [accountId]: Serializable.to<Cardano.Utxo[]>([]),
-            [accountId2]: Serializable.to<Cardano.Utxo[]>([]),
+            [accountId]: {
+              utxos: Serializable.to<Cardano.Utxo[]>([]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-a',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
+            [accountId2]: {
+              utxos: Serializable.to<Cardano.Utxo[]>([]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-b',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
           },
           accountUnspendableUtxos: {
             [accountId]: Serializable.to<Cardano.Utxo[]>([utxo1]),
             [accountId2]: Serializable.to<Cardano.Utxo[]>([utxo2]),
-          },
-          accountTransactionsTotal: {
-            [accountId]: 42,
-            [accountId2]: 100,
           },
           accountDelegationsHistory: {
             [accountId]: {
@@ -1437,8 +1698,12 @@ describe('cardanoContext slice', () => {
           state,
           walletsActions.wallets.removeAccount(walletId, accountId),
         );
-        expect(newState.accountUtxos).toEqual({
-          [accountId2]: Serializable.to<Cardano.Utxo[]>([]),
+        expect(
+          selectors.cardanoContext.selectAccountUtxos({
+            cardanoContext: newState,
+          }),
+        ).toEqual({
+          [accountId2]: [],
         });
         expect(
           selectors.cardanoContext.selectAccountUnspendableUtxos({
@@ -1457,9 +1722,6 @@ describe('cardanoContext slice', () => {
         });
         expect(newState.accountRewardsHistory).toEqual({
           [accountId2]: [],
-        });
-        expect(newState.accountTransactionsTotal).toEqual({
-          [accountId2]: 100,
         });
         expect(newState.accountDelegationsHistory).toEqual({
           [accountId2]: {
@@ -1524,14 +1786,30 @@ describe('cardanoContext slice', () => {
             [accountId3]: [],
           },
           accountUtxos: {
-            [accountId]: Serializable.to<Cardano.Utxo[]>([]),
-            [accountId2]: Serializable.to<Cardano.Utxo[]>([]),
-            [accountId3]: Serializable.to<Cardano.Utxo[]>([]),
-          },
-          accountTransactionsTotal: {
-            [accountId]: 42,
-            [accountId2]: 100,
-            [accountId3]: 50,
+            [accountId]: {
+              utxos: Serializable.to<Cardano.Utxo[]>([]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-a',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
+            [accountId2]: {
+              utxos: Serializable.to<Cardano.Utxo[]>([]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-b',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
+            [accountId3]: {
+              utxos: Serializable.to<Cardano.Utxo[]>([]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-c',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
           },
           accountDelegationsHistory: {
             [accountId]: {
@@ -1602,8 +1880,12 @@ describe('cardanoContext slice', () => {
         );
 
         // accountId and accountId2 should be removed, accountId3 should remain
-        expect(newState.accountUtxos).toEqual({
-          [accountId3]: Serializable.to<Cardano.Utxo[]>([]),
+        expect(
+          selectors.cardanoContext.selectAccountUtxos({
+            cardanoContext: newState,
+          }),
+        ).toEqual({
+          [accountId3]: [],
         });
         expect(newState.accountTransactionHistory).toEqual({
           [accountId3]: {
@@ -1615,9 +1897,6 @@ describe('cardanoContext slice', () => {
         });
         expect(newState.accountRewardsHistory).toEqual({
           [accountId3]: [],
-        });
-        expect(newState.accountTransactionsTotal).toEqual({
-          [accountId3]: 50,
         });
         expect(newState.accountDelegationsHistory).toEqual({
           [accountId3]: {
@@ -1715,10 +1994,6 @@ describe('cardanoContext slice', () => {
             [accountId1]: [utxo1],
             [accountId2]: [utxo2],
           },
-          accountTransactionsTotal: {
-            [accountId1]: 42,
-            [accountId2]: 100,
-          },
         } as unknown as CardanoContextSliceState;
 
         const newState = reducers.cardanoContext(
@@ -1737,7 +2012,6 @@ describe('cardanoContext slice', () => {
             cardanoContext: newState,
           }),
         ).toEqual({});
-        expect(newState.accountTransactionsTotal).toEqual({});
       });
     });
   });
@@ -2287,8 +2561,22 @@ describe('cardanoContext slice', () => {
         const state: CardanoContextSliceState = {
           ...initialState,
           accountUtxos: {
-            [AccountId('acc1')]: Serializable.to([utxo1]),
-            [AccountId('acc2')]: Serializable.to([utxo2]),
+            [AccountId('acc1')]: {
+              utxos: Serializable.to([utxo1]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-a',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
+            [AccountId('acc2')]: {
+              utxos: Serializable.to([utxo2]),
+              cacheKey: UtxoCacheKey({
+                topOnChainActivityId: 'tx-b',
+                stakeKeys: [],
+                accountAddressCount: 0,
+              }),
+            },
           },
         };
 
@@ -2328,37 +2616,6 @@ describe('cardanoContext slice', () => {
           cardanoContext: state,
         });
         expect(result).toEqual(accountUnspendableUtxos);
-      });
-    });
-
-    describe('selectAccountTransactionsTotal', () => {
-      it('returns empty object when there are no transactions totals for any account', () => {
-        const state: CardanoContextSliceState = {
-          ...initialState,
-          accountTransactionsTotal: {},
-        };
-
-        const result = selectors.cardanoContext.selectAccountTransactionsTotal({
-          cardanoContext: state,
-        });
-        expect(result).toEqual({});
-      });
-
-      it('returns transactions totals for multiple accounts when present', () => {
-        const accountTransactionsTotal = {
-          [AccountId('acc1')]: 42,
-          [AccountId('acc2')]: 100,
-          [AccountId('acc3')]: 200,
-        };
-        const state: CardanoContextSliceState = {
-          ...initialState,
-          accountTransactionsTotal,
-        };
-
-        const result = selectors.cardanoContext.selectAccountTransactionsTotal({
-          cardanoContext: state,
-        });
-        expect(result).toEqual(accountTransactionsTotal);
       });
     });
 
@@ -3177,6 +3434,303 @@ describe('cardanoContext slice', () => {
 
       expect(action.type).toBe('cardanoContext/retrySyncRound');
       expect(action.payload).toBeUndefined();
+    });
+  });
+
+  describe('requestManualAddressDiscovery', () => {
+    const testAccountId = AccountId('test-account');
+
+    it('is a trigger action that does not modify state', () => {
+      const stateBefore = { ...initialState };
+      const stateAfter = reducers.cardanoContext(
+        stateBefore,
+        actions.cardanoContext.requestManualAddressDiscovery({
+          accountId: testAccountId,
+        }),
+      );
+      expect(stateAfter).toEqual(stateBefore);
+    });
+
+    it('carries the accountId payload', () => {
+      const action = actions.cardanoContext.requestManualAddressDiscovery({
+        accountId: testAccountId,
+      });
+      expect(action.type).toBe('cardanoContext/requestManualAddressDiscovery');
+      expect(action.payload).toEqual({ accountId: testAccountId });
+    });
+  });
+
+  describe('manual HD sync selectors', () => {
+    const testAccountId = AccountId('test-account');
+    const thoroughOpId = `${testAccountId}-tip-hash-address-discovery-thorough`;
+    const standardOpId = `${testAccountId}-tip-hash-address-discovery`;
+
+    const stateWithSync = (
+      operations: Record<
+        string,
+        {
+          operationId: string;
+          status: 'Completed' | 'Failed' | 'InProgress' | 'Pending';
+        }
+      >,
+    ) =>
+      ({
+        cardanoContext: initialState,
+        sync: {
+          syncStatusByAccount: {
+            [testAccountId]: {
+              pendingSync: {
+                startedAt: Timestamp(1),
+                operations,
+              },
+            },
+          },
+        },
+      } as unknown as Parameters<
+        typeof selectors.cardanoContext.selectIsManualHdSyncInProgress
+      >[0]);
+
+    describe('selectIsManualHdSyncInProgress', () => {
+      it('returns true when a thorough op is Pending', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsManualHdSyncInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(true);
+      });
+
+      it('returns true when a thorough op is InProgress', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'InProgress' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsManualHdSyncInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(true);
+      });
+
+      it('returns false when only a standard ADDRESS_DISCOVERY op is pending', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsManualHdSyncInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+
+      it('returns false when the thorough op is Completed', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Completed' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsManualHdSyncInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+
+      it('returns false when the account has no pendingSync', () => {
+        const state = {
+          cardanoContext: initialState,
+          sync: { syncStatusByAccount: {} },
+        } as unknown as Parameters<
+          typeof selectors.cardanoContext.selectIsManualHdSyncInProgress
+        >[0];
+        expect(
+          selectors.cardanoContext.selectIsManualHdSyncInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe('selectIsAddressDiscoveryInProgress', () => {
+      it('returns true when a thorough op is Pending', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(true);
+      });
+
+      it('returns true when a standard ADDRESS_DISCOVERY op is Pending', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(true);
+      });
+
+      it('returns true when a standard ADDRESS_DISCOVERY op is InProgress', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'InProgress' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(true);
+      });
+
+      it('returns false when only a TRANSACTION_POLLING op is pending', () => {
+        const txpOpId = `${testAccountId}-tip-hash-transaction-polling`;
+        const state = stateWithSync({
+          [txpOpId]: { operationId: txpOpId, status: 'InProgress' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+
+      it('returns false when the discovery op is Completed', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'Completed' },
+        });
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+
+      it('returns false when the account has no pendingSync', () => {
+        const state = {
+          cardanoContext: initialState,
+          sync: { syncStatusByAccount: {} },
+        } as unknown as Parameters<
+          typeof selectors.cardanoContext.selectIsAddressDiscoveryInProgress
+        >[0];
+        expect(
+          selectors.cardanoContext.selectIsAddressDiscoveryInProgress(
+            state,
+            testAccountId,
+          ),
+        ).toBe(false);
+      });
+    });
+
+    describe('selectManualHdSyncTerminalStatus', () => {
+      it('returns "Completed" when the thorough op reached Completed', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Completed' },
+        });
+        expect(
+          selectors.cardanoContext.selectManualHdSyncTerminalStatus(
+            state,
+            testAccountId,
+          ),
+        ).toBe('Completed');
+      });
+
+      it('returns "Failed" when the thorough op reached Failed', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Failed' },
+        });
+        expect(
+          selectors.cardanoContext.selectManualHdSyncTerminalStatus(
+            state,
+            testAccountId,
+          ),
+        ).toBe('Failed');
+      });
+
+      it('returns undefined while the thorough op is still InProgress', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'InProgress' },
+        });
+        expect(
+          selectors.cardanoContext.selectManualHdSyncTerminalStatus(
+            state,
+            testAccountId,
+          ),
+        ).toBeUndefined();
+      });
+
+      it('ignores terminal status on a standard ADDRESS_DISCOVERY op', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'Completed' },
+        });
+        expect(
+          selectors.cardanoContext.selectManualHdSyncTerminalStatus(
+            state,
+            testAccountId,
+          ),
+        ).toBeUndefined();
+      });
+    });
+
+    describe('selectAccountIdInManualHdSync', () => {
+      it('returns the accountId while a thorough op is Pending', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectAccountIdInManualHdSync(state),
+        ).toBe(testAccountId);
+      });
+
+      it('returns the accountId while a thorough op is InProgress', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'InProgress' },
+        });
+        expect(
+          selectors.cardanoContext.selectAccountIdInManualHdSync(state),
+        ).toBe(testAccountId);
+      });
+
+      it('still returns the accountId after the thorough op reaches Completed but before pendingSync clears', () => {
+        const state = stateWithSync({
+          [thoroughOpId]: { operationId: thoroughOpId, status: 'Completed' },
+        });
+        expect(
+          selectors.cardanoContext.selectAccountIdInManualHdSync(state),
+        ).toBe(testAccountId);
+      });
+
+      it('returns undefined when only a standard ADDRESS_DISCOVERY op is pending', () => {
+        const state = stateWithSync({
+          [standardOpId]: { operationId: standardOpId, status: 'Pending' },
+        });
+        expect(
+          selectors.cardanoContext.selectAccountIdInManualHdSync(state),
+        ).toBeUndefined();
+      });
+
+      it('returns undefined when no account has pendingSync', () => {
+        const state = {
+          cardanoContext: initialState,
+          sync: { syncStatusByAccount: {} },
+        } as unknown as Parameters<
+          typeof selectors.cardanoContext.selectAccountIdInManualHdSync
+        >[0];
+        expect(
+          selectors.cardanoContext.selectAccountIdInManualHdSync(state),
+        ).toBeUndefined();
+      });
     });
   });
 });

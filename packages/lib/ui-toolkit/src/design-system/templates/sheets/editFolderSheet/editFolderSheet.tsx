@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { NftItemsList } from '../..';
@@ -11,8 +11,7 @@ import {
   Column,
   CustomTextInput,
 } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { Sheet, footerHeight } from '../../../organisms';
 
 import type { NftItem } from '../..';
 
@@ -42,7 +41,6 @@ interface ActionProps {
   onDeleteFolderPress?: () => void;
   moreSettingsLabel?: string;
   updateNftsLabel?: string;
-  isUpdateNftsDisabled?: boolean;
 }
 
 interface NftsProps {
@@ -58,7 +56,6 @@ interface EditFolderSheetProps {
   buttons: ButtonProps;
   actions: ActionProps;
   nfts: NftsProps;
-  title: string;
   editTokenFolderState: { status: string };
 }
 
@@ -67,107 +64,79 @@ export const EditFolderSheet = ({
   buttons,
   actions,
   nfts,
-  title,
   editTokenFolderState,
 }: EditFolderSheetProps) => {
   const isSelectingTokens = editTokenFolderState.status === 'SelectingTokens';
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
 
   return (
-    <>
-      <SheetHeader title={title} />
-      <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
-        {isSelectingTokens ? (
-          <Column>
-            <Column style={styles.nameColumn}>
-              <Text.S>{nfts.pickNftsLabel}</Text.S>
-              <NftItemsList
-                nfts={nfts.nfts}
-                onToggleNftSelection={nfts.onToggleNftSelection}
-              />
-            </Column>
+    <Sheet.Scroll>
+      {isSelectingTokens ? (
+        <Column gap={spacing.M} style={styles.contentContainer}>
+          <Text.S>{nfts.pickNftsLabel}</Text.S>
+          <NftItemsList
+            nfts={nfts.nfts}
+            onToggleNftSelection={nfts.onToggleNftSelection}
+          />
+        </Column>
+      ) : (
+        <Column gap={spacing.M} style={styles.editFolderContentContainer}>
+          <Column style={styles.nameColumn}>
+            <Text.S>{folderName.folderNameLabel}</Text.S>
+            <CustomTextInput
+              label={folderName.inputLabel}
+              value={folderName.userInputFolderName}
+              testID="edit-nft-folder-name-input"
+              inputError={folderName.inputError}
+              onChange={event => {
+                folderName.onFolderNameChange(event.nativeEvent.text);
+              }}
+            />
           </Column>
-        ) : (
-          <Column>
-            <Column style={styles.nameColumn}>
-              <Text.S>{folderName.folderNameLabel}</Text.S>
-              <CustomTextInput
-                isWithinBottomSheet
-                label={folderName.inputLabel}
-                value={folderName.userInputFolderName}
-                testID="edit-nft-folder-name-input"
-                inputError={folderName.inputError}
-                onChange={event => {
-                  folderName.onFolderNameChange(event.nativeEvent.text);
+          <Divider />
+          <Column gap={spacing.M} style={styles.moreSettingsColumn}>
+            <Text.M>{actions.moreSettingsLabel}</Text.M>
+            {actions.onUpdateNftsPress && (
+              <IconButton.Static
+                label={{
+                  position: 'right',
+                  content: String(actions.updateNftsLabel),
                 }}
+                icon={<Icon name="ImageAdd" />}
+                testID="edit-nft-folder-update-nfts-btn"
+                onPress={actions.onUpdateNftsPress}
               />
-            </Column>
-            <Divider />
-            <Column style={styles.moreSettingsColumn}>
-              <Text.M style={{ marginBottom: spacing.M }}>
-                {actions.moreSettingsLabel}
-              </Text.M>
-              {actions.onUpdateNftsPress && (
-                <IconButton.Static
-                  label={{
-                    position: 'right',
-                    content: String(actions.updateNftsLabel),
-                  }}
-                  icon={<Icon name="ImageAdd" />}
-                  testID="edit-nft-folder-update-nfts-btn"
-                  onPress={actions.onUpdateNftsPress}
-                  disabled={actions.isUpdateNftsDisabled}
-                />
-              )}
-              {actions.onDeleteFolderPress && (
-                <IconButton.Static
-                  label={{
-                    position: 'right',
-                    content: String(buttons.buttonTertiaryLabel),
-                  }}
-                  testID="edit-nft-folder-delete-btn"
-                  onPress={actions.onDeleteFolderPress}
-                  icon={<Icon name="Delete" />}
-                />
-              )}
-            </Column>
+            )}
+            {actions.onDeleteFolderPress && (
+              <IconButton.Static
+                label={{
+                  position: 'right',
+                  content: String(buttons.buttonTertiaryLabel),
+                }}
+                testID="edit-nft-folder-delete-btn"
+                onPress={actions.onDeleteFolderPress}
+                icon={<Icon name="Delete" />}
+              />
+            )}
           </Column>
-        )}
-      </Sheet.Scroll>
-      <SheetFooter
-        showDivider={false}
-        secondaryButton={{
-          label: buttons.buttonSecondaryLabel,
-          onPress: isSelectingTokens
-            ? nfts.onClose
-            : buttons.buttonSecondaryPress,
-          testID: buttons.buttonSecondaryTestID,
-        }}
-        primaryButton={{
-          label: buttons.buttonPrimaryLabel,
-          onPress: isSelectingTokens ? nfts.onDone : buttons.buttonPrimaryPress,
-          disabled: isSelectingTokens ? false : buttons.disabled,
-          testID: isSelectingTokens
-            ? 'nft-folder-select-done-btn'
-            : buttons.buttonPrimaryTestID,
-        }}
-      />
-    </>
+        </Column>
+      )}
+    </Sheet.Scroll>
   );
 };
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingBottom: footerHeight.horizontal,
+  },
+  editFolderContentContainer: {
+    marginHorizontal: spacing.S,
+  },
   nameColumn: {
     marginTop: spacing.M,
     gap: spacing.S,
-    marginBottom: spacing.S,
   },
   moreSettingsColumn: {
     marginTop: spacing.S,
-    gap: spacing.S,
+    paddingBottom: footerHeight.horizontal,
   },
 });

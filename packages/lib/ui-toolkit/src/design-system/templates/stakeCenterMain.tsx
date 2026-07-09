@@ -5,6 +5,7 @@ import { StyleSheet, View } from 'react-native';
 import { spacing } from '../../design-tokens';
 import {
   EmptyStateMessage,
+  NetworkInfoCard,
   PageHeaderSection,
   SearchBar,
   StakeCard,
@@ -15,6 +16,7 @@ import { usePageHeaderCollapseScroll } from '../util';
 
 import { PageContainerTemplate } from './pageContainerTemplate/pageContainerTemplate';
 
+import type { NetworkInfoCardProps } from '../molecules/networkInfoCard/networkInfoCard';
 import type { StakeCardProps } from '../molecules/stakeCard/stakeCard';
 import type { StakingStatusCardProps } from '../molecules/stakingStatusCard/stakingStatusCard';
 
@@ -24,6 +26,7 @@ interface StakeCenterMainProps {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   showSearchBar?: boolean;
+  networkInfoCard?: NetworkInfoCardProps;
   stakingStatusCard: StakingStatusCardProps;
   stakeCards: StakeCardProps[];
 }
@@ -34,6 +37,7 @@ export const StakeCenterMain = ({
   onSearchChange,
   searchPlaceholder,
   showSearchBar,
+  networkInfoCard,
   stakingStatusCard,
   stakeCards,
 }: StakeCenterMainProps) => {
@@ -43,10 +47,15 @@ export const StakeCenterMain = ({
   const ListHeaderComponent = useMemo(
     () => (
       <View style={styles.listHeader}>
+        {networkInfoCard && (
+          <View style={styles.networkInfoCardWrapper}>
+            <NetworkInfoCard {...networkInfoCard} />
+          </View>
+        )}
         <StakingStatusCard {...stakingStatusCard} />
       </View>
     ),
-    [stakingStatusCard],
+    [networkInfoCard, stakingStatusCard],
   );
 
   const keyExtractor = useCallback(
@@ -79,6 +88,7 @@ export const StakeCenterMain = ({
         reserveSubtitleSpace
         testID="stake-center-header-section"
         collapseScrollY={collapseScrollY}
+        stickyInScrollParent
         contentStyle={
           shouldShowSearch ? undefined : styles.headerSectionContent
         }>
@@ -108,7 +118,7 @@ export const StakeCenterMain = ({
         <View style={styles.fillSpace}>
           {headerSection}
           <GenericFlashList<StakeCardProps>
-            style={styles.fillSpace}
+            style={styles.list}
             data={stakeCards}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
@@ -133,17 +143,26 @@ const styles = StyleSheet.create({
   fillSpace: {
     flex: 1,
   },
+  list: {
+    flex: 1,
+    marginHorizontal: -spacing.M,
+  },
   headerSectionContent: {
     paddingBottom: 0,
   },
   listContent: {
+    paddingTop: spacing.M,
+    paddingHorizontal: spacing.M,
     paddingBottom: TabBarMetrics.horizontal.height + spacing.XL,
   },
   itemSeparator: {
-    height: spacing.S,
+    height: spacing.L,
   },
   listHeader: {
-    paddingBottom: spacing.S,
+    paddingBottom: spacing.L,
+  },
+  networkInfoCardWrapper: {
+    paddingBottom: spacing.L,
   },
   emptyStateContainer: {
     paddingVertical: spacing.XL,

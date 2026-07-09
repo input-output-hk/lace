@@ -12,6 +12,7 @@ import { sendFlowActions } from '../../src';
 import { FEATURE_FLAG_SEND_FLOW } from '../../src/const';
 import { createFormInitialState } from '../../src/store/form-initial-state';
 import {
+  clearRecipientSourceOnOpen,
   makeSendFlowAwaitingConfirmation,
   makeSendFlowFormDataValidation,
   makeSendFlowProcessing,
@@ -693,6 +694,7 @@ describe('send-flow sideEffects', () => {
             makeSendFlowFormDataValidation({
               addressAliasResolvers: [],
               selectAddressValidator,
+              selectChainMinimumAmountTokenValidator: () => null,
               validateForm: () => cold('a', { a: [] }),
             }),
         },
@@ -759,6 +761,7 @@ describe('send-flow sideEffects', () => {
             return makeSendFlowFormDataValidation({
               addressAliasResolvers,
               selectAddressValidator: () => addressValidator,
+              selectChainMinimumAmountTokenValidator: () => null,
               validateForm,
             });
           },
@@ -807,6 +810,7 @@ describe('send-flow sideEffects', () => {
 
             expect(validateForm).toHaveBeenCalledWith({
               blockchainSpecificData: {},
+              chainMinimumAmountTokenValidator: null,
               form,
               addressAliasResolvers,
               addressValidator,
@@ -828,6 +832,7 @@ describe('send-flow sideEffects', () => {
             makeSendFlowFormDataValidation({
               addressAliasResolvers: [],
               selectAddressValidator: () => null,
+              selectChainMinimumAmountTokenValidator: () => null,
               validateForm: () => cold('a', { a: result }),
             }),
         },
@@ -870,6 +875,93 @@ describe('send-flow sideEffects', () => {
             });
           },
         }),
+      );
+    });
+
+    it('cancels in-flight validation and re-validates when the form changes while pending', () => {
+      const validateForm = vi.fn();
+      const staleResult: FormValidationResult[] = [
+        { fieldName: 'address', error: null },
+      ];
+      const latestResult: FormValidationResult[] = [
+        {
+          fieldName: 'tokenTransfers.amount',
+          id: midnightToken.tokenId,
+          error: { error: 'insufficient-balance' },
+        },
+      ];
+      const formA = createFormInitialState({ token: midnightToken });
+      const formB = { ...formA, address: { ...formA.address, dirty: true } };
+
+      testSideEffect(
+        {
+          build: ({ cold }) => {
+            validateForm
+              .mockReturnValueOnce(cold('--a', { a: staleResult }))
+              .mockReturnValueOnce(cold('--a', { a: latestResult }));
+            return makeSendFlowFormDataValidation({
+              addressAliasResolvers: [],
+              selectAddressValidator: () => null,
+              selectChainMinimumAmountTokenValidator: () => null,
+              validateForm,
+            });
+          },
+        },
+        ({ cold, expectObservable, flush }) => {
+          const baseState = {
+            status: 'FormPendingValidation',
+            blockchainName: 'Midnight',
+            blockchainSpecificData: {},
+            minimumAmount: BigNumber(1n),
+          };
+          return {
+            stateObservables: {
+              sendFlow: {
+                // Second state arrives before the first validation (frame 2)
+                // completes: formDataChanged was applied while pending
+                selectSendFlowState$: cold('ab', {
+                  a: { ...baseState, form: formA } as SendFlowSliceState,
+                  b: { ...baseState, form: formB } as SendFlowSliceState,
+                }),
+              },
+              network: {
+                selectNetworkType$: cold('a', {
+                  a: 'testnet' as NetworkType,
+                }),
+                selectBlockchainNetworks$: cold('a', {
+                  a: {
+                    Midnight: {
+                      testnet: BlockchainNetworkId('midnight-preview'),
+                      mainnet: BlockchainNetworkId('midnight-mainnet'),
+                    },
+                  },
+                }),
+              },
+            },
+            dependencies: {
+              actions: sendFlowActions,
+            },
+            assertion: sideEffect$ => {
+              // Only the latest validation completes; the stale one is cancelled
+              expectObservable(sideEffect$).toBe('---a', {
+                a: sendFlowActions.sendFlow.formValidationCompleted({
+                  result: latestResult,
+                }),
+              });
+              flush();
+
+              expect(validateForm).toHaveBeenCalledTimes(2);
+              expect(validateForm).toHaveBeenNthCalledWith(
+                1,
+                expect.objectContaining({ form: formA }),
+              );
+              expect(validateForm).toHaveBeenNthCalledWith(
+                2,
+                expect.objectContaining({ form: formB }),
+              );
+            },
+          };
+        },
       );
     });
   });
@@ -1362,6 +1454,7 @@ describe('send-flow sideEffects', () => {
             submitTx.mockReturnValue(cold('-'));
             return makeSendFlowProcessing({
               submitTx,
+              selectTokenIdMapper: () => null,
             });
           },
         },
@@ -1401,6 +1494,21 @@ describe('send-flow sideEffects', () => {
                 } satisfies SendFlowSliceState & { status: 'Processing' },
               }),
             },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
           },
           dependencies: {
             actions: sendFlowActions,
@@ -1438,6 +1546,7 @@ describe('send-flow sideEffects', () => {
                 cold('a', {
                   a: mapResult({ success: true, txId }),
                 }),
+              selectTokenIdMapper: () => null,
             }),
         },
         ({ cold, expectObservable }) => ({
@@ -1447,6 +1556,7 @@ describe('send-flow sideEffects', () => {
                 a: {
                   status: 'Processing',
                   accountId: testAccountId,
+                  blockchainName: 'Midnight',
                   form: {
                     address: {
                       value: 'address',
@@ -1465,13 +1575,45 @@ describe('send-flow sideEffects', () => {
                 } as unknown as SendFlowSliceState,
               }),
             },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
           },
           dependencies: {
-            actions: { ...sendFlowActions, ...activitiesActions },
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
           },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('(ab)', {
-              a: activitiesActions.activities.upsertActivities({
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Midnight',
+                  networkType: 'mainnet',
+                  transferCount: 1,
+                  transferType: 'foreign',
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                  transferValue: 'UNKNOWN',
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
                 accountId: testAccountId,
                 activities: [
                   {
@@ -1488,7 +1630,7 @@ describe('send-flow sideEffects', () => {
                   },
                 ],
               }),
-              b: sendFlowActions.sendFlow.processingResulted({
+              c: sendFlowActions.sendFlow.processingResulted({
                 result: {
                   success: true,
                   txId,
@@ -1500,6 +1642,303 @@ describe('send-flow sideEffects', () => {
       );
 
       vi.restoreAllMocks();
+    });
+
+    it('omits transferValue on testnet but still emits asset-mix counts', () => {
+      const txId = 'testnet-tx';
+      const testAccountId = AccountId('testnet-account');
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult({ success: true, txId }) }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'testnet-addr' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'testnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'testnet',
+                  transferCount: 1,
+                  transferType: 'foreign',
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: txId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: midnightToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: { success: true, txId },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('still emits processingResulted when selectPrices$ has not emitted yet', () => {
+      const txId = 'cold-prices-tx';
+      const testAccountId = AccountId('test-account');
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', {
+                  a: mapResult({ success: true, txId }),
+                }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Midnight',
+                  form: {
+                    address: { value: 'address' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              // Never emits — simulates cold-start before prices are fetched
+              selectPrices$: cold(''),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            // Analytics uses startWith({}) default so transferValue is UNKNOWN;
+            // upsertActivities and processingResulted must not be blocked.
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Midnight',
+                  networkType: 'mainnet',
+                  transferCount: 1,
+                  transferType: 'foreign',
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                  transferValue: 'UNKNOWN',
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: txId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: midnightToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: { success: true, txId },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('emits failure analytics event and processingResulted on tx submission failure', () => {
+      const testAccountId = AccountId('test-account');
+      const failureResult = {
+        success: false as const,
+        errorTranslationKeys: {
+          title: 'tx-executor.submission-error.generic.title',
+          subtitle: 'tx-executor.submission-error.generic.subtitle',
+        },
+      } as const;
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', {
+                  a: mapResult(failureResult),
+                }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'address' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(5n) },
+                        token: { value: midnightToken },
+                      },
+                      {
+                        amount: { value: BigNumber(10n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | failure',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'mainnet',
+                  transferCount: 2,
+                  nftCount: 0,
+                  fungibleCount: 2,
+                  assetMix: 'fungible-only',
+                  errorCode: 'tx-executor.submission-error.generic.title',
+                },
+              }),
+              b: sendFlowActions.sendFlow.processingResulted({
+                result: failureResult,
+              }),
+            });
+          },
+        }),
+      );
     });
   });
 
@@ -1742,6 +2181,769 @@ describe('send-flow sideEffects', () => {
             expectObservable(sideEffect$).toBe('a', {
               a: sendFlowActions.sendFlowConfig.setFeatureFlagPayload({}),
             });
+          },
+        }),
+      );
+    });
+  });
+
+  describe('clearRecipientSourceOnOpen', () => {
+    it('emits recipientSourceCleared whenever the send flow is opened', () => {
+      testSideEffect(
+        clearRecipientSourceOnOpen,
+        ({ hot, expectObservable }) => ({
+          actionObservables: {
+            sendFlow: {
+              openRequested$: hot('-a-b', {
+                a: sendFlowActions.sendFlow.openRequested({}),
+                b: sendFlowActions.sendFlow.openRequested({
+                  accountId: AccountId('test'),
+                }),
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-c-c', {
+              c: sendFlowActions.sendFlowAnalytics.recipientSourceCleared(),
+            });
+          },
+        }),
+      );
+    });
+  });
+
+  describe('makeSendFlowProcessing recipient source', () => {
+    it('attaches recipientSource to the success event when set', () => {
+      const txId = 'src-test-tx';
+      const testAccountId = AccountId('src-test-account');
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult({ success: true, txId }) }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'recipient-addr' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'testnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: 'qr' as const }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'testnet',
+                  transferCount: 1,
+                  transferType: 'foreign',
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                  recipientSource: 'qr',
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: txId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: midnightToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: { success: true, txId },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('attaches recipientSource to the failure event when set', () => {
+      const errorTranslationKeys = {
+        title: 'tx-executor.submission-error.generic.title',
+        subtitle: 'tx-executor.submission-error.generic.subtitle',
+      } as const;
+      const testAccountId = AccountId('src-failure-account');
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', {
+                  a: mapResult({
+                    success: false,
+                    errorTranslationKeys,
+                  }),
+                }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'recipient-addr' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', {
+                a: 'address-book' as const,
+              }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | failure',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'mainnet',
+                  transferCount: 1,
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                  errorCode: 'tx-executor.submission-error.generic.title',
+                  recipientSource: 'address-book',
+                },
+              }),
+              b: sendFlowActions.sendFlow.processingResulted({
+                result: { success: false, errorTranslationKeys },
+              }),
+            });
+          },
+        }),
+      );
+    });
+  });
+
+  describe('makeSendFlowProcessing asset mix', () => {
+    const nftToken: Token = {
+      ...midnightToken,
+      tokenId: TokenId('nft-id'),
+      metadata: { ...midnightToken.metadata!, isNft: true },
+    };
+
+    it('emits assetMix=nft-only and matching counts on a pure NFT bundle', () => {
+      const txId = 'nft-only-tx';
+      const testAccountId = AccountId('nft-only-account');
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult({ success: true, txId }) }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'nft-recipient' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: nftToken },
+                      },
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: nftToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'mainnet',
+                  transferCount: 2,
+                  transferType: 'foreign',
+                  nftCount: 2,
+                  fungibleCount: 0,
+                  assetMix: 'nft-only',
+                  // NFT-only bundles have no fungible USD value to compute,
+                  // so transferValue is reported as 'UNKNOWN' (not omitted) on
+                  // mainnet to keep the field consistently present for foreign
+                  // mainnet transfers.
+                  transferValue: 'UNKNOWN',
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: txId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: nftToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                      {
+                        tokenId: nftToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: { success: true, txId },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('emits assetMix=mixed when an NFT and a fungible are sent together', () => {
+      const txId = 'mixed-tx';
+      const testAccountId = AccountId('mixed-account');
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult({ success: true, txId }) }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Cardano',
+                  form: {
+                    address: { value: 'mixed-recipient' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: nftToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'testnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(abc)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Cardano',
+                  networkType: 'testnet',
+                  transferCount: 2,
+                  transferType: 'foreign',
+                  nftCount: 1,
+                  fungibleCount: 1,
+                  assetMix: 'mixed',
+                  // No transferValue — testnet has no real USD value.
+                },
+              }),
+              b: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: txId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: midnightToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                      {
+                        tokenId: nftToken.tokenId,
+                        amount: BigNumber(-1n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: { success: true, txId },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+  });
+
+  // Each side-effect delivers its result asynchronously. If the machine has
+  // already moved to a state that does not handle the result event by the time it
+  // resolves, the side-effect must NOT dispatch it — otherwise the machine logs
+  // "handler not found for status X and event Y". These reproduce the reported
+  // errors and fail until the side-effects guard the dispatch on the live state.
+  describe('does not dispatch stale results after the flow leaves the handling state', () => {
+    const editingFormState = {
+      status: 'Form',
+      accountId: cardanoAccount.accountId,
+      blockchainName: cardanoAccount.blockchainName,
+      blockchainSpecificData: {},
+      serializedTx: 'tx',
+      form: { address: { value: 'addr', error: null }, tokenTransfers: [] },
+    } as unknown as SendFlowSliceState;
+
+    it('drops "preparingCompleted" when the flow has left Preparing (Idle/preparingCompleted)', () => {
+      testSideEffect(
+        makeSendFlowPreparing({ selectBaseToken: () => null }),
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  status: 'Preparing',
+                  accountId: midnightAccount.accountId,
+                  blockchainSpecificData: {},
+                } as SendFlowSliceState,
+                b: { status: 'Idle' } as SendFlowSliceState,
+              }),
+            },
+            tokens: {
+              // tokens load at frame 2 — after the flow has left Preparing
+              selectTokensGroupedByAccount$: cold('a-b', {
+                a: {},
+                b: {
+                  [midnightAccount.accountId]: {
+                    fungible: [midnightToken],
+                    nfts: [],
+                  },
+                },
+              }),
+            },
+            wallets: { selectAll$: cold('a', { a: [wallet] }) },
+            network: {
+              selectNetworkType$: cold('a', { a: 'mainnet' as NetworkType }),
+              selectBlockchainNetworks$: cold('a', { a: {} }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "discardingTxCompleted" when the flow has left DiscardingTx (Idle/discardingTxCompleted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowDiscard({
+              discardTx: (_, mapResult) =>
+                cold('--a', { a: mapResult({ success: true }) }),
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  serializedTx: 'tx',
+                  status: 'DiscardingTx',
+                } as SendFlowSliceState,
+                b: { status: 'Idle' } as SendFlowSliceState,
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "txPreviewResulted" when the flow has left the editing states (Summary/txPreviewResulted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowTxBuilding({
+              buildTx: vi.fn(),
+              previewTx: (_, mapResult) =>
+                cold('--a', {
+                  a: mapResult({ minimumAmount: BigNumber(1n), success: true }),
+                }),
+              preview: true,
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: editingFormState,
+                b: { status: 'Summary' } as SendFlowSliceState,
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "txBuildResulted" when the flow has left the editing states (Summary/txBuildResulted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowTxBuilding({
+              buildTx: (_, mapResult) =>
+                cold('--a', {
+                  a: mapResult({ fees: [], serializedTx: '', success: true }),
+                }),
+              previewTx: vi.fn(),
+              preview: false,
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  ...editingFormState,
+                  status: 'FormTxBuilding',
+                } as SendFlowSliceState,
+                b: { status: 'Summary' } as SendFlowSliceState,
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "formValidationCompleted" when the flow has left FormPendingValidation (Idle/formValidationCompleted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowFormDataValidation({
+              addressAliasResolvers: [],
+              selectAddressValidator: () => null,
+              selectChainMinimumAmountTokenValidator: () => null,
+              // validation resolves at frame 2 — after the flow left FormPendingValidation
+              validateForm: () => cold('--a', { a: [] }),
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  status: 'FormPendingValidation',
+                  form: createFormInitialState({ token: midnightToken }),
+                  blockchainName: midnightToken.blockchainName,
+                  minimumAmount: BigNumber(1n),
+                } as SendFlowSliceState,
+                b: { status: 'Idle' } as SendFlowSliceState,
+              }),
+            },
+            network: {
+              selectNetworkType$: cold('a', { a: 'testnet' as NetworkType }),
+              selectBlockchainNetworks$: cold('a', {
+                a: {
+                  Midnight: {
+                    testnet: BlockchainNetworkId('midnight-preview'),
+                    mainnet: BlockchainNetworkId('midnight-mainnet'),
+                  },
+                },
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "confirmationCompleted" when the flow has left SummaryAwaitingConfirmation (Idle/confirmationCompleted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowAwaitingConfirmation({
+              confirmTx: (_, mapResult) =>
+                cold('--a', {
+                  a: mapResult({ success: true, serializedTx: 'tx' }),
+                }),
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  status: 'SummaryAwaitingConfirmation',
+                  serializedTx: 'tx',
+                } as SendFlowSliceState,
+                b: { status: 'Idle' } as SendFlowSliceState,
+              }),
+            },
+          },
+          dependencies: { actions: sendFlowActions },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(emitted).toHaveLength(0);
+          },
+        }),
+      );
+    });
+
+    it('drops "processingResulted" when the flow has left Processing, keeping analytics/activities (Idle/processingResulted)', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              // submit resolves at frame 2 — after the flow left Processing
+              submitTx: (_, mapResult) =>
+                cold('--a', { a: mapResult({ success: true, txId: 'tx-id' }) }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, flush }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('ab', {
+                a: {
+                  status: 'Processing',
+                  accountId: midnightAccount.accountId,
+                  blockchainName: 'Midnight',
+                  blockchainSpecificData: {},
+                  serializedTx: 'tx',
+                  form: {
+                    address: { value: 'addr' },
+                    tokenTransfers: [
+                      {
+                        amount: { value: BigNumber(1n) },
+                        token: { value: midnightToken },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+                b: { status: 'Idle' } as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: { selectPrices$: cold('a', { a: {} }) },
+            addresses: { selectAllAddresses$: cold('a', { a: [] }) },
+            wallets: { selectAll$: cold('a', { a: [] }) },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            const emitted: { type: string }[] = [];
+            sideEffect$.subscribe(action =>
+              emitted.push(action as { type: string }),
+            );
+            flush();
+            // analytics/activities are valid regardless of flow state and still emit;
+            // only the stale state-machine `processingResulted` is dropped.
+            expect(
+              emitted.filter(
+                action =>
+                  action.type ===
+                  sendFlowActions.sendFlow.processingResulted.type,
+              ),
+            ).toHaveLength(0);
           },
         }),
       );

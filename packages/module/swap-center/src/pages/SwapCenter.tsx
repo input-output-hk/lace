@@ -1,11 +1,8 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
+import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import {
-  NavigationControls,
-  SheetRoutes,
-  useFocusEffect,
-} from '@lace-lib/navigation';
-import {
+  AccountSecurityAlertInline,
   Button,
   Column,
   DropdownMenu,
@@ -41,6 +38,7 @@ export const SwapsCenterPage = () => {
   );
 
   const swapFlowState = useLaceSelector('swapFlow.selectSwapFlowState');
+  const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
   const dispatchSellAmountChanged = useDispatchLaceAction(
     'swapFlow.sellAmountChanged',
   );
@@ -52,14 +50,12 @@ export const SwapsCenterPage = () => {
   // covers the extension case where the Redux store lives in the service
   // worker and survives tab close, so a fresh mount must clear any prior
   // in-flight flow. Blur reset covers internal navigation away.
-  useFocusEffect(
-    useCallback(() => {
+  useEffect(() => {
+    dispatchReset();
+    return () => {
       dispatchReset();
-      return () => {
-        dispatchReset();
-      };
-    }, [dispatchReset]),
-  );
+    };
+  }, [dispatchReset]);
 
   // --- Account selector ---
   const accountsResult = useLaceSelector(
@@ -265,11 +261,11 @@ export const SwapsCenterPage = () => {
   }, [sellTokenData, sellAmount]);
 
   const handleSellTokenPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.SwapSelectSellToken);
+    NavigationControls.navigate(SheetRoutes.SwapSelectSellToken);
   }, []);
 
   const handleBuyTokenPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.SwapSelectBuyToken);
+    NavigationControls.navigate(SheetRoutes.SwapSelectBuyToken);
   }, []);
 
   const handleSellAmountChange = useCallback(
@@ -280,7 +276,7 @@ export const SwapsCenterPage = () => {
   );
 
   const handleSettingsPress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.SwapSlippage);
+    NavigationControls.navigate(SheetRoutes.SwapSlippage);
   }, []);
 
   const areBothTokensSelected = Boolean(sellTokenId && buyTokenId);
@@ -291,11 +287,11 @@ export const SwapsCenterPage = () => {
       // when it sees a Quoted state. Keeping this handler navigation-only
       // avoids a state transition flicker on the first press that was making
       // the CTA look like it had to be tapped twice.
-      NavigationControls.sheets.navigate(SheetRoutes.SwapReview);
+      NavigationControls.navigate(SheetRoutes.SwapReview);
     } else if (!sellTokenId) {
-      NavigationControls.sheets.navigate(SheetRoutes.SwapSelectSellToken);
+      NavigationControls.navigate(SheetRoutes.SwapSelectSellToken);
     } else if (!buyTokenId) {
-      NavigationControls.sheets.navigate(SheetRoutes.SwapSelectBuyToken);
+      NavigationControls.navigate(SheetRoutes.SwapSelectBuyToken);
     } else {
       sellInputRef.current?.focus();
     }
@@ -348,6 +344,9 @@ export const SwapsCenterPage = () => {
             testID="swap-account-selector"
           />
         )}
+        {selectedAccountId ? (
+          <AccountSecurityAlertInline accountId={selectedAccountId} />
+        ) : null}
 
         <Column gap={0} style={styles.swapPanels}>
           <SwapInput
@@ -368,7 +367,9 @@ export const SwapsCenterPage = () => {
                 testID="swap-sell-input-half"
                 onPress={() => {
                   if (!sellTokenData) return;
-                  trackEvent('swaps | quick amount | half | press');
+                  trackEvent('swaps | quick amount | half | press', {
+                    ...(swapSessionId && { swapSessionId }),
+                  });
                   const half =
                     Number(sellTokenData.available) /
                     10 ** sellTokenData.decimals /
@@ -383,7 +384,9 @@ export const SwapsCenterPage = () => {
                 testID="swap-sell-input-max"
                 onPress={() => {
                   if (!sellTokenData) return;
-                  trackEvent('swaps | quick amount | max | press');
+                  trackEvent('swaps | quick amount | max | press', {
+                    ...(swapSessionId && { swapSessionId }),
+                  });
                   const max =
                     Number(sellTokenData.available) /
                     10 ** sellTokenData.decimals;

@@ -5,7 +5,11 @@ import {
   getNightTokenTickerByNetwork,
   isDustAddress,
 } from '@lace-contract/midnight-context';
-import { isSendFlowClosed, isSendFlowSuccess } from '@lace-contract/send-flow';
+import {
+  isSendFlowClosed,
+  isSendFlowSuccess,
+  useSendFlow,
+} from '@lace-contract/send-flow';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import {
   convertAmountToDenominated,
@@ -42,9 +46,33 @@ export const useDustDesignationSheet = (
   const hasInitialSynced = useRef(false);
   const wasFlowOpen = useRef(false);
   const hasInitiatedConfirmation = useRef(false);
+  const isClosingRef = useRef(false);
+  // Set right before navigating to SendResult so the unmount cleanup below
+  // skips resetting the flow — the send flow must continue while processing.
+  const isNavigatingToResultRef = useRef(false);
+
+  const { resetSendFlow } = useSendFlow();
 
   // Redux state and actions
   const dispatchClosed = useDispatchLaceAction('sendFlow.closed', true);
+
+  // Reset the flow on any dismissal except navigation to SendResult. On
+  // web/extension the sheet host unmounts its children before React Navigation
+  // processes REMOVE, so an onSheetClose listener was already deregistered by
+  // the time the navigation event fired — only the back button went through
+  // it. Unmount cleanup is the only signal that runs on every dismissal path.
+  const dispatchClosedRef = useRef(dispatchClosed);
+  dispatchClosedRef.current = dispatchClosed;
+  const resetSendFlowRef = useRef(resetSendFlow);
+  resetSendFlowRef.current = resetSendFlow;
+  useEffect(() => {
+    return () => {
+      if (isNavigatingToResultRef.current) return;
+      isClosingRef.current = true;
+      dispatchClosedRef.current();
+      resetSendFlowRef.current();
+    };
+  }, []);
   const sendFlowState = useLaceSelector(
     'sendFlow.selectSendFlowState',
   ) as SendFlowSliceState<MidnightSpecificSendFlowData>;
@@ -207,8 +235,8 @@ export const useDustDesignationSheet = (
 
   // Initialize send flow on mount
   useEffect(() => {
-    // Skip if prerequisites are missing
-    if (!nightToken || !ownDustAddress) return;
+    // Skip if prerequisites are missing or sheet is being dismissed
+    if (!nightToken || !ownDustAddress || isClosingRef.current) return;
 
     // Handle terminal states from a previous flow
     if (
@@ -273,7 +301,8 @@ export const useDustDesignationSheet = (
       sendFlowState.status === 'SummaryAwaitingConfirmation' ||
       sendFlowState.status === 'Processing'
     ) {
-      NavigationControls.sheets.navigate(
+      isNavigatingToResultRef.current = true;
+      NavigationControls.navigate(
         SheetRoutes.SendResult,
         {
           accountId: accountId as string,
@@ -286,7 +315,8 @@ export const useDustDesignationSheet = (
       );
       hasInitiatedConfirmation.current = false;
     } else if (sendFlowState.status === 'Failure') {
-      NavigationControls.sheets.navigate(
+      isNavigatingToResultRef.current = true;
+      NavigationControls.navigate(
         SheetRoutes.SendResult,
         {
           accountId: accountId as string,
@@ -301,9 +331,10 @@ export const useDustDesignationSheet = (
     }
   }, [sendFlowState.status, accountId]);
 
-  // Cleanup on unmount - cancel debounced dispatch and reset refs
-  // NOTE: Do NOT call dispatchClosed() here - the send flow needs to continue
-  // when navigating to SendResult during transaction processing
+  // Cleanup on unmount - cancel debounced dispatch and reset refs.
+  // The flow reset (dispatchClosed/resetSendFlow) lives in the dismissal
+  // effect above, guarded by isNavigatingToResultRef so it is skipped when
+  // navigating to SendResult during transaction processing.
   useEffect(() => {
     return () => {
       debouncedAddressDispatch.cancel();
@@ -322,9 +353,8 @@ export const useDustDesignationSheet = (
   );
 
   const handleClose = useCallback(() => {
-    dispatchClosed();
-    NavigationControls.sheets.close();
-  }, [dispatchClosed]);
+    NavigationControls.closeSheet();
+  }, []);
 
   const handleDesignate = useCallback(() => {
     debouncedAddressDispatch.flush();

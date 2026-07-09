@@ -164,6 +164,18 @@ export type SendFlowAddressValidator<
   }) => Observable<Option<AddressError>>;
 }>;
 
+export type ChainMinimumAmountTokenValidator<
+  BlockchainSpecificTokenMetadata = unknown,
+> = BlockchainAssigned<{
+  hasChainMinimumAmount: (
+    token: Token<BlockchainSpecificTokenMetadata>,
+  ) => boolean;
+  formatMinimumAmount: (
+    minimumAmount: BigNumber,
+    token: Token<BlockchainSpecificTokenMetadata>,
+  ) => string;
+}>;
+
 export type BaseTokenSelector<BlockchainSpecificMetadata = unknown> =
   BlockchainAssigned<{
     selectBaseToken: (
@@ -181,3 +193,24 @@ export type SendFlowAnalyticsEnhancer<
     token: Token<BlockchainSpecificTokenMetadata>;
   }) => Observable<Record<string, JsonType> | undefined>;
 }>;
+
+export type { TransferValueBucket } from '@lace-contract/token-pricing';
+
+export type TransferType =
+  | 'foreign'
+  | 'intra_account'
+  | 'intra_wallet'
+  | 'mixed'
+  | 'self';
+
+/**
+ * How the user supplied the recipient address for the current send flow.
+ *
+ * - `'qr'` — scanned via the QR code scanner.
+ * - `'address-book'` — selected from the address book.
+ * - `'manual'` — typed (or pasted) directly into the input.
+ * - `'navigation'` — pre-populated by an external navigation entry point
+ *   (e.g. deep link, dapp connector). Distinct from `'manual'` because the
+ *   user did not type it, but the source is not one of the in-flow pickers.
+ */
+export type RecipientSource = 'address-book' | 'manual' | 'navigation' | 'qr';

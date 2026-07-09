@@ -6,24 +6,23 @@ import {
   LiquiditySourceToggle,
   Text,
   Sheet,
-  SheetFooter,
-  SheetHeader,
-  useFooterHeight,
+  footerHeight,
 } from '@lace-lib/ui-toolkit';
 import { spacing } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, StyleSheet } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 export const SwapLiquiditySources = (
-  _props: SheetScreenProps<SheetRoutes.SwapLiquiditySources>,
+  props: SheetScreenProps<SheetRoutes.SwapLiquiditySources>,
 ) => {
   const { t } = useTranslation();
   const availableDexes = useLaceSelector('swapConfig.selectAvailableDexes');
   const currentExcluded = useLaceSelector('swapConfig.selectExcludedDexes');
+  const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
   const dispatchSetExcludedDexes = useDispatchLaceAction(
     'swapConfig.setExcludedDexes',
   );
@@ -49,10 +48,13 @@ export const SwapLiquiditySources = (
   );
 
   const handleConfirm = useCallback(() => {
-    trackEvent('swaps | adjust sources', { excludedDexs: localExcluded });
+    trackEvent('swaps | adjust sources', {
+      excludedDexs: localExcluded,
+      ...(swapSessionId && { swapSessionId }),
+    });
     dispatchSetExcludedDexes(localExcluded);
-    NavigationControls.sheets.close();
-  }, [localExcluded, dispatchSetExcludedDexes, trackEvent]);
+    NavigationControls.closeSheet();
+  }, [localExcluded, dispatchSetExcludedDexes, trackEvent, swapSessionId]);
 
   const dexItems = useMemo(
     () =>
@@ -65,55 +67,63 @@ export const SwapLiquiditySources = (
 
   const isLoading = availableDexes === null;
 
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={t('v2.swap.liquidity-sources.title')}
+          testID="swap-liquidity-sources-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('v2.swap.liquidity-sources.confirm'),
+            onPress: handleConfirm,
+            disabled: isLoading,
+            testID: 'swap-liquidity-sources-confirm',
+          }}
+        />
+      ),
+    });
+  }, [props.navigation, t, handleConfirm, isLoading]);
 
   return (
-    <>
-      <SheetHeader
-        title={t('v2.swap.liquidity-sources.title')}
-        testID={'swap-liquidity-sources-header'}
-      />
-      <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
-        <Column style={{ paddingBottom: spacing.M }} gap={spacing.S}>
-          <Text.M testID="swap-liquidity-sources-description">
-            {t('v2.swap.liquidity-sources.description')}
-          </Text.M>
-          <Text.XS
-            variant="secondary"
-            testID="swap-liquidity-sources-description-2">
-            {t('v2.swap.liquidity-sources.description-2')}
-          </Text.XS>
+    <Sheet.Scroll contentContainerStyle={styles.container}>
+      <Column gap={spacing.S}>
+        <Text.M testID="swap-liquidity-sources-description">
+          {t('v2.swap.liquidity-sources.description')}
+        </Text.M>
+        <Text.XS
+          variant="secondary"
+          testID="swap-liquidity-sources-description-2">
+          {t('v2.swap.liquidity-sources.description-2')}
+        </Text.XS>
+      </Column>
+      {isLoading ? (
+        <ActivityIndicator />
+      ) : (
+        <Column gap={spacing.S}>
+          {dexItems.map(dex => (
+            <LiquiditySourceToggle
+              key={dex.id}
+              name={dex.name}
+              value={dex.isEnabled}
+              onValueChange={value => {
+                handleToggle(dex.id, value);
+              }}
+              testID={`swap-liquidity-source-${dex.id}`}
+            />
+          ))}
         </Column>
-        {isLoading ? (
-          <ActivityIndicator />
-        ) : (
-          <Column gap={spacing.S}>
-            {dexItems.map(dex => (
-              <LiquiditySourceToggle
-                key={dex.id}
-                name={dex.name}
-                value={dex.isEnabled}
-                onValueChange={value => {
-                  handleToggle(dex.id, value);
-                }}
-                testID={`swap-liquidity-source-${dex.id}`}
-              />
-            ))}
-          </Column>
-        )}
-      </Sheet.Scroll>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.swap.liquidity-sources.confirm'),
-          onPress: handleConfirm,
-          disabled: isLoading,
-          testID: 'swap-liquidity-sources-confirm',
-        }}
-      />
-    </>
+      )}
+    </Sheet.Scroll>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: footerHeight.horizontal,
+    gap: spacing.S,
+  },
+});

@@ -4,8 +4,16 @@ import { useTranslation } from '@lace-contract/i18n';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { spacing, useTheme } from '../../../design-tokens';
-import { Column, Loader } from '../../atoms';
+import { radius, spacing, useTheme } from '../../../design-tokens';
+import {
+  BlurView,
+  Button,
+  Column,
+  DappExplorerSkeleton,
+  Icon,
+  Row,
+  Text,
+} from '../../atoms';
 import {
   DAppCard,
   EmptyStateMessage,
@@ -13,37 +21,74 @@ import {
   SearchBar,
 } from '../../molecules';
 import { GenericFlashList } from '../../organisms';
-import { getIsDark, isWeb, scheduleNativeListScrollToTop } from '../../util';
+import {
+  isWeb,
+  scheduleNativeListScrollToTop,
+  usePageHeaderCollapseScroll,
+} from '../../util';
 import { PageContainerTemplate } from '../pageContainerTemplate/pageContainerTemplate';
 
 import type { FlashListRef } from '@shopify/flash-list';
 
-export type DappExplorerListItem = {
-  dappId: number;
+export type DappRating = {
+  average_rating: number | null;
+  star_count: number;
+  vote_count: number;
+};
+
+export type DappExplorerDappItem = {
+  kind: 'dapp';
+  dappId: number | string;
   logoUrl: string;
   name: string;
   categoriesText: string;
 };
 
+export type DappExplorerSectionHeaderItem = {
+  kind: 'header';
+  id: string;
+  label: string;
+};
+
+export type DappExplorerInfoItem = {
+  kind: 'info';
+  id: string;
+  label: string;
+  subtitle: string;
+};
+
+export type DappExplorerListItem =
+  | DappExplorerDappItem
+  | DappExplorerInfoItem
+  | DappExplorerSectionHeaderItem;
+
 export type DappExplorerPageTemplateProps = {
   title: string;
   isLoading: boolean;
+  hasError: boolean;
+  onRetry: () => void;
   searchValue: string;
+  searchPlaceholder?: string;
   onSearchChange: (searchValue: string) => void;
+  onSubmitSearch?: () => void;
   onOpenFilters: () => void;
   isFilterActive: boolean;
   items: DappExplorerListItem[];
   /** When this changes (applied search / filters), the list scrolls to the top. */
   listScrollResetKey: string;
-  onSelectDapp: (dappId: number) => void;
+  onSelectDapp: (dappId: number | string) => void;
   testID?: string;
 };
 
 export const DappExplorerPageTemplate = ({
   title,
   isLoading,
+  hasError,
+  onRetry,
   searchValue,
+  searchPlaceholder,
   onSearchChange,
+  onSubmitSearch,
   onOpenFilters,
   isFilterActive,
   items,
@@ -53,6 +98,8 @@ export const DappExplorerPageTemplate = ({
 }: DappExplorerPageTemplateProps) => {
   const { theme, isSideMenu } = useTheme();
   const { t } = useTranslation();
+
+  const { collapseScrollY, onScroll } = usePageHeaderCollapseScroll();
 
   const listRef = useRef<FlashListRef<DappExplorerListItem>>(null);
   const skipScrollResetRef = useRef(true);
@@ -76,9 +123,6 @@ export const DappExplorerPageTemplate = ({
     return cancel;
   }, [listScrollResetKey]);
 
-  const isDark = getIsDark(theme);
-  const defaultColor = isDark ? theme.brand.white : theme.brand.black;
-
   const filterButtonContainerStyle: ViewStyle | undefined = useMemo(() => {
     if (!isFilterActive) return undefined;
     return { backgroundColor: theme.brand.ascending };
@@ -97,6 +141,40 @@ export const DappExplorerPageTemplate = ({
 
   const renderItem = useCallback(
     ({ item }: { item: DappExplorerListItem }) => {
+      if (item.kind === 'header') {
+        return (
+          <View
+            style={styles.sectionHeader}
+            testID={`dapp-explorer-section-${item.id}`}>
+            <Text.XS variant="secondary">{item.label}</Text.XS>
+          </View>
+        );
+      }
+      if (item.kind === 'info') {
+        return (
+          <View
+            style={styles.dappListItemPressable}
+            testID={`dapp-explorer-info-${item.id}`}>
+            <BlurView
+              style={[styles.infoCard, { borderColor: theme.data.negative }]}>
+              <Row alignItems="center" gap={spacing.S} style={styles.infoRow}>
+                <Icon
+                  name="AlertTriangle"
+                  variant="solid"
+                  size={24}
+                  color={theme.data.negative}
+                />
+                <Column justifyContent="center" style={styles.infoContent}>
+                  <Text.S style={{ color: theme.data.negative }}>
+                    {item.label}
+                  </Text.S>
+                  <Text.XS variant="secondary">{item.subtitle}</Text.XS>
+                </Column>
+              </Row>
+            </BlurView>
+          </View>
+        );
+      }
       return (
         <Pressable
           onPress={() => {
@@ -112,19 +190,40 @@ export const DappExplorerPageTemplate = ({
         </Pressable>
       );
     },
-    [onSelectDapp],
+    [onSelectDapp, theme.data.negative],
   );
+
+  const getItemType = useCallback(
+    (item: DappExplorerListItem) => item.kind,
+    [],
+  );
+
+  const keyExtractor = useCallback((item: DappExplorerListItem) => {
+    if (item.kind === 'header') return `header-${item.id}`;
+    if (item.kind === 'info') return `info-${item.id}`;
+    return item.dappId.toString();
+  }, []);
 
   const headerSection = useMemo(() => {
     return (
       <PageHeaderSection
+        stickyInScrollParent
+        collapseScrollY={collapseScrollY}
         title={title}
         reserveSubtitleSpace
         testID={`${testID}-header-section`}
         pageHeaderTestID="dapp-explorer-page-header">
         <SearchBar
           value={searchValue}
+          placeholder={searchPlaceholder}
+          clearable
           onChangeText={onSearchChange}
+          textInputProps={{
+            onSubmitEditing: onSubmitSearch,
+            returnKeyType: 'go',
+            autoCapitalize: 'none',
+            autoCorrect: false,
+          }}
           actions={[
             {
               iconName: 'Sorting' as const,
@@ -140,32 +239,64 @@ export const DappExplorerPageTemplate = ({
   }, [
     title,
     searchValue,
+    searchPlaceholder,
     onSearchChange,
+    onSubmitSearch,
     onOpenFilters,
     filterButtonContainerStyle,
     testID,
+    collapseScrollY,
   ]);
 
-  return (
-    <PageContainerTemplate testID={testID}>
-      {isLoading ? (
+  if (hasError) {
+    return (
+      <PageContainerTemplate testID={testID}>
         <Column
           alignItems="center"
           justifyContent="center"
-          style={styles.contentContainer}>
-          <Loader color={defaultColor} size={35} />
+          gap={spacing.L}
+          style={styles.errorStateContainer}
+          testID="dapp-explorer-error-state">
+          <Icon name="Sad" size={100} variant="solid" />
+          <Column alignItems="center" gap={spacing.XS}>
+            <Text.M align="center" testID="dapp-explorer-error-title">
+              {t('v2.dapp-explorer.error.title')}
+            </Text.M>
+            <Text.XS
+              align="center"
+              variant="secondary"
+              testID="dapp-explorer-error-message">
+              {t('v2.dapp-explorer.error.message')}
+            </Text.XS>
+          </Column>
+          <Button.Primary
+            fullWidth
+            label={t('v2.dapp-explorer.error.retry')}
+            onPress={onRetry}
+            testID="dapp-explorer-error-retry"
+          />
         </Column>
-      ) : (
-        <View style={styles.fillSpace}>
-          {headerSection}
+      </PageContainerTemplate>
+    );
+  }
+
+  return (
+    <PageContainerTemplate testID={testID}>
+      <View style={styles.fillSpace}>
+        {headerSection}
+        {isLoading ? (
+          <DappExplorerSkeleton />
+        ) : (
           <GenericFlashList
+            onScroll={onScroll}
             style={styles.fillSpace}
             data={items}
             flashListRef={listRef}
             ListEmptyComponent={ListEmptyComponent}
             gridColumns={{ compact: 1, medium: 2, large: 4 }}
             key="dapp-explorer-items"
-            keyExtractor={item => item.dappId.toString()}
+            keyExtractor={keyExtractor}
+            getItemType={getItemType}
             scrollEnabled
             showsVerticalScrollIndicator={false}
             maintainVisibleContentPosition={{ disabled: true }}
@@ -180,8 +311,8 @@ export const DappExplorerPageTemplate = ({
             renderItem={renderItem}
             scrollEventThrottle={16}
           />
-        </View>
-      )}
+        )}
+      </View>
     </PageContainerTemplate>
   );
 };
@@ -189,10 +320,6 @@ export const DappExplorerPageTemplate = ({
 const styles = StyleSheet.create({
   fillSpace: {
     flex: 1,
-  },
-  contentContainer: {
-    height: '100%',
-    gap: spacing.S,
   },
   dappListItemPressable: {
     width: '100%',
@@ -202,7 +329,35 @@ const styles = StyleSheet.create({
   emptyStateContainer: {
     paddingVertical: spacing.XL,
   },
+  errorStateContainer: {
+    flex: 1,
+    paddingHorizontal: spacing.M,
+  },
   itemsList: {
     paddingTop: spacing.S,
+  },
+  sectionHeader: {
+    paddingHorizontal: spacing.XS,
+    paddingTop: spacing.S,
+    paddingBottom: spacing.XS,
+  },
+  infoCard: {
+    backgroundColor: 'transparent',
+    borderRadius: radius.M,
+    borderWidth: 1,
+    height: 80,
+    width: '100%',
+    alignSelf: 'stretch',
+    paddingHorizontal: spacing.M,
+    overflow: 'hidden',
+  },
+  infoRow: {
+    flex: 1,
+    width: '100%',
+    minHeight: 0,
+  },
+  infoContent: {
+    flex: 1,
+    minHeight: 0,
   },
 });

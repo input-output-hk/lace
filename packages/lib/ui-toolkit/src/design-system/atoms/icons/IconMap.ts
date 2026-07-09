@@ -17,6 +17,7 @@ import {
   UsbMemory02SolidRounded,
   ImageAdd02SolidRounded,
   ImageNotFound02SolidRounded,
+  StarSolidRounded,
   StarFaceSolidRounded,
   InformationSquareSolidRounded,
   LinkSquare02SolidRounded,
@@ -137,6 +138,7 @@ import {
   UsbMemory02Icon,
   ImageAdd02Icon,
   ImageNotFound02Icon,
+  StarIcon,
   StarFaceIcon,
   InformationSquareIcon,
   LinkSquare02Icon,
@@ -321,6 +323,7 @@ export const iconMap = {
     solid: ImageNotFound02SolidRounded,
     stroke: ImageNotFound02Icon,
   },
+  Star: { solid: StarSolidRounded, stroke: StarIcon },
   StarFace: { solid: StarFaceSolidRounded, stroke: StarFaceIcon }, // old "InLoveEmoji",
   Info: { solid: InformationSquareSolidRounded, stroke: InformationSquareIcon },
   InformationCircle: {

@@ -4,6 +4,7 @@ import { ExternalLink } from '@lace-lib/ui-extension';
 import { Modal } from '@lace-lib/ui-toolkit';
 import React, { useState } from 'react';
 
+import { FEATURE_FLAG_MIDNIGHT_DISCLAIMER } from '../../../const';
 import { useDispatchLaceAction, useLaceSelector } from '../../../hooks';
 
 export const MidnightDisclaimer: React.ComponentType = () => {
@@ -20,11 +21,16 @@ export const MidnightDisclaimer: React.ComponentType = () => {
   const networkTermsAndConditions = useLaceSelector(
     'midnightContext.selectNetworkTermsAndConditions',
   );
+  const loadedFeatures = useLaceSelector('features.selectLoadedFeatures');
+  const isDisclaimerFlagEnabled = loadedFeatures.featureFlags.some(
+    flag => flag.key === FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
+  );
 
   if (
     isAuthPromptOpen ||
     shouldAcknowledgeMidnightDisclaimer !== 'shown' ||
-    isAcknowledging
+    isAcknowledging ||
+    !isDisclaimerFlagEnabled
   )
     return null;
 

@@ -9,6 +9,7 @@
     "@lace-contract/account-management": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app": "*",
+    "@lace-contract/cardano-context": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",

@@ -1,12 +1,19 @@
 import { Cardano } from '@cardano-sdk/core';
+import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
+import { whileActive } from '@lace-contract/wallet-active-state';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { Err, Milliseconds, Ok } from '@lace-sdk/util';
+import { retryBackoff } from 'backoff-rxjs';
 import {
   bufferTime,
+  catchError,
+  combineLatest,
   distinct,
   distinctUntilChanged,
   EMPTY,
   exhaustMap,
   filter,
+  from,
   groupBy,
   interval,
   map,
@@ -28,41 +35,45 @@ import {
   cardanoProtocolParameters$,
   cardanoRewardAccountDetails$,
 } from '../cardano-observables';
+import { CARDANO_TOKEN_METADATA_SCHEMA_VERSION } from '../const';
 import { isCardanoAddress } from '../util';
-import { CardanoNetworkId, CardanoTxId } from '../value-objects';
+import {
+  CardanoEraSummariesFailureId,
+  CardanoNetworkId,
+  CardanoProtocolParametersFailureId,
+  CardanoTxId,
+  TokenMetadataFailureId,
+} from '../value-objects';
 
 import {
   findMissingActivities,
   mapRewardToActivity,
   mapTransactionToActivity,
 } from './helpers';
-import {
-  fetchAddressTransactionHistories,
-  fetchNewAddressTransactionHistories,
-} from './helpers/fetch-address-transaction-histories';
+import { fetchAddressTransactionHistories } from './helpers/fetch-address-transaction-histories';
 import { addressDiscoverySync } from './side-effects/address-discovery-sync';
+import { clearStaleCardanoSyncsOnResume } from './side-effects/clear-stale-cardano-syncs-on-resume';
 import { coordinateCardanoSync } from './side-effects/coordinate-sync';
 import { findMissingTokensMetadataForActivities } from './side-effects/find-missing-tokens-metadata-for-activities';
 import { loadTokensMetadata } from './side-effects/load-tokens-metadata';
+import { manualAddressDiscoveryEnqueue } from './side-effects/manual-address-discovery';
+import { securityRescan } from './side-effects/security-rescan';
+import { securityRescanToast } from './side-effects/security-rescan-toast';
 import { syncLovelaceTokenTickerWithChain } from './side-effects/sync-lovelace-token-ticker-with-chain';
 import { syncUnspendableUtxosWithAccountUtxos } from './side-effects/sync-unspendable-utxos-with-account-utxos';
 import { createTrackAccountActivities } from './side-effects/track-account-activities';
 import { trackAccountDelegationActivities } from './side-effects/track-account-delegation-activities';
 import { createTrackAccountRewardsHistory } from './side-effects/track-account-reward-history';
 import { trackAccountTokens } from './side-effects/track-account-tokens';
-import {
-  createTrackNewerAccountTransactionHistory,
-  createTrackOlderAccountTransactionHistory,
-} from './side-effects/track-account-transaction-history';
-import { trackAccountTransactionsTotal } from './side-effects/track-account-transactions-total';
+import { createTrackOlderAccountTransactionHistory } from './side-effects/track-account-transaction-history';
 import { trackAccountUtxos } from './side-effects/track-account-utxos';
 import { trackRewardAccountDetails } from './side-effects/track-reward-account-details';
 import { trackSyncRoundFailures } from './side-effects/track-sync-round-failures';
 import { createTrackTransactionDetails } from './side-effects/track-transaction-details';
+import { transactionPollingSync } from './side-effects/transaction-polling-sync';
 
-import type { Action, SideEffect } from '../contract';
+import type { SideEffect } from '../contract';
 import type { CardanoTokenMetadata } from '../types';
-import type { ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import type { AppConfig } from '@lace-contract/module';
 import type {
   RawToken,
@@ -76,46 +87,56 @@ import type { Observable } from 'rxjs';
 const UPDATE_METADATA_BUFFER_TIME = Milliseconds(200);
 const TRACK_ACCOUNT_ACTIVITIES_DEBOUNCE_TIME = Milliseconds(2000);
 
-const getTipResultKey = (
-  getTipResult: Result<Cardano.PartialBlockHeader, ProviderError<unknown>>,
-) =>
-  getTipResult.mapOrElse<Cardano.BlockId | ProviderFailure>(
-    error => error.reason,
-    tip => tip.hash,
-  );
+const unwrapOrThrowError = <T, E extends Error>(result: Result<T, E>): T => {
+  if (result.isErr()) throw result.unwrapErr();
+  return result.unwrap();
+};
+
+const returnEmpty = () => EMPTY;
 
 export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
   tipPollFrequency =>
   (
     _,
-    { cardanoContext: { selectChainId$ } },
-    { actions, cardanoProvider: { getTip } },
+    {
+      cardanoContext: { selectChainId$ },
+      wallets: { selectActiveNetworkAccounts$ },
+    },
+    { actions, cardanoProvider: { getTip }, isWalletActive$ },
   ) =>
-    selectChainId$.pipe(
-      filter(Boolean),
-      switchMap(chainId =>
-        merge(of(void 0), interval(tipPollFrequency)).pipe(
-          exhaustMap(() => getTip({ chainId })),
-          distinctUntilChanged(
-            (a, b) => getTipResultKey(a) === getTipResultKey(b),
-          ),
-          map(getTipResult =>
-            getTipResult.mapOrElse<Action>(
-              // TODO: LW-12636 wallet data is potentially stale when this action is dispatched
-              error =>
-                actions.cardanoContext.getTipFailed({
-                  failure: error.reason,
-                  chainId,
-                }),
-              tip =>
-                actions.cardanoContext.setTip({
-                  network: CardanoNetworkId(chainId.networkMagic),
-                  tip,
-                }),
+    // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
+    // leaves the downstream `switchMap`'s in-flight inner alive on lock — it
+    // only blocks future outer emissions, not the already-running interval.
+    // See ADR 25.
+    combineLatest([
+      selectChainId$.pipe(filter(Boolean), distinctUntilChanged()),
+      selectActiveNetworkAccounts$.pipe(
+        map(accounts =>
+          accounts.some(account => account.blockchainName === 'Cardano'),
+        ),
+        distinctUntilChanged(),
+      ),
+    ]).pipe(
+      switchMap(([chainId, hasCardanoAccounts]) => {
+        if (!hasCardanoAccounts) return EMPTY;
+        return merge(of(void 0), interval(tipPollFrequency)).pipe(
+          exhaustMap(() =>
+            getTip({ chainId }).pipe(
+              map(unwrapOrThrowError),
+              retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+              catchError(returnEmpty),
             ),
           ),
-        ),
-      ),
+          distinctUntilChanged((a, b) => a.hash === b.hash),
+          map(tip =>
+            actions.cardanoContext.setTip({
+              network: CardanoNetworkId(chainId.networkMagic),
+              tip,
+            }),
+          ),
+        );
+      }),
+      whileActive(isWalletActive$),
     );
 
 /**
@@ -128,11 +149,37 @@ const distinctWithoutMetadata =
       mergeMap(tokens => tokens),
       filter(token => token.blockchainName === 'Cardano'),
       withLatestFrom(metadata$),
-      // TODO: LW-12633 update the metadata more than once
-      filter(([token, existingMetadata]) => !existingMetadata[token.tokenId]),
+      filter(([token, existingMetadata]) => {
+        const metadata = existingMetadata[token.tokenId] as
+          | StoredTokenMetadata<CardanoTokenMetadata>
+          | undefined;
+
+        return (
+          !metadata ||
+          metadata.blockchainSpecific?.metadataSchemaVersion !==
+            CARDANO_TOKEN_METADATA_SCHEMA_VERSION
+        );
+      }),
       map(([{ tokenId }]) => tokenId),
       distinct(),
     );
+
+type TokenMetadataOk = {
+  tokenId: TokenId;
+  metadata: TokenMetadata<CardanoTokenMetadata>;
+};
+
+type TokenMetadataError = { tokenId: TokenId };
+
+const toUpsertTokenMetadataPayload = (
+  result: Result<TokenMetadataOk, TokenMetadataError>,
+) => {
+  const { metadata, tokenId } = result.unwrap();
+  return { tokenId, ...metadata };
+};
+
+const toTokenMetadataFailureId = ({ tokenId }: { tokenId: TokenId }) =>
+  TokenMetadataFailureId(tokenId);
 
 export const trackTokenMetadata =
   (batchInterval: Milliseconds): SideEffect =>
@@ -141,66 +188,50 @@ export const trackTokenMetadata =
     {
       tokens: { selectAllRaw$, selectTokensMetadata$ },
       cardanoContext: { selectChainId$ },
+      failures: { selectFailureById$ },
     },
     { actions, cardanoProvider: { getTokenMetadata } },
   ) =>
     selectAllRaw$.pipe(
       distinctWithoutMetadata(selectTokensMetadata$),
       withLatestFrom(selectChainId$.pipe(filter(Boolean))),
-      mergeMap(([tokenId, chainId]) =>
-        getTokenMetadata({ tokenId }, { chainId }).pipe(
-          map(getTokenMetadataResult =>
-            getTokenMetadataResult.mapOrElse<
-              Result<
-                {
-                  tokenId: TokenId;
-                  metadata: TokenMetadata<CardanoTokenMetadata>;
-                },
-                { tokenId: TokenId; error: ProviderError }
-              >
-            >(
-              error => Err({ tokenId, error }),
-              metadata => Ok({ tokenId, metadata }),
+      mergeMap(
+        ([tokenId, chainId]): Observable<
+          Result<TokenMetadataOk, TokenMetadataError>
+        > =>
+          getTokenMetadata({ tokenId }, { chainId }).pipe(
+            map(result =>
+              Ok({ tokenId, metadata: unwrapOrThrowError(result) }),
             ),
+            retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+            catchError(() => of(Err({ tokenId }))),
           ),
-        ),
       ),
-      groupBy(getTokenMetadataResult => getTokenMetadataResult.isOk()),
+      groupBy(result => result.isOk()),
       mergeMap(group$ =>
         group$.key
           ? group$.pipe(
-              // update tokens metadata in batches every 200ms
-              // PERF: this may be done more efficiently to open the buffer only upon emission -
-              // like a debounce but collecting all values
               bufferTime(batchInterval),
-              mergeMap(getTokenMetadataOkResults => {
-                if (getTokenMetadataOkResults.length === 0) return EMPTY;
-                return of(
-                  actions.tokens.upsertTokensMetadata({
-                    metadatas: getTokenMetadataOkResults.map(
-                      getTokenMetadataResult => {
-                        const { metadata, tokenId } =
-                          getTokenMetadataResult.unwrap();
-                        return {
-                          tokenId,
-                          ...metadata,
-                        };
-                      },
-                    ),
-                  }),
+              mergeMap(okResults => {
+                if (okResults.length === 0) return EMPTY;
+                const metadatas = okResults.map(toUpsertTokenMetadataPayload);
+                return merge(
+                  of(actions.tokens.upsertTokensMetadata({ metadatas })),
+                  from(metadatas.map(toTokenMetadataFailureId)).pipe(
+                    autoDismissFailureOnSuccess(selectFailureById$),
+                  ),
                 );
               }),
             )
-          : // dispatch errors right away
-            group$.pipe(
-              map(getTokenMetadataErrorResult => {
-                const { error, tokenId } =
-                  getTokenMetadataErrorResult.unwrapErr();
-                // TODO: LW-12636 might want to display something to the user
-                // and implement some logic to attempt to re-fetch token metadata again
-                return actions.cardanoContext.getTokenMetadataFailed({
-                  tokenId,
-                  failure: error.reason,
+          : group$.pipe(
+              map(errorResult => {
+                const { tokenId } = errorResult.unwrapErr();
+                return actions.failures.addFailure({
+                  failureId: TokenMetadataFailureId(tokenId),
+                  message: 'sync.error.token-metadata-fetch-failed',
+                  retryAction: actions.cardanoContext.loadTokenMetadata({
+                    tokenId,
+                  }),
                 });
               }),
             ),
@@ -208,33 +239,58 @@ export const trackTokenMetadata =
     );
 
 /**
- * Side effect that tracks the protocol parameters based on the chainId
+ * Side effect that tracks the protocol parameters based on the chainId.
+ *
+ * Transient provider errors are retried with exponential backoff. After
+ * exhaustion a failure keyed by `CardanoProtocolParametersFailureId(network)`
+ * is surfaced only when no cached parameters exist for the active network;
+ * otherwise the failure is silent and the next chainId change to this network
+ * naturally re-triggers the fetch.
  */
 export const trackProtocolParameters: SideEffect = (
   _,
-  { cardanoContext: { selectChainId$ } },
+  {
+    cardanoContext: { selectChainId$, selectProtocolParameters$ },
+    failures: { selectFailureById$ },
+  },
   { actions, cardanoProvider: { getProtocolParameters } },
 ) =>
   selectChainId$.pipe(
     filter(Boolean),
-    switchMap(chainId =>
-      getProtocolParameters({ chainId }).pipe(
-        map(getProtocolParametersResult =>
-          getProtocolParametersResult.mapOrElse<Action>(
-            error =>
-              actions.cardanoContext.getProtocolParametersFailed({
-                chainId,
-                failure: error.reason,
-              }),
-            protocolParameters =>
+    switchMap(chainId => {
+      const network = CardanoNetworkId(chainId.networkMagic);
+      const failureId = CardanoProtocolParametersFailureId(network);
+      return getProtocolParameters({ chainId }).pipe(
+        map(unwrapOrThrowError),
+        retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+        mergeMap(protocolParameters =>
+          merge(
+            of(
               actions.cardanoContext.setProtocolParameters({
-                network: CardanoNetworkId(chainId.networkMagic),
+                network,
                 protocolParameters,
               }),
+            ),
+            of(failureId).pipe(autoDismissFailureOnSuccess(selectFailureById$)),
           ),
         ),
-      ),
-    ),
+        catchError(() =>
+          selectProtocolParameters$.pipe(
+            take(1),
+            mergeMap(existing =>
+              existing
+                ? EMPTY
+                : of(
+                    actions.failures.addFailure({
+                      failureId,
+                      message: 'sync.error.cardano-protocol-parameters-failed',
+                    }),
+                  ),
+            ),
+          ),
+        ),
+      );
+    }),
   );
 
 /**
@@ -353,33 +409,58 @@ export const wireRewardAccountDetailsObservable: SideEffect = (
   );
 
 /**
- * Side effect that tracks era summaries based on the chainId
+ * Side effect that tracks era summaries based on the chainId.
+ *
+ * Transient provider errors are retried with exponential backoff. After
+ * exhaustion a failure keyed by `CardanoEraSummariesFailureId(network)` is
+ * surfaced only when no cached era summaries exist for the active network;
+ * otherwise the failure is silent and the next chainId change to this network
+ * naturally re-triggers the fetch.
  */
 export const trackEraSummaries: SideEffect = (
   _,
-  { cardanoContext: { selectChainId$ } },
+  {
+    cardanoContext: { selectChainId$, selectEraSummaries$ },
+    failures: { selectFailureById$ },
+  },
   { actions, cardanoProvider: { getEraSummaries } },
 ) =>
   selectChainId$.pipe(
     filter(Boolean),
-    switchMap(chainId =>
-      getEraSummaries({ chainId }).pipe(
-        map(eraSummariesResult =>
-          eraSummariesResult.mapOrElse<Action>(
-            error =>
-              actions.cardanoContext.getEraSummariesFailed({
-                chainId,
-                failure: error.reason,
-              }),
-            eraSummaries =>
+    switchMap(chainId => {
+      const network = CardanoNetworkId(chainId.networkMagic);
+      const failureId = CardanoEraSummariesFailureId(network);
+      return getEraSummaries({ chainId }).pipe(
+        map(unwrapOrThrowError),
+        retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+        mergeMap(eraSummaries =>
+          merge(
+            of(
               actions.cardanoContext.setEraSummaries({
+                network,
                 eraSummaries,
-                network: CardanoNetworkId(chainId.networkMagic),
               }),
+            ),
+            of(failureId).pipe(autoDismissFailureOnSuccess(selectFailureById$)),
           ),
         ),
-      ),
-    ),
+        catchError(() =>
+          selectEraSummaries$.pipe(
+            take(1),
+            mergeMap(existing =>
+              existing
+                ? EMPTY
+                : of(
+                    actions.failures.addFailure({
+                      failureId,
+                      message: 'sync.error.cardano-era-summaries-failed',
+                    }),
+                  ),
+            ),
+          ),
+        ),
+      );
+    }),
   );
 
 export const createRegisterCardanoBlockchainNetworks =
@@ -432,8 +513,12 @@ export const submitTxSideEffect: SideEffect = (
 
 export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createRegisterCardanoBlockchainNetworks(config.defaultTestnetChainId),
+  clearStaleCardanoSyncsOnResume,
   coordinateCardanoSync,
   addressDiscoverySync,
+  manualAddressDiscoveryEnqueue,
+  securityRescan,
+  securityRescanToast,
   trackAccountTokens,
   trackSyncRoundFailures,
   trackTip(config.cardanoProvider.tipPollFrequency),
@@ -449,10 +534,7 @@ export const createCardanoProviderSideEffects = (config: AppConfig) => [
   wireRewardAccountDetailsObservable,
   trackEraSummaries,
   createTrackOlderAccountTransactionHistory(fetchAddressTransactionHistories),
-  createTrackNewerAccountTransactionHistory(
-    fetchNewAddressTransactionHistories,
-    config.cardanoProvider.transactionHistoryPollingIntervalSeconds,
-  ),
+  transactionPollingSync,
   createTrackAccountRewardsHistory(TRACK_ACCOUNT_ACTIVITIES_DEBOUNCE_TIME),
   trackAccountDelegationActivities,
   createTrackAccountActivities({
@@ -464,7 +546,6 @@ export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createTrackTransactionDetails(),
   findMissingTokensMetadataForActivities(),
   loadTokensMetadata,
-  trackAccountTransactionsTotal,
   trackAccountUtxos,
   syncUnspendableUtxosWithAccountUtxos,
   trackRewardAccountDetails,

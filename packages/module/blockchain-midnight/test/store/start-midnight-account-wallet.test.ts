@@ -2,9 +2,10 @@ import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import * as LaceSdkUtil from '@lace-sdk/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
-import * as WalletSdkDustWallet from '@midnight-ntwrk/wallet-sdk-dust-wallet';
-import * as WalletSdkShielded from '@midnight-ntwrk/wallet-sdk-shielded';
-import * as WalletSdkUnshielded from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import * as WalletSdk from '@midnight-ntwrk/wallet-sdk';
+import * as WalletSdkDustWallet from '@midnight-ntwrk/wallet-sdk/dust';
+import * as WalletSdkShielded from '@midnight-ntwrk/wallet-sdk/shielded';
+import * as WalletSdkUnshielded from '@midnight-ntwrk/wallet-sdk/unshielded';
 import noop from 'lodash/noop';
 import {
   BehaviorSubject,
@@ -30,7 +31,7 @@ import type {
 import type { ModuleInitProps } from '@lace-contract/module';
 import type { CollectionStorage } from '@lace-contract/storage';
 import type { InMemoryWalletAccount } from '@lace-contract/wallet-repo';
-import type * as WalletSdkFacade from '@midnight-ntwrk/wallet-sdk-facade';
+import type * as WalletSdkFacade from '@midnight-ntwrk/wallet-sdk/facade';
 
 // ===== MOCKS =====
 
@@ -80,18 +81,26 @@ vi.mock('@lace-sdk/util', async () => {
   };
 });
 
-vi.mock('@midnight-ntwrk/wallet-sdk-dust-wallet', () => ({
+vi.mock('@midnight-ntwrk/wallet-sdk', () => ({
+  InMemoryTransactionHistoryStorage: Object.assign(vi.fn(), {
+    restore: vi.fn(),
+  }),
+  mergeWalletEntries: vi.fn(),
+  WalletEntrySchema: {},
+}));
+
+vi.mock('@midnight-ntwrk/wallet-sdk/dust', () => ({
   DustWallet: vi.fn(),
 }));
 
 const { WalletFacadeInitMock } = vi.hoisted(() => ({
   WalletFacadeInitMock: vi.fn(),
 }));
-vi.mock('@midnight-ntwrk/wallet-sdk-facade', () => ({
+vi.mock('@midnight-ntwrk/wallet-sdk/facade', () => ({
   WalletFacade: { init: WalletFacadeInitMock },
 }));
 
-vi.mock('@midnight-ntwrk/wallet-sdk-shielded', async importOriginal => {
+vi.mock('@midnight-ntwrk/wallet-sdk/shielded', async importOriginal => {
   const actual = await importOriginal<typeof WalletSdkShielded>();
   return {
     ...actual,
@@ -100,12 +109,15 @@ vi.mock('@midnight-ntwrk/wallet-sdk-shielded', async importOriginal => {
   };
 });
 
-vi.mock('@midnight-ntwrk/wallet-sdk-shielded/v1', () => ({
-  V1Builder: vi.fn().mockReturnValue({
-    withDefaults: vi.fn().mockReturnThis(),
-    withSync: vi.fn().mockReturnThis(),
+vi.mock(
+  '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/V1Builder',
+  () => ({
+    V1Builder: vi.fn().mockReturnValue({
+      withDefaults: vi.fn().mockReturnThis(),
+      withSync: vi.fn().mockReturnThis(),
+    }),
   }),
-}));
+);
 
 vi.mock(
   '../../../../../node_modules/@midnight-ntwrk/wallet-sdk-shielded/dist/v1/Sync',
@@ -118,10 +130,7 @@ vi.mock(
   },
 );
 
-vi.mock('@midnight-ntwrk/wallet-sdk-unshielded-wallet', () => ({
-  InMemoryTransactionHistoryStorage: Object.assign(vi.fn(), {
-    fromSerialized: vi.fn(),
-  }),
+vi.mock('@midnight-ntwrk/wallet-sdk/unshielded', () => ({
   PublicKey: { fromKeyStore: vi.fn() },
   UnshieldedWallet: vi.fn(),
   createKeystore: vi.fn().mockReturnValue({
@@ -283,12 +292,12 @@ vi.mocked(WalletSdkUnshielded.UnshieldedWallet).mockReturnValue({
   startWithPublicKey: vi.fn().mockReturnValue('new-unshielded'),
 } as unknown as WalletSdkUnshielded.UnshieldedWalletClass);
 
-vi.mocked(
-  WalletSdkUnshielded.InMemoryTransactionHistoryStorage,
-).mockReturnValue({} as WalletSdkUnshielded.InMemoryTransactionHistoryStorage);
-vi.mocked(
-  WalletSdkUnshielded.InMemoryTransactionHistoryStorage.fromSerialized,
-).mockReturnValue({} as WalletSdkUnshielded.InMemoryTransactionHistoryStorage);
+vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage).mockReturnValue(
+  {} as WalletSdk.InMemoryTransactionHistoryStorage,
+);
+vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage.restore).mockReturnValue(
+  {} as WalletSdk.InMemoryTransactionHistoryStorage,
+);
 
 // ===== TESTS =====
 

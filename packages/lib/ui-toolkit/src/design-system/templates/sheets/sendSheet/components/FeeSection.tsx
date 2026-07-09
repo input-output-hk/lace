@@ -91,7 +91,6 @@ export const FeeSection = ({ copies, values, actions }: FeeSectionProps) => {
       />
       {feeRateOption === 'Custom' && (
         <CustomTextInput
-          isWithinBottomSheet
           value={customFeeRate?.toString() || ''}
           inputMode="decimal"
           onChangeText={text => {

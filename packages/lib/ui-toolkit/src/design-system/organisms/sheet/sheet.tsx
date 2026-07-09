@@ -1,257 +1,361 @@
 import type { ReactNode, Ref } from 'react';
-import type { ScrollViewProps } from 'react-native';
+import type {
+  ScrollViewProps,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+} from 'react-native';
 
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetBackdrop,
-} from '@gorhom/bottom-sheet';
-import noop from 'lodash/noop';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { Keyboard, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { useTrueSheet } from '@lodev09/react-native-true-sheet';
+import React, { useCallback, useMemo } from 'react';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { radius, spacing, useTheme } from '../../../design-tokens';
-import { Icon, IconButton } from '../../atoms';
-import { isAndroid, isAndroid15Plus, isWeb } from '../../util';
-
-import { useScrollEventsHandlers } from './useScrollEventsHandlers';
+import { spacing, useTheme } from '../../../design-tokens';
+import {
+  Avatar,
+  Button,
+  Column,
+  Divider,
+  Icon,
+  IconButton,
+  Row,
+  Text,
+} from '../../atoms';
+import { isWeb } from '../../util';
+import { getAssetImageUrl } from '../../util';
 
 import type { Theme } from '../../../design-tokens';
+import type { IconName } from '../../atoms';
+import type { ButtonVariant } from '../../atoms/button/button.types';
 import type {
-  BottomSheetProps,
   BottomSheetScrollableProps,
   BottomSheetScrollViewMethods,
-  BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
 import type { AnimatedProps } from 'react-native-reanimated';
-export interface Sheet extends BottomSheet {
-  isOpen: boolean;
-}
-interface SheetProps extends BottomSheetProps {
-  enableDynamicSizing: boolean;
-  initialIndex: number | undefined;
-  enableBackdrop?: boolean;
-  /**
-   * When false, user cannot close the sheet by panning down. Default true.
-   */
-  enablePanDownToClose?: boolean;
-  /**
-   * When false, tapping the backdrop does not close the sheet. Default true.
-   */
-  enableBackdropClose?: boolean;
-  /**
-   * When provided, called before closing. Return false to prevent close.
-   * Used by the navigator to enforce preventClose (e.g. send in progress).
-   */
-  onCloseRequest?: () => boolean;
-  testID?: string;
-  sheetRef?: React.RefObject<Sheet | null>;
-  closeSheet?: () => void;
-}
+import type { EdgeInsets } from 'react-native-safe-area-context';
 
-export type BottomSheetScrollViewProps = BottomSheetScrollableProps &
+export const footerHeight = {
+  horizontal: isWeb ? 80 : 100,
+  vertical: isWeb ? 115 : 200,
+  titleRow: 70,
+};
+const AVATAR_SIZE = 20;
+const isIPad = Platform.OS === 'ios' && Platform.isPad;
+
+type WebScrollableProps = BottomSheetScrollableProps &
   Omit<
     AnimatedProps<ScrollViewProps>,
-    'decelerationRate' | 'scrollEventThrottle'
-  > & {
-    ref?: Ref<BottomSheetScrollViewMethods>;
+    'decelerationRate' | 'ref' | 'scrollEventThrottle'
+  >;
+
+type SheetScrollProps = Omit<ScrollViewProps, 'ref'> &
+  WebScrollableProps & {
+    ref?: Ref<BottomSheetScrollViewMethods | ScrollView>;
     children: ReactNode | ReactNode[];
   };
 
-const SheetBase = ({
-  children,
-  enableDynamicSizing,
-  enableBackdrop = true,
-  enablePanDownToClose = true,
-  enableBackdropClose = true,
-  onCloseRequest,
-  initialIndex,
-  onClose = noop,
-  sheetRef,
-  closeSheet = noop,
-  ...restProps
-}: SheetProps) => {
-  const { theme, isSideMenu } = useTheme();
-  const { height: windowHeight } = useWindowDimensions();
-  const styles = useMemo(
-    () => getStyles({ theme, isSideMenu }),
-    [theme, isSideMenu],
+type HeaderAvatar = {
+  metadata: {
+    image?: string;
+    fallback?: string;
+  };
+};
+
+interface SheetHeaderProps {
+  title: string;
+  leftIcon?: IconName;
+  leftIconOnPress?: () => void;
+  subtitle?: string;
+  testID?: string;
+  headerIcon?: IconName;
+  headerAvatar?: HeaderAvatar;
+  showDivider?: boolean;
+  height?: number;
+  handleClose?: () => void;
+}
+
+export interface ButtonConfig {
+  label: string;
+  onPress: () => void;
+  variant?: ButtonVariant;
+  disabled?: boolean;
+  loading?: boolean;
+  preIconName?: IconName;
+  iconColor?: string;
+  testID?: string;
+}
+
+interface SheetFooterProps {
+  primaryButton?: ButtonConfig;
+  secondaryButton?: ButtonConfig;
+  primaryVariant?: 'critical' | 'primary';
+  vertical?: boolean;
+  showDivider?: boolean;
+  titleRow?: ReactNode;
+  testID?: string;
+}
+
+const SheetContainer = ({ children, style, ...props }: ViewProps) => {
+  const containerStyle: StyleProp<ViewStyle> = useMemo(
+    () => ({
+      padding: spacing.M,
+      ...(!!style && { style }),
+    }),
+    [style],
   );
-
-  const androidKeyboardInputMode = useMemo(
-    () => (isSideMenu || isAndroid15Plus ? 'adjustPan' : 'adjustResize'),
-    [isSideMenu, isAndroid15Plus],
-  );
-  const keyboardBehavior = useMemo(
-    () =>
-      isAndroid ? (isAndroid15Plus ? 'interactive' : 'extend') : 'interactive',
-    [isAndroid, isAndroid15Plus],
-  );
-
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => {
-      if (!enableBackdrop) return null;
-      return (
-        <BottomSheetBackdrop
-          {...props}
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          pressBehavior={enableBackdropClose ? 'close' : 'none'}
-        />
-      );
-    },
-    [enableBackdrop, enableBackdropClose],
-  );
-
-  const onCloseCallback = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  // Track actual sheet state via onChange to keep isOpen in sync
-  // This is necessary because the sheet can be closed via gestures.
-  const onChangeCallback = useCallback(
-    (index: number) => {
-      if (sheetRef?.current) {
-        // Sheet is open when index >= 0, closed when index is -1
-        sheetRef.current.isOpen = index >= 0;
-      }
-    },
-    [sheetRef],
-  );
-
-  const shouldShowCloseButton = useMemo(() => {
-    if (!isSideMenu) return false;
-    // If onCloseRequest exists, check if close is allowed
-    if (onCloseRequest) {
-      return onCloseRequest();
-    }
-    // Default to showing the button if no onCloseRequest is provided
-    return true;
-  }, [isSideMenu, onCloseRequest]);
-
-  const handleClosePress = useCallback(() => {
-    if (onCloseRequest && !onCloseRequest()) return;
-    closeSheet();
-  }, [closeSheet, onCloseRequest]);
-
-  const snapPoints = useMemo(() => {
-    if (isSideMenu) return ['100%'];
-    // When dynamic sizing is disabled, we need snap points as fallback
-    if (!enableDynamicSizing) return ['90%'];
-    return undefined;
-  }, [isSideMenu, enableDynamicSizing]);
-
-  const isFixedHeightSheet = !isWeb && !enableDynamicSizing && !isSideMenu;
-
-  const keyboardBlurBehavior = useMemo(
-    () => (isFixedHeightSheet ? 'none' : 'restore'),
-    [isFixedHeightSheet],
-  );
-
-  useEffect(() => {
-    if (!isFixedHeightSheet || !sheetRef) return;
-    const onKeyboardDidHide = () => {
-      sheetRef.current?.snapToIndex(0);
-    };
-    const sub = Keyboard.addListener('keyboardDidHide', onKeyboardDidHide);
-    return () => {
-      sub.remove();
-    };
-  }, [isFixedHeightSheet, sheetRef]);
 
   return (
-    <BottomSheet
-      enableOverDrag={false}
-      index={initialIndex}
-      snapPoints={snapPoints}
-      enableDynamicSizing={enableDynamicSizing}
-      enablePanDownToClose={enablePanDownToClose}
-      maxDynamicContentSize={windowHeight * 0.9}
-      backdropComponent={renderBackdrop}
-      detached={isSideMenu}
-      style={styles.sheet}
-      onChange={onChangeCallback}
-      onClose={onCloseCallback}
-      backgroundStyle={styles.background}
-      handleIndicatorStyle={styles.handleIndicator}
-      handleStyle={styles.handle}
-      android_keyboardInputMode={androidKeyboardInputMode}
-      keyboardBehavior={keyboardBehavior}
-      keyboardBlurBehavior={keyboardBlurBehavior}
-      ref={sheetRef}
-      {...restProps}>
-      {shouldShowCloseButton ? (
-        <IconButton.Static
-          icon={<Icon name="Cancel" size={24} />}
-          onPress={handleClosePress}
-          containerStyle={styles.closeButton}
-          testID={'side-sheet-close-button'}
-        />
-      ) : (
-        isSideMenu && <View style={styles.contentWithPadding} />
-      )}
+    <View {...props} style={containerStyle}>
       {children}
-    </BottomSheet>
+    </View>
   );
 };
 
-const Scroll = (props: BottomSheetScrollViewProps) => {
-  const {
-    children,
-    keyboardShouldPersistTaps = 'handled',
-    ...restProps
-  } = props;
+const Header = ({
+  title,
+  leftIcon = 'CaretLeft',
+  leftIconOnPress,
+  handleClose,
+  subtitle,
+  headerIcon,
+  headerAvatar,
+  showDivider = true,
+  testID = 'sheet-header',
+}: SheetHeaderProps) => {
+  const { theme } = useTheme();
 
-  // Keep sheet content above the keyboard on Android and iOS.
+  const { dismissAll } = useTrueSheet();
+
+  const headerStyles = getHeaderStyles({ theme });
+
+  const onClosePress = useCallback(() => {
+    if (handleClose) {
+      handleClose();
+    } else {
+      void dismissAll();
+    }
+  }, [dismissAll, handleClose]);
+
+  const avatarContent = useMemo(() => {
+    const imageUrl = getAssetImageUrl(headerAvatar?.metadata?.image);
+
+    return {
+      fallback: headerAvatar?.metadata?.fallback,
+      ...(imageUrl && { img: { uri: imageUrl } }),
+    };
+  }, [headerAvatar]);
+
   return (
-    <>
+    <Column testID={testID} style={styles.headerContainer}>
+      <Row alignItems="center" justifyContent="center" style={styles.headerRow}>
+        {leftIconOnPress && (
+          <IconButton.Static
+            icon={<Icon name={leftIcon} size={24} />}
+            onPress={leftIconOnPress}
+            containerStyle={styles.leftIcon}
+            testID={`${testID}-left-icon`}
+          />
+        )}
+        <Row
+          alignItems="center"
+          justifyContent="center"
+          style={styles.titleContainer}
+          gap={spacing.S}>
+          {!!headerIcon && <Icon name={headerIcon} />}
+          {!!headerAvatar && (
+            <Avatar
+              size={AVATAR_SIZE}
+              shape="rounded"
+              content={avatarContent}
+            />
+          )}
+          <Text.S numberOfLines={1} align="center" testID={`${testID}-title`}>
+            {title}
+          </Text.S>
+        </Row>
+        {isWeb && (
+          <IconButton.Static
+            icon={<Icon name="Cancel" size={20} />}
+            onPress={onClosePress}
+            containerStyle={headerStyles.closeButton}
+            testID={'side-sheet-close-button'}
+          />
+        )}
+      </Row>
+      {showDivider && (
+        <View style={styles.divider}>
+          <Divider />
+        </View>
+      )}
+      {subtitle && (
+        <Text.S
+          align="center"
+          style={styles.subtitle}
+          testID={`${testID}-subtitle`}>
+          {subtitle}
+        </Text.S>
+      )}
+    </Column>
+  );
+};
+
+const getFooterStyles = ({
+  insets,
+  theme,
+}: {
+  insets: EdgeInsets;
+  theme: Theme;
+}) =>
+  StyleSheet.create({
+    footer: {
+      // On iPad, the sheet is displayed as a floating modal, so bottom padding is not needed.
+      paddingBottom: spacing.S + (isIPad ? 0 : insets.bottom),
+      paddingHorizontal: spacing.M,
+      backgroundColor: theme.background.page,
+    },
+  });
+
+const getHeaderStyles = ({ theme }: { theme: Theme }) =>
+  StyleSheet.create({
+    closeButton: {
+      backgroundColor: theme.background.primary,
+      position: 'absolute',
+      right: spacing.M,
+      zIndex: 1,
+    },
+  });
+
+const Footer = ({
+  primaryButton,
+  secondaryButton,
+  primaryVariant = 'primary',
+  vertical = false,
+  showDivider = true,
+  titleRow,
+  testID = 'sheet-footer',
+}: SheetFooterProps) => {
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const footerStyles = getFooterStyles({ insets, theme });
+
+  const PrimaryButtonComponent =
+    primaryVariant === 'critical' ? Button.Critical : Button.Primary;
+  const SecondaryButtonComponent = Button.Secondary;
+
+  const ButtonsContainer = vertical ? Column : Row;
+
+  return (
+    <Column style={footerStyles.footer} gap={spacing.S} testID={testID}>
+      {showDivider && <Divider />}
+      {titleRow}
+      <ButtonsContainer
+        alignItems={vertical ? 'stretch' : 'center'}
+        gap={spacing.S}>
+        {!vertical && secondaryButton && (
+          <SecondaryButtonComponent
+            flex={1}
+            label={secondaryButton.label}
+            onPress={secondaryButton.onPress}
+            loading={secondaryButton.loading}
+            disabled={secondaryButton.disabled}
+            preIconName={secondaryButton.preIconName}
+            iconColor={secondaryButton.iconColor}
+            testID={secondaryButton.testID}
+          />
+        )}
+        {primaryButton && (
+          <PrimaryButtonComponent
+            flex={vertical ? undefined : 1}
+            label={primaryButton.label}
+            onPress={primaryButton.onPress}
+            loading={primaryButton.loading}
+            disabled={primaryButton.disabled}
+            preIconName={primaryButton.preIconName}
+            iconColor={primaryButton.iconColor}
+            testID={primaryButton.testID}
+          />
+        )}
+        {vertical && secondaryButton && (
+          <SecondaryButtonComponent
+            label={secondaryButton.label}
+            onPress={secondaryButton.onPress}
+            loading={secondaryButton.loading}
+            disabled={secondaryButton.disabled}
+            preIconName={secondaryButton.preIconName}
+            iconColor={secondaryButton.iconColor}
+            testID={secondaryButton.testID}
+          />
+        )}
+      </ButtonsContainer>
+    </Column>
+  );
+};
+
+const Scroll = (props: SheetScrollProps) => {
+  const { children, ref, contentContainerStyle, ...restProps } = props;
+
+  const mergedContentContainerStyle = useMemo(
+    () => [styles.scrollContentContainer, contentContainerStyle],
+    [contentContainerStyle],
+  );
+
+  if (isWeb) {
+    return (
       <BottomSheetScrollView
-        keyboardShouldPersistTaps={keyboardShouldPersistTaps}
-        scrollEventsHandlersHook={useScrollEventsHandlers}
+        keyboardShouldPersistTaps={props.keyboardShouldPersistTaps ?? 'handled'}
+        ref={ref as Ref<BottomSheetScrollViewMethods>}
+        contentContainerStyle={mergedContentContainerStyle}
         {...restProps}>
         {children}
       </BottomSheetScrollView>
-    </>
+    );
+  }
+
+  return (
+    <ScrollView
+      ref={ref as Ref<ScrollView>}
+      contentContainerStyle={mergedContentContainerStyle}
+      showsVerticalScrollIndicator={false}
+      {...restProps}>
+      {children}
+    </ScrollView>
   );
 };
 
-export const Sheet = Object.assign(SheetBase, {
+export const Sheet = Object.assign(SheetContainer, {
+  Header,
+  Footer,
   Scroll,
 });
 
-const getStyles = ({
-  theme,
-  isSideMenu,
-}: {
-  theme: Theme;
-  isSideMenu: boolean;
-}) =>
-  StyleSheet.create({
-    sheet: isSideMenu
-      ? {
-          backgroundColor: theme.background.page,
-          marginLeft: '45%',
-          paddingHorizontal: spacing.M,
-          borderRadius: radius.XL,
-        }
-      : {
-          paddingBottom: 0,
-          marginBottom: spacing.XXL,
-          paddingHorizontal: spacing.M,
-        },
-    background: { backgroundColor: theme.background.page },
-    handleIndicator: {
-      display: isSideMenu ? 'none' : 'flex',
-      backgroundColor: theme.background.secondary,
-      width: '30%',
-    },
-    handle: {
-      paddingVertical: spacing.L,
-    },
-    closeButton: {
-      backgroundColor: theme.background.primary,
-      alignSelf: 'flex-end',
-    },
-    contentWithPadding: {
-      paddingTop: spacing.M,
-    },
-  });
+const styles = StyleSheet.create({
+  headerContainer: {
+    paddingTop: spacing.L,
+  },
+  headerRow: {
+    position: 'relative',
+  },
+  leftIcon: {
+    backgroundColor: 'transparent',
+    position: 'absolute',
+    left: 0,
+    zIndex: 1,
+  },
+  titleContainer: {
+    flex: 1,
+    marginVertical: spacing.S,
+  },
+  divider: {
+    marginTop: spacing.M,
+    marginHorizontal: spacing.M,
+  },
+  subtitle: {
+    marginTop: spacing.M,
+    marginHorizontal: spacing.M,
+  },
+  scrollContentContainer: {
+    padding: spacing.M,
+  },
+});

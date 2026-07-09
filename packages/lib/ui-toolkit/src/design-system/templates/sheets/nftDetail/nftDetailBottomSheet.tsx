@@ -4,9 +4,8 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Row, Text, Divider, Column, Thumbnail } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
-import { getAssetImageUrl } from '../../../util';
+import { Sheet, footerHeight } from '../../../organisms';
+import { formatMetadataValue, getAssetImageUrl } from '../../../util';
 
 import type { Theme } from '../../../../design-tokens';
 
@@ -19,20 +18,6 @@ type MetadataRowProps = {
   testID?: string;
 };
 
-const formatMetadataValue = (value: unknown): string => {
-  if (value === undefined || value === null) {
-    return '';
-  }
-  if (typeof value === 'string') {
-    return value;
-  }
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return '[Unable to serialize]';
-  }
-};
-
 type TokenInfo = {
   policyId: string;
   assetId: string;
@@ -42,16 +27,13 @@ type TokenInfo = {
 
 interface NftDetailBottomSheetProps {
   tokenInfo: TokenInfo;
-  headerTitle: string;
   selectedNft: {
     metadata: {
       image: string;
     };
   };
-  onSendPress: () => void;
   theme: Theme;
   metadataItems: MetadataRowProps[];
-  sendMenuLabel: string;
 }
 
 const MetadataRow = ({
@@ -85,15 +67,11 @@ const MetadataRow = ({
 
 export const NftDetailBottomSheet = ({
   tokenInfo,
-  headerTitle,
   theme,
   selectedNft,
   metadataItems,
-  sendMenuLabel,
-  onSendPress,
 }: NftDetailBottomSheetProps) => {
-  const footerHeight = useFooterHeight();
-  const defaultStyles = styles(theme, footerHeight);
+  const defaultStyles = styles(theme);
   const { t } = useTranslation();
 
   const labelMap = {
@@ -110,19 +88,16 @@ export const NftDetailBottomSheet = ({
     attributes: t('v2.nft-detail.attributes'),
   };
 
-  const tokenInfoEntries = Object.entries(tokenInfo);
-
-  const defaultTokenMetadataItems = [
-    ...tokenInfoEntries.map(([label, value], index) => ({
+  const visibleDefaultItems = Object.entries(tokenInfo)
+    .filter(([, value]) => value)
+    .map(([label, value], index, items) => ({
       label: labelMap[label as keyof typeof labelMap] ?? label,
       value,
       isLink: undefined,
       onPress: undefined,
-      withDivider:
-        index === tokenInfoEntries.length - 1 && metadataItems.length > 0,
+      withDivider: index === items.length - 1 && metadataItems.length > 0,
       testID: label,
-    })),
-  ];
+    }));
 
   const additionalMetadataItems = metadataItems.map(item => ({
     label: labelMap[item.label as keyof typeof labelMap] ?? item.label,
@@ -133,68 +108,62 @@ export const NftDetailBottomSheet = ({
     testID: item.testID,
   }));
 
+  const hasAdditionalMetadata = additionalMetadataItems.length > 0;
+
   return (
-    <>
-      <SheetHeader title={headerTitle} testID="nft-detail-bottom-sheet" />
-      <Sheet.Scroll contentContainerStyle={defaultStyles.sheetContent}>
-        <Column style={defaultStyles.content}>
-          <Thumbnail
-            containerStyle={defaultStyles.thumbnail}
-            source={{
-              uri: getAssetImageUrl(selectedNft.metadata?.image),
-            }}
-            testID="nft-detail-thumbnail"
+    <Sheet.Scroll>
+      <Column style={defaultStyles.content}>
+        <Thumbnail
+          containerStyle={defaultStyles.thumbnail}
+          source={{
+            uri: getAssetImageUrl(selectedNft.metadata?.image),
+          }}
+          testID="nft-detail-thumbnail"
+        />
+
+        {visibleDefaultItems.map((item, index) => (
+          <MetadataRow
+            key={item.label || index}
+            label={item.label}
+            value={item.value}
+            isLink={item.isLink}
+            onPress={item.onPress}
+            withDivider={item.withDivider}
+            testID={item.testID}
+            defaultStyles={defaultStyles}
           />
+        ))}
 
-          {defaultTokenMetadataItems.map((item, index) => (
-            <MetadataRow
-              key={item.label || index}
-              label={item.label}
-              value={item.value}
-              isLink={item.isLink}
-              onPress={item.onPress}
-              withDivider={item.withDivider}
-              testID={item.testID}
-              defaultStyles={defaultStyles}
-            />
-          ))}
-
-          <Text.S
+        {hasAdditionalMetadata && (
+          <Text.L
             variant="secondary"
             testID="nft-detail-additional-attributes-label">
             {t('v2.nft-detail.attributes')}
-          </Text.S>
-          {additionalMetadataItems.map((item, index) => (
-            <MetadataRow
-              key={item.label || index}
-              label={item.label}
-              value={item.value}
-              isLink={item.isLink}
-              onPress={item.onPress}
-              withDivider={item.withDivider}
-              testID={item.testID}
-              defaultStyles={defaultStyles}
-            />
-          ))}
-        </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        showDivider={false}
-        primaryButton={{
-          label: sendMenuLabel,
-          onPress: onSendPress,
-          testID: 'nft-detail-send-button',
-        }}
-      />
-    </>
+          </Text.L>
+        )}
+
+        {additionalMetadataItems.map((item, index) => (
+          <MetadataRow
+            key={item.label || index}
+            label={item.label}
+            value={item.value}
+            isLink={item.isLink}
+            onPress={item.onPress}
+            withDivider={item.withDivider}
+            testID={item.testID}
+            defaultStyles={defaultStyles}
+          />
+        ))}
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
-const styles = (theme: Theme, footerHeight: number) =>
+const styles = (theme: Theme) =>
   StyleSheet.create({
-    sheetContent: { paddingBottom: footerHeight },
     content: {
       gap: spacing.L,
+      paddingBottom: footerHeight.horizontal,
     },
     metadataRow: {
       marginVertical: spacing.XS,

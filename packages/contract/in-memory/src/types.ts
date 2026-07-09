@@ -4,6 +4,7 @@ import type { BlockchainNetworkId } from '@lace-contract/network';
 import type {
   InMemoryWallet,
   InMemoryWalletAccount,
+  LazyInMemoryWalletAccount,
   WalletId,
 } from '@lace-contract/wallet-repo';
 import type { UICustomisation } from '@lace-lib/util-render';
@@ -13,7 +14,16 @@ import type { Logger } from 'ts-log';
 export interface InitializeInMemoryWalletProps {
   walletId: WalletId;
   order: number;
-  password: Uint8Array;
+  /**
+   * When provided, the integration derives a persistable in-memory wallet:
+   * accounts are tagged `InMemory` and any blockchain-specific secrets are
+   * encrypted with this password.
+   *
+   * When omitted, the integration derives only public material from
+   * `recoveryPhrase`, accounts are tagged `LazyInMemory`, and no encrypted
+   * blob is returned — Lace persists no seed material in this mode.
+   */
+  password?: Uint8Array;
   recoveryPhrase: string[];
   walletName: string;
 }
@@ -39,7 +49,10 @@ export type InitializeInMemoryWalletResult<
   BlockchainSpecificAccountData = unknown,
   BlockchainSpecificWalletData = unknown,
 > = {
-  accounts: InMemoryWalletAccount<BlockchainSpecificAccountData>[];
+  accounts: (
+    | InMemoryWalletAccount<BlockchainSpecificAccountData>
+    | LazyInMemoryWalletAccount<BlockchainSpecificAccountData>
+  )[];
   blockchainSpecificWalletData?: BlockchainSpecificWalletData;
 };
 

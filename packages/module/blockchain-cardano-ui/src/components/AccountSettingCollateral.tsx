@@ -15,7 +15,7 @@ export const AccountSettingCollateral = ({
   const { t } = useTranslation();
 
   const handlePress = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.Collateral, {
+    NavigationControls.navigate(SheetRoutes.Collateral, {
       accountId,
       walletId,
     });

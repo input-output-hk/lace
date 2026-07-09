@@ -46,6 +46,7 @@ import {
   viewsStoreContract,
   sheetPagesAddonContract,
 } from '@lace-contract/views';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_MIDNIGHT } from './const';
@@ -86,6 +87,7 @@ const dependsOnContracts = combineContracts([
   appStoreContract,
   dappConnectorStoreContract,
   featureStoreContract,
+  walletActiveStateDependencyContract,
   walletRepoStoreContract,
   viewsStoreContract,
   authenticationPromptStoreContract,

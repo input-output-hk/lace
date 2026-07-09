@@ -24,6 +24,7 @@ export const SignData = (props: SheetScreenProps<SheetRoutes.SignData>) => {
     signDataResult,
     isLoading,
     accountInfo,
+    dRepKeyHash,
   } = useSignData(props);
 
   const resultView = signDataResult ? (
@@ -31,7 +32,7 @@ export const SignData = (props: SheetScreenProps<SheetRoutes.SignData>) => {
   ) : null;
 
   const contentProps = displayDapp
-    ? { dapp: displayDapp, accountInfo, address, payload }
+    ? { dapp: displayDapp, accountInfo, address, payload, dRepKeyHash }
     : null;
 
   return (

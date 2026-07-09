@@ -8,7 +8,6 @@ import { BigIntMath } from '@cardano-sdk/util';
 import {
   TransactionBuilder,
   LOVELACE_TOKEN_ID,
-  filterSpendableUtxos,
 } from '@lace-contract/cardano-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-sdk/util';
@@ -17,6 +16,7 @@ import { catchError } from 'rxjs/operators';
 
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
+  AccountUtxoMap,
   CardanoBlockchainSpecificTxData,
   RequiredProtocolParameters,
 } from '@lace-contract/cardano-context';
@@ -28,6 +28,7 @@ import type {
   TxParams,
   TxPreviewResult,
 } from '@lace-contract/tx-executor';
+import type { Observable } from 'rxjs';
 
 const TWO_HOURS_IN_SECONDS = 7200;
 
@@ -101,9 +102,11 @@ export const txParamsToValue = (txp: TxParams): Cardano.Value =>
 
 const getBuildTxData = async ({
   dependencies,
+  cardanoAvailableAccountUtxos$,
   txParams,
 }: {
   dependencies: SideEffectDependencies;
+  cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>;
   readonly txParams: readonly TxParams[];
 }) => {
   // Extract accountId from the first token in the first txParams
@@ -117,26 +120,19 @@ const getBuildTxData = async ({
   const [
     networkMagic,
     protocolParameters,
-    allAccountUtxos,
-    unspendableAccountUtxos,
+    availableAccountUtxos,
     cardanoAddresses,
   ] = await Promise.all([
     firstValueFrom(dependencies.txExecutorCardano.cardanoNetworkMagic$),
     firstValueFrom(dependencies.txExecutorCardano.cardanoProtocolParameters$),
-    firstValueFrom(dependencies.txExecutorCardano.cardanoAccountUtxos$),
-    firstValueFrom(
-      dependencies.txExecutorCardano.cardanoAccountUnspendableUtxos$,
-    ),
+    firstValueFrom(cardanoAvailableAccountUtxos$),
     firstValueFrom(dependencies.txExecutorCardano.cardanoAddresses$),
   ]);
 
   if (!networkMagic) throw new Error('Network magic not available');
   if (!protocolParameters) throw new Error('Protocol parameters not available');
 
-  const availableUtxo = filterSpendableUtxos(
-    allAccountUtxos[accountId] ?? [],
-    unspendableAccountUtxos[accountId] ?? [],
-  );
+  const availableUtxo = availableAccountUtxos[accountId] ?? [];
 
   // Get the first Cardano address for the account as change address
   const accountAddresses: AnyAddress[] = cardanoAddresses.filter(
@@ -210,7 +206,10 @@ const buildTx = ({
 };
 
 export const makeBuildTx =
-  (dependencies: SideEffectDependencies): TxExecutorImplementation['buildTx'] =>
+  (
+    dependencies: SideEffectDependencies,
+    cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
+  ): TxExecutorImplementation['buildTx'] =>
   ({ txParams }) => {
     return defer(async (): Promise<TxBuildResult> => {
       const {
@@ -219,7 +218,11 @@ export const makeBuildTx =
         changeAddress,
         availableUtxo,
         tokenId,
-      } = await getBuildTxData({ dependencies, txParams });
+      } = await getBuildTxData({
+        dependencies,
+        cardanoAvailableAccountUtxos$,
+        txParams,
+      });
 
       const { core, tx } = buildTx({
         networkMagic,
@@ -242,6 +245,7 @@ export const makeBuildTx =
 export const makePreviewTx =
   (
     dependencies: SideEffectDependencies,
+    cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
   ): TxExecutorImplementation['previewTx'] =>
   ({ txParams }) => {
     return defer(async (): Promise<TxPreviewResult> => {
@@ -251,7 +255,11 @@ export const makePreviewTx =
         changeAddress,
         availableUtxo,
         tokenId,
-      } = await getBuildTxData({ dependencies, txParams });
+      } = await getBuildTxData({
+        dependencies,
+        cardanoAvailableAccountUtxos$,
+        txParams,
+      });
 
       const [{ address, blockchainSpecific, tokenTransfers }] = txParams;
 

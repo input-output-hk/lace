@@ -14,6 +14,12 @@ import type * as _Redux from 'redux';
 import type * as _Reselect from 'reselect';
 
 export type ColorScheme = 'dark' | 'light';
+/**
+ * The user's *choice* for theme. Distinct from `colorScheme`, which is the
+ * resolved value at render time. When `themePreference === 'system'`,
+ * `colorScheme` follows the OS-level preference.
+ */
+export type ThemePreference = 'dark' | 'light' | 'system';
 export type BottomSheet =
   | 'account-key'
   | 'collateral-send-tx'
@@ -35,6 +41,7 @@ export type SheetPageNavigation = Page & {
 
 export type ViewsSliceState = {
   colorScheme: ColorScheme;
+  themePreference: ThemePreference;
   open: Record<ViewId, View>;
   activeSheet: BottomSheet | null;
   activePage: Page | null;
@@ -64,6 +71,7 @@ export type CallHistoryMethodPayload<M extends HistoryMethod> = {
 const initialState: ViewsSliceState = {
   open: {},
   colorScheme: 'light',
+  themePreference: 'system',
   activeSheet: null,
   activePage: null,
   activeSheetPage: null,
@@ -99,6 +107,12 @@ const slice = createSlice({
     setColorScheme: (state, { payload }: PayloadAction<ColorScheme>) => {
       state.colorScheme = payload;
     },
+    setThemePreference: (
+      state,
+      { payload }: PayloadAction<ThemePreference>,
+    ) => {
+      state.themePreference = payload;
+    },
     handleColorSchemeChange: state => {
       state.colorScheme = state.colorScheme === 'light' ? 'dark' : 'light';
     },
@@ -133,6 +147,7 @@ const slice = createSlice({
     ),
     selectOpenViewsMap: (state: ViewsSliceState) => state.open,
     selectColorScheme: ({ colorScheme }) => colorScheme,
+    selectThemePreference: ({ themePreference }) => themePreference,
     getActiveSheet: (state: ViewsSliceState) => state.activeSheet,
     getActivePage: (state: ViewsSliceState) => state.activePage,
     getActiveSheetPage: (state: ViewsSliceState) => state.activeSheetPage,

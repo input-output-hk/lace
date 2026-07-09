@@ -1,3 +1,4 @@
+import { useAnalytics } from '@lace-contract/analytics';
 import { FeatureIds } from '@lace-contract/network';
 import {
   NavigationControls,
@@ -35,51 +36,59 @@ export const usePortfolioActions = (): UsePortfolioActionsReturn => {
     FeatureIds.SWAP_CENTER,
   );
 
+  const { trackEvent } = useAnalytics();
+
   const portfolioActions = useMemo<PortfolioActionsResult>(
     () => ({
       onBuyPress: isBuyAvailable
         ? () => {
-            NavigationControls.sheets.navigate(SheetRoutes.Buy);
+            trackEvent('portfolio | buy | press');
+            NavigationControls.navigate(SheetRoutes.Buy);
           }
         : undefined,
       onSendPress: () => {
-        NavigationControls.sheets.navigate(SheetRoutes.Send);
+        trackEvent('portfolio | send | press');
+        NavigationControls.navigate(SheetRoutes.Send);
       },
       onReceivePress: () => {
-        NavigationControls.sheets.navigate(SheetRoutes.Receive);
+        trackEvent('portfolio | receive | press');
+        NavigationControls.navigate(SheetRoutes.Receive);
       },
       onAccountsPress: () => {
-        NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+        trackEvent('portfolio | view accounts | press');
+        NavigationControls.navigate(StackRoutes.Home, {
           screen: TabRoutes.AccountCenter,
         });
       },
       onSwapPress: isSwapAvailable
         ? () => {
-            NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+            NavigationControls.navigate(StackRoutes.Home, {
               screen: TabRoutes.Swaps,
             });
           }
         : undefined,
     }),
-    [isBuyAvailable, isSwapAvailable],
+    [isBuyAvailable, isSwapAvailable, trackEvent],
   );
 
   const createSendAction = useMemo(
     () => (accountId: AccountId) => () => {
-      NavigationControls.sheets.navigate(SheetRoutes.Send, {
+      trackEvent('portfolio | send | press');
+      NavigationControls.navigate(SheetRoutes.Send, {
         accountId,
       });
     },
-    [],
+    [trackEvent],
   );
 
   const createAccountsAction = useMemo(
     () => () => () => {
-      NavigationControls.actions.closeAndNavigate(StackRoutes.Home, {
+      trackEvent('portfolio | view accounts | press');
+      NavigationControls.navigate(StackRoutes.Home, {
         screen: TabRoutes.AccountCenter,
       });
     },
-    [],
+    [trackEvent],
   );
 
   return {
