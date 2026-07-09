@@ -20,7 +20,9 @@ import type {
   MidnightWalletsByAccountId,
   MidnightWallet,
 } from '@lace-contract/midnight-context';
-import type { TransactionHistoryEntry } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';
+
+type UnshieldedUtxoList = NonNullable<WalletEntry['unshielded']>['spentUtxos'];
 
 const toWalletMap = (wallet: MidnightWallet): MidnightWalletsByAccountId => ({
   [wallet.accountId]: wallet,
@@ -55,21 +57,26 @@ const actions = {
 const mockDate = new Date();
 vi.setSystemTime(mockDate);
 
+type MockOverrides = Partial<Omit<WalletEntry, 'unshielded'>> & {
+  createdUtxos?: UnshieldedUtxoList;
+  spentUtxos?: UnshieldedUtxoList;
+};
+
 const createMockTxHistoryEntry = (
-  overrides: Partial<TransactionHistoryEntry> = {},
-): TransactionHistoryEntry =>
-  ({
-    id: 1,
+  overrides: MockOverrides = {},
+): WalletEntry => {
+  const { createdUtxos = [], spentUtxos = [], ...rest } = overrides;
+  return {
     hash: 'hash1',
     protocolVersion: 1,
     identifiers: [],
     timestamp: mockDate,
     fees: null,
     status: 'SUCCESS',
-    createdUtxos: [],
-    spentUtxos: [],
-    ...overrides,
-  } as TransactionHistoryEntry);
+    unshielded: { id: 1, createdUtxos, spentUtxos },
+    ...rest,
+  };
+};
 
 describe('updateActivities', () => {
   beforeEach(() => {
@@ -135,7 +142,7 @@ describe('updateActivities', () => {
         outputIndex: 0,
       },
     ];
-    const spentUtxos: TransactionHistoryEntry['spentUtxos'] = [];
+    const spentUtxos: UnshieldedUtxoList = [];
 
     testSideEffect(updateActivities, ({ cold, expectObservable, flush }) => ({
       dependencies: {
@@ -200,7 +207,7 @@ describe('updateActivities', () => {
         outputIndex: 0,
       },
     ];
-    const spentUtxos: TransactionHistoryEntry['spentUtxos'] = [];
+    const spentUtxos: UnshieldedUtxoList = [];
     const tokenBalanceChanges = [
       {
         tokenId: TokenId(
@@ -440,7 +447,7 @@ describe('loadActivityDetails', () => {
         outputIndex: 0,
       },
     ];
-    const spentUtxos: TransactionHistoryEntry['spentUtxos'] = [];
+    const spentUtxos: UnshieldedUtxoList = [];
     const txHistoryEntry = createMockTxHistoryEntry({
       hash: activityId,
       createdUtxos,
@@ -505,7 +512,7 @@ describe('loadActivityDetails', () => {
         outputIndex: 0,
       },
     ];
-    const spentUtxos: TransactionHistoryEntry['spentUtxos'] = [];
+    const spentUtxos: UnshieldedUtxoList = [];
     const txHistoryEntry = createMockTxHistoryEntry({
       hash: activityId,
       createdUtxos,

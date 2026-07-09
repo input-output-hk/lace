@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createAccountKeyManager } from '../../../src/store/side-effects/account-key-manager';
 
 import type { AccountKeys } from '@lace-contract/midnight-context';
-import type { UnshieldedKeystore } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import type { UnshieldedKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import type { MockedObject } from 'vitest';
 
 const createMockAccountKeys = (): MockedObject<AccountKeys> => {

@@ -64,6 +64,7 @@ const createMockEvent = (id: number, maxId: number): EventsSyncUpdate => ({
   _tag: 'EventsSyncUpdate',
   id,
   maxId,
+  protocolVersion: 0,
   event: {} as unknown as ledger.Event,
 });
 

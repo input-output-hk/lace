@@ -17,6 +17,7 @@ help:
 	@echo "  cleanup-node_modules : Cleanup node_modules directories"
 	@echo "  cleanup-leftovers : Cleanup leftovers (docs, logs, tmp, tsconfig.tsbuildinfo)"
 	@echo "  cleanup-mobile-app-state-ios : Cleanup mobile iOS app state in simulator to allow restart from scratch"
+	@echo "  cleanup-redundant-artifacts : Cleanup redundant artifacts (allure, coverage, leftovers)"
 	@echo "  "
 	@echo "  [Generators]"
 	@echo "  contract : Create a new contract"
@@ -78,6 +79,13 @@ cleanup-leftovers:
 		find $$dir -type f -name "tsconfig.tsbuildinfo" -exec rm {} +; \
 	done
 	@echo "│   ├── Leftovers removed."
+
+cleanup-redundant-artifacts:
+	@echo "├── Cleaning up redundant artifacts..."
+	@make cleanup-allure
+	@make cleanup-coverage
+	@make cleanup-leftovers
+	@echo "│   └── Cleanup completed."
 
 cleanup-mobile-app-state-ios:
 	@echo "├── Cleaning up mobile iOS app state in simulator..."

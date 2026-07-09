@@ -1,14 +1,14 @@
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
 // Import the root config
 import rootConfig from '../../eslint.config.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-export default tseslint.config(
+export default defineConfig(
   ...rootConfig,
   {
     languageOptions: {

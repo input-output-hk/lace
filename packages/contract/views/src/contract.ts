@@ -12,6 +12,7 @@ import store from './store';
 import type {
   ContractActionCreators,
   ContractSelectors,
+  LaceSideEffect,
 } from '@lace-contract/module';
 
 export const initializeExtensionViewAddonContract = inferContractContext({
@@ -106,3 +107,4 @@ export const viewsStoreContract = inferContractContext({
 
 export type Selectors = ContractSelectors<typeof viewsStoreContract>;
 export type ActionCreators = ContractActionCreators<typeof viewsStoreContract>;
+export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;

@@ -50,6 +50,9 @@ const setupSelector = ({
     if (selector === 'wallets.selectActiveNetworkAccounts') return accounts;
     if (selector === 'cardanoDappConnector.selectSessionAccountByOrigin')
       return sessionMapping;
+    if (selector === 'features.selectLoadedFeatures')
+      return { featureFlags: [] };
+    if (selector === 'cardanoContext.selectFlaggedExploitsByAccount') return {};
     return undefined;
   });
 };
@@ -63,6 +66,7 @@ describe('useSignDataAccountInfo', () => {
     const { result } = renderHook(() => useSignDataAccountInfo(DAPP_ORIGIN));
 
     expect(result.current).toEqual({
+      accountId: accountB.accountId,
       name: accountB.metadata.name,
       avatarUri: undefined,
     });

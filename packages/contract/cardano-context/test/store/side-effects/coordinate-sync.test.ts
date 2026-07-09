@@ -9,6 +9,7 @@ import { coordinateCardanoSync } from '../../../src/store/side-effects/coordinat
 import { cardanoContextActions } from '../../../src/store/slice';
 import { CardanoSyncFailureId } from '../../../src/value-objects';
 import {
+  cardanoAccount0Addr,
   midnightAccount,
   midnightAddress,
   previewAccountCardanoWalletAccounts,
@@ -349,6 +350,63 @@ describe('coordinateCardanoSync', () => {
                 operationId: `${syncRound1Id}-address-discovery`,
                 status: 'Pending',
                 description: 'sync.operation.address-discovery',
+                startedAt: expect.any(Number) as unknown as Timestamp,
+              },
+            }),
+          });
+        },
+      };
+    });
+  });
+
+  it('should enqueue transaction-polling operation when account already has addresses', () => {
+    testSideEffect(coordinateCardanoSync, ({ hot, expectObservable }) => {
+      const accountId = threeAccountCardanoWalletAccounts[0].accountId;
+      const tipHash = 'tip-hash-utxo';
+      const syncRoundId = `${accountId}-${tipHash}`;
+      const accounts$ = hot<AnyAccount[]>('a', {
+        a: [threeAccountCardanoWalletAccounts[0]],
+      });
+      // Account already has an address → hasAddresses=true → account-state ops branch
+      const addresses$ = hot<AnyAddress[]>('a', {
+        a: [{ ...cardanoAccount0Addr, accountId }],
+      });
+      const tip$ = hot<Cardano.PartialBlockHeader | undefined>('a', {
+        a: { hash: tipHash } as Cardano.PartialBlockHeader,
+      });
+      const selectIsSyncOperationPending$ = hot('a', {
+        a: (_opId: SyncOperationId) => false,
+      });
+      const chainId$ = hot<Cardano.ChainId>('a', {
+        a: Cardano.ChainIds.Preprod,
+      });
+      const selectAllFailures$ = hot<Record<FailureId, Failure>>('a', {
+        a: {},
+      });
+      const retrySyncRound$ = hot<
+        ReturnType<typeof actions.cardanoContext.retrySyncRound>
+      >('-', {});
+
+      return {
+        actionObservables: {
+          cardanoContext: { retrySyncRound$ },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+          addresses: { selectAllAddresses$: addresses$ },
+          cardanoContext: { selectTip$: tip$, selectChainId$: chainId$ },
+          sync: { selectIsSyncOperationPending$ },
+          failures: { selectAllFailures$ },
+        },
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('a', {
+            a: actions.sync.addSyncOperation({
+              accountId,
+              operation: {
+                operationId: `${syncRoundId}-transaction-polling`,
+                status: 'Pending',
+                description: 'sync.operation.transaction-polling',
                 startedAt: expect.any(Number) as unknown as Timestamp,
               },
             }),

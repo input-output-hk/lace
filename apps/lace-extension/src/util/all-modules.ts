@@ -30,6 +30,7 @@ import dappConnectorMidnight from '@lace-module/dapp-connector-midnight';
 import dappExplorer from '@lace-module/dapp-explorer';
 import featureDev from '@lace-module/feature-dev';
 import featurePosthog from '@lace-module/feature-posthog';
+import hwConnector from '@lace-module/hw-connector';
 import i18n from '@lace-module/i18n';
 import identityCenter from '@lace-module/identity-center';
 import migrateMultiDelegation from '@lace-module/migrate-multi-delegation';
@@ -105,6 +106,7 @@ export const allModules: LaceModule[] = [
   swapProviderSteelswap,
   migrateMultiDelegation,
   recoveryPhraseChannelExtension,
+  hwConnector,
   // keep this last to overwrite preloadedState
   migrateV1Data,
 ]

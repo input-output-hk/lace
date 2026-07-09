@@ -1,4 +1,6 @@
-import { firstValueFrom, map } from 'rxjs';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
+import { retryBackoff } from 'backoff-rxjs';
+import { catchError, firstValueFrom, map, of } from 'rxjs';
 
 import type {
   CardanoProvider,
@@ -37,18 +39,26 @@ export type TransactionProcessorParams = {
   logger: Logger;
 };
 
+/**
+ * Wraps `resolveInput` calls with exponential backoff retry. After retries
+ * are exhausted the resolver falls back to `null` (the previous silent
+ * behavior).
+ */
 export const createInputResolver = (
   resolveInput: CardanoProvider['resolveInput'],
   chainId: Cardano.ChainId,
 ): Cardano.InputResolver => ({
-  resolveInput: async (txIn: Cardano.TxIn) => {
-    return firstValueFrom(
+  resolveInput: async (txIn: Cardano.TxIn) =>
+    firstValueFrom(
       resolveInput(txIn, { chainId }).pipe(
-        // TODO: LW-12636 handle input resolver errors?
-        map(result => result.unwrapOr(null)),
+        map(result => {
+          if (result.isErr()) throw result.unwrapErr();
+          return result.unwrap();
+        }),
+        retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+        catchError(() => of<Cardano.TxOut | null>(null)),
       ),
-    );
-  },
+    ),
 });
 
 export const createGetTokenMetadataWrapper = (

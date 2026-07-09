@@ -2,17 +2,18 @@ import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import { isWeb, openUrl } from '@lace-lib/ui-toolkit';
-import { formatAmountRawToCompact } from '@lace-lib/util-render';
 import { useCallback, useMemo } from 'react';
 
-import { DAPP_DATA_RANGE_PERIOD } from '../../const';
 import { useLaceSelector } from '../../hooks/lace-context';
+
+import type { DappRating } from '@lace-lib/ui-toolkit';
 
 export type DappDetailsTemplateProps = {
   header: {
     name: string;
     categories: string[];
     logoUrl?: string;
+    rating?: DappRating | null;
   };
   statistics?: {
     title: string;
@@ -30,7 +31,7 @@ export type DappDetailsTemplateProps = {
   };
   details: {
     title: string;
-    descriptionHtml: string;
+    description: string;
   };
   socialLinks: {
     title: string;
@@ -47,11 +48,12 @@ export type DappDetailsTemplateProps = {
     onPress: () => void;
     testID?: string;
   };
+  warning?: string;
   testID?: string;
 };
 
 export const useDappDetails = (
-  activeDapp: number,
+  activeDapp: string,
 ): DappDetailsTemplateProps | null => {
   const { t } = useTranslation();
   const selectedDapp = useLaceSelector('dappExplorer.getDappById', activeDapp);
@@ -71,22 +73,23 @@ export const useDappDetails = (
     if (!selectedDapp) return;
     // Navigate to DappExternalWebView with the required DappConnectorSheetParams
     if (isWeb) {
-      void openUrl({ url: selectedDapp.website, onError: () => {} });
+      void openUrl({ url: selectedDapp.website ?? '', onError: () => {} });
     } else {
-      NavigationControls.actions.closeAndNavigate(
-        StackRoutes.DappExternalWebView,
-        {
-          title: selectedDapp.name,
-          dapp: {
-            icon: { img: { uri: selectedDapp.logo } },
-            name: selectedDapp.name,
-            category: selectedDapp.categories[0] ?? '',
-          },
-          buttonUrl: selectedDapp.website,
+      NavigationControls.closeSheet();
+      NavigationControls.navigate(StackRoutes.DappExternalWebView, {
+        title: selectedDapp.name,
+        dapp: {
+          icon: { img: { uri: selectedDapp.logoUrl ?? undefined } },
+          name: selectedDapp.name,
+          category: selectedDapp.categories[0] ?? '',
         },
-      );
+        buttonUrl: selectedDapp.website ?? '',
+        // Curated dapps are launched read-only; favouriting is reserved for
+        // user-entered external URLs.
+        canFavorite: false,
+      });
     }
-  }, [selectedDapp, activeDapp]);
+  }, [selectedDapp]);
 
   if (!selectedDapp) return null;
 
@@ -94,7 +97,7 @@ export const useDappDetails = (
     ? {
         title: t('v2.dapp-explorer.header.statistics'),
         subtitle: t('v2.dapp-explorer.header.last', {
-          period: DAPP_DATA_RANGE_PERIOD,
+          period: '30d',
         }),
         labels: {
           transactions: t('v2.dapp-explorer.header.transactions'),
@@ -102,30 +105,32 @@ export const useDappDetails = (
           users: t('v2.dapp-explorer.header.users'),
         },
         values: {
-          transactions: formatAmountRawToCompact({
-            amount: selectedDapp.metrics.transactions?.toString() ?? '',
-          }),
-          volume: `$${formatAmountRawToCompact({
-            amount: selectedDapp.metrics.volume?.toString() ?? '',
-          })}`,
-          users: formatAmountRawToCompact({
-            amount: selectedDapp.metrics.uaw?.toString() ?? '',
-          }),
+          transactions: '',
+          volume: '',
+          users: '',
         },
       }
     : undefined;
 
+  const warning =
+    selectedDapp.scam_status?.toLowerCase() === 'scam'
+      ? t('v2.dapp-explorer.scam-warning')
+      : undefined;
+
   return {
     testID: 'dapp-detail-sheet',
+    warning,
     header: {
       name: selectedDapp.name,
       categories: selectedDapp.categories,
-      logoUrl: selectedDapp.logo,
+      logoUrl: selectedDapp.logoUrl ?? undefined,
+      // TODO: re-implement ratings when tx-cart exists so multiple votes can be added to a single tx
+      rating: null,
     },
     statistics,
     details: {
       title: t('v2.dapp-explorer.header.details'),
-      descriptionHtml: selectedDapp.fullDescription,
+      description: selectedDapp.description ?? '',
     },
     socialLinks: {
       title: t('v2.dapp-explorer.header.contact'),

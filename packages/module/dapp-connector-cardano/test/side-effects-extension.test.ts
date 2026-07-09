@@ -1,7 +1,9 @@
+import { Cardano, Serialization } from '@cardano-sdk/core';
 import { DappId } from '@lace-contract/dapp-connector';
 import { ViewId } from '@lace-contract/module';
+import { AccountId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-sdk/util';
 import { EMPTY, NEVER, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -17,14 +19,17 @@ import { signData$, signTx$ } from '../src/browser/store/util';
 
 import type { ActionCreators, Selectors } from '../src';
 import type { CardanoConfirmationRequest } from '../src/common/store/dependencies/create-confirmation-callback';
-import type { Dapp } from '@lace-contract/dapp-connector';
+import type {
+  AuthorizedDappsDataSlice,
+  Dapp,
+} from '@lace-contract/dapp-connector';
 import type {
   ActionObservables,
   SideEffectDependencies,
   StateObservables,
   WithLaceContext,
 } from '@lace-contract/module';
-import type { AnyAccount } from '@lace-contract/wallet-repo';
+import type { AnyAccount, AnyWallet } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
 // Stub chrome.sidePanel so findTargetSidePanel reports it as available.
@@ -369,6 +374,204 @@ describe('side-effects-extension', () => {
       expect(signData$).not.toHaveBeenCalled();
       expect(emissions).toHaveLength(0);
     });
+
+    describe('submitTransaction pending activity dispatch', () => {
+      const OWN_ADDRESS = Cardano.PaymentAddress(
+        'addr_test1qphhr294v0w0rzgk7kz4ynsp8hwt82ha6nsp8yk6h04fhzsuryus5g7pm3lq85msee5pdtqlnv2crdc83kk2tvhsefcsu2snle',
+      );
+      const FOREIGN_ADDRESS = Cardano.PaymentAddress(
+        'addr_test1qqt3r9kd56aq9ajynjkz8hdfw3kc0pcv3tpzug8azxls62tvvz7nw9gmznn65g4ksrrfvyzhz52knc3mqxdyya47gz2qmcjmcq',
+      );
+      const PREV_TX_ID = Cardano.TransactionId(
+        '39a7a284c2a0948189dc45dec670211cd4d72f7b66c5726c08d9b3df11e44d58',
+      );
+      const CHAIN_ID = Cardano.ChainIds.Preprod;
+      const ACCOUNT_ID = AccountId('acct-1');
+
+      const ownUtxo: Cardano.Utxo = [
+        { txId: PREV_TX_ID, index: 0, address: OWN_ADDRESS },
+        { address: OWN_ADDRESS, value: { coins: 10_000_000n } },
+      ];
+
+      const buildSignedTxCbor = (): string =>
+        Serialization.Transaction.fromCore({
+          body: {
+            inputs: [{ txId: PREV_TX_ID, index: 0 }],
+            outputs: [
+              {
+                address: FOREIGN_ADDRESS,
+                value: { coins: 9_800_000n },
+              },
+            ],
+            fee: 200_000n,
+          },
+          id: '0'.repeat(64) as Cardano.TransactionId,
+          witness: { signatures: new Map() },
+        }).toCbor();
+
+      const createStateForSubmit = () => ({
+        views: { selectOpenViews$: of([]) },
+        appLock: { isUnlocked$: of(true) },
+        dappConnector: { selectAuthorizedDapps$: of({ Cardano: [] }) },
+        cardanoContext: {
+          selectChainId$: of(CHAIN_ID),
+          selectAccountUtxos$: of({ [ACCOUNT_ID]: [ownUtxo] }),
+          selectAvailableAccountUtxos$: of({ [ACCOUNT_ID]: [ownUtxo] }),
+          selectAccountUnspendableUtxos$: of({}),
+          selectRewardAccountDetails$: of({}),
+        },
+        addresses: {
+          selectAllAddresses$: of([
+            {
+              accountId: ACCOUNT_ID,
+              blockchainName: 'Cardano' as const,
+              address: OWN_ADDRESS,
+              data: {},
+            },
+          ]),
+        },
+        cardanoDappConnector: { selectSessionAccountByOrigin$: of({}) },
+        wallets: {
+          selectActiveNetworkAccounts$: of([]),
+          selectAll$: of([]),
+        },
+      });
+
+      const createDepsForSubmit = (submitTxImpl?: ReturnType<typeof vi.fn>) => {
+        const captured: {
+          submitTransaction?: (cbor: string) => Promise<string>;
+        } = {};
+        const mockConnect = vi.fn(
+          (argument: {
+            submitTransaction: (cbor: string) => Promise<string>;
+          }) => {
+            captured.submitTransaction = argument.submitTransaction;
+            return EMPTY;
+          },
+        );
+        return {
+          connectCardanoDappConnector: mockConnect,
+          actions: {
+            activities: {
+              upsertActivities: vi.fn((payload: unknown) => ({
+                type: 'activities/upsertActivities',
+                payload,
+              })),
+            },
+          },
+          authenticate: vi.fn(),
+          accessAuthSecret: vi.fn(),
+          cardanoProvider: {
+            submitTx:
+              submitTxImpl ??
+              vi.fn().mockReturnValue(of(Ok('submitted-tx-hash'))),
+          },
+          signerFactory: {},
+          captured,
+        };
+      };
+
+      it('dispatches upsertActivities when submit succeeds and tx is attributable', async () => {
+        const actionObservables = createActionObservables();
+        const stateObservables = createStateForSubmit();
+        const deps = createDepsForSubmit();
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          actionObservables as unknown as ActionObservables<ActionCreators>,
+          stateObservables as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+
+        const emissions: unknown[] = [];
+        const sub = sideEffect$.subscribe(action => emissions.push(action));
+
+        const cbor = buildSignedTxCbor();
+        const txId = await deps.captured.submitTransaction!(cbor);
+
+        expect(txId).toBe('submitted-tx-hash');
+        expect(deps.actions.activities.upsertActivities).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(deps.actions.activities.upsertActivities).toHaveBeenCalledWith(
+          expect.objectContaining({
+            accountId: ACCOUNT_ID,
+            activities: [
+              expect.objectContaining({
+                accountId: ACCOUNT_ID,
+                type: 'Pending',
+              }),
+            ],
+          }),
+        );
+        expect(emissions).toEqual([
+          expect.objectContaining({ type: 'activities/upsertActivities' }),
+        ]);
+
+        sub.unsubscribe();
+      });
+
+      it('does not dispatch upsertActivities when tx is not attributable to any account', async () => {
+        const actionObservables = createActionObservables();
+        const stateObservables = {
+          ...createStateForSubmit(),
+          cardanoContext: {
+            ...createStateForSubmit().cardanoContext,
+            selectAccountUtxos$: of({}),
+            selectAvailableAccountUtxos$: of({}),
+          },
+          addresses: { selectAllAddresses$: of([]) },
+        };
+        const deps = createDepsForSubmit();
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          actionObservables as unknown as ActionObservables<ActionCreators>,
+          stateObservables as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+
+        const emissions: unknown[] = [];
+        const sub = sideEffect$.subscribe(action => emissions.push(action));
+
+        const cbor = buildSignedTxCbor();
+        const txId = await deps.captured.submitTransaction!(cbor);
+
+        expect(txId).toBe('submitted-tx-hash');
+        expect(deps.actions.activities.upsertActivities).not.toHaveBeenCalled();
+        expect(emissions).toHaveLength(0);
+
+        sub.unsubscribe();
+      });
+
+      it('propagates provider errors and dispatches no activity', async () => {
+        const actionObservables = createActionObservables();
+        const stateObservables = createStateForSubmit();
+        const providerError = new Error('submit failed');
+        const submitTxMock = vi.fn().mockReturnValue(of(Err(providerError)));
+        const deps = createDepsForSubmit(submitTxMock);
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          actionObservables as unknown as ActionObservables<ActionCreators>,
+          stateObservables as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+
+        const emissions: unknown[] = [];
+        const sub = sideEffect$.subscribe(action => emissions.push(action));
+
+        const cbor = buildSignedTxCbor();
+        await expect(deps.captured.submitTransaction!(cbor)).rejects.toThrow(
+          'submit failed',
+        );
+
+        expect(deps.actions.activities.upsertActivities).not.toHaveBeenCalled();
+        expect(emissions).toHaveLength(0);
+
+        sub.unsubscribe();
+      });
+    });
   });
 
   describe('promptCardanoAuthorizeDapp', () => {
@@ -477,6 +680,18 @@ describe('side-effects-extension', () => {
           },
           stateObservables: {
             views: { selectOpenViews$: hot('a', { a: [] }) },
+            dappConnector: {
+              selectAuthorizedDapps$: hot('a', {
+                a: {} as AuthorizedDappsDataSlice,
+              }),
+            },
+            cardanoDappConnector: {
+              selectSessionAccountByOrigin$: hot('a', { a: {} }),
+            },
+            wallets: {
+              selectActiveNetworkAccounts$: hot('a', { a: [] }),
+              selectAll$: hot('a', { a: [] }),
+            },
           },
           dependencies: createTestDependencies(),
           assertion: sideEffect$ => {
@@ -512,6 +727,18 @@ describe('side-effects-extension', () => {
         stateObservables: {
           views: {
             selectOpenViews$: cold('a', { a: [sidePanelView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: cold('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: cold('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', { a: [] }),
+            selectAll$: cold('a', { a: [] }),
           },
         },
         dependencies: deps,
@@ -566,6 +793,18 @@ describe('side-effects-extension', () => {
           views: {
             selectOpenViews$: cold('a', { a: [sidePanelView] }),
           },
+          dappConnector: {
+            selectAuthorizedDapps$: cold('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: cold('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', { a: [] }),
+            selectAll$: cold('a', { a: [] }),
+          },
         },
         dependencies: deps,
         assertion: sideEffect$ => {
@@ -605,6 +844,18 @@ describe('side-effects-extension', () => {
         stateObservables: {
           views: {
             selectOpenViews$: cold('a', { a: [sidePanelView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: cold('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: cold('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', { a: [] }),
+            selectAll$: cold('a', { a: [] }),
           },
         },
         dependencies: deps,
@@ -649,6 +900,18 @@ describe('side-effects-extension', () => {
               b: [],
               c: [popupView],
             }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [] }),
+            selectAll$: hot('a', { a: [] }),
           },
         },
         dependencies: deps,
@@ -701,6 +964,18 @@ describe('side-effects-extension', () => {
               c: [popupView],
             }),
           },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [] }),
+            selectAll$: hot('a', { a: [] }),
+          },
         },
         dependencies: deps,
         assertion: sideEffect$ => {
@@ -746,6 +1021,18 @@ describe('side-effects-extension', () => {
               d: [],
             }),
           },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [] }),
+            selectAll$: hot('a', { a: [] }),
+          },
         },
         dependencies: deps,
         assertion: sideEffect$ => {
@@ -789,6 +1076,18 @@ describe('side-effects-extension', () => {
           views: {
             selectOpenViews$: cold('a', { a: [sidePanelView] }),
           },
+          dappConnector: {
+            selectAuthorizedDapps$: cold('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: cold('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', { a: [] }),
+            selectAll$: cold('a', { a: [] }),
+          },
         },
         dependencies: deps,
         assertion: sideEffect$ => {
@@ -797,6 +1096,257 @@ describe('side-effects-extension', () => {
           expect(
             deps.actions.cardanoDappConnector.setPendingAuthRequest,
           ).toHaveBeenCalledTimes(1);
+        },
+      }));
+    });
+
+    it('auto-grants without UI when dapp is persisted and only one wallet with one Cardano account exists', () => {
+      const deps = createTestDependencies();
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction() }),
+            completed$: NEVER,
+            failed$: NEVER,
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: { selectOpenViews$: hot('a', { a: [] }) },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {
+                Cardano: [{ dapp: { origin: mockDapp.origin } }],
+              } as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [mockAccount] }),
+            selectAll$: hot('a', {
+              a: [{ walletId: 'wallet-1' } as unknown as AnyWallet],
+            }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(
+            deps.actions.cardanoDappConnector.setPendingAuthRequest,
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              requestId: `auto-${mockDapp.origin}`,
+              dappOrigin: mockDapp.origin,
+            }),
+          );
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).toHaveBeenCalledWith({
+            authorized: true,
+            account: mockAccount,
+          });
+          expect(deps.actions.authorizeDapp.completed).toHaveBeenCalledWith({
+            authorized: true,
+            dapp: mockDapp,
+            blockchainName: 'Cardano',
+          });
+          // No UI dispatches
+          expect(deps.actions.views.setActiveSheetPage).not.toHaveBeenCalled();
+          expect(deps.actions.views.openView).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('falls through to UI when persisted but multi-account', () => {
+      const deps = createTestDependencies();
+      const secondAccount = {
+        accountId: 'account-2',
+        blockchainName: 'Cardano',
+      } as unknown as AnyAccount;
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, cold, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction(1) }),
+            completed$: NEVER,
+            failed$: NEVER,
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: {
+            selectOpenViews$: cold('a', { a: [sidePanelView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {
+                Cardano: [{ dapp: { origin: mockDapp.origin } }],
+              } as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', {
+              a: [mockAccount, secondAccount],
+            }),
+            selectAll$: hot('a', {
+              a: [{ walletId: 'wallet-1' } as unknown as AnyWallet],
+            }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          // UI path dispatches setActiveSheetPage (sidePanel mode)
+          expect(deps.actions.views.setActiveSheetPage).toHaveBeenCalled();
+          // No auto-grant confirmAuth/completed yet (waiting for user)
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).not.toHaveBeenCalled();
+          expect(deps.actions.authorizeDapp.completed).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('falls through to UI when persisted with one Cardano account but multiple wallets', () => {
+      const deps = createTestDependencies();
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, cold, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction(1) }),
+            completed$: NEVER,
+            failed$: NEVER,
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: {
+            selectOpenViews$: cold('a', { a: [sidePanelView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {
+                Cardano: [{ dapp: { origin: mockDapp.origin } }],
+              } as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [mockAccount] }),
+            selectAll$: hot('a', {
+              a: [
+                { walletId: 'wallet-1' } as unknown as AnyWallet,
+                { walletId: 'wallet-2' } as unknown as AnyWallet,
+              ],
+            }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          // UI shown even with 1 Cardano account because there are
+          // multiple wallets and the user must pick which to connect.
+          expect(deps.actions.views.setActiveSheetPage).toHaveBeenCalled();
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).not.toHaveBeenCalled();
+          expect(deps.actions.authorizeDapp.completed).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('auto-grants without UI when persisted and an account was already selected for the origin (multi-account)', () => {
+      const deps = createTestDependencies();
+      const secondAccount = {
+        accountId: 'account-2',
+        blockchainName: 'Cardano',
+      } as unknown as AnyAccount;
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction() }),
+            completed$: NEVER,
+            failed$: NEVER,
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: { selectOpenViews$: hot('a', { a: [] }) },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {
+                Cardano: [{ dapp: { origin: mockDapp.origin } }],
+              } as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', {
+              a: { [mockDapp.origin]: secondAccount.accountId },
+            }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', {
+              a: [mockAccount, secondAccount],
+            }),
+            selectAll$: hot('a', {
+              a: [{ walletId: 'wallet-1' } as unknown as AnyWallet],
+            }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          // Re-uses the previously selected account; no UI shown.
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).toHaveBeenCalledWith({
+            authorized: true,
+            account: secondAccount,
+          });
+          expect(deps.actions.authorizeDapp.completed).toHaveBeenCalledWith({
+            authorized: true,
+            dapp: mockDapp,
+            blockchainName: 'Cardano',
+          });
+          expect(deps.actions.views.setActiveSheetPage).not.toHaveBeenCalled();
+          expect(deps.actions.views.openView).not.toHaveBeenCalled();
         },
       }));
     });

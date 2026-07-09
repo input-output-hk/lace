@@ -4,10 +4,13 @@ import { type Features } from '@lace-contract/feature';
 import { ViewId } from '@lace-contract/module';
 import { viewsActions } from '@lace-contract/views';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { EMPTY, Subject, throwError } from 'rxjs';
+import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import { appActions } from '../../src';
 import {
+  performAppReload,
   reloadAppInTheBackground,
   trackSession,
 } from '../../src/store/side-effects';
@@ -104,6 +107,57 @@ describe('Side Effects', () => {
           };
         },
       );
+    });
+  });
+
+  describe('performAppReload', () => {
+    it('invokes performAppReload dependency when reloadApplication action fires', () => {
+      const reloadApplication$ = new Subject<
+        ReturnType<typeof actions.app.reloadApplication>
+      >();
+      const doReload = vi.fn(() => EMPTY);
+
+      testSideEffect(performAppReload, ({ flush }) => ({
+        actionObservables: { app: { reloadApplication$ } },
+        stateObservables: {},
+        dependencies: { performAppReload: doReload, logger: dummyLogger },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          reloadApplication$.next(actions.app.reloadApplication());
+
+          expect(doReload).toHaveBeenCalledTimes(1);
+        },
+      }));
+    });
+
+    it('keeps the subscription alive when performAppReload rejects', () => {
+      // Regression: if the platform reload (e.g. `Updates.reloadAsync()` on
+      // mobile, `runtime.reload()` on extension) errors, the inner observable's
+      // error must not terminate the outer subscription; future reload requests
+      // must still call `performAppReload`.
+      const reloadApplication$ = new Subject<
+        ReturnType<typeof actions.app.reloadApplication>
+      >();
+      const doReload = vi.fn(() =>
+        throwError(() => new Error('reload failed')),
+      );
+
+      testSideEffect(performAppReload, ({ flush }) => ({
+        actionObservables: { app: { reloadApplication$ } },
+        stateObservables: {},
+        dependencies: { performAppReload: doReload, logger: dummyLogger },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          reloadApplication$.next(actions.app.reloadApplication());
+          reloadApplication$.next(actions.app.reloadApplication());
+
+          expect(doReload).toHaveBeenCalledTimes(2);
+        },
+      }));
     });
   });
 

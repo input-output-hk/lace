@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme, type Theme } from '../../../../design-tokens';
@@ -12,7 +12,6 @@ import {
   Row,
   Text,
 } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
 import { GenericFlashList, Sheet } from '../../../organisms';
 
 import type { AvatarContent } from '../../../../utils/avatarUtils';
@@ -28,10 +27,7 @@ interface ActionButtonsProps {
 }
 
 interface LabelsProps {
-  headerTitle: string;
   name: string;
-  deleteButtonLabel: string;
-  editButtonLabel: string;
 }
 
 type ContactAddress = {
@@ -67,7 +63,7 @@ const renderAddressItem = ({
         <Divider />
       </Column>
 
-      <Row gap={spacing.M} justifyContent="space-between" alignItems="center">
+      <Row gap={spacing.XL} justifyContent="space-between" alignItems="center">
         <Row alignItems="center" gap={spacing.S} style={styles.address}>
           <Beacon
             icon={
@@ -103,15 +99,10 @@ export const ContactDetailsSheetTemplate = ({
   avatar,
   contact,
 }: ContactDetailsSheetTemplateProps) => {
-  const { headerTitle, name, deleteButtonLabel, editButtonLabel } = labels;
-  const { onDeletePress, onEditPress, onCopyPress } = actions;
+  const { name } = labels;
+  const { onCopyPress } = actions;
   const { theme } = useTheme();
   const isDarkMode = theme.name === 'dark';
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
 
   const renderItem = useCallback(
     ({ item }: { item: ContactAddress }) =>
@@ -123,39 +114,21 @@ export const ContactDetailsSheetTemplate = ({
     `${item.address}-${index}`;
 
   return (
-    <>
-      <SheetHeader title={headerTitle} testID="contact-details-sheet-header" />
-      <Sheet.Scroll
-        testID="contact-details-sheet-body"
-        contentContainerStyle={scrollContainerStyle}>
-        <Column alignItems="center" gap={spacing.M} style={styles.content}>
-          <Avatar content={avatar} size={CONTACT_AVATAR_SIZE} shape="rounded" />
-          <Text.L testID="contact-details-sheet-name">{name}</Text.L>
-        </Column>
-        <GenericFlashList<ContactAddress>
-          data={contact.addresses}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          contentContainerStyle={scrollContainerStyle}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={true}
-          nestedScrollEnabled={true}
-        />
-      </Sheet.Scroll>
-      <SheetFooter
-        testID="contact-details-sheet-footer"
-        secondaryButton={{
-          label: deleteButtonLabel,
-          onPress: onDeletePress,
-          testID: 'contact-details-sheet-delete-button',
-        }}
-        primaryButton={{
-          label: editButtonLabel,
-          onPress: onEditPress,
-          testID: 'contact-details-sheet-edit-button',
-        }}
+    <Sheet.Scroll testID="contact-details-sheet-body">
+      <Column alignItems="center" gap={spacing.M} style={styles.content}>
+        <Avatar content={avatar} size={CONTACT_AVATAR_SIZE} shape="rounded" />
+        <Text.L testID="contact-details-sheet-name">{name}</Text.L>
+      </Column>
+      <GenericFlashList<ContactAddress>
+        data={contact.addresses}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={true}
+        nestedScrollEnabled={true}
+        contentContainerStyle={styles.contentContainer}
       />
-    </>
+    </Sheet.Scroll>
   );
 };
 
@@ -168,5 +141,8 @@ const styles = StyleSheet.create({
   },
   dividerWrapper: {
     marginTop: spacing.M,
+  },
+  contentContainer: {
+    gap: spacing.S,
   },
 });

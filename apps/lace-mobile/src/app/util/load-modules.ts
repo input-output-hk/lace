@@ -60,13 +60,15 @@ export const createFeatureFlagModuleLoader = async ({
   viewId: ViewId;
   storeEnhancer?: StoreEnhancer;
 }): Promise<CreateLoaderProps & CreateStoreProps> => {
-  const { featuresToLoad, modulesToLoad } = selectModulesWithFallback({
-    availableModules,
-    featureFlags,
-    defaultFeatureFlags: appConfig!.defaultFeatureFlags,
-    environment: ENV,
-  });
-  const features = { loaded: featuresToLoad, availableModules };
+  const { featuresToLoad, modulesToLoad, fallback } = selectModulesWithFallback(
+    {
+      availableModules,
+      featureFlags,
+      defaultFeatureFlags: appConfig!.defaultFeatureFlags,
+      environment: ENV,
+    },
+  );
+  const features = { loaded: featuresToLoad, availableModules, fallback };
   const runtime = {
     app: 'lace-mobile' as const,
     env: ENV,

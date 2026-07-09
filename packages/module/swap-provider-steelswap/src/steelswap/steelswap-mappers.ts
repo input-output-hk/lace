@@ -21,10 +21,16 @@ import type {
 } from '@lace-contract/swap-provider';
 
 const STEELSWAP_PROVIDER_ID = 'steelswap';
-const STEELSWAP_PARTNER = 'lace-aggregator';
-const STEELSWAP_PARTNER_ADDRESS = '$lace@steelswap';
+export const STEELSWAP_PARTNER = 'lace-aggregator';
+export const STEELSWAP_PARTNER_ADDRESS = '$lace@steelswap';
 const LOVELACE_DECIMALS = 6;
 const QUOTE_EXPIRY_MS = 15_000;
+
+export type SteelSwapPartner = { name: string; address: string };
+const DEFAULT_PARTNER: SteelSwapPartner = {
+  name: STEELSWAP_PARTNER,
+  address: STEELSWAP_PARTNER_ADDRESS,
+};
 
 const lovelaceToAda = (lovelace: number): string =>
   (lovelace / 10 ** LOVELACE_DECIMALS).toFixed(2);
@@ -45,12 +51,13 @@ const toSmallestUnit = (displayAmount: string, decimals: number): number => {
 
 export const toEstimateRequest = (
   request: SwapQuoteRequest,
+  partner: SteelSwapPartner = DEFAULT_PARTNER,
 ): SteelSwapEstimateRequest => ({
   tokenA: request.sellTokenId,
   tokenB: request.buyTokenId,
   quantity: toSmallestUnit(request.sellAmount, request.sellTokenDecimals),
   ignoreDexes: request.excludedDexes,
-  partner: STEELSWAP_PARTNER,
+  partner: partner.name,
   hop: true,
   da: [],
 });
@@ -104,12 +111,13 @@ export const fromEstimateResponse = (
 
 export const toBuildRequest = (
   request: SwapBuildRequest,
+  partner: SteelSwapPartner = DEFAULT_PARTNER,
 ): SteelSwapBuildRequest => ({
   tokenA: request.quote.sellTokenId,
   tokenB: request.quote.buyTokenId,
   quantity: Number(request.quote.sellAmount),
   ignoreDexes: [],
-  partner: STEELSWAP_PARTNER,
+  partner: partner.name,
   hop: true,
   da: [],
   address: request.userAddress,
@@ -117,7 +125,7 @@ export const toBuildRequest = (
   utxos: request.utxos,
   collateral: request.collateralUtxos,
   slippage: Math.round(request.slippage * 100),
-  pAddress: STEELSWAP_PARTNER_ADDRESS,
+  pAddress: partner.address,
   // Intentional typo required by SteelSwap API
   feeAdust: true,
   ttl: request.ttl,

@@ -1,12 +1,14 @@
 import { getAccountIndex } from '@lace-contract/account-management';
 import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
+import { resolveAccountNameSuffix } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import { WalletType } from '@lace-contract/wallet-repo';
 import {
   NavigationControls,
   SheetRoutes,
   StackRoutes,
+  TabRoutes,
 } from '@lace-lib/navigation';
 import {
   Button,
@@ -15,7 +17,7 @@ import {
   Blockchains,
   useTheme,
   Icon,
-  PageHeader,
+  PageHeaderSection,
   PageContainerTemplate,
   usePageHeaderCollapseScroll,
 } from '@lace-lib/ui-toolkit';
@@ -25,13 +27,14 @@ import Animated from 'react-native-reanimated';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
+import type { TranslationKey } from '@lace-contract/i18n';
 import type {
   AnyAccount,
   AnyWallet,
   InMemoryWallet,
   WalletId,
 } from '@lace-contract/wallet-repo';
-import type { TabRoutes, TabScreenProps } from '@lace-lib/navigation';
+import type { TabScreenProps } from '@lace-lib/navigation';
 import type { WalletHierarchyItem } from '@lace-lib/ui-toolkit';
 import type { BlockchainName } from '@lace-lib/util-store';
 
@@ -67,6 +70,11 @@ export const AccountCenter = ({
     [visibleAccounts],
   );
 
+  const flaggedExploitsByAccount = useLaceSelector(
+    'cardanoContext.selectFlaggedExploitsByAccount',
+  );
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+
   const clearAccountStatus = useDispatchLaceAction(
     'accountManagement.clearAccountStatus',
   );
@@ -82,40 +90,81 @@ export const AccountCenter = ({
 
   const handleWalletSettings = useCallback(
     (walletId: WalletId) => {
-      trackEvent('account management | wallet settings | press', { walletId });
+      const wallet = wallets.find(w => w.walletId === walletId);
+      trackEvent(
+        'account management | wallet settings | press',
+        wallet
+          ? {
+              walletType: wallet.type,
+              accountCount: wallet.accounts.length,
+              blockchains: [
+                ...new Set(wallet.accounts.map(a => a.blockchainName)),
+              ].sort(),
+            }
+          : undefined,
+      );
       navigation.navigate(StackRoutes.WalletSettings, { walletId });
     },
-    [navigation, trackEvent],
+    [navigation, trackEvent, wallets],
   );
 
   const handleAddAccount = useCallback(
     (walletId: string) => {
-      trackEvent('account management | add account | press', { walletId });
+      const wallet = wallets.find(w => w.walletId === walletId);
+      trackEvent(
+        'account management | add account | press',
+        wallet
+          ? {
+              walletType: wallet.type,
+              existingAccountCount: wallet.accounts.length,
+              existingBlockchains: [
+                ...new Set(wallet.accounts.map(a => a.blockchainName)),
+              ].sort(),
+            }
+          : undefined,
+      );
       clearAccountStatus();
-      NavigationControls.sheets.navigate(SheetRoutes.AddAccount, {
+      NavigationControls.navigate(SheetRoutes.AddAccount, {
         walletId,
         hasNestedScrolling: true,
       });
     },
-    [clearAccountStatus, trackEvent],
+    [clearAccountStatus, trackEvent, wallets],
   );
 
   const handleAccountPress = useCallback(
     ({ walletId, accountId }: { walletId: string; accountId: string }) => {
-      trackEvent('account management | account details | press', {
-        walletId,
-        accountId,
-      });
+      const wallet = wallets.find(w => w.walletId === walletId);
+      const account = wallet?.accounts.find(a => a.accountId === accountId);
+      trackEvent(
+        'account management | account details | press',
+        wallet && account
+          ? {
+              walletType: wallet.type,
+              blockchain: account.blockchainName,
+              networkType: account.networkType,
+              accountIndex: getAccountIndex(account),
+            }
+          : undefined,
+      );
       navigation.navigate(StackRoutes.AccountDetails, { accountId, walletId });
     },
-    [navigation, trackEvent],
+    [navigation, trackEvent, wallets],
   );
+
+  const handleAtRiskPress = useCallback((accountId: string) => {
+    NavigationControls.navigate(StackRoutes.Home, {
+      screen: TabRoutes.Portfolio,
+      params: { focusAccountId: accountId },
+    });
+  }, []);
 
   const walletIconMap: Record<WalletType, React.JSX.Element> = useMemo(
     () => ({
       [WalletType.HardwareLedger]: <Icon name="HardwareWallet" />,
       [WalletType.HardwareTrezor]: <Icon name="HardwareWallet" />,
       [WalletType.InMemory]: <Icon name="BinaryCode" />,
+      [WalletType.LazyInMemory]: <Icon name="BinaryCode" />,
       [WalletType.MultiSig]: <Icon name="Wallet" />,
     }),
     [],
@@ -148,16 +197,32 @@ export const AccountCenter = ({
             ? chainA - chainB
             : getAccountIndex(a) - getAccountIndex(b);
         })
-        .map((account: AnyAccount) => ({
-          id: account.accountId,
-          title: account.metadata.name,
-          subtitle: account.blockchainName,
-          icon: getBlockchainIcon(account.blockchainName),
-          // TODO: Add image url when available
-          image: '',
-        }));
+        .map((account: AnyAccount) => {
+          const suffixInfo = resolveAccountNameSuffix(
+            flaggedExploitsByAccount[account.accountId] ?? [],
+            featureFlags,
+          );
+          const suffix = suffixInfo
+            ? suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey)
+            : undefined;
+          return {
+            id: account.accountId,
+            title: account.metadata.name,
+            suffix,
+            subtitle: account.blockchainName,
+            icon: getBlockchainIcon(account.blockchainName),
+            // TODO: Add image url when available
+            image: '',
+          };
+        });
     },
-    [getBlockchainIcon, visibleAccountIds],
+    [
+      getBlockchainIcon,
+      visibleAccountIds,
+      flaggedExploitsByAccount,
+      featureFlags,
+      t,
+    ],
   );
 
   const renderWallet = useCallback(
@@ -169,25 +234,26 @@ export const AccountCenter = ({
         (wallet as InMemoryWallet).isPassphraseConfirmed === false &&
         Boolean((wallet as InMemoryWallet).encryptedRecoveryPhrase);
       return (
-        <View>
-          <WalletHierarchy
-            showAlert={isPassphraseUnconfirmed}
-            headerIcon={getWalletIcon(wallet.type)}
-            title={wallet.metadata.name}
-            actionButtonLabel={t('v2.generic.btn.settings')}
-            addButtonLabel={t('v2.account-management.addAccount')}
-            items={convertWalletToHierarchyItems(wallet)}
-            onActionButtonPress={() => {
-              handleWalletSettings(wallet.walletId);
-            }}
-            onAddButtonPress={() => {
-              handleAddAccount(wallet.walletId);
-            }}
-            onItemPress={(accountId: string) => {
-              handleAccountPress({ walletId: wallet.walletId, accountId });
-            }}
-          />
-        </View>
+        <WalletHierarchy
+          showAlert={isPassphraseUnconfirmed}
+          headerIcon={getWalletIcon(wallet.type)}
+          title={wallet.metadata.name}
+          actionButtonLabel={t('v2.generic.btn.settings')}
+          addButtonLabel={t('v2.account-management.addAccount')}
+          items={convertWalletToHierarchyItems(wallet)}
+          onActionButtonPress={() => {
+            handleWalletSettings(wallet.walletId);
+          }}
+          onAddButtonPress={() => {
+            handleAddAccount(wallet.walletId);
+          }}
+          onItemPress={(accountId: string) => {
+            handleAccountPress({ walletId: wallet.walletId, accountId });
+          }}
+          onItemSuffixPress={(accountId: string) => {
+            handleAtRiskPress(accountId);
+          }}
+        />
       );
     },
     [
@@ -197,6 +263,7 @@ export const AccountCenter = ({
       handleWalletSettings,
       handleAddAccount,
       handleAccountPress,
+      handleAtRiskPress,
     ],
   );
 
@@ -206,25 +273,23 @@ export const AccountCenter = ({
 
   const headerSection = useMemo(
     () => (
-      <>
-        <PageHeader
-          title={t('v2.account-management.title')}
-          subtitle={t('v2.account-management.subtitle')}
-          testID={'account-center-header'}
-          collapseScrollYProp={collapseScrollY}
+      <PageHeaderSection
+        title={t('v2.account-management.title')}
+        subtitle={t('v2.account-management.subtitle')}
+        testID="account-center-header-section"
+        pageHeaderTestID="account-center-header"
+        collapseScrollY={collapseScrollY}
+        stickyInScrollParent>
+        <Button.Primary
+          fullWidth
+          preNode={<Icon name="Plus" color={theme.brand.white} />}
+          label={t('v2.account-management.addWallet')}
+          onPress={handleAddWallet}
+          testID="add-wallet-btn"
         />
-        <View style={styles.header}>
-          <Button.Primary
-            fullWidth
-            preNode={<Icon name="Plus" color={theme.brand.white} />}
-            label={t('v2.account-management.addWallet')}
-            onPress={handleAddWallet}
-            testID="add-wallet-btn"
-          />
-        </View>
-      </>
+      </PageHeaderSection>
     ),
-    [handleAddWallet, t, theme, styles.header, collapseScrollY],
+    [handleAddWallet, t, theme, collapseScrollY],
   );
 
   const ListFooterComponent = useCallback(
@@ -243,7 +308,7 @@ export const AccountCenter = ({
       <View style={styles.fillSpace}>
         {headerSection}
         <Animated.FlatList
-          style={styles.fillSpace}
+          style={styles.list}
           testID="account-center-screen"
           accessibilityLabel="AccountCenter"
           contentContainerStyle={styles.contentContainer}
@@ -265,13 +330,17 @@ const styles = StyleSheet.create({
   fillSpace: {
     flex: 1,
   },
-  contentContainer: {
-    paddingBottom: spacing.XXXXL,
+  list: {
+    flex: 1,
+    marginHorizontal: -spacing.M,
+    marginTop: -spacing.M,
   },
-  header: {
-    marginBottom: spacing.L,
+  contentContainer: {
+    paddingTop: spacing.M,
+    paddingBottom: spacing.XXXXL,
+    paddingHorizontal: spacing.M,
   },
   separator: {
-    height: spacing.S,
+    height: spacing.L,
   },
 });

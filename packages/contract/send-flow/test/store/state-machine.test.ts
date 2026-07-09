@@ -1040,6 +1040,44 @@ describe('send-flow stateMachine', () => {
       });
     });
 
+    describe('on "formDataChanged" event (change while validation in flight)', () => {
+      // First change moves Form -> FormPendingValidation; the second arrives
+      // before formValidationCompleted (e.g. amount sync dispatches one event
+      // per token) and must not be dropped
+      const state = execute(
+        stateFormReady,
+        sendFlowMachine.events.formDataChanged({
+          data: {
+            fieldName: 'address',
+            value: 'new-address',
+          },
+        }),
+        sendFlowMachine.events.formDataChanged({
+          data: {
+            fieldName: 'tokenTransfers.amount',
+            id: testToken.tokenId,
+            value: BigNumber(3n),
+          },
+        }),
+      ) as StateWithStatusOf<'FormPendingValidation'>;
+
+      it('stays in "FormPendingValidation"', () => {
+        expect(state.status).toEqual('FormPendingValidation');
+      });
+
+      it('applies the change instead of dropping it', () => {
+        expect(state.form.address.value).toEqual('new-address');
+        expect(state.form.tokenTransfers[0].amount.value).toEqual(
+          BigNumber(3n),
+        );
+        expect(state.form.tokenTransfers[0].amount.dirty).toEqual(true);
+      });
+
+      it('keeps confirm button disabled', () => {
+        expect(state.confirmButtonEnabled).toEqual(false);
+      });
+    });
+
     describe('on "closed" event when serializedTx is available', () => {
       const state = execute(
         stateFormReady,

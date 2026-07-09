@@ -2,11 +2,16 @@ import type { ModalProps as RNModalProps } from 'react-native';
 
 import React, { useMemo } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
-import { Modal as RNModal } from 'react-native';
 
-import { radius, spacing, useTheme } from '../../../design-tokens';
+import {
+  getShadowStyle,
+  radius,
+  spacing,
+  useTheme,
+} from '../../../design-tokens';
 import { Icon, Text, Button, Row, Column } from '../../atoms';
-import { getOverlayColor } from '../../util';
+import { backdropStyle } from '../../util';
+import { SheetSafeOverlay } from '../sheetSafeOverlay/sheetSafeOverlay';
 
 import type { LayoutSize, Theme } from '../../../design-tokens';
 import type { IconName } from '../../atoms';
@@ -44,7 +49,8 @@ export const Modal = ({
   onConfirm,
   onCancel,
   testIdPrefix,
-  ...restProps
+  visible,
+  animationType,
 }: ModalProps) => {
   const { theme, layoutSize } = useTheme();
   const styles = useMemo(
@@ -58,125 +64,126 @@ export const Modal = ({
     : 'modal-description';
 
   return (
-    <View>
-      <RNModal {...restProps} onRequestClose={onClose} transparent>
-        <View style={styles.overlay}>
-          <View
-            style={styles.modal}
-            testID={
-              testIdPrefix ? `${testIdPrefix}-component` : 'modal-component'
-            }>
-            {shouldShowHeader && (
+    <SheetSafeOverlay
+      visible={visible}
+      animationType={animationType}
+      onRequestClose={onClose}>
+      <View style={styles.overlay}>
+        <View
+          style={styles.modal}
+          testID={
+            testIdPrefix ? `${testIdPrefix}-component` : 'modal-component'
+          }>
+          {shouldShowHeader && (
+            <Row
+              justifyContent="space-between"
+              alignItems="center"
+              style={styles.windowTitle}>
               <Row
-                justifyContent="space-between"
+                justifyContent="center"
                 alignItems="center"
-                style={styles.windowTitle}>
-                <Row
-                  justifyContent="center"
-                  alignItems="center"
-                  gap={spacing.XS}
-                  style={styles.titleContainer}>
-                  {!!titleIcon && (
-                    <Icon
-                      name={titleIcon}
-                      size={16}
-                      testID={
-                        testIdPrefix
-                          ? `${testIdPrefix}-title-icon`
-                          : 'modal-title-icon'
-                      }
-                    />
-                  )}
-                  {!!title && (
-                    <Text.M
-                      align="center"
-                      testID={
-                        testIdPrefix
-                          ? `${testIdPrefix}-title-text`
-                          : 'modal-title-text'
-                      }>
-                      {title}
-                    </Text.M>
-                  )}
-                </Row>
-                {!!onClose && (
-                  <TouchableOpacity onPress={onClose}>
-                    <Icon
-                      name="Cancel"
-                      testID={
-                        testIdPrefix
-                          ? `${testIdPrefix}-close-button`
-                          : 'modal-close-button'
-                      }
-                    />
-                  </TouchableOpacity>
-                )}
-              </Row>
-            )}
-
-            <Column alignItems="center" gap={spacing.L}>
-              {!!sizedIcon && (
-                <View
-                  testID={
-                    testIdPrefix
-                      ? `${testIdPrefix}-sized-icon`
-                      : 'modal-sized-icon'
-                  }>
-                  {sizedIcon}
-                </View>
-              )}
-              {!!heading && (
-                <Text.L
-                  align="center"
-                  testID={
-                    testIdPrefix ? `${testIdPrefix}-heading` : 'modal-heading'
-                  }>
-                  {heading}
-                </Text.L>
-              )}
-              {typeof description === 'string' ? (
-                <Text.M align="center" testID={descriptionTestId}>
-                  {description}
-                </Text.M>
-              ) : React.isValidElement(description) ? (
-                <Text.M align="center" testID={descriptionTestId}>
-                  {description}
-                </Text.M>
-              ) : (
-                <View testID={descriptionTestId}>{description}</View>
-              )}
-            </Column>
-
-            {!!onConfirm && (
-              <Row gap={spacing.S} style={styles.footer}>
-                {!!onCancel && (
-                  <Button.Secondary
-                    flex={1}
-                    label={cancelText}
-                    onPress={onCancel}
+                gap={spacing.XS}
+                style={styles.titleContainer}>
+                {!!titleIcon && (
+                  <Icon
+                    name={titleIcon}
+                    size={16}
                     testID={
                       testIdPrefix
-                        ? `${testIdPrefix}-cancel-button`
-                        : 'modal-cancel-button'
+                        ? `${testIdPrefix}-title-icon`
+                        : 'modal-title-icon'
                     }
                   />
                 )}
-                <Button.Primary
+                {!!title && (
+                  <Text.M
+                    align="center"
+                    testID={
+                      testIdPrefix
+                        ? `${testIdPrefix}-title-text`
+                        : 'modal-title-text'
+                    }>
+                    {title}
+                  </Text.M>
+                )}
+              </Row>
+              {!!onClose && (
+                <TouchableOpacity onPress={onClose}>
+                  <Icon
+                    name="Cancel"
+                    testID={
+                      testIdPrefix
+                        ? `${testIdPrefix}-close-button`
+                        : 'modal-close-button'
+                    }
+                  />
+                </TouchableOpacity>
+              )}
+            </Row>
+          )}
+
+          <Column alignItems="center" gap={spacing.L}>
+            {!!sizedIcon && (
+              <View
+                testID={
+                  testIdPrefix
+                    ? `${testIdPrefix}-sized-icon`
+                    : 'modal-sized-icon'
+                }>
+                {sizedIcon}
+              </View>
+            )}
+            {!!heading && (
+              <Text.L
+                align="center"
+                testID={
+                  testIdPrefix ? `${testIdPrefix}-heading` : 'modal-heading'
+                }>
+                {heading}
+              </Text.L>
+            )}
+            {typeof description === 'string' ? (
+              <Text.M align="center" testID={descriptionTestId}>
+                {description}
+              </Text.M>
+            ) : React.isValidElement(description) ? (
+              <Text.M align="center" testID={descriptionTestId}>
+                {description}
+              </Text.M>
+            ) : (
+              <View testID={descriptionTestId}>{description}</View>
+            )}
+          </Column>
+
+          {!!onConfirm && (
+            <Row gap={spacing.S} style={styles.footer}>
+              {!!onCancel && (
+                <Button.Secondary
                   flex={1}
-                  label={confirmText}
-                  onPress={onConfirm}
+                  label={cancelText}
+                  onPress={onCancel}
                   testID={
                     testIdPrefix
-                      ? `${testIdPrefix}-confirm-button`
-                      : 'modal-confirm-button'
+                      ? `${testIdPrefix}-cancel-button`
+                      : 'modal-cancel-button'
                   }
                 />
-              </Row>
-            )}
-          </View>
+              )}
+              <Button.Primary
+                flex={1}
+                label={confirmText}
+                onPress={onConfirm}
+                testID={
+                  testIdPrefix
+                    ? `${testIdPrefix}-confirm-button`
+                    : 'modal-confirm-button'
+                }
+              />
+            </Row>
+          )}
         </View>
-      </RNModal>
-    </View>
+      </View>
+    </SheetSafeOverlay>
   );
 };
 
@@ -186,14 +193,12 @@ const getModalMaxWidth = (layoutSize: LayoutSize) => {
   return '33%';
 };
 
-const getStyles = (theme: Theme, layoutSize: LayoutSize) => {
-  const overlayColor = getOverlayColor(theme);
-  return StyleSheet.create({
+const getStyles = (theme: Theme, layoutSize: LayoutSize) =>
+  StyleSheet.create({
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...backdropStyle,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: overlayColor,
     },
     modal: {
       maxWidth: getModalMaxWidth(layoutSize),
@@ -201,9 +206,9 @@ const getStyles = (theme: Theme, layoutSize: LayoutSize) => {
       borderRadius: radius.M,
       position: 'relative',
       alignItems: 'center',
-      overflow: 'hidden',
       backgroundColor: theme.background.page,
       gap: spacing.M,
+      ...getShadowStyle({ theme, variant: 'overlay' }),
     },
     windowTitle: {
       width: '100%',
@@ -217,4 +222,3 @@ const getStyles = (theme: Theme, layoutSize: LayoutSize) => {
       width: '100%',
     },
   });
-};

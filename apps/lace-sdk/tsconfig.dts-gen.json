@@ -13,10 +13,20 @@
   "include": [
     "src/**/*",
     "../../packages/contract/*/src/**/*",
-    "../../packages/lib/*/src/**/*",
+    "../../packages/lib/crypto/src/**/*",
+    "../../packages/lib/observability/src/**/*",
+    "../../packages/lib/util-hw/src/**/*",
+    "../../packages/lib/util-provider/src/**/*",
+    "../../packages/lib/util-redacted/src/**/*",
+    "../../packages/lib/util-render/src/**/*",
+    "../../packages/lib/util-store/src/**/*",
     "../../packages/sdk/*/src/**/*",
-    "../../packages/module/*/src/sdk.ts",
-    "../../packages/module/*/src/augmentations.ts"
+    "../../packages/module/blockchain-cardano/src/sdk.ts",
+    "../../packages/module/cardano-provider-blockfrost/src/sdk.ts",
+    "../../packages/module/crypto-cardano-sdk/src/sdk.ts",
+    "../../packages/module/feature-dev/src/sdk.ts",
+    "../../packages/module/storage-in-memory/src/sdk.ts",
+    "../../packages/module/swap-provider-steelswap/src/sdk.ts"
   ],
   "exclude": [
     "**/*.test.*",

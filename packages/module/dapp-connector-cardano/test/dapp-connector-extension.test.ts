@@ -90,8 +90,6 @@ describe('dapp-connector-extension', () => {
       })),
     });
 
-    const unlockedState$ = of(true);
-
     it('should not throw for authorized origin', async () => {
       const authorizedOrigin = 'https://authorized-dapp.com';
       const sender: Runtime.MessageSender = {
@@ -100,7 +98,7 @@ describe('dapp-connector-extension', () => {
       const authorizedDapps$ = of(createAuthorizedDapps([authorizedOrigin]));
 
       await expect(
-        handleRequestValidation(sender, authorizedDapps$, unlockedState$),
+        handleRequestValidation(sender, authorizedDapps$),
       ).resolves.toBeUndefined();
     });
 
@@ -114,7 +112,7 @@ describe('dapp-connector-extension', () => {
       );
 
       await expect(
-        handleRequestValidation(sender, authorizedDapps$, unlockedState$),
+        handleRequestValidation(sender, authorizedDapps$),
       ).rejects.toMatchObject({
         code: APIErrorCode.Refused,
         info: expect.stringContaining('Unauthorized request origin') as string,
@@ -125,7 +123,7 @@ describe('dapp-connector-extension', () => {
       const authorizedDapps$ = of(createAuthorizedDapps([]));
 
       await expect(
-        handleRequestValidation(undefined, authorizedDapps$, unlockedState$),
+        handleRequestValidation(undefined, authorizedDapps$),
       ).rejects.toMatchObject({
         code: APIErrorCode.Refused,
       });
@@ -140,7 +138,7 @@ describe('dapp-connector-extension', () => {
       } as AuthorizedDappsDataSlice);
 
       await expect(
-        handleRequestValidation(sender, authorizedDapps$, unlockedState$),
+        handleRequestValidation(sender, authorizedDapps$),
       ).rejects.toMatchObject({
         code: APIErrorCode.Refused,
       });
@@ -158,36 +156,7 @@ describe('dapp-connector-extension', () => {
       const authorizedDapps$ = of(createAuthorizedDapps(origins));
 
       await expect(
-        handleRequestValidation(sender, authorizedDapps$, unlockedState$),
-      ).resolves.toBeUndefined();
-    });
-
-    it('should throw APIError when app is locked', async () => {
-      const authorizedOrigin = 'https://authorized-dapp.com';
-      const sender: Runtime.MessageSender = {
-        url: authorizedOrigin,
-      };
-      const authorizedDapps$ = of(createAuthorizedDapps([authorizedOrigin]));
-      const isUnlocked$ = of(false);
-
-      await expect(
-        handleRequestValidation(sender, authorizedDapps$, isUnlocked$),
-      ).rejects.toMatchObject({
-        code: APIErrorCode.Refused,
-        info: expect.stringContaining('Wallet is locked') as string,
-      });
-    });
-
-    it('should not throw when app is unlocked', async () => {
-      const authorizedOrigin = 'https://authorized-dapp.com';
-      const sender: Runtime.MessageSender = {
-        url: authorizedOrigin,
-      };
-      const authorizedDapps$ = of(createAuthorizedDapps([authorizedOrigin]));
-      const isUnlocked$ = of(true);
-
-      await expect(
-        handleRequestValidation(sender, authorizedDapps$, isUnlocked$),
+        handleRequestValidation(sender, authorizedDapps$),
       ).resolves.toBeUndefined();
     });
   });
@@ -223,7 +192,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       const subscription = observable.subscribe();
@@ -263,7 +231,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       const subscription = observable.subscribe();
@@ -310,7 +277,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       observable.subscribe();
@@ -363,7 +329,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       observable.subscribe();
@@ -405,7 +370,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       observable.subscribe();
@@ -448,7 +412,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       observable.subscribe();
@@ -533,7 +496,6 @@ describe('dapp-connector-extension', () => {
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
-        isUnlocked$: of(true),
       });
 
       observable.subscribe();

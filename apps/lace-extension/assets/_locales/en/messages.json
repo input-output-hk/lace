@@ -1,0 +1,10 @@
+{
+  "appName": {
+    "message": "Lace",
+    "description": "Extension name displayed in the browser and store listings"
+  },
+  "appDesc": {
+    "message": "One fast, accessible, and secure platform for digital assets, DApps, NFTs, and DeFi.",
+    "description": "Extension description shown in the browser extension management UI (max 132 chars)"
+  }
+}

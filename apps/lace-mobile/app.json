@@ -5,7 +5,7 @@
     "owner": "lace_io",
     "entryPoint": "index.js",
     "newArchEnabled": true,
-    "version": "2.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/Lace-ios-icon.png",
     "platforms": ["ios", "android", "web"],
@@ -27,6 +27,10 @@
           {
             "CFBundleURLName": "cardano-deeplinks",
             "CFBundleURLSchemes": ["cardano", "web+cardano"]
+          },
+          {
+            "CFBundleURLName": "lace-deeplinks",
+            "CFBundleURLSchemes": ["lace"]
           }
         ]
       },
@@ -52,6 +56,16 @@
             },
             {
               "scheme": "web+cardano"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "autoVerify": false,
+          "data": [
+            {
+              "scheme": "lace"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
@@ -124,6 +138,14 @@
             "image": "./assets/Lace-android-adaptive-icon.png",
             "backgroundColor": "#1E1E1E"
           }
+        }
+      ],
+      [
+        "react-native-ble-plx",
+        {
+          "isBackgroundEnabled": false,
+          "modes": ["central"],
+          "bluetoothAlwaysPermission": "Allow $(PRODUCT_NAME) to discover and connect to Ledger hardware wallets over Bluetooth."
         }
       ]
     ],

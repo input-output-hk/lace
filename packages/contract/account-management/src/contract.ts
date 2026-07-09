@@ -13,7 +13,10 @@ import {
 import { networkStoreContract } from '@lace-contract/network';
 import { hwWalletConnectorAddonContract } from '@lace-contract/onboarding-v2';
 import { viewsStoreContract } from '@lace-contract/views';
-import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
+import {
+  walletIdentityAddonContract,
+  walletRepoStoreContract,
+} from '@lace-contract/wallet-repo';
 
 import store from './store';
 
@@ -53,6 +56,7 @@ export const accountManagementStoreContract = inferContractContext({
     hwWalletConnectorAddonContract,
     viewsStoreContract,
     networkStoreContract,
+    walletIdentityAddonContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),

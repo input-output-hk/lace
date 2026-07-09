@@ -7,7 +7,7 @@ export interface ShadowToken {
   dropShadowBlur: number;
 }
 
-export type ShadowVariants = 'elevated' | 'inset';
+export type ShadowVariants = 'card' | 'elevated' | 'inset' | 'overlay';
 
 const shadow: ShadowToken = {
   innerShadowBlur: 16,
@@ -18,6 +18,8 @@ const getBoxShadow = ({ theme }: { theme: Theme }) => {
   return {
     elevated: `0px 0px ${shadow.innerShadowBlur}px 0px ${theme.extra.shadowInner}, 0px 0px ${shadow.dropShadowBlur}px 0px ${theme.extra.shadowDrop}`,
     inset: `inset 0px 0px ${shadow.innerShadowBlur}px 0px ${theme.extra.shadowInnerStrong}, 0px 0px ${shadow.dropShadowBlur}px 0px ${theme.extra.shadowDrop}`,
+    overlay: `0px 0px ${shadow.dropShadowBlur}px 0px ${theme.extra.shadowDrop}`,
+    card: `0px 2px 14px 0px ${theme.extra.shadowDrop}`,
   };
 };
 
@@ -30,9 +32,22 @@ export const getShadowStyle = ({
 }) => {
   if (Platform.OS === 'web') {
     const boxShadow = getBoxShadow({ theme })[variant];
+    if (variant === 'card') {
+      return { boxShadow };
+    }
     return {
       boxShadow,
       backdropFilter: 'blur(20px)',
+    };
+  }
+
+  if (variant === 'card') {
+    return {
+      shadowColor: theme.extra.shadowDrop,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 10,
+      elevation: 2,
     };
   }
 

@@ -52,8 +52,12 @@ export const useNotificationCenter = ({
   };
 
   const handleSubscriptionChange = (key: string) => {
-    trackEvent('notification | subscription | press');
-    if (subscriptionTopics.find(t => t.id === key)?.subscribed) {
+    const isSubscribed = subscriptionTopics.find(t => t.id === key)?.subscribed;
+    trackEvent('notification | subscription | press', {
+      topicId: key,
+      action: isSubscribed ? 'unsubscribe' : 'subscribe',
+    });
+    if (isSubscribed) {
       unsubscribeFromTopic({ topicId: key });
     } else {
       subscribeToTopic({ topicId: key });
@@ -68,7 +72,14 @@ export const useNotificationCenter = ({
 
   const onNotificationPress = useCallback(
     (id: string) => {
-      trackEvent('notification | notification | press');
+      const notification = notificationsBySubscribedTopics.find(
+        n => n.message.id === id,
+      );
+      trackEvent('notification | notification | press', {
+        notificationId: id,
+        wasUnread: !(notification?.read ?? true),
+        ...(notification ? { topicId: notification.message.topicId } : {}),
+      });
       handleMarkNotificationAsRead(id);
       navigation.navigate(StackRoutes.NotificationDetails, {
         notificationId: id,

@@ -7,6 +7,7 @@ import { createContextualUseLoadModules } from '@lace-lib/util-render';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { useReportOnlineStatus } from './useReportOnlineStatus';
 import { useLaceSelector } from './util/hooks';
 
 import type {
@@ -30,6 +31,7 @@ type UseHomeProps = {
     expandableRoutes: TabButtonProps[];
   };
   laceButtonBadge: LaceButtonBadgeProps | undefined;
+  isOffline: boolean;
 };
 
 type SortableTabButtonProps = TabButtonProps & { sortKey: string };
@@ -64,6 +66,9 @@ export const useHomeProps = (): UseHomeProps => {
       flag => flag.key === FeatureFlagKey('NOTIFICATION_CENTER'),
     ) ?? false;
   const networkType = useLaceSelector('network.selectNetworkType');
+
+  useReportOnlineStatus();
+  const isOffline = useLaceSelector('onlineStatus.selectIsOffline');
 
   const handleMenuItemAction = useCallback(
     (
@@ -243,5 +248,6 @@ export const useHomeProps = (): UseHomeProps => {
     networkName: networkType,
     buildTabRoutes,
     laceButtonBadge,
+    isOffline,
   };
 };

@@ -9,8 +9,13 @@
     "@lace-contract/analytics": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
     "@lace-contract/posthog": "*",
+    "@lace-contract/token-pricing": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
     "@lace-lib/util-redacted": "*",
+    "@lace-lib/util-store": "*",
     "@lace-sdk/util": "*"
   },
   "devDependencies": {

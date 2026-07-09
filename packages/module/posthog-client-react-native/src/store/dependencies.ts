@@ -1,4 +1,6 @@
+import { nativeApplicationVersion } from 'expo-application';
 import PostHog from 'posthog-react-native';
+import { Platform } from 'react-native';
 
 import type { LaceInitSync } from '@lace-contract/module';
 import type {
@@ -31,13 +33,17 @@ export const initializeSideEffectDependencies: LaceInitSync<
         featureFlagPayloads: payloads,
       };
     },
-    identify: distinctId => {
-      posthog.identify(distinctId);
+    identify: (distinctId, properties) => {
+      posthog.identify(distinctId, properties);
     },
   };
 
   return {
     posthog: posthogClient,
-    getDefaultPostHogEventProperties: () => ({}),
+    getDefaultPostHogEventProperties: () => ({
+      platform: Platform.OS,
+      osVersion: String(Platform.Version),
+      appVersion: nativeApplicationVersion ?? 'unknown',
+    }),
   };
 };

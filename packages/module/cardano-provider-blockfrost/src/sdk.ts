@@ -33,3 +33,23 @@ export default inferModuleContext({
   },
   addons: {},
 });
+
+// Headless provider classes for non-Lace consumers (e.g. a Node backend).
+// Tree-shakes the Redux module above when imported as named exports.
+export {
+  BlockfrostProvider,
+  BlockfrostActivityProvider,
+  BlockfrostNetworkInfoProvider,
+  BlockfrostTxProvider,
+  BlockfrostTxSubmitProvider,
+  BlockfrostUtxoProvider,
+} from './blockfrost';
+export { BlockfrostToCardanoSDK } from './blockfrost/blockfrost-to-cardano-sdk';
+
+export {
+  createBlockfrostHttpClient,
+  type CreateBlockfrostHttpClientProps,
+} from './create-blockfrost-http-client';
+
+export { HttpClient, isNotFoundError } from '@lace-lib/util-provider';
+export type { RateLimiter } from '@lace-lib/util-provider';

@@ -22,9 +22,9 @@ export const EmptyStateMessage = ({
     gap={spacing.M}
     style={style}
     testID={testID}>
-    <Icon name="Sad" size={48} variant="solid" />
-    <Text.M variant="secondary" align="center">
+    <Icon name="Sad" size={45} />
+    <Text.L variant="secondary" align="center">
       {message}
-    </Text.M>
+    </Text.L>
   </Column>
 );

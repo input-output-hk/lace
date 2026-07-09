@@ -100,13 +100,23 @@ export interface ResponseReady {
   response: Cip30Response;
 }
 
+/** Authorize without prompting (single account + dapp already persisted). */
+export interface SilentAuthorization {
+  type: 'silent_authorization';
+  requestId: string;
+  dappOrigin: string;
+  dappName: string;
+  account: AnyAccount;
+}
+
 /**
  * Union type representing all possible results from handling a CIP-30 message.
  */
 export type Cip30MessageResult =
   | AuthorizationRequired
   | ResponseReady
-  | SigningRequired;
+  | SigningRequired
+  | SilentAuthorization;
 
 /**
  * Dependencies required by the CIP-30 message handler.
@@ -233,17 +243,60 @@ export const handleCip30Message = async (
     }
   };
 
+  // Account to silently authorize for a persisted dapp: the one chosen for this
+  // origin this session, else the sole account (1 wallet, 1 Cardano account).
+  // null when the user must still pick.
+  const resolveAutoAuthorizeAccount = async (): Promise<AnyAccount | null> => {
+    const authorizedDapps = await firstValueFrom(deps.authorizedDapps$);
+    const isPersisted = (authorizedDapps.Cardano ?? []).some(
+      d => d.dapp.origin === dappOrigin,
+    );
+    if (!isPersisted) return null;
+
+    const cardanoAccounts = (await firstValueFrom(deps.allAccounts$)).filter(
+      a => a.blockchainName === 'Cardano',
+    );
+
+    // Reuse the account chosen for this dapp this session.
+    const sessionAccountId = deps.getAccountIdForOrigin(dappOrigin);
+    if (sessionAccountId) {
+      const sessionAccount = cardanoAccounts.find(
+        a => a.accountId === sessionAccountId,
+      );
+      if (sessionAccount) return sessionAccount;
+    }
+
+    // Otherwise only when there's nothing to pick.
+    const allWallets = await firstValueFrom(deps.allWallets$);
+    if (allWallets.length !== 1) return null;
+    return cardanoAccounts.length === 1 ? cardanoAccounts[0] : null;
+  };
+
   try {
     if (type === 'isEnabled') {
-      // Session authorization means the origin→account mapping is set up and ready.
-      const isSessionReady = deps.isSessionAuthorized(dappOrigin);
-      return createResponse({ id, success: true, result: isSessionReady });
+      if (deps.isSessionAuthorized(dappOrigin)) {
+        return createResponse({ id, success: true, result: true });
+      }
+      const autoAccount = await resolveAutoAuthorizeAccount();
+      return createResponse({
+        id,
+        success: true,
+        result: autoAccount !== null,
+      });
     }
 
     if (type === 'enable') {
-      // Skip the auth sheet if the session is already established.
-      if (deps.isSessionAuthorized(dappOrigin)) {
-        return createResponse({ id, success: true, result: true });
+      // Always re-evaluate via resolveAutoAuthorizeAccount; silent re-auth
+      // only when persisted + 1 wallet + 1 Cardano account.
+      const autoAccount = await resolveAutoAuthorizeAccount();
+      if (autoAccount) {
+        return {
+          type: 'silent_authorization',
+          requestId: id,
+          dappOrigin,
+          dappName: getDappName(dappOrigin),
+          account: autoAccount,
+        };
       }
 
       return {

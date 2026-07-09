@@ -11,6 +11,7 @@ import {
   Row,
   radius,
   useTheme,
+  getShadowStyle,
 } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -148,6 +149,7 @@ const getStyles = (theme: Theme) =>
       backgroundColor: theme.background.page,
       borderRadius: radius.XL,
       padding: spacing.XL,
+      ...getShadowStyle({ theme, variant: 'overlay' }),
     },
     buttonContainer: {
       flex: 1,

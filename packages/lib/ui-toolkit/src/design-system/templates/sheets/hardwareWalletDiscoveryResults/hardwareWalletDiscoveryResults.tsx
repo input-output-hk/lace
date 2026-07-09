@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
 
-import { spacing } from '../../../../design-tokens';
-import { Text, Icon } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { spacing, useTheme } from '../../../../design-tokens';
+import { Text, Icon, Loader } from '../../../atoms';
+import { footerHeight, Sheet } from '../../../organisms';
 
+import type { Theme } from '../../../../design-tokens/theme/types';
 import type { IconName } from '../../../atoms/icons/Icon';
 
 interface HardwareWalletDevice {
@@ -15,37 +15,38 @@ interface HardwareWalletDevice {
 }
 
 interface HardwareWalletDiscoveryResultsProps {
-  title: string;
   devices: HardwareWalletDevice[];
   onDeviceSelect: (device: HardwareWalletDevice) => void;
-  onClose?: () => void;
-  closeButtonLabel?: string;
+  statusText: string;
+  instructionText: string;
+  detailText: string;
+  linkText: string;
+  onCancel?: () => void;
   testID?: string;
-  closeButtonTestID?: string;
 }
 
 export const HardwareWalletDiscoveryResults = ({
-  title,
   devices,
   onDeviceSelect,
-  onClose,
-  closeButtonLabel = 'Close',
+  statusText,
+  instructionText,
+  detailText,
+  linkText,
+  onCancel,
   testID = 'hardware-wallet-discovery-results-sheet',
-  closeButtonTestID = 'hardware-wallet-discovery-results-close-button',
 }: HardwareWalletDiscoveryResultsProps) => {
-  const footerHeight = useFooterHeight();
+  const { theme } = useTheme();
   const styles = useMemo(
-    () => getStyles(onClose ? footerHeight : 0),
-    [onClose, footerHeight],
+    () => getStyles(theme, onCancel ? footerHeight.horizontal : 0),
+    [theme, onCancel, footerHeight],
   );
 
   return (
-    <>
-      <SheetHeader title={title} />
-      <Sheet.Scroll
-        testID={testID}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.content}>
+    <Sheet.Scroll
+      testID={testID}
+      contentContainerStyle={styles.contentContainer}>
+      <View style={styles.content}>
+        {devices.length > 0 && (
           <View style={styles.deviceList}>
             {devices.map(device => (
               <Pressable
@@ -63,22 +64,24 @@ export const HardwareWalletDiscoveryResults = ({
               </Pressable>
             ))}
           </View>
+        )}
+        <View style={styles.searchingSection}>
+          <Loader size={48} color={theme.text.primary} />
+          <Text.M style={styles.statusText}>{statusText}</Text.M>
+          <View style={styles.instructionContainer}>
+            <Icon name="InformationCircle" size={16} />
+            <Text.S style={styles.instructionText}>{instructionText}</Text.S>
+          </View>
+          <Text.S style={styles.detailText}>
+            {detailText} <Text.S style={styles.linkText}>{linkText}</Text.S>
+          </Text.S>
         </View>
-      </Sheet.Scroll>
-      {onClose && (
-        <SheetFooter
-          secondaryButton={{
-            label: closeButtonLabel,
-            onPress: onClose,
-            testID: closeButtonTestID,
-          }}
-        />
-      )}
-    </>
+      </View>
+    </Sheet.Scroll>
   );
 };
 
-const getStyles = (paddingBottom: number) =>
+const getStyles = (theme: Theme, paddingBottom: number) =>
   StyleSheet.create({
     contentContainer: {
       paddingBottom,
@@ -103,5 +106,28 @@ const getStyles = (paddingBottom: number) =>
     },
     deviceName: {
       flex: 1,
+    },
+    searchingSection: {
+      alignItems: 'center',
+      gap: spacing.M,
+      paddingTop: spacing.L,
+    },
+    statusText: {
+      textAlign: 'center',
+    },
+    instructionContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.XS,
+    },
+    instructionText: {
+      textAlign: 'center',
+    },
+    detailText: {
+      textAlign: 'center',
+      paddingHorizontal: spacing.M,
+    },
+    linkText: {
+      color: theme.brand.ascending,
     },
   });

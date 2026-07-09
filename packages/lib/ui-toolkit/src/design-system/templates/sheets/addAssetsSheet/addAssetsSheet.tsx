@@ -5,14 +5,7 @@ import { NftItemsList } from '../..';
 import { spacing } from '../../../../design-tokens';
 import { isShieldedFromMetadata } from '../../../../utils/sendSheetUtils';
 import { Column, CustomTag, Icon, Row, Text } from '../../../atoms';
-import {
-  EmptyStateMessage,
-  SheetFooter,
-  SheetHeader,
-  Tabs,
-  TokenItem,
-  useFooterHeight,
-} from '../../../molecules';
+import { EmptyStateMessage, Tabs, TokenItem } from '../../../molecules';
 import { GenericFlashList, Sheet } from '../../../organisms';
 import { getAssetImageUrl } from '../../../util';
 
@@ -89,8 +82,6 @@ export const AddAssetsTemplate = ({
     onAssetsSelectionChanged,
     setSelectedAssetView,
     onToggleNftSelection,
-    onConfirm,
-    onClose,
   } = actions;
   const {
     selectedAssetView,
@@ -109,21 +100,10 @@ export const AddAssetsTemplate = ({
     nftsLabel,
     totalBalanceWarning,
     emptyStateMessage,
-    cancelLabel,
-    confirmLabel,
     restrictionMessages,
   } = labels;
-  const footerHeight = useFooterHeight();
-  const styles = useMemo(() => getStyles(footerHeight), [footerHeight]);
+  const styles = useMemo(() => getStyles(), []);
   const isToken = selectedAssetView === SelectedAssetView.Assets;
-  const hasSelectedTokens = selectedTokens.length > 0;
-  const hasSelectedNfts = useMemo(() => {
-    return selectedNfts
-      ? Object.values(selectedNfts).some(selected => selected)
-      : false;
-  }, [selectedNfts]);
-  const isConfirmDisabled = !hasSelectedTokens && !hasSelectedNfts;
-
   const renderTokenItem = useCallback(
     ({ item, index }: { item: TokenUIData; index: number }) => {
       if (isLoading) {
@@ -185,106 +165,84 @@ export const AddAssetsTemplate = ({
   );
 
   return (
-    <>
-      <SheetHeader title={headerTitle} testID="add-assets-sheet-header" />
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={availableTokens.length !== 0}
-        contentContainerStyle={styles.scrollContainer}>
-        <Column style={styles.container}>
-          <Row justifyContent="center">
-            <Text.M variant="secondary" testID="add-assets-count">
-              {assetsCount}
-            </Text.M>
-            <Text.M testID="add-assets-label">
-              {headerTitle} {selectedLabel}
-            </Text.M>
-          </Row>
-          {shouldShowNfts && (
-            <Tabs
-              tabs={[
-                {
-                  label: tokensLabel,
-                  value: 0,
-                  testID: 'add-assets-tokens-tab',
-                },
-                { label: nftsLabel, value: 1, testID: 'add-assets-nfts-tab' },
-              ]}
-              value={isToken ? 0 : 1}
-              onChange={value => {
-                setSelectedAssetView(value as SelectedAssetView);
-              }}
+    <Sheet.Scroll
+      showsVerticalScrollIndicator={false}
+      scrollEnabled={availableTokens.length !== 0}>
+      <Column style={styles.container}>
+        <Row justifyContent="center">
+          <Text.M variant="secondary" testID="add-assets-count">
+            {assetsCount}
+          </Text.M>
+          <Text.M testID="add-assets-label">
+            {headerTitle} {selectedLabel}
+          </Text.M>
+        </Row>
+        {shouldShowNfts && (
+          <Tabs
+            tabs={[
+              {
+                label: tokensLabel,
+                value: 0,
+                testID: 'add-assets-tokens-tab',
+              },
+              { label: nftsLabel, value: 1, testID: 'add-assets-nfts-tab' },
+            ]}
+            value={isToken ? 0 : 1}
+            onChange={value => {
+              setSelectedAssetView(value as SelectedAssetView);
+            }}
+          />
+        )}
+        {restrictionMessages?.map((message, index) => (
+          <CustomTag
+            key={`restriction-${index}`}
+            color="primary"
+            backgroundType="semiTransparent"
+            icon={<Icon name="InformationCircle" size={16} />}
+            label={message}
+            isAlignStart
+          />
+        ))}
+        <Column style={styles.bottomGap}>
+          {isToken ? (
+            <Column gap={spacing.S}>
+              {isLoading ? (
+                <View style={styles.loaderContainer} testID="add-assets-loader">
+                  <ActivityIndicator size="small" color={loaderColor} />
+                </View>
+              ) : (
+                <GenericFlashList
+                  contentContainerStyle={styles.tokensList}
+                  data={availableTokens.filter(t => !isNft(t))}
+                  renderItem={renderTokenItem}
+                  keyExtractor={keyExtractor}
+                  ListEmptyComponent={EmptyStateComponent}
+                />
+              )}
+            </Column>
+          ) : (
+            <NftItemsList
+              nfts={availableTokens.filter(isNft)}
+              onToggleNftSelection={onToggleNftSelection}
+              numberOfColumns={numberOfColumns}
+              listEmptyComponent={EmptyStateComponent}
             />
           )}
-          {restrictionMessages?.map((message, index) => (
-            <CustomTag
-              key={`restriction-${index}`}
-              color="primary"
-              backgroundType="semiTransparent"
-              icon={<Icon name="InformationCircle" size={16} />}
-              label={message}
-              isAlignStart
-            />
-          ))}
-          <Column style={styles.bottomGap}>
-            {isToken ? (
-              <Column gap={spacing.S}>
-                {isLoading ? (
-                  <View
-                    style={styles.loaderContainer}
-                    testID="add-assets-loader">
-                    <ActivityIndicator size="small" color={loaderColor} />
-                  </View>
-                ) : (
-                  <GenericFlashList
-                    contentContainerStyle={styles.tokensList}
-                    data={availableTokens.filter(t => !isNft(t))}
-                    renderItem={renderTokenItem}
-                    keyExtractor={keyExtractor}
-                    ListEmptyComponent={EmptyStateComponent}
-                  />
-                )}
-              </Column>
-            ) : (
-              <NftItemsList
-                nfts={availableTokens.filter(isNft)}
-                onToggleNftSelection={onToggleNftSelection}
-                numberOfColumns={numberOfColumns}
-                listEmptyComponent={EmptyStateComponent}
-              />
-            )}
 
-            {!!totalBalanceWarning && (
-              <CustomTag
-                icon={<Icon name="InformationCircle" size={16} />}
-                label={totalBalanceWarning}
-              />
-            )}
-          </Column>
+          {!!totalBalanceWarning && (
+            <CustomTag
+              icon={<Icon name="InformationCircle" size={16} />}
+              label={totalBalanceWarning}
+            />
+          )}
         </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        secondaryButton={{
-          label: cancelLabel,
-          onPress: onClose,
-          testID: 'add-assets-cancel-button',
-        }}
-        primaryButton={{
-          label: confirmLabel,
-          onPress: onConfirm,
-          disabled: isConfirmDisabled,
-          testID: 'add-assets-confirm-button',
-        }}
-      />
-    </>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
-const getStyles = (footerHeight: number) =>
+const getStyles = () =>
   StyleSheet.create({
-    scrollContainer: {
-      paddingBottom: footerHeight,
-    },
     container: {
       gap: spacing.L,
       paddingBottom: spacing.M,

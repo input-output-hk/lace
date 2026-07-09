@@ -1,11 +1,12 @@
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
-import { LedgerKeyAgent } from '@cardano-sdk/hardware-ledger';
-import { CommunicationType, KeyPurpose } from '@cardano-sdk/key-management';
 import { HexBlob } from '@cardano-sdk/util';
 import { HexBytes } from '@lace-sdk/util';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 
+import { resolveLedgerDeviceDescriptor } from './resolve-device-descriptor';
+
+import type { CardanoLedgerSignerFactoryDependencies } from './cardano-ledger-signer-factory';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
@@ -14,6 +15,7 @@ import type {
   CardanoSignDataRequest,
   CardanoSignDataResult,
 } from '@lace-contract/cardano-context';
+import type { HardwareWalletLedger } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
 export interface CardanoLedgerDataSignerProps {
@@ -21,13 +23,19 @@ export interface CardanoLedgerDataSignerProps {
   chainId: Cardano.ChainId;
   extendedAccountPublicKey: Bip32PublicKeyHex;
   knownAddresses: GroupedAddress[];
+  wallet: HardwareWalletLedger;
 }
 
 export class CardanoLedgerDataSigner implements CardanoDataSigner {
   readonly #props: CardanoLedgerDataSignerProps;
+  readonly #dependencies: CardanoLedgerSignerFactoryDependencies;
 
-  public constructor(props: CardanoLedgerDataSignerProps) {
+  public constructor(
+    props: CardanoLedgerDataSignerProps,
+    dependencies: CardanoLedgerSignerFactoryDependencies,
+  ) {
     this.#props = props;
+    this.#dependencies = dependencies;
   }
 
   public signData(
@@ -40,17 +48,16 @@ export class CardanoLedgerDataSigner implements CardanoDataSigner {
     request: CardanoSignDataRequest,
   ): Promise<CardanoSignDataResult> {
     const bip32Ed25519 = await SodiumBip32Ed25519.create();
-    const deviceConnection = await LedgerKeyAgent.establishDeviceConnection(
-      CommunicationType.Web,
+    const descriptor = await resolveLedgerDeviceDescriptor(
+      this.#props.wallet.walletId,
+      this.#dependencies.resolveLegacyDevice,
     );
-    const keyAgent = new LedgerKeyAgent(
+    const keyAgent = await this.#dependencies.transport.createKeyAgent(
       {
+        descriptor,
         accountIndex: this.#props.accountIndex,
         chainId: this.#props.chainId,
-        communicationType: CommunicationType.Web,
-        deviceConnection,
         extendedAccountPublicKey: this.#props.extendedAccountPublicKey,
-        purpose: KeyPurpose.STANDARD,
       },
       { bip32Ed25519, logger: dummyLogger },
     );

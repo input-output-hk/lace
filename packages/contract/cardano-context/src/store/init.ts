@@ -20,6 +20,7 @@ import {
   deleteProtocolParameters,
   deleteStakePoolsData,
   deleteStakePoolsSystem,
+  stubAccountUtxoCacheKeys,
 } from './migrations';
 import { createCardanoProviderSideEffects } from './side-effects';
 import { cardanoContextReducers, initialState } from './slice';
@@ -96,16 +97,20 @@ const store: LaceInit<LaceModuleStoreInit> = ({ runtime: { config } }) => ({
   },
   persistConfig: {
     cardanoContext: {
-      version: 4,
+      version: 5,
       whitelist: [
         'accountTransactionHistory',
         'accountRewardsHistory',
         'networkInfo',
+        'accountUtxos',
+        'securityScanByAccount',
+        'securityRescanDismissedByAccount',
       ],
       migrate: createMigrate({
         2: deleteStakePoolsData,
         3: deleteProtocolParameters,
         4: deleteStakePoolsSystem,
+        5: stubAccountUtxoCacheKeys,
       }),
       transforms: [accountTransactionHistoryTransform],
     },

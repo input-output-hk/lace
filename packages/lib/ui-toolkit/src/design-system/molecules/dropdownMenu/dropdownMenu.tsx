@@ -1,4 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { StyleProp, TextStyle, ViewProps } from 'react-native';
+
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   FlatList,
   InteractionManager,
@@ -6,6 +15,7 @@ import {
   Modal,
   Pressable,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
@@ -25,8 +35,11 @@ import {
   Icon,
   Avatar,
   Row,
+  ContentPortal,
+  ContentPortalHost,
 } from '../../atoms';
 import { Toggle } from '../../atoms/toggle/toggle';
+import { isWeb } from '../../util/commons';
 import { useDropdownPosition } from '../../util/hooks/useDropdownPosition';
 
 import { isDropdownMenuItemSelected } from './dropdownMenu.utils';
@@ -46,6 +59,7 @@ export type DropdownMenuItemToggle = {
 export type DropdownMenuItem = {
   id: string;
   text: string;
+  subText?: string;
   icon?: IconName;
   avatar?: AvatarContent;
   leftIcon?: IconName;
@@ -56,6 +70,7 @@ export type DropdownMenuItem = {
 export type DropdownMenuProps = {
   items: (DropdownMenuItem | string)[];
   title?: string;
+  titleSubText?: string;
   /** The id (for DropdownMenuItem objects) or label/text value (for string items) of the selected item */
   selectedItemId?: string;
   onSelectItem?: (index: number) => void;
@@ -73,7 +88,86 @@ export type DropdownMenuProps = {
    * Defaults to the trigger button width.
    */
   dropdownWidth?: number;
+  /**
+   * When true, single-line tail-ellipsizes both the trigger title and item text
+   * so long strings stay within the fixed-height row instead of wrapping. Off
+   * by default to preserve existing wrapping behavior across consumers.
+   */
+  truncateText?: boolean;
+  /**
+   * Overrides automatic vertical placement when the menu is rendered inside
+   * constrained containers such as native sheets.
+   */
+  shouldOpenUpwards?: boolean;
   testID?: string;
+};
+
+type DropdownMenuViewportContextValue = {
+  boundaryRef: React.RefObject<View | null>;
+  boundaryInsets?: { top?: number; bottom?: number };
+  hostName: string;
+};
+
+type DropdownLayout = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type DropdownPositionResult = {
+  layout: DropdownLayout | null;
+  boundaryLayout: DropdownLayout | null;
+  shouldOpenUpwards: boolean;
+  measure: (
+    ref: View | null,
+    boundaryRef?: React.RefObject<View | null>,
+    boundaryInsets?: { top?: number; bottom?: number },
+  ) => void;
+};
+
+const DropdownMenuViewportContext =
+  createContext<DropdownMenuViewportContextValue | null>(null);
+
+export const DropdownMenuViewportProvider = ({
+  children,
+  value,
+}: {
+  children: React.ReactNode;
+  value: DropdownMenuViewportContextValue;
+}) => (
+  <DropdownMenuViewportContext.Provider value={value}>
+    {children}
+  </DropdownMenuViewportContext.Provider>
+);
+
+export const DropdownMenuViewport = ({
+  children,
+  style,
+  testID,
+  boundaryInsets,
+}: {
+  children: React.ReactNode;
+  style?: ViewProps['style'];
+  testID?: string;
+  boundaryInsets?: DropdownMenuViewportContextValue['boundaryInsets'];
+}) => {
+  const boundaryRef = useRef<View | null>(null);
+  const hostName = useRef(
+    `dropdown-menu-viewport-${Math.random().toString(36).slice(2, 11)}`,
+  ).current;
+
+  return (
+    <DropdownMenuViewportProvider
+      value={{ boundaryRef, boundaryInsets, hostName }}>
+      <View ref={boundaryRef} style={style} testID={testID}>
+        <View style={stylesPortal.hostContainer} pointerEvents="box-none">
+          <ContentPortalHost name={hostName} />
+        </View>
+        {children}
+      </View>
+    </DropdownMenuViewportProvider>
+  );
 };
 
 const MenuItem = React.memo(
@@ -84,6 +178,7 @@ const MenuItem = React.memo(
     onPress,
     isLastItem,
     theme,
+    truncateText,
   }: {
     item: DropdownMenuItem;
     index: number;
@@ -91,6 +186,7 @@ const MenuItem = React.memo(
     onPress: (index: number) => void;
     isLastItem: boolean;
     theme: Theme;
+    truncateText?: boolean;
   }) => {
     const defaultStyles = useMemo(() => styles(theme), [theme]);
     const isSelected = isDropdownMenuItemSelected(item, selectedItemId);
@@ -117,7 +213,9 @@ const MenuItem = React.memo(
           onPress={handlePress}
           disabled={isDisabled}
           accessibilityRole={hasToggle ? 'switch' : 'button'}
-          accessibilityLabel={item.text}
+          accessibilityLabel={
+            item.subText ? `${item.text}, ${item.subText}` : item.text
+          }
           accessibilityState={{
             selected: isSelected,
             disabled: isDisabled,
@@ -141,14 +239,25 @@ const MenuItem = React.memo(
             />
           )}
 
-          <Text.S
-            style={[
-              defaultStyles.text,
-              isDisabled && defaultStyles.disabledText,
-            ]}
-            testID={`dropdown-menu-item-${index}-text`}>
-            {item.text}
-          </Text.S>
+          <Column style={defaultStyles.text}>
+            <Text.S
+              numberOfLines={truncateText ? 1 : undefined}
+              ellipsizeMode={truncateText ? 'tail' : undefined}
+              style={[isDisabled && defaultStyles.disabledText]}
+              testID={`dropdown-menu-item-${index}-text`}>
+              {item.text}
+            </Text.S>
+            {!!item.subText && (
+              <Text.XS
+                variant="secondary"
+                numberOfLines={truncateText ? 1 : undefined}
+                ellipsizeMode={truncateText ? 'tail' : undefined}
+                style={[isDisabled && defaultStyles.disabledText]}
+                testID={`dropdown-menu-item-${index}-subtext`}>
+                {item.subText}
+              </Text.XS>
+            )}
+          </Column>
 
           {hasToggle ? (
             <View pointerEvents="none">
@@ -179,10 +288,57 @@ const MenuItem = React.memo(
   },
 );
 
+const TitleComponent = ({
+  title,
+  titleSubText,
+  numberOfLines,
+  ellipsizeMode,
+  style,
+  testID,
+}: {
+  title?: string;
+  titleSubText?: string;
+  numberOfLines?: number;
+  ellipsizeMode?: 'head' | 'middle' | 'tail';
+  style?: StyleProp<TextStyle>;
+  testID?: string;
+}) => (
+  <Column style={style}>
+    <Text.XS
+      numberOfLines={numberOfLines}
+      ellipsizeMode={ellipsizeMode}
+      testID={`${testID}-title`}>
+      {title}
+    </Text.XS>
+    {!!titleSubText && (
+      <Text.XS
+        variant="secondary"
+        numberOfLines={numberOfLines}
+        ellipsizeMode={ellipsizeMode}
+        testID={`${testID}-subtitle`}>
+        {titleSubText}
+      </Text.XS>
+    )}
+  </Column>
+);
+
+const ActionTextComponent = ({
+  actionText,
+  testID,
+}: {
+  actionText?: string;
+  testID?: string;
+}) => (
+  <Text.XS variant="secondary" testID={testID}>
+    {actionText}
+  </Text.XS>
+);
+
 export const DropdownMenu = React.memo(
   ({
     items,
     title,
+    titleSubText,
     selectedItemId,
     onSelectItem,
     titleAvatar,
@@ -193,13 +349,18 @@ export const DropdownMenu = React.memo(
     maxVisibleItems = MAX_VISIBLE_ITEMS,
     animationDuration = 300,
     dropdownWidth,
+    truncateText,
+    shouldOpenUpwards: shouldOpenUpwardsOverride,
     testID,
   }: DropdownMenuProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const progress = useSharedValue(0);
     const triggerRef = useRef<View | null>(null);
     const isKeyboardVisibleRef = useRef(false);
+    const viewport = useContext(DropdownMenuViewportContext);
     const { theme } = useTheme();
+    const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+    const shouldUseModalPresentation = isWeb;
 
     const defaultStyles = useMemo(() => styles(theme), [theme]);
 
@@ -220,10 +381,21 @@ export const DropdownMenu = React.memo(
       [normalizedItems.length, maxVisibleItems],
     );
 
-    const { layout, shouldOpenUpwards, measure } =
-      useDropdownPosition(maxHeight);
+    const dropdownPosition = useDropdownPosition(
+      maxHeight,
+    ) as DropdownPositionResult;
+    const {
+      layout,
+      boundaryLayout,
+      shouldOpenUpwards: shouldOpenUpwardsAuto,
+      measure,
+    } = dropdownPosition;
+    const shouldOpenUpwards =
+      shouldOpenUpwardsOverride ?? shouldOpenUpwardsAuto;
+    const shouldUseViewportPortal =
+      !isWeb && !!viewport?.hostName && !!boundaryLayout;
 
-    const containerStyle = useMemo(() => {
+    const modalContainerStyle = useMemo(() => {
       if (!layout) return null;
 
       const listWidth = dropdownWidth ?? layout.width;
@@ -244,6 +416,68 @@ export const DropdownMenu = React.memo(
         : { ...base, top: layout.y + layout.height + spacing.XS };
     }, [layout, maxHeight, shouldOpenUpwards, dropdownWidth]);
 
+    const modalBounds = useMemo(() => {
+      if (!layout) return null;
+
+      const listWidth = dropdownWidth ?? layout.width;
+      const left =
+        listWidth > layout.width
+          ? Math.max(0, layout.x + layout.width - listWidth)
+          : layout.x;
+      const top = shouldOpenUpwards
+        ? Math.max(spacing.XS, layout.y - maxHeight - spacing.XS)
+        : layout.y + layout.height + spacing.XS;
+
+      return {
+        left,
+        top,
+        width: listWidth,
+        height: maxHeight,
+      };
+    }, [layout, dropdownWidth, shouldOpenUpwards, maxHeight]);
+
+    const portalBounds = useMemo(() => {
+      if (!modalBounds || !boundaryLayout) return null;
+
+      return {
+        left: modalBounds.left - boundaryLayout.x,
+        top: modalBounds.top - boundaryLayout.y,
+        width: modalBounds.width,
+        height: modalBounds.height,
+      };
+    }, [boundaryLayout, modalBounds]);
+
+    const inlineContainerStyle = useMemo(() => {
+      if (!layout) return null;
+
+      const listWidth = dropdownWidth ?? layout.width;
+      const left = listWidth > layout.width ? layout.width - listWidth : 0;
+      const triggerHeight = layout.height || ITEM_HEIGHT;
+
+      return shouldOpenUpwards
+        ? {
+            left,
+            width: listWidth,
+            bottom: triggerHeight + spacing.XS,
+          }
+        : {
+            left,
+            width: listWidth,
+            top: triggerHeight + spacing.XS,
+          };
+    }, [layout, shouldOpenUpwards, dropdownWidth]);
+
+    const inlineBackdropStyle = useMemo(() => {
+      if (!layout) return null;
+
+      return {
+        left: -layout.x,
+        top: -layout.y,
+        width: windowWidth,
+        height: windowHeight,
+      };
+    }, [layout, windowHeight, windowWidth]);
+
     useEffect(() => {
       const showSub = Keyboard.addListener('keyboardDidShow', () => {
         isKeyboardVisibleRef.current = true;
@@ -259,7 +493,11 @@ export const DropdownMenu = React.memo(
     }, []);
 
     const measureNow = () => {
-      measure(triggerRef.current);
+      measure(
+        triggerRef.current,
+        viewport?.boundaryRef,
+        viewport?.boundaryInsets,
+      );
     };
 
     const doOpen = () => {
@@ -336,19 +574,75 @@ export const DropdownMenu = React.memo(
       };
     }, [maxHeight, shouldOpenUpwards]);
 
-    const animatedContainer = useMemo(() => {
-      return [containerStyle, animatedStyle];
-    }, [containerStyle, animatedStyle]);
+    const modalAnimatedContainer = useMemo(
+      () => [defaultStyles.modalDropdown, modalContainerStyle, animatedStyle],
+      [defaultStyles.modalDropdown, modalContainerStyle, animatedStyle],
+    );
+
+    const portalAnimatedContainer = useMemo(
+      () =>
+        portalBounds
+          ? [
+              defaultStyles.portalDropdown,
+              {
+                left: portalBounds.left,
+                top: portalBounds.top,
+                width: portalBounds.width,
+              },
+              animatedStyle,
+            ]
+          : [defaultStyles.portalDropdown, animatedStyle],
+      [animatedStyle, portalBounds, defaultStyles.portalDropdown],
+    );
+
+    const inlineAnimatedContainer = useMemo(
+      () => [defaultStyles.inlineDropdown, inlineContainerStyle, animatedStyle],
+      [defaultStyles.inlineDropdown, inlineContainerStyle, animatedStyle],
+    );
+
+    const dropdownList = (
+      <BlurView style={defaultStyles.blurView}>
+        <FlatList
+          nestedScrollEnabled={true}
+          testID={testID || 'dropdown-menu'}
+          data={normalizedItems}
+          keyExtractor={item => item.id}
+          renderItem={({ item, index }) => (
+            <MenuItem
+              key={item.id}
+              item={item}
+              index={index}
+              selectedItemId={selectedItemId}
+              onPress={handleSelect}
+              isLastItem={index === normalizedItems.length - 1}
+              theme={theme}
+              truncateText={truncateText}
+            />
+          )}
+          showsVerticalScrollIndicator={
+            normalizedItems.length > maxVisibleItems
+          }
+          contentContainerStyle={defaultStyles.contentContainer}
+        />
+      </BlurView>
+    );
 
     return (
-      <Column style={defaultStyles.dropdownContainer} gap={spacing.S}>
+      <Column
+        style={[
+          defaultStyles.dropdownContainer,
+          isOpen && defaultStyles.dropdownContainerOpen,
+        ]}
+        gap={spacing.S}>
         <Pressable
           ref={triggerRef}
           style={defaultStyles.pressable}
           onPress={toggleMenu}
           accessibilityRole="button"
           accessibilityState={{ expanded: isOpen }}
-          accessibilityLabel={title}
+          accessibilityLabel={
+            titleSubText ? `${title}, ${titleSubText}` : title
+          }
           testID={testID ? `${testID}-button` : 'dropdown-button'}>
           {!!titleAvatar && (
             <Avatar
@@ -361,21 +655,23 @@ export const DropdownMenu = React.memo(
 
           {!!titleLeftIcon && <Icon name={titleLeftIcon} size={16} />}
 
-          <Text.XS
+          <TitleComponent
+            title={title}
+            titleSubText={titleSubText}
+            numberOfLines={truncateText ? 1 : undefined}
+            ellipsizeMode={truncateText ? 'tail' : undefined}
             style={defaultStyles.text}
-            testID={testID ? `${testID}-title` : 'dropdown-button-title'}>
-            {title}
-          </Text.XS>
+            testID={testID || 'dropdown-button'}
+          />
 
           <Row alignItems="center" gap={spacing.S}>
             {!!actionText && (
-              <Text.XS
-                variant="secondary"
+              <ActionTextComponent
+                actionText={actionText}
                 testID={
                   testID ? `${testID}-action-text` : 'dropdown-action-text'
-                }>
-                {actionText}
-              </Text.XS>
+                }
+              />
             )}
 
             {showActionButton && onActionPress && (
@@ -396,40 +692,180 @@ export const DropdownMenu = React.memo(
           </Row>
         </Pressable>
 
-        <Modal transparent visible={isOpen} animationType="none">
-          <View style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-            <Pressable
-              style={StyleSheet.absoluteFillObject}
-              onPress={closeMenu}
-            />
-
-            <Animated.View
-              style={[defaultStyles.modalDropdown, animatedContainer]}>
-              <BlurView style={defaultStyles.blurView}>
-                <FlatList
-                  testID={testID || 'dropdown-menu'}
-                  data={normalizedItems}
-                  keyExtractor={item => item.id}
-                  renderItem={({ item, index }) => (
-                    <MenuItem
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      selectedItemId={selectedItemId}
-                      onPress={handleSelect}
-                      isLastItem={index === normalizedItems.length - 1}
-                      theme={theme}
-                    />
-                  )}
-                  showsVerticalScrollIndicator={
-                    normalizedItems.length > maxVisibleItems
-                  }
-                  contentContainerStyle={defaultStyles.contentContainer}
+        {isOpen &&
+          !shouldUseModalPresentation &&
+          !shouldUseViewportPortal &&
+          layout &&
+          modalBounds && (
+            <>
+              <View
+                style={[defaultStyles.inlineBackdrop, inlineBackdropStyle]}
+                pointerEvents="box-none">
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropTop,
+                    {
+                      height: modalBounds.top,
+                    },
+                  ]}
+                  onPress={closeMenu}
                 />
-              </BlurView>
-            </Animated.View>
-          </View>
-        </Modal>
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropLeft,
+                    {
+                      top: modalBounds.top,
+                      width: modalBounds.left,
+                      height: modalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropRight,
+                    {
+                      left: modalBounds.left + modalBounds.width,
+                      top: modalBounds.top,
+                      height: modalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropBottom,
+                    {
+                      top: modalBounds.top + modalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+              </View>
+              <Animated.View style={inlineAnimatedContainer}>
+                {dropdownList}
+              </Animated.View>
+            </>
+          )}
+
+        {isOpen &&
+          shouldUseViewportPortal &&
+          portalBounds &&
+          !!viewport?.hostName && (
+            <ContentPortal hostName={viewport.hostName}>
+              <View style={stylesPortal.hostContainer} pointerEvents="box-none">
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropTop,
+                    {
+                      height: portalBounds.top,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropLeft,
+                    {
+                      top: portalBounds.top,
+                      width: portalBounds.left,
+                      height: portalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropRight,
+                    {
+                      left: portalBounds.left + portalBounds.width,
+                      top: portalBounds.top,
+                      height: portalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+                <Pressable
+                  style={[
+                    defaultStyles.modalBackdropSegment,
+                    defaultStyles.modalBackdropBottom,
+                    {
+                      top: portalBounds.top + portalBounds.height,
+                    },
+                  ]}
+                  onPress={closeMenu}
+                />
+
+                <Animated.View style={portalAnimatedContainer}>
+                  {dropdownList}
+                </Animated.View>
+              </View>
+            </ContentPortal>
+          )}
+
+        {shouldUseModalPresentation && modalBounds && (
+          <Modal transparent visible={isOpen} animationType="none">
+            <View
+              style={StyleSheet.absoluteFillObject}
+              pointerEvents="box-none">
+              <Pressable
+                style={[
+                  defaultStyles.modalBackdropSegment,
+                  defaultStyles.modalBackdropTop,
+                  {
+                    height: modalBounds.top,
+                  },
+                ]}
+                onPress={closeMenu}
+              />
+              <Pressable
+                style={[
+                  defaultStyles.modalBackdropSegment,
+                  defaultStyles.modalBackdropLeft,
+                  {
+                    top: modalBounds.top,
+                    width: modalBounds.left,
+                    height: modalBounds.height,
+                  },
+                ]}
+                onPress={closeMenu}
+              />
+              <Pressable
+                style={[
+                  defaultStyles.modalBackdropSegment,
+                  defaultStyles.modalBackdropRight,
+                  {
+                    left: modalBounds.left + modalBounds.width,
+                    top: modalBounds.top,
+                    height: modalBounds.height,
+                  },
+                ]}
+                onPress={closeMenu}
+              />
+              <Pressable
+                style={[
+                  defaultStyles.modalBackdropSegment,
+                  defaultStyles.modalBackdropBottom,
+                  {
+                    top: modalBounds.top + modalBounds.height,
+                  },
+                ]}
+                onPress={closeMenu}
+              />
+
+              <Animated.View style={modalAnimatedContainer}>
+                {dropdownList}
+              </Animated.View>
+            </View>
+          </Modal>
+        )}
       </Column>
     );
   },
@@ -439,7 +875,12 @@ const styles = (theme: Theme) =>
   StyleSheet.create({
     dropdownContainer: {
       width: '100%',
+      position: 'relative',
       zIndex: 1,
+    },
+    dropdownContainerOpen: {
+      zIndex: 10,
+      elevation: 10,
     },
     pressable: {
       borderRadius: radius.S,
@@ -460,6 +901,50 @@ const styles = (theme: Theme) =>
       borderColor: theme.border.middle,
       overflow: 'hidden',
       zIndex: 3,
+      elevation: 1,
+    },
+    portalDropdown: {
+      position: 'absolute',
+      backgroundColor: theme.background.primary,
+      borderRadius: radius.S,
+      borderColor: theme.border.middle,
+      overflow: 'hidden',
+      zIndex: 3,
+      elevation: 1,
+    },
+    modalBackdropSegment: {
+      position: 'absolute',
+      zIndex: 1,
+      elevation: 1,
+    },
+    modalBackdropTop: {
+      left: 0,
+      top: 0,
+      right: 0,
+    },
+    modalBackdropLeft: {
+      left: 0,
+    },
+    modalBackdropRight: {
+      right: 0,
+    },
+    modalBackdropBottom: {
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    inlineDropdown: {
+      position: 'absolute',
+      backgroundColor: theme.background.primary,
+      borderRadius: radius.S,
+      borderColor: theme.border.middle,
+      overflow: 'hidden',
+      zIndex: 3,
+      elevation: 1,
+    },
+    inlineBackdrop: {
+      position: 'absolute',
+      zIndex: 2,
     },
     item: {
       minHeight: ITEM_HEIGHT,
@@ -487,3 +972,11 @@ const styles = (theme: Theme) =>
       backgroundColor: theme.background.primary,
     },
   });
+
+const stylesPortal = StyleSheet.create({
+  hostContainer: {
+    ...StyleSheet.absoluteFillObject,
+    pointerEvents: 'box-none',
+    zIndex: 1,
+  },
+});

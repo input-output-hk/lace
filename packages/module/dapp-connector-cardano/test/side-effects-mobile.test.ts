@@ -1,6 +1,7 @@
+import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { type DeepPartialTilObservable } from '@lace-lib/util-dev';
-import { Ok } from '@lace-sdk/util';
+import { Ok, Timestamp } from '@lace-sdk/util';
 import { firstValueFrom, of, take, toArray } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -14,6 +15,7 @@ import {
 
 import type { ActionCreators, Selectors } from '../src';
 import type { Cip30MessageHandlerDependencies } from '../src/mobile/services/cip30-message-handler';
+import type { Activity } from '@lace-contract/activities';
 import type {
   ActionObservables,
   SideEffectDependencies,
@@ -26,7 +28,7 @@ const cip30Mocks = vi.hoisted(() => ({ handleCip30Message: vi.fn() }));
 const blockchainCardanoMocks = vi.hoisted(() => ({ signData: vi.fn() }));
 
 vi.mock('@lace-lib/navigation', () => ({
-  NavigationControls: { sheets: { navigate: navigationMocks.navigate } },
+  NavigationControls: { navigate: navigationMocks.navigate },
   SheetRoutes: {
     AuthorizeDapp: 'AuthorizeDapp',
     SignData: 'SignData',
@@ -46,6 +48,14 @@ vi.mock('@lace-contract/cardano-context', async () => {
   };
 });
 
+const createPendingDappActivityMock = vi.hoisted(() => ({
+  createPendingDappActivity: vi.fn(),
+}));
+vi.mock('../src/common/store/create-pending-dapp-activity', () => ({
+  createPendingDappActivity:
+    createPendingDappActivityMock.createPendingDappActivity,
+}));
+
 vi.mock('@lace-module/blockchain-cardano', () => ({
   signData: blockchainCardanoMocks.signData,
 }));
@@ -62,7 +72,7 @@ const createMessage = (id: string, type: string) => ({
 });
 
 const createDependencies = () => ({
-  actions: cardanoDappConnectorActions,
+  actions: { ...cardanoDappConnectorActions, ...activitiesActions },
   cardanoProvider: {
     submitTx: vi.fn().mockReturnValue(of(Ok('mock-tx-hash'))),
   },
@@ -80,6 +90,7 @@ const createBaseStateObservables = (
   dappConnector: { selectAuthorizedDapps$: of({ Cardano: [] }) },
   cardanoContext: {
     selectAccountTransactionHistory$: of({}),
+    selectAvailableAccountUtxos$: of({}),
   },
   addresses: { selectAllAddresses$: of([]) },
   wallets: { selectActiveNetworkAccounts$: of([]), selectAll$: of([]) },
@@ -246,6 +257,157 @@ describe('mobile side effects', () => {
           timestamp: 456,
         }),
       );
+    });
+  });
+
+  describe('processWebViewMessage - submitTx pending activity', () => {
+    beforeEach(() => {
+      createPendingDappActivityMock.createPendingDappActivity.mockReset();
+    });
+
+    const submitTxMessage = {
+      id: 'req-submit-1',
+      type: 'submitTx',
+      source: 'lace-cip30' as const,
+      args: ['deadbeefcafe'],
+    };
+    const dappOrigin = 'https://dapp.example';
+
+    it('dispatches setWebViewResponse and activities.upsertActivities on successful submitTx', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(999);
+      const pendingActivity: Activity = {
+        accountId: AccountId('acc-1'),
+        activityId: 'tx-hash-1',
+        timestamp: Timestamp(999),
+        tokenBalanceChanges: [],
+        type: ActivityType.Pending,
+      };
+      createPendingDappActivityMock.createPendingDappActivity.mockReturnValue(
+        pendingActivity,
+      );
+      cip30Mocks.handleCip30Message.mockResolvedValue({
+        type: 'response_ready',
+        response: {
+          id: submitTxMessage.id,
+          success: true,
+          result: 'tx-hash-1',
+        },
+      });
+
+      const action =
+        cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
+          message: submitTxMessage,
+          dappOrigin,
+          timestamp: 0,
+        });
+
+      const output$ = invokeProcessWebViewMessage(action, {
+        cardanoDappConnector: {
+          selectSessionAuthorizedOrigins$: of([dappOrigin]),
+          selectSessionAccountByOrigin$: of({
+            [dappOrigin]: AccountId('acc-1'),
+          }),
+        },
+      });
+
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: submitTxMessage.id,
+          success: true,
+          result: 'tx-hash-1',
+          timestamp: 999,
+        }),
+        activitiesActions.activities.upsertActivities({
+          accountId: AccountId('acc-1'),
+          activities: [pendingActivity],
+        }),
+      ]);
+
+      expect(
+        createPendingDappActivityMock.createPendingDappActivity,
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          serializedTx: 'deadbeefcafe',
+          accountIdHint: AccountId('acc-1'),
+        }),
+      );
+    });
+
+    it('dispatches only setWebViewResponse when pending activity is not attributable', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(999);
+      createPendingDappActivityMock.createPendingDappActivity.mockReturnValue(
+        undefined,
+      );
+      cip30Mocks.handleCip30Message.mockResolvedValue({
+        type: 'response_ready',
+        response: {
+          id: submitTxMessage.id,
+          success: true,
+          result: 'tx-hash-1',
+        },
+      });
+
+      const action =
+        cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
+          message: submitTxMessage,
+          dappOrigin,
+          timestamp: 0,
+        });
+
+      const output$ = invokeProcessWebViewMessage(action, {
+        cardanoDappConnector: {
+          selectSessionAuthorizedOrigins$: of([dappOrigin]),
+          selectSessionAccountByOrigin$: of({}),
+        },
+      });
+
+      const emitted = await firstValueFrom(output$.pipe(take(1), toArray()));
+
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: submitTxMessage.id,
+          success: true,
+          result: 'tx-hash-1',
+          timestamp: 999,
+        }),
+      ]);
+    });
+
+    it('does not create pending activity when submitTx failed', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(999);
+      cip30Mocks.handleCip30Message.mockResolvedValue({
+        type: 'response_ready',
+        response: {
+          id: submitTxMessage.id,
+          success: false,
+          error: { code: APIErrorCode.InternalError, info: 'oops' },
+        },
+      });
+
+      const action =
+        cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
+          message: submitTxMessage,
+          dappOrigin,
+          timestamp: 0,
+        });
+
+      const output$ = invokeProcessWebViewMessage(action, {
+        cardanoDappConnector: {
+          selectSessionAuthorizedOrigins$: of([dappOrigin]),
+          selectSessionAccountByOrigin$: of({
+            [dappOrigin]: AccountId('acc-1'),
+          }),
+        },
+      });
+
+      const emitted = await firstValueFrom(output$.pipe(take(1), toArray()));
+
+      expect(emitted).toHaveLength(1);
+      expect(
+        createPendingDappActivityMock.createPendingDappActivity,
+      ).not.toHaveBeenCalled();
     });
   });
 

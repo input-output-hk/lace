@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "allowJs": true
+    "allowJs": true,
+    "moduleSuffixes": [".ios", ".android", ""]
   },
   "extends": "../../../tsconfig.base.json",
   "include": ["eslint.config.mjs", "vitest.config.js", "src/**/*", "test/**/*"],

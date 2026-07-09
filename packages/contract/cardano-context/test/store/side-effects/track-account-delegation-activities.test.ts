@@ -6,6 +6,7 @@ import {
   transactionSummaryInspector,
 } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
+import { failuresActions } from '@lace-contract/failures';
 import { TokenId } from '@lace-contract/tokens';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { BigNumber, Err, Ok, Timestamp } from '@lace-sdk/util';
@@ -19,6 +20,7 @@ globalThis.expect = expect;
 
 import { cardanoContextActions, CardanoRewardAccount } from '../../../src';
 import { trackAccountDelegationActivities } from '../../../src/store/side-effects/track-account-delegation-activities';
+import { CardanoDelegationFailureId } from '../../../src/value-objects';
 import { account0Context, cardanoAccount0Addr, chainId } from '../../mocks';
 
 import type {
@@ -32,6 +34,8 @@ import type {
 } from '../../../src';
 import type * as Core from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
+import type { Failure, FailureId } from '@lace-contract/failures';
+import type { TranslationKey } from '@lace-contract/i18n';
 
 // Mock the Cardano SDK transaction inspector functions
 vi.mock('@cardano-sdk/core', async importActual => {
@@ -48,12 +52,18 @@ vi.mock('@cardano-sdk/core', async importActual => {
 
 const actions = {
   ...cardanoContextActions,
+  ...failuresActions,
 };
 
 const accountId = account0Context.accountId;
 const rewardAccount = CardanoRewardAccount(
   'stake_test1urpklgzqsh9yqz8pkyuxcw9dlszpe5flnxjtl55epla6ftqktdyfz',
 );
+
+const failureId = CardanoDelegationFailureId(accountId, rewardAccount);
+const failureMessage =
+  'sync.error.cardano-delegation-history-failed' as TranslationKey;
+const noFailureSelector = (_id: FailureId): Failure | undefined => undefined;
 
 const mockAddress: AnyAddress = {
   ...cardanoAccount0Addr,
@@ -219,6 +229,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -350,6 +363,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -418,6 +434,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -485,6 +504,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -502,13 +524,12 @@ describe('trackAccountDelegationActivities', () => {
           logger: mockLogger,
         },
         assertion: sideEffect$ => {
-          // With forkJoin all-or-nothing approach, if delegations fail, we only get the failure action
-          // No successful history actions should be dispatched
-          expectObservable(sideEffect$).toBe('a', {
-            a: actions.cardanoContext.setAccountDelegationsHistoryFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
+          // After retryBackoff exhaustion (300+600+1200=2100ms) the failure
+          // is surfaced via the failures store.
+          expectObservable(sideEffect$).toBe('2100ms a', {
+            a: actions.failures.addFailure({
+              failureId,
+              message: failureMessage,
             }),
           });
         },
@@ -551,6 +572,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -568,13 +592,12 @@ describe('trackAccountDelegationActivities', () => {
           logger: mockLogger,
         },
         assertion: sideEffect$ => {
-          // With forkJoin all-or-nothing approach, if registrations fail, we only get the failure action
-          // No successful history actions should be dispatched
-          expectObservable(sideEffect$).toBe('a', {
-            a: actions.cardanoContext.setAccountDelegationsHistoryFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
+          // After retryBackoff exhaustion (300+600+1200=2100ms) the failure
+          // is surfaced via the failures store.
+          expectObservable(sideEffect$).toBe('2100ms a', {
+            a: actions.failures.addFailure({
+              failureId,
+              message: failureMessage,
             }),
           });
         },
@@ -617,6 +640,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -634,13 +660,12 @@ describe('trackAccountDelegationActivities', () => {
           logger: mockLogger,
         },
         assertion: sideEffect$ => {
-          // With forkJoin all-or-nothing approach, if withdrawals fail, we only get the failure action
-          // No successful history actions should be dispatched
-          expectObservable(sideEffect$).toBe('a', {
-            a: actions.cardanoContext.setAccountDelegationsHistoryFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
+          // After retryBackoff exhaustion (300+600+1200=2100ms) the failure
+          // is surfaced via the failures store.
+          expectObservable(sideEffect$).toBe('2100ms a', {
+            a: actions.failures.addFailure({
+              failureId,
+              message: failureMessage,
             }),
           });
         },
@@ -687,6 +712,9 @@ describe('trackAccountDelegationActivities', () => {
           },
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
+          },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
           },
         },
         dependencies: {
@@ -829,6 +857,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -963,6 +994,9 @@ describe('trackAccountDelegationActivities', () => {
           addresses: {
             selectAllAddresses$: cold('a', { a: [mockAddress] }),
           },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+          },
         },
         dependencies: {
           cardanoProvider: {
@@ -976,10 +1010,11 @@ describe('trackAccountDelegationActivities', () => {
           logger: mockLogger,
         },
         assertion: sideEffect$ => {
-          // With forkJoin, all three requests complete together, so we get one combined history action
-          // When transaction fetching fails, error actions are dispatched for each failed transaction fetch
-          // All 3 entries (delegation, registration, withdrawal) trigger transaction fetches
-          expectObservable(sideEffect$).toBe('(abcd)', {
+          // forkJoin completes at frame 0 (all three list calls succeed) so
+          // setAccountDelegationsHistory emits immediately. The three concurrent
+          // getTransactionDetails calls each fail, retry over 2100ms, then emit
+          // an addFailure with the same failureId.
+          expectObservable(sideEffect$).toBe('a 2099ms (bbb)', {
             a: actions.cardanoContext.setAccountDelegationsHistory({
               accountId,
               rewardAccount,
@@ -989,20 +1024,9 @@ describe('trackAccountDelegationActivities', () => {
                 mockWithdrawalEntry,
               ],
             }),
-            b: actions.cardanoContext.setDelegationActivitiesFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
-            }),
-            c: actions.cardanoContext.setDelegationActivitiesFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
-            }),
-            d: actions.cardanoContext.setDelegationActivitiesFailed({
-              accountId,
-              rewardAccount,
-              failure: providerError.reason,
+            b: actions.failures.addFailure({
+              failureId,
+              message: failureMessage,
             }),
           });
         },
@@ -1080,6 +1104,9 @@ describe('trackAccountDelegationActivities', () => {
             },
             addresses: {
               selectAllAddresses$: cold('a', { a: [mockAddress] }),
+            },
+            failures: {
+              selectFailureById$: cold('a', { a: noFailureSelector }),
             },
           },
           dependencies: {

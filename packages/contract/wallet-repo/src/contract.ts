@@ -24,3 +24,31 @@ export const vaultContract = inferContractContext({
   name: ContractName('vault'),
   instance: 'at-least-one',
 });
+
+export const requestHWConnectionAddonContract = inferContractContext({
+  name: ContractName('request-hw-connection-addon'),
+  instance: 'exactly-one',
+  contractType: 'addon',
+  provides: {
+    addons: ['loadRequestHWConnections'],
+  },
+});
+
+export const searchHWDevicesAddonContract = inferContractContext({
+  name: ContractName('search-hw-devices-addon'),
+  instance: 'zero-or-more',
+  contractType: 'addon',
+  provides: {
+    addons: ['loadSearchHWDevices'],
+  },
+});
+
+export const walletIdentityAddonContract = inferContractContext({
+  name: ContractName('wallet-identity-addon'),
+  instance: 'zero-or-more',
+  contractType: 'addon',
+  preloadInServiceWorker: true,
+  provides: {
+    addons: ['loadWalletIdentity'],
+  },
+});

@@ -41,7 +41,7 @@ export enum StackRoutes {
 }
 
 export enum SheetRoutes {
-  Initial = 'Initial',
+  RootStack = 'RootStack',
   AddedAccountSuccess = 'AddedAccountSuccess',
   AddedAccountFailed = 'AddedAccountFailed',
   AddAccount = 'AddAccount',
@@ -72,7 +72,6 @@ export enum SheetRoutes {
   SuccessRecoveryPhraseVerification = 'SuccessRecoveryPhraseVerification',
   EditFolder = 'EditFolder',
   CreateFolder = 'CreateFolder',
-  HardwareWalletDiscoverySearching = 'HardwareWalletDiscoverySearching',
   HardwareWalletDiscoveryError = 'HardwareWalletDiscoveryError',
   HardwareWalletDiscoveryResults = 'HardwareWalletDiscoveryResults',
   Buy = 'Buy',
@@ -81,6 +80,7 @@ export enum SheetRoutes {
   NetworkSelection = 'NetworkSelection',
   FiatCurrencySheet = 'FiatCurrencySheet',
   AssetDetailBottomSheet = 'AssetDetailBottomSheet',
+  PortfolioTokenSortControls = 'PortfolioTokenSortControls',
   ActivityDetail = 'ActivityDetail',
   DefaultOpenMode = 'DefaultOpenMode',
   StakingIssue = 'StakingIssue',

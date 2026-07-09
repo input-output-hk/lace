@@ -17,7 +17,6 @@ export type MnemonicTextInputProps = React.ComponentProps<
   onFocus?: () => void;
   placeholderText?: string;
   testID?: string;
-  isWithinBottomSheet?: boolean;
 };
 
 export const MnemonicTextInput = ({
@@ -25,7 +24,6 @@ export const MnemonicTextInput = ({
   onFocus,
   placeholderText,
   testID,
-  isWithinBottomSheet,
   ...restProps
 }: MnemonicTextInputProps) => {
   const field = useFieldContext<string>();
@@ -62,7 +60,6 @@ export const MnemonicTextInput = ({
 
   return (
     <CustomTextInput
-      isWithinBottomSheet={isWithinBottomSheet}
       ref={inputRef}
       testID={currentTestID}
       label={label}

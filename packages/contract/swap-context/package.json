@@ -16,11 +16,13 @@
     "@lace-contract/swap-provider": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/util-provider": "*",
     "@lace-lib/util-store": "*",
     "@lace-sdk/util": "*",
-    "backoff-rxjs": "*"
+    "backoff-rxjs": "*",
+    "uuid": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

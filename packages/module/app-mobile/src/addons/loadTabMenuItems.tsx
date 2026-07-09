@@ -11,7 +11,7 @@ const tabMenuItems: ContextualLaceInit<TabMenuItems, AvailableAddons> = () => ({
     {
       id: 'tab-menu-item-buy',
       action: () => {
-        NavigationControls.sheets.navigate(SheetRoutes.Buy);
+        NavigationControls.navigate(SheetRoutes.Buy);
       },
       icons: {
         Active: () => <Icon name="Plus" />,
@@ -24,7 +24,7 @@ const tabMenuItems: ContextualLaceInit<TabMenuItems, AvailableAddons> = () => ({
     {
       id: 'tab-menu-item-send',
       action: () => {
-        NavigationControls.sheets.navigate(SheetRoutes.Send);
+        NavigationControls.navigate(SheetRoutes.Send);
       },
       icons: {
         Active: () => <Icon name="ArrowUp" />,
@@ -37,7 +37,7 @@ const tabMenuItems: ContextualLaceInit<TabMenuItems, AvailableAddons> = () => ({
     {
       id: 'tab-menu-item-receive',
       action: () => {
-        NavigationControls.sheets.navigate(SheetRoutes.Receive);
+        NavigationControls.navigate(SheetRoutes.Receive);
       },
       icons: {
         Active: () => <Icon name="ArrowDown" />,

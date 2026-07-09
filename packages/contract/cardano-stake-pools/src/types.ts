@@ -1,9 +1,25 @@
 import type { Responses } from '@blockfrost/blockfrost-js';
 import type { Cardano, ProviderError } from '@cardano-sdk/core';
 import type { CardanoProviderContext } from '@lace-contract/cardano-context';
-import type { LaceBrowsePool } from '@lace-lib/ui-toolkit';
 import type { Result } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
+
+/**
+ * Subset of stake-pool fields the browse UI (e.g. PoolCard) reads. Owned here
+ * rather than in `@lace-lib/ui-toolkit` so contracts stay UI-agnostic
+ * (see ADR 28). `LacePartialStakePool` below is a superset and the
+ * compile-time `Check` keeps the two in lockstep.
+ */
+export interface LaceBrowsePool {
+  poolId: string;
+  ticker: string | null;
+  liveSaturation: number;
+  cost: number;
+  margin: number;
+  blocks: number;
+  declaredPledge: number;
+  liveStake: number;
+}
 
 /**
  * Pick only relevant Responses['pool_metadata'] fields to simplify mocking

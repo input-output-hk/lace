@@ -4,7 +4,7 @@ import { TokenId } from '@lace-contract/tokens';
 import { BigNumber } from '@lace-sdk/util';
 
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
-import type { TransactionHistoryEntry } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
+import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';
 
 type HistoryUtxo = {
   value: bigint | string;
@@ -62,7 +62,7 @@ export const getAddressFromUtxos = (
 };
 
 export const mapStatusToActivityType = (
-  status: TransactionHistoryEntry['status'],
+  status: WalletEntry['status'],
   tokenBalanceChanges?: Array<{ amount: ReturnType<typeof BigNumber> }>,
 ): ActivityType => {
   switch (status) {
@@ -79,5 +79,5 @@ export const mapStatusToActivityType = (
   }
 };
 
-export const formatFee = (fees: TransactionHistoryEntry['fees']): string =>
+export const formatFee = (fees: WalletEntry['fees']): string =>
   fees === null || fees === undefined ? '0' : String(fees);

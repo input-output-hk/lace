@@ -12,7 +12,6 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import { callKeepAlive } from './call-keep-alive';
 import { viewClose } from './side-effect-util';
 
 import type { SideEffect } from '..';
@@ -88,12 +87,6 @@ export const openView: SideEffect = (
     toEmpty,
   );
 
-const keepAlive: SideEffect = (
-  actionObservables,
-  _,
-  { viewConnect$, logger },
-) => callKeepAlive(actionObservables, viewConnect$, logger).pipe(toEmpty);
-
 export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
-  return [connectView, disconnectView, openView, keepAlive];
+  return [connectView, disconnectView, openView];
 };

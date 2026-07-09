@@ -15,12 +15,8 @@ import {
   FiatCurrencySheet,
   ComingSoonSheet,
   EditWalletSheet,
+  PortfolioTokenSortSheet,
 } from '../pages';
-import {
-  HardwareWalletDiscoverySearching,
-  HardwareWalletDiscoveryError,
-  HardwareWalletDiscoveryResults,
-} from '../pages/hardware-wallet-discovery';
 
 import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
@@ -34,23 +30,12 @@ const loadSheetPages: ContextualLaceInit<
       <SheetStack.Screen
         name={SheetRoutes.AuthorizedDApps}
         component={AuthorizedDAppsSheet}
+        options={{ detents: [1], scrollable: true }}
       />
       <SheetStack.Screen name={SheetRoutes.EditFolder} component={EditFolder} />
       <SheetStack.Screen
         name={SheetRoutes.CreateFolder}
         component={CreateFolder}
-      />
-      <SheetStack.Screen
-        name={SheetRoutes.HardwareWalletDiscoverySearching}
-        component={HardwareWalletDiscoverySearching}
-      />
-      <SheetStack.Screen
-        name={SheetRoutes.HardwareWalletDiscoveryError}
-        component={HardwareWalletDiscoveryError}
-      />
-      <SheetStack.Screen
-        name={SheetRoutes.HardwareWalletDiscoveryResults}
-        component={HardwareWalletDiscoveryResults}
       />
       <SheetStack.Screen name={SheetRoutes.Buy} component={BuySheet} />
       <SheetStack.Screen
@@ -68,16 +53,36 @@ const loadSheetPages: ContextualLaceInit<
       <SheetStack.Screen
         name={SheetRoutes.FiatCurrencySheet}
         component={FiatCurrencySheet}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
       />
       <SheetStack.Screen
         name={SheetRoutes.AssetDetailBottomSheet}
         component={AssetDetailBottomSheet}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
+      />
+      <SheetStack.Screen
+        name={SheetRoutes.PortfolioTokenSortControls}
+        component={PortfolioTokenSortSheet}
+        options={{ stackBehavior: 'push' }}
       />
       <SheetStack.Screen
         name={SheetRoutes.ActivityDetail}
         component={ActivityDetailsSheet}
       />
-      <SheetStack.Screen name={SheetRoutes.Receive} component={ReceiveSheet} />
+      <SheetStack.Screen
+        name={SheetRoutes.Receive}
+        component={ReceiveSheet}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
+      />
       <SheetStack.Screen
         name={SheetRoutes.ComingSoon}
         component={ComingSoonSheet}

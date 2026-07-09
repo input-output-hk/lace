@@ -11,7 +11,8 @@
     "@lace-contract/cardano-context": "*",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
-    "@lace-lib/ui-toolkit": "*",
+    "@lace-contract/wallet-active-state": "*",
+    "@lace-contract/wallet-repo": "*",
     "@lace-sdk/util": "*",
     "rxjs": "^7.8.1"
   },

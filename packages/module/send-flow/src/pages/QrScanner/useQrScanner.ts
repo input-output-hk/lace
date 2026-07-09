@@ -18,6 +18,7 @@ export const useQrScanner = (
       // Navigate back to send flow with the scanned address
       navigate(SheetRoutes.Send, {
         recipientAddress: data,
+        recipientSource: 'qr',
       });
     },
     [navigate],

@@ -1,5 +1,5 @@
+import { SheetSafeOverlay } from '@lace-lib/ui-toolkit';
 import React, { type ReactNode } from 'react';
-import { Modal } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../lace-context';
 
@@ -36,9 +36,7 @@ export const PasswordAuthPromptContainer = ({
 
   if (authenticationPromptState.status === 'Idle') return null;
   return (
-    <Modal
-      animationType="fade"
-      transparent
+    <SheetSafeOverlay
       visible
       onRequestClose={() => {
         onCancel();
@@ -55,6 +53,6 @@ export const PasswordAuthPromptContainer = ({
           shouldShowBiometricUnlockOffer,
         })}
       </PasswordAuthPromptOverlay>
-    </Modal>
+    </SheetSafeOverlay>
   );
 };

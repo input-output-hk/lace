@@ -459,28 +459,34 @@ export const StakeCard = ({
   };
 
   return (
-    <Pressable
-      onPress={onViewDelegation}
-      disabled={isPressableDisabled}
-      style={pressableStyle}
-      onHoverIn={handleHoverIn}
-      onHoverOut={handleHoverOut}
-      android_ripple={androidRipple}>
-      <Card testID={testID} cardStyle={styles.card}>
-        {renderHeader()}
-        <View style={styles.divider} />
-        {renderBalance()}
-        {isStakedState() && <View style={styles.divider} />}
-        {isStakedState() && renderPoolInfo()}
-        {renderActionButton()}
-        {renderWarning()}
-      </Card>
-    </Pressable>
+    <View style={styles.shadowWrapper}>
+      <Pressable
+        onPress={onViewDelegation}
+        disabled={isPressableDisabled}
+        style={pressableStyle}
+        onHoverIn={handleHoverIn}
+        onHoverOut={handleHoverOut}
+        android_ripple={androidRipple}>
+        <Card testID={testID} cardStyle={styles.card}>
+          {renderHeader()}
+          <View style={styles.divider} />
+          {renderBalance()}
+          {isStakedState() && <View style={styles.divider} />}
+          {isStakedState() && renderPoolInfo()}
+          {renderActionButton()}
+          {renderWarning()}
+        </Card>
+      </Pressable>
+    </View>
   );
 };
 
 const getStyles = (theme: Theme) =>
   StyleSheet.create({
+    shadowWrapper: {
+      borderRadius: radius.M,
+      ...getShadowStyle({ theme, variant: 'card' }),
+    },
     pressable: {
       overflow: 'hidden',
       borderRadius: radius.M,

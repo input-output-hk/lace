@@ -1,5 +1,5 @@
-import { FilterSheet, SortPreferenceButton } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { FilterSheet, Sheet, SortPreferenceButton } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useBrowsePoolFiltersSheet } from './useBrowsePoolFiltersSheet';
 
@@ -8,11 +8,37 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 export const BrowsePoolFiltersSheet = (
   props: SheetScreenProps<SheetRoutes.BrowsePoolFilterControls>,
 ) => {
+  const { navigation } = props;
   const model = useBrowsePoolFiltersSheet(props.route.params);
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={model.title}
+          testID={`${model.testID}-header`}
+          handleClose={navigation.goBack}
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          secondaryButton={{
+            label: model.cancelButtonLabel,
+            onPress: model.onCancel,
+            testID: `${model.testID}-cancel`,
+          }}
+          primaryButton={{
+            label: model.confirmButtonLabel,
+            onPress: model.onConfirm,
+            testID: `${model.testID}-confirm`,
+          }}
+        />
+      ),
+    });
+  }, [navigation, model]);
 
   return (
     <FilterSheet
-      title={model.title}
       dropdowns={[
         {
           label: model.dropdownLabel,
@@ -31,10 +57,6 @@ export const BrowsePoolFiltersSheet = (
           testID: `${model.testID}-sort-by-dropdown`,
         },
       ]}
-      onConfirm={model.onConfirm}
-      onCancel={model.onCancel}
-      cancelButtonLabel={model.cancelButtonLabel}
-      confirmButtonLabel={model.confirmButtonLabel}
       testID={model.testID}
     />
   );

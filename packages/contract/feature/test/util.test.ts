@@ -99,18 +99,18 @@ describe('util', () => {
       },
     ] as unknown as LaceModule[];
 
-    it('returns modules with usedFallback: false when flags are compatible', () => {
+    it('returns modules with fallback: undefined when flags are compatible', () => {
       const result = selectModulesWithFallback({
         availableModules: compatibleModules,
         featureFlags: defaultFlags,
         defaultFeatureFlags: defaultFlags,
         environment: developmentEnvironment,
       });
-      expect(result.usedFallback).toBe(false);
+      expect(result.fallback).toBeUndefined();
       expect(result.modulesToLoad).toHaveLength(2);
     });
 
-    it('falls back to default flags and returns usedFallback: true on incompatible flags', () => {
+    it('falls back to default flags and returns fallback.incompatibleFlags on incompatible flags', () => {
       mockCaptureException.mockClear();
 
       const incompatibleFlags: FeatureFlag[] = [
@@ -124,7 +124,7 @@ describe('util', () => {
         environment: developmentEnvironment,
       });
 
-      expect(result.usedFallback).toBe(true);
+      expect(result.fallback).toEqual({ incompatibleFlags });
       expect(result.modulesToLoad).toHaveLength(2);
       expect(mockCaptureException).toHaveBeenCalledWith(
         expect.any(MissingContractImplementationError),

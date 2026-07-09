@@ -42,12 +42,9 @@ export const linking: ContextualLaceInit<
       if (uri) {
         try {
           const cleanUri = new URL(uri);
-          NavigationControls.actions.closeAndNavigate(
-            StackRoutes.DappExternalWebView,
-            {
-              buttonUrl: cleanUri.toString(),
-            } as DappConnectorSheetParams,
-          );
+          NavigationControls.navigate(StackRoutes.DappExternalWebView, {
+            buttonUrl: cleanUri.toString(),
+          } as DappConnectorSheetParams);
           // Return after triggering navigation to prevent further processing
           return state;
         } catch {
@@ -60,7 +57,7 @@ export const linking: ContextualLaceInit<
       try {
         const [address, _] = path.split('?');
         if (Cardano.Address.isValid(address)) {
-          NavigationControls.sheets.navigate(SheetRoutes.Send, {
+          NavigationControls.navigate(SheetRoutes.Send, {
             recipientAddress: address,
           });
         }

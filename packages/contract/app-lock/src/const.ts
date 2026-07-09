@@ -1,3 +1,4 @@
+import { FeatureFlagKey } from '@lace-contract/feature';
 import { Milliseconds } from '@lace-sdk/util';
 
 import type { TranslationKey } from '@lace-contract/i18n';
@@ -53,3 +54,6 @@ export const INACTIVITY_TIMEOUT_OPTIONS: {
     labelKey: 'v2.app-lock.inactivity-timeout.option-7',
   },
 ];
+export const PAUSE_NETWORK_POLLING_FEATURE_FLAG = FeatureFlagKey(
+  'PAUSE_NETWORK_POLLING_WHILE_LOCKED',
+);

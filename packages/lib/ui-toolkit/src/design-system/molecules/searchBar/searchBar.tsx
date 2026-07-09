@@ -23,6 +23,7 @@ export interface SearchBarProps {
   onChangeText?: (text: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  clearable?: boolean;
   testID?: string;
   textInputProps?: Omit<
     TextInputProps,
@@ -37,6 +38,7 @@ export const SearchBar = ({
   onChangeText,
   placeholder,
   disabled = false,
+  clearable = false,
   testID = 'search-bar',
   textInputProps,
   extraStyle = {},
@@ -49,12 +51,26 @@ export const SearchBar = ({
   const renderedPlaceholder = placeholder ?? defaultPlaceholder;
 
   const hasActions = actions.length > 0;
+  const shouldShowClearButton = clearable && !disabled && value.length > 0;
+  const hasTrailingContent = hasActions || shouldShowClearButton;
 
-  const renderActions = () => {
-    if (actions.length === 0) return null;
+  const handleClear = () => {
+    onChangeText?.('');
+  };
+
+  const renderTrailingContent = () => {
+    if (!hasTrailingContent) return null;
 
     return (
-      <Row gap={spacing.M} style={styles.actionsContainer}>
+      <Row alignItems="center" gap={spacing.M} style={styles.actionsContainer}>
+        {shouldShowClearButton && (
+          <IconButton.Static
+            icon={<Icon name="Cancel" size={16} color={theme.text.secondary} />}
+            onPress={handleClear}
+            containerStyle={styles.clearButton}
+            testID={`${testID}-clear-button`}
+          />
+        )}
         {actions.map((action, index) => {
           const hasAscendingColor = action.hasAscendingColor ?? false;
           return (
@@ -97,7 +113,7 @@ export const SearchBar = ({
       <Row
         style={[
           styles.inputContainer,
-          hasActions && styles.inputContainerWithActions,
+          hasTrailingContent && styles.inputContainerWithActions,
         ]}>
         <RNTextInput
           value={value}
@@ -110,7 +126,7 @@ export const SearchBar = ({
           {...textInputProps}
         />
       </Row>
-      {renderActions()}
+      {renderTrailingContent()}
     </Row>
   );
 };
@@ -132,6 +148,11 @@ const getStyles = (theme: Theme) =>
     input: {
       flex: 1,
       color: theme.text.primary,
+    },
+    clearButton: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: spacing.XS,
     },
     disabled: {
       opacity: 0.5,

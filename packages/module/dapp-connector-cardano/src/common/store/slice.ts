@@ -1,3 +1,4 @@
+import { dappConnectorActions } from '@lace-contract/dapp-connector';
 import {
   createAction,
   createSlice,
@@ -308,17 +309,6 @@ const slice = createSlice({
       state.lastAuthResponse = null;
     },
     /**
-     * Add a dApp origin to session authorized list
-     */
-    addSessionAuthorizedOrigin: (state, { payload }: PayloadAction<string>) => {
-      if (!state.sessionAuthorizedOrigins.includes(payload)) {
-        state.sessionAuthorizedOrigins.push(payload);
-      }
-    },
-    clearSessionAuthorizedOrigins: state => {
-      state.sessionAuthorizedOrigins = [];
-    },
-    /**
      * Set the account ID for a specific dApp origin.
      * Used to maintain per-dApp account selection.
      */
@@ -327,21 +317,6 @@ const slice = createSlice({
       { payload }: PayloadAction<{ origin: string; accountId: AccountId }>,
     ) => {
       state.sessionAccountByOrigin[payload.origin] = payload.accountId;
-    },
-    /**
-     * Clear the account for a specific dApp origin.
-     */
-    clearSessionAccountForOrigin: (
-      state,
-      { payload }: PayloadAction<string>,
-    ) => {
-      delete state.sessionAccountByOrigin[payload];
-    },
-    /**
-     * Clear all per-origin account mappings.
-     */
-    clearAllSessionAccountsByOrigin: state => {
-      state.sessionAccountByOrigin = {};
     },
     /**
      * Add a response to the WebView response queue (called by side effect).
@@ -515,7 +490,17 @@ const slice = createSlice({
           };
           state.pendingAuthRequest = null;
         }
-      });
+      })
+      .addCase(
+        dappConnectorActions.authorizedDapps.removeAuthorizedDapp,
+        (state, { payload }) => {
+          if (payload.blockchainName !== 'Cardano') return;
+          const origin = payload.dapp.id;
+          state.sessionAuthorizedOrigins =
+            state.sessionAuthorizedOrigins.filter(o => o !== origin);
+          delete state.sessionAccountByOrigin[origin];
+        },
+      );
   },
   selectors: {
     selectPendingAuthRequest: (state: CardanoDappConnectorState) =>

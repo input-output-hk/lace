@@ -57,7 +57,10 @@ export const coingeckoClient = {
     // This ensures that when one token's price changes, we don't invalidate the cache for all tokens
     const fetchPromises = coinGeckoIds.map(async coinId => {
       const supportedCurrency = getSupportedCurrency(currency);
-      const url = buildPriceUrl(baseUrl, coinId, supportedCurrency);
+      const url = buildPriceUrl(baseUrl, coinId, {
+        currency: supportedCurrency,
+        includeUsd: true,
+      });
 
       const response = await fetch(url);
 

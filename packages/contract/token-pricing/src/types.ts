@@ -33,6 +33,7 @@ export type TokenPriceRequest = BaseTokenPrice;
 
 export type TokenPriceResponse = BaseTokenPrice & {
   price: number;
+  priceInUsd: number;
   change24h?: number;
 };
 

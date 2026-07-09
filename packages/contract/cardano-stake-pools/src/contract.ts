@@ -10,6 +10,8 @@ import {
   inferContractContext,
 } from '@lace-contract/module';
 import { networkStoreContract } from '@lace-contract/network';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import store from './store';
 
@@ -27,6 +29,8 @@ export const cardanoStakePoolsStoreContract = inferContractContext({
     networkStoreContract,
     cardanoProviderStoreContract,
     cardanoProviderDependencyContract,
+    walletActiveStateDependencyContract,
+    walletRepoStoreContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),

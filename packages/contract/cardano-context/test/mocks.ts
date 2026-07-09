@@ -276,8 +276,8 @@ export const account4SomeAdaTokens: RawToken = {
   tokenId: LOVELACE_TOKEN_ID,
 };
 
-export const tip1 = { blockNo: 1 } as Cardano.Tip;
-export const tip2 = { blockNo: 2 } as Cardano.Tip;
+export const tip1 = { blockNo: 1, hash: 'tip1-hash' } as unknown as Cardano.Tip;
+export const tip2 = { blockNo: 2, hash: 'tip2-hash' } as unknown as Cardano.Tip;
 
 export const createTransactionHistoryItem = ({
   id,

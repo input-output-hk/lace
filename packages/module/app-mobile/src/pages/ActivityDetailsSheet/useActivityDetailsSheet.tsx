@@ -33,7 +33,7 @@ export const useActivityDetailsSheet = ({
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { appConfig } = useConfig();
-  const { activityId } = route.params;
+  const { activityId, activity: activityFromParams } = route.params;
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +57,11 @@ export const useActivityDetailsSheet = ({
     'activities.loadActivityDetails',
   );
 
-  const activity = useLaceSelector('activities.selectActivityById', activityId);
+  const activityFromStore = useLaceSelector(
+    'activities.selectActivityById',
+    activityId,
+  );
+  const activity = activityFromStore ?? activityFromParams;
 
   const accountId = activity?.accountId ?? activityDetails?.accountId ?? '';
   const accounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
@@ -107,6 +111,10 @@ export const useActivityDetailsSheet = ({
     headerTitle,
     loadingText,
     activityDetails,
+    // Resolve the type from the synchronously-available activity (route param /
+    // store) so the sheet can pick its detent on first render, before the async
+    // activityDetails load resolves. Avoids a full-height-then-collapse flash.
+    activityType: activity?.type ?? activityDetails?.type,
     explorerUrl,
     getMainTokenBalanceChange:
       activitiesItemUICustomisation?.getMainTokenBalanceChange,

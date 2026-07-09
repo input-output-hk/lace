@@ -1,4 +1,8 @@
-import { getAdaTokenTickerByNetwork } from '@lace-contract/cardano-context';
+import {
+  getAdaTokenTickerByNetwork,
+  resolveAccountNameSuffix,
+} from '@lace-contract/cardano-context';
+import { useTranslation } from '@lace-contract/i18n';
 import {
   FEATURE_FLAG_TOKEN_PRICING,
   TOKEN_PRICING_NETWORK_TYPE,
@@ -20,7 +24,9 @@ import {
 
 import type { TransactionInfo } from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
+import type { AccountId } from '@lace-contract/wallet-repo';
 
 export interface SignTxDataAccountInfo {
   name: string;
@@ -49,6 +55,9 @@ export interface UseSignTxDataResult {
   coinSymbol: string;
   networkMagic: Cardano.NetworkMagic | undefined;
   accountInfo: SignTxDataAccountInfo | undefined;
+  /** AccountId of the wallet account that would sign this transaction, or
+   *  undefined when no session account is bound for the requesting dApp. */
+  accountId: AccountId | undefined;
   tokenPrices: Record<TokenPriceId, TokenPrice> | undefined;
   currencyTicker: string | undefined;
 }
@@ -86,6 +95,10 @@ export const useSignTxData = ({
   const sessionAccountByOrigin = useLaceSelector(
     'cardanoDappConnector.selectSessionAccountByOrigin',
   );
+  const flaggedExploitsByAccount = useLaceSelector(
+    'cardanoContext.selectFlaggedExploitsByAccount',
+  );
+  const { t } = useTranslation();
 
   const [transactionInfo, setTransactionInfo] =
     useState<TransactionInfo | null>(null);
@@ -140,17 +153,31 @@ export const useSignTxData = ({
     [featureFlags, networkType],
   );
 
-  const accountInfo = useMemo((): SignTxDataAccountInfo | undefined => {
+  const accountId = useMemo((): AccountId | undefined => {
     if (!dappOrigin) return undefined;
-    const accountId = sessionAccountByOrigin[dappOrigin];
+    return sessionAccountByOrigin[dappOrigin] ?? undefined;
+  }, [dappOrigin, sessionAccountByOrigin]);
+
+  const accountInfo = useMemo((): SignTxDataAccountInfo | undefined => {
     if (!accountId) return undefined;
     const account = allAccounts.find(a => a.accountId === accountId);
     if (!account) return undefined;
+    const suffixInfo = resolveAccountNameSuffix(
+      flaggedExploitsByAccount[account.accountId] ?? [],
+      featureFlags,
+    );
+    // The chip label lives in ui-toolkit's `SecurityAlertPill` — brackets
+    // are the pill's visual encapsulation there. Here the suffix is
+    // concatenated onto plain account-name text (no pill around it), so
+    // we wrap it in brackets to keep the "flagged" affordance readable.
+    const compromisedSuffix = suffixInfo
+      ? ` [${suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey)}]`
+      : '';
     return {
-      name: account.metadata.name,
+      name: `${account.metadata.name}${compromisedSuffix}`,
       blockchainName: account.blockchainName,
     };
-  }, [dappOrigin, sessionAccountByOrigin, allAccounts]);
+  }, [accountId, allAccounts, flaggedExploitsByAccount, featureFlags, t]);
 
   return {
     transactionInfo,
@@ -167,6 +194,7 @@ export const useSignTxData = ({
     coinSymbol,
     networkMagic: chainId?.networkMagic,
     accountInfo,
+    accountId,
     tokenPrices: isTokenPricingEnabled ? allPrices : undefined,
     currencyTicker: isTokenPricingEnabled
       ? currencyPreference.ticker

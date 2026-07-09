@@ -16,13 +16,18 @@ import { useHomeProps } from './useHomeProps';
 export const Home = ({
   children,
 }: StackScreenProps<StackRoutes.Home> & { children: React.ReactNode }) => {
-  const { tabBarPosition, networkName, buildTabRoutes, laceButtonBadge } =
-    useHomeProps();
+  const {
+    tabBarPosition,
+    networkName,
+    buildTabRoutes,
+    laceButtonBadge,
+    isOffline,
+  } = useHomeProps();
   const { trackEvent } = useAnalytics();
 
   const openNetworkSelectionSheet = useCallback(() => {
     trackEvent('home | tab bar | network | press');
-    NavigationControls.sheets.navigate(SheetRoutes.NetworkSelection);
+    NavigationControls.navigate(SheetRoutes.NetworkSelection);
   }, [trackEvent]);
 
   const renderTabBar = useCallback(
@@ -36,10 +41,17 @@ export const Home = ({
           expandableRoutes={expandableRoutes}
           networkName={networkName}
           laceButtonBadge={laceButtonBadge}
+          isOffline={isOffline}
         />
       );
     },
-    [buildTabRoutes, networkName, laceButtonBadge, openNetworkSelectionSheet],
+    [
+      buildTabRoutes,
+      networkName,
+      laceButtonBadge,
+      openNetworkSelectionSheet,
+      isOffline,
+    ],
   );
 
   return (

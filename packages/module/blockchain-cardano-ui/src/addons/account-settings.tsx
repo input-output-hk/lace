@@ -1,8 +1,10 @@
 import { createAccountSettings } from '@lace-contract/account-management';
+import { AccountId } from '@lace-contract/wallet-repo';
 import { createUICustomisation } from '@lace-lib/util-render';
 import React from 'react';
 
 import { AccountSettingCollateral } from '../components/AccountSettingCollateral';
+import { HdWalletSyncRow } from '../pages/AccountSettings/HdWalletSyncRow';
 import { extractCardanoPublicExtendedKey } from '../utils/extract-cardano-public-key';
 
 import type { AccountSettingsUICustomisation } from '@lace-contract/account-management';
@@ -45,6 +47,10 @@ const accountSettings = () =>
               walletId={walletId}
             />
           ),
+        },
+        {
+          id: 'hd-wallet-sync',
+          component: () => <HdWalletSyncRow accountId={AccountId(accountId)} />,
         },
       ]),
     PublicKeysSupplier,

@@ -1,3 +1,4 @@
+import { whileActive } from '@lace-contract/wallet-active-state';
 import { createByBlockchainNameSelector } from '@lace-lib/util-store';
 import {
   concat,
@@ -75,6 +76,7 @@ const responseToPrice = (
   blockchain: response.blockchain,
   identifier: response.identifier,
   price: response.price,
+  priceInUsd: response.priceInUsd,
   fiatCurrency: response.fiatCurrency,
   change24h: response.change24h,
   lastUpdated: timestamp,
@@ -179,7 +181,7 @@ export const makePollPrices =
       tokenPricing,
       network: { selectNetworkType$ },
     },
-    { tokenPricingProvider, actions, logger },
+    { tokenPricingProvider, actions, logger, isWalletActive$ },
   ) => {
     // Return immediately if provider is not available (feature flag is off)
     if (!tokenPricingProvider) return EMPTY;
@@ -193,6 +195,10 @@ export const makePollPrices =
     const currencyPreference$ =
       tokenPricing.selectCurrencyPreference$ ?? of(DEFAULT_CURRENCY_PREFERENCE);
 
+    // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
+    // leaves the downstream `switchMap`'s in-flight `interval` alive on lock —
+    // it only blocks future outer emissions, not the already-running poll.
+    // See ADR 25.
     return isSynced$.pipe(
       filter(Boolean),
       switchMap(() =>
@@ -236,11 +242,19 @@ export const makePollPrices =
           }),
         ),
       ),
+      whileActive(isWalletActive$),
     );
   };
 
 /**
- * Fetch prices immediately when new tokens appear or when existing prices are stale
+ * Fetch prices immediately when new tokens appear or when existing prices are stale.
+ *
+ * Not gated on `isWalletActive$` — qualifies for ADR 25's state-cascade pattern.
+ * `selectAggregatedFungibleTokensForVisibleAccounts$` is mutated only by
+ * blockchain producers (Cardano `tokens` slice via `cardano-context`, Bitcoin
+ * via `blockchain-bitcoin`, Midnight via `blockchain-midnight`), all of which
+ * are themselves gated on `isWalletActive$`. With every producer paused while
+ * locked, this selector cannot emit during lock — so no fetch fires.
  */
 export const makeFetchPricesForNewTokens =
   (selectMapper: ByBlockchainNameSelector<TokenIdMapper>): SideEffect =>
@@ -292,6 +306,11 @@ export const makeFetchPricesForNewTokens =
 
 /**
  * Fetch prices on demand (e.g. when fiat currency changes).
+ *
+ * Not gated on `isWalletActive$` — qualifies for ADR 25's UI-action-cascade
+ * pattern. `setCurrencyPreference$` is dispatched only from the wallet UI
+ * fiat-currency selector; the lock screen blocks all UI interaction, so this
+ * action cannot fire while locked.
  */
 export const makeFetchPricesOnDemand =
   (selectMapper: ByBlockchainNameSelector<TokenIdMapper>): SideEffect =>
@@ -352,7 +371,7 @@ export const makeFetch24HPriceHistoryOnSync =
       tokenPricing,
       network: { selectNetworkType$ },
     },
-    { tokenPricingProvider, actions, logger },
+    { tokenPricingProvider, actions, logger, isWalletActive$ },
   ) => {
     if (!tokenPricingProvider) return EMPTY;
     const currencyPreference$ =
@@ -363,6 +382,12 @@ export const makeFetch24HPriceHistoryOnSync =
       distinctUntilChanged(),
     );
 
+    // Gated on `isWalletActive$` because an in-flight Cardano sync round can
+    // complete during lock (HTTP responses arriving after the gate flipped),
+    // transitioning `isSynced$` to `true` and triggering a price-history fetch.
+    // The gate also has a useful byproduct on unlock: a fresh subscription
+    // re-evaluates the price-history TTL, so cached entries that expired during
+    // a long lock window are refetched. See ADR 25.
     return isSynced$.pipe(
       filter(Boolean),
       switchMap(() =>
@@ -400,9 +425,18 @@ export const makeFetch24HPriceHistoryOnSync =
           }),
         ),
       ),
+      whileActive(isWalletActive$),
     );
   };
 
+/**
+ * Fetch price history on demand (e.g. when the user opens a token detail view).
+ *
+ * Not gated on `isWalletActive$` — qualifies for ADR 25's UI-action-cascade
+ * pattern. `requestPriceHistory$` is dispatched only from UI hooks, and the
+ * lock screen blocks all UI interaction, so this action cannot fire while
+ * locked.
+ */
 export const makeFetchPriceHistoryOnDemand =
   (selectMapper: ByBlockchainNameSelector<TokenIdMapper>): SideEffect =>
   (

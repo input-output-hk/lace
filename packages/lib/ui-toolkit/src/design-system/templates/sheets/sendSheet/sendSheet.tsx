@@ -10,7 +10,6 @@ import {
   type FeeEntry,
 } from '../../../../utils/sendSheetUtils';
 import { Column } from '../../../atoms';
-import { SheetFooter, SheetHeader, useFooterHeight } from '../../../molecules';
 import { Sheet } from '../../../organisms';
 
 import {
@@ -89,6 +88,11 @@ export interface SendSheetProps {
   actions: SheetActionsProps;
   /** Optional footer title row content (e.g. from send-flow sheet UI customisation). Rendered below divider with transparent background. */
   sheetFooterTitleRow?: ReactNode;
+  /** Optional node rendered inside the scroll body immediately after the
+   *  account selector, before the recipient input. Used by the wallet app
+   *  to surface an inline security-alert (chip + disclosure) for a
+   *  compromised source account without navigating away from the sheet. */
+  belowAccountSlot?: ReactNode;
 }
 
 export const SendSheet = ({
@@ -96,109 +100,76 @@ export const SendSheet = ({
   values,
   utils,
   actions,
-  sheetFooterTitleRow,
+  belowAccountSlot,
 }: SendSheetProps) => {
-  const { headerTitle, reviewTransactionLabel } = copies;
   const {
-    isReviewTransactionEnabled,
     noteSectionLength,
     shouldShowNoteSection,
     NoticeComponent,
     FeeSection,
   } = utils;
-  const { onReviewTransactionPress } = actions;
 
   const summaryValues = useMemo(
     () => ({ estimatedFee: values.estimatedFee }),
     [values.estimatedFee],
   );
 
-  const footerHeight = useFooterHeight({
-    hasTitleRow: !!sheetFooterTitleRow,
-  });
-  const contentContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
-
-  const footerPrimaryButton = useMemo(
-    () => ({
-      label: reviewTransactionLabel,
-      onPress: onReviewTransactionPress,
-      disabled: !isReviewTransactionEnabled,
-      testID: 'send-form-review-transaction-button' as const,
-    }),
-    [
-      reviewTransactionLabel,
-      onReviewTransactionPress,
-      isReviewTransactionEnabled,
-    ],
-  );
-
   return (
-    <>
-      <SheetHeader title={headerTitle} testID="send-form-header" />
-      <Sheet.Scroll
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={contentContainerStyle}>
-        <Column
-          justifyContent="space-between"
-          gap={spacing.M}
-          style={styles.content}>
-          <Column style={styles.section}>
-            <AccountSelector
+    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+      <Column
+        justifyContent="space-between"
+        gap={spacing.M}
+        style={styles.content}>
+        <Column style={styles.section}>
+          <AccountSelector
+            copies={copies}
+            values={values}
+            actions={actions}
+            testIdPrefix="send-form"
+          />
+          {belowAccountSlot}
+          <RecipientInput
+            copies={copies}
+            values={values}
+            utils={utils}
+            actions={actions}
+            testIdPrefix="send-form"
+          />
+          <AssetsSection
+            copies={copies}
+            values={values}
+            utils={utils}
+            actions={actions}
+          />
+          {shouldShowNoteSection && (
+            <NoteSection
               copies={copies}
               values={values}
               actions={actions}
+              length={noteSectionLength}
               testIdPrefix="send-form"
             />
-            <RecipientInput
-              copies={copies}
-              values={values}
-              utils={utils}
-              actions={actions}
-              testIdPrefix="send-form"
-            />
-            <AssetsSection
-              copies={copies}
-              values={values}
-              utils={utils}
-              actions={actions}
-            />
-            {shouldShowNoteSection && (
-              <NoteSection
-                copies={copies}
-                values={values}
-                actions={actions}
-                length={noteSectionLength}
-                testIdPrefix="send-form"
-              />
-            )}
+          )}
 
-            {FeeSection && <FeeSection />}
+          {FeeSection && <FeeSection />}
 
-            {NoticeComponent && <NoticeComponent />}
+          {NoticeComponent && <NoticeComponent />}
 
-            <SummarySection
-              copies={copies}
-              values={summaryValues}
-              utils={utils}
-              testIdPrefix="send-form"
-            />
-          </Column>
+          <SummarySection
+            copies={copies}
+            values={summaryValues}
+            utils={utils}
+            testIdPrefix="send-form"
+          />
         </Column>
-      </Sheet.Scroll>
-      <SheetFooter
-        titleRow={sheetFooterTitleRow}
-        primaryButton={footerPrimaryButton}
-      />
-    </>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: spacing.XL,
+    paddingBottom: spacing.XXXXL,
   },
   section: {
     gap: spacing.XL,

@@ -16,6 +16,7 @@ import {
   tap,
 } from 'rxjs';
 
+import { KEEP_ALIVE_MESSAGE, isKeepAliveMessage } from './util';
 import { ChannelName } from './value-objects/channel-name.vo';
 
 import type {
@@ -65,6 +66,19 @@ export const createBackgroundMessenger = ({
     return channel;
   };
   const onPortMessage = (data: unknown, port: MessengerPort) => {
+    if (isKeepAliveMessage(data)) {
+      // Reserved transport-level ping. Mere receipt resets the SW idle timer;
+      // the ack lets the consumer observe SW liveness without invoking user code.
+      try {
+        port.postMessage(KEEP_ALIVE_MESSAGE);
+      } catch (error) {
+        logger.warn(
+          `[BackgroundMessenger(${port.name})] failed to ack keepAlive ping`,
+          error,
+        );
+      }
+      return;
+    }
     logger.debug(`[BackgroundMessenger(${port.name})] message`, data);
     const { message$ } = channels.get(ChannelName(port.name))!;
     message$.next({ data, port });

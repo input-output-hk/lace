@@ -1,4 +1,8 @@
 import {
+  appStoreContract,
+  performAppReloadDependencyContract,
+} from '@lace-contract/app';
+import {
   appLockActivityChannelAddon,
   appLockStoreContract,
 } from '@lace-contract/app-lock';
@@ -6,6 +10,10 @@ import {
   authenticationPromptDeferBiometricPromptAddon,
   authenticationPromptStoreContract,
 } from '@lace-contract/authentication-prompt';
+import {
+  featureFlagRefreshTriggerDependencyContract,
+  featureStoreContract,
+} from '@lace-contract/feature';
 import {
   combineContracts,
   inferModuleContext,
@@ -25,10 +33,14 @@ import type {
 const implementsContracts = combineContracts([
   authenticationPromptDeferBiometricPromptAddon,
   appLockActivityChannelAddon,
+  featureFlagRefreshTriggerDependencyContract,
+  performAppReloadDependencyContract,
 ] as const);
 const dependsOnContracts = combineContracts([
+  appStoreContract,
   appLockStoreContract,
   authenticationPromptStoreContract,
+  featureStoreContract,
 ] as const);
 
 const mobileModule = inferModuleContext({

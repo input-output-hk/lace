@@ -1,4 +1,5 @@
 import { Serialization } from '@cardano-sdk/core';
+import { whileActive } from '@lace-contract/wallet-active-state';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { firstStateOfStatus, serializeError } from '@lace-lib/util-store';
 import { retryBackoff } from 'backoff-rxjs';
@@ -18,6 +19,8 @@ import {
   timeout,
   withLatestFrom,
 } from 'rxjs';
+
+import { getQuoteAnalyticsContext } from '../get-quote-analytics-context';
 
 import type {
   SwapDexEntry,
@@ -66,18 +69,25 @@ export const makeFetchQuote: SideEffect = (
   {
     swapFlow: { selectSwapFlowState$ },
     swapConfig: { selectSlippage$, selectExcludedDexes$ },
+    swapAnalytics: { selectSwapSessionId$ },
     tokens: { selectTokenById$ },
   },
   { actions, logger, swapProviders },
 ) =>
   firstStateOfStatus(selectSwapFlowState$, 'Quoting').pipe(
-    withLatestFrom(selectSlippage$, selectExcludedDexes$, selectTokenById$),
+    withLatestFrom(
+      selectSlippage$,
+      selectExcludedDexes$,
+      selectTokenById$,
+      selectSwapSessionId$,
+    ),
     switchMap(
-      ([state, slippage, excludedDexes, selectTokenById]: [
+      ([state, slippage, excludedDexes, selectTokenById, swapSessionId]: [
         SwapStateQuoting,
         number,
         string[],
         (tokenId: string) => { decimals: number } | undefined,
+        string | undefined,
       ]) => {
         const sellToken = selectTokenById(state.sellTokenId);
         const request: SwapQuoteRequest = {
@@ -125,6 +135,8 @@ export const makeFetchQuote: SideEffect = (
                   tokenOut: state.buyTokenId,
                   amount: state.sellAmount,
                   excludedDexs: excludedDexes,
+                  ...getQuoteAnalyticsContext(selectedQuote),
+                  ...(swapSessionId && { swapSessionId }),
                 },
               }),
             ]);
@@ -141,12 +153,16 @@ export const makeQuoteRefresh: SideEffect = (
     swapConfig: { selectSlippage$, selectExcludedDexes$ },
     tokens: { selectTokenById$ },
   },
-  { actions, logger, swapProviders },
+  { actions, logger, swapProviders, isWalletActive$ },
 ) => {
   const notQuoted$ = selectSwapFlowState$.pipe(
     switchMap(state => (state.status !== 'Quoted' ? of(true) : [])),
   );
 
+  // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
+  // leaves the downstream `switchMap`'s in-flight `interval` alive on lock —
+  // it only blocks future outer emissions, not the already-running poll.
+  // See ADR 25.
   return firstStateOfStatus(selectSwapFlowState$, 'Quoted').pipe(
     switchMap(state =>
       interval(QUOTE_REFRESH_INTERVAL_MS).pipe(
@@ -190,6 +206,7 @@ export const makeQuoteRefresh: SideEffect = (
         }),
       ),
     ),
+    whileActive(isWalletActive$),
   );
 };
 
@@ -198,6 +215,7 @@ export const makeBuildSwapTx: SideEffect = (
   {
     swapFlow: { selectSwapFlowState$ },
     swapConfig: { selectSlippage$, selectExcludedDexes$ },
+    swapAnalytics: { selectSwapSessionId$ },
     addresses: { selectByAccountId$ },
     cardanoContext: { selectAccountUtxos$, selectAccountUnspendableUtxos$ },
   },
@@ -210,6 +228,7 @@ export const makeBuildSwapTx: SideEffect = (
       selectByAccountId$,
       selectAccountUtxos$,
       selectAccountUnspendableUtxos$,
+      selectSwapSessionId$,
     ),
     switchMap(
       ([
@@ -219,6 +238,7 @@ export const makeBuildSwapTx: SideEffect = (
         selectByAccountId,
         accountUtxos,
         accountUnspendableUtxos,
+        swapSessionId,
       ]: [SwapStateBuilding, number, string[], ...unknown[]]) => {
         const targetProvider = swapProviders[0];
 
@@ -294,6 +314,10 @@ export const makeBuildSwapTx: SideEffect = (
                       tokenOut: state.buyTokenId,
                       amount: state.sellAmount,
                       excludedDexs: excludedDexes,
+                      ...getQuoteAnalyticsContext(state.selectedQuote),
+                      ...((swapSessionId as string | undefined) && {
+                        swapSessionId: swapSessionId as string,
+                      }),
                     },
                   }),
                 ]);
@@ -474,16 +498,24 @@ export const makeAwaitConfirmation =
   ({ confirmTx }: { confirmTx: ConfirmTx }): SideEffect =>
   (
     _,
-    { swapFlow: { selectSwapFlowState$ }, wallets: { selectAll$ } },
+    {
+      swapFlow: { selectSwapFlowState$ },
+      swapAnalytics: { selectSwapSessionId$ },
+      wallets: { selectAll$ },
+    },
     { actions, logger },
   ) =>
     firstStateOfStatus(selectSwapFlowState$, 'AwaitingConfirmation').pipe(
-      withLatestFrom(selectAll$),
-      switchMap(([state, wallets]) => {
+      withLatestFrom(selectAll$, selectSwapSessionId$),
+      switchMap(([state, wallets, swapSessionId]) => {
         const allWallets = wallets as readonly AnyWallet[];
         const wallet = allWallets.find(w =>
           w.accounts.some(a => a.accountId === state.accountId),
         );
+
+        const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
+        const sessionContext: Record<string, string> =
+          typeof swapSessionId === 'string' ? { swapSessionId } : {};
 
         if (!wallet) {
           logger.error('No wallet found for swap confirmation');
@@ -493,7 +525,11 @@ export const makeAwaitConfirmation =
             }),
             actions.analytics.trackEvent({
               eventName: 'swaps | sign failure',
-              payload: { reason: 'v2.swap.error.no-wallet-found' },
+              payload: {
+                reason: 'v2.swap.error.no-wallet-found',
+                ...quoteContext,
+                ...sessionContext,
+              },
             }),
           ]);
         }
@@ -524,7 +560,11 @@ export const makeAwaitConfirmation =
                 action,
                 actions.analytics.trackEvent({
                   eventName: 'swaps | sign failure',
-                  payload: { reason: action.payload.errorMessage },
+                  payload: {
+                    reason: action.payload.errorMessage,
+                    ...quoteContext,
+                    ...sessionContext,
+                  },
                 }),
               ]);
             }
@@ -537,7 +577,7 @@ export const makeAwaitConfirmation =
               actions.swapFlow.confirmationFailed({ errorMessage: reason }),
               actions.analytics.trackEvent({
                 eventName: 'swaps | sign failure',
-                payload: { reason },
+                payload: { reason, ...quoteContext, ...sessionContext },
               }),
             ]);
           }),
@@ -549,12 +589,19 @@ export const makeProcessing =
   ({ submitTx }: { submitTx: SubmitTx }): SideEffect =>
   (
     _,
-    { swapFlow: { selectSwapFlowState$ }, swapConfig: { selectSlippage$ } },
+    {
+      swapFlow: { selectSwapFlowState$ },
+      swapConfig: { selectSlippage$ },
+      swapAnalytics: { selectSwapSessionId$ },
+    },
     { actions, logger },
   ) =>
     firstStateOfStatus(selectSwapFlowState$, 'Processing').pipe(
-      withLatestFrom(selectSlippage$),
-      switchMap(([state, slippage]) => {
+      withLatestFrom(selectSlippage$, selectSwapSessionId$),
+      switchMap(([state, slippage, swapSessionId]) => {
+        const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
+        const sessionContext: Record<string, string> =
+          typeof swapSessionId === 'string' ? { swapSessionId } : {};
         return submitTx(
           {
             accountId: state.accountId,
@@ -578,7 +625,12 @@ export const makeProcessing =
                     tokenIn: state.sellTokenId,
                     tokenOut: state.buyTokenId,
                     quantity: state.sellAmount,
+                    expectedBuyAmount: state.selectedQuote.expectedBuyAmount,
+                    quotedPrice: state.selectedQuote.price,
                     targetSlippage: slippage.toString(),
+                    txId: value.txId,
+                    ...quoteContext,
+                    ...sessionContext,
                   },
                 }),
               ]);
@@ -590,7 +642,7 @@ export const makeProcessing =
               actions.swapFlow.submissionFailed({ errorMessage: reason }),
               actions.analytics.trackEvent({
                 eventName: 'swaps | sign failure',
-                payload: { reason },
+                payload: { reason, ...quoteContext, ...sessionContext },
               }),
             ]);
           }),
@@ -601,13 +653,27 @@ export const makeProcessing =
               actions.swapFlow.submissionFailed({ errorMessage: reason }),
               actions.analytics.trackEvent({
                 eventName: 'swaps | sign failure',
-                payload: { reason },
+                payload: { reason, ...quoteContext, ...sessionContext },
               }),
             ]);
           }),
         );
       }),
     );
+
+/**
+ * Mints a fresh `swapSessionId` whenever the swap UI mounts or unmounts (the
+ * `swapFlow.reset` action is dispatched from the SwapCenter screen's
+ * `useFocusEffect` on entry and blur). Every funnel event emitted while the
+ * session is active carries this id, so PostHog can compute drop-off across
+ * `select token → fetch estimate → review tx → sign success/failure` for a
+ * single attempt without false joins from prior sessions.
+ */
+export const rotateSwapSession: SideEffect = (
+  { swapFlow: { reset$ } },
+  _,
+  { actions, uuid },
+) => reset$.pipe(map(() => actions.swapAnalytics.swapSessionStarted(uuid())));
 
 export const swapContextSideEffects = [
   makeAutoQuote,
@@ -616,4 +682,5 @@ export const swapContextSideEffects = [
   makeFetchQuote,
   makeQuoteRefresh,
   makeBuildSwapTx,
+  rotateSwapSession,
 ];

@@ -25,6 +25,11 @@ import type {
   InMemoryWalletIntegration,
 } from '@lace-contract/in-memory';
 import type { ContextualLaceInit } from '@lace-contract/module';
+import type {
+  InMemoryWalletAccount,
+  LazyInMemoryWalletAccount,
+  WalletId,
+} from '@lace-contract/wallet-repo';
 
 /**
  * Default account name for Bitcoin accounts.
@@ -48,6 +53,47 @@ const encryptBitcoinSeed = async (seed: Buffer, passphrase: Uint8Array) => {
   return HexBytes.fromByteArray(seedEncrypted);
 };
 
+type BitcoinAccountFor<T extends 'InMemory' | 'LazyInMemory'> =
+  T extends 'InMemory'
+    ? InMemoryWalletAccount<BitcoinBip32AccountProps>
+    : LazyInMemoryWalletAccount<BitcoinBip32AccountProps>;
+
+const buildAccountsForNetworks = <T extends 'InMemory' | 'LazyInMemory'>({
+  walletId,
+  accountIndex,
+  accountName,
+  targetNetworks,
+  extendedAccountPublicKeys,
+  accountType,
+}: {
+  walletId: WalletId;
+  accountIndex: number;
+  accountName?: string;
+  targetNetworks?: Parameters<typeof resolveTargetNetworks>[0];
+  extendedAccountPublicKeys: ReturnType<typeof getExtendedPubKeys>;
+  accountType: T;
+}): BitcoinAccountFor<T>[] =>
+  resolveTargetNetworks(targetNetworks).map(network => {
+    const networkId = BitcoinNetworkId(network);
+    return {
+      accountId: BitcoinAccountId(walletId, accountIndex, network),
+      accountType,
+      blockchainName: 'Bitcoin',
+      blockchainNetworkId: networkId,
+      blockchainSpecific: {
+        accountIndex,
+        extendedAccountPublicKeys:
+          network === BitcoinNetwork.Mainnet
+            ? extendedAccountPublicKeys.mainnet
+            : extendedAccountPublicKeys.testnet4,
+        networkId,
+      },
+      metadata: { name: accountName || defaultAccountName(accountIndex) },
+      networkType: network === BitcoinNetwork.Mainnet ? 'mainnet' : 'testnet',
+      walletId,
+    } as BitcoinAccountFor<T>;
+  });
+
 export const createAccounts: CreateInMemoryWalletAccounts<
   BitcoinBip32AccountProps,
   BitcoinSpecificInMemoryWalletData
@@ -59,7 +105,6 @@ export const createAccounts: CreateInMemoryWalletAccounts<
   accountName,
   targetNetworks,
 }) => {
-  const targetBitcoinNetworks = resolveTargetNetworks(targetNetworks);
   const seed = await emip3decrypt(
     Buffer.from(encryptedRootPrivateKey, 'hex'),
     password,
@@ -71,29 +116,14 @@ export const createAccounts: CreateInMemoryWalletAccounts<
 
   seed.fill(0);
 
-  return await Promise.all(
-    targetBitcoinNetworks.map(async network => {
-      const networkId = BitcoinNetworkId(network);
-
-      return {
-        blockchainName: 'Bitcoin',
-        networkType: network === BitcoinNetwork.Mainnet ? 'mainnet' : 'testnet',
-        blockchainNetworkId: networkId,
-        blockchainSpecific: {
-          accountIndex,
-          extendedAccountPublicKeys:
-            network === BitcoinNetwork.Mainnet
-              ? extendedAccountPublicKeys.mainnet
-              : extendedAccountPublicKeys.testnet4,
-          networkId,
-        },
-        accountId: BitcoinAccountId(walletId, accountIndex, network),
-        accountType: 'InMemory',
-        walletId,
-        metadata: { name: accountName || defaultAccountName(accountIndex) },
-      };
-    }),
-  );
+  return buildAccountsForNetworks({
+    accountIndex,
+    accountName,
+    accountType: 'InMemory',
+    extendedAccountPublicKeys,
+    targetNetworks,
+    walletId,
+  });
 };
 
 export const initializeWallet: InitializeInMemoryWallet<
@@ -101,8 +131,32 @@ export const initializeWallet: InitializeInMemoryWallet<
   BitcoinSpecificInMemoryWalletData
 > = async (props, dependencies) => {
   const accountIndex = 0;
+  const { walletId, recoveryPhrase, password } = props;
+
+  if (!password) {
+    // Lazy path: derive extended public keys from the mnemonic without
+    // encrypting/persisting the seed. Lace persists no seed material.
+    const seed = bip39.mnemonicToSeedSync(recoveryPhrase.join(' '));
+    try {
+      const extendedAccountPublicKeys = getExtendedPubKeys(
+        Buffer.from(seed),
+        accountIndex,
+      );
+      return {
+        accounts: buildAccountsForNetworks({
+          accountIndex,
+          accountType: 'LazyInMemory',
+          extendedAccountPublicKeys,
+          walletId,
+        }),
+      };
+    } finally {
+      seed.fill(0);
+    }
+  }
+
   const blockchainSpecificWalletData = await createBlockchainSpecificWalletData(
-    props,
+    { password, recoveryPhrase, walletId },
     dependencies,
   );
 
@@ -113,6 +167,7 @@ export const initializeWallet: InitializeInMemoryWallet<
         accountIndex,
         blockchainName: 'Bitcoin',
         blockchainSpecific: blockchainSpecificWalletData,
+        password,
       },
       dependencies,
     ),

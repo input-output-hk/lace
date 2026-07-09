@@ -21,12 +21,14 @@ export const getSupportedCurrency = (currency: string): SupportedCurrency => {
 export const buildPriceUrl = (
   baseUrl: string,
   coinGeckoId: string,
-  currency: string,
+  { currency, includeUsd = false }: { currency: string; includeUsd?: boolean },
 ): string => {
   const supportedCurrency = getSupportedCurrency(currency);
   const vsCurrency = CURRENCY_MAP[supportedCurrency];
+  const vsCurrencies =
+    includeUsd && vsCurrency !== 'usd' ? `${vsCurrency},usd` : vsCurrency;
 
-  return `${baseUrl}${COINGECKO_ENDPOINTS.SIMPLE_PRICE}?ids=${coinGeckoId}&vs_currencies=${vsCurrency}&include_24hr_change=true`;
+  return `${baseUrl}${COINGECKO_ENDPOINTS.SIMPLE_PRICE}?ids=${coinGeckoId}&vs_currencies=${vsCurrencies}&include_24hr_change=true`;
 };
 
 /**
@@ -116,6 +118,7 @@ export const extractPriceData = (
   return {
     price: priceInfo[cgCurrency],
     change24h: priceInfo[`${cgCurrency}_24h_change`],
+    priceInUsd: priceInfo['usd'],
   };
 };
 

@@ -47,8 +47,11 @@ import type {
   SignatureEnabled,
   SignatureVerifyingKey,
 } from '@midnight-ntwrk/ledger-v8';
-import type { UtxoWithMeta } from '@midnight-ntwrk/wallet-sdk-facade';
+import type { UtxoWithMeta } from '@midnight-ntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
+
+const isNativeNightCoin = (coin: UtxoWithMeta) =>
+  coin.utxo.type === nativeToken().raw;
 
 export type MidnightTxParameters = {
   amount: BigNumber;
@@ -275,9 +278,7 @@ export const makeBuildTx =
         midnightWallet.state().pipe(
           take(1),
           map(({ unshielded: { availableCoins } }) =>
-            availableCoins.filter(
-              ({ utxo: { type } }) => type === nativeToken().raw,
-            ),
+            availableCoins.filter(isNativeNightCoin),
           ),
           map(availableNightCoins =>
             dependencies.buildTransaction({

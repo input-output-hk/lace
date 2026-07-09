@@ -1,6 +1,7 @@
 export type CoinGeckoPriceData = {
   price: number;
   change24h: number;
+  priceInUsd?: number;
 };
 
 export type CoinGeckoCoinEntry = {

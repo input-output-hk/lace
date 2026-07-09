@@ -102,7 +102,7 @@ export const submitClaimSideEffect: SideEffect = (
           code: 400,
           status: 'invalidaddress',
         };
-        NavigationControls.actions.closeAndNavigate(StackRoutes.ClaimError);
+        NavigationControls.navigate(StackRoutes.ClaimError);
         return of(actions.cardanoUriLinking.submitClaimFailed(error));
       }
 
@@ -136,15 +136,11 @@ export const submitClaimSideEffect: SideEffect = (
                 const error: ClaimResponseError = isClaimResponseError(parsed)
                   ? parsed
                   : { code: 404, status: 'notfound' };
-                NavigationControls.actions.closeAndNavigate(
-                  StackRoutes.ClaimError,
-                );
+                NavigationControls.navigate(StackRoutes.ClaimError);
                 return actions.cardanoUriLinking.submitClaimFailed(error);
               }
 
-              NavigationControls.actions.closeAndNavigate(
-                StackRoutes.ClaimSuccess,
-              );
+              NavigationControls.navigate(StackRoutes.ClaimSuccess);
               return actions.cardanoUriLinking.submitClaimSuccess(parsed);
             }),
           ),
@@ -154,7 +150,7 @@ export const submitClaimSideEffect: SideEffect = (
           const typedError: ClaimResponseError = isClaimResponseError(error)
             ? error
             : { code: 404, status: 'notfound' };
-          NavigationControls.actions.closeAndNavigate(StackRoutes.ClaimError);
+          NavigationControls.navigate(StackRoutes.ClaimError);
           return of(actions.cardanoUriLinking.submitClaimFailed(typedError));
         }),
       );

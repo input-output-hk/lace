@@ -160,6 +160,9 @@ export const migrateMultiDelegationReducers = {
 export const migrateMultiDelegationActions = {
   migrateMultiDelegation: {
     ...slice.actions,
+    startMigration: createAction<MultiDelegationAccount>(
+      'migrateMultiDelegation/startMigration',
+    ),
     migrate: createAction<MultiDelegationAccount>(
       'migrateMultiDelegation/migrate',
     ),

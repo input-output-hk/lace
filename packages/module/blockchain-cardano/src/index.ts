@@ -24,6 +24,7 @@ import {
 import {
   addressValidatorAddonContract,
   baseTokenAddonContract,
+  chainMinimumAmountTokenValidatorAddonContract,
 } from '@lace-contract/send-flow';
 import { signerFactoryAddonContract } from '@lace-contract/signer';
 import { stakingCenterStoreContract } from '@lace-contract/staking-center';
@@ -31,7 +32,10 @@ import { syncStoreContract } from '@lace-contract/sync';
 import { tokenIdMapperAddonContract } from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorImplementationAddonContract } from '@lace-contract/tx-executor';
-import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
+import {
+  walletIdentityAddonContract,
+  walletRepoStoreContract,
+} from '@lace-contract/wallet-repo';
 
 import store from './store';
 
@@ -57,12 +61,14 @@ const implementsContracts = combineContracts([
   activitiesItemCustomizationsAddonContract,
   syncStoreContract,
   baseTokenAddonContract,
+  chainMinimumAmountTokenValidatorAddonContract,
   addressBookAddressValidatorAddonContract,
   delegationTxBuilderAddonContract,
   cardanoInMemorySigningDependencyContract,
   tokenIdMapperAddonContract,
   deregistrationTxBuilderAddonContract,
   stakingCenterStoreContract,
+  walletIdentityAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
@@ -89,6 +95,8 @@ const extensionModule = inferModuleContext({
       import('./in-memory-wallet-integration'),
     loadAddressValidator: async () => import('./address-validator'),
     loadBaseToken: async () => import('./exposed-modules/base-token-selector'),
+    loadChainMinimumAmountTokenValidator: async () =>
+      import('./exposed-modules/chain-minimum-amount-token-validator'),
     loadTxExecutorImplementation: async () =>
       import('./tx-executor-implementation'),
     loadActivitiesItemUICustomisations: async () =>
@@ -105,6 +113,7 @@ const extensionModule = inferModuleContext({
     loadSendFlowSheetUICustomisations: async () =>
       import('./exposed-modules/send-flow-sheet-ui-customization'),
     loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
+    loadWalletIdentity: async () => import('./exposed-modules/wallet-identity'),
   },
 });
 

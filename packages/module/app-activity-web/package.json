@@ -6,8 +6,11 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/app": "*",
     "@lace-contract/app-lock": "*",
+    "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
+    "@lace-contract/views": "*",
     "@lace-sdk/extension-messaging": "*",
     "react": "*",
     "rxjs": "*",

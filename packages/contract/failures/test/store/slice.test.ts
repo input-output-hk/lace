@@ -1,3 +1,5 @@
+import '../../src/augmentations';
+
 import { describe, expect, it } from 'vitest';
 
 import { failuresActions as actions } from '../../src/store/slice';

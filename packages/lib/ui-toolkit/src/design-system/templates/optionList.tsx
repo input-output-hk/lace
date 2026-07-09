@@ -22,7 +22,6 @@ type ListOptionType = {
 };
 
 interface OptionListProps {
-  colors: readonly string[];
   options: ListOptionType[];
   title: string;
   subtitle: string;
@@ -33,8 +32,9 @@ interface OptionListProps {
   searchPlaceholder?: string;
   onBackPress?: () => void;
   onClosePress?: () => void;
-  isTablet?: boolean;
 }
+
+const ItemSeparator = () => <View style={styles.itemSeparator} />;
 
 export const OptionList = ({
   options,
@@ -47,7 +47,6 @@ export const OptionList = ({
   searchPlaceholder,
   onBackPress,
   onClosePress,
-  isTablet,
 }: OptionListProps) => {
   const { theme } = useTheme();
   const { collapseScrollY, onScroll } = usePageHeaderCollapseScroll();
@@ -55,11 +54,10 @@ export const OptionList = ({
   const headerSection = useMemo(
     () => (
       <PageHeaderSection
-        isTablet={isTablet}
         title={title}
         subtitle={subtitle}
         backgroundImage={backgroundImage}
-        showSearch={showSearch || isTablet}
+        showSearch={showSearch}
         searchValue={searchValue}
         onSearchChange={onSearchChange}
         searchPlaceholder={searchPlaceholder}
@@ -67,7 +65,8 @@ export const OptionList = ({
         onClosePress={onClosePress}
         testID="option-list-header-section"
         pageHeaderTestID="option-list-page-header"
-        collapseScrollY={collapseScrollY}></PageHeaderSection>
+        collapseScrollY={collapseScrollY}
+        stickyInScrollParent></PageHeaderSection>
     ),
     [
       title,
@@ -75,7 +74,6 @@ export const OptionList = ({
       backgroundImage,
       onBackPress,
       onClosePress,
-      isTablet,
       collapseScrollY,
       searchValue,
       onSearchChange,
@@ -121,7 +119,7 @@ export const OptionList = ({
           data={options}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+          ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onScroll={onScroll}

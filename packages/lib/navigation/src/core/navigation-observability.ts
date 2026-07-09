@@ -10,22 +10,17 @@ type RouteLike = {
   params?: unknown;
 };
 
-type ScreenListeners = {
-  focus: () => void;
-  blur: () => void;
-  transitionStart?: (event: { data?: { closing?: boolean } }) => void;
+type ActiveRoute = {
+  name: string;
+  params?: unknown;
+  navigator: NavigatorKind;
 };
 
-type ScreenListenersFactory = (args: {
-  route: {
-    name: string;
-    params?: unknown;
-  };
-}) => ScreenListeners;
-
 type ContainerObservabilityProps = {
-  onReady: () => void;
-  onStateChange: (state: Readonly<NavigationState> | undefined) => void;
+  onNavigationReady: () => void;
+  onNavigationStateChange: (
+    state: Readonly<NavigationState> | undefined,
+  ) => void;
 };
 
 type NavigationRefLike = {
@@ -35,6 +30,7 @@ type NavigationRefLike = {
         params?: unknown;
       }
     | undefined;
+  getState?: () => Readonly<NavigationState> | undefined;
 };
 
 const safeAddBreadcrumb = (
@@ -90,167 +86,123 @@ export const trackNavigationAction = (
   });
 };
 
-const createNavigationLifecycleTracker = (
-  navigator: NavigatorKind,
-): {
-  onReady: (route: RouteLike | undefined) => void;
+const getActiveRouteFromState = (
+  navigationState: Readonly<NavigationState> | undefined,
+  navigator: NavigatorKind = 'sheet',
+): ActiveRoute | undefined => {
+  if (!navigationState?.routes?.length) return undefined;
+
+  const routeIndex = navigationState.index ?? navigationState.routes.length - 1;
+  const route = navigationState.routes[routeIndex];
+  if (!route) return undefined;
+
+  const nextNavigator =
+    navigator === 'sheet' && route.name === 'RootStack' ? 'stack' : navigator;
+
+  const nestedState = route.state as Readonly<NavigationState> | undefined;
+  if (nestedState) {
+    const nestedRoute = getActiveRouteFromState(nestedState, nextNavigator);
+    if (nestedRoute?.name) return nestedRoute;
+  }
+
+  return {
+    name: route.name,
+    params: route.params,
+    navigator: nextNavigator,
+  };
+};
+
+const createNavigationLifecycleTracker = (): {
+  onReady: (
+    navigationState: Readonly<NavigationState> | undefined,
+    route: RouteLike | undefined,
+  ) => void;
   onStateChange: (state: Readonly<NavigationState> | undefined) => void;
-  createScreenListeners: (withTransitions?: boolean) => ScreenListenersFactory;
 } => {
   const seenRoutes = new Set<string>();
   const state = {
     previousRouteName: null as string | null,
   };
 
-  const trackDidLoad = (routeName: string): void => {
-    if (seenRoutes.has(routeName)) return;
-    seenRoutes.add(routeName);
-    trackViewLifecycle(navigator, 'did_load', routeName);
+  const trackDidLoad = (route: ActiveRoute): void => {
+    const routeKey = `${route.navigator}:${route.name}`;
+    if (seenRoutes.has(routeKey)) return;
+
+    seenRoutes.add(routeKey);
+    trackViewLifecycle(route.navigator, 'did_load', route.name);
   };
 
   const handleRouteChange = (
-    route: RouteLike | undefined,
+    route: ActiveRoute | undefined,
     isInitial: boolean,
   ): void => {
     const currentRouteName = route?.name;
     if (!currentRouteName) return;
 
-    trackDidLoad(currentRouteName);
+    trackDidLoad(route);
 
     const previousRouteName = state.previousRouteName;
     const didRouteChange = previousRouteName !== currentRouteName;
 
     if (isInitial || didRouteChange) {
       safeAddBreadcrumb('navigation.state_change', 'navigation.state_change', {
-        navigator,
+        navigator: route.navigator,
         from: previousRouteName,
         to: currentRouteName,
-        ...getRouteParamsSummary(route?.params),
+        ...getRouteParamsSummary(route.params),
       });
     }
 
     state.previousRouteName = currentRouteName;
   };
 
-  const getCurrentRouteFromState = (
-    navigationState: Readonly<NavigationState> | undefined,
-  ): RouteLike | undefined => {
-    if (!navigationState?.routes?.length) return undefined;
-
-    const routeIndex =
-      navigationState.index ?? navigationState.routes.length - 1;
-    const route = navigationState.routes[routeIndex];
-    if (!route) return undefined;
-
-    const nestedState = route.state as Readonly<NavigationState> | undefined;
-    if (nestedState) {
-      const nestedRoute = getCurrentRouteFromState(nestedState);
-      if (nestedRoute?.name) return nestedRoute;
-    }
-
-    return { name: route.name, params: route.params };
-  };
-
-  const createScreenListeners =
-    (withTransitions = false): ScreenListenersFactory =>
-    ({ route }) => {
-      const routeName = route.name;
-
-      return {
-        focus: () => {
-          trackDidLoad(routeName);
-          trackViewLifecycle(navigator, 'did_appear', routeName);
-        },
-        blur: () => {
-          trackViewLifecycle(navigator, 'did_disappear', routeName);
-        },
-        ...(withTransitions
-          ? {
-              transitionStart: (event: { data?: { closing?: boolean } }) => {
-                const isClosing = event?.data?.closing === true;
-                trackViewLifecycle(
-                  navigator,
-                  isClosing ? 'will_disappear' : 'will_appear',
-                  routeName,
-                );
-              },
-            }
-          : {}),
-      };
-    };
-
   return {
-    onReady: route => {
-      handleRouteChange(route, true);
+    onReady: (navigationState, route) => {
+      const activeRoute =
+        getActiveRouteFromState(navigationState) ??
+        (route?.name
+          ? {
+              name: route.name,
+              params: route.params,
+              navigator: 'sheet' as const,
+            }
+          : undefined);
+
+      handleRouteChange(activeRoute, true);
     },
     onStateChange: navigationState => {
-      const route = getCurrentRouteFromState(navigationState);
-      handleRouteChange(route, false);
+      handleRouteChange(getActiveRouteFromState(navigationState), false);
     },
-    createScreenListeners,
   };
 };
 
 export const useNavigationObservability = (
-  stackNavigationRef: NavigationRefLike,
-  sheetNavigatorRef: NavigationRefLike,
+  navigationRef: NavigationRefLike,
 ): {
-  stackContainerProps: ContainerObservabilityProps;
-  sheetContainerProps: ContainerObservabilityProps;
-  stackScreenListeners: ReturnType<
-    ReturnType<typeof createNavigationLifecycleTracker>['createScreenListeners']
-  >;
-  sheetScreenListeners: ReturnType<
-    ReturnType<typeof createNavigationLifecycleTracker>['createScreenListeners']
-  >;
+  onNavigationReady: ContainerObservabilityProps['onNavigationReady'];
+  onNavigationStateChange: ContainerObservabilityProps['onNavigationStateChange'];
 } => {
-  const stackNavigationTracker = useMemo(
-    () => createNavigationLifecycleTracker('stack'),
-    [],
-  );
-  const sheetNavigationTracker = useMemo(
-    () => createNavigationLifecycleTracker('sheet'),
+  const navigationTracker = useMemo(
+    () => createNavigationLifecycleTracker(),
     [],
   );
 
-  const stackScreenListeners = useMemo(
-    () => stackNavigationTracker.createScreenListeners(true),
-    [stackNavigationTracker],
-  );
-  const sheetScreenListeners = useMemo(
-    () => sheetNavigationTracker.createScreenListeners(),
-    [sheetNavigationTracker],
-  );
+  const onNavigationReady = useCallback(() => {
+    navigationTracker.onReady(
+      navigationRef.getState?.(),
+      navigationRef.getCurrentRoute?.(),
+    );
+  }, [navigationRef, navigationTracker]);
 
-  const handleStackReady = useCallback(() => {
-    stackNavigationTracker.onReady(stackNavigationRef.getCurrentRoute?.());
-  }, [stackNavigationRef, stackNavigationTracker]);
-  const handleStackStateChange = useCallback(
+  const onNavigationStateChange = useCallback(
     (state: Readonly<NavigationState> | undefined) => {
-      stackNavigationTracker.onStateChange(state);
+      navigationTracker.onStateChange(state);
     },
-    [stackNavigationTracker],
-  );
-  const handleSheetReady = useCallback(() => {
-    sheetNavigationTracker.onReady(sheetNavigatorRef.getCurrentRoute?.());
-  }, [sheetNavigationTracker, sheetNavigatorRef]);
-  const handleSheetStateChange = useCallback(
-    (state: Readonly<NavigationState> | undefined) => {
-      sheetNavigationTracker.onStateChange(state);
-    },
-    [sheetNavigationTracker],
+    [navigationTracker],
   );
 
   return {
-    stackContainerProps: {
-      onReady: handleStackReady,
-      onStateChange: handleStackStateChange,
-    },
-    sheetContainerProps: {
-      onReady: handleSheetReady,
-      onStateChange: handleSheetStateChange,
-    },
-    stackScreenListeners,
-    sheetScreenListeners,
+    onNavigationReady,
+    onNavigationStateChange,
   };
 };

@@ -1,11 +1,12 @@
 import { useTranslation } from '@lace-contract/i18n';
+import { useNavigation } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import React, { useCallback, useEffect, useState } from 'react';
 import { AppState, StyleSheet, View, Linking } from 'react-native';
 
 import { radius, spacing } from '../../../../design-tokens';
 import { Text } from '../../../atoms';
-import { SheetFooter } from '../../../molecules';
+import { Sheet } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens';
 export interface QrScannerSheetProps {
@@ -22,6 +23,7 @@ export const QrScannerSheet = ({
   theme,
 }: QrScannerSheetProps) => {
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [isScanned, setIsScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +67,55 @@ export const QrScannerSheet = ({
     };
   }, [getPermission]);
 
+  useEffect(() => {
+    if (!permission?.granted) {
+      navigation.setOptions({
+        footer: (
+          <Sheet.Footer
+            primaryButton={{
+              label:
+                permission?.canAskAgain === false
+                  ? t('v2.send-flow.qr-scanner.open-settings')
+                  : t('v2.send-flow.qr-scanner.request-permission'),
+              onPress:
+                permission?.canAskAgain === false
+                  ? handleOpenSettings
+                  : handleRequestPermission,
+              loading: isRequestingPermission,
+            }}
+            secondaryButton={
+              permission?.canAskAgain === false
+                ? undefined
+                : {
+                    label: t('v2.send-flow.qr-scanner.open-settings'),
+                    onPress: handleOpenSettings,
+                  }
+            }
+          />
+        ),
+      });
+      return;
+    }
+
+    navigation.setOptions({
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: t('v2.send-flow.qr-scanner.done'),
+            onPress: onClose,
+          }}
+        />
+      ),
+    });
+  }, [
+    navigation,
+    permission,
+    t,
+    handleRequestPermission,
+    isRequestingPermission,
+    onClose,
+  ]);
+
   const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {
     if (isScanned) return;
 
@@ -85,78 +136,47 @@ export const QrScannerSheet = ({
 
   if (!permission?.granted) {
     return (
-      <>
-        <View style={styles.permissionContent}>
-          <Text.L style={styles.permissionTitle}>
-            {t('v2.send-flow.qr-scanner.permission-denied')}
-          </Text.L>
-          <Text.M style={styles.permissionMessage}>
-            {t('v2.send-flow.qr-scanner.permission-message')}
-          </Text.M>
-        </View>
-        <SheetFooter
-          primaryButton={{
-            label:
-              permission?.canAskAgain === false
-                ? t('v2.send-flow.qr-scanner.open-settings')
-                : t('v2.send-flow.qr-scanner.request-permission'),
-            onPress:
-              permission?.canAskAgain === false
-                ? handleOpenSettings
-                : handleRequestPermission,
-            loading: isRequestingPermission,
-          }}
-          secondaryButton={
-            permission?.canAskAgain === false
-              ? undefined
-              : {
-                  label: t('v2.send-flow.qr-scanner.open-settings'),
-                  onPress: handleOpenSettings,
-                }
-          }
-        />
-      </>
+      <View style={styles.permissionContent}>
+        <Text.L style={styles.permissionTitle}>
+          {t('v2.send-flow.qr-scanner.permission-denied')}
+        </Text.L>
+        <Text.M style={styles.permissionMessage}>
+          {t('v2.send-flow.qr-scanner.permission-message')}
+        </Text.M>
+      </View>
     );
   }
 
   return (
-    <>
-      <View style={styles.cameraContainer}>
-        <CameraView
-          style={styles.camera}
-          facing="back"
-          onBarcodeScanned={isScanned ? undefined : handleBarCodeScanned}
-          barcodeScannerSettings={{
-            barcodeTypes: ['qr'],
-          }}
-        />
-
-        <View style={styles.overlay}>
-          <View style={styles.scanArea}>
-            <View style={[styles.corner, styles.topLeft]} />
-            <View style={[styles.corner, styles.topRight]} />
-            <View style={[styles.corner, styles.bottomLeft]} />
-            <View style={[styles.corner, styles.bottomRight]} />
-          </View>
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text.M style={styles.errorText}>{error}</Text.M>
-            </View>
-          )}
-
-          <Text.L style={styles.instructionText}>
-            {t('v2.send-flow.qr-scanner.title')}
-          </Text.L>
-        </View>
-      </View>
-      <SheetFooter
-        primaryButton={{
-          label: t('v2.send-flow.qr-scanner.done'),
-          onPress: onClose,
+    <View style={styles.cameraContainer}>
+      <CameraView
+        style={styles.camera}
+        facing="back"
+        onBarcodeScanned={isScanned ? undefined : handleBarCodeScanned}
+        barcodeScannerSettings={{
+          barcodeTypes: ['qr'],
         }}
       />
-    </>
+
+      <View style={styles.overlay}>
+        <View style={styles.scanArea}>
+          <View style={[styles.corner, styles.topLeft]} />
+          <View style={[styles.corner, styles.topRight]} />
+          <View style={[styles.corner, styles.bottomLeft]} />
+          <View style={[styles.corner, styles.bottomRight]} />
+        </View>
+
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text.M style={styles.errorText}>{error}</Text.M>
+          </View>
+        )}
+
+        <Text.L style={styles.instructionText}>
+          {t('v2.send-flow.qr-scanner.title')}
+        </Text.L>
+      </View>
+    </View>
   );
 };
 
@@ -164,7 +184,7 @@ const getStyles = (theme: Theme) =>
   StyleSheet.create({
     cameraContainer: {
       flex: 1,
-      marginVertical: spacing.L,
+      marginVertical: spacing.XXL,
       borderRadius: radius.L,
       overflow: 'hidden',
       position: 'relative',

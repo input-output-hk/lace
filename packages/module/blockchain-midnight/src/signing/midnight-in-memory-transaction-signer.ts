@@ -24,7 +24,7 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { SignerAuth } from '@lace-contract/signer';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { CombinedTokenTransfer } from '@midnight-ntwrk/wallet-sdk-facade';
+import type { CombinedTokenTransfer } from '@midnight-ntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 
 const toOutputs = (

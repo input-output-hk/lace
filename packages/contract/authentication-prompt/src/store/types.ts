@@ -16,6 +16,24 @@ export type AuthenticationPromptStatus =
 
 export type AuthPromptPurpose = 'action-authorization' | 'wallet-unlock';
 
+/**
+ * Bounded taxonomy of biometric verification failure reasons, attached to
+ * `verifiedBiometric({ success: false })` for analytics. Present in state
+ * machine transitions only to flow through the action payload.
+ *
+ *  - `auth_failed`: OS secure-store reported auth_failed (wrong biometric).
+ *  - `unknown`: Unclassified secure-store error; treated as retryable.
+ *  - `pre_auth_failed`: Android biometrics-only pre-auth failed or was
+ *    cancelled by the user (Android Keystore PIN fallback bug recovery).
+ *  - `verification_failed`: Retrieved password did not verify against the
+ *    app-lock sentinel (authSecret mismatch).
+ */
+export type BiometricFailureReason =
+  | 'auth_failed'
+  | 'pre_auth_failed'
+  | 'unknown'
+  | 'verification_failed';
+
 export type Config = {
   purpose: AuthPromptPurpose;
   cancellable?: boolean;

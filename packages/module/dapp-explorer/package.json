@@ -11,8 +11,12 @@
     "type-check:test": "tsc --noEmit -p tsconfig.test.json"
   },
   "dependencies": {
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/custom-dapps": "*",
     "@lace-contract/module": "*",
+    "backoff-rxjs": "*",
     "fuse.js": "^7.0.0",
+    "rxjs": "*",
     "zod": "^3.25.0"
   },
   "devDependencies": {

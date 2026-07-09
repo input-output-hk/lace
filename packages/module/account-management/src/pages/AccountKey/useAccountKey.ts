@@ -82,7 +82,7 @@ export const useAccountKey = ({
   );
 
   const handleDone = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   return {

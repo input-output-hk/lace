@@ -1,22 +1,27 @@
-import { ProviderError, ProviderFailure } from '@cardano-sdk/core';
+import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
+import { retryBackoff } from 'backoff-rxjs';
 import {
+  catchError,
   combineLatest,
   concatMap,
   debounceTime,
   EMPTY,
   filter,
-  firstValueFrom,
   from,
   map,
+  merge as rxMerge,
+  mergeMap,
   of,
   switchMap,
 } from 'rxjs';
-import { resultMergeMap } from 'ts-results-es/rxjs-operators';
 
 import { ActivityKind } from '../../types';
+import { CardanoActivitiesProcessingFailureId } from '../../value-objects';
+import { createInputResolver } from '../helpers/transaction-processors';
 
-import type { Action, SideEffect } from '../../contract';
+import type { CardanoContextAction, SideEffect } from '../../contract';
 import type {
   CardanoRewardActivity,
   RequiredProtocolParameters,
@@ -29,6 +34,8 @@ import type {
 import type { MapRewardToActivityParams } from '../helpers/map-reward-to-activity';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
+import type { Failure, FailureId } from '@lace-contract/failures';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { Result } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
@@ -57,12 +64,13 @@ type ProcessTransactionDeps = {
   ) => Observable<Result<Activity, Error>>;
   protocolParameters: RequiredProtocolParameters;
   chainId: Cardano.ChainId;
+  selectFailureById$: Observable<(id: FailureId) => Failure | undefined>;
 };
 
 const processTransaction = (
   data: Extract<MissingActivityData, { kind: ActivityKind.Transaction }>,
   deps: ProcessTransactionDeps,
-): Observable<Action> => {
+): Observable<CardanoContextAction> => {
   const { txId, accountId, rewardAccount, accountAddresses } = data;
   const {
     getTransactionDetails,
@@ -72,12 +80,18 @@ const processTransaction = (
     protocolParameters,
     logger,
     actions,
+    selectFailureById$,
   } = deps;
 
-  return getTransactionDetails(txId, {
-    chainId,
-  }).pipe(
-    resultMergeMap(txDetails =>
+  const failureId = CardanoActivitiesProcessingFailureId(AccountId(accountId));
+
+  return getTransactionDetails(txId, { chainId }).pipe(
+    map(result => {
+      if (result.isErr()) throw result.unwrapErr();
+      return result.unwrap();
+    }),
+    retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+    mergeMap(txDetails =>
       mapTransactionToActivity({
         accountId,
         txDetails,
@@ -85,30 +99,32 @@ const processTransaction = (
         rewardAccount,
         protocolParameters,
         logger,
-        resolveInput: async txIn =>
-          firstValueFrom(
-            resolveInput(txIn, { chainId }).pipe(
-              // TODO: handle input resolver errors?
-              map(result => result.unwrapOr(null)),
-            ),
-          ),
-      }),
+        resolveInput: createInputResolver(resolveInput, chainId).resolveInput,
+      }).pipe(
+        map(result => {
+          if (result.isErr()) throw result.unwrapErr();
+          return result.unwrap();
+        }),
+      ),
     ),
-    map(accountActivityResult =>
-      accountActivityResult.mapOrElse<Action>(
-        error =>
-          actions.activities.getActivitiesFailed({
-            accountId: AccountId(accountId),
-            failure:
-              error instanceof ProviderError
-                ? error.reason
-                : ProviderFailure.Unknown,
-          }),
-        activity =>
+    mergeMap(activity =>
+      rxMerge(
+        of(
           actions.activities.upsertActivities({
             accountId: AccountId(accountId),
             activities: [activity],
           }),
+        ),
+        of(failureId).pipe(autoDismissFailureOnSuccess(selectFailureById$)),
+      ),
+    ),
+    catchError(() =>
+      of(
+        actions.failures.addFailure({
+          failureId,
+          message:
+            'sync.error.cardano-activities-processing-failed' as TranslationKey,
+        }),
       ),
     ),
   );
@@ -117,7 +133,7 @@ const processTransaction = (
 const processReward = (
   data: Extract<MissingActivityData, { kind: ActivityKind.Reward }>,
   actions: SideEffectDeps['actions'],
-): Observable<Action> => {
+): Observable<CardanoContextAction> => {
   const { accountId, rewardActivity } = data;
   return of(
     actions.activities.upsertActivities({
@@ -147,7 +163,7 @@ export const createTrackAccountActivities =
   }: TrackAccountActivitiesParams): SideEffect =>
   (
     _,
-    { activities, addresses, cardanoContext },
+    { activities, addresses, cardanoContext, failures: { selectFailureById$ } },
     {
       cardanoProvider: { getTransactionDetails, resolveInput },
       logger,
@@ -199,6 +215,7 @@ export const createTrackAccountActivities =
             mapTransactionToActivity,
             protocolParameters,
             chainId,
+            selectFailureById$,
           };
 
           return from(activitiesToLoad).pipe(

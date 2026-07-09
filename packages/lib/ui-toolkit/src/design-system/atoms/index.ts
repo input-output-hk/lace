@@ -6,6 +6,7 @@ export * from './chart/line-chart';
 export * from './loader/loader';
 export * from './text/text';
 export * from './logo/logo';
+export * from './logo/lace-logo-multicolor';
 export * from './logo/logo-with-text';
 export * from './input/text-input';
 export * from './input/numeric-input';
@@ -30,7 +31,6 @@ export * from './avatar/avatar';
 export * from './blurred-label/blurred-label';
 export * from './link/link';
 export * from './pill/pill';
-export * from './webView/webView';
 export * from './brand/brand';
 export * from './divider/divider';
 export * from './customTextInput/customTextInput';
@@ -38,10 +38,12 @@ export * from './toggle/toggle';
 export * from './customTag/customTag';
 export * from './badge/badge';
 export * from './beacon/beacon';
+export * from './offlineIndicator';
 export * from './toast/toast';
 export * from './settingsCard/settingsCard';
 export * from './radioButton/radioButton';
 export * from './pricePill/pricePill';
+export * from './securityAlertPill/securityAlertPill';
 export * from './linearGradient/linearGradient';
 
 /**

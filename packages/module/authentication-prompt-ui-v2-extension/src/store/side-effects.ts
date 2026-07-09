@@ -47,9 +47,18 @@ export const trackAppLockEvents: SideEffect = (
     ),
     verifiedBiometric$.pipe(
       filter(({ payload }) => !payload.success),
-      map(() =>
+      map(({ payload }) =>
         actions.analytics.trackEvent({
           eventName: 'app lock | biometric | failed',
+          payload: {
+            ...(payload.failureReason && {
+              failureReason: payload.failureReason,
+            }),
+            ...(payload.androidKeystoreRecovery && {
+              androidKeystoreAttemptNumber:
+                payload.androidKeystoreRecovery.attemptNumber,
+            }),
+          },
         }),
       ),
     ),

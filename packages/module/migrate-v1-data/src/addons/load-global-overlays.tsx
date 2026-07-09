@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { useAnalytics } from '@lace-contract/analytics';
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { Trans, useTranslation } from '@lace-contract/i18n';
 import {
@@ -257,6 +258,7 @@ const ActivateWalletScreen = ({
   getAppPassword,
 }: ActivateWalletScreenProps) => {
   const { t } = useTranslation();
+  const { trackEvent } = useAnalytics();
   const { theme } = useTheme();
   const styles = getActivateWalletStyles(theme);
 
@@ -327,6 +329,7 @@ const ActivateWalletScreen = ({
       );
 
       if (!canDecrypt) {
+        trackEvent('migration | v1 | failed', { step: 'decrypt' });
         setIsActivating(false);
         setErrorMessage(
           t('migrate-v1.password-migration.activate-wallet.wrong-password'),
@@ -353,6 +356,10 @@ const ActivateWalletScreen = ({
         walletId,
         error,
       );
+      trackEvent('migration | v1 | failed', {
+        step: 'reencrypt',
+        errorCode: error instanceof Error ? error.name : 'unknown',
+      });
       setIsActivating(false);
       setErrorMessage(
         t('migrate-v1.password-migration.activate-wallet.reencrypt-failed'),
@@ -369,6 +376,7 @@ const ActivateWalletScreen = ({
     walletName,
     getAppPassword,
     dispatchUpdateWallet,
+    trackEvent,
     dispatchWalletActivated,
     t,
   ]);

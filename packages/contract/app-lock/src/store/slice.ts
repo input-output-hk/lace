@@ -1,6 +1,10 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { featuresSelectors } from '@lace-contract/feature';
+import { createSelector, createSlice } from '@reduxjs/toolkit';
 
-import { DEFAULT_INACTIVITY_TIMEOUT_MS } from '../const';
+import {
+  PAUSE_NETWORK_POLLING_FEATURE_FLAG,
+  DEFAULT_INACTIVITY_TIMEOUT_MS,
+} from '../const';
 
 import { lockStateMachine } from './state-machine';
 
@@ -78,6 +82,36 @@ const slice = createSlice({
   },
 });
 
+/**
+ * `true` whenever the wallet is in a state that should perform network
+ * polling. The truth table has two axes: `lockState.status` and the
+ * `PAUSE_NETWORK_POLLING_FEATURE_FLAG` feature flag.
+ *
+ * When the flag is absent (default), this returns `true` regardless of
+ * lock state — preserving today's behaviour. When the flag is present,
+ * polling pauses for `Preparing`, `Locked` and `Unlocking` states.
+ *
+ * `Preparing` is treated as inactive so polling does not fire during the
+ * boot window before the lock state machine has decided whether the
+ * wallet is locked or awaiting setup. `AwaitingSetup` is treated as
+ * active because first-run onboarding may need polling-driven flows.
+ *
+ * Consumed by the `whileActive` operator. See ADR 25.
+ */
+const isWalletActive = createSelector(
+  slice.selectors.selectLockState,
+  featuresSelectors.features.selectLoadedFeatures,
+  (lockState, loaded) => {
+    const isPauseEnabled = loaded.featureFlags.some(
+      flag => flag.key === PAUSE_NETWORK_POLLING_FEATURE_FLAG,
+    );
+    if (!isPauseEnabled) return true;
+    return (
+      lockState.status === 'Unlocked' || lockState.status === 'AwaitingSetup'
+    );
+  },
+);
+
 export const appLockReducers = {
   [slice.name]: slice.reducer,
 };
@@ -87,7 +121,10 @@ export const appLockActions = {
 };
 
 export const appLockSelectors = {
-  appLock: slice.selectors,
+  appLock: {
+    ...slice.selectors,
+    isWalletActive,
+  },
 };
 
 export type AppLockStoreState = StateFromReducersMapObject<

@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native';
 import { SignDataLayout, SignDataResult } from '../../common/components';
 import { useLaceSelector } from '../../common/hooks';
 import { useSignDataAccountInfo } from '../../common/hooks/useSignDataAccountInfo';
+import { useSignDataDRepKeyHash } from '../../common/hooks/useSignDataDRepKeyHash';
 import { useDappPopupFlow, useDappViewClose } from '../hooks';
 
 import type { SignDataContentProps } from '../../common/components/sign-data';
@@ -34,6 +35,7 @@ export const CardanoDappSignData = () => {
   });
 
   const accountInfo = useSignDataAccountInfo(request?.dappOrigin);
+  const dRepKeyHash = useSignDataDRepKeyHash(request?.dappOrigin);
   const hwErrorKeys = useLaceSelector(
     'cardanoDappConnector.selectSignDataHwErrorKeys',
   );
@@ -102,8 +104,9 @@ export const CardanoDappSignData = () => {
       accountInfo,
       address,
       payload,
+      dRepKeyHash,
     };
-  }, [request, accountInfo]);
+  }, [request, accountInfo, dRepKeyHash]);
 
   const isShowingLoading = isLoading && !isComplete && !isError;
 

@@ -1,3 +1,4 @@
+import { failuresSelectors } from '@lace-contract/failures';
 import { markParameterizedSelector } from '@lace-contract/module';
 import { AccountId, walletsActions } from '@lace-contract/wallet-repo';
 import { Serializable } from '@lace-lib/util-store';
@@ -6,10 +7,14 @@ import flatten from 'lodash/flatten';
 import values from 'lodash/values';
 import { REHYDRATE } from 'redux-persist';
 
-import { ACTIVITIES_PER_PAGE, MAX_ACTIVITIES_PER_ACCOUNT } from '../const';
+import {
+  ACTIVITIES_PER_PAGE,
+  ActivityType,
+  MAX_ACTIVITIES_PER_ACCOUNT,
+} from '../const';
+import { ActivitiesPaginationFailureId } from '../value-objects';
 
 import type { Activity, ActivityDetail } from '../types';
-import type { ProviderFailure } from '@cardano-sdk/core';
 import type { TokenId } from '@lace-contract/tokens';
 import type { BlockchainAssigned } from '@lace-lib/util-store';
 import type {
@@ -28,27 +33,63 @@ export type ActivitiesSliceState<BlockchainSpecificMetadata = unknown> = {
   activityDetails?: Serializable<ActivityDetail<BlockchainSpecificMetadata>>;
 };
 
+export type PendingActivitiesByAccount<BlockchainSpecificMetadata = unknown> =
+  Record<AccountId, Activity<BlockchainSpecificMetadata>[]>;
+
+const EMPTY_PENDING_ACTIVITIES_BY_ACCOUNT: PendingActivitiesByAccount = {};
+
 const initialState: ActivitiesSliceState = {
   activities: {},
   desiredLoadedActivitiesCountPerAccount: {},
   hasLoadedOldestEntry: {},
 };
 
+const encodeActivity = (activity: Activity): Activity => {
+  if (activity.blockchainSpecific === undefined) return activity;
+  return {
+    ...activity,
+    blockchainSpecific: Serializable.to(
+      activity.blockchainSpecific as object,
+    ) as unknown,
+  };
+};
+
+const decodeActivity = (activity: Activity): Activity => {
+  if (activity.blockchainSpecific === undefined) return activity;
+  return {
+    ...activity,
+    blockchainSpecific: Serializable.fromCached(
+      activity.blockchainSpecific as unknown as Serializable<unknown>,
+    ),
+  };
+};
+
 const slice = createSlice({
   name: 'activities',
   initialState,
   reducers: {
-    setActivities: (
-      state,
-      {
-        payload: { accountId, activities },
-      }: Readonly<
-        PayloadAction<{ accountId: AccountId; activities: Activity[] }>
-      >,
-    ) => {
-      state.activities[accountId] = [...activities].sort(
-        sortActivitiesCallback,
-      );
+    setActivities: {
+      reducer: (
+        state,
+        {
+          payload: { accountId, activities },
+        }: Readonly<
+          PayloadAction<{ accountId: AccountId; activities: Activity[] }>
+        >,
+      ) => {
+        state.activities[accountId] = [...activities].sort(
+          sortActivitiesCallback,
+        );
+      },
+      prepare: ({
+        accountId,
+        activities,
+      }: {
+        accountId: AccountId;
+        activities: Activity[];
+      }) => ({
+        payload: { accountId, activities: activities.map(encodeActivity) },
+      }),
     },
     setActivityDetails: {
       reducer: (
@@ -70,25 +111,36 @@ const slice = createSlice({
         return { payload: { activityDetails: serialized } };
       },
     },
-    upsertActivities: (
-      state,
-      {
-        payload: { accountId, activities: incomingActivities },
-      }: Readonly<
-        PayloadAction<{
-          accountId: AccountId;
-          activities: Activity[];
-        }>
-      >,
-    ) => {
-      const currentActivities = state.activities[accountId] || [];
-      const jointActivityEntries = [
-        ...currentActivities,
-        ...incomingActivities,
-      ].map(activity => [activity.activityId, activity] as const);
-      state.activities[accountId] = [
-        ...new Map(jointActivityEntries).values(),
-      ].sort(sortActivitiesCallback);
+    upsertActivities: {
+      reducer: (
+        state,
+        {
+          payload: { accountId, activities: incomingActivities },
+        }: Readonly<
+          PayloadAction<{
+            accountId: AccountId;
+            activities: Activity[];
+          }>
+        >,
+      ) => {
+        const currentActivities = state.activities[accountId] || [];
+        const jointActivityEntries = [
+          ...currentActivities,
+          ...incomingActivities,
+        ].map(activity => [activity.activityId, activity] as const);
+        state.activities[accountId] = [
+          ...new Map(jointActivityEntries).values(),
+        ].sort(sortActivitiesCallback);
+      },
+      prepare: ({
+        accountId,
+        activities,
+      }: {
+        accountId: AccountId;
+        activities: Activity[];
+      }) => ({
+        payload: { accountId, activities: activities.map(encodeActivity) },
+      }),
     },
     resetActivities: (
       state,
@@ -115,8 +167,13 @@ const slice = createSlice({
         state.activities[accountId]?.length ?? 0;
 
       if (currentDesiredCount <= loadedActivitiesForAccount) {
+        // Anchor on the actual loaded count so the first increment always
+        // lifts desired above loaded and triggers a fetch. Without this,
+        // when side effects (e.g. newer-tx polling) populate activities
+        // before anyone has incremented desired, the first increment just
+        // catches desired up to loaded and no fetch fires.
         state.desiredLoadedActivitiesCountPerAccount[accountId] =
-          currentDesiredCount + incrementBy;
+          loadedActivitiesForAccount + incrementBy;
       }
     },
     setHasLoadedOldestEntry: (
@@ -202,15 +259,51 @@ const slice = createSlice({
     selectHasLoadedOldestEntry: state => state.hasLoadedOldestEntry,
     selectDesiredLoadedActivitiesCountPerAccount: state =>
       state.desiredLoadedActivitiesCountPerAccount,
-    selectActivityDetails: ({ activityDetails }) =>
-      activityDetails
-        ? Serializable.from<ActivityDetail>(activityDetails)
-        : undefined,
+    selectActivityDetails: state => state.activityDetails,
   },
 });
 
-const selectAllFlat = createSelector(slice.selectors.selectAllMap, activities =>
+const selectActivityDetails = createSelector(
+  slice.selectors.selectActivityDetails,
+  activityDetails =>
+    activityDetails
+      ? Serializable.from<ActivityDetail>(activityDetails)
+      : undefined,
+);
+
+const selectAllMap = createSelector(
+  slice.selectors.selectAllMap,
+  rawActivities => {
+    const decoded: Record<AccountId, Activity[]> = {};
+    for (const accountId in rawActivities) {
+      decoded[accountId as AccountId] = (
+        rawActivities[accountId as AccountId] ?? []
+      ).map(decodeActivity);
+    }
+    return decoded;
+  },
+);
+
+const selectAllFlat = createSelector(selectAllMap, activities =>
   flatten(values(activities)),
+);
+
+const selectPendingActivitiesByAccount = createSelector(
+  selectAllMap,
+  (activitiesByAccount): PendingActivitiesByAccount => {
+    const result: PendingActivitiesByAccount = {};
+    let hasAny = false;
+    for (const accountId in activitiesByAccount) {
+      const pending = activitiesByAccount[accountId as AccountId].filter(
+        activity => activity.type === ActivityType.Pending,
+      );
+      if (pending.length > 0) {
+        result[accountId as AccountId] = pending;
+        hasAny = true;
+      }
+    }
+    return hasAny ? result : EMPTY_PENDING_ACTIVITIES_BY_ACCOUNT;
+  },
 );
 
 const selectByAccountId = markParameterizedSelector(
@@ -259,16 +352,21 @@ const selectIsLoadingOlderActivitiesByAccount = markParameterizedSelector(
       slice.selectors.selectDesiredLoadedActivitiesCountPerAccount,
       slice.selectors.selectAllMap,
       slice.selectors.selectHasLoadedOldestEntry,
+      failuresSelectors.failures.selectAllFailures,
       (_: unknown, accountId: AccountId) => accountId,
     ],
     (
       desiredLoadedActivitiesCountPerAccount,
       activities,
       hasLoadedOldestEntry,
+      failures,
       accountId,
       // eslint-disable-next-line max-params
     ) => {
       if (hasLoadedOldestEntry[accountId] ?? false) {
+        return false;
+      }
+      if (failures[ActivitiesPaginationFailureId(accountId)]) {
         return false;
       }
       const desiredLoadedActivitiesCount =
@@ -288,8 +386,8 @@ const selectHasLoadedOldestEntryByAccount = markParameterizedSelector(
   ),
 );
 
-const pollNewerAccountsActivities = createAction(
-  'activities/pollNewerAccountsActivities',
+const retryPagination = createAction<{ accountId: AccountId }>(
+  'activities/retryPagination',
 );
 
 const loadActivityDetails = createAction<
@@ -298,17 +396,11 @@ const loadActivityDetails = createAction<
   }>
 >('activities/loadActivityDetails');
 
-const getActivitiesFailed = createAction<{
-  accountId: AccountId;
-  failure: ProviderFailure;
-}>('activities/getActivitiesFailed');
-
 export const activitiesActions = {
   activities: {
     ...slice.actions,
-    pollNewerAccountsActivities,
-    getActivitiesFailed,
     loadActivityDetails,
+    retryPagination,
   },
 };
 
@@ -319,13 +411,16 @@ export const activitiesReducers = {
 export const activitiesSelectors = {
   activities: {
     ...slice.selectors,
+    selectAllMap,
     selectAllFlat,
     selectByAccountId,
     selectByAccountIdAndTokenId,
     selectByTokenIdFlat,
     selectActivityById,
+    selectActivityDetails,
     selectIsLoadingOlderActivitiesByAccount,
     selectHasLoadedOldestEntryByAccount,
+    selectPendingActivitiesByAccount,
   },
 };
 

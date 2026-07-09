@@ -1,6 +1,7 @@
+import { ActivityType } from '@lace-contract/activities';
 import { useUICustomisation } from '@lace-contract/app';
-import { ActivityDetailSheetTemplate } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { ActivityDetailSheetTemplate, Sheet } from '@lace-lib/ui-toolkit';
+import React, { useCallback, useEffect } from 'react';
 
 import { useActivityDetailsSheet } from './useActivityDetailsSheet';
 
@@ -9,10 +10,16 @@ import type { SheetScreenProps, SheetRoutes } from '@lace-lib/navigation';
 export const ActivityDetailsSheet = (
   props: SheetScreenProps<SheetRoutes.ActivityDetail>,
 ) => {
+  const { navigation } = props;
+  const goBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+  const onBackPress = navigation.canGoBack() ? goBack : undefined;
   const {
     headerTitle,
     loadingText,
     activityDetails,
+    activityType,
     explorerUrl,
     isLoading,
     theme,
@@ -21,6 +28,8 @@ export const ActivityDetailsSheet = (
     getMainTokenBalanceChange,
     tokensMetadataByTokenId,
   } = useActivityDetailsSheet(props);
+
+  const hasRewardData = activityType === ActivityType.Rewards;
 
   const [activityDetailsSheetUICustomisation] = useUICustomisation(
     'addons.loadActivityDetailsSheetUICustomisations',
@@ -43,10 +52,23 @@ export const ActivityDetailsSheet = (
       />
     ) : null;
 
+  useEffect(() => {
+    props.navigation.setOptions({
+      detents: hasRewardData ? ['auto'] : [1],
+      scrollable: !hasRewardData,
+      header: (
+        <Sheet.Header
+          title={headerTitle}
+          leftIconOnPress={onBackPress}
+          testID="activity-details-sheet-header"
+        />
+      ),
+    });
+  }, [props.navigation, headerTitle, onBackPress, hasRewardData]);
+
   return (
     <ActivityDetailSheetTemplate
       headerProps={{
-        headerTitle,
         loadingText,
         isLoading,
         theme,

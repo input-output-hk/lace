@@ -3,7 +3,7 @@ import { combineLatest, EMPTY, mergeMap, of, type Observable } from 'rxjs';
 
 import { utxoKey } from '../../util';
 
-import type { SideEffect, Action } from '../../contract';
+import type { SideEffect, CardanoContextAction } from '../../contract';
 
 /**
  * Side effect that removes UTXOs from accountUnspendableUtxos when they are
@@ -16,31 +16,36 @@ export const syncUnspendableUtxosWithAccountUtxos: SideEffect = (
   { actions },
 ) =>
   combineLatest([selectAccountUtxos$, selectAccountUnspendableUtxos$]).pipe(
-    mergeMap(([accountUtxos, accountUnspendableUtxos]): Observable<Action> => {
-      const actionsToDispatch: Action[] = [];
+    mergeMap(
+      ([
+        accountUtxos,
+        accountUnspendableUtxos,
+      ]): Observable<CardanoContextAction> => {
+        const actionsToDispatch: CardanoContextAction[] = [];
 
-      for (const accountId of Object.keys(accountUnspendableUtxos)) {
-        const unspendableUtxos =
-          accountUnspendableUtxos[AccountId(accountId)] ?? [];
-        if (unspendableUtxos.length === 0) continue;
+        for (const accountId of Object.keys(accountUnspendableUtxos)) {
+          const unspendableUtxos =
+            accountUnspendableUtxos[AccountId(accountId)] ?? [];
+          if (unspendableUtxos.length === 0) continue;
 
-        const availableUtxoKeys = new Set(
-          (accountUtxos[AccountId(accountId)] ?? []).map(utxoKey),
-        );
-        const filteredUnspendable = unspendableUtxos.filter(utxo =>
-          availableUtxoKeys.has(utxoKey(utxo)),
-        );
-
-        if (filteredUnspendable.length !== unspendableUtxos.length) {
-          actionsToDispatch.push(
-            actions.cardanoContext.setAccountUnspendableUtxos({
-              accountId: AccountId(accountId),
-              utxos: filteredUnspendable,
-            }),
+          const availableUtxoKeys = new Set(
+            (accountUtxos[AccountId(accountId)] ?? []).map(utxoKey),
           );
-        }
-      }
+          const filteredUnspendable = unspendableUtxos.filter(utxo =>
+            availableUtxoKeys.has(utxoKey(utxo)),
+          );
 
-      return actionsToDispatch.length > 0 ? of(...actionsToDispatch) : EMPTY;
-    }),
+          if (filteredUnspendable.length !== unspendableUtxos.length) {
+            actionsToDispatch.push(
+              actions.cardanoContext.setAccountUnspendableUtxos({
+                accountId: AccountId(accountId),
+                utxos: filteredUnspendable,
+              }),
+            );
+          }
+        }
+
+        return actionsToDispatch.length > 0 ? of(...actionsToDispatch) : EMPTY;
+      },
+    ),
   );

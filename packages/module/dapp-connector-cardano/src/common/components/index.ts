@@ -13,11 +13,6 @@ export type {
 export { SignTxError } from './SignTxError';
 export { SignTxLoadingContent } from './SignTxLoadingContent';
 export { SignTxView } from './SignTxView';
-export type {
-  SignTxViewPrimaryButton,
-  SignTxViewSecondaryButton,
-  SignTxViewProps,
-} from './SignTxView';
 export { SignTxContent } from './SignTxContent';
 export type { SignTxContentDapp, SignTxContentProps } from './SignTxContent';
 export { SignTxLayout } from './SignTxLayout';

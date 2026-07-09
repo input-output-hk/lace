@@ -59,7 +59,6 @@ export const RecipientInput = ({
 
   return (
     <CustomTextInput
-      isWithinBottomSheet
       value={addressSelected}
       label={recipientLabel}
       animatedLabel

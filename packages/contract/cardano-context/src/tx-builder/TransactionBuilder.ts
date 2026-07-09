@@ -203,11 +203,27 @@ export class TransactionBuilder {
    * @returns `this` for fluent chaining.
    */
   public setMemo(memo: string): TransactionBuilder {
-    const metadata = {
-      blob: new Map([[674n, new Map([['msg', [memo]]])]]),
-    };
+    return this.setMetadata(674n, new Map([['msg', [memo]]]));
+  }
+
+  /**
+   * Sets a transaction metadata entry under the given label, preserving any
+   * previously set entries (including those added via {@link setMemo}). Calling
+   * with an existing label overwrites that label's value.
+   *
+   * @param label - Metadata label (e.g. `674` for CIP-20 messages, `721` for CIP-25 NFT metadata).
+   * @param metadatum - The metadatum value to associate with the label.
+   * @returns `this` for fluent chaining.
+   */
+  public setMetadata(
+    label: bigint,
+    metadatum: Cardano.Metadatum,
+  ): TransactionBuilder {
+    const existing = this.transaction.auxiliaryData()?.toCore();
+    const blob = new Map(existing?.blob);
+    blob.set(label, metadatum);
     this.transaction.setAuxiliaryData(
-      Serialization.AuxiliaryData.fromCore(metadata),
+      Serialization.AuxiliaryData.fromCore({ ...existing, blob }),
     );
 
     return this;
@@ -294,6 +310,27 @@ export class TransactionBuilder {
       __typename: Cardano.CertificateType.Unregistration,
       stakeCredential,
       deposit,
+    };
+    this.certificates.push(certificate);
+    return this;
+  }
+
+  /**
+   * Adds a Conway-era vote delegation certificate.
+   * This delegates the stake credential's voting power to a DRep.
+   *
+   * @param stakeCredential - The stake credential delegating its vote.
+   * @param dRep - The delegate representative to delegate to (credential, AlwaysAbstain, or AlwaysNoConfidence).
+   * @returns `this` for fluent chaining.
+   */
+  public addVoteDelegationCertificate(
+    stakeCredential: Cardano.Credential,
+    dRep: Cardano.DelegateRepresentative,
+  ): TransactionBuilder {
+    const certificate: Cardano.VoteDelegationCertificate = {
+      __typename: Cardano.CertificateType.VoteDelegation,
+      stakeCredential,
+      dRep,
     };
     this.certificates.push(certificate);
     return this;

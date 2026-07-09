@@ -191,8 +191,6 @@ export const initializeDependencies: LaceInitSync<
               ),
             ),
           ),
-          keepAlive: () =>
-            from(api.keepAlive().catch(ignoreRemoteApiShutdownError)),
         },
       };
     }),

@@ -14,7 +14,7 @@ export const useEditWalletSuccess = () => {
   const { t } = useTranslation();
 
   const buttonAction = useCallback(() => {
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, []);
 
   const title = t('v2.wallet-settings.edit-wallet-success.title');

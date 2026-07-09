@@ -1,9 +1,11 @@
-import type { FC } from 'react';
-
 import type { SheetRoutes, StackRoutes, TabRoutes } from './routes';
-import type { BottomSheetFooterProps } from '@gorhom/bottom-sheet';
+import type { Activity } from '@lace-contract/activities';
 import type { FolderId, Token } from '@lace-contract/tokens';
-import type { AccountId, WalletId } from '@lace-contract/wallet-repo';
+import type {
+  AccountId,
+  WalletId,
+  WalletType,
+} from '@lace-contract/wallet-repo';
 import type {
   AvatarContent,
   DappConnectorSheetParams,
@@ -14,15 +16,14 @@ import type {
   DeviceDescriptor,
   HardwareIntegrationId,
 } from '@lace-lib/util-hw';
+import type {
+  TrueSheetNavigationOptions,
+  TrueSheetScreenProps,
+} from '@lodev09/react-native-true-sheet/navigation';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type {
   CompositeScreenProps,
-  NavigationProp,
   NavigatorScreenParams,
-  ParamListBase,
-  RouteProp,
-  StackActionHelpers,
-  StackNavigationState,
 } from '@react-navigation/native';
 import type { StackScreenProps as ReactNavigationStackScreenProps } from '@react-navigation/stack';
 
@@ -41,8 +42,23 @@ export type NavigationState = {
     state?: NavigationState;
   }>;
 };
+
+type PortfolioTokenSortParams = {
+  tokenSortOption?: 'quantity' | 'ticker' | 'value';
+  tokenSortOrder?: 'asc' | 'desc';
+};
+
+type PortfolioTokenSortSheetParams = PortfolioTokenSortParams & {
+  isTokenPricingEnabled?: boolean;
+};
+
+type PortfolioTabParams = PortfolioTokenSortParams & {
+  /** One-shot: open the accounts carousel focused on this account. */
+  focusAccountId?: string;
+};
+
 export type TabParameterList = {
-  [TabRoutes.Portfolio]: undefined;
+  [TabRoutes.Portfolio]: PortfolioTabParams | undefined;
   [TabRoutes.DApps]: undefined;
   [TabRoutes.Settings]: undefined;
   [TabRoutes.AccountCenter]: undefined;
@@ -70,6 +86,7 @@ export type StackParameterList = {
     | {
         hardwareSetup?: {
           optionId: HardwareIntegrationId;
+          walletType: WalletType;
           device: DeviceDescriptor;
           derivationTypes?: Array<'ICARUS_TREZOR' | 'ICARUS' | 'LEDGER'>;
         };
@@ -78,10 +95,13 @@ export type StackParameterList = {
   [StackRoutes.OnboardingHardware]: undefined;
   [StackRoutes.OnboardingHardwareSetup]: {
     optionId: HardwareIntegrationId;
+    walletType: WalletType;
     device: DeviceDescriptor;
     derivationTypes?: Array<'ICARUS_TREZOR' | 'ICARUS' | 'LEDGER'>;
   };
-  [StackRoutes.DappExternalWebView]: BaseSheetParams & DappConnectorSheetParams;
+  [StackRoutes.DappExternalWebView]: DappConnectorSheetParams & {
+    canFavorite?: boolean;
+  };
   [StackRoutes.ClaimPayload]: {
     faucet_url: string;
     code: string;
@@ -90,176 +110,205 @@ export type StackParameterList = {
   [StackRoutes.ClaimSuccess]: undefined;
   [StackRoutes.ClaimError]: undefined;
   // Identity center
-  [StackRoutes.IntroStart]: BaseSheetParams;
-  [StackRoutes.IntroLace]: BaseSheetParams;
-  [StackRoutes.IntroProof]: BaseSheetParams;
-  [StackRoutes.IntroPrivacy]: BaseSheetParams;
-  [StackRoutes.IntroComplete]: BaseSheetParams;
+  [StackRoutes.IntroStart]: undefined;
+  [StackRoutes.IntroLace]: undefined;
+  [StackRoutes.IntroProof]: undefined;
+  [StackRoutes.IntroPrivacy]: undefined;
+  [StackRoutes.IntroComplete]: undefined;
   // Notifications center
-  [StackRoutes.NotificationDetails]: BaseSheetParams & {
+  [StackRoutes.NotificationDetails]: {
     notificationId: string;
   };
 };
 
 export type SheetParameterList = {
-  [SheetRoutes.Initial]: BaseSheetParams;
-  [SheetRoutes.AddedAccountSuccess]: BaseSheetParams;
-  [SheetRoutes.AddedAccountFailed]: BaseSheetParams;
-  [SheetRoutes.AddAccount]: BaseSheetParams & {
+  [SheetRoutes.RootStack]: NavigatorScreenParams<StackParameterList>;
+  [SheetRoutes.AddedAccountSuccess]: undefined;
+  [SheetRoutes.AddedAccountFailed]: undefined;
+  [SheetRoutes.AddAccount]: {
     walletId: string;
+    hasNestedScrolling?: boolean;
   };
-  [SheetRoutes.CreateNewWallet]: BaseSheetParams;
-  [SheetRoutes.AddWalletHardware]: BaseSheetParams;
-  [SheetRoutes.AddWalletHardwareSetup]: BaseSheetParams & {
+  [SheetRoutes.CreateNewWallet]: undefined;
+  [SheetRoutes.AddWalletHardware]: undefined;
+  [SheetRoutes.AddWalletHardwareSetup]: {
     optionId: HardwareIntegrationId;
     device: DeviceDescriptor;
     derivationTypes?: DerivationType[];
   };
-  [SheetRoutes.SuccessCreateNewWallet]: BaseSheetParams & {
+  [SheetRoutes.SuccessCreateNewWallet]: {
     walletId: WalletId;
   };
-  [SheetRoutes.RestoreWalletRecoveryPhrase]: BaseSheetParams;
-  [SheetRoutes.RestoreWalletSelectBlockchains]: BaseSheetParams;
-  [SheetRoutes.RestoreWalletSuccess]: BaseSheetParams & {
+  [SheetRoutes.RestoreWalletRecoveryPhrase]:
+    | {
+        hasNestedScrolling?: boolean;
+      }
+    | undefined;
+  [SheetRoutes.RestoreWalletSelectBlockchains]:
+    | {
+        hasNestedScrolling?: boolean;
+      }
+    | undefined;
+  [SheetRoutes.RestoreWalletSuccess]: {
     walletId: WalletId;
   };
-  [SheetRoutes.RemoveAccount]: BaseSheetParams & {
+  [SheetRoutes.RemoveAccount]: {
     walletId: string;
     accountId: string;
   };
-  [SheetRoutes.RemoveAccountSuccess]: BaseSheetParams;
-  [SheetRoutes.RemoveWalletSuccess]: BaseSheetParams;
-  [SheetRoutes.CustomizeAccount]: BaseSheetParams & {
+  [SheetRoutes.RemoveAccountSuccess]: undefined;
+  [SheetRoutes.RemoveWalletSuccess]: undefined;
+  [SheetRoutes.CustomizeAccount]: {
     walletId: string;
     accountId: string;
   };
-  [SheetRoutes.CustomizeAccountSuccess]: BaseSheetParams;
-  [SheetRoutes.AuthorizedDApps]: BaseSheetParams;
-  [SheetRoutes.Receive]: BaseSheetParams;
-  [SheetRoutes.Send]: BaseSheetParams & {
+  [SheetRoutes.CustomizeAccountSuccess]: undefined;
+  [SheetRoutes.AuthorizedDApps]:
+    | {
+        featureName?: string;
+      }
+    | undefined;
+  [SheetRoutes.Receive]: undefined;
+  [SheetRoutes.Send]: {
     accountId?: AccountId;
     assetsSelected?: Token[];
     recipientAddress?: string;
+    /**
+     * Provenance of `recipientAddress`. Used by analytics to attribute
+     * `send | transaction | success/failure` to the entry vector. The QR
+     * scanner and address-book pickers set this when navigating back; an
+     * external entry (deep link, dapp connector) can pass `'navigation'`.
+     * Manual typing is captured separately when the input dispatches.
+     */
+    recipientSource?: 'address-book' | 'manual' | 'navigation' | 'qr';
   };
-  [SheetRoutes.AddAssets]: BaseSheetParams & {
+  [SheetRoutes.AddAssets]: {
     accountId: AccountId;
     blockchainName: string;
   };
-  [SheetRoutes.AddressBook]: BaseSheetParams & {
+  [SheetRoutes.AddressBook]: {
     accountId: AccountId;
   };
-  [SheetRoutes.QrScanner]: BaseSheetParams;
-  [SheetRoutes.ReviewTransaction]: BaseSheetParams & {
+  [SheetRoutes.QrScanner]: undefined;
+  [SheetRoutes.ReviewTransaction]: {
     accountId: string;
     accountName: string;
     blockchainName: string;
   };
-  [SheetRoutes.SendResult]: BaseSheetParams & {
+  [SheetRoutes.SendResult]: {
     accountId: string;
     result: {
       status: 'failure' | 'processing' | 'success';
       blockchain: string;
     };
   };
-  [SheetRoutes.AccountKey]: BaseSheetParams & {
+  [SheetRoutes.AccountKey]: {
     walletId: string;
     accountId: string;
   };
-  [SheetRoutes.RecoveryPhrase]: BaseSheetParams & {
+  [SheetRoutes.RecoveryPhrase]: {
     walletId: WalletId;
   };
-  [SheetRoutes.RecoveryPhraseVerification]: BaseSheetParams & {
+  [SheetRoutes.RecoveryPhraseVerification]: {
     walletId: WalletId;
   };
-  [SheetRoutes.SuccessRecoveryPhraseVerification]: BaseSheetParams;
-  [SheetRoutes.EditFolder]: BaseSheetParams & {
+  [SheetRoutes.SuccessRecoveryPhraseVerification]: undefined;
+  [SheetRoutes.EditFolder]: {
     folderId: FolderId;
     accountId: AccountId;
   };
-  [SheetRoutes.CreateFolder]: BaseSheetParams & {
+  [SheetRoutes.CreateFolder]: {
     accountId: AccountId;
   };
-  [SheetRoutes.HardwareWalletDiscoverySearching]: BaseSheetParams;
-  [SheetRoutes.HardwareWalletDiscoveryError]: BaseSheetParams;
-  [SheetRoutes.HardwareWalletDiscoveryResults]: BaseSheetParams & {
-    devices: Array<{
-      id: string;
-      name: string;
-      icon: string;
-    }>;
-  };
-  [SheetRoutes.Buy]: BaseSheetParams & {
+  [SheetRoutes.HardwareWalletDiscoveryError]: undefined;
+  [SheetRoutes.HardwareWalletDiscoveryResults]: undefined;
+  [SheetRoutes.Buy]: {
     accountId?: string;
   };
-  [SheetRoutes.ThemeSelection]: BaseSheetParams;
-  [SheetRoutes.Language]: BaseSheetParams;
-  [SheetRoutes.NetworkSelection]: BaseSheetParams;
-  [SheetRoutes.FiatCurrencySheet]: BaseSheetParams;
-  [SheetRoutes.AssetDetailBottomSheet]: BaseSheetParams & {
+  [SheetRoutes.ThemeSelection]: undefined;
+  [SheetRoutes.Language]: undefined;
+  [SheetRoutes.NetworkSelection]: undefined;
+  [SheetRoutes.FiatCurrencySheet]:
+    | {
+        featureName?: string;
+      }
+    | undefined;
+  [SheetRoutes.AssetDetailBottomSheet]: {
     token: Token;
+    // Origin marker: was the sheet opened from the portfolio (multi-account)
+    // tokens list? Immutable for the lifetime of the sheet entry — controls
+    // whether a back-to-portfolio affordance is shown after drilling down.
     isFromPortfolio?: boolean;
+    // Current view inside the sheet. Mutable via `navigation.setParams` so the
+    // drill-down survives re-mounts when child sheets (e.g. ActivityDetail)
+    // are pushed on top. Defaults to `isFromPortfolio` on first mount.
+    isPortfolioView?: boolean;
   };
-  [SheetRoutes.ActivityDetail]: BaseSheetParams & {
+  [SheetRoutes.PortfolioTokenSortControls]:
+    | PortfolioTokenSortSheetParams
+    | undefined;
+  [SheetRoutes.ActivityDetail]: {
     activityId: string;
+    activity?: Activity;
   };
-  [SheetRoutes.DefaultOpenMode]: BaseSheetParams;
-  [SheetRoutes.StakingIssue]: BaseSheetParams & {
+  [SheetRoutes.DefaultOpenMode]: undefined;
+  [SheetRoutes.StakingIssue]: {
     accountId: string;
     issueType: 'high-saturation' | 'locked' | 'pledge' | 'retiring';
   };
-  [SheetRoutes.ComingSoon]: BaseSheetParams & {
+  [SheetRoutes.ComingSoon]: {
     featureName: string;
   };
-  [SheetRoutes.Collateral]: BaseSheetParams & {
+  [SheetRoutes.Collateral]: {
     accountId: string;
     walletId: string;
   };
-  [SheetRoutes.BrowsePool]: BaseSheetParams & {
+  [SheetRoutes.BrowsePool]: {
     searchQuery?: string;
     accountId: string;
     browsePoolSortOption?: string;
     browsePoolSortOrder?: string;
   };
-  [SheetRoutes.BrowsePoolFilterControls]: BaseSheetParams & {
+  [SheetRoutes.BrowsePoolFilterControls]: {
     accountId: string;
     searchQuery?: string;
     browsePoolSortOption?: string;
     browsePoolSortOrder?: string;
   };
-  [SheetRoutes.StakePoolDetails]: BaseSheetParams & {
+  [SheetRoutes.StakePoolDetails]: {
     poolId: string;
     searchQuery?: string;
     accountId: string;
     browsePoolSortOption?: string;
     browsePoolSortOrder?: string;
   };
-  [SheetRoutes.StakeDelegation]: BaseSheetParams & {
+  [SheetRoutes.StakeDelegation]: {
     accountId: string;
   };
-  [SheetRoutes.NewDelegation]: BaseSheetParams & {
+  [SheetRoutes.NewDelegation]: {
     poolId: string;
     accountId: string;
   };
-  [SheetRoutes.DelegationSuccess]: BaseSheetParams;
-  [SheetRoutes.DeregisterPool]: BaseSheetParams & {
+  [SheetRoutes.DelegationSuccess]: undefined;
+  [SheetRoutes.DeregisterPool]: {
     accountId: string;
   };
-  [SheetRoutes.DeregistrationSuccess]: BaseSheetParams;
-  [SheetRoutes.EditWallet]: BaseSheetParams & { walletId: string };
-  [SheetRoutes.EditWalletSuccess]: BaseSheetParams;
-  [SheetRoutes.AddContact]: BaseSheetParams & {
+  [SheetRoutes.DeregistrationSuccess]: undefined;
+  [SheetRoutes.EditWallet]: { walletId: string };
+  [SheetRoutes.EditWalletSuccess]: undefined;
+  [SheetRoutes.AddContact]: {
+    contactId?: string;
+    source?: 'send-flow';
+  };
+  [SheetRoutes.ContactDetails]: {
     contactId?: string;
   };
-  [SheetRoutes.ContactDetails]: BaseSheetParams & {
-    contactId?: string;
+  [SheetRoutes.SelectAccount]: ExtendedParams<'SelectAccount'>;
+  [SheetRoutes.DappDetail]: {
+    activeDapp: string;
   };
-  [SheetRoutes.SelectAccount]: BaseSheetParams &
-    ExtendedParams<'SelectAccount'>;
-  [SheetRoutes.DappDetail]: BaseSheetParams & {
-    activeDapp: number;
-  };
-  [SheetRoutes.DappFilterControls]: BaseSheetParams;
-  [SheetRoutes.AuthorizeDapp]: BaseSheetParams & {
+  [SheetRoutes.DappFilterControls]: undefined;
+  [SheetRoutes.AuthorizeDapp]: {
     title?: string;
     dapp: {
       icon: AvatarContent;
@@ -278,7 +327,7 @@ export type SheetParameterList = {
      */
     dappStatus?: 'blocked' | 'trusted' | 'unsecured';
   };
-  [SheetRoutes.SignData]: BaseSheetParams & {
+  [SheetRoutes.SignData]: {
     requestId: string;
     dapp: {
       icon: AvatarContent;
@@ -288,7 +337,7 @@ export type SheetParameterList = {
     address: string;
     payload: string;
   };
-  [SheetRoutes.SignTx]: BaseSheetParams & {
+  [SheetRoutes.SignTx]: {
     requestId: string;
     dapp: {
       icon: AvatarContent;
@@ -298,112 +347,47 @@ export type SheetParameterList = {
     txHex: string;
     partialSign: boolean;
   };
-  [SheetRoutes.MidnightSettings]: BaseSheetParams;
-  [SheetRoutes.EditTokenName]: BaseSheetParams & {
+  [SheetRoutes.MidnightSettings]: undefined;
+  [SheetRoutes.EditTokenName]: {
     token: Token;
     takenTokenNames: string[];
   };
-  [SheetRoutes.DustDesignation]: BaseSheetParams & {
+  [SheetRoutes.DustDesignation]: {
     accountId: AccountId;
   };
   // Identity center
 
-  [SheetRoutes.ConnectionDetails]: BaseSheetParams;
-  [SheetRoutes.ConnectionPending]: BaseSheetParams;
-  [SheetRoutes.ConnectionComplete]: BaseSheetParams;
-  [SheetRoutes.KYCDetails]: BaseSheetParams;
-  [SheetRoutes.KYCWebview]: BaseSheetParams;
+  [SheetRoutes.ConnectionDetails]: undefined;
+  [SheetRoutes.ConnectionPending]: undefined;
+  [SheetRoutes.ConnectionComplete]: undefined;
+  [SheetRoutes.KYCDetails]: undefined;
+  [SheetRoutes.KYCWebview]: undefined;
   // Swap center
-  [SheetRoutes.SwapSelectSellToken]: BaseSheetParams;
-  [SheetRoutes.SwapSelectBuyToken]: BaseSheetParams;
-  [SheetRoutes.SwapSlippage]: BaseSheetParams;
-  [SheetRoutes.SwapLiquiditySources]: BaseSheetParams;
-  [SheetRoutes.SwapReview]: BaseSheetParams;
-  [SheetRoutes.SwapResult]: BaseSheetParams;
-  [SheetRoutes.LockSettings]: BaseSheetParams;
+  [SheetRoutes.SwapSelectSellToken]: undefined;
+  [SheetRoutes.SwapSelectBuyToken]: undefined;
+  [SheetRoutes.SwapSlippage]: undefined;
+  [SheetRoutes.SwapLiquiditySources]: undefined;
+  [SheetRoutes.SwapReview]: undefined;
+  [SheetRoutes.SwapResult]: undefined;
+  [SheetRoutes.LockSettings]: undefined;
 };
 
-export type BaseSheetParams =
-  | {
-      preventAnimation?: boolean;
-      hasNestedScrolling?: boolean;
-      featureName?: string;
-      /**
-       * When true, the sheet cannot be closed by the user (gesture or backdrop).
-       * Use for flows that must complete (e.g. send in progress). Programmatic
-       * close via NavigationControls.sheets.close() still works.
-       */
-      preventClose?: boolean;
-    }
-  | undefined;
-
 export type StackScreenProps<T extends keyof StackParameterList> =
-  ReactNavigationStackScreenProps<StackParameterList, T>;
+  CompositeScreenProps<
+    ReactNavigationStackScreenProps<StackParameterList, T>,
+    TrueSheetScreenProps<SheetParameterList, SheetRoutes.RootStack>
+  >;
 
 export type TabScreenProps<T extends keyof TabParameterList> =
   CompositeScreenProps<
     BottomTabScreenProps<TabParameterList, T>,
-    StackScreenProps<keyof StackParameterList>
+    StackScreenProps<StackRoutes.Home>
   >;
 
-export type SheetNavigationOptions = {
-  title?: string;
-  headerShown?: boolean;
-  /**
-   * When true, the sheet cannot be closed by the user (gesture or backdrop).
-   * Can be set per-screen via options. Programmatic close still works.
-   */
-  preventClose?: boolean;
-  snapPoints?: string[];
-  footer?: FC<BottomSheetFooterProps> | undefined;
-};
-
-export type SheetNavigationEventMap = {
-  sheetClose: {
-    data: { forced?: boolean };
-    canPreventDefault: true;
-  };
-  sheetOpen: {
-    data: undefined;
-  };
-};
-
-export type SheetNavigationProperty<
-  ParameterList extends ParamListBase,
-  RouteName extends keyof ParameterList = keyof ParameterList,
-  NavigatorID extends string | undefined = undefined,
-> = NavigationProp<
-  ParameterList,
-  RouteName,
-  NavigatorID,
-  StackNavigationState<ParameterList>,
-  SheetNavigationOptions,
-  SheetNavigationEventMap
-> &
-  StackActionHelpers<ParameterList>;
-
-export type SheetScreenProps<T extends keyof SheetParameterList> = {
-  navigation: SheetNavigationProperty<SheetParameterList, T>;
-  route: RouteProp<SheetParameterList, T>;
-};
-
-type NavigationOptions = {
-  merge?: boolean;
-  pop?: boolean;
-  reset?: boolean;
-  /**
-   * When true, prevents the sheet from closing during navigation transitions.
-   * Use this for flows where content changes may trigger unwanted sheet closes.
-   */
-  preventCloseOnTransition?: boolean;
-};
-
-export type NavigateParams<T extends SheetRoutes> = [
-  route: T,
-  params?: SheetParameterList[T],
-  options?: NavigationOptions,
-];
+export type SheetScreenProps<T extends keyof SheetParameterList> =
+  TrueSheetScreenProps<SheetParameterList, T>;
 
 export type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+export type { TrueSheetNavigationOptions as SheetNavigationOptions };
 
 export * from './routes';

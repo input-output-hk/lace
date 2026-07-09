@@ -25,19 +25,18 @@ export const useAddWalletPage = ({ navigation }: AddWalletScreenProps) => {
   }, [navigation]);
 
   const handleCreateWallet = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.CreateNewWallet);
+    NavigationControls.navigate(SheetRoutes.CreateNewWallet);
   }, []);
 
   const handleRestoreWallet = useCallback(() => {
     clearRestoreWalletFlow();
-    NavigationControls.sheets.navigate(
-      SheetRoutes.RestoreWalletRecoveryPhrase,
-      { hasNestedScrolling: true },
-    );
+    NavigationControls.navigate(SheetRoutes.RestoreWalletRecoveryPhrase, {
+      hasNestedScrolling: true,
+    });
   }, [clearRestoreWalletFlow]);
 
   const handleConnectHardwareWallet = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.AddWalletHardware);
+    NavigationControls.navigate(SheetRoutes.AddWalletHardware);
   }, []);
 
   const loadedOnboardingOptions = useLoadedOnboardingOptions();

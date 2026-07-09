@@ -117,7 +117,10 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
       expect(result).toEqual(
-        actions.authenticationPrompt.verifiedBiometric({ success: false }),
+        actions.authenticationPrompt.verifiedBiometric({
+          success: false,
+          failureReason: 'auth_failed',
+        }),
       );
     });
   });
@@ -179,6 +182,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 1,
             maxAttempts: 3,
@@ -201,6 +205,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 1,
             maxAttempts: 3,
@@ -225,6 +230,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result1).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 1,
             maxAttempts: 3,
@@ -237,6 +243,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result2).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 2,
             maxAttempts: 3,
@@ -263,6 +270,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result1).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 1,
             maxAttempts: 3,
@@ -275,6 +283,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result2).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 2,
             maxAttempts: 3,
@@ -314,6 +323,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       expect(result1).toEqual(
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
+          failureReason: 'pre_auth_failed',
           androidKeystoreRecovery: {
             attemptNumber: 1,
             maxAttempts: 3,

@@ -85,13 +85,13 @@ export const useStakingIssueSheet = (
   );
 
   const handleDeRegister = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.DeregisterPool, {
+    NavigationControls.navigate(SheetRoutes.DeregisterPool, {
       accountId: accountIdString,
     });
   }, [accountIdString]);
 
   const handleUpdate = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.BrowsePool, {
+    NavigationControls.navigate(SheetRoutes.BrowsePool, {
       accountId: accountIdString,
     });
   }, [accountIdString]);
@@ -101,18 +101,15 @@ export const useStakingIssueSheet = (
     if (isWeb) {
       void openUrl({ url, onError: () => {} });
     } else {
-      NavigationControls.actions.closeAndNavigate(
-        StackRoutes.DappExternalWebView,
-        {
-          title: t('v2.pool-status.delegate-vote'),
-          dapp: {
-            icon: { img: { uri: 'https://gov.tools/favicon.ico' } },
-            name: t('v2.pool-status.delegate-vote'),
-            category: '',
-          },
-          buttonUrl: url,
+      NavigationControls.navigate(StackRoutes.DappExternalWebView, {
+        title: t('v2.pool-status.delegate-vote'),
+        dapp: {
+          icon: { img: { uri: 'https://gov.tools/favicon.ico' } },
+          name: t('v2.pool-status.delegate-vote'),
+          category: '',
         },
-      );
+        buttonUrl: url,
+      });
     }
   }, [t]);
 

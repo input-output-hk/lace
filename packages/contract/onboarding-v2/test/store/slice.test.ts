@@ -1,4 +1,4 @@
-import { WalletId } from '@lace-contract/wallet-repo';
+import { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { HardwareIntegrationId } from '@lace-lib/util-hw';
 import { describe, expect, it } from 'vitest';
 
@@ -93,7 +93,12 @@ describe('onboardingV2 slice', () => {
       stateWithError,
       actions.onboardingV2.attemptCreateHardwareWallet({
         optionId: HardwareIntegrationId('ledger'),
-        device: { vendorId: 0x2c97, productId: 0x4015, serialNumber: '0001' },
+        device: {
+          kind: 'usb',
+          vendorId: 0x2c97,
+          productId: 0x4015,
+          serialNumber: '0001',
+        },
         accountIndex: 0,
         blockchainName: 'Cardano' as BlockchainName,
       }),
@@ -121,7 +126,12 @@ describe('onboardingV2 slice', () => {
     const walletId = WalletId('wallet-generated');
     const state = onboardingV2Reducers.onboardingV2(
       busyState,
-      actions.onboardingV2.createWalletSuccess({ walletId, isRecovery: false }),
+      actions.onboardingV2.createWalletSuccess({
+        walletId,
+        isRecovery: false,
+        walletType: WalletType.InMemory,
+        blockchains: ['Cardano' as BlockchainName],
+      }),
     );
 
     expect(state.isCreatingWallet).toBe(false);

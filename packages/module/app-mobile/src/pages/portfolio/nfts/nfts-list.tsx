@@ -1,8 +1,9 @@
 import type {
+  FlatList as FlatListRef,
   LayoutChangeEvent,
+  ListRenderItemInfo,
   StyleProp,
   ViewStyle,
-  ListRenderItemInfo,
 } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
@@ -23,8 +24,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { type FlatList, StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { type FlatList, StyleSheet, View, Pressable } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../../hooks';
@@ -59,6 +59,7 @@ export const NftsList = ({
   scrollHandler,
   footerSpacerHeight,
   contentTopInset,
+  listRef,
 }: {
   accountId: AccountId;
   activeIndex: number;
@@ -68,15 +69,17 @@ export const NftsList = ({
   scrollHandler: ScrollHandlerProcessed<Record<string, unknown>>;
   footerSpacerHeight?: number;
   contentTopInset?: number;
+  listRef?: React.RefObject<FlatListRef | null>;
 }) => {
   // Custom hooks
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const listRef = useRef<FlatList>(null);
+  const internalListRef = useRef<FlatList>(null);
+  const resolvedListRef = listRef ?? internalListRef;
 
   useEffect(() => {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [activeIndex, selectedAssetView]);
+    resolvedListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [activeIndex, selectedAssetView, resolvedListRef]);
 
   const setSelectedFolderId = useDispatchLaceAction('ui.setSelectedFolderId');
   const allGroupedNfts = useLaceSelector(
@@ -159,7 +162,7 @@ export const NftsList = ({
   // Callbacks
   const handleEditFolder = useCallback(() => {
     if (openFolderId) {
-      NavigationControls.sheets.navigate(SheetRoutes.EditFolder, {
+      NavigationControls.navigate(SheetRoutes.EditFolder, {
         folderId: openFolderId,
         accountId,
       });
@@ -167,7 +170,7 @@ export const NftsList = ({
   }, [openFolderId, accountId]);
 
   const handleCreateFolder = useCallback(() => {
-    NavigationControls.sheets.navigate(SheetRoutes.CreateFolder, {
+    NavigationControls.navigate(SheetRoutes.CreateFolder, {
       accountId,
     });
   }, [accountId]);
@@ -185,7 +188,7 @@ export const NftsList = ({
 
   const handleSelectToken = useCallback(
     (token: (typeof filteredGroupedNfts.nonFolderTokens)[number]) => {
-      NavigationControls.sheets.navigate(SheetRoutes.AssetDetailBottomSheet, {
+      NavigationControls.navigate(SheetRoutes.AssetDetailBottomSheet, {
         token,
       });
     },
@@ -319,13 +322,14 @@ export const NftsList = ({
         contentContainerStyle={contentContainerStyle}
         ListHeaderComponent={listHeaderNode}
         scrollHandler={scrollHandler}
+        listRef={resolvedListRef}
       />
     );
   }
 
   return (
     <Animated.FlatList
-      ref={listRef as React.RefObject<FlatList>}
+      ref={resolvedListRef}
       testID="nft-list-container"
       data={nftGridItems}
       keyExtractor={keyExtractor}
@@ -353,6 +357,7 @@ const getStyles = (theme: Theme) =>
     },
     columnWrapper: {
       gap: GAP,
+      paddingTop: spacing.S,
     },
     createFolderGridItem: {
       aspectRatio: 1,

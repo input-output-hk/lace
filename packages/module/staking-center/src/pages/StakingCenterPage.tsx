@@ -15,6 +15,7 @@ export const StakingCenterPage = () => {
   const {
     stakeCards,
     stakingStatusCard,
+    networkInfoCard,
     hasCardanoAccounts,
     cardanoAccounts,
     searchValue,
@@ -47,6 +48,7 @@ export const StakingCenterPage = () => {
       showSearchBar={
         Array.isArray(cardanoAccounts) && cardanoAccounts.length > 1
       }
+      networkInfoCard={networkInfoCard}
       stakingStatusCard={stakingStatusCard}
       stakeCards={stakeCards}
     />

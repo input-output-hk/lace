@@ -977,10 +977,6 @@ export class CardanoDappConnectorApi
     return accountId;
   }
 
-  /**
-   * Gets UTXOs for the account associated with the given dApp origin.
-   * @param origin - The dApp origin URL
-   */
   async #getAccountUtxos(origin: string): Promise<Cardano.Utxo[]> {
     const accountId = this.#getAccountId(origin);
     const accountUtxos = await firstValueFrom(this.#accountUtxos$);

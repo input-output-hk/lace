@@ -3,14 +3,15 @@ import type { StyleProp, ViewStyle } from 'react-native';
 
 import { compactNumberWithUnit } from '@lace-lib/util-render';
 import React, { useCallback, useMemo } from 'react';
-import { Pressable } from 'react-native-gesture-handler';
+import { Pressable } from 'react-native';
 
 import { spacing } from '../../../design-tokens';
 import { Card, Row, Text, Column } from '../../atoms';
 import { isWeb } from '../../util';
 import { ProgressBar } from '../progressBar/progressBar';
 
-import type { BrowsePoolSortOption, LaceBrowsePool } from '../../util/types';
+import type { BrowsePoolSortOption } from '../../util/types';
+import type { LaceBrowsePool } from '@lace-contract/cardano-stake-pools';
 
 export interface PoolCardProps {
   cardStyle: StyleProp<ViewStyle>;

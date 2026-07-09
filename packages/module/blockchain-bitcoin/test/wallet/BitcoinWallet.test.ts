@@ -337,6 +337,169 @@ describe('BitcoinWallet', () => {
     wallet.shutdown();
   });
 
+  it('keeps a pending transaction that is in history but still unconfirmed', async () => {
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      20,
+      walletInfo,
+      poll$,
+      resync$,
+      logger,
+    );
+
+    // The address-history endpoint returns the in-flight tx with
+    // confirmations: 0 (not yet mined) before it shows up confirmed.
+    wallet.transactionHistory$.next([
+      {
+        transactionHash: 'in-flight-tx',
+        inputs: [{ txId: 'u', index: 0 }],
+        outputs: [],
+        confirmations: 0,
+      } as unknown as BitcoinTransactionHistoryEntry,
+    ]);
+
+    // The mempool still reports the tx as pending.
+    provider.getTransactionsInMempool.mockImplementation(() =>
+      of(
+        Ok({
+          items: [
+            {
+              transactionHash: 'in-flight-tx',
+              inputs: [{ txId: 'u', index: 0 }],
+              outputs: [],
+              confirmations: 0,
+            },
+          ],
+          cursor: '',
+        }),
+      ),
+    );
+
+    wallet.pendingTransactions$.next([
+      {
+        transactionHash: 'in-flight-tx',
+        inputs: [{ txId: 'u', index: 0 }],
+        outputs: [],
+        confirmations: 0,
+      } as unknown as BitcoinTransactionHistoryEntry,
+    ]);
+
+    await firstValueFrom((wallet as any).updatePendingTransactions());
+
+    const hashes = wallet.pendingTransactions$
+      .getValue()
+      .map(tx => tx.transactionHash);
+
+    expect(hashes).toContain('in-flight-tx');
+
+    wallet.shutdown();
+  });
+
+  it('does not treat an unconfirmed history entry as a spent input', async () => {
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      20,
+      walletInfo,
+      poll$,
+      resync$,
+      logger,
+    );
+
+    // History contains the in-flight tx unconfirmed; the mempool endpoint
+    // lags and returns nothing, so the local entry is the only source.
+    wallet.transactionHistory$.next([
+      {
+        transactionHash: 'in-flight-tx',
+        inputs: [{ txId: 'u', index: 0 }],
+        outputs: [],
+        confirmations: 0,
+      } as unknown as BitcoinTransactionHistoryEntry,
+    ]);
+
+    provider.getTransactionsInMempool.mockImplementation(() =>
+      of(Ok({ items: [], cursor: '' })),
+    );
+
+    wallet.pendingTransactions$.next([
+      {
+        transactionHash: 'in-flight-tx',
+        inputs: [{ txId: 'u', index: 0 }],
+        outputs: [],
+        confirmations: 0,
+      } as unknown as BitcoinTransactionHistoryEntry,
+    ]);
+
+    await firstValueFrom((wallet as any).updatePendingTransactions());
+
+    const hashes = wallet.pendingTransactions$
+      .getValue()
+      .map(tx => tx.transactionHash);
+
+    expect(hashes).toContain('in-flight-tx');
+
+    wallet.shutdown();
+  });
+
+  it('purges a pending transaction only after it confirms in history', async () => {
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      20,
+      walletInfo,
+      poll$,
+      resync$,
+      logger,
+    );
+
+    const pendingEntry = {
+      transactionHash: 'own-tx',
+      inputs: [{ txId: 'u', index: 0 }],
+      outputs: [],
+      confirmations: 0,
+      blockHeight: -1,
+      timestamp: 12_345_678,
+    } as unknown as BitcoinTransactionHistoryEntry;
+
+    wallet.pendingTransactions$.next([pendingEntry]);
+
+    // Poll 1: history already lists the tx (still unconfirmed), mempool too.
+    provider.getTransactions.mockImplementation(() =>
+      of(Ok({ items: [{ ...pendingEntry }], cursor: '' })),
+    );
+    provider.getTransactionsInMempool.mockImplementation(() =>
+      of(Ok({ items: [{ ...pendingEntry }], cursor: '' })),
+    );
+
+    await firstValueFrom((wallet as any).updateTransactions());
+    await firstValueFrom((wallet as any).updatePendingTransactions());
+
+    expect(
+      wallet.pendingTransactions$.value.map(tx => tx.transactionHash),
+    ).toContain('own-tx');
+
+    // Poll 2: the tx is mined — history reports it confirmed, mempool empty.
+    provider.getTransactions.mockImplementation(() =>
+      of(
+        Ok({
+          items: [{ ...pendingEntry, confirmations: 1, blockHeight: 100 }],
+          cursor: '',
+        }),
+      ),
+    );
+    provider.getTransactionsInMempool.mockImplementation(() =>
+      of(Ok({ items: [], cursor: '' })),
+    );
+
+    await firstValueFrom((wallet as any).updateTransactions());
+    await firstValueFrom((wallet as any).updatePendingTransactions());
+
+    expect(wallet.pendingTransactions$.value).toEqual([]);
+
+    wallet.shutdown();
+  });
+
   it('returns static fee market on testnet', async () => {
     const wallet = new BitcoinWallet(
       provider,
@@ -471,6 +634,55 @@ describe('BitcoinWallet', () => {
 
     const emitted = await firstValueFrom(wallet.transactionHistory$);
     expect(emitted).toEqual(newTxs);
+
+    wallet.shutdown();
+  });
+
+  it('replaces a stale history entry with freshly fetched data', async () => {
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      20,
+      walletInfo,
+      poll$,
+      resync$,
+      logger,
+    );
+
+    wallet.transactionHistory$.next([
+      {
+        transactionHash: 'tx1',
+        inputs: [],
+        outputs: [],
+        confirmations: 0,
+        blockHeight: -1,
+        timestamp: 12_345_678,
+      } as unknown as BitcoinTransactionHistoryEntry,
+    ]);
+
+    provider.getTransactions.mockImplementation(() =>
+      of(
+        Ok({
+          items: [
+            {
+              transactionHash: 'tx1',
+              inputs: [],
+              outputs: [],
+              confirmations: 1,
+              blockHeight: 100,
+              timestamp: 12_345_678,
+            },
+          ],
+          cursor: '',
+        }),
+      ),
+    );
+
+    const changed = await firstValueFrom((wallet as any).updateTransactions());
+
+    expect(changed).toBe(true);
+    expect(wallet.transactionHistory$.value).toHaveLength(1);
+    expect(wallet.transactionHistory$.value[0].confirmations).toBe(1);
 
     wallet.shutdown();
   });

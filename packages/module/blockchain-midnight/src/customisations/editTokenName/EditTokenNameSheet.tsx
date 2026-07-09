@@ -8,14 +8,15 @@ import {
   NavigationControls,
   type SheetScreenProps,
 } from '@lace-lib/navigation';
-import { EditTokenNameBottomSheet } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { EditTokenNameBottomSheet, Sheet } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useDispatchLaceAction } from '../../hooks';
 
 import type { SheetRoutes } from '@lace-lib/navigation';
 
 export const EditTokenNameSheet = ({
+  navigation,
   route,
 }: SheetScreenProps<SheetRoutes.EditTokenName>) => {
   const { token, takenTokenNames } = route.params;
@@ -39,10 +40,10 @@ export const EditTokenNameSheet = ({
     takenTokenNames,
     onSave: metadata => {
       upsertTokenMetadata(metadata);
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     },
     onClose: () => {
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     },
     getErrorMessage: (name, excludedNames) => {
       if (isTakenTokenName(name, excludedNames)) {
@@ -55,14 +56,30 @@ export const EditTokenNameSheet = ({
     },
   });
 
+  useEffect(() => {
+    navigation.setOptions({
+      header: <Sheet.Header title={t('tokens.detail-drawer.header')} />,
+      footer: (
+        <Sheet.Footer
+          secondaryButton={{
+            label: t('tokens.detail-drawer.cancel'),
+            onPress: handleClose,
+          }}
+          primaryButton={{
+            label: t('tokens.detail-drawer.save'),
+            onPress: handleSave,
+            disabled: isSaveDisabled,
+          }}
+        />
+      ),
+    });
+  }, [navigation, t, handleClose, handleSave, isSaveDisabled]);
+
   return (
     <EditTokenNameBottomSheet
       labels={{
-        title: t('tokens.detail-drawer.header'),
         nameLabel: t('tokens.detail-drawer.custom-name.input.full-name'),
         tickerLabel: t('tokens.detail-drawer.custom-name.input.short-name'),
-        confirmLabel: t('tokens.detail-drawer.save'),
-        cancelLabel: t('tokens.detail-drawer.cancel'),
       }}
       values={{
         tokenFullName,
@@ -73,10 +90,7 @@ export const EditTokenNameSheet = ({
       actions={{
         onTokenFullNameChange: setTokenFullName,
         onTokenShortNameChange: setTokenShortName,
-        onConfirm: handleSave,
-        onCancel: handleClose,
       }}
-      utils={{ isConfirmDisabled: isSaveDisabled }}
     />
   );
 };

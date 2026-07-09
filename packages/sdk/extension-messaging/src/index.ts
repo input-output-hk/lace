@@ -78,7 +78,11 @@ const _nonBackgroundConsumeRemoteApi = <T extends object>(
   consumeMessengerRemoteApi(props, {
     destructor: new FinalizationRegistryDestructor(dependencies.logger),
     messenger: createNonBackgroundMessenger(
-      { baseChannel: props.baseChannel, lazy: props.lazy },
+      {
+        baseChannel: props.baseChannel,
+        keepAlivePingPong: props.keepAlivePingPong,
+        lazy: props.lazy,
+      },
       dependencies,
     ),
     ...dependencies,

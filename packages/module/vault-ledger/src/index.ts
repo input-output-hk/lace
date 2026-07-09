@@ -1,5 +1,3 @@
-import { featureStoreContract } from '@lace-contract/feature';
-import { i18nDependencyContract } from '@lace-contract/i18n';
 import {
   combineContracts,
   inferModuleContext,
@@ -12,10 +10,7 @@ import {
   onboardingOptionsAddonContract,
 } from '@lace-contract/onboarding-v2';
 import { signerFactoryAddonContract } from '@lace-contract/signer';
-import {
-  vaultContract,
-  walletRepoStoreContract,
-} from '@lace-contract/wallet-repo';
+import { searchHWDevicesAddonContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_LEDGER } from './const';
 
@@ -25,28 +20,21 @@ import type {
   LaceSideEffect,
   LaceModuleMap,
   ModuleAddons,
+  LaceModule,
 } from '@lace-contract/module';
 
 export { FEATURE_FLAG_LEDGER } from './const';
 
-const implementsContracts = combineContracts([
-  vaultContract,
+const sharedImplementsContracts = [
   onboardingOptionsAddonContract,
   signerFactoryAddonContract,
   hwWalletConnectorAddonContract,
   hwBlockchainSupportAddonContract,
   ledgerHwAccountConnectorAddonContract,
-] as const);
-const dependsOnContracts = combineContracts([
-  i18nDependencyContract,
-  featureStoreContract,
-  walletRepoStoreContract,
-] as const);
+] as const;
 
-const extensionModule = inferModuleContext({
+const sharedModuleParts = {
   moduleName: ModuleName('vault-ledger'),
-  implements: implementsContracts,
-  dependsOn: dependsOnContracts,
   feature: {
     willLoad: featureFlags =>
       featureFlags.some(flag => flag.key === FEATURE_FLAG_LEDGER),
@@ -55,17 +43,54 @@ const extensionModule = inferModuleContext({
       description: 'Ledger hardware wallets support',
     },
   },
+} as const satisfies Partial<LaceModule>;
+
+const extensionImplementsContracts = combineContracts([
+  ...sharedImplementsContracts,
+] as const);
+const extensionDependsOnContracts = combineContracts([] as const);
+
+const extensionModule = inferModuleContext({
+  ...sharedModuleParts,
+  implements: extensionImplementsContracts,
+  dependsOn: extensionDependsOnContracts,
   addons: {
-    loadOnboardingOptions: async () => import('./onboarding-options'),
-    loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
-    loadHwWalletConnector: async () => import('./hw-wallet-connector'),
-    loadLedgerHwAccountConnector: async () => import('./hw-account-connector'),
+    loadOnboardingOptions: async () => import('./addons/onboarding-options'),
+    loadSignerFactory: async () => import('./addons/signer-factory-web'),
+    loadHwWalletConnector: async () =>
+      import('./addons/hw-wallet-connector-web'),
+    loadLedgerHwAccountConnector: async () =>
+      import('./addons/hw-account-connector-web'),
     loadHwBlockchainSupport: async () => import('./hw-blockchain-support'),
+  },
+});
+
+const mobileImplementsContracts = combineContracts([
+  ...sharedImplementsContracts,
+  searchHWDevicesAddonContract,
+] as const);
+const mobileDependsOnContracts = combineContracts([] as const);
+
+const mobileModule = inferModuleContext({
+  ...sharedModuleParts,
+  implements: mobileImplementsContracts,
+  dependsOn: mobileDependsOnContracts,
+  addons: {
+    loadOnboardingOptions: async () => import('./addons/onboarding-options'),
+    loadSignerFactory: async () => import('./addons/signer-factory-mobile'),
+    loadHwWalletConnector: async () =>
+      import('./addons/hw-wallet-connector-mobile'),
+    loadLedgerHwAccountConnector: async () =>
+      import('./addons/hw-account-connector-mobile'),
+    loadHwBlockchainSupport: async () => import('./hw-blockchain-support'),
+    loadSearchHWDevices: async () =>
+      import('./addons/search-hw-devices-mobile'),
   },
 });
 
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
+  'lace-mobile': mobileModule,
 };
 
 export default moduleMap;
@@ -74,6 +99,6 @@ export type Selectors = ModuleSelectors<typeof extensionModule>;
 export type ActionCreators = ModuleActionCreators<typeof extensionModule>;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 export type AvailableAddons = ModuleAddons<
-  typeof implementsContracts,
-  typeof dependsOnContracts
+  typeof extensionImplementsContracts,
+  typeof extensionDependsOnContracts
 >;

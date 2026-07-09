@@ -19,6 +19,10 @@
   3. Add accessible line-height
   4. Improve text rendering
 */
+html,
+body {
+  height: 100%;
+}
 body {
   line-height: 1.5;
   font-family: 'proxima-nova', sans-serif;

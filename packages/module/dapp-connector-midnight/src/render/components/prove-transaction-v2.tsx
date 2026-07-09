@@ -1,10 +1,14 @@
-import type { CSSProperties } from 'react';
-
-import { Box, Text, useTheme } from '@input-output-hk/lace-ui-toolkit';
 import { useTranslation } from '@lace-contract/i18n';
 import { DappConnectorLayoutV2 } from '@lace-lib/ui-extension';
-import { DappInfoCard } from '@lace-lib/ui-toolkit';
+import {
+  DappInfoCard,
+  Text,
+  radius,
+  spacing,
+  useTheme,
+} from '@lace-lib/ui-toolkit';
 import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 
 export interface ProveTransactionV2Props {
   confirmTransaction: () => void;
@@ -15,6 +19,20 @@ export interface ProveTransactionV2Props {
   url: string;
 }
 
+const PRE_MAX_HEIGHT = 280;
+
+const styles = StyleSheet.create({
+  titleContainer: { marginBottom: spacing.M },
+  section: { marginVertical: spacing.M },
+  smallSection: { marginVertical: spacing.S },
+  preContainer: {
+    maxHeight: PRE_MAX_HEIGHT,
+    padding: spacing.S,
+    marginTop: spacing.S,
+    borderRadius: radius.XS,
+  },
+});
+
 export const ProveTransactionV2 = ({
   name,
   url,
@@ -24,22 +42,14 @@ export const ProveTransactionV2 = ({
   transactionData,
 }: ProveTransactionV2Props) => {
   const { t } = useTranslation();
-  const { vars } = useTheme();
+  const { theme } = useTheme();
 
-  const preStyle: CSSProperties = useMemo(
-    () => ({
-      fontSize: '11px',
-      maxHeight: '280px',
-      overflow: 'auto',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-all',
-      backgroundColor: vars.colors.$card_elevated_backgroundColor,
-      color: vars.colors.$text_primary,
-      padding: '8px',
-      borderRadius: '8px',
-      margin: '8px 0 0 0',
-    }),
-    [vars],
+  const preContainerStyle = useMemo(
+    () => [
+      styles.preContainer,
+      { backgroundColor: theme.background.secondary },
+    ],
+    [theme],
   );
 
   return (
@@ -52,26 +62,27 @@ export const ProveTransactionV2 = ({
         label: t('dapp-connector.sign-transaction.deny'),
         action: rejectTransaction,
       }}>
-      <Box mb="$16">
-        <Text.Body.Large weight="$bold">
-          {t('dapp-connector.sign-transaction.title')}
-        </Text.Body.Large>
-      </Box>
+      <View style={styles.titleContainer}>
+        <Text.M>{t('dapp-connector.sign-transaction.title')}</Text.M>
+      </View>
       <DappInfoCard imageUrl={imageUrl} name={name} url={url} />
-      <Box my="$16">
-        <Text.Body.Normal data-testid="dapp-sign-description">
+      <View style={styles.section}>
+        <Text.S testID="dapp-sign-description">
           {t('dapp-connector.sign-transaction.description')}
-        </Text.Body.Normal>
-      </Box>
+        </Text.S>
+      </View>
       {transactionData && (
-        <Box my="$8">
-          <Text.Body.Small weight="$bold">
+        <View style={styles.smallSection}>
+          <Text.XS>
             {t('dapp-connector.sign-transaction.transaction-data')}
-          </Text.Body.Small>
-          <pre data-testid="dapp-transaction-data" style={preStyle}>
-            {transactionData}
-          </pre>
-        </Box>
+          </Text.XS>
+          <ScrollView
+            style={preContainerStyle}
+            nestedScrollEnabled
+            testID="dapp-transaction-data">
+            <Text.XS>{transactionData}</Text.XS>
+          </ScrollView>
+        </View>
       )}
     </DappConnectorLayoutV2>
   );

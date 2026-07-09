@@ -188,6 +188,23 @@ const baseConfig = {
       /node_modules\/react-native-safe-area-context/,
       require.resolve('../empty.js'),
     ),
+    new NormalModuleReplacementPlugin(
+      /node_modules\/react-native-ble-plx/,
+      require.resolve('../empty.js'),
+    ),
+    // `react-native-screens` ships Fabric specs (`codegenNativeComponent`,
+    // `react-native/Libraries/ReactNative/AppContainer`) that are not
+    // available on `react-native-web`. The content scripts/SW reach it
+    // transitively via `@lace-lib/ui-toolkit`'s SheetSafeOverlay but never
+    // render it. The Expo UI build still uses the real package.
+    new NormalModuleReplacementPlugin(
+      /node_modules\/react-native-screens/,
+      require.resolve('../empty.js'),
+    ),
+    new NormalModuleReplacementPlugin(
+      /node_modules\/@lodev09\/react-native-true-sheet/,
+      require.resolve('../empty.js'),
+    ),
     new NormalModuleReplacementPlugin(/node-fetch/, resource => {
       resource.request = path.join(__dirname, '../fetch.js');
     }),

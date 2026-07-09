@@ -1,5 +1,5 @@
 import { useTranslation } from '@lace-contract/i18n';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
@@ -12,13 +12,8 @@ import {
   Row,
   Text,
 } from '../../../atoms';
-import {
-  DropdownMenu,
-  SheetFooter,
-  SheetHeader,
-  useFooterHeight,
-} from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { DropdownMenu } from '../../../molecules';
+import { Sheet, footerHeight } from '../../../organisms';
 
 import type {
   ContactSheetProps,
@@ -74,7 +69,6 @@ const RecipientItem = ({
           }
         />
         <CustomTextInput
-          isWithinBottomSheet
           label={t('v2.contact-sheet.label.address')}
           value={recipient.address}
           onChangeText={text => {
@@ -130,19 +124,11 @@ export const ContactSheet = ({
   isResolvingAlias,
   onUploadAvatar,
   onRemoveContact,
-  onCancel,
-  onSave,
-  saveDisabled,
   nameError,
   testID,
 }: ContactSheetProps) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const footerHeight = useFooterHeight();
-  const scrollContainerStyle = useMemo(
-    () => ({ paddingBottom: footerHeight }),
-    [footerHeight],
-  );
 
   // Auto-detect is always the first option provided by the template
   const autoDetectOption = {
@@ -161,133 +147,101 @@ export const ContactSheet = ({
   };
 
   return (
-    <>
-      <SheetHeader
-        title={t(
-          mode === 'add'
-            ? 'v2.contact-sheet.title.add'
-            : 'v2.contact-sheet.title.edit',
-        )}
-      />
-      <Sheet.Scroll contentContainerStyle={scrollContainerStyle}>
-        <View style={styles.container}>
-          {/* Avatar Section */}
-          <View style={styles.avatarContainer}>
-            <Avatar
-              size={100}
-              content={{
-                img: avatarUrl ? { uri: avatarUrl } : undefined,
-                fallback: avatarFallback,
-              }}
-              shape="rounded"
-            />
-            {isResolvingAlias && (
-              <View style={styles.avatarLoadingOverlay}>
-                <ActivityIndicator size="small" color={theme.text.primary} />
-              </View>
-            )}
-          </View>
-
-          {/* Upload Button */}
-          {onUploadAvatar && (
-            <Button.Secondary
-              label={t('v2.contact-sheet.button.upload')}
-              onPress={onUploadAvatar}
-              preIconName="ImageAdd"
-            />
-          )}
-
-          {/* Remove Button (Edit mode only) */}
-          {mode === 'edit' && onRemoveContact && (
-            <View style={styles.removeButtonContainer}>
-              <Button.Critical
-                testID={testID ? `${testID}-remove-contact-button` : undefined}
-                label={t('v2.contact-sheet.button.remove')}
-                onPress={onRemoveContact}
-                fullWidth
-              />
+    <Sheet.Scroll>
+      <Column alignItems="center" gap={spacing.M} style={styles.container}>
+        <View style={styles.avatarContainer}>
+          <Avatar
+            size={100}
+            content={{
+              img: avatarUrl ? { uri: avatarUrl } : undefined,
+              fallback: avatarFallback,
+            }}
+            shape="rounded"
+          />
+          {isResolvingAlias && (
+            <View style={styles.avatarLoadingOverlay}>
+              <ActivityIndicator size="small" color={theme.text.primary} />
             </View>
           )}
+        </View>
 
-          {/* Name Input */}
-          <View style={styles.inputContainer}>
-            <CustomTextInput
-              isWithinBottomSheet
-              label={t('v2.contact-sheet.label.name')}
-              value={name}
-              onChangeText={onNameChange}
-              inputError={nameError}
-              testID={testID ? `${testID}-name-input` : undefined}
+        {onUploadAvatar && (
+          <Button.Secondary
+            label={t('v2.contact-sheet.button.upload')}
+            onPress={onUploadAvatar}
+            preIconName="ImageAdd"
+          />
+        )}
+
+        {mode === 'edit' && onRemoveContact && (
+          <View style={styles.removeButtonContainer}>
+            <Button.Critical
+              testID={testID ? `${testID}-remove-contact-button` : undefined}
+              label={t('v2.contact-sheet.button.remove')}
+              onPress={onRemoveContact}
+              fullWidth
             />
           </View>
+        )}
 
-          {/* Recipient Address(es) Section */}
-          <Row
-            style={styles.recipientsHeader}
-            justifyContent="space-between"
-            alignItems="center">
-            <Text.S variant="primary">
-              {t('v2.contact-sheet.label.recipients')}
-            </Text.S>
-            <Button.Secondary
-              onPress={() => {
-                onAddRecipient();
-              }}
-              preIconName="Plus"
-              size="small"
-              testID={testID ? `${testID}-add-recipient-button` : undefined}
-            />
-          </Row>
-
-          {recipients.map((recipient, index) => (
-            <RecipientItem
-              key={recipient.id}
-              recipient={recipient}
-              index={index}
-              totalRecipients={recipients.length}
-              blockchainOptions={allBlockchainOptions}
-              onBlockchainChange={handleBlockchainChange}
-              onAddressChange={onAddressChange}
-              onAddressBlur={onAddressBlur}
-              onRemoveRecipient={onRemoveRecipient}
-              testIDPrefix={testID}
-            />
-          ))}
-
-          {/* Address Count */}
-          <Text.XS variant="secondary" style={styles.addressCount}>
-            {t('v2.contact-sheet.info.addresses-included', {
-              count: recipients.length,
-            })}
-          </Text.XS>
+        <View style={styles.inputContainer}>
+          <CustomTextInput
+            label={t('v2.contact-sheet.label.name')}
+            value={name}
+            onChangeText={onNameChange}
+            inputError={nameError}
+            testID={testID ? `${testID}-name-input` : undefined}
+          />
         </View>
-      </Sheet.Scroll>
-      <SheetFooter
-        showDivider={false}
-        secondaryButton={{
-          label: t('v2.contact-sheet.button.cancel'),
-          onPress: onCancel,
-          testID: testID ? `${testID}-cancel-button` : undefined,
-        }}
-        primaryButton={{
-          label: t('v2.contact-sheet.button.save'),
-          onPress: onSave,
-          disabled: saveDisabled,
-          testID: testID ? `${testID}-save-button` : undefined,
-        }}
-      />
-    </>
+
+        <Row
+          style={styles.recipientsHeader}
+          justifyContent="space-between"
+          alignItems="center">
+          <Text.S variant="primary">
+            {t('v2.contact-sheet.label.recipients')}
+          </Text.S>
+          <Button.Secondary
+            onPress={() => {
+              onAddRecipient();
+            }}
+            preIconName="Plus"
+            size="small"
+            testID={testID ? `${testID}-add-recipient-button` : undefined}
+          />
+        </Row>
+
+        {recipients.map((recipient, index) => (
+          <RecipientItem
+            key={recipient.id}
+            recipient={recipient}
+            index={index}
+            totalRecipients={recipients.length}
+            blockchainOptions={allBlockchainOptions}
+            onBlockchainChange={handleBlockchainChange}
+            onAddressChange={onAddressChange}
+            onAddressBlur={onAddressBlur}
+            onRemoveRecipient={onRemoveRecipient}
+            testIDPrefix={testID}
+          />
+        ))}
+
+        <Text.XS variant="secondary" style={styles.addressCount}>
+          {t('v2.contact-sheet.info.addresses-included', {
+            count: recipients.length,
+          })}
+        </Text.XS>
+      </Column>
+    </Sheet.Scroll>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    paddingTop: spacing.XL,
-    gap: spacing.M,
+    paddingBottom: footerHeight.horizontal,
   },
   avatarContainer: {
-    marginBottom: spacing.S,
+    marginVertical: spacing.S,
     position: 'relative',
   },
   avatarLoadingOverlay: {
@@ -319,7 +273,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.M,
   },
   addressCount: {
-    textAlign: 'center',
     marginTop: spacing.M,
   },
 });

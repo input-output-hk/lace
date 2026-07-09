@@ -7,9 +7,7 @@ import {
 } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
-import { Row, Text } from '../../../atoms';
-import { SheetHeader } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { Column, Row, Text } from '../../../atoms';
 import {
   mnemonicFormOptions,
   useAppForm,
@@ -29,7 +27,6 @@ export type RestoreWalletRecoverySheetTemplateProps = {
 };
 
 export const RestoreWalletRecoverySheetTemplate = ({
-  title,
   instructionText,
   placeholderText,
   pasteButtonLabel,
@@ -99,12 +96,7 @@ export const RestoreWalletRecoverySheetTemplate = ({
   }, []);
 
   return (
-    <Sheet.Scroll
-      testID={testID}
-      contentContainerStyle={styles.content}
-      keyboardShouldPersistTaps="handled">
-      <SheetHeader title={title} testID={`${testID}-header`} />
-
+    <Column testID={testID} style={styles.content}>
       <TouchableWithoutFeedback
         accessible={false}
         onPress={handleOutsideTap}
@@ -126,7 +118,6 @@ export const RestoreWalletRecoverySheetTemplate = ({
                   </Text.XS>
                   <View style={styles.inputContainer}>
                     <field.MnemonicTextInput
-                      isWithinBottomSheet
                       placeholderText={placeholderText}
                       testID={inputTestID}
                     />
@@ -150,15 +141,14 @@ export const RestoreWalletRecoverySheetTemplate = ({
           </form.AppField>
         </View>
       </TouchableWithoutFeedback>
-    </Sheet.Scroll>
+    </Column>
   );
 };
 
 const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
-    paddingHorizontal: spacing.L,
-    paddingBottom: spacing.XXL,
+    padding: spacing.L,
     gap: spacing.XL,
   },
   form: {

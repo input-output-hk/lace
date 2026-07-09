@@ -1,5 +1,5 @@
-import { EditWalletSheetTemplate } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { EditWalletSheetTemplate, Sheet } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useEditWallet } from './useEditWallet';
 
@@ -10,12 +10,19 @@ export const EditWalletSheet = (
 ) => {
   const { secondaryButton, primaryButton, ...templateProps } =
     useEditWallet(props);
+  const { labels } = templateProps;
 
-  return (
-    <EditWalletSheetTemplate
-      {...templateProps}
-      secondaryButton={secondaryButton}
-      primaryButton={primaryButton}
-    />
-  );
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: <Sheet.Header title={labels.title} />,
+      footer: (
+        <Sheet.Footer
+          secondaryButton={secondaryButton}
+          primaryButton={primaryButton}
+        />
+      ),
+    });
+  }, [props.navigation, labels.title, secondaryButton, primaryButton]);
+
+  return <EditWalletSheetTemplate {...templateProps} />;
 };

@@ -25,6 +25,7 @@ import { networkStoreContract } from '@lace-contract/network';
 import {
   addressValidatorAddonContract,
   baseTokenAddonContract,
+  chainMinimumAmountTokenValidatorAddonContract,
   sendFlowStoreContract,
 } from '@lace-contract/send-flow';
 import { signerFactoryAddonContract } from '@lace-contract/signer';
@@ -32,6 +33,7 @@ import { syncStoreContract } from '@lace-contract/sync';
 import { tokenIdMapperAddonContract } from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorImplementationAddonContract } from '@lace-contract/tx-executor';
+import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import store from './store';
@@ -55,6 +57,7 @@ const implementsContracts = combineContracts([
   txExecutorImplementationAddonContract,
   addressValidatorAddonContract,
   baseTokenAddonContract,
+  chainMinimumAmountTokenValidatorAddonContract,
   addressBookAddressValidatorAddonContract,
   tokenIdMapperAddonContract,
   signerFactoryAddonContract,
@@ -64,6 +67,7 @@ const dependsOnContracts = combineContracts([
   bitcoinFeeMarketProvider,
   networkStoreContract,
   walletRepoStoreContract,
+  walletActiveStateDependencyContract,
   activitiesStoreContract,
   tokensStoreContract,
   sendFlowStoreContract,
@@ -83,6 +87,8 @@ const bitcoinModule = inferModuleContext({
       import('./in-memory-wallet-integration'),
     loadAddressValidator: async () => import('./address-validator'),
     loadBaseToken: async () => import('./exposed-modules/base-token-selector'),
+    loadChainMinimumAmountTokenValidator: async () =>
+      import('./exposed-modules/chain-minimum-amount-token-validator'),
     loadTxExecutorImplementation: async () =>
       import('./tx-executor-implementation'),
     loadActivitiesItemUICustomisations: async () =>

@@ -28,6 +28,7 @@ export const connectStore = async ({
   const remoteStore = consumeRemoteApi(
     {
       baseChannel: STORE_CHANNEL,
+      keepAlivePingPong: true,
       properties: remoteStoreApiProperties,
     },
     { logger, runtime },

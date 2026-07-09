@@ -8,8 +8,8 @@ import {
 } from '@lace-contract/midnight-context';
 import { createBlockchainNetworkTargetResolver } from '@lace-contract/network';
 import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { HDWallet, Roles } from '@midnight-ntwrk/wallet-sdk/hd';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import { HDWallet, Roles } from '@midnight-ntwrk/wallet-sdk-hd';
 import * as bip39 from 'bip39';
 
 import type {
@@ -174,8 +174,20 @@ export const initializeWallet: InitializeInMemoryWallet<
 > = async (props, dependencies) => {
   dependencies.logger.debug('Creating Midnight in-memory wallet');
 
+  if (!props.password) {
+    // Midnight account props require per-role `encryptedKey` material that
+    // signers decrypt at sign time, so there is no lazy shape that the
+    // current Midnight signer can consume. Lazy support requires either an
+    // optional encryptedKey + a lazy signer factory, or a re-derive-on-demand
+    // signer that bypasses encryptedKey altogether.
+    throw new Error(
+      'Midnight in-memory integration does not yet support lazy wallets (no password): the existing account shape requires encrypted per-role keys',
+    );
+  }
+
+  const { password } = props;
   const blockchainSpecificWalletData = await createBlockchainSpecificWalletData(
-    props,
+    { ...props, password },
     dependencies,
   );
 
@@ -186,6 +198,7 @@ export const initializeWallet: InitializeInMemoryWallet<
         accountIndex: 0,
         blockchainName: 'Midnight',
         blockchainSpecific: blockchainSpecificWalletData,
+        password,
       },
       dependencies,
     ),

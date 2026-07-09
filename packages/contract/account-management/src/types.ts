@@ -1,14 +1,29 @@
 import type { ComponentType, ReactElement } from 'react';
 
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
 import type {
   AnyAccount,
   WalletId,
   WalletType,
 } from '@lace-contract/wallet-repo';
-import type { PublicKeys } from '@lace-lib/ui-toolkit';
 import type { UICustomisation } from '@lace-lib/util-render';
 import type { BlockchainName } from '@lace-lib/util-store';
+
+/**
+ * Shape of public keys displayed by the account key sheet. Owned here
+ * (rather than in `@lace-lib/ui-toolkit`) so this contract stays
+ * UI-agnostic per ADR 28.
+ */
+export type PublicKeys<Key extends string> =
+  | {
+      type: 'multi';
+      value: Array<{ nameTranslationKey: TranslationKey; value: Key }>;
+    }
+  | {
+      type: 'single';
+      value: Key;
+    };
 
 export type AccountSettingsOption = {
   id: string;

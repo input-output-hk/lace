@@ -3,8 +3,9 @@ import { type SheetScreenProps } from '@lace-lib/navigation';
 import {
   AddAccountSheet as AddAccountSheetTemplate,
   Modal,
+  Sheet,
 } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useAddAccount } from './useAddAccount';
 
@@ -22,13 +23,28 @@ export const AddAccount = (props: SheetScreenProps<SheetRoutes.AddAccount>) => {
     ...sheetProps
   } = useAddAccount(props);
 
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={sheetProps.title}
+          testID="add-account-sheet-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          secondaryButton={secondaryButton}
+          primaryButton={primaryButton}
+        />
+      ),
+    });
+  }, [props.navigation, sheetProps.title, secondaryButton, primaryButton]);
+
   return (
     <>
       <AddAccountSheetTemplate
         {...sheetProps}
         selectedBlockchain={selectedBlockchain}
-        secondaryButton={secondaryButton}
-        primaryButton={primaryButton}
       />
       <Modal
         visible={isNoRecoveryPhraseModalVisible}

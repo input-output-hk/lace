@@ -6,8 +6,8 @@ import {
   WalletType,
 } from '@lace-contract/wallet-repo';
 import { NavigationControls } from '@lace-lib/navigation';
-import { isIOS, type ButtonConfig } from '@lace-lib/ui-toolkit';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type ButtonConfig } from '@lace-lib/ui-toolkit';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   useDispatchLaceAction,
@@ -82,19 +82,6 @@ export const useAddAccount = (
       loadedInMemoryWalletIntegrations,
     ],
   );
-
-  const didAdjustSheetHeightRef = useRef(false);
-
-  useEffect(() => {
-    if (!isIOS) return;
-    if (didAdjustSheetHeightRef.current) return;
-    if (blockchainOptions.length === 0) return;
-
-    didAdjustSheetHeightRef.current = true;
-    requestAnimationFrame(() => {
-      NavigationControls.sheets.expand();
-    });
-  }, [blockchainOptions.length]);
 
   const [selectedBlockchain, setSelectedBlockchain] = useState<BlockchainName>(
     () => blockchainOptions?.[0] || 'Cardano',
@@ -183,7 +170,7 @@ export const useAddAccount = (
     setAccountName('');
     clearAccountStatus();
     clearActiveSheetPage(null);
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [clearAccountStatus, clearActiveSheetPage, setLoading]);
 
   // Adding an account on a blockchain the wallet has no data for requires

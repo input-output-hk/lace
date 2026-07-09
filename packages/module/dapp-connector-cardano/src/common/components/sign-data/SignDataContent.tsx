@@ -1,5 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
 import {
+  AccountSecurityAlertInline,
   Avatar,
   Column,
   CustomTag,
@@ -17,12 +18,14 @@ import { formatSignDataPayload } from '../../utils/sign-data-payload';
 
 import type { SignDataDisplayDapp } from './types';
 import type { SignDataAccountInfo } from '../../types/sign-data-account';
+import type { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 
 export interface SignDataContentProps {
   dapp: SignDataDisplayDapp;
   accountInfo?: SignDataAccountInfo;
   address: string;
   payload: string;
+  dRepKeyHash?: Ed25519KeyHashHex;
 }
 
 export const SignDataContent = ({
@@ -30,6 +33,7 @@ export const SignDataContent = ({
   accountInfo,
   address,
   payload,
+  dRepKeyHash,
 }: SignDataContentProps) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -88,6 +92,7 @@ export const SignDataContent = ({
               color="white"
             />
           </Row>
+          <AccountSecurityAlertInline accountId={accountInfo.accountId} />
           <Divider />
         </Column>
       )}
@@ -97,7 +102,7 @@ export const SignDataContent = ({
           {t('dapp-connector.cardano.sign-data.address-label')}
         </Text.XS>
         <Text.S style={styles.preText} selectable>
-          {addrToDisplay(address)}
+          {addrToDisplay(address, { dRepKeyHash })}
         </Text.S>
       </View>
 

@@ -15,9 +15,7 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
-    sheets: {
-      close: vi.fn(),
-    },
+    closeSheet: vi.fn(),
   },
 }));
 
@@ -32,7 +30,7 @@ vi.mock('../../../src/common/hooks/useSignTxData', () => ({
 }));
 
 const mockUseSignTxData = vi.mocked(useSignTxData);
-const mockSheetsClose = vi.mocked(NavigationControls.sheets.close);
+const mockSheetsClose = vi.mocked(NavigationControls.closeSheet);
 
 const REQUEST_ID = 'req-sign-tx-1';
 
@@ -75,6 +73,7 @@ const EMPTY_SIGN_TX_DATA: UseSignTxDataResult = {
   coinSymbol: 'ADA',
   networkMagic: undefined,
   accountInfo: undefined,
+  accountId: undefined,
   tokenPrices: undefined,
   currencyTicker: undefined,
 };

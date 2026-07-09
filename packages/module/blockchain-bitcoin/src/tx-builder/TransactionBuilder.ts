@@ -12,6 +12,8 @@ import {
 } from '../common';
 import { GreedyInputSelector } from '../input-selection';
 
+import { BitcoinTxBuildError, BitcoinTxBuildErrorCode } from './errors';
+
 import type { DerivedAddress, UnsignedTransaction } from '../common';
 import type { InputSelector } from '../input-selection';
 import type { BitcoinUTxO } from '@lace-contract/bitcoin-context';
@@ -75,7 +77,10 @@ export class TransactionBuilder {
       validateBitcoinAddress(changeAddress, this.network) !==
       AddressValidationResult.Valid
     ) {
-      throw new Error('Invalid change address');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.InvalidChangeAddress,
+        'Invalid change address',
+      );
     }
     this.changeAddress = changeAddress;
     return this;
@@ -104,7 +109,10 @@ export class TransactionBuilder {
       validateBitcoinAddress(address, this.network) !==
       AddressValidationResult.Valid
     ) {
-      throw new Error('Invalid recipient address');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.InvalidRecipientAddress,
+        'Invalid recipient address',
+      );
     }
     this.outputs.push({ address, value });
     return this;
@@ -126,7 +134,8 @@ export class TransactionBuilder {
     const data = Buffer.from(message, 'utf8');
 
     if (data.length > 80) {
-      throw new Error(
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.MessageTooLong,
         `OP_RETURN message exceeds 80 bytes (actual: ${data.length}).`,
       );
     }
@@ -145,13 +154,22 @@ export class TransactionBuilder {
    */
   public build(): UnsignedTransaction {
     if (!this.utxos || this.utxos.length === 0) {
-      throw new Error('No UTXOs available to fund the transaction.');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.NoUtxos,
+        'No UTXOs available to fund the transaction.',
+      );
     }
     if (!this.changeAddress) {
-      throw new Error('Change address not set.');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.ChangeAddressNotSet,
+        'Change address not set.',
+      );
     }
     if (this.outputs.length === 0) {
-      throw new Error('No outputs have been added.');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.NoOutputs,
+        'No outputs have been added.',
+      );
     }
 
     const feeRateSatoshis = (this.feeRate * 100_000_000) / 1000;
@@ -169,7 +187,10 @@ export class TransactionBuilder {
     });
 
     if (!result) {
-      throw new Error('Insufficient funds or coin selection failed.');
+      throw new BitcoinTxBuildError(
+        BitcoinTxBuildErrorCode.InsufficientFunds,
+        'Insufficient funds or coin selection failed.',
+      );
     }
     selectedUTxOs = result.selectedUTxOs;
     fee = result.fee;
@@ -180,7 +201,10 @@ export class TransactionBuilder {
         addr => addr.address === utxo.address,
       );
       if (!knownAddr) {
-        throw new Error('Unknown address in UTXO set.');
+        throw new BitcoinTxBuildError(
+          BitcoinTxBuildErrorCode.UnresolvedUtxoAddress,
+          'Unknown address in UTXO set.',
+        );
       }
       this.signers.push(knownAddr);
 

@@ -15,7 +15,7 @@ import type {
 } from '@lace-lib/ui-toolkit';
 import type { BlockchainName } from '@lace-lib/util-store';
 
-interface UseContactFormReturn {
+export interface UseContactFormReturn {
   name: string;
   onNameChange: (name: string) => void;
   nameError: string | undefined;
@@ -41,7 +41,14 @@ interface UseContactFormReturn {
   saveDisabled: boolean;
 }
 
-export const useContactForm = (contact?: Contact): UseContactFormReturn => {
+interface UseContactFormOptions {
+  onClose?: () => void;
+}
+
+export const useContactForm = (
+  contact?: Contact,
+  options?: UseContactFormOptions,
+): UseContactFormReturn => {
   const existingContacts = useLaceSelector('addressBook.selectAllContacts');
 
   const {
@@ -146,6 +153,7 @@ export const useContactForm = (contact?: Contact): UseContactFormReturn => {
     avatarUrl,
     resolvedAlias: resolution.unwrapOr(undefined),
     existingAliases: contact?.aliases,
+    onClose: options?.onClose,
   });
 
   return {

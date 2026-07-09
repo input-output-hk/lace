@@ -125,9 +125,11 @@ export const TokenGroupSummary: React.FC<TokenGroupSummaryProps> = ({
   if (tokens.length === 0) {
     return (
       <Column gap={spacing.XS} alignItems="center">
-        <Text.XS>0</Text.XS>
+        <Text.XS testID={`account-card-${type}-summary-value`}>0</Text.XS>
         {!hideTokensLabel && (
-          <Text.XS testID={`account-card-${type}-summary`}>{label}</Text.XS>
+          <Text.XS testID={`account-card-${type}-summary-label`}>
+            {label}
+          </Text.XS>
         )}
       </Column>
     );
@@ -135,7 +137,9 @@ export const TokenGroupSummary: React.FC<TokenGroupSummaryProps> = ({
 
   return (
     <View style={styles.outerRow}>
-      <View style={[styles.innerRow, rowStyle]}>
+      <View
+        style={[styles.innerRow, rowStyle]}
+        testID={`account-card-${type}-summary-tokens-list`}>
         {displayTokens.map((token, index) => (
           <View key={index} style={[styles.shape, shapeStyle(index)]}>
             {renderTokenContent(token)}
@@ -153,7 +157,7 @@ export const TokenGroupSummary: React.FC<TokenGroupSummaryProps> = ({
       {!hideTokensLabel && (
         <Text.XS
           style={[styles.countText, countTextStyle]}
-          testID={`account-card-${type}-summary`}>
+          testID={`account-card-${type}-summary-label`}>
           {[tokens.length, label].join(' ')}
         </Text.XS>
       )}

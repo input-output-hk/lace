@@ -8,9 +8,11 @@ import type { SyncSliceState, SyncOperation, SyncOperationId } from '../types';
 import type { Percent } from '@cardano-sdk/util';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
-import type * as _immer from 'immer';
+import type {
+  PayloadAction,
+  StateFromReducersMapObject,
+} from '@reduxjs/toolkit';
+import type * as _immer from 'immer'; // NOSONAR: required so immer's WritableDraft types are referenceable in emitted .d.ts files
 
 const initialState: SyncSliceState = {
   syncStatusByAccount: {},
@@ -55,24 +57,20 @@ const slice = createSlice({
       const { accountId, operation } = payload;
 
       // Initialize account if not exists
-      if (!state.syncStatusByAccount[accountId]) {
-        state.syncStatusByAccount[accountId] = {
-          pendingSync: {
-            startedAt: Timestamp(Date.now()),
-            operations: {},
-          },
-        };
-      }
+      state.syncStatusByAccount[accountId] ??= {
+        pendingSync: {
+          startedAt: Timestamp(Date.now()),
+          operations: {},
+        },
+      };
 
       const accountStatus = state.syncStatusByAccount[accountId];
 
       // Initialize pendingSync if it doesn't exist
-      if (!accountStatus.pendingSync) {
-        accountStatus.pendingSync = {
-          startedAt: Timestamp(Date.now()),
-          operations: {},
-        };
-      }
+      accountStatus.pendingSync ??= {
+        startedAt: Timestamp(Date.now()),
+        operations: {},
+      };
 
       // Add operation to pendingSync
       accountStatus.pendingSync.operations[operation.operationId] = operation;
@@ -177,13 +175,36 @@ const slice = createSlice({
     ) => {
       const { accountId } = payload;
 
-      if (!state.syncStatusByAccount[accountId]) {
-        state.syncStatusByAccount[accountId] = {};
-      }
+      state.syncStatusByAccount[accountId] ??= {};
 
       state.syncStatusByAccount[accountId].lastSuccessfulSync = Timestamp(
         Date.now(),
       );
+    },
+
+    /**
+     * Drops `pendingSync` for the specified accounts, preserving
+     * `lastSuccessfulSync`. Used by per-blockchain coordinators to clear
+     * their own stale operations on unlock — only blockchains whose
+     * operation IDs aren't stable across sync rounds (e.g. Cardano's
+     * `tipHash`-based IDs) need this. Blockchains with stable per-account
+     * IDs (Bitcoin's `${accountId}-bitcoin-sync`, Midnight's
+     * `${accountId}-midnight-sync`) update their existing operation in
+     * place on the next emission and must NOT be cleared — clearing
+     * leaves a gap that surfaces as "syncing without percentage" for
+     * accounts mid-first-sync (no `lastSuccessfulSync` yet).
+     *
+     * See ADR 25.
+     */
+    clearPendingSyncsForAccounts: (
+      state,
+      { payload }: PayloadAction<{ accountIds: AccountId[] }>,
+    ) => {
+      for (const accountId of payload.accountIds) {
+        if (state.syncStatusByAccount[accountId]) {
+          state.syncStatusByAccount[accountId].pendingSync = undefined;
+        }
+      }
     },
 
     updateSyncProgress: (

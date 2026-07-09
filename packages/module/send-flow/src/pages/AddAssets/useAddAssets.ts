@@ -329,7 +329,15 @@ export const useAddAssets = (accountId: AccountId, blockchainName: string) => {
       },
     });
 
-    trackEvent('send | add assets sheet | confirm');
+    const nftSelectedCount = selectedAssets.filter(
+      token => token.metadata?.isNft,
+    ).length;
+    const fungibleSelectedCount = selectedAssets.length - nftSelectedCount;
+    trackEvent('send | add assets sheet | confirm', {
+      totalSelectedCount: selectedAssets.length,
+      fungibleSelectedCount,
+      nftSelectedCount,
+    });
 
     // Navigate back to Send sheet
     navigate(SheetRoutes.Send, {

@@ -6,6 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/activities": "*",
     "@lace-contract/addresses": "*",
     "@lace-contract/authentication-prompt": "*",
     "@lace-contract/module": "*",

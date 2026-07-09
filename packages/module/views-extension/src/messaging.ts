@@ -13,7 +13,6 @@ export interface ExtensionViewApi {
     payload: Omit<CallHistoryMethodPayload<HistoryMethod>, 'viewId'>,
   ) => Promise<void>;
   close: () => Promise<void>;
-  keepAlive: () => Promise<void>;
   locationChanged$: Observable<ViewLocation>;
 }
 
@@ -22,5 +21,4 @@ export const extensionViewApiProperties: RemoteApiProperties<ExtensionViewApi> =
     close: RemoteApiPropertyType.MethodReturningPromise,
     callHistoryMethod: RemoteApiPropertyType.MethodReturningPromise,
     locationChanged$: RemoteApiPropertyType.HotObservable,
-    keepAlive: RemoteApiPropertyType.MethodReturningPromise,
   };

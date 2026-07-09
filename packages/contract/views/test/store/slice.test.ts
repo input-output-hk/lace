@@ -34,7 +34,6 @@ const SheetRoutes = {
   RecoveryPhraseVerification: 'RecoveryPhraseVerification',
   SuccessRecoveryPhraseVerification: 'SuccessRecoveryPhraseVerification',
   EditFolder: 'EditFolder',
-  HardwareWalletDiscoverySearching: 'HardwareWalletDiscoverySearching',
   HardwareWalletDiscoveryError: 'HardwareWalletDiscoveryError',
   HardwareWalletDiscoveryResults: 'HardwareWalletDiscoveryResults',
   Buy: 'Buy',
@@ -57,6 +56,7 @@ describe('views/slice', () => {
         activeSheetPage: null,
         language: 'en',
         hasExplicitLanguagePreference: false,
+        themePreference: 'system' as const,
       };
     });
 
@@ -95,6 +95,7 @@ describe('views/slice', () => {
           activeSheetPage: null,
           language: 'en',
           hasExplicitLanguagePreference: false,
+          themePreference: 'system' as const,
         };
 
         const viewIdToRemove = ViewId('view1');
@@ -126,6 +127,7 @@ describe('views/slice', () => {
           activeSheetPage: null,
           language: 'en',
           hasExplicitLanguagePreference: false,
+          themePreference: 'system' as const,
         };
       });
 
@@ -356,6 +358,7 @@ describe('views/slice', () => {
           activeSheetPage: null,
           language: 'en',
           hasExplicitLanguagePreference: false,
+          themePreference: 'system' as const,
         },
       };
 
@@ -397,6 +400,7 @@ describe('views/slice', () => {
               activeSheetPage: null,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -426,6 +430,7 @@ describe('views/slice', () => {
               activeSheetPage: null,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -447,6 +452,7 @@ describe('views/slice', () => {
               activeSheetPage: null,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -464,6 +470,7 @@ describe('views/slice', () => {
               activeSheetPage: null,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -493,6 +500,7 @@ describe('views/slice', () => {
               activeSheetPage,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -516,6 +524,7 @@ describe('views/slice', () => {
               activeSheetPage,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 
@@ -535,6 +544,7 @@ describe('views/slice', () => {
               activeSheetPage: null,
               language: 'en',
               hasExplicitLanguagePreference: false,
+              themePreference: 'system' as const,
             },
           };
 

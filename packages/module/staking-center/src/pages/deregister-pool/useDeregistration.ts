@@ -143,7 +143,7 @@ export const useDeregistration = (
 
   const handleCancelPress = useCallback(() => {
     resetDeregistrationFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [resetDeregistrationFlow]);
 
   const areFeesReady = deregistrationFlowState.status === 'Summary';

@@ -1,5 +1,8 @@
 import { emip3decrypt } from '@cardano-sdk/key-management';
-import { appLockActions as actions } from '@lace-contract/app-lock';
+import {
+  appLockActions as actions,
+  PAUSE_NETWORK_POLLING_FEATURE_FLAG,
+} from '@lace-contract/app-lock';
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { ViewId } from '@lace-contract/module';
 import { viewsActions, SidePanelViewId } from '@lace-contract/views';
@@ -11,10 +14,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { verifyAuthSecretHook } from '../../src/addons/auth-secret-verifier';
 import { appLockSetupHook } from '../../src/addons/setup-app-lock';
+import { isWalletActive$, walletResumed$ } from '../../src/store/observables';
 import {
   closePopupsOnLock,
+  emitWalletResumedObservable,
   makeSetupAppLock,
   verifyAuthSecret,
+  wireIsWalletActiveObservable,
 } from '../../src/store/side-effects';
 
 import type { Subscription } from 'rxjs';
@@ -276,6 +282,144 @@ describe('module app-lock side effects', () => {
           flush();
 
           expect(emissions).toEqual([]);
+        },
+      }));
+    });
+  });
+
+  describe('wireIsWalletActiveObservable', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('forwards distinct values to isWalletActive$ and emits no actions', () => {
+      const nextSpy = vi.spyOn(isWalletActive$, 'next');
+      const emissions: unknown[] = [];
+
+      testSideEffect(wireIsWalletActiveObservable, ({ cold, flush }) => ({
+        stateObservables: {
+          appLock: {
+            isWalletActive$: cold('a-a-b-b-a', { a: true, b: false }),
+          },
+        },
+        dependencies: {},
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe(action => {
+            emissions.push(action);
+          });
+          flush();
+
+          expect(nextSpy.mock.calls).toEqual([[true], [false], [true]]);
+          expect(emissions).toEqual([]);
+        },
+      }));
+    });
+  });
+
+  describe('emitWalletResumedObservable', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('fires walletResumed$ on Unlocking → Unlocked but not on other transitions when PAUSE_NETWORK_POLLING_WHILE_LOCKED is enabled', () => {
+      const nextSpy = vi.spyOn(walletResumed$, 'next');
+      const emissions: unknown[] = [];
+
+      testSideEffect(emitWalletResumedObservable, ({ cold, hot, flush }) => ({
+        stateObservables: {
+          appLock: {
+            // Preparing → AwaitingSetup → Unlocked (first-run): no resume
+            // Unlocked → Locked → Unlocking → Unlocked (pause + resume): one resume
+            selectLockState$: cold('a-b-c-d-e-f-c', {
+              a: { status: 'Preparing' },
+              b: { status: 'AwaitingSetup' },
+              c: { status: 'Unlocked' },
+              d: { status: 'Locked' },
+              e: { status: 'Unlocking' },
+              f: { status: 'Unlocked' },
+            }),
+          },
+          features: {
+            selectLoadedFeatures$: hot('a', {
+              a: {
+                modules: [],
+                featureFlags: [{ key: PAUSE_NETWORK_POLLING_FEATURE_FLAG }],
+              },
+            }),
+          },
+        },
+        dependencies: {},
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe(action => {
+            emissions.push(action);
+          });
+          flush();
+
+          expect(nextSpy.mock.calls).toEqual([[]]);
+          expect(emissions).toEqual([]);
+        },
+      }));
+    });
+
+    it('does not fire walletResumed$ on AwaitingSetup → Unlocked (first-run setup completion) when PAUSE_NETWORK_POLLING_WHILE_LOCKED is enabled', () => {
+      const nextSpy = vi.spyOn(walletResumed$, 'next');
+
+      testSideEffect(emitWalletResumedObservable, ({ cold, hot, flush }) => ({
+        stateObservables: {
+          appLock: {
+            selectLockState$: cold('a-b-c', {
+              a: { status: 'Preparing' },
+              b: { status: 'AwaitingSetup' },
+              c: { status: 'Unlocked' },
+            }),
+          },
+          features: {
+            selectLoadedFeatures$: hot('a', {
+              a: {
+                modules: [],
+                featureFlags: [{ key: PAUSE_NETWORK_POLLING_FEATURE_FLAG }],
+              },
+            }),
+          },
+        },
+        dependencies: {},
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          expect(nextSpy).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('does not fire walletResumed$ on Unlocking → Unlocked when PAUSE_NETWORK_POLLING_WHILE_LOCKED is disabled (no pause to resume from)', () => {
+      const nextSpy = vi.spyOn(walletResumed$, 'next');
+
+      testSideEffect(emitWalletResumedObservable, ({ cold, hot, flush }) => ({
+        stateObservables: {
+          appLock: {
+            // Locked → Unlocking → Unlocked: would fire walletResumed$
+            // when the flag is enabled.
+            selectLockState$: cold('a-b-c', {
+              a: { status: 'Locked' },
+              b: { status: 'Unlocking' },
+              c: { status: 'Unlocked' },
+            }),
+          },
+          features: {
+            // Flag absent — `whileActive` never paused anything, so no
+            // pause to resume from.
+            selectLoadedFeatures$: hot('a', {
+              a: { modules: [], featureFlags: [] },
+            }),
+          },
+        },
+        dependencies: {},
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          expect(nextSpy).not.toHaveBeenCalled();
         },
       }));
     });

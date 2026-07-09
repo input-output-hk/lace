@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TokenId } from '@lace-contract/tokens';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, it, expect, vi } from 'vitest';
 
@@ -91,6 +92,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'ada',
           price: 0.5,
+          priceInUsd: 0.5,
           fiatCurrency: 'USD',
           lastUpdated: Date.now(),
         },
@@ -227,6 +229,7 @@ describe('side-effects', () => {
           tokenPricingProvider: undefined,
           actions: tokenPricingActions,
           logger,
+          isWalletActive$: of(true),
         },
         assertion: sideEffect$ => {
           expectObservable(sideEffect$).toBe('|');
@@ -262,6 +265,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // Should not poll when on testnet
@@ -300,6 +304,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$, '^ 120000ms !').toBe(
@@ -358,6 +363,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // First emission at frame 60000 (interval 1 tick, startWith(0) is dropped because withLatestFrom doesn't have values yet)
@@ -413,6 +419,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // First emission at frame 60000 (startWith(0) is dropped because withLatestFrom doesn't have values yet)
@@ -459,6 +466,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // First emission at frame 60000 (startWith(0) is dropped because withLatestFrom doesn't have values yet)
@@ -513,6 +521,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // First emission at frame 60000 (startWith(0) is dropped because withLatestFrom doesn't have values yet)
@@ -548,6 +557,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'ada',
           price: 0.5,
+          priceInUsd: 0.5,
           fiatCurrency: 'USD',
           lastUpdated: oldTimestamp, // Stale - should fetch
         },
@@ -556,6 +566,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'min',
           price: 0.02,
+          priceInUsd: 0.02,
           fiatCurrency: 'USD',
           lastUpdated: recentTimestamp, // Fresh - should not fetch
         },
@@ -591,6 +602,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             // First emission at frame 60000 (startWith(0) is dropped because withLatestFrom doesn't have values yet)
@@ -633,6 +645,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'ada',
           price: 0.5,
+          priceInUsd: 0.5,
           fiatCurrency: 'USD',
           lastUpdated: recentTimestamp, // Fresh - should not fetch
         },
@@ -662,6 +675,7 @@ describe('side-effects', () => {
             tokenPricingProvider: mockProvider,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$, '^ 1ms !').toBe('');
@@ -672,6 +686,170 @@ describe('side-effects', () => {
             }, 10);
           },
         };
+      });
+    });
+
+    describe('wallet active gating', () => {
+      it('does not poll prices while wallet is inactive', () => {
+        const token = createMockToken('ada');
+        const responses = [createMockResponse('ada', 0.5)];
+
+        testSideEffect(pollPrices, ({ cold, hot, expectObservable }) => {
+          const mockProvider = createMockProvider(cold('a|', { a: responses }));
+
+          return {
+            stateObservables: {
+              // `hot` (no `|`) so the gate stays subscribed across the window
+              // — `of(false)` would complete and propagate completion through
+              // `whileActive`'s `switchMap`, ending the side effect early.
+              sync: {
+                selectGlobalSyncStatus$: hot('a', { a: 'synced' as const }),
+              },
+              tokens: {
+                selectAggregatedFungibleTokensForVisibleAccounts$: hot('a', {
+                  a: [token],
+                }),
+              },
+              tokenPricing: {
+                selectPrices$: hot('a', { a: {} }),
+              },
+              network: {
+                selectNetworkType$: hot<NetworkType>('a', { a: 'mainnet' }),
+              },
+            },
+            dependencies: {
+              tokenPricingProvider: mockProvider,
+              actions: tokenPricingActions,
+              logger,
+              isWalletActive$: hot('f', { f: false }),
+            },
+            assertion: sideEffect$ => {
+              // Window covers two interval ticks; no emissions while locked.
+              expectObservable(sideEffect$, '^ 120000ms !').toBe('');
+              // `setTimeout` runs after the test scheduler flush, so we can
+              // safely assert the provider was never called.
+              setTimeout(() => {
+                expect(mockProvider.fetchPrices).not.toHaveBeenCalled();
+              }, 10);
+            },
+          };
+        });
+      });
+
+      it('resumes polling when wallet becomes active', () => {
+        const token = createMockToken('ada');
+        const responses = [createMockResponse('ada', 0.5)];
+
+        testSideEffect(pollPrices, ({ cold, hot, expectObservable }) => {
+          const mockProvider = createMockProvider(cold('a|', { a: responses }));
+
+          return {
+            stateObservables: {
+              // Inactive at frame 0, becomes active at frame 4. Once active,
+              // `interval(60000).startWith(0)` schedules its first tick at
+              // frame 60004.
+              // Cold so the source replays its current value when
+              // `whileActive` resubscribes after the gate flips. Hot would
+              // not replay the frame-0 emission, leaving `withLatestFrom`
+              // waiting forever.
+              sync: {
+                selectGlobalSyncStatus$: cold('a', { a: 'synced' as const }),
+              },
+              tokens: {
+                selectAggregatedFungibleTokensForVisibleAccounts$: cold('a', {
+                  a: [token],
+                }),
+              },
+              tokenPricing: {
+                selectPrices$: cold('a', { a: {} }),
+              },
+              network: {
+                selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+              },
+            },
+            dependencies: {
+              tokenPricingProvider: mockProvider,
+              actions: tokenPricingActions,
+              logger,
+              isWalletActive$: hot('f---t', { f: false, t: true }),
+            },
+            assertion: sideEffect$ => {
+              // First emission lands at frame 60004 (60000ms after the
+              // gate flipped on at frame 4). The frame-4 `startWith(0)`
+              // emission is dropped by `withLatestFrom` because cold
+              // sources have not yet emitted at that exact frame.
+              expectObservable(sideEffect$, '^ 70000ms !').toBe(
+                '60004ms (ab)',
+                {
+                  a: tokenPricingActions.tokenPricing.startUpdate(),
+                  b: expect.objectContaining({
+                    type: 'tokenPricing/setPrices',
+                  }) as PayloadAction<SetPricesPayload>,
+                },
+              );
+            },
+          };
+        });
+      });
+
+      // Regression guard: this test fails if `whileActive` is moved
+      // mid-pipeline — the leaked `interval` keeps polling and
+      // `fetchPrices` is called past the lock.
+      it('stops polling when wallet transitions from active to inactive', () => {
+        const token = createMockToken('ada');
+        const responses = [createMockResponse('ada', 0.5)];
+
+        testSideEffect(pollPrices, ({ cold, hot, expectObservable }) => {
+          const mockProvider = createMockProvider(cold('a|', { a: responses }));
+          // Active at frame 0; lock at frame 90000 (after the first
+          // poll at frame 60000, before the second at frame 120000).
+          // Constructed before the other hot observables so that its
+          // frame-0 emission is queued first, allowing `whileActive`'s
+          // switchMap to subscribe to the source pipeline before the
+          // source's hot dependencies emit.
+          const isWalletActive$ = hot('t 89999ms f', {
+            t: true,
+            f: false,
+          });
+
+          return {
+            stateObservables: {
+              sync: {
+                selectGlobalSyncStatus$: hot('a', { a: 'synced' as const }),
+              },
+              tokens: {
+                selectAggregatedFungibleTokensForVisibleAccounts$: hot('a', {
+                  a: [token],
+                }),
+              },
+              tokenPricing: {
+                selectPrices$: hot('a', { a: {} }),
+              },
+              network: {
+                selectNetworkType$: hot<NetworkType>('a', { a: 'mainnet' }),
+              },
+            },
+            dependencies: {
+              tokenPricingProvider: mockProvider,
+              actions: tokenPricingActions,
+              logger,
+              isWalletActive$,
+            },
+            assertion: sideEffect$ => {
+              // First poll at frame 60000 emitted; second poll at 120000
+              // is suppressed because the gate flipped at 90000.
+              expectObservable(sideEffect$, '^ 130000ms !').toBe(
+                '60000ms (ab)',
+                {
+                  a: tokenPricingActions.tokenPricing.startUpdate(),
+                  b: expect.objectContaining({
+                    type: 'tokenPricing/setPrices',
+                  }) as PayloadAction<SetPricesPayload>,
+                },
+              );
+            },
+          };
+        });
       });
     });
   });
@@ -743,6 +921,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'ada',
           price: 0.5,
+          priceInUsd: 0.5,
           fiatCurrency: 'USD',
           lastUpdated: Date.now(),
         },
@@ -783,6 +962,7 @@ describe('side-effects', () => {
           blockchain: 'Cardano' as const,
           identifier: 'ada',
           price: 0.5,
+          priceInUsd: 0.5,
           fiatCurrency: 'USD',
           lastUpdated: Date.now(),
         },
@@ -990,6 +1170,7 @@ describe('side-effects', () => {
             tokenPricingProvider: undefined,
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('|');
@@ -1021,6 +1202,7 @@ describe('side-effects', () => {
             tokenPricingProvider: createMockProvider(),
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
@@ -1052,6 +1234,7 @@ describe('side-effects', () => {
             tokenPricingProvider: createMockProvider(),
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
@@ -1083,6 +1266,7 @@ describe('side-effects', () => {
             tokenPricingProvider: createMockProvider(),
             actions: tokenPricingActions,
             logger,
+            isWalletActive$: of(true),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
@@ -1132,6 +1316,7 @@ describe('side-effects', () => {
               tokenPricingProvider: mockProvider,
               actions: tokenPricingActions,
               logger,
+              isWalletActive$: of(true),
             },
             assertion: sideEffect$ => {
               expectObservable(sideEffect$).toBe('(ab)', {
@@ -1213,6 +1398,7 @@ describe('side-effects', () => {
               tokenPricingProvider: mockProvider,
               actions: tokenPricingActions,
               logger,
+              isWalletActive$: of(true),
             },
             assertion: sideEffect$ => {
               expectObservable(sideEffect$).toBe('');
@@ -1261,6 +1447,7 @@ describe('side-effects', () => {
               tokenPricingProvider: mockProvider,
               actions: tokenPricingActions,
               logger,
+              isWalletActive$: of(true),
             },
             assertion: sideEffect$ => {
               expectObservable(sideEffect$).toBe('');
@@ -1276,6 +1463,170 @@ describe('side-effects', () => {
           };
         },
       );
+    });
+
+    describe('wallet active gating', () => {
+      it('does not fetch price history while wallet is inactive', () => {
+        const token = createMockToken('ada');
+        const responses = [createMockPriceHistoryResponse('ada', '24H')];
+
+        testSideEffect(
+          fetch24HPriceHistoryOnSync,
+          ({ cold, hot, expectObservable }) => {
+            const mockProvider = createMockProvider(
+              undefined,
+              cold('a|', { a: responses }),
+            );
+
+            return {
+              stateObservables: {
+                // `hot` (no `|`) so the gate stays subscribed across the run.
+                sync: {
+                  // Sync transitions to synced at frame 0 — would normally
+                  // trigger a fetch, but the gate suppresses it.
+                  selectGlobalSyncStatus$: hot('a', { a: 'synced' as const }),
+                },
+                tokens: {
+                  selectAggregatedFungibleTokensForVisibleAccounts$: hot('a', {
+                    a: [token],
+                  }),
+                },
+                tokenPricing: {
+                  selectPriceHistory$: hot('a', { a: {} }),
+                },
+                network: {
+                  selectNetworkType$: hot<NetworkType>('a', { a: 'mainnet' }),
+                },
+              },
+              dependencies: {
+                tokenPricingProvider: mockProvider,
+                actions: tokenPricingActions,
+                logger,
+                isWalletActive$: hot('f', { f: false }),
+              },
+              assertion: sideEffect$ => {
+                expectObservable(sideEffect$, '^---!').toBe('');
+                setTimeout(() => {
+                  expect(mockProvider.fetchPriceHistory).not.toHaveBeenCalled();
+                }, 10);
+              },
+            };
+          },
+        );
+      });
+
+      it('fetches price history when wallet becomes active and sync is complete', () => {
+        const token = createMockToken('ada');
+        const responses = [createMockPriceHistoryResponse('ada', '24H')];
+
+        testSideEffect(
+          fetch24HPriceHistoryOnSync,
+          ({ cold, hot, expectObservable }) => {
+            const mockProvider = createMockProvider(
+              undefined,
+              cold('a|', { a: responses }),
+            );
+
+            return {
+              stateObservables: {
+                // Inactive at frame 0, becomes active at frame 4.
+                // Cold so the source replays its current value when
+                // `whileActive` resubscribes after the gate flips. Hot would
+                // not replay the frame-0 emission.
+                sync: {
+                  selectGlobalSyncStatus$: cold('a', { a: 'synced' as const }),
+                },
+                tokens: {
+                  selectAggregatedFungibleTokensForVisibleAccounts$: cold('a', {
+                    a: [token],
+                  }),
+                },
+                tokenPricing: {
+                  selectPriceHistory$: cold('a', { a: {} }),
+                },
+                network: {
+                  selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+                },
+              },
+              dependencies: {
+                tokenPricingProvider: mockProvider,
+                actions: tokenPricingActions,
+                logger,
+                isWalletActive$: hot('f---t', { f: false, t: true }),
+              },
+              assertion: sideEffect$ => {
+                // On activation, fresh subscription re-evaluates the TTL,
+                // sees the empty cache, and fetches immediately.
+                expectObservable(sideEffect$, '^----!').toBe('----a', {
+                  a: expect.objectContaining({
+                    type: 'tokenPricing/setPriceHistory',
+                  }) as PayloadAction<SetPricesPayload>,
+                });
+              },
+            };
+          },
+        );
+      });
+
+      // Regression guard: this test fails if `whileActive` is moved
+      // mid-pipeline — the leaked outer `switchMap` inner stays subscribed
+      // to the tokens selector and a token-list change during lock would
+      // trigger another fetch.
+      it('stops fetching when wallet transitions from active to inactive', () => {
+        const token1 = createMockToken('ada');
+        const token2 = createMockToken('btc');
+        const responses = [createMockPriceHistoryResponse('ada', '24H')];
+
+        testSideEffect(fetch24HPriceHistoryOnSync, ({ cold, hot, flush }) => {
+          const mockProvider = createMockProvider(
+            undefined,
+            cold('a|', { a: responses }),
+          );
+
+          return {
+            stateObservables: {
+              // Active 0–5, locked at frame 6 (no return to active).
+              sync: {
+                selectGlobalSyncStatus$: cold('a', { a: 'synced' as const }),
+              },
+              tokens: {
+                // [token1] at frame 2 (during active phase, triggers a
+                // fetch); [token1, token2] at frame 8 (during lock — must
+                // NOT trigger a fetch when `whileActive` is at end-of-pipe).
+                // Frame 2 (not 0) so all `withLatestFrom` cold sources have
+                // already emitted at the subscription frame.
+                selectAggregatedFungibleTokensForVisibleAccounts$: cold(
+                  '--a-----b',
+                  {
+                    a: [token1],
+                    b: [token1, token2],
+                  },
+                ),
+              },
+              tokenPricing: {
+                selectPriceHistory$: cold('a', { a: {} }),
+              },
+              network: {
+                selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+              },
+            },
+            dependencies: {
+              tokenPricingProvider: mockProvider,
+              actions: tokenPricingActions,
+              logger,
+              isWalletActive$: hot('t-----f', { t: true, f: false }),
+            },
+            assertion: sideEffect$ => {
+              sideEffect$.subscribe();
+              flush();
+              // One fetch for the active-phase token; the post-lock
+              // token-list change is ignored because the gate tore down
+              // the entire pipeline.
+              expect(mockProvider.fetchPriceHistory).toHaveBeenCalledTimes(1);
+            },
+          };
+        });
+      });
     });
   });
 

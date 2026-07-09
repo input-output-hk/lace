@@ -101,7 +101,7 @@ export const useCreateFolder = (
 
   const handleCancelPress = useCallback(() => {
     cancelFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [cancelFlow]);
 
   const onToggleNftSelection = useCallback(
@@ -117,13 +117,9 @@ export const useCreateFolder = (
     [folderTokens, removeToken, addToken],
   );
 
-  const onNftSelectionClose = useCallback(() => {
-    NavigationControls.sheets.close();
-  }, []);
-
   const handleCreateFolder = useCallback(() => {
     completeCreation();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
     showToast({
       text: successMessage,
       color: 'positive',
@@ -167,7 +163,7 @@ export const useCreateFolder = (
         buttonPrimaryLabel: doneLabel,
         buttonPrimaryPress: onNftSelectionDone,
         buttonSecondaryLabel,
-        buttonSecondaryPress: onNftSelectionClose,
+        buttonSecondaryPress: handleCancelPress,
         buttonPrimaryTestID: 'nft-folder-select-done-btn',
         buttonSecondaryTestID: 'nft-folder-name-cancel-btn',
         disabled: shouldDisableDone,
@@ -188,7 +184,6 @@ export const useCreateFolder = (
     doneLabel,
     onNftSelectionDone,
     buttonSecondaryLabel,
-    onNftSelectionClose,
     buttonPrimaryLabel,
     handleContinuePress,
     handleCancelPress,
@@ -201,7 +196,7 @@ export const useCreateFolder = (
     () => ({
       nfts: folderTokens,
       onToggleNftSelection,
-      onClose: onNftSelectionClose,
+      onClose: handleCancelPress,
       onDone: onNftSelectionDone,
       pickNftsLabel,
       doneLabel,
@@ -209,7 +204,7 @@ export const useCreateFolder = (
     [
       folderTokens,
       onToggleNftSelection,
-      onNftSelectionClose,
+      handleCancelPress,
       onNftSelectionDone,
       pickNftsLabel,
       doneLabel,

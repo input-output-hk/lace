@@ -400,7 +400,11 @@ export class BitcoinWallet {
           const { items: newHistory, cursor: nextCursor } = result.value;
           const currentHistory = this.transactionHistory$.value;
 
-          const combinedHistory = [...newHistory, ...currentHistory];
+          // Freshly fetched entries must come last: Map keeps the last value
+          // per key, so they replace stale duplicates. Otherwise a tx first
+          // seen unconfirmed would stay at confirmations: 0 forever and never
+          // be purged from pendingTransactions$.
+          const combinedHistory = [...currentHistory, ...newHistory];
 
           const uniqueHistory = Array.from(
             new Map(
@@ -443,7 +447,8 @@ export class BitcoinWallet {
    *
    * 3. **Purge Invalid Local Transactions**:
    *    - Iterates over the local list of pending transactions to check each transaction's inputs against:
-   *      a. Inputs of all other transactions in the transaction history to detect if any inputs have been confirmed in a block.
+   *      a. Inputs of **confirmed** transactions in the history (confirmations > 0) to detect inputs settled in a
+   *         block. Unconfirmed history entries are ignored — a transaction stays pending until it is mined.
    *      b. Inputs of other remote pending transactions to handle RBF scenarios where a transaction might be replaced
    *         by another with the same inputs but not the same hash.
    *    - Removes any local transactions whose inputs are found in the confirmed transactions or in another competing pending transaction.
@@ -468,10 +473,19 @@ export class BitcoinWallet {
 
           const { items: remotePendingTxs } = mempoolResult.value;
 
+          // History also contains still-unconfirmed transactions (e.g. the
+          // wallet's own just-submitted tx). Only block-included entries
+          // (confirmations > 0) count for the purge checks below — purging a
+          // tx merely *present* in history would drop its in-flight spends
+          // from the balance before they settle.
+          const confirmedHistory = this.transactionHistory$.value.filter(
+            tx => tx.confirmations > 0,
+          );
+
           const validLocalTxs = localPendingTxs.filter(localTx => {
             const isSpent = localTx.inputs.some(
               input =>
-                this.isInputSpent(input, this.transactionHistory$.value) ||
+                this.isInputSpent(input, confirmedHistory) ||
                 this.isInputSpent(
                   input,
                   remotePendingTxs.filter(
@@ -494,7 +508,7 @@ export class BitcoinWallet {
           let newPendingTxs = Array.from(finalTxsMap.values());
 
           const confirmedHashes = new Set(
-            this.transactionHistory$.value.map(tx => tx.transactionHash),
+            confirmedHistory.map(tx => tx.transactionHash),
           );
 
           newPendingTxs = newPendingTxs.filter(

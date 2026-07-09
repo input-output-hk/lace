@@ -10,8 +10,8 @@ import {
 } from '@lace-contract/midnight-context';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { Milliseconds, Timestamp } from '@lace-sdk/util';
+import { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import { WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
 import omit from 'lodash/omit.js';
 import {
   catchError,
@@ -37,6 +37,7 @@ import {
   FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+  FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
   FeatureFlagKeysByNetworkId,
   GatedMidnightSDKNetworkId,
 } from '../../const';
@@ -582,6 +583,7 @@ export const handleMidnightSettingsChange: SideEffect = (
 export const triggerMidnightDisclaimerOnWalletCreation: SideEffect = (
   { wallets: { addWallet$, updateWallet$ } },
   {
+    features: { selectLoadedFeatures$ },
     midnightContext: { selectShouldAcknowledgeMidnightDisclaimer$ },
     wallets: { selectAll$ },
   },
@@ -595,8 +597,17 @@ export const triggerMidnightDisclaimerOnWalletCreation: SideEffect = (
   return merge(
     addWallet$.pipe(
       filter(({ payload }) => hasMidnightAccount(payload)),
-      withLatestFrom(selectShouldAcknowledgeMidnightDisclaimer$),
-      filter(([, status]) => status === 'not-shown'),
+      withLatestFrom(
+        selectShouldAcknowledgeMidnightDisclaimer$,
+        selectLoadedFeatures$,
+      ),
+      filter(
+        ([, status, loadedFeatures]) =>
+          status === 'not-shown' &&
+          loadedFeatures.featureFlags.some(
+            f => f.key === FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
+          ),
+      ),
       map(() => setDisclaimerShown()),
     ),
     updateWallet$.pipe(
@@ -604,32 +615,46 @@ export const triggerMidnightDisclaimerOnWalletCreation: SideEffect = (
       withLatestFrom(
         walletsPairwise$,
         selectShouldAcknowledgeMidnightDisclaimer$,
+        selectLoadedFeatures$,
       ),
-      filter(([action, [previousWallets, nextWallets], disclaimerStatus]) => {
-        if (disclaimerStatus !== 'not-shown') return false;
+      filter(
+        ([
+          action,
+          [previousWallets, nextWallets],
+          disclaimerStatus,
+          loadedFeatures,
+        ]) => {
+          if (disclaimerStatus !== 'not-shown') return false;
+          if (
+            !loadedFeatures.featureFlags.some(
+              f => f.key === FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
+            )
+          )
+            return false;
 
-        const walletId = action.payload.id;
-        const previousWallet = previousWallets.find(
-          w => w.walletId === walletId,
-        );
-        const nextWallet = nextWallets.find(w => w.walletId === walletId);
-        if (!previousWallet || !nextWallet) return false;
+          const walletId = action.payload.id;
+          const previousWallet = previousWallets.find(
+            w => w.walletId === walletId,
+          );
+          const nextWallet = nextWallets.find(w => w.walletId === walletId);
+          if (!previousWallet || !nextWallet) return false;
 
-        // `updateWallet` carries the full `accounts` array. Any edit (e.g. add Cardano, rename)
-        // still includes existing Midnight rows, so "has Midnight in next" is not enough.
-        // Require a new Midnight accountId vs. the previous snapshot so we do not fire on
-        // unrelated updates while the disclaimer flag is still `not-shown` (see effect JSDoc).
-        const previousMidnightIds = new Set(
-          previousWallet.accounts
+          // `updateWallet` carries the full `accounts` array. Any edit (e.g. add Cardano, rename)
+          // still includes existing Midnight rows, so "has Midnight in next" is not enough.
+          // Require a new Midnight accountId vs. the previous snapshot so we do not fire on
+          // unrelated updates while the disclaimer flag is still `not-shown` (see effect JSDoc).
+          const previousMidnightIds = new Set(
+            previousWallet.accounts
+              .filter(isInMemoryMidnightAccount)
+              .map(a => a.accountId),
+          );
+          const isNewMidnightAccountAdded = nextWallet.accounts
             .filter(isInMemoryMidnightAccount)
-            .map(a => a.accountId),
-        );
-        const isNewMidnightAccountAdded = nextWallet.accounts
-          .filter(isInMemoryMidnightAccount)
-          .some(account => !previousMidnightIds.has(account.accountId));
+            .some(account => !previousMidnightIds.has(account.accountId));
 
-        return isNewMidnightAccountAdded;
-      }),
+          return isNewMidnightAccountAdded;
+        },
+      ),
       map(() => setDisclaimerShown()),
     ),
   );

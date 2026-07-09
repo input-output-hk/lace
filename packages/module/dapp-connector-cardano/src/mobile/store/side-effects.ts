@@ -3,10 +3,11 @@ import * as Crypto from '@cardano-sdk/crypto';
 import { blake2b } from '@cardano-sdk/crypto';
 import { Bip32Account, KeyRole } from '@cardano-sdk/key-management';
 import {
-  cardanoAccountUtxos$,
+  buildCip30SignTxWitnessSet,
   cardanoAccountUnspendableUtxos$,
   cardanoAddresses$,
   cardanoChainId$,
+  countTransactionSignatures,
   isCardanoAccount,
   cardanoRewardAccountDetails$,
 } from '@lace-contract/cardano-context';
@@ -21,6 +22,7 @@ import { HexBytes } from '@lace-sdk/util';
 import {
   catchError,
   filter,
+  firstValueFrom,
   from,
   map,
   merge,
@@ -33,6 +35,7 @@ import {
 } from 'rxjs';
 
 import { APIErrorCode, TxSignErrorCode } from '../../common/api-error';
+import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
 import {
@@ -112,7 +115,10 @@ export const processWebViewMessage: SideEffect = (
       selectPendingAuthRequest$,
     },
     dappConnector: { selectAuthorizedDapps$ },
-    cardanoContext: { selectAccountTransactionHistory$ },
+    cardanoContext: {
+      selectAccountTransactionHistory$,
+      selectAvailableAccountUtxos$,
+    },
     addresses: { selectAllAddresses$ },
     wallets: { selectActiveNetworkAccounts$, selectAll$ },
   },
@@ -160,7 +166,7 @@ export const processWebViewMessage: SideEffect = (
       ]) => {
         const handlerDeps = {
           authorizedDapps$: of(authorizedDapps ?? { Cardano: [] }),
-          accountUtxos$: cardanoAccountUtxos$,
+          accountUtxos$: selectAvailableAccountUtxos$,
           accountUnspendableUtxos$: cardanoAccountUnspendableUtxos$,
           rewardAccountDetails$: cardanoRewardAccountDetails$,
           addresses$: cardanoAddresses$,
@@ -184,10 +190,71 @@ export const processWebViewMessage: SideEffect = (
                 ...response,
                 timestamp: Date.now(),
               };
+
+              const isSuccessfulSubmitTx =
+                message.type === 'submitTx' &&
+                response.success &&
+                Array.isArray(message.args) &&
+                typeof message.args[0] === 'string';
+
+              if (isSuccessfulSubmitTx) {
+                const serializedTx = message.args![0] as string;
+                const accountIdHint = sessionAccountByOrigin[dappOrigin];
+                return from(
+                  Promise.all([
+                    firstValueFrom(selectAvailableAccountUtxos$),
+                    firstValueFrom(selectAllAddresses$),
+                  ]),
+                ).pipe(
+                  mergeMap(([accountUtxos, allAddresses]) => {
+                    const pendingActivity = createPendingDappActivity({
+                      serializedTx,
+                      accountIdHint,
+                      accountUtxos,
+                      allAddresses,
+                    });
+                    return pendingActivity
+                      ? of(
+                          actions.cardanoDappConnector.setWebViewResponse(
+                            webViewResponse,
+                          ),
+                          actions.activities.upsertActivities({
+                            accountId: pendingActivity.accountId,
+                            activities: [pendingActivity],
+                          }),
+                        )
+                      : of(
+                          actions.cardanoDappConnector.setWebViewResponse(
+                            webViewResponse,
+                          ),
+                        );
+                  }),
+                );
+              }
+
               return of(
                 actions.cardanoDappConnector.setWebViewResponse(
                   webViewResponse,
                 ),
+              );
+            } else if (result.type === 'silent_authorization') {
+              // Mimics user-confirm flow without UI; downstream side effects
+              // send the response and re-persist (idempotent).
+              const dappInfo: DappInfo = {
+                name: pageTitle || result.dappName,
+                origin: result.dappOrigin,
+                imageUrl: faviconUrl,
+              };
+              return of(
+                actions.cardanoDappConnector.setPendingAuthRequest({
+                  requestId: result.requestId,
+                  dappOrigin: result.dappOrigin,
+                  dapp: dappInfo,
+                }),
+                actions.cardanoDappConnector.confirmAuth({
+                  authorized: true,
+                  account: result.account,
+                }),
               );
             } else if (result.type === 'signing_required') {
               const {
@@ -211,7 +278,7 @@ export const processWebViewMessage: SideEffect = (
                   partialSign: result.partialSign ?? false,
                 };
 
-                NavigationControls.sheets.navigate(SheetRoutes.SignTx, {
+                NavigationControls.navigate(SheetRoutes.SignTx, {
                   requestId,
                   dapp: toSigningNavParams(dappInfo),
                   txHex: pendingSignTxRequest.txHex,
@@ -238,7 +305,7 @@ export const processWebViewMessage: SideEffect = (
                 payload: result.payload ?? '',
               };
 
-              NavigationControls.sheets.navigate(SheetRoutes.SignData, {
+              NavigationControls.navigate(SheetRoutes.SignData, {
                 requestId,
                 dapp: toSigningNavParams(dappInfo),
                 address: pendingSignDataRequest.address,
@@ -279,7 +346,7 @@ export const processWebViewMessage: SideEffect = (
                 dapp: dappInfo,
               };
 
-              NavigationControls.sheets.navigate(SheetRoutes.AuthorizeDapp, {
+              NavigationControls.navigate(SheetRoutes.AuthorizeDapp, {
                 dapp: toAuthorizeDappNavParams(dappInfo),
                 dappOrigin: origin,
                 dappStatus: getDappStatusFromOrigin(origin),
@@ -617,7 +684,7 @@ export const handleSignTxConfirmation: SideEffect = (
     },
     wallets: { selectActiveNetworkAccounts$, selectAll$ },
     addresses: { selectAllAddresses$ },
-    cardanoContext: { selectChainId$, selectAccountUtxos$ },
+    cardanoContext: { selectChainId$, selectAvailableAccountUtxos$ },
   },
   { actions, accessAuthSecret, authenticate, signerFactory },
 ) => {
@@ -629,7 +696,7 @@ export const handleSignTxConfirmation: SideEffect = (
       selectAll$,
       selectAllAddresses$,
       selectChainId$,
-      selectAccountUtxos$,
+      selectAvailableAccountUtxos$,
     ),
     filter(([, pendingRequest]) => pendingRequest !== null),
     switchMap(
@@ -641,7 +708,7 @@ export const handleSignTxConfirmation: SideEffect = (
         allWallets,
         allAddresses,
         chainId,
-        accountUtxos,
+        availableAccountUtxos,
       ]) => {
         const {
           requestId,
@@ -743,7 +810,7 @@ export const handleSignTxConfirmation: SideEffect = (
             extendedAccountPublicKey: Bip32PublicKeyHex;
           };
 
-        const localUtxos = accountUtxos[accountId] ?? [];
+        const localUtxos = availableAccountUtxos[accountId] ?? [];
 
         return from(
           (async () => {
@@ -811,11 +878,32 @@ export const handleSignTxConfirmation: SideEffect = (
             return signer.sign({ serializedTx: HexBytes(txHex) }).pipe(
               take(1),
               mergeMap(result => {
-                // CIP-30 signTx returns just the witness set, not the full signed tx
-                const signedTx = Serialization.Transaction.fromCbor(
+                if (
+                  isPartialSign &&
+                  countTransactionSignatures(
+                    Serialization.TxCBOR(result.serializedTx),
+                  ) === 0
+                ) {
+                  const errorResponse: WebViewResponse = {
+                    id: requestId,
+                    success: false,
+                    error: {
+                      code: TxSignErrorCode.ProofGeneration,
+                      info: 'The wallet does not have the secret key associated with any of the inputs and certificates.',
+                    },
+                    timestamp: Date.now(),
+                  };
+                  return of(
+                    actions.cardanoDappConnector.setWebViewResponse(
+                      errorResponse,
+                    ),
+                    actions.cardanoDappConnector.clearPendingSignTxRequest(),
+                  );
+                }
+                const witnessSetCbor = buildCip30SignTxWitnessSet(
+                  Serialization.TxCBOR(txHex),
                   Serialization.TxCBOR(result.serializedTx),
                 );
-                const witnessSetCbor = signedTx.witnessSet().toCbor();
                 const successResponse: WebViewResponse = {
                   id: requestId,
                   success: true,

@@ -13,8 +13,7 @@ import React, {
   useMemo,
   useCallback,
 } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Pressable } from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
 import { getImageUri, getWebIpfsFallbackSource, isWeb } from '../../util';

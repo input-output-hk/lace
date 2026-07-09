@@ -1,14 +1,22 @@
-import type { AccountId, WalletId } from './value-objects';
+import type { AccountId, AccountIdentityKey, WalletId } from './value-objects';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 import type { NetworkType } from '@lace-contract/network';
-import type { BlockchainName } from '@lace-lib/util-store';
-import type { HexBytes } from '@lace-sdk/util';
+import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
+import type { HexBytes, Timestamp } from '@lace-sdk/util';
 
 export enum WalletType {
   /***
    * Keys are managed by Lace
    */
   InMemory = 'InMemory',
+  /**
+   * Keys (and the seed they derive from) are NOT persisted by Lace.
+   * The wallet entity holds only public material; an external module
+   * supplies the seed on demand via its own signer-factory-addon
+   * implementation (e.g. fetching from a remote key-management service
+   * such as Torus on each signing request).
+   */
+  LazyInMemory = 'LazyInMemory',
   /**
    * Keys are managed by an external Ledger device
    */
@@ -38,6 +46,14 @@ export interface AccountMetadata {
   name: string;
   /** Optional avatar image URL for account display (e.g. in account selector). */
   avatarUri?: string;
+  /**
+   * Epoch-ms timestamp of when this account was first created/onboarded in
+   * Lace. Optional for backwards compatibility: accounts persisted before this
+   * field existed rehydrate with it undefined, which is treated as "onboarded
+   * before any security detection shipped" and thus eligible for a proactive
+   * re-scan. Stamped at account-creation sites, never in a reducer.
+   */
+  onboardedAt?: Timestamp;
 }
 
 type AccountBase<BlockchainSpecific> = {
@@ -52,6 +68,10 @@ type AccountBase<BlockchainSpecific> = {
 export interface InMemoryWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
   accountType: 'InMemory';
+}
+export interface LazyInMemoryWalletAccount<BlockchainSpecific = unknown>
+  extends AccountBase<BlockchainSpecific> {
+  accountType: 'LazyInMemory';
 }
 export interface HardwareWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
@@ -80,6 +100,11 @@ export type InMemoryWallet<BlockchainSpecificAccountProps = unknown> =
     type: WalletType.InMemory;
     isPassphraseConfirmed: boolean;
   };
+export type LazyInMemoryWallet<BlockchainSpecificAccountProps = unknown> =
+  WalletBase<BlockchainSpecificInMemoryWalletData> & {
+    accounts: LazyInMemoryWalletAccount<BlockchainSpecificAccountProps>[];
+    type: WalletType.LazyInMemory;
+  };
 export type HardwareWalletLedger<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificHardwareWalletData> & {
     type: WalletType.HardwareLedger;
@@ -103,7 +128,11 @@ export type MultiSigWallet<BlockchainSpecificAccountProps = unknown> =
     type: WalletType.MultiSig;
     accounts: MultiSigWalletAccount<BlockchainSpecificAccountProps>[];
   };
-export type AnyWallet = HardwareWallet | InMemoryWallet | MultiSigWallet;
+export type AnyWallet =
+  | HardwareWallet
+  | InMemoryWallet
+  | LazyInMemoryWallet
+  | MultiSigWallet;
 export type AnyAccount<
   HwProps = unknown,
   InMemoryProps = unknown,
@@ -111,4 +140,19 @@ export type AnyAccount<
 > =
   | HardwareWalletAccount<HwProps>
   | InMemoryWalletAccount<InMemoryProps>
+  | LazyInMemoryWalletAccount<InMemoryProps>
   | MultiSigWalletAccount<MultiSigProps>;
+
+/**
+ * Blockchain-provided extractor of an account's key-derived identity. Each
+ * blockchain module implements this against its own `blockchainSpecific`
+ * account shape (e.g. Cardano reads the extended account public key) and
+ * registers it via the `loadWalletIdentity` addon. Consumers use it to detect
+ * that a wallet being added is already present, independent of how its
+ * `walletId` was derived.
+ */
+export type WalletIdentity = BlockchainAssigned<{
+  getAccountIdentityKey: (
+    account: AnyAccount,
+  ) => AccountIdentityKey | undefined;
+}>;

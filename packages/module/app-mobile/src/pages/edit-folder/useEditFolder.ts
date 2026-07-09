@@ -1,8 +1,8 @@
 import { isDuplicateString } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
-import { NavigationControls } from '@lace-lib/navigation';
+import { NavigationControls, useFocusEffect } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -127,8 +127,18 @@ export const useEditFolder = (
   const [folderName, setFolderName] = useState(currentFolder?.name || '');
   const [nfts, setNfts] = useState<TokenWithSelection[]>([]);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const isClosingSheetRef = useRef(false);
 
   const { onFolderNameChange } = useFolderNameHelpers(setFolderName);
+
+  const editFlowFolderId =
+    editTokenFolderState.status !== 'Idle'
+      ? editTokenFolderState.folderId
+      : undefined;
+  const isEditFlowForCurrentFolder = editFlowFolderId === folderId;
+  const sheetEditTokenFolderState = isEditFlowForCurrentFolder
+    ? editTokenFolderState
+    : { status: 'Preparing' };
 
   const isDuplicateFolderName = useMemo(
     () =>
@@ -148,7 +158,11 @@ export const useEditFolder = (
 
   const handleSaveChangesPress = useCallback(() => {
     if (isDuplicateFolderName) return;
-    if (editTokenFolderState.status === 'Editing') {
+    if (
+      editTokenFolderState.status === 'Editing' &&
+      isEditFlowForCurrentFolder
+    ) {
+      isClosingSheetRef.current = true;
       confirmNameChange(folderName.trim());
       showToast({
         text: successMessage,
@@ -165,13 +179,14 @@ export const useEditFolder = (
           color: theme.brand.white,
         },
       });
-      NavigationControls.sheets.close();
+      NavigationControls.closeSheet();
     }
   }, [
     confirmNameChange,
     currentFolder,
     folderName,
     editTokenFolderState.status,
+    isEditFlowForCurrentFolder,
     showToast,
     successMessage,
     theme,
@@ -179,28 +194,45 @@ export const useEditFolder = (
   ]);
 
   const handleDeleteFolderPress = useCallback(() => {
-    if (currentFolder && editTokenFolderState.status === 'Editing') {
+    isClosingSheetRef.current = true;
+    if (
+      currentFolder &&
+      editTokenFolderState.status === 'Editing' &&
+      isEditFlowForCurrentFolder
+    ) {
       deleteFolder();
       setSelectedFolderId(null);
+    } else {
+      cancelEditFlow();
     }
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [
     currentFolder,
+    cancelEditFlow,
     deleteFolder,
     setSelectedFolderId,
     editTokenFolderState.status,
+    isEditFlowForCurrentFolder,
   ]);
 
   const handleSheetClose = useCallback(() => {
+    isClosingSheetRef.current = true;
     cancelEditFlow();
-    NavigationControls.sheets.close();
+    NavigationControls.closeSheet();
   }, [cancelEditFlow]);
 
   const onUpdateNftsPress = useCallback(() => {
-    if (editTokenFolderState.status === 'Editing') {
+    if (
+      editTokenFolderState.status === 'Editing' &&
+      isEditFlowForCurrentFolder
+    ) {
       goToSelectingTokens();
     }
-  }, [goToSelectingTokens, editTokenFolderState.status]);
+  }, [
+    goToSelectingTokens,
+    editTokenFolderState.status,
+    isEditFlowForCurrentFolder,
+  ]);
 
   const { onDeleteModalPress, onDeleteModalClose, onDeleteModalConfirm } =
     useModalHelpers(setIsDeleteModalVisible, handleDeleteFolderPress);
@@ -216,9 +248,21 @@ export const useEditFolder = (
   const onNftSelectionClose = useCallback(() => goToEditing(), [goToEditing]);
 
   const handleUpdateFolderTokens = useCallback(() => {
+    if (
+      editTokenFolderState.status !== 'SelectingTokens' ||
+      !isEditFlowForCurrentFolder
+    ) {
+      return;
+    }
     setTokens(getSelectedTokenIds(nfts));
     completeTokenSelection();
-  }, [nfts, setTokens, completeTokenSelection]);
+  }, [
+    nfts,
+    setTokens,
+    completeTokenSelection,
+    editTokenFolderState.status,
+    isEditFlowForCurrentFolder,
+  ]);
 
   const onNftSelectionDone = useCallback(() => {
     handleUpdateFolderTokens();
@@ -263,15 +307,8 @@ export const useEditFolder = (
       onDeleteFolderPress: onDeleteModalPress,
       moreSettingsLabel,
       updateNftsLabel,
-      isUpdateNftsDisabled: editTokenFolderState.status !== 'Editing',
     }),
-    [
-      onUpdateNftsPress,
-      onDeleteModalPress,
-      moreSettingsLabel,
-      updateNftsLabel,
-      editTokenFolderState.status,
-    ],
+    [onUpdateNftsPress, onDeleteModalPress, moreSettingsLabel, updateNftsLabel],
   );
 
   const deleteModalProps = useMemo(
@@ -313,17 +350,49 @@ export const useEditFolder = (
   }, [selectableNfts, currentFolder?.name]);
 
   useEffect(() => {
-    if (folderId && editTokenFolderState.status === 'Idle') {
+    setFolderName(currentFolder?.name || '');
+  }, [folderId, currentFolder?.name]);
+
+  useFocusEffect(
+    useCallback(() => {
+      isClosingSheetRef.current = false;
+    }, [folderId]),
+  );
+
+  useEffect(() => {
+    if (isClosingSheetRef.current || !currentFolder) {
+      return;
+    }
+
+    if (editTokenFolderState.status === 'Idle') {
+      startEditing(folderId);
+      return;
+    }
+
+    if (
+      editFlowFolderId !== folderId &&
+      (editTokenFolderState.status === 'Preparing' ||
+        editTokenFolderState.status === 'Editing' ||
+        editTokenFolderState.status === 'SelectingTokens')
+    ) {
+      cancelEditFlow();
       startEditing(folderId);
     }
-  }, [folderId, editTokenFolderState.status, startEditing]);
+  }, [
+    folderId,
+    editFlowFolderId,
+    editTokenFolderState.status,
+    currentFolder,
+    startEditing,
+    cancelEditFlow,
+  ]);
 
   return {
     folderNameProps,
     buttonProps,
     actionProps,
     deleteModalProps,
-    editTokenFolderState,
+    editTokenFolderState: sheetEditTokenFolderState,
     title,
     nftsProps,
   };

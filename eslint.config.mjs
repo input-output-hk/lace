@@ -1,4 +1,5 @@
 import eslintNxPlugin from '@nx/eslint-plugin';
+import { defineConfig } from 'eslint/config';
 import checkFile from 'eslint-plugin-check-file';
 import eslintFunctionalPlugin from 'eslint-plugin-functional';
 import importPlugin from 'eslint-plugin-import';
@@ -9,7 +10,7 @@ import eslintUnicornPlugin from 'eslint-plugin-unicorn';
 import jsoncParser from 'jsonc-eslint-parser';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig(
   tseslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   {
@@ -62,6 +63,16 @@ export default tseslint.config(
       'max-params': ['warn', 3],
       'no-void': 'off',
       'no-console': 'error',
+      // Note: scoped to src/ only via override on **/test/** below.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            ':matches(Program, ExportNamedDeclaration) > :matches(TSInterfaceDeclaration, TSTypeAliasDeclaration)[id.name=/^(Action|AppConfig|LaceAddons|SideEffectDependencies|State)$/]',
+          message:
+            'Do not name a local type/interface after a `@lace-contract/module` augmentation target (`Action`, `AppConfig`, `LaceAddons`, `SideEffectDependencies`, `State`). The lace-sdk types bundler renames the clashing contract declaration but not its augmentations, producing incomplete types. Use a domain-specific name (e.g. `AuthenticationPromptState`) and keep augmentations inside `declare module` blocks in `augmentations.ts`.',
+        },
+      ],
       'prefer-arrow-functions/prefer-arrow-functions': 'error',
       'import/order': [
         'error',
@@ -237,6 +248,51 @@ export default tseslint.config(
     files: ['side-effects.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
+  // Allow `@lace-contract/module` augmentation targets to be declared in
+  // their source file (the only place they are valid as top-level names).
+  // Matched when ESLint runs from the workspace root; the same exemption is
+  // mirrored in packages/contract/module/eslint.config.mjs for nx invocations
+  // which load the per-package config.
+  {
+    files: ['packages/contract/module/src/types.ts'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
+  // The bundler-clash hazard only affects what ships in the lace-sdk types
+  // bundle; tests are not bundled, so they're exempt.
+  {
+    files: ['**/test/**/*.{ts,tsx}', '**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': 'off',
+    },
+  },
+  // ADR 28: contract packages must not depend on UI libraries
+  {
+    files: [
+      'packages/contract/*/src/**/*.{ts,tsx}',
+      'packages/contract/*/test/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@lace-lib/ui-toolkit', '@lace-lib/ui-toolkit/*'],
+              message:
+                'Contracts must be UI-agnostic (ADR 28). Move the type into the contract that owns the domain, or duplicate it locally.',
+            },
+            {
+              group: ['@lace-lib/navigation', '@lace-lib/navigation/*'],
+              message:
+                'Contracts must not depend on navigation lib (ADR 28). Duplicate the needed route enums into the contract; parity is enforced by routes-parity.ts in @lace-lib/navigation.',
+            },
+          ],
+        },
+      ],
     },
   },
   {

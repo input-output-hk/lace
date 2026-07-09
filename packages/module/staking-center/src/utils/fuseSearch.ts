@@ -30,25 +30,31 @@ export interface FuseSearchState {
   totalPoolsCount: number;
 }
 
-const emptyFuseSearchState: FuseSearchState = {
+export const emptyFuseSearchState: FuseSearchState = {
   isLoading: true,
   pools: [],
   search: () => [],
   totalPoolsCount: 0,
 };
 
-class FuseSearch {
+export class FuseSearch {
   public readonly fuse$ = new BehaviorSubject(emptyFuseSearchState);
 
   public connect(slice: StateObservables<Selectors>['cardanoStakePools']) {
+    // `poolSummaries[X]` and `networkData[X]` are written together by
+    // `createStakePoolsNetworkData`, but the v1→v2 migration can leave
+    // `poolSummaries` populated for a network whose `networkData` has not
+    // yet been fetched. Surface that partial state as a loading
+    // placeholder instead of throwing.
     return combineLatest([
       slice.selectActivePoolSummaries$,
       slice.selectActiveNetworkData$,
     ]).subscribe(([list, networkData]) => {
-      if (list) {
-        if (!networkData) throw new Error('Impossible undefined networkData');
+      if (list && networkData) {
         this.makeIndex(list, networkData);
-      } else this.fuse$.next(emptyFuseSearchState);
+      } else {
+        this.fuse$.next(emptyFuseSearchState);
+      }
     });
   }
 

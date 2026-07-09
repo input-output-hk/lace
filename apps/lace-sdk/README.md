@@ -99,7 +99,6 @@ const config: Partial<AppConfig> = {
   defaultTestnetChainId: Cardano.ChainIds.Preprod,
   cardanoProvider: {
     tipPollFrequency: Milliseconds(30_000),
-    transactionHistoryPollingIntervalSeconds: Milliseconds(30_000),
     blockfrostConfigs: {
       // Keyed by Cardano network magic
       1: {

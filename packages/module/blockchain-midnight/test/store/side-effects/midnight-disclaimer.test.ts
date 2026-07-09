@@ -11,8 +11,10 @@ import { testSideEffect } from '@lace-lib/util-dev';
 import { HexBytes } from '@lace-sdk/util';
 import { describe, it } from 'vitest';
 
+import { FEATURE_FLAG_MIDNIGHT_DISCLAIMER } from '../../../src/const';
 import { triggerMidnightDisclaimerOnWalletCreation } from '../../../src/store/side-effects';
 
+import type { FeatureFlag } from '@lace-contract/feature';
 import type {
   HardwareWallet,
   InMemoryWallet,
@@ -92,6 +94,16 @@ const hardwareCardanoOnlyWallet: HardwareWallet = {
 };
 
 describe('triggerMidnightDisclaimerOnWalletCreation', () => {
+  const flagEnabledFeatures = {
+    featureFlags: [{ key: FEATURE_FLAG_MIDNIGHT_DISCLAIMER }] as FeatureFlag[],
+    modules: [],
+  };
+
+  const flagDisabledFeatures = {
+    featureFlags: [] as FeatureFlag[],
+    modules: [],
+  };
+
   it('dispatches set shown when addWallet includes an in-memory Midnight account and disclaimer is not-shown', () => {
     testSideEffect(
       triggerMidnightDisclaimerOnWalletCreation,
@@ -105,6 +117,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('n--', {
               n: 'not-shown' as const,
@@ -139,6 +154,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('n--', {
               n: 'not-shown' as const,
@@ -169,6 +187,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('k--', {
               k: 'acknowledged' as const,
@@ -202,6 +223,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('n---', {
               n: 'not-shown' as const,
@@ -244,6 +268,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('n---', {
               n: 'not-shown' as const,
@@ -280,6 +307,9 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('n---', {
               n: 'not-shown' as const,
@@ -321,9 +351,84 @@ describe('triggerMidnightDisclaimerOnWalletCreation', () => {
           },
         },
         stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagEnabledFeatures }),
+          },
           midnightContext: {
             selectShouldAcknowledgeMidnightDisclaimer$: cold('s---', {
               s: 'shown' as const,
+            }),
+          },
+          wallets: {
+            selectAll$: cold('ab-', {
+              a: [cardanoOnlyWallet],
+              b: [cardanoAndMidnightWallet],
+            }),
+          },
+        },
+        dependencies: { actions },
+        assertion: (sideEffect$: Observable<Action>) => {
+          expectObservable(sideEffect$).toBe('---');
+        },
+      }),
+    );
+  });
+
+  it('does not dispatch addWallet when MIDNIGHT_DISCLAIMER flag is absent', () => {
+    testSideEffect(
+      triggerMidnightDisclaimerOnWalletCreation,
+      ({ cold, expectObservable }) => ({
+        actionObservables: {
+          wallets: {
+            addWallet$: cold('--a', {
+              a: actions.wallets.addWallet(stubData.midnightWallet),
+            }),
+            updateWallet$: cold('------'),
+          },
+        },
+        stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagDisabledFeatures }),
+          },
+          midnightContext: {
+            selectShouldAcknowledgeMidnightDisclaimer$: cold('n--', {
+              n: 'not-shown' as const,
+            }),
+          },
+          wallets: {
+            selectAll$: cold('0--', { 0: [] }),
+          },
+        },
+        dependencies: { actions },
+        assertion: (sideEffect$: Observable<Action>) => {
+          expectObservable(sideEffect$).toBe('------');
+        },
+      }),
+    );
+  });
+
+  it('does not dispatch updateWallet when MIDNIGHT_DISCLAIMER flag is absent', () => {
+    testSideEffect(
+      triggerMidnightDisclaimerOnWalletCreation,
+      ({ cold, expectObservable }) => ({
+        actionObservables: {
+          wallets: {
+            addWallet$: cold('---------'),
+            updateWallet$: cold('--u', {
+              u: actions.wallets.updateWallet({
+                id: testWalletId,
+                changes: { accounts: cardanoAndMidnightWallet.accounts },
+              }),
+            }),
+          },
+        },
+        stateObservables: {
+          features: {
+            selectLoadedFeatures$: cold('f', { f: flagDisabledFeatures }),
+          },
+          midnightContext: {
+            selectShouldAcknowledgeMidnightDisclaimer$: cold('n---', {
+              n: 'not-shown' as const,
             }),
           },
           wallets: {

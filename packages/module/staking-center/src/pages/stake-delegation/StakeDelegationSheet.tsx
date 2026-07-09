@@ -1,8 +1,8 @@
 import { Cardano } from '@cardano-sdk/core';
+import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { isWeb, RegularPoolSheet } from '@lace-lib/ui-toolkit';
-import React, { useMemo } from 'react';
-import { StyleSheet, useWindowDimensions, View } from 'react-native';
+import { RegularPoolSheetTemplate, Sheet } from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useLaceSelector } from '../../hooks';
 import { useStakePoolDetails } from '../stake-pool-details/useStakePoolDetails';
@@ -12,23 +12,18 @@ import { useRewardAccount, useStakeDelegation } from './useStakeDelegation';
 import type { CardanoRewardAccount } from '@lace-contract/cardano-context';
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
-// RegularPoolSheet's FlatList sits inside a `flex: 1` wrapper, which collapses
-// to 0 height when its parent is unbounded. The shared sheet navigator no
-// longer wraps screens in a flex-filling view on native (removed in 006b129a8
-// to let @gorhom/bottom-sheet dynamic-size around natural content). Give the
-// native path an explicit bounded height so the list has room to render.
-// Mirrors the BrowsePoolSheet fix (a95ae524f).
-const SHEET_HEIGHT_RATIO = 0.9;
-
 const StakeDelegationSheetContent = ({
   accountId,
   poolId,
   rewardAccount,
+  navigation,
 }: {
   accountId: AccountId;
   poolId: Cardano.PoolId;
   rewardAccount: CardanoRewardAccount;
+  navigation: SheetScreenProps<SheetRoutes.StakeDelegation>['navigation'];
 }) => {
+  const { t } = useTranslation();
   const stakePoolDetailsProps = useStakePoolDetails({ poolId, accountId });
 
   const regularPoolSheetProps = useStakeDelegation({
@@ -38,9 +33,64 @@ const StakeDelegationSheetContent = ({
     poolId,
   });
 
+  const {
+    primaryButtonLabel,
+    secondaryButtonLabel,
+    onPrimaryPress,
+    onSecondaryPress,
+    isSecondaryButtonDisabled,
+  } = regularPoolSheetProps ?? {};
+  const hasFooter = Boolean(
+    (primaryButtonLabel && onPrimaryPress) ||
+      (secondaryButtonLabel && onSecondaryPress),
+  );
+
+  useEffect(() => {
+    navigation.setOptions({
+      header: (
+        <Sheet.Header
+          testID="regular-pool-sheet-header"
+          title={t('v2.regular-pool.title')}
+        />
+      ),
+      footer: hasFooter ? (
+        <Sheet.Footer
+          testID="regular-pool-sheet-footer"
+          showDivider
+          secondaryButton={
+            secondaryButtonLabel && onSecondaryPress
+              ? {
+                  label: secondaryButtonLabel,
+                  onPress: onSecondaryPress,
+                  disabled: isSecondaryButtonDisabled,
+                }
+              : undefined
+          }
+          primaryButton={
+            primaryButtonLabel && onPrimaryPress
+              ? {
+                  label: primaryButtonLabel,
+                  onPress: onPrimaryPress,
+                }
+              : undefined
+          }
+        />
+      ) : undefined,
+    });
+  }, [
+    navigation,
+    t,
+    hasFooter,
+    primaryButtonLabel,
+    secondaryButtonLabel,
+    onPrimaryPress,
+    onSecondaryPress,
+    isSecondaryButtonDisabled,
+  ]);
+
   if (!regularPoolSheetProps) return null;
 
-  return <RegularPoolSheet {...regularPoolSheetProps} />;
+  return <RegularPoolSheetTemplate {...regularPoolSheetProps} />;
 };
 
 export const StakeDelegationSheet = (
@@ -53,11 +103,6 @@ export const StakeDelegationSheet = (
   );
 
   const rewardAccount = useRewardAccount(AccountId(accountId));
-  const { height: windowHeight } = useWindowDimensions();
-  const containerStyle = useMemo(
-    () => [styles.container, { height: windowHeight * SHEET_HEIGHT_RATIO }],
-    [windowHeight],
-  );
 
   const rewardAccountDetails = rewardAccountDetailsMap[AccountId(accountId)];
 
@@ -67,23 +112,12 @@ export const StakeDelegationSheet = (
     return null;
   }
 
-  const content = (
+  return (
     <StakeDelegationSheetContent
       accountId={AccountId(accountId)}
       poolId={Cardano.PoolId(poolId)}
       rewardAccount={rewardAccount}
+      navigation={props.navigation}
     />
   );
-
-  if (isWeb) {
-    return content;
-  }
-
-  return <View style={containerStyle}>{content}</View>;
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-});

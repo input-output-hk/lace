@@ -19,7 +19,7 @@ import Animated, {
 import { shallowEqual } from 'react-redux';
 
 import { useTheme, radius, spacing } from '../../../design-tokens';
-import { BlurView, Brand, Button, Pill } from '../../atoms';
+import { BlurView, Brand, Button, OfflineIndicator, Pill } from '../../atoms';
 import { isAndroid, isWeb } from '../../util';
 
 import { AccountRow, type AccountRowProps } from './accountRow';
@@ -40,6 +40,7 @@ interface TabBarProps {
   onLaceButtonPress?: () => void;
   /** Optional hook when user opens the accounts / sync status panel from the tab bar. */
   onAccountsStatusPress?: () => void;
+  isOffline?: boolean;
 }
 
 export const ExpandableSectionMetrics = {
@@ -64,6 +65,7 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
     openNetworkSelectionSheet,
     onLaceButtonPress,
     onAccountsStatusPress,
+    isOffline = false,
   }) => {
     const { theme, layoutSize, isSideMenu } = useTheme();
     const { width, height: windowHeight } = useWindowDimensions();
@@ -330,11 +332,18 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
                         network={networkName}
                         onPress={openNetworkSelectionSheet}
                       />
-                      <Pill.SyncStatus
-                        status={accountsStatus}
-                        onPress={openAccountsStatus}
-                        syncingProgress={overallSyncingProgress}
-                      />
+                      {isOffline ? (
+                        <OfflineIndicator
+                          visible
+                          onPress={openAccountsStatus}
+                        />
+                      ) : (
+                        <Pill.SyncStatus
+                          status={accountsStatus}
+                          onPress={openAccountsStatus}
+                          syncingProgress={overallSyncingProgress}
+                        />
+                      )}
                     </View>
                   </View>
                   <View style={styles.headerBorder} />
@@ -358,6 +367,7 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
                       preIconName="CaretLeft"
                       onPress={closeAccountsStatus}
                     />
+                    <OfflineIndicator visible={isOffline} />
                   </View>
                   <FlatList
                     key={'accountDataList'}

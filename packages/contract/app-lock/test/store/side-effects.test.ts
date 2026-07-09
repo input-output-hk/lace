@@ -17,7 +17,10 @@ import {
 /** A safe, small timeout used where tests verify the timer fires (avoids setTimeout overflow). */
 const SAFE_TIMEOUT_MS = Milliseconds(60_000);
 
-const actions = { ...appLockActions, ...authenticationPromptActions };
+const actions = {
+  ...appLockActions,
+  ...authenticationPromptActions,
+};
 
 describe('app-lock side effects', () => {
   describe('preparing', () => {

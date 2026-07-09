@@ -7,9 +7,13 @@ import {
   type CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import { CompositeSignerFactory } from '@lace-contract/signer';
-import { WalletType, type InMemoryWallet } from '@lace-contract/wallet-repo';
+import {
+  WalletType,
+  type InMemoryWallet,
+  type LazyInMemoryWallet,
+} from '@lace-contract/wallet-repo';
 import { ByteArray, Err, HexBytes, Ok } from '@lace-sdk/util';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { Address, addressesSelectors } from '@lace-contract/addresses';
@@ -47,11 +51,26 @@ export type WalletWithCardanoSigning = {
 };
 
 export interface SignCardanoTxProps extends CardanoSignRequest {
-  /** Password for in-memory wallets. Required for now (only wallet type supported). */
+  /**
+   * Password for {@link WalletType.InMemory} wallets. Required when the
+   * resolved account is `InMemory`; ignored for `LazyInMemory` accounts
+   * (the mnemonic is fetched on demand by the signer factory).
+   */
   password?: Uint8Array;
-  /** Cardano in-memory account to sign with. Required when >1 exists. */
+  /**
+   * Cardano account to sign with. Required when more than one signable
+   * Cardano account is present on the active network.
+   */
   accountId?: AccountId;
 }
+
+type SignableCardanoWallet = InMemoryWallet | LazyInMemoryWallet;
+
+const isSignableCardanoWallet = (wallet: {
+  type: WalletType;
+}): wallet is SignableCardanoWallet =>
+  wallet.type === WalletType.InMemory ||
+  wallet.type === WalletType.LazyInMemory;
 
 export const signCardanoTx = async (
   wallet: WalletWithCardanoSigning,
@@ -59,18 +78,9 @@ export const signCardanoTx = async (
 ): Promise<Result<CardanoSignResult, Error>> => {
   const { serializedTx, password, accountId: requestedAccountId } = props;
 
-  if (!password) {
-    return Err(
-      new Error(
-        'password is required — only in-memory wallet signing is currently supported',
-      ),
-    );
-  }
-
   try {
     const { stateObservables: obs } = wallet;
 
-    // --- Read state from observables (type-safe, no cast needed) ---
     const allWallets = await firstValueFrom(obs.wallets.selectAll$);
     const activeNetworkIds = await firstValueFrom(
       obs.network.selectAllActiveNetworkIds$,
@@ -82,12 +92,9 @@ export const signCardanoTx = async (
       obs.cardanoContext.selectAccountUtxos$,
     );
 
-    // --- Resolve account + wallet ---
-    const inMemoryWallets = allWallets.filter(
-      (w): w is InMemoryWallet => w.type === WalletType.InMemory,
-    );
+    const signableWallets = allWallets.filter(isSignableCardanoWallet);
 
-    const cardanoInMemoryAccounts = inMemoryWallets.flatMap(w =>
+    const cardanoAccounts = signableWallets.flatMap(w =>
       w.accounts.filter(
         a =>
           a.blockchainName === 'Cardano' &&
@@ -96,44 +103,49 @@ export const signCardanoTx = async (
     );
 
     let accountId: AccountId;
-    let walletEntity: InMemoryWallet;
+    let walletEntity: SignableCardanoWallet;
 
     if (requestedAccountId) {
-      const found = cardanoInMemoryAccounts.find(
+      const found = cardanoAccounts.find(
         a => a.accountId === requestedAccountId,
       );
       if (!found) {
         return Err(
           new Error(
-            `Cardano in-memory account "${requestedAccountId}" not found on the active network`,
+            `Cardano account "${requestedAccountId}" not found on the active network`,
           ),
         );
       }
       accountId = found.accountId;
-      walletEntity = inMemoryWallets.find(w => w.walletId === found.walletId)!;
+      walletEntity = signableWallets.find(w => w.walletId === found.walletId)!;
     } else {
-      if (cardanoInMemoryAccounts.length === 0) {
+      if (cardanoAccounts.length === 0) {
+        return Err(
+          new Error('No Cardano accounts found on the active network'),
+        );
+      }
+      if (cardanoAccounts.length > 1) {
         return Err(
           new Error(
-            'No Cardano in-memory accounts found on the active network',
+            `Multiple Cardano accounts found (${cardanoAccounts.length}) — specify accountId to disambiguate`,
           ),
         );
       }
-      if (cardanoInMemoryAccounts.length > 1) {
-        return Err(
-          new Error(
-            `Multiple Cardano in-memory accounts found (${cardanoInMemoryAccounts.length}) — specify accountId to disambiguate`,
-          ),
-        );
-      }
-      const account = cardanoInMemoryAccounts[0];
+      const account = cardanoAccounts[0];
       accountId = account.accountId;
-      walletEntity = inMemoryWallets.find(
+      walletEntity = signableWallets.find(
         w => w.walletId === account.walletId,
       )!;
     }
 
-    // --- Build known addresses (same mapping as confirm-tx.ts) ---
+    if (walletEntity.type === WalletType.InMemory && !password) {
+      return Err(
+        new Error(
+          'password is required for InMemory wallets — supply props.password or use a LazyInMemory wallet',
+        ),
+      );
+    }
+
     const knownAddresses = allAddresses
       .filter(
         addr =>
@@ -157,22 +169,26 @@ export const signCardanoTx = async (
         }),
       );
 
-    // --- Get UTXOs ---
     const utxo = accountUtxos[accountId] ?? [];
 
-    // --- Create headless SignerAuth ---
     const auth: SignerAuth = {
       authenticate: () => of(true),
-      accessAuthSecret: callback => callback(AuthSecret(ByteArray(password))),
+      accessAuthSecret: callback =>
+        password
+          ? callback(AuthSecret(ByteArray(password)))
+          : throwError(
+              () =>
+                new Error(
+                  'accessAuthSecret called on a wallet that has no password — this is a LazyInMemory wallet; signer factories must not access the auth secret',
+                ),
+            ),
     };
 
-    // --- Load signer factory ---
     const signerFactories = (await wallet._loadModules(
       'addons.loadSignerFactory',
     )) as SignerFactory[];
     const signerFactory = new CompositeSignerFactory(signerFactories);
 
-    // --- Sign ---
     const context: CardanoTransactionSignerContext = {
       wallet: walletEntity,
       accountId,

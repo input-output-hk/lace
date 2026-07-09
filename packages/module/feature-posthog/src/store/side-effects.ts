@@ -5,7 +5,7 @@ import type { SideEffect } from '..';
 export const initializePostHogFeatureDependencies: SideEffect = (
   _,
   { analytics: { selectAnalyticsUser$ } },
-  { posthog, initializePostHogFeatureDependencies },
+  { posthog, initializePostHogFeatureDependencies, featureFlagRefreshTrigger$ },
 ) => {
   initializePostHogFeatureDependencies(
     posthog,
@@ -14,6 +14,7 @@ export const initializePostHogFeatureDependencies: SideEffect = (
       map(user => user?.id),
       distinctUntilChanged(),
     ),
+    featureFlagRefreshTrigger$,
   );
   return EMPTY;
 };

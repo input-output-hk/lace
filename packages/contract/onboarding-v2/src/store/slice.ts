@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { AttemptCreateHardwareWalletPayload } from '../types';
-import type { WalletId } from '@lace-contract/wallet-repo';
+import type { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import type { HardwareErrorCategory } from '@lace-lib/util-hw';
 import type { BlockchainName } from '@lace-lib/util-store';
 import type {
@@ -39,6 +39,8 @@ export type CreateWalletFailurePayload = {
 export type CreateWalletSuccessPayload = {
   walletId: WalletId;
   isRecovery: boolean;
+  walletType: WalletType;
+  blockchains: BlockchainName[];
 };
 
 export type OnboardingV2SliceState = {

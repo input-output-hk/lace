@@ -77,6 +77,22 @@ export const isNotDisabledApiMsg = (message: unknown) =>
   !isInternalMessage(message) ||
   message.remoteApiInternalMsg !== disabledApiMsg.remoteApiInternalMsg;
 
+/**
+ * Interval at which `keepAlivePingPong` consumers send a reserved ping on the
+ * base channel. Tuned below Chrome's MV3 ~30s SW idle window.
+ */
+export const KEEP_ALIVE_PING_INTERVAL_MS = 20_000;
+export interface KeepAliveMessage {
+  __keepAlive: true;
+}
+export const KEEP_ALIVE_MESSAGE: KeepAliveMessage = { __keepAlive: true };
+export const isKeepAliveMessage = (
+  message: unknown,
+): message is KeepAliveMessage =>
+  typeof message === 'object' &&
+  message !== null &&
+  (message as { __keepAlive?: unknown }).__keepAlive === true;
+
 export class FinalizationRegistryDestructor implements Destructor {
   readonly #registry: FinalizationRegistry<unknown>;
   readonly #logger: Logger;

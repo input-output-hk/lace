@@ -1,10 +1,11 @@
-import { TokenId, type Token } from '@lace-contract/tokens';
+import { type Token } from '@lace-contract/tokens';
 import { BigNumber, None } from '@lace-sdk/util';
 import { of, map, mergeMap } from 'rxjs';
 
 import type {
   AddressError,
   AmountError,
+  ChainMinimumAmountTokenValidator,
   DefaultAddressError,
   FormData,
   FormValidationResult,
@@ -124,6 +125,7 @@ const validateAddress = <
 
 type ValidateAmountParams<BlockchainSpecificTokenMetadata = unknown> = {
   amount: BigNumber;
+  chainMinimumAmountTokenValidator: ChainMinimumAmountTokenValidator<BlockchainSpecificTokenMetadata> | null;
   minimumAmount: BigNumber;
   token: Token<BlockchainSpecificTokenMetadata>;
 };
@@ -143,31 +145,33 @@ export const humanMinimumAmount = (decimals: number) => {
 
 const validateAmount = <BlockchainSpecificTokenMetadata = unknown>({
   amount,
+  chainMinimumAmountTokenValidator,
   minimumAmount,
   token,
 }: ValidateAmountParams<BlockchainSpecificTokenMetadata>): AmountError | null => {
   const balance = BigNumber.valueOf(token.available);
   const parsedAmount = BigNumber.valueOf(amount);
 
-  // TODO LW-14767
-  const isLovelace = token.tokenId === TokenId('lovelace');
-  const minQuantity =
-    isLovelace && minimumAmount !== '-1'
-      ? BigNumber.valueOf(minimumAmount)
-      : 1n;
+  const chainMinimum = chainMinimumAmountTokenValidator?.hasChainMinimumAmount(
+    token,
+  )
+    ? chainMinimumAmountTokenValidator
+    : null;
+  const isMinimumInitialized = BigNumber.valueOf(minimumAmount) !== -1n;
+  const shouldUseChainMinimum = chainMinimum !== null && isMinimumInitialized;
+
+  const minQuantity = shouldUseChainMinimum
+    ? BigNumber.valueOf(minimumAmount)
+    : 1n;
 
   if (parsedAmount < minQuantity)
     return {
       error: 'less-than-minimum',
-      argument: isLovelace
-        ? minimumAmount === '-1'
-          ? // three dots for lovelace when minimum amount is not yet initialized
-            '...'
-          : // convert lovelace to ADA
-            // TODO LW-14767
-            (Number(minimumAmount) / 1000000).toString()
-        : // make token human readable minimum amount from token decimals
-          humanMinimumAmount(token.decimals),
+      argument: chainMinimum
+        ? isMinimumInitialized
+          ? chainMinimum.formatMinimumAmount(minimumAmount, token)
+          : '...'
+        : humanMinimumAmount(token.decimals),
     };
 
   return balance < parsedAmount ? { error: 'insufficient-balance' } : null;
@@ -184,6 +188,7 @@ type ValidateFormParams<
   > | null;
   addressAliasResolvers: AddressAliasResolver[];
   blockchainSpecificData: BlockchainSpecificSendFlowData;
+  chainMinimumAmountTokenValidator: ChainMinimumAmountTokenValidator<BlockchainSpecificTokenMetadata> | null;
   form: FormData<BlockchainSpecificTokenMetadata, BlockchainSpecificFormData>;
   minimumAmount: BigNumber;
   network: BlockchainNetworkId;
@@ -197,6 +202,7 @@ export const validateForm = <
   addressValidator,
   addressAliasResolvers,
   blockchainSpecificData,
+  chainMinimumAmountTokenValidator,
   form,
   minimumAmount,
   network,
@@ -230,6 +236,7 @@ export const validateForm = <
           error: tt.amount.dirty
             ? validateAmount<BlockchainSpecificTokenMetadata>({
                 amount: tt.amount.value,
+                chainMinimumAmountTokenValidator,
                 minimumAmount,
                 token: tt.token.value,
               })

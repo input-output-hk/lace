@@ -1,22 +1,30 @@
+import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
+import { retryBackoff } from 'backoff-rxjs';
 import {
+  catchError,
   combineLatest,
   debounceTime,
   EMPTY,
   filter,
   from,
   map,
+  merge as rxMerge,
   mergeMap,
+  of,
   switchMap,
   toArray,
 } from 'rxjs';
 
 import { CardanoRewardAccount } from '../../types';
 import { mapToRecord } from '../../util';
+import { CardanoRewardsHistoryFailureId } from '../../value-objects';
 import { groupCardanoAddressesByAccount } from '../helpers';
 
 import type { SideEffect } from '../../contract';
 import type { CardanoAddressData, Reward } from '../../types';
 import type { AnyAddress } from '@lace-contract/addresses';
+import type { TranslationKey } from '@lace-contract/i18n';
 
 const extractDistinctRewardAccounts = (
   accountAddresses: AnyAddress<CardanoAddressData>[],
@@ -35,12 +43,21 @@ const extractDistinctRewardAccounts = (
 /**
  * Side effect that tracks account rewards history by grouping Cardano
  * addresses by account and fetching rewards for each account's reward accounts.
+ *
+ * Transient provider errors are retried per-call with exponential backoff.
+ * After exhaustion a failure keyed by `CardanoRewardsHistoryFailureId(accountId)`
+ * is surfaced; the next address/chainId change naturally re-triggers the fetch
+ * and a successful result auto-dismisses the failure.
  */
 export const createTrackAccountRewardsHistory =
   (debounceTimeout: number): SideEffect =>
   (
     _,
-    { addresses: { selectAllAddresses$ }, cardanoContext: { selectChainId$ } },
+    {
+      addresses: { selectAllAddresses$ },
+      cardanoContext: { selectChainId$ },
+      failures: { selectFailureById$ },
+    },
     { actions, cardanoProvider: { getAccountRewards } },
   ) =>
     combineLatest([
@@ -58,40 +75,47 @@ export const createTrackAccountRewardsHistory =
           mergeMap(accountAddresses => {
             const { accountId, rewardAccounts } =
               extractDistinctRewardAccounts(accountAddresses);
-            if (rewardAccounts.length === 0) return EMPTY;
+            if (!accountId || rewardAccounts.length === 0) return EMPTY;
+
+            const failureId = CardanoRewardsHistoryFailureId(accountId);
 
             return from(rewardAccounts).pipe(
               mergeMap(rewardAccount =>
                 getAccountRewards({ rewardAccount }, { chainId }).pipe(
-                  map(result => ({ rewardAccount, result })),
+                  map(result => {
+                    if (result.isErr()) throw result.unwrapErr();
+                    return { rewardAccount, value: result.unwrap() };
+                  }),
+                  retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
                 ),
               ),
               toArray(),
-              map(results => {
+              mergeMap(results => {
                 const rewardsMap = new Map<CardanoRewardAccount, Reward[]>();
-                const errors = [];
-
-                for (const { rewardAccount, result } of results) {
-                  if (result.isOk()) {
-                    rewardsMap.set(rewardAccount, result.value);
-                  } else {
-                    errors.push({ rewardAccount, error: result.error });
-                  }
+                for (const { rewardAccount, value } of results) {
+                  rewardsMap.set(rewardAccount, value);
                 }
-
-                if (errors.length) {
-                  return actions.cardanoContext.getAccountRewardsHistoryFailed({
-                    accountId,
-                    failure: errors[0].error.reason,
-                  });
-                }
-
-                const rewardsHistoryRecord = mapToRecord(rewardsMap);
-                return actions.cardanoContext.setAccountRewardsHistory({
-                  accountId,
-                  rewardsHistory: rewardsHistoryRecord,
-                });
+                return rxMerge(
+                  of(
+                    actions.cardanoContext.setAccountRewardsHistory({
+                      accountId,
+                      rewardsHistory: mapToRecord(rewardsMap),
+                    }),
+                  ),
+                  of(failureId).pipe(
+                    autoDismissFailureOnSuccess(selectFailureById$),
+                  ),
+                );
               }),
+              catchError(() =>
+                of(
+                  actions.failures.addFailure({
+                    failureId,
+                    message:
+                      'sync.error.cardano-rewards-history-failed' as TranslationKey,
+                  }),
+                ),
+              ),
             );
           }),
         );

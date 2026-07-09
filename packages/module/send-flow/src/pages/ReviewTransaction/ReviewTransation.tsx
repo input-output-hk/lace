@@ -1,5 +1,10 @@
-import { ReviewTransactionTemplate } from '@lace-lib/ui-toolkit';
-import React from 'react';
+import { AccountId } from '@lace-contract/wallet-repo';
+import {
+  AccountSecurityAlertInline,
+  ReviewTransactionTemplate,
+  Sheet,
+} from '@lace-lib/ui-toolkit';
+import React, { useEffect } from 'react';
 
 import { useReviewTransaction } from './useReviewTransaction';
 
@@ -15,14 +20,46 @@ export const ReviewTransaction = (
     nextButtonPress,
     isNextButtonDisabled,
   } = useReviewTransaction(props);
+  const { accountId } = props.route.params;
+
+  useEffect(() => {
+    props.navigation.setOptions({
+      header: (
+        <Sheet.Header
+          title={labels.headerTitle}
+          leftIconOnPress={backButtonPress}
+          testID="review-transaction-sheet-header"
+        />
+      ),
+      footer: (
+        <Sheet.Footer
+          primaryButton={{
+            label: labels.nextButtonLabel,
+            onPress: nextButtonPress,
+            disabled: isNextButtonDisabled,
+            testID: 'review-transaction-sheet-next-button',
+          }}
+        />
+      ),
+    });
+  }, [
+    props.navigation,
+    labels.headerTitle,
+    labels.nextButtonLabel,
+    backButtonPress,
+    nextButtonPress,
+    isNextButtonDisabled,
+  ]);
+
   return (
     <ReviewTransactionTemplate
-      headerTitle={labels.headerTitle}
       labels={labels}
-      backButtonPress={backButtonPress}
-      nextButtonPress={nextButtonPress}
-      nextButtonDisabled={isNextButtonDisabled}
       values={values}
+      belowAccountSlot={
+        accountId ? (
+          <AccountSecurityAlertInline accountId={AccountId(accountId)} />
+        ) : undefined
+      }
     />
   );
 };

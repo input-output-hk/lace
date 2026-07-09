@@ -59,6 +59,9 @@ import type {
 import type { StateObservable } from 'redux-observable';
 import type { Storage } from 'redux-persist';
 
+const SERIALIZABLE_CHECK_WARN_AFTER_MS = 128;
+const IMMUTABLE_CHECK_WARN_AFTER_MS = 256;
+
 const createActionObservables = (
   action$: Observable<Action>,
   actions: object,
@@ -283,11 +286,17 @@ export const createStore = async <
     devTools: createStoreProps.devTools || false,
     middleware: getDefaultMiddleware =>
       getDefaultMiddleware({
+        immutableCheck: {
+          warnAfter: IMMUTABLE_CHECK_WARN_AFTER_MS,
+        },
         serializableCheck: {
           ignoredActions: [
             'accountManagement/attemptAddAccount',
             'accountManagement/attemptAddInMemoryWalletAccount',
             'txExecutor/tx-phase-completed',
+            // Carries the submit result's blockchainSpecificActivityMetadata, whose
+            // Cardano produced-output coin/asset quantities are BigInt.
+            'sendFlow/processingResulted',
             'cardanoContext/setProtocolParameters',
             'cardanoContext/setEraSummaries',
             'cardanoContext/setStakePoolsData',
@@ -299,6 +308,7 @@ export const createStore = async <
             PURGE,
             REGISTER,
           ],
+          warnAfter: SERIALIZABLE_CHECK_WARN_AFTER_MS,
         },
       }),
     enhancers: getDefaultEnhancers => {
