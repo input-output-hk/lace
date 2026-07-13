@@ -1,0 +1,39 @@
+name: Issue Slack Notifications
+
+# Posts to Slack (#lace-qa-notify) when a GitHub issue is opened on this repo.
+# Starting simple: notify on every opened issue; a CRITICAL-only filter comes
+# later via the commented `if:` gate below.
+#
+# Testing: posts via the existing SLACK_WEBHOOK secret and @-mentions Berno.
+# For the real rollout, switch to a dedicated #lace-qa-notify webhook secret.
+
+on:
+  issues:
+    types: [opened]
+  # Testing aid only: issue events run the DEFAULT-branch copy of a workflow,
+  # so this can't be tested from a branch. `push` runs the branch's own copy,
+  # letting us iterate before merge. Scoped to this branch; remove before merge.
+  push:
+    branches: [ci/issue-slack-notify]
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    name: Notify lace-qa-notify
+    runs-on: ubuntu-22.04
+    # CRITICAL-only later, e.g.:
+    # if: >-
+    #   github.event_name == 'push' ||
+    #   contains(github.event.issue.labels.*.name, 'critical') ||
+    #   contains(github.event.issue.title, 'CRITICAL')
+    steps:
+      - name: Post to Slack
+        uses: rtCamp/action-slack-notify@v2.3.3
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          # Minimal payload to isolate the 400: just the webhook + a plain
+          # message. If this posts, we re-add title/mention/etc.; if it still
+          # 400s, SLACK_WEBHOOK isn't a classic incoming webhook.
+          SLACK_MESSAGE: 'issue-notify smoke test (push) from ci/issue-slack-notify'
