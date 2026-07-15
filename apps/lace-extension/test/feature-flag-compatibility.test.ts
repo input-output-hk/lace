@@ -33,6 +33,7 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: PAUSE_NETWORK_POLLING_FEATURE_FLAG },
   { key: FEATURE_FLAG_WALLET_SECURITY_ALERTS },
+  { key: FeatureFlagKey('GOVERNANCE_CENTER') },
 ];
 
 testFeatureFlagCompatibility(

@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 
 export { makeBuildDelegationTx } from './build-delegation-tx';
 export { makeBuildDeregistrationTx } from './build-deregistration-tx';
+export { makeBuildVoteDelegationTx } from './build-vote-delegation-tx';
 
 type StateObservablesWithAvailableAccountUtxos = {
   cardanoContext?: {

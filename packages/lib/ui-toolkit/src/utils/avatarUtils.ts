@@ -24,6 +24,11 @@ export interface AvatarProps {
   shape?: ImageShape;
   isShielded?: boolean;
   chainSymbol?: IconName;
+  /**
+   * Icon shown when the image is absent or fails to load; takes precedence
+   * over `content.fallback` initials. Not supported for the hexagon shape.
+   */
+  fallbackIcon?: IconName;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }

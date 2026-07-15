@@ -66,6 +66,7 @@ export type TabParameterList = {
   [TabRoutes.About]: undefined;
   [TabRoutes.Contacts]: undefined;
   [TabRoutes.StakingCenter]: undefined;
+  [TabRoutes.GovernanceCenter]: undefined;
   [TabRoutes.IdentityCenter]: undefined;
   [TabRoutes.NotificationCenter]: undefined;
   [TabRoutes.Swaps]: undefined;
@@ -370,6 +371,22 @@ export type SheetParameterList = {
   [SheetRoutes.SwapReview]: undefined;
   [SheetRoutes.SwapResult]: undefined;
   [SheetRoutes.LockSettings]: undefined;
+  // Governance center
+  [SheetRoutes.BrowseDRep]: {
+    accountId: string;
+  };
+  [SheetRoutes.DRepDetails]: {
+    accountId: string;
+    drepId: string;
+  };
+  [SheetRoutes.NewDRepDelegation]: {
+    accountId: string;
+    dRep:
+      | { type: 'alwaysAbstain' }
+      | { type: 'alwaysNoConfidence' }
+      | { type: 'specific'; drepId: string };
+  };
+  [SheetRoutes.DRepDelegationSuccess]: undefined;
 };
 
 export type StackScreenProps<T extends keyof StackParameterList> =

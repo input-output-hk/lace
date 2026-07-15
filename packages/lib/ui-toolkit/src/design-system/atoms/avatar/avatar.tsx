@@ -50,6 +50,7 @@ export const Avatar = ({
   shape = 'squared',
   isShielded = false,
   chainSymbol,
+  fallbackIcon,
   style,
   testID,
   ...props
@@ -130,6 +131,12 @@ export const Avatar = ({
               onError={() => {
                 setHasImageError(true);
               }}
+            />
+          ) : fallbackIcon ? (
+            <Icon
+              name={fallbackIcon}
+              size={imgNotFoundDefaultIconSize}
+              testID={testID ? `${testID}-fallback-icon` : undefined}
             />
           ) : shouldShowIcon ? (
             <Icon name="ImageNotFound" size={imgNotFoundDefaultIconSize} />

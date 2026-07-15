@@ -3,14 +3,10 @@ import {
   DEFAULT_DECIMALS,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
+import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
-import {
-  NavigationControls,
-  SheetRoutes,
-  StackRoutes,
-} from '@lace-lib/navigation';
-import { isWeb, openUrl } from '@lace-lib/ui-toolkit';
+import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { formatAmountToLocale } from '@lace-lib/util-render';
 import { useCallback, useMemo } from 'react';
 
@@ -96,22 +92,20 @@ export const useStakingIssueSheet = (
     });
   }, [accountIdString]);
 
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+  const isGovernanceCenterEnabled = useMemo(
+    () =>
+      featureFlags.some(
+        flag => flag.key === FeatureFlagKey('GOVERNANCE_CENTER'),
+      ),
+    [featureFlags],
+  );
+
   const handleDelegateVote = useCallback(() => {
-    const url = 'https://gov.tools/';
-    if (isWeb) {
-      void openUrl({ url, onError: () => {} });
-    } else {
-      NavigationControls.navigate(StackRoutes.DappExternalWebView, {
-        title: t('v2.pool-status.delegate-vote'),
-        dapp: {
-          icon: { img: { uri: 'https://gov.tools/favicon.ico' } },
-          name: t('v2.pool-status.delegate-vote'),
-          category: '',
-        },
-        buttonUrl: url,
-      });
-    }
-  }, [t]);
+    NavigationControls.navigate(SheetRoutes.BrowseDRep, {
+      accountId: accountIdString,
+    });
+  }, [accountIdString]);
 
   const poolStatusState = issueTypeToPoolStatusState[issueType];
 
@@ -166,7 +160,8 @@ export const useStakingIssueSheet = (
     return {
       ...baseProps,
       state: 'locked-rewards' as const,
-      onDelegateVote: handleDelegateVote,
+      // No handler when the governance center is disabled — the sheet hides the button.
+      ...(isGovernanceCenterEnabled && { onDelegateVote: handleDelegateVote }),
     };
   }
 

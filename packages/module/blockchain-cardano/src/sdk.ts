@@ -5,9 +5,13 @@ import {
   cardanoProviderStoreContract,
   delegationTxBuilderAddonContract,
   deregistrationTxBuilderAddonContract,
+  voteDelegationTxBuilderAddonContract,
   FEATURE_FLAG_CARDANO,
 } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
+// TODO: re-add once auth prompt is decoupled from react-native
+//tx-executor → authentication-prompt → react-native.
+// import { governanceCenterStoreContract } from '@lace-contract/governance-center';
 import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
   combineContracts,
@@ -40,6 +44,8 @@ const implementsContracts = combineContracts([
   cardanoInMemorySigningDependencyContract,
   tokenIdMapperAddonContract,
   deregistrationTxBuilderAddonContract,
+  // governanceCenterStoreContract,
+  voteDelegationTxBuilderAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
@@ -71,6 +77,8 @@ export default inferModuleContext({
     loadTokenIdMapper: async () => import('./exposed-modules/token-id-mapper'),
     loadDeregistrationTxBuilder: async () =>
       import('./exposed-modules/deregistration-tx-builder'),
+    loadVoteDelegationTxBuilder: async () =>
+      import('./exposed-modules/vote-delegation-tx-builder'),
     loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
   },
 });

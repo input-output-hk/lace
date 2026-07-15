@@ -22,6 +22,7 @@ import dappConnectorCardano from '@lace-module/dapp-connector-cardano';
 import dappExplorer from '@lace-module/dapp-explorer';
 import featureDev from '@lace-module/feature-dev';
 import featurePosthog from '@lace-module/feature-posthog';
+import governanceCenter from '@lace-module/governance-center';
 import hwConnector from '@lace-module/hw-connector';
 import i18n from '@lace-module/i18n';
 import identityCenter from '@lace-module/identity-center';
@@ -48,6 +49,7 @@ export const allModules = [
   analyticsPosthog,
   appMobile,
   stakingCenter,
+  governanceCenter,
   identityCenter,
   addressBook,
   authenticationPromptUiV2Extension,

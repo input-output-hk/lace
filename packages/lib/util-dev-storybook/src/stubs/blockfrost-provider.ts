@@ -4,6 +4,7 @@ import {
   ProviderError,
   ProviderFailure,
 } from '@cardano-sdk/core';
+import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 import { AddressType } from '@cardano-sdk/key-management';
 import {
   CardanoPaymentAddress,
@@ -29,6 +30,7 @@ import type {
   CardanoProvider,
   CardanoProviderContext,
   CardanoProviderDependencies,
+  DRepSummary,
 } from '@lace-contract/cardano-context';
 import type {
   BlockfrostPartialStakePool,
@@ -282,6 +284,186 @@ const stubCardanoStakePoolsProvider: CardanoStakePoolsProvider = {
   },
 };
 
+const toCip105DrepId = (hex: string, hasScript: boolean): Cardano.DRepID => {
+  try {
+    return Cardano.DRepID.cip105FromCredential({
+      hash: Hash28ByteBase16(hex),
+      type: hasScript
+        ? Cardano.CredentialType.ScriptHash
+        : Cardano.CredentialType.KeyHash,
+    });
+  } catch {
+    return Cardano.DRepID(
+      `drep1${hex.replace(/[^a-f0-9]/g, '0').slice(0, 39)}`,
+    );
+  }
+};
+
+type DRepStub = Omit<DRepSummary, 'cip105DrepId'>;
+
+const rawStubDReps: DRepStub[] = [
+  {
+    drepId: Cardano.DRepID(
+      'drep1y2j8g8wuy77t752e8tzgyzu64wexjnqytalu27ew3dhtxmgchssuz',
+    ),
+    hex: 'a4741ddc27bcbf51593ac4820b9aabb2694c045f7fc57b2e8b6eb36d',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '15000000000',
+    hasScript: false,
+    name: 'Cardano Foundation DRep',
+    metadata: {
+      imageUrl:
+        'https://ipfs.io/ipfs/QmQuACDqwUDnimsBWudnSiiKNKKgRfUUYjU2XDiE21rLYd',
+      bio: 'Stewarding Cardano governance on behalf of the community.',
+      email: 'governance@example.org',
+      objectives: 'Keep the treasury safe from unnecessary spending.',
+      motivations: 'Transparency and accountability.',
+      qualifications: 'Operating Cardano infrastructure since 2021.',
+      paymentAddress:
+        'addr1q8gugy4wtkxzxh4l0ea36dml2refn6muwfetafwurmucuf7w3ljnue344ndssp4nfux2r5wkm2nx53t0ha7mn92e94xqx4fq4c',
+      references: [{ label: 'website', uri: 'https://example.org' }],
+    },
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1y2c7se8qeuzy33luc9x08l96fulqscksdjkrh3mmuggyn0q6rr4zx',
+    ),
+    hex: 'b1e864e0cf0448c7fcc14cf3fcba4f3e0862d06cac3bc77be21049bc',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '8500000000',
+    hasScript: false,
+    name: 'IOG DRep Delegate',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1ytp0jshwta2qhpr7fv3q9maeax77ng0favy8qzafu26tayqcxjgaf',
+    ),
+    hex: 'c2f942ee5f540b847e4b2202efb9e9bde9a1e9eb08700ba9e2b4be90',
+    isActive: false,
+    retired: false,
+    expired: true,
+    amount: '3200000000',
+    hasScript: false,
+    name: 'Community DRep Alpha',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1ytf6q50lda63e7fltjjrryd2az7w0vh6h65wpw4f70za7qgl9lfc6',
+    ),
+    hex: 'd3a051ff6f751cf93f5ca43191aae8bce7b2fabea8e0baa9f3c5df01',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '22000000000',
+    hasScript: false,
+    name: 'Emurgo Governance',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1y0jtzv5gwzdrm7mlqnchhgd7p2w0s0qmcn00r262pl2wqysgn0zfv',
+    ),
+    hex: 'e4b13288709a3dfb7f04f17ba1be0a9cf83c1bc4def1ab4a0fd4e012',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '11750000000',
+    hasScript: true,
+    name: 'Script-Governed DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1yt6uysuesy95auyqw4gt583v7jdp60fwkhcgut93krjlzgc769vl9',
+    ),
+    hex: 'f5c24399810b4ef0807550ba1e2cf49a1d3d2eb5f08e2cb1b0e5f123',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '5600000000',
+    hasScript: false,
+    name: 'DeFi Cardano DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1y2ndx4qqjckgkj53qd3r6t5yux355nldq6hsua7vk8mfydqt443rm',
+    ),
+    hex: 'a6d35400962c8b4a9103623d2e84e1a34a4fed06af0e77ccb1f69234',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '19400000000',
+    hasScript: false,
+    name: 'Cardano Whale DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1y2m7geg3qul96jcsyaeq8hlw9whp5z42zlylpzyf6tn6x3gq5ntf9',
+    ),
+    hex: 'b7e46511073e5d4b10277203dfee2bae1a0aaa17c9f08889d2e7a345',
+    isActive: false,
+    retired: false,
+    expired: true,
+    amount: '900000000',
+    hasScript: false,
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1yty02a3zrp8ku4crz2zrurll8je0yygm9rdqzzvcu0utg4scy7zvz',
+    ),
+    hex: 'c8f57622184f6e570312843e0fff3cb2f2111b28da010998e3f8b456',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '7300000000',
+    hasScript: false,
+    name: 'NFT Community DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1ytvsdpen99g876q5zw257yqq3hpsxq3ze843yz4fgqx92ecwpdevu',
+    ),
+    hex: 'd906873329507f681413954f10008dc3030222c9eb120aa9400c5567',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '33000000000',
+    hasScript: false,
+    name: 'Stake Pool Operator DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1yt4p0xzyxpsgq7f9ysr9qgg3nm2pgyenmterrwaqt5wkv7qng2nrd',
+    ),
+    hex: 'ea179844306080792524065021119ed4141333daf231bba05d1d6678',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '2100000000',
+    hasScript: false,
+    name: 'Catalyst Voter DRep',
+  },
+  {
+    drepId: Cardano.DRepID(
+      'drep1ytaj3224g9cfpqpkx5tkqv3rpljj2fzyavp59n93dch80zga5crgz',
+    ),
+    hex: 'fb28a955417090803635176032230fe5252444eb0342ccb16e2e7789',
+    isActive: false,
+    retired: false,
+    expired: true,
+    amount: '450000000',
+    hasScript: false,
+    name: 'Educational DRep',
+  },
+];
+
+const stubDReps: DRepSummary[] = rawStubDReps.map(d => ({
+  ...d,
+  cip105DrepId: toCip105DrepId(d.hex, d.hasScript),
+}));
+
 // Simple mock implementations that avoid complex type issues
 export const stubCardanoProvider: CardanoProvider = {
   getTip: (_context: CardanoProviderContext) => {
@@ -438,6 +620,10 @@ export const stubCardanoProvider: CardanoProvider = {
 
   getAccountWithdrawals: (_props, _context: CardanoProviderContext) => {
     return of(Ok([]));
+  },
+
+  getDReps: (_context: CardanoProviderContext) => {
+    return of(Ok(stubDReps));
   },
 };
 

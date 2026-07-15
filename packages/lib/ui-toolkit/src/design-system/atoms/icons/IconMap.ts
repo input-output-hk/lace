@@ -100,6 +100,7 @@ import {
   ThumbsDownIcon as ThumbsDownIconSolid,
   Exchange01Icon as Exchange01Solid,
   FlowConnectionIcon as FlowConnectionSolidRounded,
+  EarthIcon as EarthIconSolid,
 } from '@hugeicons-pro/core-solid-rounded';
 import {
   UserAccountIcon,
@@ -235,6 +236,7 @@ import {
   ThumbsDownIcon as ThumbsDownIconStroke,
   Exchange01Icon as Exchange01IconStroke,
   FlowConnectionIcon as FlowConnectionIconStroke,
+  EarthIcon as EarthIconStroke,
 } from '@hugeicons-pro/core-stroke-rounded';
 
 type IconSvgElement = readonly (readonly [
@@ -287,6 +289,7 @@ export const iconMap = {
     stroke: BubbleChatQuestionIcon,
   },
   Download: { solid: Download04SolidRounded, stroke: Download04Icon },
+  Earth: { solid: EarthIconSolid, stroke: EarthIconStroke },
   Globe: { solid: null, stroke: GlobeIcon },
   Mail: { solid: null, stroke: Mail01Icon },
   Tick: { solid: null, stroke: Tick01Icon }, // also old "check"

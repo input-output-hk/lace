@@ -407,6 +407,14 @@ export interface CardanoProvider {
     props: SubmitTxArgs,
     context: CardanoProviderContext,
   ) => Observable<Result<Cardano.TransactionId, ProviderError>>;
+
+  /**
+   * @return Observable that emits the complete registered-DRep list once and
+   * completes. Internally pages through the provider until exhausted.
+   */
+  getDReps: (
+    context: CardanoProviderContext,
+  ) => Observable<Result<DRepSummary[], ProviderError>>;
 }
 
 export interface CardanoProviderDependencies {
@@ -501,6 +509,71 @@ export type AccountUnspendableUtxoMap = Record<AccountId, Cardano.Utxo[]>;
 export type CardanoBlockchainSpecificTxData = {
   memo: string;
 };
+
+export type DRepOption =
+  | { type: 'alwaysAbstain' }
+  | { type: 'alwaysNoConfidence' }
+  | { type: 'specific'; drepId: Cardano.DRepID };
+
+export type DRepReference = { label?: string; uri: string };
+
+/** CIP-119 metadata fields Lace displays, parsed from the inline `json_metadata.body`. */
+export type DRepMetadata = {
+  /** CIP-100 anchor: where the metadata document is hosted. */
+  metadataUrl?: string;
+  /** blake2b-256 hash of the anchored metadata document. */
+  metadataHash?: string;
+  /** `body.image.contentUrl`. */
+  imageUrl?: string;
+  bio?: string;
+  email?: string;
+  objectives?: string;
+  motivations?: string;
+  qualifications?: string;
+  paymentAddress?: string;
+  references?: DRepReference[];
+};
+
+export type DRepSummary = {
+  drepId: Cardano.DRepID;
+  cip105DrepId: Cardano.DRepID;
+  hex: string;
+  /** Derived convenience flag: `!retired && !expired`. */
+  isActive: boolean;
+  /** DRep has been deregistered. */
+  retired: boolean;
+  /** Inactive beyond the `drep_activity` protocol window. */
+  expired: boolean;
+  amount: string;
+  hasScript: boolean;
+  name?: string;
+  metadata?: DRepMetadata;
+};
+
+export type BuildVoteDelegationTxParams = {
+  accountId: AccountId;
+  dRep: DRepOption;
+};
+
+export type BuildVoteDelegationTxResult =
+  | {
+      success: false;
+      error: Error;
+    }
+  | {
+      success: true;
+      serializedTx: string;
+      fees: FeeEntry[];
+      deposit: string;
+    };
+
+export type BuildVoteDelegationTx = (
+  params: BuildVoteDelegationTxParams,
+) => Observable<BuildVoteDelegationTxResult>;
+
+export type MakeBuildVoteDelegationTx<TDependencies = unknown> = (
+  dependencies: TDependencies,
+) => BuildVoteDelegationTx;
 
 export type BuildDelegationTxParams = {
   accountId: AccountId;

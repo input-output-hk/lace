@@ -119,6 +119,9 @@ describe('useStakingIssueSheet', () => {
       if (selector === 'network.selectNetworkType') {
         return 'mainnet';
       }
+      if (selector === 'features.selectLoadedFeatures') {
+        return { featureFlags: [], modules: [] };
+      }
       return {};
     });
 
@@ -169,7 +172,23 @@ describe('useStakingIssueSheet', () => {
   });
 
   describe('discriminated union shape based on issueType', () => {
-    it('should include onDelegateVote when issueType is "locked"', () => {
+    it('should include onDelegateVote when issueType is "locked" and the governance center is enabled', () => {
+      mockUseLaceSelector.mockImplementation((selector: string) => {
+        if (selector === 'cardanoContext.selectRewardAccountDetails') {
+          return { [mockAccountId]: mockRewardAccountDetails };
+        }
+        if (selector === 'addresses.selectByAccountId') {
+          return [{ data: { rewardAccount: 'stake_test1abc' } }];
+        }
+        if (selector === 'network.selectNetworkType') {
+          return 'mainnet';
+        }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [{ key: 'GOVERNANCE_CENTER' }], modules: [] };
+        }
+        return {};
+      });
+
       const { result } = renderHook(() =>
         useStakingIssueSheet(mockAccountId, 'locked'),
       );
@@ -178,6 +197,16 @@ describe('useStakingIssueSheet', () => {
       expect(result.current?.state).toBe('locked-rewards');
       expect(result.current).toHaveProperty('onDelegateVote');
       expect(typeof result.current?.onDelegateVote).toBe('function');
+    });
+
+    it('should not include onDelegateVote when issueType is "locked" but the governance center is disabled', () => {
+      const { result } = renderHook(() =>
+        useStakingIssueSheet(mockAccountId, 'locked'),
+      );
+
+      expect(result.current).not.toBeNull();
+      expect(result.current?.state).toBe('locked-rewards');
+      expect(result.current).not.toHaveProperty('onDelegateVote');
     });
 
     it('should not include onDelegateVote when issueType is "high-saturation"', () => {
@@ -234,6 +263,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'testnet';
+        }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
         }
         return {};
       });
@@ -349,6 +381,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
+        }
         return {};
       });
 
@@ -381,6 +416,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
+        }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
         }
         return {};
       });
@@ -415,6 +453,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
+        }
         return {};
       });
 
@@ -445,6 +486,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
+        }
         return {};
       });
 
@@ -466,6 +510,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
+        }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [], modules: [] };
         }
         return {};
       });

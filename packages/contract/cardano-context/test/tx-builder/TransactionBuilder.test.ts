@@ -28,6 +28,7 @@ const protocolParameters = {
   prices: { memory: 0.0577, steps: 0.0000721 },
   coinsPerUtxoByte: 4310,
   poolDeposit: 2_000_000,
+  stakeKeyDeposit: 2_000_000,
   dRepDeposit: 500_000_000,
   maxTxSize: 16384,
   maxValueSize: 4096,
@@ -366,7 +367,45 @@ describe('TransactionBuilder', () => {
     expect(inputSum).toBe(outputSum + fee);
   });
 
-  it('balancing does not require additional utxos if explicitly set enough via addInput AND does not require explicit outputs', () => {
+  it('adds VoteRegistrationDelegation certificate with deposit', async () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const stakeCredential: Cardano.Credential = {
+      type: Cardano.CredentialType.KeyHash,
+      hash: 'df3c57e80cb3d2e09a2fdde4e0dec9e21b6baf0f87f9c47a1b91c4e' as unknown as Cardano.Credential['hash'],
+    };
+    const dRep: Cardano.DelegateRepresentative = {
+      __typename: 'AlwaysNoConfidence',
+    };
+    const deposit = 2_000_000n;
+
+    const availableUtxos: Cardano.Utxo[] = [
+      mkUtxo(42, 0, 15_000_000n, changeAddr),
+    ];
+
+    const tx = new TransactionBuilder(networkMagic, protocolParameters)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs(availableUtxos)
+      .addVoteRegistrationDelegationCertificate(dRep, stakeCredential, deposit)
+      .build();
+    const core = tx.toCore();
+
+    expect(core.body.certificates).toHaveLength(1);
+    const cert = core.body.certificates![0];
+    expect(cert.__typename).toBe(
+      Cardano.CertificateType.VoteRegistrationDelegation,
+    );
+    if (
+      cert.__typename === Cardano.CertificateType.VoteRegistrationDelegation
+    ) {
+      expect(cert.dRep).toEqual({ __typename: 'AlwaysNoConfidence' });
+      expect(cert.stakeCredential).toBe(stakeCredential);
+      expect(cert.deposit).toBe(deposit);
+    }
+  });
+
+  it('balancing does not require additional utxos if explicitly set enough via addInput AND does not require explicit outputs', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =

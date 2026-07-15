@@ -7,6 +7,7 @@ export * from './blockfrost-input-resolver-provider';
 export * from './blockfrost-stake-pool-provider';
 export * from './blockfrost-rewards-provider';
 export * from './blockfrost-delegations-provider';
+export * from './blockfrost-governance-provider';
 export * from './blockfrost-registrations-provider';
 export * from './blockfrost-withdrawals-provider';
 export * from './blockfrost-utxo-provider';

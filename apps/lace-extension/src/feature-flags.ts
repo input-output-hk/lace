@@ -125,6 +125,23 @@ const featureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('V1_MIGRATION') },
   { key: FeatureFlagKey('VAULT_LEDGER') },
   { key: FeatureFlagKey('VAULT_TREZOR') },
+  {
+    key: FeatureFlagKey('GOVERNANCE_CENTER'),
+    payload: {
+      promotedDreps: {
+        mainnet: [
+          {
+            id: 'drep1yg4mxhwlct5crvnkqpqy06l6lrszn0f4cyc5k2hv0pk8xhsvluu37',
+            additional_information: {
+              en: 'Recommended by Lace for consistent governance participation.',
+              es: 'Recomendado por Lace por su participación constante en la gobernanza.',
+              ja: 'Lace が一貫したガバナンス参加を理由に推奨しています。',
+            },
+          },
+        ],
+      },
+    },
+  },
 ];
 
 export default featureFlags;

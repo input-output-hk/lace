@@ -12,9 +12,11 @@ import {
   cardanoProviderStoreContract,
   delegationTxBuilderAddonContract,
   deregistrationTxBuilderAddonContract,
+  voteDelegationTxBuilderAddonContract,
   FEATURE_FLAG_CARDANO,
 } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
+import { governanceCenterStoreContract } from '@lace-contract/governance-center';
 import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
   combineContracts,
@@ -68,6 +70,8 @@ const implementsContracts = combineContracts([
   tokenIdMapperAddonContract,
   deregistrationTxBuilderAddonContract,
   stakingCenterStoreContract,
+  governanceCenterStoreContract,
+  voteDelegationTxBuilderAddonContract,
   walletIdentityAddonContract,
 ] as const);
 
@@ -108,6 +112,8 @@ const extensionModule = inferModuleContext({
     loadTokenIdMapper: async () => import('./exposed-modules/token-id-mapper'),
     loadDeregistrationTxBuilder: async () =>
       import('./exposed-modules/deregistration-tx-builder'),
+    loadVoteDelegationTxBuilder: async () =>
+      import('./exposed-modules/vote-delegation-tx-builder'),
     loadAccountUICustomisations: async () =>
       import('./exposed-modules/account-ui-customisation'),
     loadSendFlowSheetUICustomisations: async () =>

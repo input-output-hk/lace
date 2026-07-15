@@ -2,7 +2,7 @@
   "name": "$EXTENSION_NAME",
   "description": "__MSG_appDesc__",
   "default_locale": "en",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "manifest_version": 3,
   "key": "$EXTENSION_KEY",
   "icons": {
