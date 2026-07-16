@@ -14,3 +14,4 @@ export * from './webView/webView';
 export * from './notificationsPage/notificationsPageTemplate';
 export * from './notificationDetailsPage/notificationDetailsPageTemplate';
 export * from './pageContainerTemplate/pageContainerTemplate';
+export * from './governanceCenterMain';

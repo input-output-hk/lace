@@ -119,6 +119,21 @@ describe('BlockfrostRewardsProvider', () => {
 
       expect(result.isErr()).toBe(true);
     });
+
+    it('should return no rewards when the account was never on-chain (404)', async () => {
+      vi.mocked(mockClient.request).mockRejectedValue(
+        new HttpClientError(404, 'Not Found'),
+      );
+
+      const result = await firstValueFrom(
+        provider.getAccountRewards({ rewardAccount }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual([]);
+      }
+    });
   });
 
   describe('getRewardAccountInfo', () => {
@@ -241,7 +256,7 @@ describe('BlockfrostRewardsProvider', () => {
       expect(result.isErr()).toBe(true);
     });
 
-    it('should handle 404 not found as error', async () => {
+    it('should return never-active defaults when the account was never on-chain (404)', async () => {
       mockResponses(vi.mocked(mockClient.request) as Mock, [
         [`accounts/${rewardAccount}`, new HttpClientError(404, 'Not Found')],
       ]);
@@ -250,7 +265,16 @@ describe('BlockfrostRewardsProvider', () => {
         provider.getRewardAccountInfo({ rewardAccount }),
       );
 
-      expect(result.isErr()).toBe(true);
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          isActive: false,
+          isRegistered: false,
+          rewardsSum: BigNumber(0n),
+          withdrawableAmount: BigNumber(0n),
+          controlledAmount: BigNumber(0n),
+        });
+      }
     });
   });
 });

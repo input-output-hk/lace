@@ -337,6 +337,30 @@ export class TransactionBuilder {
   }
 
   /**
+   * Adds a Conway-era combined stake registration + vote delegation certificate.
+   * Registers the stake key and delegates voting power to a DRep in a single certificate.
+   *
+   * @param dRep - The DRep to delegate voting power to.
+   * @param stakeCredential - The stake credential to register and delegate.
+   * @param deposit - The stake key deposit amount in lovelace.
+   * @returns `this` for fluent chaining.
+   */
+  public addVoteRegistrationDelegationCertificate(
+    dRep: Cardano.DelegateRepresentative,
+    stakeCredential: Cardano.Credential,
+    deposit: bigint,
+  ): TransactionBuilder {
+    const certificate: Cardano.VoteRegistrationDelegationCertificate = {
+      __typename: Cardano.CertificateType.VoteRegistrationDelegation,
+      dRep,
+      stakeCredential,
+      deposit,
+    };
+    this.certificates.push(certificate);
+    return this;
+  }
+
+  /**
    * @param rewardAccount - stake address to withdraw rewards from
    * @param amount - amount to withdraw (must match the available amount exactly - either withdraw all or nothing)
    * @returns `this` for fluent chaining.

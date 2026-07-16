@@ -33,6 +33,7 @@ const experimentalFeatureFlags = [
   { key: FeatureFlagKey('BLOCKCHAIN_BITCOIN') },
   { key: FeatureFlagKey('BITCOIN_MEMPOOL_FEE_MARKET') },
   { key: FeatureFlagKey('CARDANO_URI_LINKING') },
+  { key: FeatureFlagKey('GOVERNANCE_CENTER') },
   { key: MD_MIGRATION_FEATURE_FLAG },
   { key: ADA_HANDLE_FEATURE_FLAG },
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },

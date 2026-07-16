@@ -15,6 +15,7 @@
     "@lace-contract/addresses": "*",
     "@lace-contract/cardano-context": "*",
     "@lace-contract/feature": "*",
+    "@lace-contract/governance-center": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/in-memory": "*",
     "@lace-contract/module": "*",

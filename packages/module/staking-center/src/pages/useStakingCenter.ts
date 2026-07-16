@@ -5,6 +5,7 @@ import {
   convertLovelacesToAda,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
+import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { FeatureIds } from '@lace-contract/network';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
@@ -147,6 +148,15 @@ export const useStakingCenter = () => {
     FeatureIds.BUY_FLOW,
   );
 
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+  const isGovernanceCenterEnabled = useMemo(
+    () =>
+      featureFlags.some(
+        flag => flag.key === FeatureFlagKey('GOVERNANCE_CENTER'),
+      ),
+    [featureFlags],
+  );
+
   const handleStake = useCallback((accountId: string) => {
     NavigationControls.navigate(SheetRoutes.BrowsePool, { accountId });
   }, []);
@@ -252,6 +262,14 @@ export const useStakingCenter = () => {
       };
 
       const handleDelegate = () => {
+        // Vote delegation lives in the governance center; fall back to the
+        // staking-issue explainer only when that module is disabled.
+        if (isGovernanceCenterEnabled) {
+          NavigationControls.navigate(SheetRoutes.BrowseDRep, {
+            accountId: account.accountId.toString(),
+          });
+          return;
+        }
         NavigationControls.navigate(SheetRoutes.StakingIssue, {
           accountId: account.accountId.toString(),
           issueType: 'locked',
@@ -290,6 +308,7 @@ export const useStakingCenter = () => {
     handleStake,
     handleAddFunds,
     isBuyAvailable,
+    isGovernanceCenterEnabled,
     isStakingStatusLoading,
     adaDisplayTicker,
   ]);

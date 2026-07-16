@@ -1,4 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
+import { isNotFoundError } from '@lace-lib/util-provider';
 import { BigNumber, Err, Ok } from '@lace-sdk/util';
 import { catchError, from, map, of } from 'rxjs';
 
@@ -24,6 +25,20 @@ type BlockfrostRewardList = Responses['account_reward_content'];
 // while `active` is only true when registered AND delegated to a pool.
 type BlockfrostAccountContent = Responses['account_content'] & {
   registered?: boolean;
+};
+
+/**
+ * Blockfrost returns 404 from the `accounts/*` endpoints for a stake address
+ * that has never appeared on-chain. That is a normal state for a fresh
+ * account, not an error: it means "never registered, nothing staked, no
+ * rewards".
+ */
+const NEVER_ACTIVE_REWARD_ACCOUNT_INFO: RewardAccountInfo = {
+  isActive: false,
+  isRegistered: false,
+  rewardsSum: BigNumber(0n),
+  withdrawableAmount: BigNumber(0n),
+  controlledAmount: BigNumber(0n),
 };
 
 export class BlockfrostRewardsProvider extends BlockfrostProvider {
@@ -56,7 +71,10 @@ export class BlockfrostRewardsProvider extends BlockfrostProvider {
           })),
         ),
       ),
-      catchError(error => of(Err(error as ProviderError))),
+      catchError(error => {
+        if (isNotFoundError(error)) return of(Ok<Reward[]>([]));
+        return of(Err(error as ProviderError));
+      }),
     );
   }
 
@@ -89,7 +107,12 @@ export class BlockfrostRewardsProvider extends BlockfrostProvider {
               controlledAmount: BigNumber(BigInt(account.controlled_amount)),
             }),
         )
-        .catch(error => Err(error as ProviderError)),
+        .catch((error): Result<RewardAccountInfo, ProviderError> => {
+          if (isNotFoundError(error)) {
+            return Ok(NEVER_ACTIVE_REWARD_ACCOUNT_INFO);
+          }
+          return Err(error as ProviderError);
+        }),
     );
   }
 }

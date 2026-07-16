@@ -10,6 +10,7 @@ export enum TabRoutes {
   IdentityCenter = 'IdentityCenter',
   NotificationCenter = 'NotificationCenter',
   Swaps = 'Swaps',
+  GovernanceCenter = 'GovernanceCenter',
 }
 
 export enum StackRoutes {
@@ -121,4 +122,9 @@ export enum SheetRoutes {
   SwapReview = 'SwapReview',
   SwapResult = 'SwapResult',
   LockSettings = 'LockSettings',
+  // Governance center
+  BrowseDRep = 'BrowseDRep',
+  DRepDetails = 'DRepDetails',
+  NewDRepDelegation = 'NewDRepDelegation',
+  DRepDelegationSuccess = 'DRepDelegationSuccess',
 }

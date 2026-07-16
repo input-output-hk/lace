@@ -155,12 +155,14 @@ export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
                 style={styles.rewardsLockedHeader}>
                 <Text.M>{t('v2.pool-status.rewards-locked')}</Text.M>
               </Row>
-              <Button.Critical
-                label={t('v2.pool-status.delegate-vote')}
-                size="large"
-                onPress={props.onDelegateVote}
-                testID={poolStatusSheetTestIds.delegateVoteButton}
-              />
+              {props.onDelegateVote && (
+                <Button.Critical
+                  label={t('v2.pool-status.delegate-vote')}
+                  size="large"
+                  onPress={props.onDelegateVote}
+                  testID={poolStatusSheetTestIds.delegateVoteButton}
+                />
+              )}
             </View>
           )}
 

@@ -21,6 +21,7 @@ import {
   BlockfrostActivityProvider,
   BlockfrostAddressDiscovery,
   BlockfrostAssetProvider,
+  BlockfrostGovernanceProvider,
   BlockfrostInputResolverProvider,
   BlockfrostNetworkInfoProvider,
   BlockfrostRewardsProvider,
@@ -183,6 +184,14 @@ const getTxSubmitProvider = memoize(
   (config: BlockfrostConfig, logger: Logger) => {
     const client = getBlockfrostClient(config);
     return new BlockfrostTxSubmitProvider(client, logger);
+  },
+  computeBlockfrostConfigIdentifier,
+);
+
+const getGovernanceProvider = memoize(
+  (config: BlockfrostConfig, logger: Logger) => {
+    const client = getBlockfrostClient(config);
+    return new BlockfrostGovernanceProvider(client, logger);
   },
   computeBlockfrostConfigIdentifier,
 );
@@ -397,6 +406,13 @@ export const initializeDependencies: LaceInit<
             .then(id => Ok(Cardano.TransactionId(id)))
             .catch(Err<ProviderError>),
         );
+      },
+      getDReps: context => {
+        const provider = getGovernanceProvider(
+          getBlockfrostConfig(context, blockfrostConfigs),
+          logger,
+        );
+        return provider.getDReps();
       },
     },
     cardanoStakePoolsProvider: {

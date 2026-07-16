@@ -32,7 +32,8 @@ interface BasePoolStatusSheetProps {
 
 interface LockedRewardsPoolStatusSheetProps extends BasePoolStatusSheetProps {
   state: 'locked-rewards';
-  onDelegateVote: () => void;
+  /** Omitted when no vote-delegation destination exists (governance center disabled) — hides the button. */
+  onDelegateVote?: () => void;
 }
 
 interface OtherPoolStatusSheetProps extends BasePoolStatusSheetProps {
