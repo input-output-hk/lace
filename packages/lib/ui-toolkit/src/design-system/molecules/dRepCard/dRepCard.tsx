@@ -110,10 +110,7 @@ export const DRepCard = ({
               </Text.XS>
             )}
             {description !== undefined && (
-              <Text.XS
-                variant="secondary"
-                testID={`${testID}-description`}
-                numberOfLines={2}>
+              <Text.XS variant="secondary" testID={`${testID}-description`}>
                 {description}
               </Text.XS>
             )}

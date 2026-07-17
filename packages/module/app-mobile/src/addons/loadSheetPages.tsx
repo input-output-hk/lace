@@ -49,6 +49,10 @@ const loadSheetPages: ContextualLaceInit<
       <SheetStack.Screen
         name={SheetRoutes.NetworkSelection}
         component={NetworkSheet}
+        options={{
+          detents: [1],
+          scrollable: true,
+        }}
       />
       <SheetStack.Screen
         name={SheetRoutes.FiatCurrencySheet}

@@ -1,10 +1,8 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
-import { httpClientProvingProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 
 import { APIError } from './api-error';
 import { FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR } from './const';
-import { DappZkConfigProvider } from './dapp-zk-config-provider';
 import { type ExtendedDAppConnectorWalletAPI } from './types';
 
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
@@ -130,6 +128,15 @@ export class MidnightWalletApi {
             'Prover server URI not available in network configuration',
           );
         }
+        // Must stay a dynamic import: this graph reaches @midnight-ntwrk/ledger-v8
+        // (WASM). A static import compiles the WASM on every page the content
+        // scripts load on, and pages whose CSP lacks 'wasm-unsafe-eval' then
+        // abort the whole script before any wallet is injected.
+        const [{ httpClientProvingProvider }, { DappZkConfigProvider }] =
+          await Promise.all([
+            import('@midnight-ntwrk/midnight-js-http-client-proof-provider'),
+            import('./dapp-zk-config-provider'),
+          ]);
         return httpClientProvingProvider(
           config.proverServerUri,
           new DappZkConfigProvider(keyMaterialProvider),

@@ -5,7 +5,7 @@ import { StyleSheet } from 'react-native';
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTag, Icon, Row, Text } from '../../../atoms';
 import { RadioGroup } from '../../../molecules';
-import { footerHeight } from '../../../organisms';
+import { Sheet, footerHeight } from '../../../organisms';
 
 const TESTNET = 'testnet';
 export interface TestnetNetwork {
@@ -98,7 +98,10 @@ export const NetworkSelectionSheet = ({
   );
 
   return (
-    <Column style={styles.container}>
+    <Sheet.Scroll
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.container}
+      testID={testID}>
       <Text.S testID={`${testID}-description`}>{description}</Text.S>
       <RadioGroup
         options={filteredNetworkTypeOptions}
@@ -113,7 +116,7 @@ export const NetworkSelectionSheet = ({
           {blockchainTestnetGroups.map(renderBlockchainTestnetGroup)}
         </Column>
       )}
-    </Column>
+    </Sheet.Scroll>
   );
 };
 
