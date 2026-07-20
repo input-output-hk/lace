@@ -112,6 +112,21 @@ describe('MidnightWalletApi', () => {
       );
     });
 
+    it('getProvingProvider resolves a callable provider via lazy import', async () => {
+      (authenticator.requestAccess as Mock).mockResolvedValue(true);
+      const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
+      const keyMaterialProvider = {
+        getZKIR: vi.fn(),
+        getProverKey: vi.fn(),
+        getVerifierKey: vi.fn(),
+      };
+      const provingProvider = await decodedApi.getProvingProvider(
+        keyMaterialProvider,
+      );
+      expect(provingProvider.check).toBeInstanceOf(Function);
+      expect(provingProvider.prove).toBeInstanceOf(Function);
+    });
+
     it('throws APIError with InternalError when FF is disabled', async () => {
       const walletApiWithDisabledFF = new MidnightWalletApi(
         testWalletProperties,

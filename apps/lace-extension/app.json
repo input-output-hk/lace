@@ -4,7 +4,7 @@
     "slug": "lace-extension",
     "owner": "lace_io",
     "newArchEnabled": true,
-    "version": "2.1.1",
+    "version": "2.1.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "platforms": ["web"],
