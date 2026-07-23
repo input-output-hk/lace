@@ -1,8 +1,6 @@
 import { AuthPromptUI } from '@lace-contract/authentication-prompt';
-import { ThemeProvider } from '@lace-lib/ui-toolkit';
 import React from 'react';
-import { Appearance, StyleSheet, View } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
 import {
   MIDNIGHT_AUTHORIZE_DAPP_LOCATION,
@@ -21,23 +19,25 @@ import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
 import type { Render } from '@lace-contract/views';
 
-const authPromptContainerStyles = StyleSheet.create({
+const authPromptStyles = StyleSheet.create({
+  root: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
+    pointerEvents: 'box-none',
+  },
   container: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 1,
+    pointerEvents: 'box-none',
   },
 });
 
 const AuthPromptUIWithTheme = () => (
-  <SafeAreaProvider>
-    <ThemeProvider defaultTheme={Appearance.getColorScheme() || 'dark'}>
-      <View
-        style={authPromptContainerStyles.container}
-        pointerEvents="box-none">
-        <AuthPromptUI />
-      </View>
-    </ThemeProvider>
-  </SafeAreaProvider>
+  <View style={authPromptStyles.root}>
+    <View style={authPromptStyles.container}>
+      <AuthPromptUI />
+    </View>
+  </View>
 );
 
 const renderMap: ContextualLaceInit<Render[], AvailableAddons> = () => {

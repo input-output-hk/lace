@@ -4,7 +4,8 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import type { Dapp } from '@lace-contract/dapp-connector';
+import type { Dapp, DappId } from '@lace-contract/dapp-connector';
+import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 
 type ProveTxRequest = {
   dapp: Dapp;
@@ -21,11 +22,17 @@ type SignDataRequest = {
 export type MidnightDappConnectorState = {
   proveTxRequest: ProveTxRequest | null;
   signDataRequest: SignDataRequest | null;
+  /**
+   * Maps dApp origin to the account ID selected for that dApp.
+   * Each dApp maintains its own account selection independently.
+   */
+  sessionAccountByOrigin: Record<string, AccountId>;
 };
 
 const initialState: MidnightDappConnectorState = {
   proveTxRequest: null,
   signDataRequest: null,
+  sessionAccountByOrigin: {},
 };
 
 const slice = createSlice({
@@ -44,12 +51,21 @@ const slice = createSlice({
     ) => {
       state.signDataRequest = payload;
     },
+    setSessionAccountForOrigin: (
+      state,
+      { payload }: PayloadAction<{ origin: string; accountId: AccountId }>,
+    ) => {
+      state.sessionAccountByOrigin[payload.origin] = payload.accountId;
+    },
   },
   selectors: {
     selectProveTxRequest: (state: Readonly<MidnightDappConnectorState>) =>
       state.proveTxRequest,
     selectSignDataRequest: (state: Readonly<MidnightDappConnectorState>) =>
       state.signDataRequest,
+    selectSessionAccountByOrigin: (
+      state: Readonly<MidnightDappConnectorState>,
+    ) => state.sessionAccountByOrigin,
   },
 });
 
@@ -61,6 +77,9 @@ const confirmDappTx = createAction('midnightDappConnector/confirmDappTx');
 const rejectDappTx = createAction('midnightDappConnector/rejectDappTx');
 const confirmSignData = createAction('midnightDappConnector/confirmSignData');
 const rejectSignData = createAction('midnightDappConnector/rejectSignData');
+const confirmConnect = createAction<{ account: AnyAccount; dappId: DappId }>(
+  'midnightDappConnector/confirmConnect',
+);
 
 export const midnightDappConnectorActions = {
   midnightDappConnector: {
@@ -69,6 +88,7 @@ export const midnightDappConnectorActions = {
     rejectDappTx,
     confirmSignData,
     rejectSignData,
+    confirmConnect,
   },
 };
 

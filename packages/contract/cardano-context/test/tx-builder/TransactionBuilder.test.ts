@@ -1,7 +1,19 @@
-import { Cardano } from '@cardano-sdk/core';
-import { describe, expect, it } from 'vitest';
+import { Cardano, Serialization } from '@cardano-sdk/core';
+import { HexBlob } from '@cardano-sdk/util';
+import { describe, expect, it, vi } from 'vitest';
 
-import { TransactionBuilder } from '../../src/tx-builder/TransactionBuilder';
+import {
+  InputSelectionError,
+  InputSelectionFailure,
+} from '../../src/input-selection/InputSelectionError';
+import { LargeFirstCoinSelector } from '../../src/input-selection/LargeFirstCoinSelector';
+import { RoundRobinRandomCoinSelector } from '../../src/input-selection/RoundRobinRandomCoinSelector';
+import {
+  InsufficientCollateralError,
+  TransactionBuilder,
+} from '../../src/tx-builder/TransactionBuilder';
+
+import type { TxEvaluator } from '@cardano-sdk/tx-construction';
 
 const txIn = (txId: string, index: number): Cardano.TxIn => ({
   txId: txId as Cardano.TransactionId,
@@ -38,7 +50,7 @@ const protocolParameters = {
 } as unknown as Cardano.ProtocolParameters;
 
 describe('TransactionBuilder', () => {
-  it('builds and balances a simple ADA transfer', () => {
+  it('builds and balances a simple ADA transfer', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =
@@ -58,7 +70,7 @@ describe('TransactionBuilder', () => {
       .setUnspentOutputs(availableUtxos)
       .transferValue(recipientAddr, { coins: 5_000_000n });
 
-    const tx = builder.build();
+    const tx = await builder.build();
 
     const core = tx.toCore();
     const body = core.body;
@@ -89,7 +101,7 @@ describe('TransactionBuilder', () => {
     expect(hasChange).toBe(true);
   });
 
-  it('supports preselected input + additional selection and still balances', () => {
+  it('supports preselected input + additional selection and still balances', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
     const changeAddr =
       'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
@@ -109,7 +121,7 @@ describe('TransactionBuilder', () => {
       .addInput(preSel)
       .transferValue(recipientAddr, { coins: 5_000_000n });
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -147,7 +159,7 @@ describe('TransactionBuilder', () => {
     expect(hasChange).toBe(true);
   });
 
-  it('sets memo and adds auxiliaryDataHash', () => {
+  it('sets memo and adds auxiliaryDataHash', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =
@@ -168,7 +180,7 @@ describe('TransactionBuilder', () => {
       .setMemo(memo)
       .transferValue(recipientAddr, { coins: 5_000_000n });
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -196,7 +208,7 @@ describe('TransactionBuilder', () => {
     expect(inputSum).toBe(outputSum + fee);
   });
 
-  it('balances with native assets (multi-asset output)', () => {
+  it('balances with native assets (multi-asset output)', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =
@@ -236,7 +248,7 @@ describe('TransactionBuilder', () => {
         assets: targetAssets,
       });
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -274,7 +286,7 @@ describe('TransactionBuilder', () => {
     expect(inputAda).toBe(outputAda + fee);
   });
 
-  it('balances with rewards withdrawal', () => {
+  it('balances with rewards withdrawal', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =
@@ -297,7 +309,7 @@ describe('TransactionBuilder', () => {
         coins: 3_000_000n,
       });
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -311,7 +323,7 @@ describe('TransactionBuilder', () => {
     expect(inputAda + withdrawalAmount).toBe(outputAda + fee);
   });
 
-  it('includes vote delegation certificate in built transaction', () => {
+  it('includes vote delegation certificate in built transaction', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
 
     const changeAddr =
@@ -339,7 +351,7 @@ describe('TransactionBuilder', () => {
       .setUnspentOutputs([adaOnly])
       .addVoteDelegationCertificate(stakeCredential, dRep);
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -384,7 +396,7 @@ describe('TransactionBuilder', () => {
       mkUtxo(42, 0, 15_000_000n, changeAddr),
     ];
 
-    const tx = new TransactionBuilder(networkMagic, protocolParameters)
+    const tx = await new TransactionBuilder(networkMagic, protocolParameters)
       .setChangeAddress(changeAddr)
       .setUnspentOutputs(availableUtxos)
       .addVoteRegistrationDelegationCertificate(dRep, stakeCredential, deposit)
@@ -423,7 +435,7 @@ describe('TransactionBuilder', () => {
       .addInput(adaOnly)
       .addRewardsWithdrawal(rewardAccount, withdrawalAmount);
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const core = tx.toCore();
     const body = core.body;
 
@@ -434,7 +446,7 @@ describe('TransactionBuilder', () => {
     expect(inputAda + withdrawalAmount).toBe(outputAda + fee);
   });
 
-  it('merges setMetadata entries with setMemo and overwrites same-label entries', () => {
+  it('merges setMetadata entries with setMemo and overwrites same-label entries', async () => {
     const networkMagic = Cardano.NetworkMagics.Preprod;
     const changeAddr =
       'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
@@ -455,7 +467,7 @@ describe('TransactionBuilder', () => {
       .setMemo(memo)
       .transferValue(recipientAddr, { coins: 5_000_000n });
 
-    const tx = builder.build();
+    const tx = await builder.build();
     const body = tx.toCore().body;
 
     expect(body.auxiliaryDataHash).toBeDefined();
@@ -467,5 +479,272 @@ describe('TransactionBuilder', () => {
       ]),
     });
     expect(body.auxiliaryDataHash).toBe(expectedHash);
+  });
+
+  it('builds identical transactions across runs with a fixed-seed RoundRobinRandomCoinSelector', async () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const recipientAddr =
+      'addr_test1xrphkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gt7r0vd4msrxnuwnccdxlhdjar77j6lg0wypcc9uar5d2shs4p04xh' as Cardano.PaymentAddress;
+
+    const buildOnce = async () => {
+      const tx = await new TransactionBuilder(networkMagic, protocolParameters)
+        .setChangeAddress(changeAddr)
+        .setUnspentOutputs([
+          mkUtxo(1, 0, 3_000_000n, changeAddr),
+          mkUtxo(2, 0, 4_500_000n, changeAddr),
+          mkUtxo(3, 1, 9_000_000n, changeAddr),
+        ])
+        .useCoinSelector(new RoundRobinRandomCoinSelector({ seed: 7n }))
+        .transferValue(recipientAddr, { coins: 5_000_000n })
+        .build();
+      return tx.toCbor();
+    };
+
+    expect(await buildOnce()).toEqual(await buildOnce());
+  });
+
+  it('annotates the error as a fallback failure when the default selectors cannot cover the target', async () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const recipientAddr =
+      'addr_test1xrphkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gt7r0vd4msrxnuwnccdxlhdjar77j6lg0wypcc9uar5d2shs4p04xh' as Cardano.PaymentAddress;
+
+    const builder = new TransactionBuilder(networkMagic, protocolParameters)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([mkUtxo(50, 0, 1_000_000n, changeAddr)])
+      .transferValue(recipientAddr, { coins: 5_000_000n });
+
+    const caught: unknown = await builder
+      .build()
+      .catch((error: unknown) => error);
+
+    expect(caught).toBeInstanceOf(InputSelectionError);
+    expect((caught as InputSelectionError).failure).toBe(
+      InputSelectionFailure.BalanceInsufficient,
+    );
+    expect((caught as Error).message).toMatch(/fallback coin selector/);
+  });
+
+  it('skips the fallback retry when Large-First is supplied as the primary selector', async () => {
+    const networkMagic = Cardano.NetworkMagics.Preprod;
+    const changeAddr =
+      'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+    const recipientAddr =
+      'addr_test1xrphkx6acpnf78fuvxn0mkew3l0fd058hzquvz7w36x4gt7r0vd4msrxnuwnccdxlhdjar77j6lg0wypcc9uar5d2shs4p04xh' as Cardano.PaymentAddress;
+
+    const selector = new LargeFirstCoinSelector();
+    const selectSpy = vi.spyOn(selector, 'select');
+
+    const builder = new TransactionBuilder(networkMagic, protocolParameters)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([mkUtxo(51, 0, 1_000_000n, changeAddr)])
+      .useCoinSelector(selector)
+      .transferValue(recipientAddr, { coins: 5_000_000n });
+
+    const caught: unknown = await builder
+      .build()
+      .catch((error: unknown) => error);
+
+    expect(caught).toBeInstanceOf(InputSelectionError);
+    expect((caught as Error).message).not.toMatch(/fallback/);
+    expect(selectSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('TransactionBuilder Plutus support', () => {
+  const changeAddr =
+    'addr_test1qpfhhfy2qgls50r9u4yh0l7z67xpg0a5rrhkmvzcuqrd0znuzcjqw982pcftgx53fu5527z2cj2tkx2h8ux2vxsg475q9gw0lz' as Cardano.PaymentAddress;
+  const otherKeyAddr =
+    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95' as Cardano.PaymentAddress;
+
+  const dummyScript = {
+    __type: Cardano.ScriptType.Plutus,
+    version: Cardano.PlutusLanguageVersion.V3,
+    bytes: 'deadbeef',
+  } as unknown as Cardano.Script;
+
+  const unitDatum: Cardano.PlutusData = Serialization.PlutusData.fromCbor(
+    HexBlob('d87980'),
+  ).toCore();
+
+  const costModels: Cardano.CostModels = new Map([
+    [Cardano.PlutusLanguageVersion.V3, Array.from({ length: 251 }, () => 0)],
+  ]);
+
+  const scriptInputUtxo: Cardano.Utxo = mkUtxo(0, 0, 20_000_000n, changeAddr);
+  const collateralUtxo: Cardano.Utxo = mkUtxo(200, 0, 10_000_000n, changeAddr);
+  const collateralUtxoOtherAddr: Cardano.Utxo = mkUtxo(
+    200,
+    0,
+    10_000_000n,
+    otherKeyAddr,
+  );
+
+  const makeEvaluator = (budget: Cardano.ExUnits): TxEvaluator => ({
+    evaluate: async tx =>
+      (tx.witness.redeemers ?? []).map(r => ({
+        purpose: r.purpose,
+        index: r.index,
+        budget,
+      })),
+  });
+
+  const makeResolver = (...utxos: Cardano.Utxo[]): Cardano.InputResolver => ({
+    resolveInput: async input => {
+      const u = utxos.find(
+        u => u[0].txId === input.txId && u[0].index === input.index,
+      );
+      return u?.[1] ?? null;
+    },
+  });
+
+  const buildPlutusScriptTx = async (
+    collateral: Cardano.Utxo,
+    returnAddr: Cardano.PaymentAddress,
+    budget: Cardano.ExUnits = { memory: 100, steps: 100_000 },
+  ) =>
+    new TransactionBuilder(Cardano.NetworkMagics.Preprod, protocolParameters)
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([])
+      .addInput(scriptInputUtxo, { redeemer: unitDatum })
+      .attachScript(dummyScript)
+      .setCollateralUtxos([collateral])
+      .setCollateralChangeAddress(returnAddr)
+      .setPlutusContext({
+        costModels,
+        txEvaluator: makeEvaluator(budget),
+        inputResolver: makeResolver(scriptInputUtxo),
+      })
+      .build();
+
+  it('sets totalCollateral and collateralReturn proportional to fee', async () => {
+    const tx = await buildPlutusScriptTx(collateralUtxo, changeAddr);
+    const body = tx.toCore().body;
+    const fee = body.fee;
+    const expectedCollateral = (fee * 150n + 99n) / 100n;
+
+    expect(body.collaterals).toHaveLength(1);
+    expect(body.collaterals![0].txId).toBe(collateralUtxo[0].txId);
+    expect(body.totalCollateral).toBe(expectedCollateral);
+    expect(body.collateralReturn).toBeDefined();
+    expect(body.collateralReturn!.value.coins).toBe(
+      collateralUtxo[1].value.coins - expectedCollateral,
+    );
+  });
+
+  it('throws InsufficientCollateralError when the pool cannot fund collateral', async () => {
+    const tinyCollateral = mkUtxo(201, 0, 100_000n, changeAddr);
+    await expect(
+      buildPlutusScriptTx(tinyCollateral, changeAddr),
+    ).rejects.toThrow(InsufficientCollateralError);
+  });
+
+  it('combines multiple collateral UTxOs largest-first to cover the required amount', async () => {
+    const part1 = mkUtxo(202, 0, 3_000_000n, changeAddr);
+    const part2 = mkUtxo(203, 0, 3_000_000n, changeAddr);
+
+    const tx = await new TransactionBuilder(
+      Cardano.NetworkMagics.Preprod,
+      protocolParameters,
+    )
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([])
+      .addInput(scriptInputUtxo, { redeemer: unitDatum })
+      .attachScript(dummyScript)
+      .setCollateralUtxos([part1, part2])
+      .setCollateralChangeAddress(changeAddr)
+      .setPlutusContext({
+        costModels,
+        txEvaluator: makeEvaluator({ memory: 100, steps: 100_000 }),
+        inputResolver: makeResolver(scriptInputUtxo),
+      })
+      .build();
+    const body = tx.toCore().body;
+    const expectedCollateral = (body.fee * 150n + 99n) / 100n;
+
+    expect(body.collaterals).toHaveLength(2);
+    expect(body.totalCollateral).toBe(expectedCollateral);
+    expect(body.collateralReturn!.value.coins).toBe(
+      6_000_000n - expectedCollateral,
+    );
+  });
+
+  it('sizes collateral selection to the fee-derived requirement, not the fallback', async () => {
+    // Fees high enough that ceil(fee * collateralPercentage / 100) exceeds the
+    // 5 ADA fallback, so a selection seeded at the fallback would reserve too
+    // few of the fragmented 4 ADA UTxOs and fail on the larger requirement.
+    const highFeeParams = {
+      ...protocolParameters,
+      minFeeConstant: 5_000_000,
+    } as unknown as Cardano.ProtocolParameters;
+    const bigScriptInput = mkUtxo(300, 0, 40_000_000n, changeAddr);
+    const collateralParts = [
+      mkUtxo(301, 0, 4_000_000n, changeAddr),
+      mkUtxo(302, 0, 4_000_000n, changeAddr),
+      mkUtxo(303, 0, 4_000_000n, changeAddr),
+    ];
+
+    const tx = await new TransactionBuilder(
+      Cardano.NetworkMagics.Preprod,
+      highFeeParams,
+    )
+      .setChangeAddress(changeAddr)
+      .setUnspentOutputs([])
+      .addInput(bigScriptInput, { redeemer: unitDatum })
+      .attachScript(dummyScript)
+      .setCollateralUtxos(collateralParts)
+      .setCollateralChangeAddress(changeAddr)
+      .setPlutusContext({
+        costModels,
+        txEvaluator: makeEvaluator({ memory: 100, steps: 100_000 }),
+        inputResolver: makeResolver(bigScriptInput),
+      })
+      .build();
+
+    const body = tx.toCore().body;
+    const requiredCollateral = (body.fee * 150n + 99n) / 100n;
+
+    expect(requiredCollateral).toBeGreaterThan(5_000_000n);
+    expect(body.collaterals).toHaveLength(3);
+    expect(body.totalCollateral).toBe(requiredCollateral);
+    expect(body.collateralReturn!.value.coins).toBe(
+      12_000_000n - requiredCollateral,
+    );
+  });
+
+  it('corrects fee downward when evaluated ex-units are less than seed', async () => {
+    const seedBudget: Cardano.ExUnits = {
+      memory: 14_000_000,
+      steps: 10_000_000_000,
+    };
+    const smallBudget: Cardano.ExUnits = { memory: 100, steps: 100_000 };
+
+    const txSeed = await buildPlutusScriptTx(
+      collateralUtxo,
+      changeAddr,
+      seedBudget,
+    );
+    const txSmall = await buildPlutusScriptTx(
+      collateralUtxo,
+      changeAddr,
+      smallBudget,
+    );
+
+    expect(txSmall.toCore().body.fee).toBeLessThan(txSeed.toCore().body.fee);
+  });
+
+  it('accounts for collateral signer when collateral is at a distinct address', async () => {
+    const txSameAddr = await buildPlutusScriptTx(collateralUtxo, changeAddr);
+    const txOtherAddr = await buildPlutusScriptTx(
+      collateralUtxoOtherAddr,
+      changeAddr,
+    );
+
+    expect(txOtherAddr.toCore().body.fee).toBeGreaterThan(
+      txSameAddr.toCore().body.fee,
+    );
   });
 });

@@ -1,9 +1,14 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Err, Ok, type Result } from '@lace-sdk/util';
+import { ActivityType } from '@lace-contract/activities';
+import { Err, Ok, type Result } from '@lace-lib/util';
 import isEmpty from 'lodash/isEmpty';
 import { catchError, from, map, of, switchMap } from 'rxjs';
 
-import { getTransactionData } from './get-transaction-summary-data';
+import {
+  computeNetFlows,
+  type TokenTransferValue,
+} from '../../compute-net-flows';
+
 import { inputOutputTransformer } from './input-output-transform';
 import {
   createTransactionInspector,
@@ -19,6 +24,7 @@ import type {
   TxSummary,
   TxMetadata,
 } from '../../types';
+import type { TokenTransferValue as SdkTokenTransferValue } from '@cardano-sdk/core';
 import type {
   MetadataInspection,
   TransactionSummaryInspection,
@@ -46,7 +52,11 @@ export type BuildCardanoTransactionParams = {
   txDetails: Pick<ExtendedTxDetails, 'auxiliaryData' | 'body'> & {
     body: Pick<
       Cardano.HydratedTxBody,
-      'certificates' | 'outputs' | 'proposalProcedures' | 'votingProcedures'
+      | 'certificates'
+      | 'donation'
+      | 'outputs'
+      | 'proposalProcedures'
+      | 'votingProcedures'
     >;
   };
   summary: Pick<
@@ -56,6 +66,10 @@ export type BuildCardanoTransactionParams = {
   metadata: MetadataInspection;
   assetsInfo: Map<Cardano.AssetId, TokenMetadata<CardanoTokenMetadata>>;
   accountAddresses: Cardano.PaymentAddress[];
+  tokenTransfer: {
+    fromAddress: Map<Cardano.PaymentAddress, SdkTokenTransferValue>;
+    toAddress: Map<Cardano.PaymentAddress, SdkTokenTransferValue>;
+  };
 };
 
 export const cardanoMetadatumToObject = (
@@ -104,17 +118,64 @@ const hasRegOrDeregCertificate = (
     Cardano.isCertType(cert, Cardano.RegAndDeregCertificateTypes),
   );
 
-/**
- * Builds the Cardano-specific transaction data
- */
+const MAX_SUMMARY_ADDRESSES = 5;
+
+const buildTxSummaryFromNetFlows = (
+  netFlows: {
+    from: Map<Cardano.PaymentAddress, TokenTransferValue>;
+    to: Map<Cardano.PaymentAddress, TokenTransferValue>;
+  },
+  accountAddresses: Cardano.PaymentAddress[],
+  isIncoming: boolean,
+): TxSummary[] | undefined => {
+  const ownSet = new Set(accountAddresses);
+  if (isIncoming) {
+    const senderAddrs = [...netFlows.from.keys()]
+      .filter(addr => !ownSet.has(addr))
+      .slice(0, MAX_SUMMARY_ADDRESSES);
+    if (senderAddrs.length > 0) {
+      const walletEntry = [...netFlows.to.entries()].find(([addr]) =>
+        ownSet.has(addr),
+      );
+      // Returns undefined rather than emit a TxSummary with the wrong amount when inspectors disagree on sign.
+      if (!walletEntry) return undefined;
+      return [
+        {
+          addr: senderAddrs,
+          amount: walletEntry[1].coins,
+          type: ActivityType.Receive,
+        },
+      ];
+    }
+  }
+  const foreignRecipients = [...netFlows.to.entries()].filter(
+    ([addr]) => !ownSet.has(addr),
+  );
+  if (foreignRecipients.length === 0) return undefined;
+  return foreignRecipients
+    .slice(0, MAX_SUMMARY_ADDRESSES)
+    .map(([addr, value]) => ({
+      addr: [addr],
+      amount: value.coins,
+      type: ActivityType.Send,
+    }));
+};
+
 const buildCardanoTransaction = ({
   txDetails: {
     auxiliaryData,
-    body: { outputs, votingProcedures, proposalProcedures, certificates },
+    body: {
+      outputs,
+      votingProcedures,
+      proposalProcedures,
+      certificates,
+      donation,
+    },
   },
   summary: { coins, resolvedInputs, collateral, deposit, returnedDeposit },
   assetsInfo,
   accountAddresses,
+  tokenTransfer,
 }: BuildCardanoTransactionParams): CardanoTransaction => {
   const addrInputs = resolvedInputs.map(input =>
     inputOutputTransformer(input, assetsInfo),
@@ -125,21 +186,22 @@ const buildCardanoTransaction = ({
 
   let txSummary: TxSummary[] | undefined;
   if (!hasRegOrDeregCertificate(certificates)) {
-    // A transaction with registration or deregistration certificates is a self transaction,
-    // meaning that all inputs and outputs belong to the wallet.
-    // Transaction summary is needed only if this is an incoming or outgoing transaction, to
-    // display the outputs coming into the wallet or inputs going out of the wallet respectively.
-    txSummary = getTransactionData({
-      addrOutputs,
-      addrInputs,
+    const netFlows = computeNetFlows(
+      tokenTransfer.fromAddress,
+      tokenTransfer.toAddress,
       accountAddresses,
-      isIncomingTransaction: coins > 0,
-    });
+    );
+    txSummary = buildTxSummaryFromNetFlows(
+      netFlows,
+      accountAddresses,
+      coins > 0n,
+    );
   }
 
   return {
     deposit,
     returnedDeposit,
+    donation,
     addrInputs,
     addrOutputs,
     metadata:
@@ -155,32 +217,6 @@ const buildCardanoTransaction = ({
   };
 };
 
-/**
- * Maps a transaction to detailed activity information for Cardano transactions.
- *
- * This function takes a basic activity and enriches it with detailed Cardano-specific
- * transaction information including inputs, outputs, metadata, certificates, and other
- * blockchain-specific details.
- *
- * @param {Object} params - Parameters required to map transaction to activity details.
- * @param {Activity} params.activity - The base activity to enrich with transaction details.
- * @param {ExtendedTxDetails} params.txDetails - Complete transaction details including body, metadata, and timing.
- * @param {Cardano.PaymentAddress[]} params.accountAddresses - Account addresses to track for input/output analysis.
- * @param {Cardano.RewardAccount} params.rewardAccount - The reward account associated with the activity.
- * @param {RequiredProtocolParameters} params.protocolParameters - Current protocol parameters for transaction validation.
- * @param {Cardano.InputResolver} params.inputResolver - Function to resolve transaction inputs with detailed information.
- * @param {Function} params.getTokenMetadata - Function to fetch token metadata for assets in the transaction.
- * @param {Logger} params.logger - Logger instance for error handling and debugging.
- * @returns {Observable<Result<ActivityDetail<CardanoTransaction>, Error>>} An observable that emits the enriched activity details.
- *
- * The function performs the following steps:
- * 1. Inspects the transaction using a transaction inspector to extract summary and metadata
- * 2. Fetches asset metadata for all tokens involved in the transaction
- * 3. Builds a detailed CardanoTransaction object with inputs, outputs, certificates, and metadata
- * 4. Returns an ActivityDetail object containing the original activity plus fee and blockchain-specific details
- *
- * Errors encountered during processing are captured as `Err` in the result.
- */
 export const mapTransactionToActivityDetails = ({
   activity,
   txDetails,
@@ -202,12 +238,12 @@ export const mapTransactionToActivityDetails = ({
   });
 
   return from(txSummaryInspector(txDetails)).pipe(
-    switchMap(({ summary, metadata }) =>
+    switchMap(({ summary, metadata, tokenTransfer }) =>
       fetchAssetsMetadata(summary, getTokenMetadata).pipe(
-        map(assetsInfo => ({ summary, metadata, assetsInfo })),
+        map(assetsInfo => ({ summary, metadata, tokenTransfer, assetsInfo })),
       ),
     ),
-    map(({ summary, metadata, assetsInfo }) => ({
+    map(({ summary, metadata, tokenTransfer, assetsInfo }) => ({
       fee: summary.fee.toString(),
       cardano: buildCardanoTransaction({
         txDetails,
@@ -216,13 +252,14 @@ export const mapTransactionToActivityDetails = ({
         metadata,
         assetsInfo,
         accountAddresses,
+        tokenTransfer,
       }),
     })),
     map(({ fee, cardano }) => {
       return Ok<ActivityDetail<CardanoTransaction>>({
         ...activity,
         fee,
-        address: 'TODO',
+        address: cardano.txSummary?.[0]?.addr[0] ?? '',
         blockchainSpecific: cardano,
       });
     }),

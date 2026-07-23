@@ -3,9 +3,9 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { useCopyToClipboard } from '@lace-lib/ui-toolkit';
+import { ByteArray } from '@lace-lib/util';
 import { createStateMachine } from '@lace-lib/util-store';
-import { ByteArray } from '@lace-sdk/util';
-import { useCallback, useEffect, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import {
   useDispatchLaceAction,
@@ -142,14 +142,20 @@ export const useRecoveryPhraseVerification = ({
 
   // Clipboard helpers are only exposed in development environments, but the
   // hook itself must be called unconditionally to comply with the Rules of Hooks.
-  const { copyToClipboard, pasteFromClipboard } = useCopyToClipboard({
-    onPasteSuccess: (value: string) => {
-      dispatch(events.inputChanged({ value }));
-    },
-    onError: () => {
-      // TODO: Show error toast
-    },
-  });
+  const copyToClipboardOptions = useMemo(
+    () => ({
+      onPasteSuccess: (value: string) => {
+        dispatch(events.inputChanged({ value }));
+      },
+      onError: () => {
+        // TODO: Show error toast
+      },
+    }),
+    [dispatch],
+  );
+  const { copyToClipboard, pasteFromClipboard } = useCopyToClipboard(
+    copyToClipboardOptions,
+  );
 
   const handlePaste = useCallback(() => {
     if (!isDevelopmentEnvironment) return;
@@ -202,9 +208,39 @@ export const useRecoveryPhraseVerification = ({
   const mnemonicWords =
     mnemonicState.status === 'Ready' ? mnemonicState.mnemonicWords : null;
 
-  return {
-    state,
-    display: {
+  const handleToggleBlur = useCallback(() => {
+    dispatch(events.toggleBlur());
+  }, [dispatch]);
+  const handleContinue = useCallback(() => {
+    trackEvent('recovery phrase | display | continue | press', {
+      flow: 'onboarding',
+    });
+    dispatch(events.proceed());
+  }, [dispatch, trackEvent]);
+  const handleCopy = useCallback(() => {
+    if (!isDevelopmentEnvironment) return;
+    if (state.status !== 'Display' || mnemonicState.status !== 'Ready') {
+      return;
+    }
+    trackEvent('recovery phrase | display | copied | press', {
+      flow: 'onboarding',
+    });
+    const recoveryPhrase = mnemonicToString(mnemonicState.mnemonicWords);
+    copyToClipboard(recoveryPhrase);
+  }, [state, mnemonicState, copyToClipboard, trackEvent]);
+  const handleInputChange = useCallback(
+    (value: string) => {
+      dispatch(events.inputChanged({ value }));
+    },
+    [dispatch],
+  );
+  const handleBack = useCallback(() => {
+    dispatch(events.back());
+  }, [dispatch]);
+
+  // Stable refs: the consumer feeds display/verify into navigation.setOptions.
+  const display = useMemo(
+    () => ({
       copies: {
         title: t('v2.recovery-phrase.display.title'),
         description: t('v2.recovery-phrase.display.description'),
@@ -215,28 +251,22 @@ export const useRecoveryPhraseVerification = ({
       },
       mnemonicWords,
       handleSheetClose: closeSheet,
-      handleToggleBlur: useCallback(() => {
-        dispatch(events.toggleBlur());
-      }, [dispatch]),
-      handleContinue: useCallback(() => {
-        trackEvent('recovery phrase | display | continue | press', {
-          flow: 'onboarding',
-        });
-        dispatch(events.proceed());
-      }, [dispatch, trackEvent]),
-      handleCopy: useCallback(() => {
-        if (!isDevelopmentEnvironment) return;
-        if (state.status !== 'Display' || mnemonicState.status !== 'Ready') {
-          return;
-        }
-        trackEvent('recovery phrase | display | copied | press', {
-          flow: 'onboarding',
-        });
-        const recoveryPhrase = mnemonicToString(mnemonicState.mnemonicWords);
-        copyToClipboard(recoveryPhrase);
-      }, [state, mnemonicState, copyToClipboard, trackEvent]),
-    },
-    verify: {
+      handleToggleBlur,
+      handleContinue,
+      handleCopy,
+    }),
+    [
+      t,
+      mnemonicWords,
+      closeSheet,
+      handleToggleBlur,
+      handleContinue,
+      handleCopy,
+    ],
+  );
+
+  const verify = useMemo(
+    () => ({
       copies: {
         title: t('v2.recovery-phrase.verification.title'),
         description: t('v2.recovery-phrase.verification.description'),
@@ -247,15 +277,22 @@ export const useRecoveryPhraseVerification = ({
       handlePaste,
       handleFinish: displayHandleFinish,
       handleSheetClose: closeSheet,
-      handleInputChange: useCallback(
-        (value: string) => {
-          dispatch(events.inputChanged({ value }));
-        },
-        [dispatch],
-      ),
-      handleBack: useCallback(() => {
-        dispatch(events.back());
-      }, [dispatch]),
-    },
+      handleInputChange,
+      handleBack,
+    }),
+    [
+      t,
+      handlePaste,
+      displayHandleFinish,
+      closeSheet,
+      handleInputChange,
+      handleBack,
+    ],
+  );
+
+  return {
+    state,
+    display,
+    verify,
   };
 };

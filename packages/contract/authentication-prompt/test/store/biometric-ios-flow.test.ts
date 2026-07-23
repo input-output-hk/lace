@@ -2,7 +2,7 @@
  * Tests for iOS-specific biometric authentication flow.
  * iOS directly retrieves from Keychain (no pre-auth needed).
  */
-import { of } from 'rxjs';
+import { of, toArray } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import {
@@ -45,9 +45,9 @@ describe('makeAuthenticationBiometricVerifying - iOS flow', () => {
   const runIOSTest = async (
     mockSecureStore: ReturnType<typeof createMockSecureStore>,
   ) => {
-    const { sideEffect } = createBiometricSideEffect(mockSecureStore, 'ios');
     const { firstValueFrom } = await import('rxjs');
 
+    const { sideEffect } = createBiometricSideEffect(mockSecureStore, 'ios');
     const selectState$ = of({
       config,
       status: 'VerifyingBiometric',
@@ -64,7 +64,7 @@ describe('makeAuthenticationBiometricVerifying - iOS flow', () => {
           t: mockTranslation,
           localAuthentication: mockLocalAuth,
         } as unknown as Parameters<typeof sideEffect>[2],
-      ),
+      ).pipe(toArray()),
     );
   };
 
@@ -78,9 +78,9 @@ describe('makeAuthenticationBiometricVerifying - iOS flow', () => {
     expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
     // Should have directly retrieved from secure store
     expect(mockSecureStore.getItem).toHaveBeenCalled();
-    expect(result).toEqual(
+    expect(result).toEqual([
       actions.authenticationPrompt.verifiedBiometric({ success: true }),
-    );
+    ]);
   });
 
   it('user cancel allows retry', async () => {
@@ -90,7 +90,7 @@ describe('makeAuthenticationBiometricVerifying - iOS flow', () => {
     const result = await runIOSTest(mockSecureStore);
 
     expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-    expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+    expect(result).toEqual([actions.authenticationPrompt.biometricCanceled()]);
   });
 
   it('device auth removed falls back to password prompt', async () => {
@@ -101,6 +101,11 @@ describe('makeAuthenticationBiometricVerifying - iOS flow', () => {
     });
     const result = await runIOSTest(mockSecureStore);
 
-    expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+    expect(result).toEqual([
+      actions.authenticationPrompt.setDeviceAuthReady({
+        deviceAuthReady: false,
+      }),
+      actions.authenticationPrompt.biometricCanceled(),
+    ]);
   });
 });

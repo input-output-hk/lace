@@ -54,6 +54,7 @@ export const ProveTransactionV2 = ({
 
   return (
     <DappConnectorLayoutV2
+      fillViewport
       primaryButton={{
         label: t('dapp-connector.sign-transaction.sign'),
         action: confirmTransaction,

@@ -62,13 +62,17 @@ export const CardanoDappConnect = (
     setSelectedAccount(account);
   }, []);
 
-  const dappPayload = request
-    ? {
-        dappDomain: extractDappDomain(request.dapp.origin),
-        dappName: request.dapp.name,
-        blockchain: 'Cardano',
-      }
-    : undefined;
+  const dappPayload = useMemo(
+    () =>
+      request
+        ? {
+            dappDomain: extractDappDomain(request.dapp.origin),
+            dappName: request.dapp.name,
+            blockchain: 'Cardano',
+          }
+        : undefined,
+    [request],
+  );
 
   const handleAuthorize = useCallback(() => {
     if (!selectedAccount || !dappPayload) return;
@@ -86,6 +90,16 @@ export const CardanoDappConnect = (
     trackEvent('dapp connector | authorize dapp | cancel | press', dappPayload);
   }, [rejectConnect, trackEvent, dappPayload]);
 
+  // Stable close handler for the header — reads the latest `handleCancel` via a ref
+  // (mirrors `rejectConnectRef` below). Staying referentially stable lets the header
+  // effect omit every selection-driven dep, so the close X never re-publishes as
+  // selection changes — even if `handleCancel` later gains a selection dependency.
+  const handleCancelRef = useRef(handleCancel);
+  handleCancelRef.current = handleCancel;
+  const handleHeaderClose = useCallback(() => {
+    handleCancelRef.current();
+  }, []);
+
   // Reject when the sheet is dismissed without an explicit response (X
   // button, swipe down, click outside, navigation away). Hold the latest
   // dispatcher in a ref so this unmount-only effect calls a fresh reference
@@ -101,22 +115,27 @@ export const CardanoDappConnect = (
     };
   }, []);
 
+  // Publish the close X in its own effect: the footer below re-publishes as selection
+  // resolves, and a shared effect would re-create the header each time — remounting
+  // `side-sheet-close-button` and dropping a tap mid-swap. `setOptions` merges, so the
+  // header and footer effects coexist. See ADR 31.
   useEffect(() => {
-    if (!request) {
-      props.navigation.setOptions({
-        header: undefined,
-        footer: undefined,
-      });
-      return;
-    }
     props.navigation.setOptions({
-      header: (
+      header: request ? (
         <Sheet.Header
           title={t('dapp-connector.cardano.authorize.title')}
-          handleClose={handleCancel}
+          handleClose={handleHeaderClose}
         />
-      ),
-      footer: (
+      ) : undefined,
+    });
+  }, [props.navigation, request, t, handleHeaderClose]);
+
+  // Footer re-publishes as selection enables the authorize button (`disabled`/`onPress`
+  // depend on `selectedAccount`). This `setOptions({ footer })` merges over the header
+  // effect's output, so the close X above is untouched.
+  useEffect(() => {
+    props.navigation.setOptions({
+      footer: request ? (
         <Sheet.Footer
           primaryButton={{
             disabled: !selectedAccount,
@@ -130,15 +149,16 @@ export const CardanoDappConnect = (
           }}
           showDivider={true}
         />
-      ),
+      ) : undefined,
     });
   }, [
     props.navigation,
+    request,
     selectedAccount,
     handleAuthorize,
     handleCancel,
-    request,
     t,
+    theme.brand.white,
   ]);
 
   if (!request) {

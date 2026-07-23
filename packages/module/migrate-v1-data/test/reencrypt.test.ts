@@ -1,6 +1,8 @@
-import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
-import { describe, expect, it } from 'vitest';
+import { emip3encrypt } from '@cardano-sdk/key-management';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
+import { sha256 } from '@noble/hashes/sha2';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   reEncryptWalletSecrets,
@@ -9,6 +11,12 @@ import {
 } from '../src/store/reencrypt';
 
 import type { InMemoryWallet } from '@lace-contract/wallet-repo';
+
+vi.mock('@noble/hashes/argon2', () => ({
+  argon2idAsync: vi.fn(async (password: Uint8Array, salt: Uint8Array) =>
+    sha256(Uint8Array.from([...password, ...salt])),
+  ),
+}));
 
 const toPassword = (text: string) => ByteArray.fromUTF8(text);
 
@@ -111,7 +119,7 @@ describe('tryDecrypt', () => {
     const isDecrypted = await tryDecrypt(encrypted, password);
     expect(isDecrypted).toBe(true);
 
-    const decrypted = await emip3decrypt(
+    const decrypted = await SecretBox.open(
       ByteArray.fromHex(encrypted),
       password,
     );
@@ -170,7 +178,7 @@ describe('reEncryptWalletSecrets', () => {
         newPassword,
       );
 
-      const decryptedPhrase = await emip3decrypt(
+      const decryptedPhrase = await SecretBox.open(
         ByteArray.fromHex(result.encryptedRecoveryPhrase!),
         newPassword,
       );
@@ -181,7 +189,7 @@ describe('reEncryptWalletSecrets', () => {
       const chainData = result.blockchainSpecific!.Cardano as {
         encryptedRootPrivateKey: HexBytes;
       };
-      const decryptedKey = await emip3decrypt(
+      const decryptedKey = await SecretBox.open(
         ByteArray.fromHex(chainData.encryptedRootPrivateKey),
         newPassword,
       );
@@ -211,7 +219,7 @@ describe('reEncryptWalletSecrets', () => {
             { encryptedRootPrivateKey: HexBytes }
           >
         )[chain];
-        const decryptedKey = await emip3decrypt(
+        const decryptedKey = await SecretBox.open(
           ByteArray.fromHex(chainData.encryptedRootPrivateKey),
           newPassword,
         );
@@ -232,7 +240,7 @@ describe('reEncryptWalletSecrets', () => {
         newPassword,
       );
 
-      const decryptedPhrase = await emip3decrypt(
+      const decryptedPhrase = await SecretBox.open(
         ByteArray.fromHex(result.encryptedRecoveryPhrase!),
         newPassword,
       );
@@ -258,7 +266,7 @@ describe('reEncryptWalletSecrets', () => {
       const midnightData = result.blockchainSpecific!.Midnight as {
         encryptedSeed: HexBytes;
       };
-      const decryptedSeed = await emip3decrypt(
+      const decryptedSeed = await SecretBox.open(
         ByteArray.fromHex(midnightData.encryptedSeed),
         newPassword,
       );
@@ -286,7 +294,7 @@ describe('reEncryptWalletSecrets', () => {
         dustKey: { encryptedKey: HexBytes };
       };
 
-      const decryptedNight = await emip3decrypt(
+      const decryptedNight = await SecretBox.open(
         ByteArray.fromHex(spec.nightExternalKey.encryptedKey),
         newPassword,
       );
@@ -294,13 +302,13 @@ describe('reEncryptWalletSecrets', () => {
         'night-external-key',
       );
 
-      const decryptedZswap = await emip3decrypt(
+      const decryptedZswap = await SecretBox.open(
         ByteArray.fromHex(spec.zswapKey.encryptedKey),
         newPassword,
       );
       expect(ByteArray.toUTF8(ByteArray(decryptedZswap))).toBe('zswap-key');
 
-      const decryptedDust = await emip3decrypt(
+      const decryptedDust = await SecretBox.open(
         ByteArray.fromHex(spec.dustKey.encryptedKey),
         newPassword,
       );
@@ -389,7 +397,7 @@ describe('reEncryptWalletSecrets', () => {
       );
 
       // Result valid
-      const decryptedPhrase = await emip3decrypt(
+      const decryptedPhrase = await SecretBox.open(
         ByteArray.fromHex(result.encryptedRecoveryPhrase!),
         newPassword,
       );
@@ -398,7 +406,7 @@ describe('reEncryptWalletSecrets', () => {
       );
 
       // Original unchanged
-      const originalDecryptedPhrase = await emip3decrypt(
+      const originalDecryptedPhrase = await SecretBox.open(
         ByteArray.fromHex(wallet.encryptedRecoveryPhrase!),
         oldPassword,
       );
@@ -432,7 +440,7 @@ describe('reEncryptWalletSecrets', () => {
         reEncryptWalletSecrets(wallet, oldPassword, newPassword),
       ).rejects.toThrow();
 
-      const decryptedPhrase = await emip3decrypt(
+      const decryptedPhrase = await SecretBox.open(
         ByteArray.fromHex(wallet.encryptedRecoveryPhrase!),
         oldPassword,
       );
@@ -468,7 +476,7 @@ describe('reEncryptWalletSecrets', () => {
       const chainData = result.blockchainSpecific!.Cardano as {
         encryptedRootPrivateKey: HexBytes;
       };
-      const decryptedKey = await emip3decrypt(
+      const decryptedKey = await SecretBox.open(
         ByteArray.fromHex(chainData.encryptedRootPrivateKey),
         newPassword,
       );

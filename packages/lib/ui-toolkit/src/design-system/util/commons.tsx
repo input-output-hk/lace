@@ -2,8 +2,8 @@ import React from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 
 import { spacing, useTheme, type Theme } from '../../design-tokens';
-import { Brand } from '../atoms';
-import { TabBarMetrics } from '../organisms';
+import { Brand } from '../atoms/brand/brand';
+import { TabBarMetrics } from '../organisms/tabBar/tabBarMetrics';
 
 export const TIMEOUT_DURATION = 1500;
 

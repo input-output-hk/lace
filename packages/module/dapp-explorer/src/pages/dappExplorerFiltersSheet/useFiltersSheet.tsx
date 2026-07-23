@@ -1,6 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls } from '@lace-lib/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   useDispatchLaceAction,
@@ -40,20 +40,20 @@ export const useFiltersSheet = () => {
     setLocalCategory(dappSearchParams?.category);
   }, [dappSearchParams?.chain, dappSearchParams?.category]);
 
-  const handleConfirm = () => {
+  const handleConfirm = useCallback(() => {
     setSearchParams({
       chain: localChain,
       category: localCategory,
     });
     NavigationControls.closeSheet();
-  };
+  }, [setSearchParams, localChain, localCategory]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     resetSearchParams();
     // Reset local state to match reset
     setLocalChain(undefined);
     setLocalCategory('show all');
-  };
+  }, [resetSearchParams]);
 
   const dropdowns = useMemo<FilterSheetProps['dropdowns']>(() => {
     const blockchains = activeBlockchains ?? [];
@@ -86,13 +86,16 @@ export const useFiltersSheet = () => {
     ];
   }, [activeBlockchains, dappCategories, localChain, localCategory, t]);
 
-  return {
-    title: t('v2.generic.sheet.header.filters'),
-    onConfirm: handleConfirm,
-    onCancel: handleCancel,
-    cancelButtonLabel: t('v2.generic.btn.clear'),
-    confirmButtonLabel: t('v2.generic.btn.apply'),
-    dropdowns,
-    testID: testID,
-  };
+  return useMemo(
+    () => ({
+      title: t('v2.generic.sheet.header.filters'),
+      onConfirm: handleConfirm,
+      onCancel: handleCancel,
+      cancelButtonLabel: t('v2.generic.btn.clear'),
+      confirmButtonLabel: t('v2.generic.btn.apply'),
+      dropdowns,
+      testID: testID,
+    }),
+    [t, handleConfirm, handleCancel, dropdowns],
+  );
 };

@@ -25,24 +25,17 @@ import type {
   MultiSigWalletAccount,
 } from '@lace-contract/wallet-repo';
 
-const deriveAddressMock = vi.fn();
+const { deriveAddressMock } = vi.hoisted(() => ({
+  deriveAddressMock: vi.fn(),
+}));
 
-vi.mock('@cardano-sdk/key-management', async () => {
-  const actual = await vi.importActual('@cardano-sdk/key-management');
-  return {
-    ...actual,
-    Bip32Account: vi.fn().mockImplementation(() => ({
-      deriveAddress: deriveAddressMock,
-    })),
-  };
-});
-
-vi.mock('@cardano-sdk/crypto', async () => {
-  const actual = await vi.importActual('@cardano-sdk/crypto');
-  return {
-    ...actual,
-    SodiumBip32Ed25519: { create: vi.fn().mockResolvedValue({}) },
-  };
+vi.mock('@lace-lib/core', async () => {
+  const actual = await vi.importActual('@lace-lib/core');
+  const Bip32Account = Object.assign(
+    vi.fn().mockImplementation(() => ({ deriveAddress: deriveAddressMock })),
+    { createDefaultDependencies: vi.fn().mockResolvedValue({}) },
+  );
+  return { ...actual, Bip32Account };
 });
 
 const chainId: Cardano.ChainId = {

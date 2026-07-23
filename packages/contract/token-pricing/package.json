@@ -12,8 +12,8 @@
     "@lace-contract/sync": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/wallet-active-state": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

@@ -1,6 +1,6 @@
 import type { BitcoinProviderContext } from './types';
 import type { ProviderError } from '@cardano-sdk/core';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 /**
@@ -81,8 +81,14 @@ export type BitcoinInscriptionRef = {
  *
  * @property {string} txId - The unique identifier (transaction hash) of the transaction that created this output.
  * @property {number} index - The output index within the transaction.
- * @property {bigint} satoshis - The value of this output in satoshis.
- * @property {string} address - The common associated with this UTxO. This is the recipient of the funds in this output.
+ * @property {number} satoshis - The value of this output in satoshis.
+ *   Represented as `number`, not `bigint`: every Bitcoin amount — and any
+ *   aggregate of them, which is bounded by the 2,100,000,000,000,000-satoshi
+ *   total supply — stays well under Number.MAX_SAFE_INTEGER (~9.007e15), so it
+ *   is exact; and bitcoinjs-lib v6 PSBT output values are `number` at the
+ *   signing boundary regardless. (NWL Mobile audit M-306 reviewed and accepted
+ *   on these grounds — no reachable precision loss.)
+ * @property {string} address - The address associated with this UTxO. This is the recipient of the funds in this output.
  */
 export type BitcoinUTxO = {
   readonly txId: string;
@@ -114,7 +120,8 @@ export type BitcoinInputEntry = {
  * Represents a single output of a transaction.
  *
  * @property {string} address - The address involved in the transaction input or output.
- * @property {bigint} satoshis - The amount in satoshis for this input or output.
+ * @property {number} satoshis - The amount in satoshis for this input or output
+ *   (see BitcoinUTxO.satoshis for why `number` is exact and used here).
  * @property {string} opReturnData - The OP_RETURN data associated with this output, if any.
  */
 export type BitcoinOutputEntry = {
@@ -290,6 +297,26 @@ export interface BitcoinProvider {
     context: BitcoinProviderContext,
     txHash: string,
   ) => Observable<Result<BitcoinTransactionHistoryEntry, ProviderError>>;
+
+  /**
+   * Fetches the raw serialized transaction (hex) for a given transaction hash.
+   *
+   * The raw bytes are required to embed previous transactions into a PSBT
+   * (nonWitnessUtxo) so hardware devices can verify input amounts.
+   *
+   * This method returns a cold observable, every new subscriber triggers one backend request;
+   * the stream then emits once and completes.
+   *
+   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * such as network identifier.
+   * @param txHash 32-byte transaction ID in hexadecimal form.
+   * @returns {Observable<Result<string, ProviderError>>}
+   *          Cold observable that emits exactly one {@link Result} and then completes.
+   */
+  getRawTransaction: (
+    context: BitcoinProviderContext,
+    txHash: string,
+  ) => Observable<Result<string, ProviderError>>;
 
   /**
    * Fetches the transactions the history of transactions associated with a given blockchain address.

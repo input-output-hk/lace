@@ -40,9 +40,31 @@ export type CardanoInFlightUtxoActivityMetadata = {
   security?: CardanoActivitySecurityMetadata;
 };
 
+/**
+ * Extra metadata for activities classified as
+ * `ActivityType.NightDesignation`. Surfaced on both pending and
+ * confirmed activities so the UI can render the operation variant
+ * (designate / update / deregister) and the target dust pubkey
+ * without re-parsing the tx CBOR.
+ *
+ * `dustPubkeyHex` is 32-byte hex when the action is `designate` or
+ * `update` (carries the Midnight coin pubkey written into the new
+ * `DustMappingDatum`). Absent for `deregister` — there's no new
+ * datum, the existing one is burned with the NFT.
+ */
+export type CardanoNightDesignationActivityMetadata = {
+  action: 'deregister' | 'designate' | 'update';
+  dustPubkeyHex?: string;
+};
+
+export type CardanoActivityBlockchainSpecific =
+  CardanoInFlightUtxoActivityMetadata & {
+    nightDesignation?: CardanoNightDesignationActivityMetadata;
+  };
+
 declare module '@lace-contract/activities' {
   interface BlockchainSpecificActivityMetadata {
-    Cardano?: CardanoInFlightUtxoActivityMetadata;
+    Cardano?: CardanoActivityBlockchainSpecific;
   }
 }
 

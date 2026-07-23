@@ -18,13 +18,25 @@ const migrations: MigrationManifest = {
     const typed = state as unknown as TokenPricingState;
     return { ...typed, prices: {} } as unknown as PersistedState;
   },
+  // v5: price keying and matching changed (ticker → unique AssetId), so cached
+  // entries are stale or wrong. Clear prices and history; tokens re-fetch, and
+  // any that no longer resolve show no price.
+  5: (state: PersistedState): PersistedState => {
+    if (!state) return state;
+    const typed = state as unknown as TokenPricingState;
+    return {
+      ...typed,
+      prices: {},
+      priceHistory: {},
+    } as unknown as PersistedState;
+  },
 };
 
 const store: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => ({
   reducers: tokenPricingReducers,
   persistConfig: {
     tokenPricing: {
-      version: 4,
+      version: 5,
       whitelist: ['currencyPreference', 'prices', 'priceHistory'],
       migrate: createMigrate(migrations, { debug: false }),
     },

@@ -1,4 +1,4 @@
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import type { Tagged } from 'type-fest';
 

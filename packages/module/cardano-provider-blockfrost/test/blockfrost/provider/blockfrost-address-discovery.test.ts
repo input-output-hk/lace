@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BlockfrostAddressDiscovery } from '../../../src/blockfrost';
 
-import type { Bip32Account } from '@cardano-sdk/key-management';
+import type { Bip32Account } from '@lace-lib/core';
 import type { HttpClient } from '@lace-lib/util-provider';
 import type { Logger } from 'ts-log';
 import type { Mocked } from 'vitest';

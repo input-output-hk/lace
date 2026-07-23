@@ -4,8 +4,8 @@ import type {
   AnyAddress,
 } from '@lace-contract/addresses';
 import type { BlockchainNetworkId } from '@lace-contract/network';
+import type { Option } from '@lace-lib/util';
 import type { BlockchainAssigned } from '@lace-lib/util-store';
-import type { Option } from '@lace-sdk/util';
 
 export type ContactAddress = Pick<AnyAddress, 'address' | 'blockchainName'> & {
   accountId?: AnyAddress['accountId'];

@@ -1,0 +1,21 @@
+{
+  "name": "@lace-lib/bitcoin-air-gapped-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/ur-transport": "*",
+    "@scure/bip32": "2.0.1"
+  },
+  "devDependencies": {
+    "@cardano-sdk/core": "0.47.0",
+    "@keystonehq/bc-ur-registry": "^0.8.0",
+    "bs58check": "3.0.1",
+    "buffer": "^6.0.3"
+  }
+}

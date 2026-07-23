@@ -1,5 +1,5 @@
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { TokenId } from '../../src';

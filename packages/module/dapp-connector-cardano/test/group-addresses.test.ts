@@ -8,8 +8,8 @@ import {
   type GroupedAddressAssets,
 } from '../src/common/utils';
 
-import type { TokenTransferValue } from '../src/common/hooks';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { StoredTokenMetadata, TokenId } from '@lace-contract/tokens';
 
 describe('group-addresses', () => {

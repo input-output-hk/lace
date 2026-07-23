@@ -1,5 +1,5 @@
 import { DEFAULT_CURRENCY } from '@lace-contract/token-pricing';
-import { catchError, from, map, of, switchMap, tap } from 'rxjs';
+import { catchError, defer, from, map, of, switchMap, tap } from 'rxjs';
 
 import { coingeckoClient } from './coingecko-client';
 import { findCoinGeckoId } from './utils';
@@ -15,8 +15,14 @@ import type { PriceDataPoint, TimeRange } from '@lace-lib/ui-toolkit';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 
+// The supported vs_currencies list is stable but can change; a TTL'd cache lets
+// a currency CoinGecko later drops stop being offered within the window.
+const SUPPORTED_CURRENCIES_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+
 export class CoinGeckoProvider implements TokenPricingProvider {
   private coinsListCache?: CoinGeckoCoinsList;
+  private coinsListPromise?: Promise<CoinGeckoCoinsList>;
+  private supportedCurrenciesCache?: { value: string[]; fetchedAt: number };
 
   public constructor(
     private readonly baseUrl: string,
@@ -140,11 +146,61 @@ export class CoinGeckoProvider implements TokenPricingProvider {
     );
   }
 
-  private async ensureCoinsListLoaded(): Promise<CoinGeckoCoinsList> {
-    if (!this.coinsListCache) {
-      this.coinsListCache = await coingeckoClient.fetchCoinsList(this.baseUrl);
+  public fetchSupportedCurrencies(): Observable<string[]> {
+    const cached = this.supportedCurrenciesCache;
+    if (
+      cached &&
+      Date.now() - cached.fetchedAt < SUPPORTED_CURRENCIES_CACHE_TTL_MS
+    ) {
+      return of(cached.value);
     }
-    return this.coinsListCache;
+    // `defer` so each retryBackoff resubscription issues a fresh request rather
+    // than replaying one eagerly-created (already-settled) promise.
+    return defer(() =>
+      from(coingeckoClient.fetchSupportedCurrencies(this.baseUrl)),
+    ).pipe(
+      tap({
+        next: currencies => {
+          // Only cache a non-empty list — a transient empty response should be
+          // retried, not pinned.
+          if (currencies.length > 0) {
+            this.supportedCurrenciesCache = {
+              value: currencies,
+              fetchedAt: Date.now(),
+            };
+          }
+        },
+        error: error => {
+          this.logger.error(
+            'CoinGecko fetchSupportedCurrencies failed:',
+            error,
+          );
+        },
+      }),
+    );
+  }
+
+  private async ensureCoinsListLoaded(): Promise<CoinGeckoCoinsList> {
+    if (this.coinsListCache) {
+      return this.coinsListCache;
+    }
+    // Memoize the in-flight promise so concurrent callers (price + per-range
+    // history fetches firing together) share a single coins-list download
+    // instead of each racing on the empty cache and fetching it again.
+    if (!this.coinsListPromise) {
+      this.coinsListPromise = coingeckoClient
+        .fetchCoinsList(this.baseUrl)
+        .then(list => {
+          this.coinsListCache = list;
+          return list;
+        })
+        .catch(error => {
+          // Don't cache a rejected fetch — let the next call retry.
+          this.coinsListPromise = undefined;
+          throw error;
+        });
+    }
+    return this.coinsListPromise;
   }
 
   private getMappedRequests(requests: TokenPriceRequest[]): Observable<{
@@ -162,8 +218,11 @@ export class CoinGeckoProvider implements TokenPricingProvider {
 
         for (const request of requests) {
           const cgId = findCoinGeckoId(
-            request.identifier,
-            request.blockchain,
+            {
+              identifier: request.identifier,
+              blockchain: request.blockchain,
+              contractAddress: request.contractAddress,
+            },
             coinsList,
           );
           if (cgId) {

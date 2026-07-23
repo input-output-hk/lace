@@ -15,7 +15,7 @@ import type {
   SignerFactory,
   TransactionSigner,
 } from '@lace-contract/signer';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 /** Interface for Cardano key operations. */
 export interface CardanoKeyAgent {
@@ -25,6 +25,13 @@ export interface CardanoKeyAgent {
     context: {
       knownAddresses: GroupedAddress[];
       utxo: Cardano.Utxo[];
+      /**
+       * Native scripts carried by the transaction. When provided, signature
+       * detection also matches their RequireSignature key hashes against the
+       * wallet's own credentials so a witness is produced for keys required
+       * only via a native script.
+       */
+      scripts?: Cardano.Script[];
     },
   ): Promise<Map<Ed25519PublicKeyHex, string>>;
 

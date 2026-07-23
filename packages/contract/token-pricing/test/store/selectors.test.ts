@@ -1,8 +1,12 @@
 import { tokensSelectors, TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import { CardanoTokenPriceId, DEFAULT_CURRENCY_PREFERENCE } from '../../src';
+import {
+  CardanoTokenPriceId,
+  DEFAULT_CURRENCY_PREFERENCE,
+  FIAT_CURRENCIES,
+} from '../../src';
 import { tokenPricingSliceSelectors } from '../../src/store/selectors';
 
 import type { TokenPricingState } from '../../src';
@@ -53,6 +57,8 @@ describe('selectors', () => {
         failedTokenIds: [],
       },
       currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+      supportedVsCurrencies: null,
+      currencyChoiceExclusions: [],
     },
   } as const;
 
@@ -166,6 +172,8 @@ describe('selectors', () => {
           priceHistory: {},
           metadata: mockState.tokenPricing.metadata,
           currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+          supportedVsCurrencies: null,
+          currencyChoiceExclusions: [],
         },
       };
       const isPricingStale =
@@ -190,6 +198,8 @@ describe('selectors', () => {
             error: null,
           },
           currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+          supportedVsCurrencies: null,
+          currencyChoiceExclusions: [],
         },
       };
       const isPricingStale =
@@ -206,6 +216,8 @@ describe('selectors', () => {
           priceHistory: {},
           metadata: mockState.tokenPricing.metadata,
           currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+          supportedVsCurrencies: null,
+          currencyChoiceExclusions: [],
         },
       };
       const isPricingStale =
@@ -249,6 +261,8 @@ describe('selectors', () => {
           failedTokenIds: [],
         },
         currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+        supportedVsCurrencies: null,
+        currencyChoiceExclusions: [],
       },
     });
 
@@ -330,6 +344,8 @@ describe('selectors', () => {
           failedTokenIds: [],
         },
         currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+        supportedVsCurrencies: null,
+        currencyChoiceExclusions: [],
       },
     };
 
@@ -422,6 +438,8 @@ describe('selectors', () => {
             failedTokenIds: [],
           },
           currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+          supportedVsCurrencies: null,
+          currencyChoiceExclusions: [],
         },
       };
 
@@ -481,6 +499,8 @@ describe('selectors', () => {
             failedTokenIds: [],
           },
           currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+          supportedVsCurrencies: null,
+          currencyChoiceExclusions: [],
         } as TokenPricingState,
         rawTokens: {} as Partial<MultiAccountsTokensMap>,
         tokensMetadata: { byTokenId: {} } as TokensMetadataState,
@@ -593,6 +613,142 @@ describe('selectors', () => {
           '24H',
         );
       expect(result[0].price).toBe(510); // (1000 * 0.5) + (1 * 10)
+    });
+  });
+
+  describe('selectSupportedCurrencyPreferences', () => {
+    const buildState = (
+      supportedVsCurrencies: string[] | null,
+      currencyChoiceExclusions: string[] = [],
+    ): { tokenPricing: TokenPricingState } => ({
+      tokenPricing: {
+        ...mockState.tokenPricing,
+        supportedVsCurrencies,
+        currencyChoiceExclusions,
+      },
+    });
+
+    const select =
+      tokenPricingSliceSelectors.tokenPricing
+        .selectSupportedCurrencyPreferences;
+
+    it('returns the full allowlist when CoinGecko list is not yet fetched (null)', () => {
+      expect(select(buildState(null))).toEqual(FIAT_CURRENCIES);
+    });
+
+    it('returns the full allowlist when CoinGecko list is empty', () => {
+      expect(select(buildState([]))).toEqual(FIAT_CURRENCIES);
+    });
+
+    it('intersects the allowlist with the CoinGecko supported list', () => {
+      const result = select(buildState(['usd', 'eur', 'gbp']));
+      expect(result).toEqual([
+        { name: 'USD', ticker: '$' },
+        { name: 'EUR', ticker: '€' },
+        { name: 'GBP', ticker: '£' },
+      ]);
+    });
+
+    it('ignores CoinGecko codes that are not fiat/in the allowlist', () => {
+      const result = select(buildState(['usd', 'btc', 'eth', 'xau']));
+      expect(result).toEqual([{ name: 'USD', ticker: '$' }]);
+    });
+
+    it('matches case-insensitively against the allowlist', () => {
+      const result = select(buildState(['USD', 'EUR']));
+      expect(result.map(c => c.name)).toEqual(['USD', 'EUR']);
+    });
+
+    it('preserves allowlist display order regardless of CoinGecko order', () => {
+      const result = select(buildState(['gbp', 'usd', 'eur']));
+      expect(result.map(c => c.name)).toEqual(['USD', 'EUR', 'GBP']);
+    });
+
+    it('removes excluded currencies even when CoinGecko still supports them', () => {
+      const result = select(buildState(['usd', 'eur', 'gbp'], ['eur']));
+      expect(result.map(c => c.name)).toEqual(['USD', 'GBP']);
+    });
+
+    it('applies exclusions even when the CoinGecko list is unavailable', () => {
+      const result = select(buildState(null, ['eur']));
+      expect(result.map(c => c.name)).not.toContain('EUR');
+      expect(result).toHaveLength(FIAT_CURRENCIES.length - 1);
+    });
+
+    it('always keeps the default currency even when it is excluded', () => {
+      const result = select(buildState(['usd', 'eur', 'gbp'], ['usd']));
+      expect(result.map(c => c.name)).toContain('USD');
+    });
+
+    it('always keeps the default currency even when CoinGecko does not list it', () => {
+      const result = select(buildState(['eur', 'gbp']));
+      expect(result.map(c => c.name)).toContain('USD');
+    });
+
+    it('never returns an empty list even when every currency is excluded', () => {
+      const allExcluded = FIAT_CURRENCIES.map(c => c.name.toLowerCase());
+      const result = select(buildState(['jpy'], allExcluded));
+      expect(result.map(c => c.name)).toEqual(['USD']);
+    });
+  });
+
+  describe('selectCurrencyFallback', () => {
+    const buildState = (
+      currencyPreference: { name: string; ticker: string },
+      supportedVsCurrencies: string[] | null,
+      currencyChoiceExclusions: string[] = [],
+    ): { tokenPricing: TokenPricingState } => ({
+      tokenPricing: {
+        ...mockState.tokenPricing,
+        currencyPreference,
+        supportedVsCurrencies,
+        currencyChoiceExclusions,
+      },
+    });
+
+    const eur = { name: 'EUR', ticker: '€' };
+    const select =
+      tokenPricingSliceSelectors.tokenPricing.selectCurrencyFallback;
+
+    it('does not fall back away from the default currency (loop guard)', () => {
+      // Default is unsupported + excluded, yet must never fall back on itself.
+      expect(
+        select(buildState(DEFAULT_CURRENCY_PREFERENCE, ['eur'], ['usd'])),
+      ).toEqual({ fallback: false });
+    });
+
+    it('does not fall back when the selected currency is still selectable', () => {
+      expect(select(buildState(eur, ['usd', 'eur', 'gbp']))).toEqual({
+        fallback: false,
+      });
+    });
+
+    it('falls back when CoinGecko no longer lists an allowed currency', () => {
+      expect(select(buildState(eur, ['usd', 'gbp']))).toEqual({
+        fallback: true,
+      });
+    });
+
+    it('falls back when the currency is excluded', () => {
+      expect(select(buildState(eur, ['usd', 'eur', 'gbp'], ['eur']))).toEqual({
+        fallback: true,
+      });
+    });
+
+    it('falls back when the currency is not in the allowlist', () => {
+      expect(
+        select(buildState({ name: 'XYZ', ticker: 'X' }, ['usd', 'xyz'])),
+      ).toEqual({ fallback: true });
+    });
+
+    it('does not fall back while the CoinGecko list is unavailable (currency still selectable)', () => {
+      expect(select(buildState(eur, null))).toEqual({ fallback: false });
+    });
+
+    it('falls back for an excluded currency even when CoinGecko is unavailable', () => {
+      expect(select(buildState(eur, null, ['eur']))).toEqual({
+        fallback: true,
+      });
     });
   });
 });

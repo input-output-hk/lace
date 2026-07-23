@@ -28,11 +28,12 @@
     "@lace-contract/views": "*",
     "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
     "@lace-lib/ui-extension": "*",
     "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-render": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

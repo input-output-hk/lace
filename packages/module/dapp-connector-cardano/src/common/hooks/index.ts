@@ -1,6 +1,5 @@
 export {
   useDappTxInspection,
-  type TokenTransferValue,
   type UseDappTxInspectionResult,
 } from './useDappTxInspection';
 

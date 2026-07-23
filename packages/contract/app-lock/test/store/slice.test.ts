@@ -1,4 +1,4 @@
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '../../src/const';

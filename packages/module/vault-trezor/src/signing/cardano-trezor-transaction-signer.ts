@@ -7,7 +7,7 @@ import {
   util,
 } from '@cardano-sdk/key-management';
 import { createInputResolver } from '@lace-contract/cardano-context';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import TrezorConnect from '@trezor/connect-web';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
@@ -87,6 +87,7 @@ export class CardanoTrezorTransactionSigner
       const signatures = await keyAgent.signTransaction(tx.body(), {
         knownAddresses: this.#props.knownAddresses,
         txInKeyPathMap,
+        scripts: tx.toCore().witness.scripts,
       });
 
       const witnessSet = tx.witnessSet();

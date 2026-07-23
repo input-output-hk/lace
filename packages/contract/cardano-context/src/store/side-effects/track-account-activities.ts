@@ -17,6 +17,7 @@ import {
   switchMap,
 } from 'rxjs';
 
+import { FEATURE_FLAG_CNIGHT_DESIGNATION } from '../../const';
 import { ActivityKind } from '../../types';
 import { CardanoActivitiesProcessingFailureId } from '../../value-objects';
 import { createInputResolver } from '../helpers/transaction-processors';
@@ -36,7 +37,7 @@ import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
 import type { Failure, FailureId } from '@lace-contract/failures';
 import type { TranslationKey } from '@lace-contract/i18n';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 type TrackAccountActivitiesParams = {
@@ -65,6 +66,7 @@ type ProcessTransactionDeps = {
   protocolParameters: RequiredProtocolParameters;
   chainId: Cardano.ChainId;
   selectFailureById$: Observable<(id: FailureId) => Failure | undefined>;
+  isNightDesignationEnabled: boolean;
 };
 
 const processTransaction = (
@@ -81,6 +83,7 @@ const processTransaction = (
     logger,
     actions,
     selectFailureById$,
+    isNightDesignationEnabled,
   } = deps;
 
   const failureId = CardanoActivitiesProcessingFailureId(AccountId(accountId));
@@ -100,6 +103,7 @@ const processTransaction = (
         protocolParameters,
         logger,
         resolveInput: createInputResolver(resolveInput, chainId).resolveInput,
+        isNightDesignationEnabled,
       }).pipe(
         map(result => {
           if (result.isErr()) throw result.unwrapErr();
@@ -163,7 +167,13 @@ export const createTrackAccountActivities =
   }: TrackAccountActivitiesParams): SideEffect =>
   (
     _,
-    { activities, addresses, cardanoContext, failures: { selectFailureById$ } },
+    {
+      activities,
+      addresses,
+      cardanoContext,
+      failures: { selectFailureById$ },
+      features: { selectLoadedFeatures$ },
+    },
     {
       cardanoProvider: { getTransactionDetails, resolveInput },
       logger,
@@ -179,6 +189,7 @@ export const createTrackAccountActivities =
       cardanoContext.selectEraSummaries$,
       cardanoContext.selectTransactionHistoryGroupedByAccount$,
       cardanoContext.selectRewardsHistoryGroupedByAccount$,
+      selectLoadedFeatures$,
     ]).pipe(
       debounceTime(debounceTimeout),
       switchMap(
@@ -191,10 +202,15 @@ export const createTrackAccountActivities =
           eraSummaries,
           transactionHistoryByAccount,
           accountRewardsHistoryByAccount,
+          loadedFeatures,
         ]) => {
           // only proceed if we have protocol parameters
           if (protocolParameters === undefined || eraSummaries === undefined)
             return EMPTY;
+
+          const isNightDesignationEnabled = loadedFeatures.featureFlags.some(
+            f => f.key === FEATURE_FLAG_CNIGHT_DESIGNATION,
+          );
 
           const activitiesToLoad = findMissingActivities({
             addresses,
@@ -216,6 +232,7 @@ export const createTrackAccountActivities =
             protocolParameters,
             chainId,
             selectFailureById$,
+            isNightDesignationEnabled,
           };
 
           return from(activitiesToLoad).pipe(

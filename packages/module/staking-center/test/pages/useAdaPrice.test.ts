@@ -1,6 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
+import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { CardanoTokenPriceId } from '@lace-contract/token-pricing';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,7 +25,7 @@ describe('useAdaPrice', () => {
 
   it('returns selected currency and ADA price in that currency', () => {
     const selectedCurrency = { name: 'USD', ticker: '$' };
-    const adaPriceId = CardanoTokenPriceId('ada');
+    const adaPriceId = CardanoTokenPriceId(LOVELACE_TOKEN_ID);
     const prices = { [adaPriceId]: { price: 0.42 } };
 
     mockUseLaceSelector.mockImplementation((selector: string) => {

@@ -1,5 +1,5 @@
 import { isNotNil } from '@cardano-sdk/util';
-import { None, type Option } from '@lace-sdk/util';
+import { None, type Option } from '@lace-lib/util';
 import debounce from 'lodash/debounce';
 import { useEffect, useRef, useState } from 'react';
 import { firstValueFrom } from 'rxjs';

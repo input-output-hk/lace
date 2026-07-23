@@ -19,7 +19,7 @@ import type {
   AnyAccount,
   AnyWallet,
 } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 const mockChainId: Cardano.ChainId = { networkId: 0, networkMagic: 1 };
 const mockAccountId = 'account-1' as AccountId;

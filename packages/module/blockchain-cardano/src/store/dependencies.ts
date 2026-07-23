@@ -11,7 +11,8 @@ import {
   type SignInMemoryTransactionProps,
   type SigningError,
 } from '@lace-contract/cardano-context';
-import { ByteArray, Err, Ok } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, Err, Ok } from '@lace-lib/util';
 import { catchError, forkJoin, from, map, mergeMap, of } from 'rxjs';
 
 import type { LaceInit } from '@lace-contract/module';
@@ -32,24 +33,34 @@ export const initializeDependencies: LaceInit<
         ),
       ]).pipe(
         mergeMap(([bip32Ed25519, txInKeyPathMap]) => {
+          const encryptedRootPrivateKeyBytes = ByteArray.fromHex(
+            props.encryptedRootPrivateKey,
+          );
           const keyAgent = new InMemoryKeyAgent(
             {
               accountIndex: props.accountIndex,
               chainId: props.chainId,
-              encryptedRootPrivateKeyBytes: [
-                ...ByteArray.fromHex(props.encryptedRootPrivateKey),
-              ],
+              encryptedRootPrivateKeyBytes: [...encryptedRootPrivateKeyBytes],
               extendedAccountPublicKey: props.extendedAccountPublicKey,
               getPassphrase: async () => props.authSecret,
               purpose: KeyPurpose.STANDARD,
             },
-            { bip32Ed25519, logger },
+            {
+              bip32Ed25519,
+              logger,
+              rootPrivateKeyEncryption: SecretBox.isSealed(
+                encryptedRootPrivateKeyBytes,
+              )
+                ? { encrypt: SecretBox.seal, decrypt: SecretBox.open }
+                : undefined,
+            },
           );
 
           return from(
             keyAgent.signTransaction(props.tx.body(), {
               knownAddresses: props.knownAddresses,
               txInKeyPathMap,
+              scripts: props.tx.toCore().witness.scripts,
             }),
           ).pipe(
             map(signatures => {

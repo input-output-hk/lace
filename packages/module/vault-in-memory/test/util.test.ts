@@ -1,6 +1,6 @@
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { AccountId, WalletType } from '@lace-contract/wallet-repo';
-import { ByteArray, type HexBytes } from '@lace-sdk/util';
+import { ByteArray, type HexBytes } from '@lace-lib/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 

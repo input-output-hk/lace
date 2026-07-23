@@ -37,11 +37,14 @@ export const computeFiatForFee = ({
   let priceId: string;
   let amountInBaseUnit: BigNumberJs;
 
+  // Prices are keyed by the base-coin tokenId (BITCOIN_TOKEN_ID / LOVELACE_TOKEN_ID),
+  // not the ticker. Inlined here to keep this generic module independent of the
+  // blockchain-context contracts.
   if (chainName === 'Bitcoin') {
-    priceId = BitcoinTokenPriceId('btc');
+    priceId = BitcoinTokenPriceId('bitcoin');
     amountInBaseUnit = new BigNumberJs(rawAmount).div(SATOSHIS_PER_BTC);
   } else if (chainName === 'Cardano') {
-    priceId = CardanoTokenPriceId('ada');
+    priceId = CardanoTokenPriceId('lovelace');
     amountInBaseUnit = new BigNumberJs(rawAmount).div(LOVELACE_PER_ADA);
   } else {
     return EMPTY_FIAT;

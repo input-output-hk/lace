@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "*",
+    "@cardano-sdk/core": "0.47.0",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app": "*",
@@ -18,11 +18,11 @@
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-provider": "*",
     "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*",
     "backoff-rxjs": "*",
-    "uuid": "*"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

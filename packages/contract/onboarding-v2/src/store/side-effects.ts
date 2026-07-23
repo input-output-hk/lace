@@ -265,11 +265,20 @@ const createWalletCreationSideEffect =
 /** Promise-based {@link HwWalletConnector} wrapped to return Observables. */
 interface ObservableHwWalletConnector {
   id: HardwareIntegrationId;
+  optionIds?: HardwareIntegrationId[];
   createWallet: (
     state: State,
     props: CreateHardwareWalletProps,
   ) => Observable<WalletEntity>;
 }
+
+/** True when the connector serves the given onboarding option id. */
+const connectorServesOption = (
+  connector: { id: HardwareIntegrationId; optionIds?: HardwareIntegrationId[] },
+  optionId: HardwareIntegrationId,
+): boolean =>
+  connector.id === optionId ||
+  (connector.optionIds?.includes(optionId) ?? false);
 
 /**
  * The HW connector creates the wallet entity via the service worker. Before
@@ -289,12 +298,11 @@ export const createHwWalletCreationSideEffect =
   }): SideEffect =>
   (
     { onboardingV2: { attemptCreateHardwareWallet$ } },
-    { onboardingV2: { selectPendingCreateWallet$ } },
+    _state,
     { actions, logger, secureStore, __getState },
   ) =>
     attemptCreateHardwareWallet$.pipe(
-      withLatestFrom(selectPendingCreateWallet$),
-      switchMap(([{ payload }, pendingCreateWallet]) => {
+      switchMap(({ payload }) => {
         if (!walletCreationGuard.tryAcquire()) {
           logger.warn(
             '[Onboarding] Wallet creation already in progress, ignoring duplicate attempt',
@@ -302,7 +310,9 @@ export const createHwWalletCreationSideEffect =
           return EMPTY;
         }
 
-        const connector = hwConnectors.find(c => c.id === payload.optionId);
+        const connector = hwConnectors.find(c =>
+          connectorServesOption(c, payload.optionId),
+        );
         if (!connector) {
           walletCreationGuard.release();
           logger.error(
@@ -313,7 +323,7 @@ export const createHwWalletCreationSideEffect =
           );
         }
 
-        const password = pendingCreateWallet?.password;
+        const { password } = payload;
         if (!password) {
           walletCreationGuard.release();
           logger.error(
@@ -444,6 +454,7 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
   const observableHwConnectors: ObservableHwWalletConnector[] =
     hwConnectors.map(c => ({
       id: c.id,
+      optionIds: c.optionIds,
       createWallet: (state, props) =>
         defer(() => from(c.createWallet(state, props))),
     }));

@@ -9,6 +9,8 @@ import kotlinx.coroutines.*
 import org.hyperledger.identus.apollo.derivation.EdHDKey
 import org.hyperledger.identus.apollo.utils.KMMEdPrivateKey
 import org.bouncycastle.crypto.digests.Blake2bDigest
+import org.bouncycastle.crypto.generators.Argon2BytesGenerator
+import org.bouncycastle.crypto.params.Argon2Parameters
 import java.lang.Exception
 
 class ApolloModule(reactContext: ReactApplicationContext) :
@@ -103,6 +105,47 @@ class ApolloModule(reactContext: ReactApplicationContext) :
       blake2bHexSync(inputHex, outLen)
     } catch (e: Exception) {
       ""
+    }
+  }
+
+  /**
+   * Derives a key from the given password and salt using Argon2id (version 1.3).
+   * Byte parameters are hex-encoded; resolves with the hex-encoded derived key.
+   */
+  @ReactMethod
+  fun argon2id(
+    passwordHex: String,
+    saltHex: String,
+    memoryKb: Int,
+    iterations: Int,
+    parallelism: Int,
+    outLen: Int,
+    promise: Promise
+  ) {
+    CoroutineScope(Dispatchers.Default).launch {
+      var password: ByteArray? = null
+      var out: ByteArray? = null
+      try {
+        password = passwordHex.decodeHex()
+        out = ByteArray(outLen)
+        val generator = Argon2BytesGenerator()
+        generator.init(
+          Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
+            .withVersion(Argon2Parameters.ARGON2_VERSION_13)
+            .withMemoryAsKB(memoryKb)
+            .withIterations(iterations)
+            .withParallelism(parallelism)
+            .withSalt(saltHex.decodeHex())
+            .build()
+        )
+        generator.generateBytes(password, out, 0, outLen)
+        promise.resolve(out.toHex())
+      } catch (e: Exception) {
+        promise.reject("ARGON2_ERROR", "Failed to compute argon2id: ${e.message}", e)
+      } finally {
+        password?.fill(0)
+        out?.fill(0)
+      }
     }
   }
 

@@ -1,5 +1,11 @@
 import { coalesceValueQuantities } from '@cardano-sdk/core';
 
+import { buildChangeOutputs } from './change-builder';
+import {
+  InputSelectionError,
+  InputSelectionFailure,
+} from './InputSelectionError';
+
 import type {
   CoinSelector,
   CoinSelectorParams,
@@ -105,24 +111,29 @@ const pickBy = (
  * 2. **ADA Phase** — Once asset requirements are satisfied, selects UTxOs by descending ADA value
  *    until the total required ADA (including fees and min-UTxO requirements) is fulfilled.
  *
+ * Once the target is covered, the surplus is returned as min-ADA compliant change outputs
+ * (see {@link buildChangeOutputs}); funding their min-ADA may pull extra UTxOs into the selection.
+ *
  * @remarks
  * - Preselected UTxOs (`preSelectedUtxo`) are always preserved and excluded from further selection.
- * - Throws errors when balance is insufficient for either assets or ADA.
  * - Deterministic given a fixed set of inputs.
  *
- * @throws {Error} When there is insufficient balance for a required asset or for ADA.
+ * @throws {InputSelectionError} `BalanceInsufficient` when a required asset or ADA cannot be
+ *   covered; `UtxoFullyDepleted` when the pool runs out while funding the change min-ADA.
  */
 export class LargeFirstCoinSelector implements CoinSelector {
   /**
    * Executes the coin selection process.
    *
    * @param params - See {@link CoinSelectorParams}.
-   * @returns An object containing the selected UTxOs (`selection`) and the remaining available ones.
+   * @returns The selected UTxOs, the remaining available ones, and the change outputs.
    */
   public select({
     preSelectedUtxo,
     availableUtxo,
     targetValue,
+    changeAddress,
+    protocolParameters,
   }: CoinSelectorParams): CoinSelectorResult {
     const selection: Cardano.Utxo[] = [...(preSelectedUtxo ?? [])];
 
@@ -157,7 +168,10 @@ export class LargeFirstCoinSelector implements CoinSelector {
       remaining = rest;
 
       if (have < qty) {
-        throw new Error(`Insufficient balance for asset ${id}`);
+        throw new InputSelectionError(
+          InputSelectionFailure.BalanceInsufficient,
+          `Insufficient balance for asset ${id}: required ${qty}, selected ${have}`,
+        );
       }
     }
 
@@ -181,10 +195,19 @@ export class LargeFirstCoinSelector implements CoinSelector {
       remaining = rest;
 
       if (deficit > 0n) {
-        throw new Error('Insufficient ADA');
+        throw new InputSelectionError(
+          InputSelectionFailure.BalanceInsufficient,
+          `Insufficient ADA: short by ${deficit} lovelace`,
+        );
       }
     }
 
-    return { selection, remaining };
+    return buildChangeOutputs({
+      selection,
+      remaining,
+      targetValue,
+      changeAddress,
+      protocolParameters,
+    });
   }
 }

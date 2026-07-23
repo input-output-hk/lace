@@ -9,7 +9,7 @@ import {
   useTheme,
 } from '@lace-lib/ui-toolkit';
 import { useCopyToClipboard } from '@lace-lib/ui-toolkit';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -77,17 +77,17 @@ export const ContactDetailsSheet = ({
     copyToClipboard(address);
   };
 
-  const onEditPress = () => {
+  const onEditPress = useCallback(() => {
     if (contact?.id) {
       NavigationControls.navigate(SheetRoutes.AddContact, {
         contactId: contact.id,
       });
     }
-  };
+  }, [contact?.id]);
 
-  const onDeletePress = () => {
+  const onDeletePress = useCallback(() => {
     setIsDeleteModalVisible(true);
-  };
+  }, []);
 
   const closeDeleteModal = () => {
     setIsDeleteModalVisible(false);

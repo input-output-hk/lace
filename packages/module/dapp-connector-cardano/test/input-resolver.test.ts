@@ -1,5 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Ok, Err } from '@lace-sdk/util';
+import { Ok, Err } from '@lace-lib/util';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

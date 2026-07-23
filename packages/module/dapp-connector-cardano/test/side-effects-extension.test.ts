@@ -1,9 +1,9 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
 import { DappId } from '@lace-contract/dapp-connector';
 import { ViewId } from '@lace-contract/module';
-import { AccountId } from '@lace-contract/wallet-repo';
+import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
+import { Err, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Err, Ok } from '@lace-sdk/util';
 import { EMPTY, NEVER, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -18,6 +18,7 @@ import {
 import { signData$, signTx$ } from '../src/browser/store/util';
 
 import type { ActionCreators, Selectors } from '../src';
+import type { SigningResult } from '../src/browser/store/util';
 import type { CardanoConfirmationRequest } from '../src/common/store/dependencies/create-confirmation-callback';
 import type {
   AuthorizedDappsDataSlice,
@@ -62,6 +63,40 @@ vi.mock('../src/browser/store/util', async () => {
     signTx$: vi.fn().mockReturnValue(of({ type: 'SIGN_TX_ACTION' })),
     signData$: vi.fn().mockReturnValue(of({ type: 'SIGN_DATA_ACTION' })),
     detectViewClosure: vi.fn().mockReturnValue(EMPTY),
+  };
+});
+
+/**
+ * Mock BIP32 derivation used by the signTransaction wrapper for DRep key
+ * hashing.
+ */
+vi.mock('@cardano-sdk/key-management', async () => {
+  const actual = await vi.importActual('@cardano-sdk/key-management');
+  return {
+    ...actual,
+    Bip32Account: vi.fn().mockImplementation(() => ({
+      derivePublicKey: vi.fn().mockResolvedValue('0'.repeat(64)),
+    })),
+  };
+});
+
+vi.mock('@cardano-sdk/crypto', async () => {
+  const actual = await vi.importActual('@cardano-sdk/crypto');
+  return {
+    ...actual,
+    SodiumBip32Ed25519: {
+      create: vi.fn().mockResolvedValue({
+        derivePublicKey: vi.fn().mockReturnValue('0'.repeat(64)),
+        getRawPublicKey: vi.fn().mockReturnValue('0'.repeat(64)),
+      }),
+    },
+    Ed25519PublicKey: {
+      fromHex: vi.fn().mockReturnValue({
+        hash: vi.fn().mockReturnValue({
+          hex: vi.fn().mockReturnValue('0'.repeat(56)),
+        }),
+      }),
+    },
   };
 });
 
@@ -572,6 +607,114 @@ describe('side-effects-extension', () => {
         sub.unsubscribe();
       });
     });
+
+    describe('signTransaction signer factory errors', () => {
+      const CHAIN_ID = Cardano.ChainIds.Preprod;
+      const ACCOUNT_ID = AccountId('acct-1');
+      const WALLET_ID = WalletId('wallet-1');
+      const ORIGIN = 'https://test-dapp.com';
+
+      const account = {
+        accountId: ACCOUNT_ID,
+        walletId: WALLET_ID,
+        accountIndex: 0,
+        accountType: 'InMemory',
+        name: 'Test Account',
+        blockchainName: 'Cardano' as const,
+        blockchainSpecific: {
+          accountIndex: 0,
+          chainId: CHAIN_ID,
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+      } as unknown as AnyAccount;
+
+      const wallet = {
+        walletId: WALLET_ID,
+        name: 'Test Wallet',
+        type: WalletType.InMemory,
+        metadata: {},
+        accounts: [account],
+      } as unknown as AnyWallet;
+
+      const createStateForSignTx = () => ({
+        views: { selectOpenViews$: of([]) },
+        appLock: { isUnlocked$: of(true) },
+        dappConnector: { selectAuthorizedDapps$: of({ Cardano: [] }) },
+        cardanoContext: {
+          selectChainId$: of(CHAIN_ID),
+          selectAvailableAccountUtxos$: of({}),
+          selectAccountUnspendableUtxos$: of({}),
+          selectAccountTransactionHistory$: of({}),
+          selectRewardAccountDetails$: of({}),
+        },
+        addresses: { selectAllAddresses$: of([]) },
+        cardanoDappConnector: {
+          selectSessionAccountByOrigin$: of({ [ORIGIN]: ACCOUNT_ID }),
+        },
+        wallets: {
+          selectActiveNetworkAccounts$: of([account]),
+          selectAll$: of([wallet]),
+        },
+      });
+
+      it('emits error signing result when the signer factory throws for an unsupported account', async () => {
+        const captured: {
+          signTransaction?: (
+            txCbor: string,
+            partialSign: boolean,
+            origin: string,
+          ) => Promise<string>;
+          signingResult$?: Subject<SigningResult>;
+        } = {};
+        const mockConnect = vi.fn(
+          (argument: {
+            signTransaction: (
+              txCbor: string,
+              partialSign: boolean,
+              origin: string,
+            ) => Promise<string>;
+            signingResult$: Subject<SigningResult>;
+          }) => {
+            captured.signTransaction = argument.signTransaction;
+            captured.signingResult$ = argument.signingResult$;
+            return EMPTY;
+          },
+        );
+        const deps = {
+          connectCardanoDappConnector: mockConnect,
+          actions: {},
+          authenticate: vi.fn().mockReturnValue(of(true)),
+          accessAuthSecret: vi.fn(),
+          cardanoProvider: { submitTx: vi.fn() },
+          signerFactory: {
+            canSign: () => false,
+            createTransactionSigner: () => {
+              throw new Error(
+                'No signer factory registered for account type "InMemory"',
+              );
+            },
+          },
+        };
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          createActionObservables() as unknown as ActionObservables<ActionCreators>,
+          createStateForSignTx() as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+        const sub = sideEffect$.subscribe();
+
+        const results: SigningResult[] = [];
+        captured.signingResult$!.subscribe(result => results.push(result));
+
+        await expect(
+          captured.signTransaction!('84a400', true, ORIGIN),
+        ).rejects.toThrow('No signer factory registered');
+        expect(results).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
+
+        sub.unsubscribe();
+      });
+    });
   });
 
   describe('promptCardanoAuthorizeDapp', () => {
@@ -818,6 +961,62 @@ describe('side-effects-extension', () => {
       }));
     });
 
+    it('sheet mode: opens a new auth UI for a second request even when the first never completed (dapp disconnected)', () => {
+      const deps = createTestDependencies();
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, cold, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            // Two enable()s for the same dapp, spaced past the 100ms debounce;
+            // the first never resolves.
+            start$: hot('-a 298ms b', {
+              a: startAction(1),
+              b: startAction(1),
+            }),
+            completed$: NEVER,
+            failed$: NEVER,
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: {
+            selectOpenViews$: cold('a', { a: [sidePanelView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: cold('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: cold('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', { a: [] }),
+            selectAll$: cold('a', { a: [] }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          const authorizeSheetOpens = vi
+            .mocked(deps.actions.views.setActiveSheetPage)
+            .mock.calls.filter(
+              ([payload]) =>
+                (payload as { route?: string } | null)?.route ===
+                'AuthorizeDapp',
+            );
+          expect(authorizeSheetOpens).toHaveLength(2);
+        },
+      }));
+    });
+
     it('sheet mode: dispatches completed(false) on panel closure', () => {
       const deps = createTestDependencies();
       testSideEffect(promptCardanoAuthorizeDapp, ({ hot, cold, flush }) => ({
@@ -985,6 +1184,134 @@ describe('side-effects-extension', () => {
             authorized: false,
             dapp: mockDapp,
           });
+        },
+      }));
+    });
+
+    it('popup mode: dismisses the prompt without authorizing when the request is cancelled (connection dropped)', () => {
+      const deps = createTestDependencies();
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, cold, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction() }),
+            completed$: NEVER,
+            failed$: hot('- 300ms a', {
+              a: {
+                type: 'authorizeDapp/failed',
+                payload: { dapp: mockDapp, reason: 'connection dropped' },
+              },
+            }),
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: {
+            // cold replays [popupView] per subscription (like the
+            // BehaviorSubject-backed selector), so the cancellation watch's
+            // late re-subscription still finds the window to close.
+            selectOpenViews$: cold('a', { a: [popupView] }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [] }),
+            selectAll$: hot('a', { a: [] }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(deps.actions.views.closeView).toHaveBeenCalledWith(
+            popupView.id,
+          );
+          expect(
+            deps.actions.cardanoDappConnector.clearPendingAuthRequest,
+          ).toHaveBeenCalled();
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).not.toHaveBeenCalled();
+          expect(deps.actions.authorizeDapp.completed).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('popup mode: dismisses the prompt when the request is cancelled before the popup window registers', () => {
+      // The cancellation watch must be active immediately — a drop can arrive
+      // while the popup is still opening (before selectOpenViews$ reports it),
+      // else the stale popup stays confirmable after the contract denied.
+      const deps = createTestDependencies();
+      testSideEffect(promptCardanoAuthorizeDapp, ({ hot, flush }) => ({
+        actionObservables: {
+          authorizeDapp: {
+            start$: hot('-a', { a: startAction() }),
+            completed$: NEVER,
+            // Failure fires at ~130ms — after the popup is requested (~110ms,
+            // post-debounce) but before its window registers (~160ms).
+            failed$: hot('- 130ms a', {
+              a: {
+                type: 'authorizeDapp/failed',
+                payload: { dapp: mockDapp, reason: 'connection dropped' },
+              },
+            }),
+          },
+          cardanoDappConnector: {
+            confirmConnect$: NEVER,
+            rejectConnect$: NEVER,
+          },
+          views: {
+            viewDisconnected$: NEVER,
+            locationChanged$: NEVER,
+          },
+        },
+        stateObservables: {
+          views: {
+            selectOpenViews$: hot('a 110ms b 50ms c', {
+              a: [],
+              b: [],
+              c: [popupView],
+            }),
+          },
+          dappConnector: {
+            selectAuthorizedDapps$: hot('a', {
+              a: {} as AuthorizedDappsDataSlice,
+            }),
+          },
+          cardanoDappConnector: {
+            selectSessionAccountByOrigin$: hot('a', { a: {} }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: hot('a', { a: [] }),
+            selectAll$: hot('a', { a: [] }),
+          },
+        },
+        dependencies: deps,
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(deps.actions.views.closeView).toHaveBeenCalledWith(
+            popupView.id,
+          );
+          expect(
+            deps.actions.cardanoDappConnector.clearPendingAuthRequest,
+          ).toHaveBeenCalled();
+          expect(
+            deps.actions.cardanoDappConnector.confirmAuth,
+          ).not.toHaveBeenCalled();
+          expect(deps.actions.authorizeDapp.completed).not.toHaveBeenCalled();
         },
       }));
     });

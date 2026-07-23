@@ -1,5 +1,5 @@
 import { isNotNil } from '@cardano-sdk/util';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 
 import { WalletType } from './types';
 
@@ -13,9 +13,22 @@ import type {
 import type { AccountIdentityKey } from './value-objects';
 import type { ByBlockchainName } from '@lace-lib/util-store';
 
+const HARDWARE_WALLET_TYPES: ReadonlySet<string> = new Set([
+  WalletType.HardwareLedger,
+  WalletType.HardwareTrezor,
+  WalletType.HardwareSeedSigner,
+  WalletType.HardwareKeystone,
+]);
+
 export const isHardwareWallet = (wallet: AnyWallet): wallet is HardwareWallet =>
-  wallet.type === WalletType.HardwareLedger ||
-  wallet.type === WalletType.HardwareTrezor;
+  HARDWARE_WALLET_TYPES.has(wallet.type);
+
+/**
+ * Account-level counterpart of {@link isHardwareWallet} for call sites that
+ * only hold an account type string.
+ */
+export const isHardwareAccountType = (accountType: string): boolean =>
+  HARDWARE_WALLET_TYPES.has(accountType);
 
 export const isTrezorWallet = (
   wallet: AnyWallet,

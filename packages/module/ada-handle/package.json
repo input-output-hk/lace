@@ -9,7 +9,7 @@
     "@koralabs/adahandle-sdk": "^1.5.5",
     "@lace-contract/cardano-context": "*",
     "@lace-contract/module": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

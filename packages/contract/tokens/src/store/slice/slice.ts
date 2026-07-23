@@ -2,7 +2,7 @@ import { BigIntMath } from '@cardano-sdk/util';
 import { markParameterizedSelector } from '@lace-contract/module';
 import { networkSelectors } from '@lace-contract/network';
 import { AccountId, walletsSelectors } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { createSelector } from '@reduxjs/toolkit';
 
 import { FolderId, TokenId } from '../../value-objects';

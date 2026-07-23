@@ -4,12 +4,12 @@ import {
   type GetActivityTokenBalanceChange,
   type GetActivityTokensInfoSummary,
 } from '@lace-contract/activities';
+import { BigNumber } from '@lace-lib/util';
 import {
   formatAmountRawToDenominated,
   formatDate,
   formatTime,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import groupBy from 'lodash/groupBy';
 
 import type { IconName } from '../design-system/atoms/icons/Icon';
@@ -32,6 +32,7 @@ const ActivityToFormattedType = {
   [ActivityType.Registration]: 'registration',
   [ActivityType.Deregistration]: 'deregistration',
   [ActivityType.Withdrawal]: 'withdrawal',
+  [ActivityType.NightDesignation]: 'nightDesignation',
 };
 
 const activityToIconName: Record<ActivityType, IconName> = {
@@ -45,6 +46,7 @@ const activityToIconName: Record<ActivityType, IconName> = {
   Self: 'Recycle03',
   Failed: 'AlertTriangle',
   Pending: 'Loading03',
+  NightDesignation: 'Moon',
 };
 
 const mapActivityTypeToLabel = (type: ActivityType, t: TFunction) => {
@@ -69,6 +71,8 @@ const mapActivityTypeToLabel = (type: ActivityType, t: TFunction) => {
       return t('activity.history.deregistration');
     case ActivityType.Withdrawal:
       return t('activity.history.withdrawal');
+    case ActivityType.NightDesignation:
+      return t('activity.history.night-designation');
   }
 };
 
@@ -179,6 +183,7 @@ export const formatAndGroupActivitiesByDate = ({
         case ActivityType.Registration:
         case ActivityType.Deregistration:
         case ActivityType.Withdrawal:
+        case ActivityType.NightDesignation:
           return {
             ...commonProps,
             info: {

@@ -14,7 +14,7 @@ import { InfoRow } from './InfoRow';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 
 export interface AdditionalInfoSectionProps {
-  /** Parsed transaction info (fee, deposit, returned deposit) */
+  /** Parsed transaction info (fee, donation, deposit, returned deposit) */
   transactionInfo: TransactionInfo;
   /** Total collateral value in lovelace, or undefined */
   collateralValue: bigint | undefined;
@@ -28,7 +28,7 @@ export interface AdditionalInfoSectionProps {
 
 /**
  * Collapsible section showing additional transaction info:
- * collateral, returned deposit, deposit, and fee (with optional fiat).
+ * collateral, returned deposit, deposit, fee, and donation (with optional fiat).
  */
 export const AdditionalInfoSection = ({
   transactionInfo,
@@ -98,6 +98,21 @@ export const AdditionalInfoSection = ({
         )}
         testID="sign-tx-fee"
       />
+      {transactionInfo.donation !== undefined &&
+        transactionInfo.donation > BigInt(0) && (
+          <InfoRow
+            label={t('dapp-connector.cardano.sign-tx.donation-label')}
+            value={`${formatLovelaceToAda(
+              transactionInfo.donation,
+            )} ${coinSymbol}`}
+            secondaryValue={calculateAdaFiatValue(
+              transactionInfo.donation,
+              tokenPrices,
+              currencyTicker,
+            )}
+            testID="sign-tx-donation"
+          />
+        )}
     </CollapsibleSection>
   );
 };

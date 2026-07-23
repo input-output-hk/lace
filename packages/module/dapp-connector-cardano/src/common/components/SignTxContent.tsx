@@ -28,11 +28,11 @@ import {
   TransactionSummary,
 } from './sign-tx';
 
-import type { TokenTransferValue } from '../hooks/useDappTxInspection';
 import type { TokensMetadataMap } from '../utils';
 import type { SlotDateTime } from '../utils/slot-datetime';
 import type { TransactionInfo } from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 import type { AccountId } from '@lace-contract/wallet-repo';
 

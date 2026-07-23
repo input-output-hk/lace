@@ -1,10 +1,10 @@
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 import { BehaviorSubject, filter, finalize, map, switchMap, take } from 'rxjs';
 
 import { AuthSecret } from '../value-objects';
 
 import type { AccessAuthSecret } from './types';
-import type { WithLogger } from '@lace-sdk/util';
+import type { WithLogger } from '@lace-lib/util';
 
 /**
  * Internal auth secret bus used by the verification flow.

@@ -2,7 +2,7 @@ import { Serialization } from '@cardano-sdk/core';
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
 import { util } from '@cardano-sdk/key-management';
 import { createInputResolver } from '@lace-contract/cardano-context';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 

@@ -1,5 +1,5 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { describe, expect, test } from 'vitest';
 
 import {

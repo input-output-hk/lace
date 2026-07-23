@@ -5,7 +5,7 @@ import {
   filterSpendableUtxos,
   type AccountRewardAccountDetailsMap,
 } from '@lace-contract/cardano-context';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -186,7 +186,7 @@ export const makeBuildDeregistrationTx =
       // Add the Conway-era unregistration certificate with deposit
       builder.addStakeDeregistrationCertificate(stakeCredential, deposit);
 
-      const tx = builder.build();
+      const tx = await builder.build();
 
       const core = tx.toCore();
       const feeBigint = core.body.fee;
@@ -205,6 +205,7 @@ export const makeBuildDeregistrationTx =
         serializedTx,
         fees,
         depositReturn,
+        withdrawalAmount: String(withdrawableAmount),
       };
     }).pipe(
       catchError((error: Error) =>

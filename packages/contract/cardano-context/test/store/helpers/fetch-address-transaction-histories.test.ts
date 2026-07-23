@@ -2,7 +2,7 @@ import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { AddressType } from '@cardano-sdk/key-management';
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
-import { Err, Ok, Timestamp } from '@lace-sdk/util';
+import { Err, Ok, Timestamp } from '@lace-lib/util';
 import { defer, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

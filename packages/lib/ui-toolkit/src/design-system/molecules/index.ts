@@ -10,6 +10,7 @@ export * from './contactGroup/contactGroup';
 export * from './contactItem/contact';
 export * from './detailRows/detailRows';
 export * from './dropdownMenu/dropdownMenu';
+export * from './dropdownMenu/sheetPositionContext';
 export * from './modal/modal';
 export * from './floatingOverlay/floatingOverlay';
 export * from './sheetSafeOverlay/sheetSafeOverlay';

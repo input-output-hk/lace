@@ -1,0 +1,21 @@
+{
+  "name": "@lace-lib/cardano-keystone-protocol",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@keystonehq/bc-ur-registry": "^0.8.0",
+    "@keystonehq/bc-ur-registry-cardano": "^0.5.0",
+    "@lace-lib/ur-transport": "*",
+    "buffer": "^6.0.3",
+    "type-fest": "^4.41.0"
+  },
+  "devDependencies": {
+    "@keystonehq/keystone-sdk": "^0.12.3"
+  }
+}

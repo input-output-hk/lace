@@ -1,0 +1,30 @@
+{
+  "description": "Critical-by-default key patterns for the shared Lace UI translation set (packages/contract/i18n, consumed by every wrapper app). A source key matching one of these patterns is accuracy-critical (financial / security consequence). Under strict / permissive tolerance, check:i18n-provenance requires its technique to be human-reviewed (one of exact-reuse, verbatim, mtpe, human — never a raw machine draft such as machine-translated or the unconfirmed exact-ambiguous pool pick) AND, unless it is a deliberate `verbatim`, requires the key to be listed in verified-critical-{lang}.json (parallel manual check complete). Bypassed under pre-production tolerance. Globs are matched against SOURCE keys, `*` = any chars. Patterns are derived from the real @lace-contract/i18n en.json namespaces (NOT carbon.*-prefixed). Covers the strategy's critical-by-default surfaces; see docs/i18n-strategy.md.",
+  "patterns": [
+    "send-flow.*",
+    "v2.send-flow.*",
+    "midnight.send-flow.*",
+    "v2.midnight.send-flow.*",
+    "drawer.receive.*",
+    "midnight.drawer.receive.*",
+    "v2.sheets.receive.*",
+    "v2.swap.*",
+    "v2.deregister-pool.*",
+    "v2.pages.stake-delegation*",
+    "v2.sheets.stake-delegation*",
+    "authentication-prompt.*",
+    "dapp-connector.sign-transaction.*",
+    "dapp-connector.sign-data.*",
+    "dapp-connector.cardano.sign-tx.*",
+    "dapp-connector.cardano.sign-data.*",
+    "v2.dappConnector.*",
+    "v2.recovery-phrase.*",
+    "v2.wallet-settings.*recovery-phrase*",
+    "v2.onboarding.mnemonic-stage*",
+    "v2.action-prompt-card.confirmPassphrase*",
+    "onboarding.in-memory.*recovery-phrase*",
+    "tx-executor.building-error.insufficient-*",
+    "collateral.sheet.not-enough-balance*",
+    "designation-flow.*"
+  ]
+}

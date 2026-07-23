@@ -1,5 +1,9 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
+import {
+  clearPendingCreateWalletSecrets,
+  getPendingCreateWalletPasswordUtf8,
+} from '@lace-contract/onboarding-v2';
 import { StackRoutes, TabRoutes } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -8,6 +12,7 @@ import {
   useDispatchLaceAction,
   useLaceSelector,
   useLoadModules,
+  usePendingCreateWalletSecrets,
 } from '../../hooks';
 import { toAccountOption } from '../utils';
 
@@ -45,9 +50,7 @@ export const useOnboardingCreateWallet = ({
     'onboardingV2.resetCreateWalletStatus',
   );
 
-  const pendingCreateWallet = useLaceSelector(
-    'onboardingV2.selectPendingCreateWallet',
-  );
+  const pendingCreateWallet = usePendingCreateWalletSecrets();
   const isCreatingWallet = useLaceSelector(
     'onboardingV2.selectIsCreatingWallet',
   );
@@ -71,12 +74,15 @@ export const useOnboardingCreateWallet = ({
   >([]);
   const hasInitializedSelection = useRef(false);
 
+  const [isFinishing, setIsFinishing] = useState(false);
+
   useEffect(() => {
     // This waits for the wallet to be created and then resets the status
     // We need to do this since there is now way yet to do a reset from
     // a side effect. TODO to check later maybe?
     if (!lastCreatedWalletId) return;
 
+    clearPendingCreateWalletSecrets();
     resetCreateWalletStatus();
     navigation.reset({
       index: 0,
@@ -114,6 +120,7 @@ export const useOnboardingCreateWallet = ({
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       isNavigatingToPasswordEntry.current = false;
+      setIsFinishing(false);
       // Reset status when returning to this screen
       if (createWalletError) {
         resetCreateWalletStatus();
@@ -121,6 +128,10 @@ export const useOnboardingCreateWallet = ({
     });
     return unsubscribe;
   }, [navigation, createWalletError, resetCreateWalletStatus]);
+
+  useEffect(() => {
+    if (createWalletError) setIsFinishing(false);
+  }, [createWalletError]);
 
   useEffect(() => {
     if (!inMemoryWalletIntegrations.length || hasInitializedSelection.current) {
@@ -159,7 +170,7 @@ export const useOnboardingCreateWallet = ({
 
   const handleFinishSetup = useCallback(() => {
     // Prevent re-triggering while navigating to password entry
-    if (isNavigatingToPasswordEntry.current) {
+    if (isNavigatingToPasswordEntry.current || isFinishing) {
       return;
     }
 
@@ -168,18 +179,21 @@ export const useOnboardingCreateWallet = ({
 
     trackEvent('onboarding | create wallet | finish setup | press');
 
+    setIsFinishing(true);
+
     const walletName = t('onboarding.create-wallet.default-wallet-name', {
       index: 0,
     });
     attemptCreateWallet({
       walletName,
       blockchains: selectedBlockchains,
-      password: pendingCreateWallet?.password ?? '',
+      password: getPendingCreateWalletPasswordUtf8() ?? '',
       recoveryPhrase: pendingCreateWallet?.recoveryPhrase ?? [],
     });
   }, [
     attemptCreateWallet,
     hasNoBlockchainsAndIsCreatingWallet,
+    isFinishing,
     pendingCreateWallet?.recoveryPhrase,
     pendingCreateWallet?.password,
     selectedBlockchains,
@@ -211,11 +225,13 @@ export const useOnboardingCreateWallet = ({
 
   const isFinishDisabled = useMemo(() => {
     return (
+      isFinishing ||
       hasNoBlockchainsAndIsCreatingWallet ||
       !pendingCreateWallet?.password ||
       !inMemoryWalletIntegrations.length
     );
   }, [
+    isFinishing,
     hasNoBlockchainsAndIsCreatingWallet,
     inMemoryWalletIntegrations.length,
     pendingCreateWallet?.password,
@@ -231,7 +247,7 @@ export const useOnboardingCreateWallet = ({
     onBackPress: handleBackPress,
     finishButtonLabel,
     isFinishDisabled,
-    isFinishLoading: isCreatingWallet,
-    isAccountSelectionDisabled: isCreatingWallet,
+    isFinishLoading: isCreatingWallet || isFinishing,
+    isAccountSelectionDisabled: isCreatingWallet || isFinishing,
   };
 };

@@ -1,5 +1,5 @@
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import { Redacted } from '@lace-lib/util-redacted';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
 
 import type { Tagged } from 'type-fest';
 

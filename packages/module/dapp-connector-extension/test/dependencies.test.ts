@@ -2,7 +2,7 @@ import {
   AuthenticatorError,
   AuthenticatorErrorCode,
 } from '@lace-contract/dapp-connector';
-import { exposeAuthenticatorApi } from '@lace-sdk/dapp-connector';
+import { exposeAuthenticatorApi } from '@lace-lib/dapp-connector';
 import { BehaviorSubject, NEVER, Subject } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -11,8 +11,8 @@ import initializeStore from '../src/store/init';
 
 import type { Dapp, DappId } from '@lace-contract/dapp-connector';
 import type { ModuleInitProps } from '@lace-contract/module';
-import type { AuthenticatorApi } from '@lace-sdk/dapp-connector';
-import type { ChannelName } from '@lace-sdk/extension-messaging';
+import type { AuthenticatorApi } from '@lace-lib/dapp-connector';
+import type { ChannelName } from '@lace-lib/extension-messaging';
 
 const mockShutdown = vi.fn();
 const mockDisconnectSubject = new Subject();
@@ -25,7 +25,7 @@ const createMockDapp = (origin: string): Dapp => ({
   origin,
 });
 
-vi.mock('@lace-sdk/dapp-connector', () => ({
+vi.mock('@lace-lib/dapp-connector', () => ({
   exposeAuthenticatorApi: vi.fn(() => ({
     shutdown: mockShutdown,
     messenger: {
@@ -366,6 +366,251 @@ describe('dapp-connector-extension dependencies', () => {
 
       subscription?.unsubscribe();
       dappConnectedSub?.unsubscribe();
+    });
+
+    // Issues a pending request (tab 77/frame 0) and tracks whether cancelled$ fires.
+    const setupPendingRequestWithCancelTracking = async () => {
+      const store = initializeStore({} as ModuleInitProps, {
+        logger: dummyLogger,
+      });
+      const hasAccounts = vi.fn().mockResolvedValue(true);
+      const accessRequests: unknown[] = [];
+
+      const subscription = store.sideEffectDependencies
+        ?.connectAuthenticator?.({ ...defaultConnectOptions, hasAccounts })
+        .subscribe(request => accessRequests.push(request));
+
+      const authenticator = getExposedAuthenticator();
+      const sender = {
+        tab: { id: 77, title: 'Test', favIconUrl: 'icon.png' },
+        frameId: 0,
+      } as unknown as Parameters<AuthenticatorApi['requestAccess']>[0];
+
+      void authenticator.requestAccess(sender);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(1);
+
+      let isCancelled = false;
+      (
+        accessRequests[0] as {
+          cancelled$?: { subscribe: (next: () => void) => void };
+        }
+      ).cancelled$?.subscribe(() => {
+        isCancelled = true;
+      });
+
+      return { subscription, getIsCancelled: () => isCancelled };
+    };
+
+    it('fires cancelled$ on a pending access request when the originating port disconnects', async () => {
+      const { subscription, getIsCancelled } =
+        await setupPendingRequestWithCancelTracking();
+
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 77 }, frameId: 0 } },
+      });
+
+      expect(getIsCancelled()).toBe(true);
+
+      subscription?.unsubscribe();
+    });
+
+    it('does not fire cancelled$ when an unrelated port disconnects', async () => {
+      const { subscription, getIsCancelled } =
+        await setupPendingRequestWithCancelTracking();
+
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 999 }, frameId: 0 } },
+      });
+
+      expect(getIsCancelled()).toBe(false);
+
+      subscription?.unsubscribe();
+    });
+
+    it('fires cancelled$ when the port disconnected before cancelled$ was subscribed', async () => {
+      const store = initializeStore({} as ModuleInitProps, {
+        logger: dummyLogger,
+      });
+      const hasAccounts = vi.fn().mockResolvedValue(true);
+      const accessRequests: unknown[] = [];
+
+      const subscription = store.sideEffectDependencies
+        ?.connectAuthenticator?.({ ...defaultConnectOptions, hasAccounts })
+        .subscribe(request => accessRequests.push(request));
+
+      const authenticator = getExposedAuthenticator();
+      const sender = {
+        tab: { id: 77, title: 'Test', favIconUrl: 'icon.png' },
+        frameId: 0,
+      } as unknown as Parameters<AuthenticatorApi['requestAccess']>[0];
+
+      void authenticator.requestAccess(sender);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(1);
+
+      // Drop while still queued: nothing is subscribed to cancelled$ yet.
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 77 }, frameId: 0 } },
+      });
+
+      let isCancelled = false;
+      (
+        accessRequests[0] as {
+          cancelled$?: { subscribe: (next: () => void) => void };
+        }
+      ).cancelled$?.subscribe(() => {
+        isCancelled = true;
+      });
+
+      expect(isCancelled).toBe(true);
+
+      subscription?.unsubscribe();
+    });
+
+    it('fires cancelled$ when the port disconnects during the hasAccounts await', async () => {
+      const store = initializeStore({} as ModuleInitProps, {
+        logger: dummyLogger,
+      });
+      // Gate hasAccounts on an external promise so the port can drop while
+      // requestAccess is still awaiting assertHasAccounts().
+      let releaseHasAccounts: () => void = () => {};
+      const hasAccountsGate = new Promise<void>(resolve => {
+        releaseHasAccounts = resolve;
+      });
+      const hasAccounts = vi.fn(async () => {
+        await hasAccountsGate;
+        return true;
+      });
+      const accessRequests: unknown[] = [];
+
+      const subscription = store.sideEffectDependencies
+        ?.connectAuthenticator?.({ ...defaultConnectOptions, hasAccounts })
+        .subscribe(request => accessRequests.push(request));
+
+      const authenticator = getExposedAuthenticator();
+      const sender = {
+        tab: { id: 77, title: 'Test', favIconUrl: 'icon.png' },
+        frameId: 0,
+      } as unknown as Parameters<AuthenticatorApi['requestAccess']>[0];
+
+      void authenticator.requestAccess(sender);
+      // Let requestAccess run up to (and block on) the assertHasAccounts await.
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(0);
+
+      // Port drops mid-await.
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 77 }, frameId: 0 } },
+      });
+
+      releaseHasAccounts();
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(1);
+
+      let isCancelled = false;
+      (
+        accessRequests[0] as {
+          cancelled$?: { subscribe: (next: () => void) => void };
+        }
+      ).cancelled$?.subscribe(() => {
+        isCancelled = true;
+      });
+
+      expect(isCancelled).toBe(true);
+
+      subscription?.unsubscribe();
+    });
+
+    it('fires cancelled$ on the stale request when the port reconnects under the same context before cancelled$ was subscribed', async () => {
+      const store = initializeStore({} as ModuleInitProps, {
+        logger: dummyLogger,
+      });
+      const hasAccounts = vi.fn().mockResolvedValue(true);
+      const accessRequests: unknown[] = [];
+
+      const subscription = store.sideEffectDependencies
+        ?.connectAuthenticator?.({ ...defaultConnectOptions, hasAccounts })
+        .subscribe(request => accessRequests.push(request));
+
+      const authenticator = getExposedAuthenticator();
+      const sender = {
+        tab: { id: 77, title: 'Test', favIconUrl: 'icon.png' },
+        frameId: 0,
+      } as unknown as Parameters<AuthenticatorApi['requestAccess']>[0];
+
+      void authenticator.requestAccess(sender);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(1);
+
+      // Refresh while queued: drop then reconnect under the same context, before
+      // cancelled$ is subscribed.
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 77 }, frameId: 0 } },
+      });
+      mockConnectSubject.next({
+        sender: { tab: { id: 77 }, frameId: 0 },
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      let isCancelled = false;
+      (
+        accessRequests[0] as {
+          cancelled$?: { subscribe: (next: () => void) => void };
+        }
+      ).cancelled$?.subscribe(() => {
+        isCancelled = true;
+      });
+
+      expect(isCancelled).toBe(true);
+
+      subscription?.unsubscribe();
+    });
+
+    it('does not fire cancelled$ on a request issued after the port reconnected under the same context', async () => {
+      const store = initializeStore({} as ModuleInitProps, {
+        logger: dummyLogger,
+      });
+      const hasAccounts = vi.fn().mockResolvedValue(true);
+      const accessRequests: unknown[] = [];
+
+      const subscription = store.sideEffectDependencies
+        ?.connectAuthenticator?.({ ...defaultConnectOptions, hasAccounts })
+        .subscribe(request => accessRequests.push(request));
+
+      const authenticator = getExposedAuthenticator();
+      const sender = {
+        tab: { id: 77, title: 'Test', favIconUrl: 'icon.png' },
+        frameId: 0,
+      } as unknown as Parameters<AuthenticatorApi['requestAccess']>[0];
+
+      // Stale request from the pre-refresh page, then a refresh.
+      void authenticator.requestAccess(sender);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      mockDisconnectSubject.next({
+        disconnected: { sender: { tab: { id: 77 }, frameId: 0 } },
+      });
+      mockConnectSubject.next({
+        sender: { tab: { id: 77 }, frameId: 0 },
+      });
+
+      // Fresh request from the reloaded page, under the new epoch.
+      void authenticator.requestAccess(sender);
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(accessRequests).toHaveLength(2);
+
+      let isCancelled = false;
+      (
+        accessRequests[1] as {
+          cancelled$?: { subscribe: (next: () => void) => void };
+        }
+      ).cancelled$?.subscribe(() => {
+        isCancelled = true;
+      });
+
+      expect(isCancelled).toBe(false);
+
+      subscription?.unsubscribe();
     });
 
     it('should emit dappDisconnected when a port disconnects', () => {

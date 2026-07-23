@@ -1,6 +1,6 @@
 import { BITCOIN_TOKEN_ID } from '@lace-contract/bitcoin-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, it, expect } from 'vitest';
 
 import { createChainMinimumAmountTokenValidator } from '../../src/exposed-modules/chain-minimum-amount-token-validator';

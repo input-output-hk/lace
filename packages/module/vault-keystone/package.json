@@ -1,0 +1,35 @@
+{
+  "name": "@lace-module/vault-keystone",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/crypto": "0.4.7",
+    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/util": "0.17.2",
+    "@lace-contract/air-gapped-qr-exchange": "*",
+    "@lace-contract/bitcoin-context": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/onboarding-v2": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/bitcoin-air-gapped-protocol": "*",
+    "@lace-lib/cardano-keystone-protocol": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-hw": "*",
+    "bitcoinjs-lib": "^6.1.7",
+    "buffer": "^6.0.3",
+    "rxjs": "^7.8.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@bitcoinerlab/secp256k1": "1.2.0",
+    "@keystonehq/bc-ur-registry": "^0.8.0",
+    "ecpair": "^3.0.0"
+  }
+}

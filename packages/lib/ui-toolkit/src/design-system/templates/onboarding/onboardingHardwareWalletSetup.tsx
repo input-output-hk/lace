@@ -11,13 +11,21 @@ import { OnboardingLayout } from './OnboardingLayout';
 
 import type { DropdownMenuItem } from '../../molecules/dropdownMenu/dropdownMenu';
 
-const ACCOUNT_INDEX_OPTIONS: DropdownMenuItem[] = Array.from(
-  { length: 50 },
-  (_, index) => ({
+/**
+ * App-wide ceiling for uncapped devices. Mirrors MAX_ACCOUNT_INDEX in
+ * @lace-module/account-management (addAccountHelpers.ts) - kept separate
+ * because modules own business rules and ui-toolkit is presentation-only.
+ * Change both together.
+ */
+const DEFAULT_MAX_ACCOUNT_INDEX = 49;
+
+const buildAccountIndexOptions = (
+  maxAccountIndex: number,
+): DropdownMenuItem[] =>
+  Array.from({ length: maxAccountIndex + 1 }, (_, index) => ({
     id: String(index),
     text: `Account #${index}`,
-  }),
-);
+  }));
 
 export interface DerivationTypeOption {
   value: string;
@@ -31,6 +39,11 @@ export interface OnboardingHardwareWalletSetupProps {
   accountIndex: number;
   onAccountIndexChange: (index: number) => void;
   accountLabel: string;
+  /**
+   * Highest selectable account index (inclusive). Set when the device
+   * firmware caps derivation (e.g. Keystone Cardano: 24); defaults to 49.
+   */
+  maxAccountIndex?: number;
   derivationTypeOptions?: DerivationTypeOption[];
   derivationType?: string;
   onDerivationTypeChange?: (type: string) => void;
@@ -42,6 +55,10 @@ export interface OnboardingHardwareWalletSetupProps {
   // Use the sheet layout (SheetHeader + scroll + anchored SheetFooter) instead
   // of the full-screen OnboardingLayout. Set when hosting inside a sheet.
   embedded?: boolean;
+  // Hide the account-index/derivation fields. Air-gapped Bitcoin reads the
+  // account index from the device export, so it shows instructions instead.
+  showAccountSetup?: boolean;
+  instructionText?: string;
 }
 
 export const OnboardingHardwareWalletSetup = (
@@ -57,6 +74,7 @@ const FullScreenHardwareWalletSetup = ({
   accountIndex,
   onAccountIndexChange,
   accountLabel,
+  maxAccountIndex,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
@@ -65,6 +83,8 @@ const FullScreenHardwareWalletSetup = ({
   createButtonLabel,
   isLoading = false,
   error,
+  showAccountSetup = true,
+  instructionText,
 }: OnboardingHardwareWalletSetupProps) => {
   const selectedDerivationOption = derivationTypeOptions?.find(
     o => o.value === derivationType,
@@ -82,12 +102,15 @@ const FullScreenHardwareWalletSetup = ({
             accountIndex={accountIndex}
             onAccountIndexChange={onAccountIndexChange}
             accountLabel={accountLabel}
+            maxAccountIndex={maxAccountIndex}
             derivationTypeOptions={derivationTypeOptions}
             derivationType={derivationType}
             onDerivationTypeChange={onDerivationTypeChange}
             derivationTypeLabel={derivationTypeLabel}
             selectedDerivationOption={selectedDerivationOption}
             error={error}
+            showAccountSetup={showAccountSetup}
+            instructionText={instructionText}
           />
         </ScrollView>
 
@@ -109,11 +132,14 @@ const EmbeddedHardwareWalletSetup = ({
   accountIndex,
   onAccountIndexChange,
   accountLabel,
+  maxAccountIndex,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
   derivationTypeLabel,
   error,
+  showAccountSetup = true,
+  instructionText,
 }: OnboardingHardwareWalletSetupProps) => {
   const contentContainerStyle = useMemo(
     () => [
@@ -134,12 +160,15 @@ const EmbeddedHardwareWalletSetup = ({
         accountIndex={accountIndex}
         onAccountIndexChange={onAccountIndexChange}
         accountLabel={accountLabel}
+        maxAccountIndex={maxAccountIndex}
         derivationTypeOptions={derivationTypeOptions}
         derivationType={derivationType}
         onDerivationTypeChange={onDerivationTypeChange}
         derivationTypeLabel={derivationTypeLabel}
         selectedDerivationOption={selectedDerivationOption}
         error={error}
+        showAccountSetup={showAccountSetup}
+        instructionText={instructionText}
       />
     </Sheet.Scroll>
   );
@@ -149,84 +178,108 @@ interface FieldGroupsProps {
   accountIndex: number;
   onAccountIndexChange: (index: number) => void;
   accountLabel: string;
+  maxAccountIndex?: number;
   derivationTypeOptions?: DerivationTypeOption[];
   derivationType?: string;
   onDerivationTypeChange?: (type: string) => void;
   derivationTypeLabel?: string;
   selectedDerivationOption?: DerivationTypeOption;
   error?: string | null;
+  showAccountSetup?: boolean;
+  instructionText?: string;
 }
 
 const FieldGroups = ({
   accountIndex,
   onAccountIndexChange,
   accountLabel,
+  maxAccountIndex = DEFAULT_MAX_ACCOUNT_INDEX,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
   derivationTypeLabel,
   selectedDerivationOption,
   error,
-}: FieldGroupsProps) => (
-  <>
-    <View style={fieldStyles.fieldGroup}>
-      <Text.S variant="primary" style={fieldStyles.label}>
-        {accountLabel}
-      </Text.S>
-      <DropdownMenu
-        items={ACCOUNT_INDEX_OPTIONS}
-        title={`Account #${accountIndex}`}
-        selectedItemId={String(accountIndex)}
-        onSelectItem={index => {
-          onAccountIndexChange(index);
-        }}
-        maxVisibleItems={5}
-        testID="hardware-setup-account-index"
-      />
-    </View>
+  showAccountSetup = true,
+  instructionText,
+}: FieldGroupsProps) => {
+  const accountIndexOptions = useMemo(
+    () => buildAccountIndexOptions(maxAccountIndex),
+    [maxAccountIndex],
+  );
 
-    {derivationTypeOptions &&
-      derivationType &&
-      onDerivationTypeChange &&
-      derivationTypeLabel && (
+  return (
+    <>
+      {!showAccountSetup && instructionText && (
         <View style={fieldStyles.fieldGroup}>
-          <Text.S variant="primary" style={fieldStyles.label}>
-            {derivationTypeLabel}
+          <Text.S variant="primary" testID="hardware-setup-instructions">
+            {instructionText}
           </Text.S>
-          <DropdownMenu
-            items={derivationTypeOptions.map(o => ({
-              id: o.value,
-              text: o.label,
-            }))}
-            title={selectedDerivationOption?.label ?? derivationType}
-            selectedItemId={derivationType}
-            onSelectItem={index => {
-              const selected = derivationTypeOptions[index];
-              if (selected) onDerivationTypeChange(selected.value);
-            }}
-            maxVisibleItems={4}
-            testID="hardware-setup-derivation-type"
-          />
-          <View style={fieldStyles.tooltipContainer}>
-            {derivationTypeOptions.map(o => (
-              <Text.XS
-                key={o.value}
-                variant="secondary"
-                style={fieldStyles.tooltipLine}>
-                {o.label}: {o.description}
-              </Text.XS>
-            ))}
-          </View>
         </View>
       )}
 
-    {error && (
-      <View style={fieldStyles.errorContainer}>
-        <Text.S variant="secondary">{error}</Text.S>
-      </View>
-    )}
-  </>
-);
+      {showAccountSetup && (
+        <View style={fieldStyles.fieldGroup}>
+          <Text.S variant="primary" style={fieldStyles.label}>
+            {accountLabel}
+          </Text.S>
+          <DropdownMenu
+            items={accountIndexOptions}
+            title={`Account #${accountIndex}`}
+            selectedItemId={String(accountIndex)}
+            onSelectItem={index => {
+              onAccountIndexChange(index);
+            }}
+            maxVisibleItems={5}
+            testID="hardware-setup-account-index"
+          />
+        </View>
+      )}
+
+      {showAccountSetup &&
+        derivationTypeOptions &&
+        derivationType &&
+        onDerivationTypeChange &&
+        derivationTypeLabel && (
+          <View style={fieldStyles.fieldGroup}>
+            <Text.S variant="primary" style={fieldStyles.label}>
+              {derivationTypeLabel}
+            </Text.S>
+            <DropdownMenu
+              items={derivationTypeOptions.map(o => ({
+                id: o.value,
+                text: o.label,
+              }))}
+              title={selectedDerivationOption?.label ?? derivationType}
+              selectedItemId={derivationType}
+              onSelectItem={index => {
+                const selected = derivationTypeOptions[index];
+                if (selected) onDerivationTypeChange(selected.value);
+              }}
+              maxVisibleItems={4}
+              testID="hardware-setup-derivation-type"
+            />
+            <View style={fieldStyles.tooltipContainer}>
+              {derivationTypeOptions.map(o => (
+                <Text.XS
+                  key={o.value}
+                  variant="secondary"
+                  style={fieldStyles.tooltipLine}>
+                  {o.label}: {o.description}
+                </Text.XS>
+              ))}
+            </View>
+          </View>
+        )}
+
+      {error && (
+        <View style={fieldStyles.errorContainer}>
+          <Text.S variant="secondary">{error}</Text.S>
+        </View>
+      )}
+    </>
+  );
+};
 
 const fullScreenStyles = StyleSheet.create({
   container: {

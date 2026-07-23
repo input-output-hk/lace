@@ -95,6 +95,7 @@ export const ActivityDetails = ({
       [ActivityType.Withdrawal]: successConfig,
       [ActivityType.Self]: successConfig,
       [ActivityType.Receive]: successConfig,
+      [ActivityType.NightDesignation]: successConfig,
       [ActivityType.Rewards]: {
         icon: 'Gift',
         color: 'positive',
@@ -263,6 +264,15 @@ export const ActivityDetails = ({
           </Column>
         }
       />
+      {!!activityDetail?.blockchainSpecific?.donation && (
+        <ActivityDetailItem
+          testID="activity-details-donation"
+          label={t('v2.activity-details.sheet.donation')}
+          value={`${convertLovelacesToAda(
+            activityDetail?.blockchainSpecific?.donation,
+          )} ${nativeCoinSymbol}`}
+        />
+      )}
 
       {!!activityDetail?.blockchainSpecific?.votingProcedures && (
         <ActivityDetailsVotingProcedure

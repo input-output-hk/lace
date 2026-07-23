@@ -6,8 +6,8 @@ import type {
 } from '@lace-contract/module';
 import type { Token, TokenId } from '@lace-contract/tokens';
 import type { AccountId, AnyWallet } from '@lace-contract/wallet-repo';
+import type { BigNumber } from '@lace-lib/util';
 import type { BlockchainAssigned, ErrorObject } from '@lace-lib/util-store';
-import type { BigNumber } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
 /**

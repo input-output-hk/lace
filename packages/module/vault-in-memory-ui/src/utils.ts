@@ -1,4 +1,4 @@
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 
 // Expo export always sets process.env.NODE_ENV to 'production', even for dev
 // builds. EXPO_PUBLIC_NODE_ENV is forwarded from the shell by prepare-expo-env

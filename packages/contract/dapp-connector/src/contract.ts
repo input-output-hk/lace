@@ -6,7 +6,7 @@ import {
   inferContractContext,
 } from '@lace-contract/module';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
-import { ChannelName } from '@lace-sdk/extension-messaging';
+import { ChannelName } from '@lace-lib/extension-messaging';
 
 import store from './store';
 
@@ -18,12 +18,12 @@ import type {
   ContractSelectors,
   LaceSideEffect,
 } from '@lace-contract/module';
-import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
 import type {
   BaseChannel,
   ConsumeRemoteApiOptions,
-} from '@lace-sdk/extension-messaging';
-import type { MinimalRuntime } from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
+import type { MinimalRuntime } from '@lace-lib/extension-messaging';
+import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 
@@ -117,6 +117,12 @@ export interface AccessRequest {
   done: (accessGranted: boolean) => void;
   /** Browser window ID where the requesting dApp tab lives (extension only). */
   windowId?: number;
+  /**
+   * Emits when the dApp connection drops before the user responds. The
+   * authorize queue is serialized, so an unresolved request blocks all later
+   * ones; platforms that can detect the drop surface it here to free the queue.
+   */
+  cancelled$?: Observable<void>;
 }
 
 export interface ConnectAuthenticatorOptions {

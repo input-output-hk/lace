@@ -1,5 +1,5 @@
 import { signerAuthFromPrompt } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { catchError, defer, map, of } from 'rxjs';
 
 import { mapMidnightConfirmError } from './error-mapping';

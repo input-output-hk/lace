@@ -1,6 +1,7 @@
 import {
   COLLATERAL_AMOUNT_LOVELACES,
   convertLovelacesToAda,
+  LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import {
@@ -264,8 +265,6 @@ export const useCollateralState = ({
     return Number(adaString);
   }, []);
 
-  // ADA price ID in token-pricing (CardanoTokenPriceId('ada') -> 'cardano:ada')
-
   // Extract estimated fee from state when available
   const estimatedFee = useMemo<EstimatedFee | undefined>(() => {
     // Check if state has fees (Ready, Confirming, or Submitting states)
@@ -289,7 +288,7 @@ export const useCollateralState = ({
 
         // Fiat values are only available on mainnet with token pricing enabled
         const adaPriceData = isTokenPricingEnabled
-          ? allPrices?.[CardanoTokenPriceId('ada')]
+          ? allPrices?.[CardanoTokenPriceId(LOVELACE_TOKEN_ID)]
           : undefined;
         const fiatValue =
           adaPriceData?.price == null

@@ -1,4 +1,4 @@
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 export const password = 'ComplexPassword2024!';
 export const encryptedRecoveryPhrasePassword = password;

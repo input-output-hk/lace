@@ -4,8 +4,8 @@ import {
   WalletId,
   walletsActions,
 } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { REHYDRATE } from 'redux-persist';
 import { describe, expect, it } from 'vitest';
 
@@ -386,6 +386,59 @@ describe('activities slice', () => {
         );
 
         expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({});
+      });
+
+      it('restores desiredLoadedActivitiesCountPerAccount from the payload hint instead of the (shrunken) activities length', () => {
+        const rehydrateAction = {
+          type: REHYDRATE,
+          key: 'activities',
+          payload: {
+            activities: {
+              [accountId]: [activity1], // 1 survives after the migration drops rewards
+            },
+            desiredLoadedActivitiesCountPerAccount: {
+              [accountId]: 4, // pre-migration count: 1 tx + 3 dropped rewards
+            },
+          },
+        };
+
+        const state = activitiesReducers.activities(
+          initialState,
+          rehydrateAction,
+        );
+
+        expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({
+          [accountId]: 4,
+        });
+      });
+
+      it('falls back to activities length for accounts missing from the payload hint', () => {
+        const rehydrateAction = {
+          type: REHYDRATE,
+          key: 'activities',
+          payload: {
+            activities: {
+              [accountId]: [activity1],
+              [account2Id]: [
+                activity2,
+                { ...activity2, activityId: 'activity2b' },
+              ],
+            },
+            desiredLoadedActivitiesCountPerAccount: {
+              [accountId]: 4,
+            },
+          },
+        };
+
+        const state = activitiesReducers.activities(
+          initialState,
+          rehydrateAction,
+        );
+
+        expect(state.desiredLoadedActivitiesCountPerAccount).toStrictEqual({
+          [accountId]: 4,
+          [account2Id]: 2,
+        });
       });
     });
 

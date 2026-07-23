@@ -1,8 +1,8 @@
 import { createObservableHook } from '@lace-lib/util-store';
 import { firstValueFrom } from 'rxjs';
 
+import type { MakeFunctionObservable } from '@lace-lib/util';
 import type { RequestHWConnection } from '@lace-lib/util-hw';
-import type { MakeFunctionObservable } from '@lace-sdk/util';
 
 export const requestHWConnectionHook =
   createObservableHook<MakeFunctionObservable<RequestHWConnection>>();

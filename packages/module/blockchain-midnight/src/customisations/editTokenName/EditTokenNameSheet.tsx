@@ -9,10 +9,11 @@ import {
   type SheetScreenProps,
 } from '@lace-lib/navigation';
 import { EditTokenNameBottomSheet, Sheet } from '@lace-lib/ui-toolkit';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { useDispatchLaceAction } from '../../hooks';
 
+import type { UseEditTokenNameProps } from '@lace-contract/midnight-context';
 import type { SheetRoutes } from '@lace-lib/navigation';
 
 export const EditTokenNameSheet = ({
@@ -23,6 +24,31 @@ export const EditTokenNameSheet = ({
   const { t } = useTranslation();
   const upsertTokenMetadata = useDispatchLaceAction(
     'tokens.upsertTokenMetadata',
+  );
+
+  const onSave = useCallback<UseEditTokenNameProps['onSave']>(
+    metadata => {
+      upsertTokenMetadata(metadata);
+      NavigationControls.closeSheet();
+    },
+    [upsertTokenMetadata],
+  );
+
+  const onClose = useCallback<UseEditTokenNameProps['onClose']>(() => {
+    NavigationControls.closeSheet();
+  }, []);
+
+  const getErrorMessage = useCallback<UseEditTokenNameProps['getErrorMessage']>(
+    (name, excludedNames) => {
+      if (isTakenTokenName(name, excludedNames)) {
+        return t('tokens.detail-drawer.custom-name.input.error.name-taken');
+      }
+      if (isForbiddenTokenName(name)) {
+        return t('tokens.detail-drawer.custom-name.input.error.forbidden-name');
+      }
+      return undefined;
+    },
+    [t],
   );
 
   const {
@@ -38,22 +64,9 @@ export const EditTokenNameSheet = ({
   } = useEditTokenName({
     token,
     takenTokenNames,
-    onSave: metadata => {
-      upsertTokenMetadata(metadata);
-      NavigationControls.closeSheet();
-    },
-    onClose: () => {
-      NavigationControls.closeSheet();
-    },
-    getErrorMessage: (name, excludedNames) => {
-      if (isTakenTokenName(name, excludedNames)) {
-        return t('tokens.detail-drawer.custom-name.input.error.name-taken');
-      }
-      if (isForbiddenTokenName(name)) {
-        return t('tokens.detail-drawer.custom-name.input.error.forbidden-name');
-      }
-      return undefined;
-    },
+    onSave,
+    onClose,
+    getErrorMessage,
   });
 
   useEffect(() => {

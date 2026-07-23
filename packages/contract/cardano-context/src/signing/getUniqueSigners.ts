@@ -218,6 +218,12 @@ const getNativeScriptKeyPaths = (
       case Cardano.NativeScriptKind.RequireTimeBefore:
       case Cardano.NativeScriptKind.RequireTimeAfter:
         break;
+      case Cardano.NativeScriptKind.RequireGuard: {
+        if (nativeScript.credential.type === Cardano.CredentialType.KeyHash) {
+          out.add(nativeScript.credential.hash);
+        }
+        break;
+      }
     }
   }
 };

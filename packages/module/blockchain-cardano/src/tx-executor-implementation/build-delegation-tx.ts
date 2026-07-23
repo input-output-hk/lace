@@ -4,7 +4,7 @@ import {
   TransactionBuilder,
   filterSpendableUtxos,
 } from '@lace-contract/cardano-context';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -150,7 +150,7 @@ export const makeBuildDelegationTx =
       // Already registered, just delegate
       builder.addStakeDelegationCertificate(poolId, stakeCredential);
 
-      const tx = builder.build();
+      const tx = await builder.build();
       const core = tx.toCore();
       const feeBigint = core.body.fee;
 

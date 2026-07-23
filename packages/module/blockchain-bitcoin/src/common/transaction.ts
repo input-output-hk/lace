@@ -1,8 +1,11 @@
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { Psbt } from 'bitcoinjs-lib';
 
 import type { DerivedAddress } from './address';
-import type { BitcoinNetwork } from '@lace-contract/bitcoin-context';
+import type {
+  BitcoinNetwork,
+  BitcoinUnsignedTxDto,
+} from '@lace-contract/bitcoin-context';
 
 export type UnsignedTransaction = {
   context: Psbt;
@@ -19,9 +22,13 @@ export type SignedTransaction = {
   hex: string;
 };
 
-type SerializedDto = Omit<UnsignedTransaction, 'context'> & {
-  context: string;
-};
+/**
+ * Wire form of UnsignedTransaction. Intersecting with the contract's
+ * BitcoinUnsignedTxDto makes the compiler reject any drift between what
+ * this module serializes and what the vault signers decode.
+ */
+type SerializedDto = BitcoinUnsignedTxDto &
+  Omit<UnsignedTransaction, 'context'>;
 
 export interface SignedBitcoinTransactionDto {
   network: string;

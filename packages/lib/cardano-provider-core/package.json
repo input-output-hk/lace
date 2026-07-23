@@ -1,0 +1,20 @@
+{
+  "name": "@lace-lib/cardano-provider-core",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/cardano-stake-pools": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-lib/core": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-provider": "*",
+    "bottleneck": "^2.19.5"
+  },
+  "devDependencies": {
+    "@blockfrost/blockfrost-js": "^6.0.0"
+  }
+}

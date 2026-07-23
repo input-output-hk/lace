@@ -20,7 +20,7 @@ import {
   ModuleName,
 } from '@lace-contract/module';
 import '@lace-contract/feature';
-import { Err, Ok, Timestamp } from '@lace-sdk/util';
+import { Err, Ok, Timestamp } from '@lace-lib/util';
 import { type Observable, of } from 'rxjs';
 
 import { protocolParameters } from './protocol-parameters';
@@ -41,7 +41,7 @@ import type {
   StakePoolsNetworkData,
 } from '@lace-contract/cardano-stake-pools';
 import type { LaceModuleMap } from '@lace-contract/module';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 
 const toBlockfrostPartialStakePool = (
   details: NonNullable<BlockfrostStakePool>,
@@ -503,7 +503,8 @@ export const stubCardanoProvider: CardanoProvider = {
     // name/ticker-less metadata here clobbers the seeded base-token metadata
     // to an unnamed token whenever a metadata load runs for it (e.g. after a
     // UTxO-driven token refresh), making it render as the raw `lovelace` id.
-    // Return realistic base-token metadata so it resolves to ADA/tADA.
+    // Return realistic base-token metadata (always ticker ADA, regardless
+    // of network) so it keeps a name/ticker.
     if (tokenId === 'lovelace') {
       return of(
         Ok({
@@ -587,6 +588,9 @@ export const stubCardanoProvider: CardanoProvider = {
         ] as Cardano.Utxo,
       ]),
     ),
+
+  getUtxosAtAddress: (): Observable<Result<Cardano.Utxo[], ProviderError>> =>
+    of(Ok([])),
 
   getRewardAccountInfo: (_props, _context: CardanoProviderContext) => {
     // Return stub reward account info - indicates no staking (loading state)

@@ -1,5 +1,5 @@
 import { getI18n } from '@lace-contract/i18n';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import { createPasswordFlagManager } from '../../utils/password-flag';
 import { AuthSecret } from '../../value-objects';

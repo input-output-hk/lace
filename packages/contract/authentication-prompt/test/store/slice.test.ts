@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { authenticationPromptSelectors as selectors } from '../../src';
 import {
@@ -7,7 +7,7 @@ import {
   authenticationPromptReducers,
 } from '../../src/store/slice';
 
-import type { AuthenticationPromptStatus } from '../../src';
+import type { AuthenticationPromptStatus, Config } from '../../src';
 import type { State } from '@lace-contract/module';
 
 const createStore = () =>
@@ -216,6 +216,270 @@ describe('authenticationPrompt slice', () => {
         }),
       );
       expect(store.getState().authenticationPrompt.deviceAuthReady).toBe(false);
+    });
+  });
+
+  describe('verifiedPassword failed-attempt counter (L-201)', () => {
+    const config: Config = {
+      purpose: 'wallet-unlock',
+      confirmButtonLabel: 'authentication-prompt.confirm-button-label',
+      message: 'authentication-prompt.message.wallet-lock',
+    };
+
+    const readAttempts = (store: ReturnType<typeof createStore>) =>
+      selectors.authenticationPrompt.selectFailedPasswordAttempts(
+        store.getState(),
+      );
+
+    const enterVerifyingPassword = (store: ReturnType<typeof createStore>) => {
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.confirmedPassword(),
+      );
+    };
+
+    const openPasswordPrompt = (store: ReturnType<typeof createStore>) => {
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.requested(config),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.openedPassword(),
+      );
+    };
+
+    it('starts at zero', () => {
+      expect(readAttempts(createStore())).toBe(0);
+    });
+
+    it('increments on each consecutive failed verification', () => {
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      enterVerifyingPassword(store);
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+      expect(readAttempts(store)).toBe(1);
+
+      // A failure returns the machine to OpenPassword; re-confirm to retry.
+      enterVerifyingPassword(store);
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+      expect(readAttempts(store)).toBe(2);
+    });
+
+    it('resets to zero on a successful verification', () => {
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      enterVerifyingPassword(store);
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+      expect(readAttempts(store)).toBe(1);
+
+      enterVerifyingPassword(store);
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: true,
+        }),
+      );
+      expect(readAttempts(store)).toBe(0);
+    });
+
+    it('resets to zero when the user unlocks via biometrics instead', () => {
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      enterVerifyingPassword(store);
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+      expect(readAttempts(store)).toBe(1);
+
+      // Switch to biometrics and succeed; the password backoff counter must
+      // still clear, otherwise the next password entry stays throttled (L-201).
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.switchToBiometric(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.confirmedBiometric(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedBiometric({
+          success: true,
+        }),
+      );
+      expect(readAttempts(store)).toBe(0);
+    });
+  });
+
+  describe('verifiedPassword unlock-backoff deadline (L-201)', () => {
+    const config: Config = {
+      purpose: 'wallet-unlock',
+      confirmButtonLabel: 'authentication-prompt.confirm-button-label',
+      message: 'authentication-prompt.message.wallet-lock',
+    };
+
+    // Fixed wall-clock so the deadline `verifiedPassword` stamps via `Date.now()`
+    // in its `prepare` is deterministic.
+    const NOW = 1_700_000_000_000;
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    const readBackoffUntil = (store: ReturnType<typeof createStore>) =>
+      selectors.authenticationPrompt.selectUnlockBackoffUntil(store.getState());
+
+    const failOnce = (store: ReturnType<typeof createStore>) => {
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.confirmedPassword(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+    };
+
+    const openPasswordPrompt = (store: ReturnType<typeof createStore>) => {
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.requested(config),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.openedPassword(),
+      );
+    };
+
+    it('starts unthrottled', () => {
+      expect(readBackoffUntil(createStore())).toBe(0);
+    });
+
+    it('sets an absolute deadline of now + backoff(attempts) on failure', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW);
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      failOnce(store);
+      // 1st failure → 1s backoff
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+
+      failOnce(store);
+      // 2nd failure → 2s backoff
+      expect(readBackoffUntil(store)).toBe(NOW + 2000);
+    });
+
+    it('clears the deadline on a successful verification', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW);
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      failOnce(store);
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.confirmedPassword(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: true,
+        }),
+      );
+      expect(readBackoffUntil(store)).toBe(0);
+    });
+
+    it('clears the deadline when the user unlocks via biometrics instead', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW);
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      failOnce(store);
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.switchToBiometric(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.confirmedBiometric(),
+      );
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedBiometric({
+          success: true,
+        }),
+      );
+      expect(readBackoffUntil(store)).toBe(0);
+    });
+
+    it('ignores a stale password verify that arrives when not actively verifying', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW);
+      // The no-op transition logs; silence it to keep the test output clean.
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      // Arm a real backoff, which leaves the prompt back in OpenPassword.
+      failOnce(store);
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+
+      // A verify that resolves late (prompt is OpenPassword, not
+      // VerifyingPassword) must not clear the live backoff on success...
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: true,
+        }),
+      );
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+      expect(
+        selectors.authenticationPrompt.selectFailedPasswordAttempts(
+          store.getState(),
+        ),
+      ).toBe(1);
+
+      // ...nor inflate it on failure.
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedPassword({
+          success: false,
+        }),
+      );
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+      expect(
+        selectors.authenticationPrompt.selectFailedPasswordAttempts(
+          store.getState(),
+        ),
+      ).toBe(1);
+    });
+
+    it('ignores a stale biometric success that arrives when not actively verifying', () => {
+      vi.spyOn(Date, 'now').mockReturnValue(NOW);
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      const store = createStore();
+      openPasswordPrompt(store);
+
+      failOnce(store);
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+
+      // Biometric success arriving while in OpenPassword (not
+      // VerifyingBiometric) must not wipe the live password backoff.
+      store.dispatch(
+        authenticationPromptActions.authenticationPrompt.verifiedBiometric({
+          success: true,
+        }),
+      );
+      expect(readBackoffUntil(store)).toBe(NOW + 1000);
+      expect(
+        selectors.authenticationPrompt.selectFailedPasswordAttempts(
+          store.getState(),
+        ),
+      ).toBe(1);
     });
   });
 });

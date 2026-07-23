@@ -27,6 +27,7 @@ export const OnboardingDesktopLogin = (
     onNext,
     passwordStrengthFeedback,
     inputError,
+    passwordRecoveryNote,
   } = useOnboardingDesktopLogin(props);
 
   return (
@@ -49,6 +50,7 @@ export const OnboardingDesktopLogin = (
       onNext={onNext}
       passwordStrengthFeedback={passwordStrengthFeedback}
       inputError={inputError}
+      passwordRecoveryNote={passwordRecoveryNote}
     />
   );
 };

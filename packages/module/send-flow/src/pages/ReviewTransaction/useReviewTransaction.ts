@@ -7,9 +7,9 @@ import {
   useSendFlow,
 } from '@lace-contract/send-flow';
 import { SheetRoutes } from '@lace-lib/navigation';
+import { BigNumber } from '@lace-lib/util';
 import { convertAmountToDenominated } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 import { useFeeToken } from '../../hooks/useFeeToken';
@@ -161,11 +161,11 @@ export const useReviewTransaction = (
       })) || [],
   };
 
-  const backButtonPress = () => {
+  const backButtonPress = useCallback(() => {
     trackEvent('send | review transaction | back | press');
     dispatchBack();
     navigate(SheetRoutes.Send);
-  };
+  }, [trackEvent, dispatchBack, navigate]);
 
   // Track if confirmation was initiated from this screen (vs navigating here while already in that state)
   const hasInitiatedConfirmation = useRef(false);
@@ -206,12 +206,12 @@ export const useReviewTransaction = (
     sendFlowState.status === 'SummaryAwaitingConfirmation' ||
     sendFlowState.status === 'Processing';
 
-  const nextButtonPress = () => {
+  const nextButtonPress = useCallback(() => {
     if (isNextButtonDisabled) return;
     trackEvent('send | review transaction | next | press');
     hasInitiatedConfirmation.current = true;
     dispatchConfirm();
-  };
+  }, [isNextButtonDisabled, trackEvent, dispatchConfirm]);
 
   return {
     labels,

@@ -1,5 +1,5 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
-import { Seconds } from '@lace-sdk/util';
+import { Seconds } from '@lace-lib/util';
 import { NEVER } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';

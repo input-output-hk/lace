@@ -15,6 +15,7 @@
     "@lace-contract/network": "*",
     "@lace-contract/secure-store": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
     "@lace-lib/ui-toolkit": "*",
     "@lace-lib/util-render": "*",
     "antd": "^4.24.12",

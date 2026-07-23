@@ -205,7 +205,9 @@ const slice = createSlice({
     /**
      * Handles the REHYDRATE action to restore the activities state from persisted storage.
      * For each account, sets the initial desiredLoadedActivitiesCountPerAccount to the number of activities
-     * that were persisted for that account.
+     * that were persisted for that account — unless the payload carries a per-account count hint, in which
+     * case the hint wins. The v3 migration supplies the hint to preserve the window after pruning
+     * activities; see reset-reward-activity-dates.
      *
      * @param state - The current state of the activities slice.
      * @param action - The rehydrate action containing the payload with activities data.
@@ -213,16 +215,20 @@ const slice = createSlice({
     builder.addCase(REHYDRATE, (state, action: RehydrateAction) => {
       const isRehydrateAction = 'key' in action && action.key === 'activities';
       if (!isRehydrateAction || !action.payload) return;
-      const { activities } = action.payload as {
-        activities?: Record<AccountId, Activity[]>;
-      };
+      const { activities, desiredLoadedActivitiesCountPerAccount } =
+        action.payload as {
+          activities?: Record<AccountId, Activity[]>;
+          desiredLoadedActivitiesCountPerAccount?: Record<AccountId, number>;
+        };
 
       Object.entries(activities ?? {}).forEach(
         ([accountId, accountActivities]) => {
           const id = AccountId(accountId);
-          state.desiredLoadedActivitiesCountPerAccount[id] =
+          const count =
+            desiredLoadedActivitiesCountPerAccount?.[id] ??
             accountActivities.length;
-          if (accountActivities.length >= MAX_ACTIVITIES_PER_ACCOUNT) {
+          state.desiredLoadedActivitiesCountPerAccount[id] = count;
+          if (count >= MAX_ACTIVITIES_PER_ACCOUNT) {
             state.hasLoadedOldestEntry[id] = false;
           }
         },

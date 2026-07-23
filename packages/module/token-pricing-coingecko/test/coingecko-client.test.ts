@@ -194,6 +194,41 @@ describe('coingeckoClient', () => {
     });
   });
 
+  describe('fetchSupportedCurrencies', () => {
+    it('should return a list of currency codes', async () => {
+      const currencies = ['usd', 'eur', 'gbp', 'jpy'];
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => currencies,
+      });
+
+      const result = await coingeckoClient.fetchSupportedCurrencies(
+        testBaseUrl,
+      );
+
+      expect(result).toEqual(currencies);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${testBaseUrl}/simple/supported_vs_currencies`,
+      );
+    });
+
+    it('should throw on rate limit error', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: false, status: 429 });
+
+      await expect(
+        coingeckoClient.fetchSupportedCurrencies(testBaseUrl),
+      ).rejects.toThrow('CoinGecko rate limit exceeded');
+    });
+
+    it('should throw on other API errors', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: false, status: 503 });
+
+      await expect(
+        coingeckoClient.fetchSupportedCurrencies(testBaseUrl),
+      ).rejects.toThrow('CoinGecko API error: 503');
+    });
+  });
+
   describe('fetchPriceHistory', () => {
     beforeEach(() => {
       vi.spyOn(Date, 'now').mockReturnValue(1704067200000); // 2024-01-01 00:00:00

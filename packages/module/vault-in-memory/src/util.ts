@@ -1,10 +1,7 @@
-import * as Crypto from '@cardano-sdk/crypto';
-import { emip3encrypt, util } from '@cardano-sdk/key-management';
 import { WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { encryptRecoveryPhrase } from '@lace-lib/core';
 
 import type { CreateInMemoryWalletProps } from './types';
-import type { HexBlob } from '@cardano-sdk/util';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
 import type {
   InMemoryWallet,
@@ -12,35 +9,6 @@ import type {
 } from '@lace-contract/wallet-repo';
 import type { BlockchainName } from '@lace-lib/util-store';
 import type { Logger } from 'ts-log';
-
-const computeWalletId = (recoveryPhrase: string[]): WalletId => {
-  const phrase = util.joinMnemonicWords(recoveryPhrase);
-  const phraseHex = Buffer.from(phrase, 'utf8').toString('hex') as HexBlob;
-
-  const BYTES_MIN = 16; // This was Crypto.blake2b.BYTES_MIN before the refactor in cardano-js-sdk
-  const digest = Crypto.blake2b.hash<Crypto.Hash32ByteBase16>(
-    phraseHex,
-    BYTES_MIN,
-  );
-
-  const walletIdHex = Crypto.blake2b.hash<Crypto.Hash32ByteBase16>(
-    digest as HexBlob,
-    BYTES_MIN,
-  );
-
-  return WalletId(walletIdHex);
-};
-
-const encryptRecoveryPhrase = async (
-  recoveryPhrase: string[],
-  password: Uint8Array,
-) => {
-  const walletEncrypted = await emip3encrypt(
-    ByteArray.fromUTF8(util.joinMnemonicWords(recoveryPhrase)),
-    password,
-  );
-  return HexBytes.fromByteArray(ByteArray(walletEncrypted));
-};
 
 type BlockchainSpecificDataMap = { [b in BlockchainName]?: unknown };
 
@@ -67,7 +35,7 @@ export const createInMemoryWalletEntityFactory =
       recoveryPhrase,
       password,
     );
-    const walletId = computeWalletId(recoveryPhrase);
+    const walletId = WalletId.deriveFromMnemonic(recoveryPhrase);
     const integrationsData = await Promise.all(
       integrations
         .filter(({ blockchainName }) => blockchains.includes(blockchainName))

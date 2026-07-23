@@ -26,6 +26,7 @@ export * from './blur-view/blur-view';
 export * from './blurTextView/blurTextView';
 export * from './indexedChip/indexedChip';
 export * from './qrCode/qrCode';
+export * from './qrCode/animatedQrCode';
 export * from './portal/portal';
 export * from './avatar/avatar';
 export * from './blurred-label/blurred-label';

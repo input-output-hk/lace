@@ -1,5 +1,5 @@
 import type { CARDANO_TOKEN_METADATA_SCHEMA_VERSION } from './const';
-import type { CardanoNetworkId } from './value-objects';
+import type { CardanoNetworkId, MasterFingerprint } from './value-objects';
 import type {
   Asset,
   Cardano,
@@ -33,7 +33,7 @@ import type {
   Milliseconds,
   Result,
   Timestamp,
-} from '@lace-sdk/util';
+} from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 import type { Tagged } from 'type-fest';
@@ -116,6 +116,7 @@ export type CardanoTransaction = {
   certificates?: Cardano.HydratedCertificate[];
   collateral: Cardano.Lovelace;
   deposit: Cardano.Lovelace;
+  donation?: Cardano.Lovelace;
   metadata?: TxMetadata[];
   proposalProcedures?: Cardano.ProposalProcedure[];
   returnedDeposit: Cardano.Lovelace;
@@ -207,6 +208,11 @@ export type GetTokensProps = {
 export type GetAccountRewardsProps = {
   rewardAccount: CardanoRewardAccount;
   page?: number;
+  pageSize?: number;
+};
+
+export type GetUtxosAtAddressProps = {
+  address: CardanoPaymentAddress;
   pageSize?: number;
 };
 
@@ -366,6 +372,19 @@ export interface CardanoProvider {
   ) => Observable<Result<Cardano.Utxo[], ProviderError>>;
 
   /**
+   * Fetch the UTxOs sitting at an arbitrary payment address (with inline
+   * datums populated). Unlike {@link getAccountUtxos} this targets a single
+   * address rather than a stake account — used to discover script-address
+   * UTxOs (e.g. the cNIGHT designation registration UTxO).
+   *
+   * @return Observable that emits the address' UTxOs once and completes
+   */
+  getUtxosAtAddress: (
+    props: GetUtxosAtAddressProps,
+    context: CardanoProviderContext,
+  ) => Observable<Result<Cardano.Utxo[], ProviderError>>;
+
+  /**
    * @return Observable that emits reward account info (rewards sum and controlled amount) once and completes
    */
   getRewardAccountInfo: (
@@ -432,6 +451,12 @@ type CommonCardanoAccountProps = {
 export type CardanoBip32AccountProps = CommonCardanoAccountProps & {
   accountIndex: number;
   extendedAccountPublicKey: Bip32PublicKeyHex;
+  /**
+   * 4-byte BTC BIP-32 master fingerprint (xfp) of the seed owning this
+   * account. Present for hardware signers that require it to target the
+   * device seed (e.g. the Seed Signer); absent for other account types.
+   */
+  masterFingerprint?: MasterFingerprint;
 };
 export type CardanoMultiSigAccountProps = CommonCardanoAccountProps & {
   /**
@@ -615,6 +640,8 @@ export type BuildDeregistrationTxResult =
       fees: FeeEntry[];
       /** Deposit return in lovelace as string (positive value) */
       depositReturn: string;
+      /** Staking rewards withdrawn in lovelace as string (positive value, '0' when no rewards) */
+      withdrawalAmount: string;
     };
 
 export type BuildDeregistrationTx = (

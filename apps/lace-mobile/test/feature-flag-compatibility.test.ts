@@ -1,3 +1,7 @@
+import {
+  FEATURE_FLAG_KEYSTONE,
+  FEATURE_FLAG_SEED_SIGNER,
+} from '@lace-contract/air-gapped-qr-exchange';
 import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '@lace-contract/app-lock';
 import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-context';
 import { FeatureFlagKey } from '@lace-contract/feature';
@@ -33,12 +37,15 @@ const experimentalFeatureFlags = [
   { key: FeatureFlagKey('BLOCKCHAIN_BITCOIN') },
   { key: FeatureFlagKey('BITCOIN_MEMPOOL_FEE_MARKET') },
   { key: FeatureFlagKey('CARDANO_URI_LINKING') },
+  { key: FeatureFlagKey('CNIGHT_DESIGNATION') },
   { key: FeatureFlagKey('GOVERNANCE_CENTER') },
   { key: MD_MIGRATION_FEATURE_FLAG },
   { key: ADA_HANDLE_FEATURE_FLAG },
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: PAUSE_NETWORK_POLLING_FEATURE_FLAG },
   { key: FEATURE_FLAG_WALLET_SECURITY_ALERTS },
+  { key: FEATURE_FLAG_SEED_SIGNER },
+  { key: FEATURE_FLAG_KEYSTONE },
 ];
 
 testFeatureFlagCompatibility(

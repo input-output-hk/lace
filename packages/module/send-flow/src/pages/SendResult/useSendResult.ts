@@ -2,7 +2,7 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import { isSendFlowSuccess, useSendFlow } from '@lace-contract/send-flow';
-import { WalletType } from '@lace-contract/wallet-repo';
+import { isHardwareWallet } from '@lace-contract/wallet-repo';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -89,9 +89,7 @@ export const useSendResult = (
   }, [props.navigation, shouldPreventClose]);
 
   const isHardwareWalletFlow =
-    'wallet' in sendFlowState &&
-    (sendFlowState.wallet.type === WalletType.HardwareLedger ||
-      sendFlowState.wallet.type === WalletType.HardwareTrezor);
+    'wallet' in sendFlowState && isHardwareWallet(sendFlowState.wallet);
 
   const hwErrorKeys =
     isFailure && isHardwareWalletFlow && 'errorTranslationKeys' in sendFlowState
@@ -184,22 +182,26 @@ export const useSendResult = (
         })()
       : undefined;
 
-  const primaryButton = (() => {
+  const successPrimaryButtonLabel = copies.success.primaryButtonLabel;
+  const failurePrimaryButtonLabel = copies.failure.primaryButtonLabel;
+  const closeButtonLabel = copies.closeButtonLabel;
+
+  const primaryButton = useMemo(() => {
     if (isSuccess && !shouldHidePrimaryButtonOnSuccess) {
       return {
-        primaryButtonLabel: copies.success.primaryButtonLabel,
+        primaryButtonLabel: successPrimaryButtonLabel,
         primaryButtonPress: () => {
           resetSendFlow();
           trackEvent('send | result | success | primary button | press');
           NavigationControls.navigate(SheetRoutes.ComingSoon, {
-            featureName: copies.success.primaryButtonLabel,
+            featureName: successPrimaryButtonLabel,
           });
         },
       };
     }
     if (isFailure) {
       return {
-        primaryButtonLabel: copies.failure.primaryButtonLabel,
+        primaryButtonLabel: failurePrimaryButtonLabel,
         primaryButtonPress: () => {
           resetSendFlow();
           trackEvent('send | result | failure | primary button | press');
@@ -209,20 +211,33 @@ export const useSendResult = (
       };
     }
     return undefined;
-  })();
+  }, [
+    isSuccess,
+    shouldHidePrimaryButtonOnSuccess,
+    isFailure,
+    successPrimaryButtonLabel,
+    failurePrimaryButtonLabel,
+    resetSendFlow,
+    trackEvent,
+    dispatchConfirmed,
+    navigate,
+  ]);
 
-  const footer = {
-    closeButton: shouldPreventClose
-      ? undefined
-      : {
-          closeButtonLabel: copies.closeButtonLabel,
-          closeButtonPress: () => {
-            resetSendFlow();
-            NavigationControls.closeSheet();
+  const footer = useMemo(
+    () => ({
+      closeButton: shouldPreventClose
+        ? undefined
+        : {
+            closeButtonLabel,
+            closeButtonPress: () => {
+              resetSendFlow();
+              NavigationControls.closeSheet();
+            },
           },
-        },
-    primaryButton,
-  };
+      primaryButton,
+    }),
+    [shouldPreventClose, closeButtonLabel, resetSendFlow, primaryButton],
+  );
 
   const networkType = useLaceSelector('network.selectNetworkType');
   const transactionDetails = useMemo(() => {

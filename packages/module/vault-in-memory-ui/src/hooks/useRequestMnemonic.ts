@@ -14,8 +14,8 @@ import type {
   RequestRecoveryPhraseParams,
 } from '@lace-contract/recovery-phrase';
 import type { WalletId } from '@lace-contract/wallet-repo';
+import type { ByteArray } from '@lace-lib/util';
 import type { StateObject } from '@lace-lib/util-store';
-import type { ByteArray } from '@lace-sdk/util';
 
 type RecoveryPhraseState =
   | StateObject<'Failed', { reason: RecoveryPhraseRequestErrorReason }>

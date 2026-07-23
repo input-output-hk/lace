@@ -6,6 +6,8 @@ import {
 } from '@cardano-sdk/core';
 import { minAdaRequired, minFee } from '@cardano-sdk/tx-construction';
 
+import { buildChangeOutputs } from '../input-selection/change-builder';
+import { InputSelectionError } from '../input-selection/InputSelectionError';
 import { getUniqueSignerKeyHashes } from '../signing/getUniqueSigners';
 
 import type { RequiredProtocolParameters } from '../types';
@@ -15,6 +17,13 @@ import type {
 } from './types';
 
 const MAX_BALANCE_ITERATIONS = 20;
+
+const BALANCE_EXHAUSTED_MESSAGE = 'Failed to balance transaction';
+
+type BalancingLoopParams = Omit<
+  BalanceTransactionParams,
+  'fallbackCoinSelector'
+>;
 
 /**
  * Coalesces the values of all inputs (by looking them up in `resolvedInputs`).
@@ -112,86 +121,62 @@ const computeVkWitnessesCost = (
 };
 
 /**
- * Parameters for {@link addChangeOutput}.
+ * Verifies that every change output meets the minimum UTxO value (min-ADA)
+ * rule.
  *
- * @property body - Transaction body to which a change output may be appended.
- * @property protocolParameters - Protocol parameters (for Min-ADA calculation).
- * @property changeAddress - Address where change should be sent.
- * @property change - The computed change value to return.
+ * Change may come from the coin selector or from the forced-selection
+ * fallback; this guard surfaces an invalid change output immediately instead
+ * of producing an invalid transaction.
+ *
+ * @param changeOutputs - The change outputs to verify.
+ * @param protocolParameters - Protocol parameters (for min-ADA calculation).
+ * @throws Error When a change output holds less than its min-ADA requirement.
  */
-type AddChangeOutputParams = {
-  body: Cardano.TxBody;
-  protocolParameters: RequiredProtocolParameters;
-  changeAddress: Cardano.PaymentAddress;
-  change: Cardano.Value;
-};
-
-/**
- * Adds a change output if the computed `change` meets Min-ADA requirements.
- *
- * If `change.coins` is below the minimum UTxO value for its (potential) multi-asset payload,
- * the function **does not** append the output and instead returns the **required padding**
- * (the missing lovelace) that must be added to `change.coins` to satisfy Min-ADA.
- *
- * If Min-ADA is satisfied, the change output is appended and `0n` is returned.
- *
- * @param params - See {@link AddChangeOutputParams}.
- * @returns `0n` if the change was added; otherwise the required lovelace padding.
- */
-const addChangeOutput = ({
-  body,
-  protocolParameters,
-  changeAddress,
-  change,
-}: AddChangeOutputParams): bigint => {
-  const changeOutput = {
-    address: changeAddress,
-    value: change,
-  };
-
-  const minUtxoValue = minAdaRequired(
-    changeOutput,
-    BigInt(protocolParameters.coinsPerUtxoByte),
-  );
-  const chainCoin = change.coins;
-
-  if (chainCoin < minUtxoValue) {
-    return minUtxoValue - chainCoin;
+const assertChangeOutputsMeetMinAda = (
+  changeOutputs: Cardano.TxOut[],
+  protocolParameters: RequiredProtocolParameters,
+): void => {
+  for (const changeOutput of changeOutputs) {
+    const minUtxoValue = minAdaRequired(
+      changeOutput,
+      BigInt(protocolParameters.coinsPerUtxoByte),
+    );
+    if (changeOutput.value.coins < minUtxoValue) {
+      throw new Error(
+        `Change output is below the minimum UTxO value: holds ${changeOutput.value.coins} lovelace, requires ${minUtxoValue}`,
+      );
+    }
   }
-
-  body.outputs.push(changeOutput);
-
-  return 0n;
 };
 
 /**
- * Balances a transaction by selecting inputs, computing fees, and adding change as needed.
+ * Runs the fee-convergence balancing loop with a single coin selector.
  *
  * **Algorithm (high level):**
  * 1. Clone the unbalanced transaction.
  * 2. Compute implicit coin (deposits/withdrawals) and start with a working fee.
  * 3. Derive the **required input value** = `sum(outputs)` - `implicitValue` (which accounts for fee, donation, mint).
- * 4. Use the provided `coinSelector` to pick inputs that satisfy the target value (including assets).
- * 5. Compute **change** = `selectedInputs - requiredInputValue` (+ any pending `changePadding`).
- * 6. If change is non-zero:
- *    - Try to add it as an output; if it fails Min-ADA, return the required padding and retry.
- * 7. Compute the minimum fee (`minFee`) and add the VK-witness cost estimate.
- * 8. If the new fee is higher than the working fee, update the fee and repeat.
- * 9. When stable, verify with {@link isTransactionBalanced}; if not balanced, iterate again.
+ * 4. Use the provided `coinSelector` to pick inputs that satisfy the target value (including assets)
+ *    and to build the min-ADA compliant change outputs returning the surplus.
+ * 5. Verify the change outputs meet min-ADA and append them to the body.
+ * 6. Compute the minimum fee (`minFee`) and add the VK-witness cost estimate.
+ * 7. If the new fee is higher than the working fee, update the fee and repeat.
+ * 8. When stable, verify with {@link isTransactionBalanced}; if not balanced, iterate again.
  *
  * @throws Error If the transaction cannot be balanced after iterations.
  *
  * @param params - See {@link BalanceTransactionParams}.
  * @returns The balanced transaction (with inputs, change, and final fee set).
  */
-export const balanceTransaction = ({
+const runBalancingLoop = ({
   unbalancedTx,
   availableUtxo,
   preSelectedUtxo,
+  collateralUtxos,
   protocolParameters,
   coinSelector,
   changeAddress,
-}: BalanceTransactionParams): Cardano.Tx => {
+}: BalancingLoopParams): { tx: Cardano.Tx; selection: Cardano.Utxo[] } => {
   let isBalanced = false;
 
   const implicitCoin = Cardano.util.computeImplicitCoin(
@@ -202,7 +187,7 @@ export const balanceTransaction = ({
   const mint = unbalancedTx.body.mint;
   const donation = unbalancedTx.body.donation ?? 0n;
   let balancedTx;
-  let changePadding = 0n;
+  let selection: Cardano.Utxo[] = [];
 
   let iterCount = 0;
   while (!isBalanced && iterCount < MAX_BALANCE_ITERATIONS) {
@@ -221,7 +206,7 @@ export const balanceTransaction = ({
         (implicitCoin.withdrawals ?? 0n) +
         (implicitCoin.reclaimDeposit ?? 0n) -
         (implicitCoin.deposit ?? 0n) -
-        (fee + changePadding + donation),
+        (fee + donation),
       assets: mint ?? new Map<Cardano.AssetId, bigint>(),
     };
 
@@ -230,11 +215,15 @@ export const balanceTransaction = ({
       implicitValue,
     ]);
 
-    let { selection } = coinSelector.select({
+    let changeOutputs: Cardano.TxOut[];
+    ({ selection, changeOutputs } = coinSelector.select({
       preSelectedUtxo,
       availableUtxo,
       targetValue: requiredInputValue,
-    });
+      outputsToCover: outputs,
+      changeAddress,
+      protocolParameters,
+    }));
 
     // Cardano requires at least one input for transaction validity.
     // When deposit refunds exceed outputs+fees, coin selector may return empty selection.
@@ -244,36 +233,30 @@ export const balanceTransaction = ({
       const adaOnlyUtxo = availableUtxo.find(
         utxo => !utxo[1].value.assets || utxo[1].value.assets.size === 0,
       );
-      selection = [adaOnlyUtxo ?? availableUtxo[0]];
+      const forcedUtxo = adaOnlyUtxo ?? availableUtxo[0];
+
+      // The selector's change did not account for the forced input; rebuild it
+      // through buildChangeOutputs, not as a raw `forcedUtxo - target` output:
+      // raw change can sit below min-ADA or exceed maxValueSize, failing the
+      // build with an error the fallback selector cannot recover from.
+      ({ selection, changeOutputs } = buildChangeOutputs({
+        selection: [forcedUtxo],
+        remaining: availableUtxo.filter(utxo => utxo !== forcedUtxo),
+        targetValue: requiredInputValue,
+        changeAddress,
+        protocolParameters,
+      }));
     }
 
     body.inputs = selection.map(([input]) => input as Cardano.TxIn);
 
-    const selectedInputValue = coalesceValueQuantities(
-      selection.map(([_, output]) => output.value),
-    );
-    const change = coalesceValueQuantities([
-      subtractValueQuantities([selectedInputValue, requiredInputValue]),
-      { coins: changePadding, assets: new Map<Cardano.AssetId, bigint>() },
+    assertChangeOutputsMeetMinAda(changeOutputs, protocolParameters);
+    body.outputs.push(...changeOutputs);
+
+    const uniqueSigners = getUniqueSignerKeyHashes(balancedTx, [
+      ...selection,
+      ...(collateralUtxos ?? []),
     ]);
-
-    if (!isZeroValue(change)) {
-      const padding = addChangeOutput({
-        body,
-        protocolParameters,
-        changeAddress,
-        change,
-      });
-
-      if (padding > 0) {
-        changePadding += padding;
-        balancedTx = null;
-        ++iterCount;
-        continue;
-      }
-    }
-
-    const uniqueSigners = getUniqueSignerKeyHashes(balancedTx, selection);
     const vkWitnessesCost = computeVkWitnessesCost(
       uniqueSigners.size,
       BigInt(protocolParameters.minFeeCoefficient),
@@ -298,10 +281,147 @@ export const balanceTransaction = ({
   }
 
   if (!balancedTx || !isBalanced) {
-    throw new Error('Failed to balance transaction');
+    throw new Error(BALANCE_EXHAUSTED_MESSAGE);
   }
 
-  return balancedTx;
+  return { tx: balancedTx, selection };
+};
+
+/**
+ * Failures the fallback selector may recover from: the selector giving up
+ * ({@link InputSelectionError}) or the loop exhausting its iterations.
+ * Anything else (e.g. a selector violating the min-ADA change contract)
+ * indicates a bug and must surface unchanged.
+ */
+const isRecoverableBySelectorSwap = (error: unknown): boolean =>
+  error instanceof InputSelectionError ||
+  (error instanceof Error && error.message === BALANCE_EXHAUSTED_MESSAGE);
+
+/**
+ * Wraps the fallback selector's failure so callers can tell that both
+ * selection strategies were exhausted. The fallback error is surfaced rather
+ * than the primary one because the deterministic fallback gives the most
+ * actionable diagnosis: a `BalanceInsufficient` from Large-First proves the
+ * funds genuinely cannot cover the target. An {@link InputSelectionError}
+ * keeps its `failure` discriminator so genuine insufficiency remains
+ * detectable.
+ */
+const asFallbackFailure = (fallbackError: unknown): Error => {
+  const message =
+    fallbackError instanceof Error
+      ? fallbackError.message
+      : String(fallbackError);
+  const wrappedMessage = `${BALANCE_EXHAUSTED_MESSAGE} with fallback coin selector: ${message}`;
+  return fallbackError instanceof InputSelectionError
+    ? new InputSelectionError(fallbackError.failure, wrappedMessage)
+    : new Error(wrappedMessage);
+};
+
+/**
+ * Balances a transaction by selecting inputs, computing fees, and adding
+ * change as needed (see {@link runBalancingLoop} for the algorithm).
+ *
+ * When the primary `coinSelector` path fails recoverably (it threw an
+ * {@link InputSelectionError} or the loop exhausted its iterations) and a
+ * distinct `fallbackCoinSelector` is configured, the entire loop is re-run
+ * once with the fallback. The fallback re-runs the whole loop rather than a
+ * single iteration: randomized selectors re-seed per call, so their
+ * fee-convergence iterations are progressive and a mid-loop selector swap
+ * would break convergence.
+ *
+ * @throws Error If the transaction cannot be balanced; when the fallback was
+ *   attempted its failure is surfaced, annotated as a fallback failure.
+ *
+ * @param params - See {@link BalanceTransactionParams}.
+ * @returns The balanced transaction (with inputs, change, and final fee set).
+ */
+export const balanceTransaction = ({
+  fallbackCoinSelector,
+  ...loopParams
+}: BalanceTransactionParams): { tx: Cardano.Tx; selection: Cardano.Utxo[] } => {
+  try {
+    return runBalancingLoop(loopParams);
+  } catch (error) {
+    if (
+      !fallbackCoinSelector ||
+      fallbackCoinSelector === loopParams.coinSelector ||
+      !isRecoverableBySelectorSwap(error)
+    ) {
+      throw error;
+    }
+    try {
+      return runBalancingLoop({
+        ...loopParams,
+        coinSelector: fallbackCoinSelector,
+      });
+    } catch (fallbackError) {
+      throw asFallbackFailure(fallbackError);
+    }
+  }
+};
+
+/**
+ * Recomputes the minimum fee using actual post-evaluation ex-units and, if
+ * lower than the seeded fee, returns corrected outputs (the largest change
+ * output at `changeAddress` increased by the saving) and the corrected fee.
+ * Returns the original values unchanged when no correction is possible (no
+ * change output at changeAddress) or when the evaluated fee is not lower.
+ */
+export const correctFeeAfterEvaluation = ({
+  balancedTx,
+  evaluatedRedeemers,
+  resolvedInputs,
+  protocolParameters,
+  changeAddress,
+}: {
+  balancedTx: Cardano.Tx;
+  evaluatedRedeemers: Cardano.Redeemer[];
+  resolvedInputs: Cardano.Utxo[];
+  protocolParameters: RequiredProtocolParameters;
+  changeAddress: Cardano.PaymentAddress;
+}): { outputs: Cardano.TxOut[]; fee: Cardano.Lovelace } => {
+  const txWithEvaluation: Cardano.Tx = {
+    ...balancedTx,
+    witness: { ...balancedTx.witness, redeemers: evaluatedRedeemers },
+  };
+  const uniqueSigners = getUniqueSignerKeyHashes(
+    txWithEvaluation,
+    resolvedInputs,
+  );
+  const vkCost = computeVkWitnessesCost(
+    uniqueSigners.size,
+    BigInt(protocolParameters.minFeeCoefficient),
+  );
+  const evaluatedFee =
+    minFee(txWithEvaluation, resolvedInputs, protocolParameters) + vkCost;
+  const currentFee = balancedTx.body.fee;
+  if (evaluatedFee >= currentFee) {
+    return { outputs: balancedTx.body.outputs, fee: currentFee };
+  }
+  const saving = currentFee - evaluatedFee;
+  const outputs = balancedTx.body.outputs;
+  let changeIndex = -1;
+  for (let index = 0; index < outputs.length; index++) {
+    if (
+      outputs[index].address === changeAddress &&
+      (changeIndex < 0 ||
+        outputs[index].value.coins > outputs[changeIndex].value.coins)
+    ) {
+      changeIndex = index;
+    }
+  }
+  if (changeIndex < 0) {
+    return { outputs, fee: currentFee };
+  }
+  const correctedOutputs = [...outputs];
+  correctedOutputs[changeIndex] = {
+    ...correctedOutputs[changeIndex],
+    value: {
+      ...correctedOutputs[changeIndex].value,
+      coins: correctedOutputs[changeIndex].value.coins + saving,
+    },
+  };
+  return { outputs: correctedOutputs, fee: evaluatedFee };
 };
 
 /**

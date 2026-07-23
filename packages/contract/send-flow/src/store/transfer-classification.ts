@@ -5,7 +5,7 @@ import type { AnyAddress } from '@lace-contract/addresses';
 import type { TokenIdMapper, TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 import type { AccountId, AnyWallet } from '@lace-contract/wallet-repo';
-import type { BigNumber } from '@lace-sdk/util';
+import type { BigNumber } from '@lace-lib/util';
 
 // Re-export so existing send-flow consumers keep their imports stable.
 export { bucketUsdValue } from '@lace-contract/token-pricing';

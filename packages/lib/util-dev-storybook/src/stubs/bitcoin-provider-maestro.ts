@@ -11,7 +11,7 @@ import {
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import { of } from 'rxjs';
 
 import type { LaceModuleMap } from '@lace-contract/module';
@@ -20,6 +20,16 @@ const stubBitcoinProvider: BitcoinProvider = {
   getLastKnownBlock: () =>
     of(Ok({ height: 0, hash: 'stub-bitcoin-block-hash' })),
   getTransaction: () =>
+    of(
+      Err(
+        new ProviderError(
+          ProviderFailure.NotFound,
+          undefined,
+          'Stub implementation',
+        ),
+      ),
+    ),
+  getRawTransaction: () =>
     of(
       Err(
         new ProviderError(

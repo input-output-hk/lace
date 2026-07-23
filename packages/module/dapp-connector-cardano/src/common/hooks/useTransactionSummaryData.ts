@@ -12,8 +12,8 @@ import {
 import { calculateAdaFiatValue } from '../utils/sign-tx-utils';
 import { formatLovelaceToAda } from '../utils/transaction-inspector';
 
-import type { TokenTransferValue } from './useDappTxInspection';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 
 export interface AssetProperties {

@@ -1,8 +1,8 @@
 import { featuresSelectors } from '@lace-contract/feature';
 import { markParameterizedSelector } from '@lace-contract/module';
 import { networkSelectors } from '@lace-contract/network';
+import { BigNumber } from '@lace-lib/util';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber } from '@lace-sdk/util';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';

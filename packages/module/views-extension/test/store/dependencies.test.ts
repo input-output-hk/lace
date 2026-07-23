@@ -2,7 +2,7 @@ import { SidePanelViewId } from '@lace-contract/views';
 import {
   consumeMessengerRemoteApi,
   generalizeBackgroundMessenger,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { NEVER, Subject, firstValueFrom } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,7 +16,7 @@ import type { View } from '@lace-contract/views';
 import type {
   DisconnectEvent,
   MinimalPort,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import type { Mock } from 'vitest';
 
 const mockApi = {
@@ -25,8 +25,8 @@ const mockApi = {
   locationChanged$: NEVER,
 };
 
-vi.mock('@lace-sdk/extension-messaging', async () => {
-  const actual = await vi.importActual('@lace-sdk/extension-messaging');
+vi.mock('@lace-lib/extension-messaging', async () => {
+  const actual = await vi.importActual('@lace-lib/extension-messaging');
 
   return {
     __esModule: true,

@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
-import { Bip32Account } from '@cardano-sdk/key-management';
 import {
   type GetAccountRewardsProps,
+  type GetUtxosAtAddressProps,
   type CardanoProviderContext,
   type CardanoProviderDependencies,
   type CardanoTokenMetadata,
@@ -11,12 +11,6 @@ import {
   getAdaTokenTickerByNetwork,
   toContractAddress,
 } from '@lace-contract/cardano-context';
-import { buildUrl, HttpClient } from '@lace-lib/util-provider';
-import { Err, Ok } from '@lace-sdk/util';
-import Bottleneck from 'bottleneck';
-import memoize from 'lodash/memoize';
-import { from, map, of } from 'rxjs';
-
 import {
   BlockfrostActivityProvider,
   BlockfrostAddressDiscovery,
@@ -32,9 +26,17 @@ import {
   BlockfrostTokensProvider,
   BlockfrostUtxoProvider,
   BlockfrostTxSubmitProvider,
-} from '../blockfrost';
-
-import { LOVELACE_METADATA, toContractTokenMetadata } from './util';
+  LOVELACE_METADATA,
+  toContractTokenMetadata,
+  computeBlockfrostConfigIdentifier,
+  getBlockfrostClient,
+  type BlockfrostConfig,
+} from '@lace-lib/cardano-provider-core';
+import { Bip32Account } from '@lace-lib/core';
+import { Blockchains } from '@lace-lib/ui-toolkit/src/design-system/atoms/icons/urls';
+import { Err, Ok } from '@lace-lib/util';
+import memoize from 'lodash/memoize';
+import { from, map, of } from 'rxjs';
 
 import type {
   ProviderError,
@@ -50,45 +52,7 @@ import type {
 } from '@lace-contract/cardano-stake-pools';
 import type { LaceInit } from '@lace-contract/module';
 import type { TokenMetadata } from '@lace-contract/tokens';
-import type { RateLimiterConfig } from '@lace-lib/util-provider';
 import type { Logger } from 'ts-log';
-
-export type BlockfrostClientConfig = {
-  projectId?: string;
-  baseUrl: string;
-  apiVersion?: string;
-};
-
-export type BlockfrostConfig = {
-  clientConfig: BlockfrostClientConfig;
-  rateLimiterConfig: RateLimiterConfig;
-};
-
-const computeBlockfrostConfigIdentifier = ({
-  clientConfig: { baseUrl, projectId },
-}: BlockfrostConfig) => `${baseUrl}-${projectId}`;
-
-const getBlockfrostClient = memoize(
-  ({ clientConfig, rateLimiterConfig }: BlockfrostConfig) => {
-    const rateLimiter = new Bottleneck({
-      reservoir: rateLimiterConfig.size,
-      reservoirIncreaseAmount: rateLimiterConfig.increaseAmount,
-      reservoirIncreaseInterval: rateLimiterConfig.increaseInterval,
-      reservoirIncreaseMaximum: rateLimiterConfig.size,
-    });
-    return new HttpClient(
-      {
-        baseUrl: buildUrl(
-          ['api', clientConfig.apiVersion],
-          clientConfig.baseUrl,
-        ),
-        requestInit: { headers: { project_id: clientConfig.projectId ?? '' } },
-      },
-      { rateLimiter },
-    );
-  },
-  computeBlockfrostConfigIdentifier,
-);
 
 const getNetworkInfoProvider = memoize(
   (config: BlockfrostConfig, logger: Logger) => {
@@ -294,7 +258,9 @@ export const initializeDependencies: LaceInit<
             context.chainId.networkMagic,
           );
           const ticker = getAdaTokenTickerByNetwork(networkType);
-          return of(Ok({ ...LOVELACE_METADATA, ticker }));
+          return of(
+            Ok({ ...LOVELACE_METADATA, ticker, image: Blockchains.Cardano }),
+          );
         }
         const provider = getAssetProvider(
           getBlockfrostConfig(context, blockfrostConfigs),
@@ -368,6 +334,13 @@ export const initializeDependencies: LaceInit<
           logger,
         );
         return utxoProvider.getAccountUtxos(props);
+      },
+      getUtxosAtAddress: (props: GetUtxosAtAddressProps, context) => {
+        const utxoProvider = getUtxoProvider(
+          getBlockfrostConfig(context, blockfrostConfigs),
+          logger,
+        );
+        return utxoProvider.getUtxosAtAddress(props);
       },
       getAddressTransactionHistory: (props, context) => {
         const activityProvider = getAccountActivityProvider(

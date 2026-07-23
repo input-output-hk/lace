@@ -1,8 +1,8 @@
 import { logger } from '@cardano-sdk/util-dev';
+import { BlockfrostStakePoolProvider } from '@lace-lib/cardano-provider-core';
 import { ProviderError, ProviderFailure } from '@lace-lib/util-provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BlockfrostStakePoolProvider } from '../../../src/blockfrost/provider/blockfrost-stake-pool-provider';
 import { mockResponses } from '../util';
 
 import type { Responses } from '@blockfrost/blockfrost-js';

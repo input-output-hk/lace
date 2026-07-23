@@ -1,11 +1,5 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
-import * as Crypto from '@cardano-sdk/crypto';
-import { blake2b } from '@cardano-sdk/crypto';
-import {
-  AddressType,
-  Bip32Account,
-  KeyRole,
-} from '@cardano-sdk/key-management';
+import { AddressType, KeyRole } from '@cardano-sdk/key-management';
 import {
   type AccountRewardAccountDetailsMap,
   type CardanoAccountAddressHistoryMap,
@@ -21,10 +15,11 @@ import {
   type AccountId,
   type AnyAccount,
   type AnyWallet,
-  WalletType,
+  isHardwareWallet,
 } from '@lace-contract/wallet-repo';
+import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
+import { senderOrigin } from '@lace-lib/dapp-connector';
 import { mapHwSigningError } from '@lace-lib/util-hw';
-import { senderOrigin } from '@lace-sdk/dapp-connector';
 import { firstValueFrom } from 'rxjs';
 
 import {
@@ -51,6 +46,7 @@ import type {
   WalletApiExtension,
   WithSenderContext,
 } from '../../types';
+import type * as Crypto from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
@@ -145,17 +141,11 @@ const derivePublicKeyForAccount = async ({
     );
   }
 
-  const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
-  const dependencies = { blake2b, bip32Ed25519 };
-  const bip32Account = new Bip32Account(
-    account.blockchainSpecific,
-    dependencies,
-  );
-
-  return bip32Account.derivePublicKey({
-    index: 0,
+  return deriveBip32PublicKey(
+    account.blockchainSpecific.extendedAccountPublicKey,
     role,
-  });
+    0,
+  );
 };
 
 /**
@@ -722,9 +712,8 @@ export class CardanoDappConnectorApi
       knownAddresses,
       auth,
     };
-    const dataSigner = this.#signerFactory.createDataSigner(signerContext);
-
     try {
+      const dataSigner = this.#signerFactory.createDataSigner(signerContext);
       const result = (await firstValueFrom(
         dataSigner.signData({
           signWith: addrToSignWith(addr),
@@ -741,10 +730,9 @@ export class CardanoDappConnectorApi
           'User cancelled authentication',
         );
       }
-      const isHwWallet =
-        wallet.type === WalletType.HardwareLedger ||
-        wallet.type === WalletType.HardwareTrezor;
-      const hwErrorKeys = isHwWallet ? mapHwSigningError(error) : undefined;
+      const hwErrorKeys = isHardwareWallet(wallet)
+        ? mapHwSigningError(error)
+        : undefined;
       this.#signingResult$?.next({ type: 'error', hwErrorKeys });
       throw error;
     }
@@ -1117,24 +1105,13 @@ export class CardanoDappConnectorApi
     const knownAddresses = transformToGroupedAddresses(allAddresses, accountId);
     const localUtxos = accountUtxos[accountId] ?? [];
 
-    const { accountIndex, extendedAccountPublicKey } =
-      account.blockchainSpecific as {
-        accountIndex: number;
-        extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
-      };
+    const { extendedAccountPublicKey } = account.blockchainSpecific as {
+      extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
+    };
 
-    const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
-    const bip32Account = new Bip32Account(
-      { extendedAccountPublicKey, accountIndex, chainId },
-      { blake2b, bip32Ed25519 },
+    const dRepKeyHash = hashEd25519PublicKey(
+      await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
     );
-    const dRepPubKey = await bip32Account.derivePublicKey({
-      index: 0,
-      role: KeyRole.DRep,
-    });
-    const dRepKeyHash = Crypto.Ed25519PublicKey.fromHex(dRepPubKey)
-      .hash()
-      .hex();
 
     if (!partialSign) {
       if (

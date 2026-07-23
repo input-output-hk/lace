@@ -1,5 +1,5 @@
 import { midnightWallets$ } from '@lace-contract/midnight-context';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import curry from 'lodash/fp/curry';
 import { catchError, map, of, switchMap, take, throwError } from 'rxjs';

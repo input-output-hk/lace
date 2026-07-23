@@ -1,6 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import { Environment } from '@lace-contract/module';
-import { Milliseconds, Seconds } from '@lace-sdk/util';
+import { Milliseconds, Seconds } from '@lace-lib/util';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import { cleanEnv, str, makeValidator } from 'envalid';
 

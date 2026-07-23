@@ -1,4 +1,4 @@
-import { NotImplementedError } from '@lace-sdk/util';
+import { NotImplementedError } from '@lace-lib/util';
 import { throwError } from 'rxjs';
 
 import type {

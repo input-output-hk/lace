@@ -9,10 +9,10 @@ import type {
   BitcoinSignDataRequest,
 } from '@lace-contract/bitcoin-context';
 import type { SignerAuth } from '@lace-contract/signer';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
-vi.mock('@cardano-sdk/key-management', () => ({
-  emip3decrypt: vi.fn().mockResolvedValue(new Uint8Array(64)),
+vi.mock('@lace-lib/core', () => ({
+  SecretBox: { open: vi.fn().mockResolvedValue(new Uint8Array(64)) },
 }));
 
 vi.mock('../../src/common', () => ({

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { calculateNetBalance, getTransactionType } from '../src/common/utils';
 
-import type { TokenTransferValue } from '../src/common/hooks';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 
 describe('calculateNetBalance', () => {
   const createTokenTransferValue = (

@@ -1,6 +1,6 @@
 import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { HexBytes, Ok, Err } from '@lace-sdk/util';
+import { HexBytes, Ok, Err } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';

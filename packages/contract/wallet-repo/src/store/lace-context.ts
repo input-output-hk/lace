@@ -53,6 +53,27 @@ const selectActiveBlockchains = createSelector(
   allAccounts => uniq(allAccounts.map(account => account.blockchainName)),
 );
 
+/**
+ * Wallets that hold accounts but none on the active network, so they are
+ * filtered out of selectActiveNetworkWallets. Surfaced so the wallet does not
+ * silently disappear on a network switch (ADR-11). Matches every wallet type:
+ * hardware wallets reach this state when the device only exported other
+ * networks, software wallets when all their accounts on the active network
+ * were removed. Consumers must tailor recovery copy to the wallet type.
+ */
+const selectWalletsHiddenByActiveNetwork = createSelector(
+  repositorySelectors.selectAll,
+  networkSelectors.network.selectAllActiveNetworkIds,
+  (wallets, activeNetworkIds) =>
+    wallets.filter(
+      wallet =>
+        wallet.accounts.length > 0 &&
+        !wallet.accounts.some(account =>
+          activeNetworkIds.includes(account.blockchainNetworkId),
+        ),
+    ),
+);
+
 /** Display names of all accounts on the given blockchain network. */
 const selectAccountNamesByNetworkId = markParameterizedSelector(
   createSelector(
@@ -107,6 +128,7 @@ export const walletsSelectors = {
   wallets: {
     ...repositorySelectors,
     selectActiveNetworkWallets,
+    selectWalletsHiddenByActiveNetwork,
     selectActiveNetworkAccounts,
     selectActiveNetworkAccountsByBlockchainName,
     selectActiveBlockchains,

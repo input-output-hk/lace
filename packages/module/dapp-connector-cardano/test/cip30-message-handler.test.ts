@@ -1,6 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

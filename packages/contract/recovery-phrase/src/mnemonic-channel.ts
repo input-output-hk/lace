@@ -6,7 +6,7 @@ import type {
   ExposeRecoveryPhraseChannel,
   RecoveryPhraseChannel,
 } from './types';
-import type { ByteArray, MakePropertiesObservable } from '@lace-sdk/util';
+import type { ByteArray, MakePropertiesObservable } from '@lace-lib/util';
 
 export type OnMnemonicRequest = ReturnType<
   typeof initialiseRecoveryPhraseChannel

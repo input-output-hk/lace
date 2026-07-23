@@ -2,8 +2,8 @@ import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { describe, expect, it } from 'vitest';
 
 import { DETERMINISTIC_NONCE_202606_DETECTION_AVAILABLE_SINCE } from '../../src/security/exploit-descriptors';

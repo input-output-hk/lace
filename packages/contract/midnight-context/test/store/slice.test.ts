@@ -1,4 +1,4 @@
-import { BigNumber, HexBytes } from '@lace-sdk/util';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it } from 'vitest';
 

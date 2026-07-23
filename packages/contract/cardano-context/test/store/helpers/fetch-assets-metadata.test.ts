@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { TokenId } from '@lace-contract/tokens';
-import { Err, Ok, Timestamp } from '@lace-sdk/util';
+import { Err, Ok, Timestamp } from '@lace-lib/util';
 import { EMPTY } from 'rxjs';
 import { describe, it, vi, expect } from 'vitest';
 

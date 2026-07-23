@@ -13,11 +13,13 @@ import { APIError } from '../../src/api-error';
 import { MidnightDappConnectorApi } from '../../src/store/dependencies/midnight-dapp-connector-api';
 
 import type { MidnightDappConnectorApiOptions } from '../../src/store/dependencies/midnight-dapp-connector-api';
+import type { SenderContext } from '../../src/types';
 import type {
   MidnightWalletsByAccountId,
   MidnightNetworkConfig,
   MidnightWallet,
 } from '@lace-contract/midnight-context';
+import type { AccountId } from '@lace-contract/wallet-repo';
 import type {
   DesiredInput,
   DesiredOutput,
@@ -101,12 +103,19 @@ const userConfirmation = vi.fn().mockResolvedValue({
   isConfirmed: true,
 });
 
+const testAccountId = 'test-account-id' as AccountId;
+const testOrigin = 'https://test-dapp.io';
+const testSender = { sender: { url: testOrigin } } as unknown as SenderContext;
+const getAccountIdForOrigin = (origin: string): AccountId | undefined =>
+  origin === testOrigin ? testAccountId : undefined;
+
 const optionsWithoutWallet: MidnightDappConnectorApiOptions = {
   wallets$: of({}),
   network$: mockNetwork$,
   userConfirmTransaction: userConfirmation,
   supportedNetworksIds$: of(initialSupportedNetworkIds),
   isUnlocked$: of(true),
+  getAccountIdForOrigin,
 };
 
 describe('MidnightDappConnectorApi', () => {
@@ -153,14 +162,14 @@ describe('MidnightDappConnectorApi', () => {
   describe('getShieldedBalances', () => {
     it('should return shielded balances', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getShieldedBalances();
+      const result = await api.getShieldedBalances(testSender);
       expect(result).toEqual({ token1: 100n });
       expect(mockWallet.state).toHaveBeenCalled();
     });
 
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
-      await expect(api.getShieldedBalances()).rejects.toThrow(
+      await expect(api.getShieldedBalances(testSender)).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -169,7 +178,7 @@ describe('MidnightDappConnectorApi', () => {
   describe('getUnshieldedBalances', () => {
     it('should return unshielded balances', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getUnshieldedBalances();
+      const result = await api.getUnshieldedBalances(testSender);
       expect(result).toEqual({
         '0000000000000000000000000000000000000000000000000000000000000000':
           1000n,
@@ -180,7 +189,7 @@ describe('MidnightDappConnectorApi', () => {
 
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
-      await expect(api.getUnshieldedBalances()).rejects.toThrow(
+      await expect(api.getUnshieldedBalances(testSender)).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -190,7 +199,7 @@ describe('MidnightDappConnectorApi', () => {
     it('should return dust balance', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      const result = await api.getDustBalance();
+      const result = await api.getDustBalance(testSender);
       expect(result).toEqual({
         balance: 1000n,
         cap: 5000000000000n,
@@ -210,7 +219,7 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getDustBalance();
+      const result = await api.getDustBalance(testSender);
 
       expect(result).toEqual({
         balance: 750n,
@@ -222,7 +231,7 @@ describe('MidnightDappConnectorApi', () => {
   describe('getShieldedAddresses', () => {
     it('should return shielded addresses in bech32m format', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getShieldedAddresses();
+      const result = await api.getShieldedAddresses(testSender);
       expect(result).toEqual({
         shieldedAddress: 'shielded-address',
         shieldedCoinPublicKey: 'bech32m-shielded-coin-public-key',
@@ -233,7 +242,7 @@ describe('MidnightDappConnectorApi', () => {
 
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
-      await expect(api.getShieldedAddresses()).rejects.toThrow(
+      await expect(api.getShieldedAddresses(testSender)).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -242,13 +251,13 @@ describe('MidnightDappConnectorApi', () => {
   describe('getUnshieldedAddress', () => {
     it('should return unshielded address', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getUnshieldedAddress();
+      const result = await api.getUnshieldedAddress(testSender);
       expect(result).toEqual({ unshieldedAddress: 'unshielded-address' });
     });
 
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
-      await expect(api.getUnshieldedAddress()).rejects.toThrow(
+      await expect(api.getUnshieldedAddress(testSender)).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -257,13 +266,13 @@ describe('MidnightDappConnectorApi', () => {
   describe('getDustAddress', () => {
     it('should return dust address', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
-      const result = await api.getDustAddress();
+      const result = await api.getDustAddress(testSender);
       expect(result).toEqual({ dustAddress: 'dust-address' });
     });
 
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
-      await expect(api.getDustAddress()).rejects.toThrow(
+      await expect(api.getDustAddress(testSender)).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -342,7 +351,7 @@ describe('MidnightDappConnectorApi', () => {
 
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.submitTransaction(mockSerializedTx);
+      await api.submitTransaction(mockSerializedTx, testSender);
 
       expect(ledger.Transaction.deserialize).toHaveBeenCalledWith(
         'signature',
@@ -357,7 +366,9 @@ describe('MidnightDappConnectorApi', () => {
     it('should throw error if wallet is not available', async () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
 
-      await expect(api.submitTransaction('mock-transaction')).rejects.toThrow(
+      await expect(
+        api.submitTransaction('mock-transaction', testSender),
+      ).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
     });
@@ -373,9 +384,9 @@ describe('MidnightDappConnectorApi', () => {
 
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await expect(api.submitTransaction('mock-transaction')).rejects.toThrow(
-        mockError,
-      );
+      await expect(
+        api.submitTransaction('mock-transaction', testSender),
+      ).rejects.toThrow(mockError);
     });
 
     describe('onPendingActivity callback', () => {
@@ -428,7 +439,7 @@ describe('MidnightDappConnectorApi', () => {
           onPendingActivity,
         });
 
-        await api.submitTransaction(mockSerializedTx);
+        await api.submitTransaction(mockSerializedTx, testSender);
 
         expect(onPendingActivity).toHaveBeenCalledTimes(1);
         expect(onPendingActivity).toHaveBeenCalledWith(
@@ -469,7 +480,7 @@ describe('MidnightDappConnectorApi', () => {
           onPendingActivity,
         });
 
-        await api.submitTransaction(mockSerializedTx);
+        await api.submitTransaction(mockSerializedTx, testSender);
 
         expect(onPendingActivity).not.toHaveBeenCalled();
       });
@@ -489,7 +500,7 @@ describe('MidnightDappConnectorApi', () => {
         });
 
         await expect(
-          api.submitTransaction(mockSerializedTx),
+          api.submitTransaction(mockSerializedTx, testSender),
         ).resolves.toBeUndefined();
         expect(onPendingActivity).not.toHaveBeenCalled();
       });
@@ -506,9 +517,9 @@ describe('MidnightDappConnectorApi', () => {
           onPendingActivity,
         });
 
-        await expect(api.submitTransaction(mockSerializedTx)).rejects.toThrow(
-          'submit failed',
-        );
+        await expect(
+          api.submitTransaction(mockSerializedTx, testSender),
+        ).rejects.toThrow('submit failed');
         expect(onPendingActivity).not.toHaveBeenCalled();
       });
     });
@@ -549,6 +560,7 @@ describe('MidnightDappConnectorApi', () => {
         shieldedInputs,
         shieldedOutputs,
         defaultOptions,
+        testSender,
       );
 
       expect(result.tx).toBe(mockSerializedTx.toString('hex'));
@@ -587,7 +599,12 @@ describe('MidnightDappConnectorApi', () => {
         },
       ];
 
-      await api.makeIntent(unshieldedInputs, unshieldedOutputs, defaultOptions);
+      await api.makeIntent(
+        unshieldedInputs,
+        unshieldedOutputs,
+        defaultOptions,
+        testSender,
+      );
 
       expect(mockWallet.initSwap).toHaveBeenCalledWith(
         { unshielded: { 'token-x': 2000n } },
@@ -629,7 +646,12 @@ describe('MidnightDappConnectorApi', () => {
         },
       ];
 
-      await api.makeIntent(mixedInputs, mixedOutputs, defaultOptions);
+      await api.makeIntent(
+        mixedInputs,
+        mixedOutputs,
+        defaultOptions,
+        testSender,
+      );
 
       expect(mockWallet.initSwap).toHaveBeenCalledWith(
         {
@@ -670,7 +692,7 @@ describe('MidnightDappConnectorApi', () => {
         { kind: 'shielded', type: 'token-a', value: 300n },
       ];
 
-      await api.makeIntent(inputs, shieldedOutputs, defaultOptions);
+      await api.makeIntent(inputs, shieldedOutputs, defaultOptions, testSender);
 
       expect(mockWallet.initSwap).toHaveBeenCalledWith(
         { shielded: { 'token-a': 800n } },
@@ -682,10 +704,15 @@ describe('MidnightDappConnectorApi', () => {
     it('should forward payFees: false option', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.makeIntent(shieldedInputs, shieldedOutputs, {
-        intentId: 'random',
-        payFees: false,
-      });
+      await api.makeIntent(
+        shieldedInputs,
+        shieldedOutputs,
+        {
+          intentId: 'random',
+          payFees: false,
+        },
+        testSender,
+      );
 
       expect(mockWallet.initSwap).toHaveBeenCalledWith(
         expect.any(Object),
@@ -697,10 +724,15 @@ describe('MidnightDappConnectorApi', () => {
     it('should skip signRecipe for shielded-only inputs and outputs', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.makeIntent(shieldedInputs, shieldedOutputs, {
-        intentId: 'random',
-        payFees: false,
-      });
+      await api.makeIntent(
+        shieldedInputs,
+        shieldedOutputs,
+        {
+          intentId: 'random',
+          payFees: false,
+        },
+        testSender,
+      );
 
       expect(mockWallet.signRecipe).not.toHaveBeenCalled();
       expect(mockWallet.finalizeRecipe).toHaveBeenCalledWith(mockRecipe);
@@ -713,7 +745,12 @@ describe('MidnightDappConnectorApi', () => {
         { kind: 'unshielded', type: 'token-x', value: 100n },
       ];
 
-      await api.makeIntent(unshieldedInputs, shieldedOutputs, defaultOptions);
+      await api.makeIntent(
+        unshieldedInputs,
+        shieldedOutputs,
+        defaultOptions,
+        testSender,
+      );
 
       expect(mockWallet.signRecipe).toHaveBeenCalledWith(mockRecipe);
     });
@@ -728,7 +765,12 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       await expect(
-        api.makeIntent(shieldedInputs, shieldedOutputs, defaultOptions),
+        api.makeIntent(
+          shieldedInputs,
+          shieldedOutputs,
+          defaultOptions,
+          testSender,
+        ),
       ).rejects.toThrow(
         new APIError(ErrorCodes.Rejected, 'User rejected transaction'),
       );
@@ -740,7 +782,12 @@ describe('MidnightDappConnectorApi', () => {
       const api = new MidnightDappConnectorApi(optionsWithoutWallet);
 
       await expect(
-        api.makeIntent(shieldedInputs, shieldedOutputs, defaultOptions),
+        api.makeIntent(
+          shieldedInputs,
+          shieldedOutputs,
+          defaultOptions,
+          testSender,
+        ),
       ).rejects.toThrow(
         new APIError(ErrorCodes.InternalError, 'Wallet is unavailable'),
       );
@@ -754,6 +801,7 @@ describe('MidnightDappConnectorApi', () => {
       userConfirmTransaction: userConfirmation,
       supportedNetworksIds$: of(initialSupportedNetworkIds),
       isUnlocked$: of(true),
+      getAccountIdForOrigin,
     };
 
     beforeEach(() => {
@@ -1090,9 +1138,13 @@ describe('MidnightDappConnectorApi', () => {
     it('should create transfer transaction with shielded outputs', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      const result = await api.makeTransfer(shieldedOutputs, {
-        payFees: true,
-      });
+      const result = await api.makeTransfer(
+        shieldedOutputs,
+        {
+          payFees: true,
+        },
+        testSender,
+      );
 
       expect(result.tx).toBe(mockSerializedTx.toString('hex'));
       expect(mockWallet.transferTransaction).toHaveBeenCalledWith(
@@ -1115,7 +1167,7 @@ describe('MidnightDappConnectorApi', () => {
     it('should forward payFees: false option', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.makeTransfer(shieldedOutputs, { payFees: false });
+      await api.makeTransfer(shieldedOutputs, { payFees: false }, testSender);
 
       expect(mockWallet.transferTransaction).toHaveBeenCalledWith(
         expect.any(Array),
@@ -1126,7 +1178,7 @@ describe('MidnightDappConnectorApi', () => {
     it('should default payFees to true when not specified', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.makeTransfer(shieldedOutputs, undefined);
+      await api.makeTransfer(shieldedOutputs, undefined, testSender);
 
       expect(mockWallet.transferTransaction).toHaveBeenCalledWith(
         expect.any(Array),
@@ -1137,7 +1189,7 @@ describe('MidnightDappConnectorApi', () => {
     it('should skip signRecipe for shielded-only outputs', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
 
-      await api.makeTransfer(shieldedOutputs, { payFees: false });
+      await api.makeTransfer(shieldedOutputs, { payFees: false }, testSender);
 
       expect(mockWallet.signRecipe).not.toHaveBeenCalled();
       expect(mockWallet.finalizeRecipe).toHaveBeenCalledWith(mockRecipe);
@@ -1155,7 +1207,7 @@ describe('MidnightDappConnectorApi', () => {
         },
       ];
 
-      await api.makeTransfer(unshieldedOutputs, { payFees: true });
+      await api.makeTransfer(unshieldedOutputs, { payFees: true }, testSender);
 
       expect(mockWallet.signRecipe).toHaveBeenCalledWith(mockRecipe);
       expect(mockWallet.finalizeRecipe).toHaveBeenCalled();
@@ -1171,7 +1223,7 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       await expect(
-        api.makeTransfer(shieldedOutputs, { payFees: true }),
+        api.makeTransfer(shieldedOutputs, { payFees: true }, testSender),
       ).rejects.toThrow(
         new APIError(ErrorCodes.Rejected, 'User rejects transaction'),
       );
@@ -1325,6 +1377,59 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       expect(await api.isLocked()).toBe(false);
+    });
+  });
+
+  describe('per-origin account resolution', () => {
+    const buildWallet = (accountId: string, unshielded: string) =>
+      ({
+        accountId,
+        networkId: NetworkId.NetworkId.Preview,
+        state: vi.fn().mockReturnValue(of(mockWalletState)),
+        address$: of({ dust: 'dust', unshielded, shielded: 'shielded' }),
+      } as unknown as MidnightWallet);
+
+    const originA = 'https://dapp-a.io';
+    const originB = 'https://dapp-b.io';
+    const senderA = { sender: { url: originA } } as unknown as SenderContext;
+    const senderB = { sender: { url: originB } } as unknown as SenderContext;
+
+    const multiAccountOptions: MidnightDappConnectorApiOptions = {
+      ...optionsWithoutWallet,
+      wallets$: of({
+        'account-a': buildWallet('account-a', 'unshielded-a'),
+        'account-b': buildWallet('account-b', 'unshielded-b'),
+      } as unknown as MidnightWalletsByAccountId),
+      getAccountIdForOrigin: (origin: string) => {
+        if (origin === originA) return 'account-a' as AccountId;
+        if (origin === originB) return 'account-b' as AccountId;
+        return undefined;
+      },
+    };
+
+    it('returns the account bound to the requesting origin', async () => {
+      const api = new MidnightDappConnectorApi(multiAccountOptions);
+
+      expect(await api.getUnshieldedAddress(senderA)).toEqual({
+        unshieldedAddress: 'unshielded-a',
+      });
+      expect(await api.getUnshieldedAddress(senderB)).toEqual({
+        unshieldedAddress: 'unshielded-b',
+      });
+    });
+
+    it('throws when the requesting origin has no bound account', async () => {
+      const api = new MidnightDappConnectorApi(multiAccountOptions);
+      const unboundSender = {
+        sender: { url: 'https://unbound.io' },
+      } as unknown as SenderContext;
+
+      await expect(api.getUnshieldedAddress(unboundSender)).rejects.toThrow(
+        new APIError(
+          ErrorCodes.InternalError,
+          'No account is connected for this dApp. Please reconnect.',
+        ),
+      );
     });
   });
 });

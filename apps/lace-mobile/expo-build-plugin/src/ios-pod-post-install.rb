@@ -52,5 +52,10 @@ installer.pods_project.targets.each do |target|
 
     # Do not fail Release builds on those known header warnings.
     config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+
+    # Argon2Swift vendors an internal blake2.h; the Pods project headermap
+    # would resolve Blake2's quoted includes to that copy. Search paths
+    # (Headers/Private/Blake2) already carry Blake2's own header.
+    config.build_settings['USE_HEADERMAP'] = 'NO' if target.name == 'Blake2'
   end
 end

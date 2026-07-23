@@ -11,7 +11,7 @@
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
-    "@lace-sdk/extension-messaging": "*",
+    "@lace-lib/extension-messaging": "*",
     "react": "*",
     "rxjs": "*",
     "webextension-polyfill": "*"

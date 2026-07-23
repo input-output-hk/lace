@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "*",
+    "@cardano-sdk/core": "0.47.0",
     "@gorhom/bottom-sheet": "^5.0.0",
     "@lace-contract/account-management": "*",
     "@lace-contract/analytics": "*",

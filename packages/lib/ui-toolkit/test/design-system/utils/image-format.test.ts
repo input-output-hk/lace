@@ -158,4 +158,66 @@ describe('getAssetImageUrl', () => {
       'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD',
     );
   });
+
+  describe('SVG rejection (NWL R1 audit M-301)', () => {
+    it('rejects base64 SVG data URIs, falling through to the icon fallback', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(
+        getAssetImageUrl('data:image/svg+xml;base64,PHN2Zz48L3N2Zz4='),
+      ).toBeUndefined();
+    });
+
+    it('rejects utf8 SVG data URIs carrying markup', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(
+        getAssetImageUrl('data:image/svg+xml,<svg onload="alert(1)"></svg>'),
+      ).toBeUndefined();
+    });
+
+    it('still returns raster data URIs (png/jpeg) verbatim', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA';
+      expect(getAssetImageUrl(png)).toBe(png);
+    });
+
+    it('refuses to wrap raw base64 bytes as an SVG media type', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(getAssetImageUrl('PHN2Zz48L3N2Zz4=', 'svg+xml')).toBeUndefined();
+    });
+
+    it('rejects mixed-case data: SVG URIs (the scheme is case-insensitive)', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(
+        getAssetImageUrl('Data:image/svg+xml,<svg onload="alert(1)"></svg>'),
+      ).toBeUndefined();
+      expect(
+        getAssetImageUrl('DATA:image/SVG+XML;base64,PHN2Zz48L3N2Zz4='),
+      ).toBeUndefined();
+    });
+
+    it('rejects percent-encoded and alternate SVG MIME spellings', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(
+        getAssetImageUrl('data:image/svg%2bxml,<svg></svg>'),
+      ).toBeUndefined();
+      expect(
+        getAssetImageUrl('data:image/svg;base64,PHN2Zz4='),
+      ).toBeUndefined();
+    });
+
+    it('rejects non-image data: URIs (only raster image types are allowlisted)', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      expect(
+        getAssetImageUrl('data:text/html,<script>alert(1)</script>'),
+      ).toBeUndefined();
+    });
+
+    it('allows raster data URIs regardless of scheme casing', async () => {
+      const { getAssetImageUrl } = await loadImageFormatModule(true);
+      const gif = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+      expect(getAssetImageUrl(gif)).toBe(gif);
+      const webp = 'Data:image/webp;base64,UklGRh4AAABXRUJQ';
+      expect(getAssetImageUrl(webp)).toBe(webp);
+    });
+  });
 });

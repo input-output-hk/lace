@@ -8,6 +8,6 @@
   "dependencies": {
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*"
   }
 }

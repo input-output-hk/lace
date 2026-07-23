@@ -22,6 +22,17 @@ RCT_EXTERN_METHOD(
                   rejecter:(RCTPromiseRejectBlock)reject
                   )
 
+RCT_EXTERN_METHOD(
+                  argon2id:(NSString *)passwordHex
+                  saltHex:(NSString *)saltHex
+                  memoryKb:(nonnull NSNumber *)memoryKb
+                  iterations:(nonnull NSNumber *)iterations
+                  parallelism:(nonnull NSNumber *)parallelism
+                  outLen:(nonnull NSNumber *)outLen
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject
+                  )
+
 RCT_EXTERN__BLOCKING_SYNCHRONOUS_METHOD(derivePublicKeySync:(NSString *)pubKeyHex
                                       role:(nonnull NSNumber *)role
                                       index:(nonnull NSNumber *)index)

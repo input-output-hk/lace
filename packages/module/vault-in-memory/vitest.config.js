@@ -10,6 +10,7 @@ export default defineConfig({
       ...baseConfig.test.coverage,
       reportsDirectory: __dirname + '/coverage',
     },
+    setupFiles: [__dirname + '/test/setup-argon2.ts'],
     include: [__dirname + '/**/*.test.ts'],
   },
 });

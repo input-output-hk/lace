@@ -6,8 +6,7 @@
  * 2. If Android Keystore bug detected → use pre-auth for retry
  * 3. Happy path = 1 prompt
  */
-import { of } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of, toArray } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import {
@@ -79,7 +78,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
           t: mockTranslation,
           localAuthentication: localAuth ?? mockLocalAuth,
         } as unknown as Parameters<typeof sideEffect>[2],
-      ),
+      ).pipe(toArray()),
     );
   };
 
@@ -93,9 +92,9 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       // No pre-auth should be called on happy path
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({ success: true }),
-      );
+      ]);
     });
 
     it('direct Keystore cancelled allows retry', async () => {
@@ -106,7 +105,9 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       // No pre-auth on cancel
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('direct Keystore auth failed allows retry', async () => {
@@ -116,12 +117,12 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       const result = await runAndroidTest(mockSecureStore);
 
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'auth_failed',
         }),
-      );
+      ]);
     });
   });
 
@@ -149,9 +150,9 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
         disableDeviceFallback: true,
         cancelLabel: 'Cancel',
       });
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({ success: true }),
-      );
+      ]);
     });
 
     it('Keystore bug + pre-auth lockout falls back to password prompt', async () => {
@@ -165,7 +166,12 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       const result = await runAndroidTest(mockSecureStore);
 
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('Keystore bug + pre-auth cancelled allows retry', async () => {
@@ -179,7 +185,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       const result = await runAndroidTest(mockSecureStore);
 
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -188,7 +194,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
     });
 
     it('Keystore bug + pre-auth failed allows retry', async () => {
@@ -202,7 +208,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       const result = await runAndroidTest(mockSecureStore);
 
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -211,7 +217,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
     });
   });
 
@@ -227,7 +233,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       // First attempt - should allow retry (attempt 1/3)
       const result1 = await runAndroidTest(mockSecureStore);
-      expect(result1).toEqual(
+      expect(result1).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -236,11 +242,11 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
 
       // Second attempt - should allow retry (attempt 2/3)
       const result2 = await runAndroidTest(mockSecureStore);
-      expect(result2).toEqual(
+      expect(result2).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -249,11 +255,16 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
 
       // Third attempt - should fall back to password prompt (reached max attempts)
       const result3 = await runAndroidTest(mockSecureStore);
-      expect(result3).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result3).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('3 consecutive pre-auth failures falls back to password prompt on 3rd attempt', async () => {
@@ -267,7 +278,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       // First attempt - should allow retry (attempt 1/3)
       const result1 = await runAndroidTest(mockSecureStore);
-      expect(result1).toEqual(
+      expect(result1).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -276,11 +287,11 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
 
       // Second attempt - should allow retry (attempt 2/3)
       const result2 = await runAndroidTest(mockSecureStore);
-      expect(result2).toEqual(
+      expect(result2).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -289,11 +300,16 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
 
       // Third attempt - should fall back to password prompt (reached max attempts)
       const result3 = await runAndroidTest(mockSecureStore);
-      expect(result3).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result3).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('successful auth on 2nd attempt resets retry count', async () => {
@@ -320,7 +336,7 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
 
       // First attempt - cancelled (attempt 1/3)
       const result1 = await runAndroidTest(mockSecureStore);
-      expect(result1).toEqual(
+      expect(result1).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'pre_auth_failed',
@@ -329,13 +345,13 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
             maxAttempts: 3,
           },
         }),
-      );
+      ]);
 
       // Second attempt - succeeds! (should reset retry count)
       const result2 = await runAndroidTest(mockSecureStore);
-      expect(result2).toEqual(
+      expect(result2).toEqual([
         actions.authenticationPrompt.verifiedBiometric({ success: true }),
-      );
+      ]);
     });
   });
 
@@ -347,7 +363,12 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       const result = await runAndroidTest(mockSecureStore);
 
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('not_found error falls back to password prompt', async () => {
@@ -357,7 +378,12 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       const result = await runAndroidTest(mockSecureStore);
 
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('lockout error falls back to password prompt', async () => {
@@ -367,7 +393,12 @@ describe('makeAuthenticationBiometricVerifying - Android flow', () => {
       const result = await runAndroidTest(mockSecureStore);
 
       expect(mockLocalAuth.authenticate).not.toHaveBeenCalled();
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
   });
 });

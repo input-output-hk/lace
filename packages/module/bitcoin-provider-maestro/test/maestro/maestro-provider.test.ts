@@ -165,6 +165,65 @@ describe('MaestroBitcoinProvider', () => {
     });
   });
 
+  describe('getRawTransaction', () => {
+    const txHash =
+      'd34d329997dc02a0ce85496409c5c8f84d9a584d1d0db37fcef8e63005b3da20';
+
+    it('returns the raw transaction hex', async () => {
+      queueResponse<HttpRequestResponse<MaestroTransactionResponse>>(
+        REGULAR_TX,
+      );
+
+      const hex = await provider.getRawTransaction(txHash);
+
+      expect(hex).toBe(REGULAR_TX.data.data.hex);
+      expect(mockClient.request).toHaveBeenCalledWith(
+        `/rpc/transaction/${txHash}`,
+        { params: { verbose: true } },
+      );
+    });
+
+    it('serves confirmed transactions from cache on subsequent calls', async () => {
+      queueResponse<HttpRequestResponse<MaestroTransactionResponse>>(
+        REGULAR_TX,
+      );
+
+      const first = await provider.getRawTransaction(txHash);
+      const second = await provider.getRawTransaction(txHash);
+
+      expect(first).toBe(REGULAR_TX.data.data.hex);
+      expect(second).toBe(REGULAR_TX.data.data.hex);
+      expect(mockClient.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-fetches unconfirmed transactions on every call', async () => {
+      const unconfirmedTx = {
+        ...REGULAR_TX,
+        data: {
+          ...REGULAR_TX.data,
+          data: { ...REGULAR_TX.data.data, confirmations: 0 },
+        },
+      };
+      queueResponse<HttpRequestResponse<MaestroTransactionResponse>>(
+        unconfirmedTx,
+      );
+      queueResponse<HttpRequestResponse<MaestroTransactionResponse>>(
+        unconfirmedTx,
+      );
+
+      await provider.getRawTransaction(txHash);
+      await provider.getRawTransaction(txHash);
+
+      expect(mockClient.request).toHaveBeenCalledTimes(2);
+    });
+
+    it('propagates provider errors', async () => {
+      queueError(new HttpClientError(500, 'Internal error'));
+
+      await expect(provider.getRawTransaction(txHash)).rejects.toThrow();
+    });
+  });
+
   describe('getTransactions', () => {
     it('get all transactions from an address', async () => {
       const address = 'tb1qwj666s6uktl2q5am0uej008usfsg93fgrwjuuf';

@@ -1,6 +1,6 @@
 import { initializeMidnightDappConnectorSideEffectDependencies } from './dapp-connector';
 
-import type { WithLogger } from '@lace-sdk/util';
+import type { WithLogger } from '@lace-lib/util';
 
 export type MidnightSideDappConnectorEffectsDependencies = ReturnType<
   typeof initializeMidnightDappConnectorSideEffectDependencies

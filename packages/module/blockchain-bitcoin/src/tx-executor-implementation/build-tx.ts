@@ -1,13 +1,15 @@
 import { ActivityType } from '@lace-contract/activities';
 import { BITCOIN_TOKEN_ID } from '@lace-contract/bitcoin-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
-import { BigNumber } from '@lace-sdk/util';
-import { defer, firstValueFrom, of } from 'rxjs';
+import { BigNumber } from '@lace-lib/util';
+import { Transaction } from 'bitcoinjs-lib';
+import { defer, firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { DUST_THRESHOLD, encodeUnsignedTxToString } from '../common';
 import { buildErrorTranslationKey, TransactionBuilder } from '../tx-builder';
 
+import type { ProviderError } from '@cardano-sdk/core';
 import type {
   Activity,
   BlockchainSpecificActivityMetadata,
@@ -25,6 +27,8 @@ import type {
   TxExecutorImplementation,
   TxParams,
 } from '@lace-contract/tx-executor';
+import type { Result } from '@lace-lib/util';
+import type { Psbt } from 'bitcoinjs-lib';
 import type { Observable } from 'rxjs';
 
 /**
@@ -101,6 +105,52 @@ export const applyInFlightUtxoAdjustments = (
   return utxos.filter(utxo => !spent.has(outpointKey(utxo)));
 };
 
+/**
+ * Embeds each input's full previous transaction (nonWitnessUtxo) into the
+ * PSBT so it is self-contained for hardware signers: Ledger requires the
+ * previous transaction for segwit-v0 inputs and Trezor consumes it as refTxs.
+ * Duplicate previous transactions are fetched only once and all fetches run
+ * concurrently. Each fetched transaction is verified to hash to the requested
+ * txid so a wrong provider response fails the build locally instead of as an
+ * opaque device-side rejection. Throws if any fetch fails, failing the build
+ * instead of producing a PSBT a device would reject.
+ *
+ * @param psbt The freshly built PSBT whose inputs carry only witnessUtxo.
+ * @param getRawTransaction Fetches the raw transaction hex for a tx id.
+ */
+const embedPreviousTransactions = async (
+  psbt: Psbt,
+  getRawTransaction: (
+    txId: string,
+  ) => Observable<Result<string, ProviderError>>,
+): Promise<void> => {
+  const inputTxIds = psbt.txInputs.map(input =>
+    Buffer.from(input.hash).reverse().toString('hex'),
+  );
+
+  const uniqueTxIds = [...new Set(inputTxIds)];
+  if (uniqueTxIds.length === 0) return;
+
+  const rawTxResults = await firstValueFrom(
+    forkJoin(uniqueTxIds.map(txId => getRawTransaction(txId))),
+  );
+
+  const rawTxByTxId = new Map<string, Buffer>();
+  uniqueTxIds.forEach((txId, index) => {
+    const rawTx = Buffer.from(rawTxResults[index].unwrap(), 'hex');
+    if (Transaction.fromBuffer(rawTx).getId() !== txId) {
+      throw new Error(
+        `Fetched previous transaction does not match requested txid ${txId}`,
+      );
+    }
+    rawTxByTxId.set(txId, rawTx);
+  });
+
+  inputTxIds.forEach((txId, index) => {
+    psbt.updateInput(index, { nonWitnessUtxo: rawTxByTxId.get(txId)! });
+  });
+};
+
 export const makeBuildTx =
   (
     { bitcoinAccountWallets$, logger }: SideEffectDependencies,
@@ -174,7 +224,10 @@ export const makeBuildTx =
       );
 
       txBuilder
-        .setChangeAddress(bitcoinAccountWallet.address.address)
+        .setChange(
+          bitcoinAccountWallet.address,
+          bitcoinAccountWallet.masterFingerprint,
+        )
         .setUtxoSet(adjustedUtxos);
 
       for (const txp of txParams) {
@@ -193,6 +246,12 @@ export const makeBuildTx =
 
       const tx = txBuilder.build();
       tx.network = network;
+
+      if (bitcoinAccountWallet.masterFingerprint) {
+        await embedPreviousTransactions(tx.context, txId =>
+          bitcoinAccountWallet.getRawTransaction(txId),
+        );
+      }
 
       return {
         fees: [

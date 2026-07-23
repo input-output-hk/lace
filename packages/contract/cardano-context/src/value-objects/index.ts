@@ -15,3 +15,4 @@ export * from './utxo-cache-key.vo';
 export * from './reward-account-details-cache-key.vo';
 export * from './reward-activity-id.vo';
 export * from './1852-extended-public-key.vo';
+export * from './master-fingerprint.vo';

@@ -7,9 +7,9 @@
   "main": "src/index.ts",
   "dependencies": {
     "@lace-contract/module": "*",
+    "@lace-lib/dapp-connector": "*",
+    "@lace-lib/extension-messaging": "*",
     "@lace-lib/util-store": "*",
-    "@lace-sdk/dapp-connector": "*",
-    "@lace-sdk/extension-messaging": "*",
     "redux-persist": "*"
   },
   "devDependencies": {

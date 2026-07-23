@@ -21,7 +21,7 @@ import { initialiseActivityChannel } from '../report-activity-channel';
 
 import type { SideEffect } from '../contract';
 import type { LaceInit } from '@lace-contract/module';
-import type { Milliseconds } from '@lace-sdk/util';
+import type { Milliseconds } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 export const preparing: SideEffect = (

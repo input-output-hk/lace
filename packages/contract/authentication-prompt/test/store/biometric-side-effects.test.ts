@@ -223,8 +223,11 @@ describe('makeAuthenticationBiometricVerifying', () => {
           localAuthentication: biometricLocalAuth,
         },
         assertion: sideEffect$ => {
-          expectObservable(sideEffect$).toBe('a', {
-            a: actions.authenticationPrompt.biometricCanceled(),
+          expectObservable(sideEffect$).toBe('(ab)', {
+            a: actions.authenticationPrompt.setDeviceAuthReady({
+              deviceAuthReady: false,
+            }),
+            b: actions.authenticationPrompt.biometricCanceled(),
           });
         },
         stateObservables: {

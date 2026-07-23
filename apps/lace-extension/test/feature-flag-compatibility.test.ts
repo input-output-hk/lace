@@ -1,3 +1,7 @@
+import {
+  FEATURE_FLAG_KEYSTONE,
+  FEATURE_FLAG_SEED_SIGNER,
+} from '@lace-contract/air-gapped-qr-exchange';
 import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '@lace-contract/app-lock';
 import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-context';
 import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
@@ -33,6 +37,9 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: PAUSE_NETWORK_POLLING_FEATURE_FLAG },
   { key: FEATURE_FLAG_WALLET_SECURITY_ALERTS },
+  { key: FEATURE_FLAG_SEED_SIGNER },
+  { key: FeatureFlagKey('CNIGHT_DESIGNATION') },
+  { key: FEATURE_FLAG_KEYSTONE },
   { key: FeatureFlagKey('GOVERNANCE_CENTER') },
 ];
 

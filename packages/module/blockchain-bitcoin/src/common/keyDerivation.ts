@@ -1,5 +1,8 @@
 import * as ecc from '@bitcoinerlab/secp256k1';
-import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
+import {
+  BitcoinNetwork,
+  bitcoinAccountDerivationPath,
+} from '@lace-contract/bitcoin-context';
 import { HDKey } from '@scure/bip32';
 import * as bitcoin from 'bitcoinjs-lib';
 import { pbkdf2Sync } from 'pbkdf2';
@@ -10,12 +13,24 @@ import type { ExtendedAccountPublicKeys } from './info';
 
 bitcoin.initEccLib(ecc);
 
-const ADDRESS_TYPE_TO_PURPOSE: Record<AddressType, number> = {
-  [AddressType.Legacy]: 44,
-  [AddressType.SegWit]: 49,
-  [AddressType.NativeSegWit]: 84,
-  [AddressType.Taproot]: 86,
-  [AddressType.ElectrumNativeSegWit]: 0,
+const TESTNET_BIP32_VERSIONS = {
+  private: bitcoin.networks.testnet.bip32.private,
+  public: bitcoin.networks.testnet.bip32.public,
+};
+
+/**
+ * Imports a BIP-32 extended key, tolerating either a mainnet (xpub/xprv) or a
+ * testnet (tpub/tprv) version prefix. @scure/bip32 validates the version against
+ * a single {private, public} pair, so try mainnet first and fall back to
+ * testnet. The version bytes do not affect child derivation; the wallet network
+ * is tracked separately via the account networkType.
+ */
+const hdKeyFromExtendedKey = (extendedKey: string): HDKey => {
+  try {
+    return HDKey.fromExtendedKey(extendedKey);
+  } catch {
+    return HDKey.fromExtendedKey(extendedKey, TESTNET_BIP32_VERSIONS);
+  }
 };
 
 /**
@@ -31,7 +46,6 @@ const ADDRESS_TYPE_TO_KEY: Record<
   [AddressType.SegWit]: 'segWit',
   [AddressType.NativeSegWit]: 'nativeSegWit',
   [AddressType.Taproot]: 'taproot',
-  [AddressType.ElectrumNativeSegWit]: 'electrumNativeSegWit',
 };
 
 /**
@@ -71,24 +85,6 @@ export const deriveBip39Seed = (
 };
 
 /**
- * Derives the Electrum-compatible seed from the given mnemonic and optional password.
- *
- * Electrum predates the introduction of BIP-39 and uses a custom seed derivation method that differs
- * from the standard BIP-39 process.
- *
- * Instead of generating the seed using the BIP-39 standard, Electrum derives its seed using the
- * PBKDF2-SHA512 algorithm with 2048 iterations and a custom salt.
- *
- * @param {string} mnemonic - The Electrum-compatible mnemonic phrase (12 or more words).
- * @param {string} [password=''] - An optional password to strengthen the seed derivation (default is an empty string).
- * @returns {Buffer} The derived 64-byte Electrum-compatible seed.
- */
-export const deriveElectrumSeed = (mnemonic: string, password = ''): Buffer => {
-  const salt = `electrum${password}`;
-  return pbkdf2Sync(mnemonic, salt, 2048, 64, 'sha512');
-};
-
-/**
  * Represents a derived key pair consisting of a public key and a private key.
  */
 export type KeyPair = {
@@ -123,8 +119,11 @@ export const deriveAccountRootKeyPair = (props: {
 }): { pair: { publicKey: string; privateKey: string }; path: string } => {
   const { seed, addressType, network, account } = props;
   const root = HDKey.fromMasterSeed(seed);
-  const networkIndex = network === BitcoinNetwork.Mainnet ? 0 : 1;
-  const accountPath = `m/${ADDRESS_TYPE_TO_PURPOSE[addressType]}'/${networkIndex}'/${account}'`;
+  const accountPath = bitcoinAccountDerivationPath({
+    addressType,
+    network,
+    account,
+  });
   const accountNode = root.derive(accountPath);
 
   if (!accountNode.privateExtendedKey) {
@@ -162,7 +161,7 @@ export const deriveChildKeyPair = (
   chain: ChainType,
   index: number,
 ): { pair: { publicKey: string; privateKey: string }; path: string } => {
-  const hdAccountKey = HDKey.fromExtendedKey(accountKey);
+  const hdAccountKey = hdKeyFromExtendedKey(accountKey);
   const chainPath = chain === ChainType.External ? '0' : '1';
   const fullPath = `m/${chainPath}/${index}`;
   const childNode = hdAccountKey.derive(fullPath);
@@ -201,7 +200,7 @@ export const deriveChildPublicKey = (
   chain: ChainType,
   index: number,
 ): Buffer => {
-  const hdKey = HDKey.fromExtendedKey(extendedPublicKey);
+  const hdKey = hdKeyFromExtendedKey(extendedPublicKey);
   const chainPath = chain === ChainType.External ? '0' : '1';
   const relativePath = `m/${chainPath}/${index}`;
   const childNode = hdKey.derive(relativePath);
@@ -217,7 +216,7 @@ export const deriveChildPublicKey = (
  * Derives the extended account public keys for all supported address types and networks.
  *
  * Given a master seed and an account index, this function derives the account-level extended public key
- * (xpub) for each address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit) on both Mainnet and Testnet.
+ * (xpub) for each address type (Legacy, SegWit, NativeSegWit, Taproot) on both Mainnet and Testnet.
  * The returned structure maps each network to its corresponding extended keys.
  *
  * @param {Buffer} seed - The master seed derived from the mnemonic.
@@ -236,7 +235,6 @@ export const getExtendedPubKeys = (
     AddressType.Legacy,
     AddressType.Taproot,
     AddressType.SegWit,
-    AddressType.ElectrumNativeSegWit,
   ];
   const networks: BitcoinNetwork[] = [
     BitcoinNetwork.Mainnet,
@@ -252,14 +250,12 @@ export const getExtendedPubKeys = (
       segWit: '',
       nativeSegWit: '',
       taproot: '',
-      electrumNativeSegWit: '',
     },
     testnet4: {
       legacy: '',
       segWit: '',
       nativeSegWit: '',
       taproot: '',
-      electrumNativeSegWit: '',
     },
   };
 

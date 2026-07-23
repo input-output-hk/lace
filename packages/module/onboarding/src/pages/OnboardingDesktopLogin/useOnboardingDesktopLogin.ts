@@ -1,5 +1,9 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
+import {
+  clearPendingCreateWalletSecrets,
+  setPendingCreateWalletSecrets,
+} from '@lace-contract/onboarding-v2';
 import { StackRoutes } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -24,14 +28,8 @@ export const useOnboardingDesktopLogin = ({
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
 
-  const setPendingCreateWallet = useDispatchLaceAction(
-    'onboardingV2.setPendingCreateWallet',
-  );
   const resetCreateWalletStatus = useDispatchLaceAction(
     'onboardingV2.resetCreateWalletStatus',
-  );
-  const clearPendingCreateWallet = useDispatchLaceAction(
-    'onboardingV2.clearPendingCreateWallet',
   );
 
   useEffect(() => {
@@ -43,7 +41,7 @@ export const useOnboardingDesktopLogin = ({
   const handleNext = useCallback(() => {
     trackEvent('onboarding | create password | next | press');
     if (!newPassword || newPassword !== confirmPassword) return;
-    setPendingCreateWallet({ password: newPassword });
+    setPendingCreateWalletSecrets({ password: newPassword });
     if (hardwareSetup) {
       navigation.navigate(StackRoutes.OnboardingHardwareSetup, hardwareSetup);
     } else {
@@ -51,22 +49,15 @@ export const useOnboardingDesktopLogin = ({
     }
     setNewPassword('');
     setConfirmPassword('');
-  }, [
-    navigation,
-    newPassword,
-    confirmPassword,
-    setPendingCreateWallet,
-    hardwareSetup,
-    trackEvent,
-  ]);
+  }, [navigation, newPassword, confirmPassword, hardwareSetup, trackEvent]);
 
   const handleBackPress = useCallback(() => {
     trackEvent('onboarding | create password | back | press');
     // If we go back (either start or restore) we clear the pending
     // data so that the user can start again
-    clearPendingCreateWallet();
+    clearPendingCreateWalletSecrets();
     navigation.goBack();
-  }, [clearPendingCreateWallet, navigation, trackEvent]);
+  }, [navigation, trackEvent]);
 
   const toggleNewPasswordVisibility = useCallback(() => {
     trackEvent(
@@ -97,6 +88,17 @@ export const useOnboardingDesktopLogin = ({
   const confirmPasswordLabel = t('onboarding.desktop-login.confirm-password');
   const nextButtonLabel = t('v2.generic.btn.next');
   const passwordMatchError = t('onboarding.desktop-login.password-match-error');
+  // The unlock password is app-wide and cannot be reset, so warn on every
+  // onboarding path — hardware included. Only the recovery *route* differs:
+  // software wallets restore from the recovery phrase; hardware wallets restore
+  // by reconnecting the device (the keys never leave it), so we pick the
+  // matching copy rather than show phrase-based guidance to hardware users
+  // (PR review of #2453).
+  const passwordRecoveryNote = t(
+    hardwareSetup
+      ? 'onboarding.desktop-login.password-recovery-note-hardware'
+      : 'onboarding.desktop-login.password-recovery-note',
+  );
 
   const getInputError = useCallback((): string | undefined => {
     if (!newPassword || !confirmPassword) {
@@ -130,5 +132,6 @@ export const useOnboardingDesktopLogin = ({
     onNext: handleNext,
     passwordStrengthFeedback,
     inputError,
+    passwordRecoveryNote,
   };
 };

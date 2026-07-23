@@ -1,3 +1,5 @@
+import { canonicalUsbProductId } from '@lace-lib/util-hw';
+
 import type { WalletId } from './wallet-id.vo';
 import type { DeviceDescriptor, HardwareVendorName } from '@lace-lib/util-hw';
 import type { Tagged } from 'type-fest';
@@ -10,6 +12,8 @@ const USB_NO_SERIAL_SENTINEL = 'no-serial';
 /**
  * Wallet ID for hardware wallets, derived from the physical device descriptor.
  * USB IDs use `usb-hw-{vid}-{pid}-{serial}`, while BLE use `ble-{vendor}-{id}`.
+ * The productId is canonicalized so ids stay stable for vendors whose devices
+ * report app/firmware-dependent productId bits (Ledger).
  */
 export type HardwareWalletId = Tagged<WalletId, 'HardwareWalletId'>;
 export const HardwareWalletId = (
@@ -17,7 +21,10 @@ export const HardwareWalletId = (
 ): HardwareWalletId => {
   switch (descriptor.kind) {
     case 'usb':
-      return `usb-hw-${descriptor.vendorId}-${descriptor.productId}-${
+      return `usb-hw-${descriptor.vendorId}-${canonicalUsbProductId(
+        descriptor.vendorId,
+        descriptor.productId,
+      )}-${
         descriptor.serialNumber ?? USB_NO_SERIAL_SENTINEL
       }` as HardwareWalletId;
     case 'ble':

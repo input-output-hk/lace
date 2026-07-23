@@ -17,5 +17,9 @@
     "@lace-lib/util-store": "*",
     "@ledgerhq/react-native-hw-transport-ble": "^6.40.1",
     "react-native-ble-plx": "^3.5.1"
+  },
+  "devDependencies": {
+    "@lace-lib/bitcoin-air-gapped-protocol": "*",
+    "@ledgerhq/errors": "^6.35.0"
   }
 }

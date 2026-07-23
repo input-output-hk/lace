@@ -192,12 +192,14 @@ export const useDeregistration = (
     const depositReturnLovelace = hasFees
       ? Number(deregistrationFlowState.depositReturn ?? 0)
       : 0;
+    const withdrawalLovelace = hasFees
+      ? Number(deregistrationFlowState.withdrawalAmount ?? 0)
+      : 0;
 
-    // Format fee and deposit return for display
     const feeAda = feeLovelace / LOVELACE_DIVISOR;
     const depositReturnAda = depositReturnLovelace / LOVELACE_DIVISOR;
-    // Total is deposit return minus fee (net gain to user)
-    const totalAda = depositReturnAda - feeAda;
+    const withdrawalAda = withdrawalLovelace / LOVELACE_DIVISOR;
+    const totalAda = depositReturnAda + withdrawalAda - feeAda;
 
     return {
       poolName,
@@ -210,6 +212,10 @@ export const useDeregistration = (
       depositReturn: hasFees
         ? `+${depositReturnAda.toFixed(6)}`
         : 'Calculating...',
+      withdrawalAmount:
+        hasFees && withdrawalAda > 0
+          ? `+${withdrawalAda.toFixed(6)}`
+          : undefined,
       transactionFee: hasFees ? `-${feeAda.toFixed(6)}` : 'Calculating...',
       total: hasFees
         ? `${totalAda >= 0 ? '+' : ''}${totalAda.toFixed(6)}`

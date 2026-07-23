@@ -565,4 +565,60 @@ describe('format-number', () => {
       });
     });
   });
+
+  describe('rawToBigInt', () => {
+    it('returns 0n for empty or blank input', () => {
+      expect(formatNumber.rawToBigInt('', 0)).toEqual(0n);
+      expect(formatNumber.rawToBigInt('   ', 6)).toEqual(0n);
+    });
+
+    it('converts a whole-number string to a BigInt', () => {
+      expect(formatNumber.rawToBigInt('5000000', 0)).toEqual(5000000n);
+    });
+
+    it('scales by decimals and truncates the fractional part', () => {
+      expect(formatNumber.rawToBigInt('1.5', 6)).toEqual(1500000n);
+      expect(formatNumber.rawToBigInt('1.2345678', 6)).toEqual(1234567n);
+    });
+
+    it('preserves precision for integer parts above 2^53', () => {
+      // 45e15 lovelace (> Number.MAX_SAFE_INTEGER ~= 9.007e15) must round-trip exactly.
+      expect(formatNumber.rawToBigInt('45000000000000001', 0)).toEqual(
+        45000000000000001n,
+      );
+      // 21_000_000 BTC expressed in satoshis, scaled by 8 decimals.
+      expect(formatNumber.rawToBigInt('21000000', 8)).toEqual(
+        2100000000000000n,
+      );
+    });
+
+    it('returns 0n for non-numeric input instead of throwing', () => {
+      expect(formatNumber.rawToBigInt('abc', 0)).toEqual(0n);
+    });
+
+    it('returns 0n for non-finite input instead of throwing', () => {
+      // 'Infinity' parses to a valid, non-NaN BigNumber that BigInt() rejects.
+      expect(formatNumber.rawToBigInt('Infinity', 6)).toEqual(0n);
+      expect(formatNumber.rawToBigInt('-Infinity', 6)).toEqual(0n);
+    });
+
+    it('handles negative amounts, truncating toward zero', () => {
+      expect(formatNumber.rawToBigInt('-5', 6)).toEqual(-5000000n);
+      expect(formatNumber.rawToBigInt('-1.2345678', 6)).toEqual(-1234567n);
+    });
+
+    it('stays exact at and beyond the 1e21 exponential-notation boundary', () => {
+      // BigNumber.toString() switches to exponential notation at >=1e21; the
+      // scaling must not (regression guard for audit finding L-204).
+      // '1000' scaled by 18 decimals is exactly 1e21.
+      expect(formatNumber.rawToBigInt('1000', 18)).toEqual(
+        1000000000000000000000n,
+      );
+      // A fractional mantissa past 1e21 must scale exactly, not collapse to a
+      // tiny value from a truncated exponential string.
+      expect(formatNumber.rawToBigInt('9999.5', 18)).toEqual(
+        9999500000000000000000n,
+      );
+    });
+  });
 });

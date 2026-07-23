@@ -1,21 +1,17 @@
 import { Cardano } from '@cardano-sdk/core';
 import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
-import { whileActive } from '@lace-contract/wallet-active-state';
+import { Err, Milliseconds, Ok } from '@lace-lib/util';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
-import { Err, Milliseconds, Ok } from '@lace-sdk/util';
 import { retryBackoff } from 'backoff-rxjs';
 import {
   bufferTime,
   catchError,
-  combineLatest,
   distinct,
   distinctUntilChanged,
   EMPTY,
-  exhaustMap,
   filter,
   from,
   groupBy,
-  interval,
   map,
   merge,
   mergeMap,
@@ -41,7 +37,6 @@ import {
   CardanoEraSummariesFailureId,
   CardanoNetworkId,
   CardanoProtocolParametersFailureId,
-  CardanoTxId,
   TokenMetadataFailureId,
 } from '../value-objects';
 
@@ -51,12 +46,9 @@ import {
   mapTransactionToActivity,
 } from './helpers';
 import { fetchAddressTransactionHistories } from './helpers/fetch-address-transaction-histories';
-import { addressDiscoverySync } from './side-effects/address-discovery-sync';
 import { clearStaleCardanoSyncsOnResume } from './side-effects/clear-stale-cardano-syncs-on-resume';
-import { coordinateCardanoSync } from './side-effects/coordinate-sync';
 import { findMissingTokensMetadataForActivities } from './side-effects/find-missing-tokens-metadata-for-activities';
 import { loadTokensMetadata } from './side-effects/load-tokens-metadata';
-import { manualAddressDiscoveryEnqueue } from './side-effects/manual-address-discovery';
 import { securityRescan } from './side-effects/security-rescan';
 import { securityRescanToast } from './side-effects/security-rescan-toast';
 import { syncLovelaceTokenTickerWithChain } from './side-effects/sync-lovelace-token-ticker-with-chain';
@@ -66,7 +58,6 @@ import { trackAccountDelegationActivities } from './side-effects/track-account-d
 import { createTrackAccountRewardsHistory } from './side-effects/track-account-reward-history';
 import { trackAccountTokens } from './side-effects/track-account-tokens';
 import { createTrackOlderAccountTransactionHistory } from './side-effects/track-account-transaction-history';
-import { trackAccountUtxos } from './side-effects/track-account-utxos';
 import { trackRewardAccountDetails } from './side-effects/track-reward-account-details';
 import { trackSyncRoundFailures } from './side-effects/track-sync-round-failures';
 import { createTrackTransactionDetails } from './side-effects/track-transaction-details';
@@ -81,7 +72,7 @@ import type {
   TokenId,
   TokenMetadata,
 } from '@lace-contract/tokens';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 const UPDATE_METADATA_BUFFER_TIME = Milliseconds(200);
@@ -91,53 +82,6 @@ const unwrapOrThrowError = <T, E extends Error>(result: Result<T, E>): T => {
   if (result.isErr()) throw result.unwrapErr();
   return result.unwrap();
 };
-
-const returnEmpty = () => EMPTY;
-
-export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
-  tipPollFrequency =>
-  (
-    _,
-    {
-      cardanoContext: { selectChainId$ },
-      wallets: { selectActiveNetworkAccounts$ },
-    },
-    { actions, cardanoProvider: { getTip }, isWalletActive$ },
-  ) =>
-    // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
-    // leaves the downstream `switchMap`'s in-flight inner alive on lock — it
-    // only blocks future outer emissions, not the already-running interval.
-    // See ADR 25.
-    combineLatest([
-      selectChainId$.pipe(filter(Boolean), distinctUntilChanged()),
-      selectActiveNetworkAccounts$.pipe(
-        map(accounts =>
-          accounts.some(account => account.blockchainName === 'Cardano'),
-        ),
-        distinctUntilChanged(),
-      ),
-    ]).pipe(
-      switchMap(([chainId, hasCardanoAccounts]) => {
-        if (!hasCardanoAccounts) return EMPTY;
-        return merge(of(void 0), interval(tipPollFrequency)).pipe(
-          exhaustMap(() =>
-            getTip({ chainId }).pipe(
-              map(unwrapOrThrowError),
-              retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
-              catchError(returnEmpty),
-            ),
-          ),
-          distinctUntilChanged((a, b) => a.hash === b.hash),
-          map(tip =>
-            actions.cardanoContext.setTip({
-              network: CardanoNetworkId(chainId.networkMagic),
-              tip,
-            }),
-          ),
-        );
-      }),
-      whileActive(isWalletActive$),
-    );
 
 /**
  * @returns Observable that emits deduplicated ids of tokens which do not have metadata
@@ -478,50 +422,13 @@ export const createRegisterCardanoBlockchainNetworks =
       ),
     );
 
-export const submitTxSideEffect: SideEffect = (
-  { cardanoContext: { submitTx$ } },
-  { cardanoContext: { selectChainId$ } },
-  { cardanoProvider, actions },
-) =>
-  submitTx$.pipe(
-    withLatestFrom(selectChainId$),
-    mergeMap(([{ payload }, chainId]) => {
-      if (!chainId) {
-        return of(
-          actions.cardanoContext.submitTxFailed({
-            txId: CardanoTxId.fromCbor(payload.serializedTx),
-            error: 'Chain ID not found',
-          }),
-        );
-      }
-      return cardanoProvider
-        .submitTx({ signedTransaction: payload.serializedTx }, { chainId })
-        .pipe(
-          map(result =>
-            result.isOk()
-              ? actions.cardanoContext.submitTxCompleted({
-                  txId: result.value as CardanoTxId,
-                })
-              : actions.cardanoContext.submitTxFailed({
-                  txId: CardanoTxId.fromCbor(payload.serializedTx),
-                  error: result.error.message,
-                }),
-          ),
-        );
-    }),
-  );
-
 export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createRegisterCardanoBlockchainNetworks(config.defaultTestnetChainId),
   clearStaleCardanoSyncsOnResume,
-  coordinateCardanoSync,
-  addressDiscoverySync,
-  manualAddressDiscoveryEnqueue,
   securityRescan,
   securityRescanToast,
   trackAccountTokens,
   trackSyncRoundFailures,
-  trackTip(config.cardanoProvider.tipPollFrequency),
   trackTokenMetadata(UPDATE_METADATA_BUFFER_TIME),
   syncLovelaceTokenTickerWithChain,
   trackProtocolParameters,
@@ -546,8 +453,6 @@ export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createTrackTransactionDetails(),
   findMissingTokensMetadataForActivities(),
   loadTokensMetadata,
-  trackAccountUtxos,
   syncUnspendableUtxosWithAccountUtxos,
   trackRewardAccountDetails,
-  submitTxSideEffect,
 ];

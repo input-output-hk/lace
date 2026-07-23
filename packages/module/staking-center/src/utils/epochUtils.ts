@@ -1,4 +1,5 @@
-import { createSlotTimeCalc, epochSlotsCalc, Cardano } from '@cardano-sdk/core';
+import { createSlotTimeCalc, Cardano } from '@cardano-sdk/core';
+import { getEpochFirstSlot } from '@lace-contract/cardano-context';
 
 import type { EraSummary } from '@cardano-sdk/core';
 
@@ -35,5 +36,5 @@ export const calculateEpochEnd = (
   const nextEpoch = (currentEpoch + 1) as Cardano.EpochNo;
   const mutableEraSummaries = eraSummaries as EraSummary[];
   const slotTimeCalc = createSlotTimeCalc(mutableEraSummaries);
-  return slotTimeCalc(epochSlotsCalc(nextEpoch, mutableEraSummaries).firstSlot);
+  return slotTimeCalc(getEpochFirstSlot(nextEpoch, mutableEraSummaries));
 };

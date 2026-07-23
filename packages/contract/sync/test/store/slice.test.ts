@@ -4,7 +4,7 @@ import {
   WalletId,
   walletsActions,
 } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { syncActions as actions } from '../../src/index';

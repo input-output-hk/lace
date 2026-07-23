@@ -4,13 +4,17 @@ import {
   getNetworkDetails,
 } from '@lace-contract/cardano-context';
 
+import { makeBitcoinHwAccountConnector } from './bitcoin/hw-account-connector';
+
 import type { AvailableAddons } from '.';
+import type { LedgerBitcoinTransport } from './ledger-bitcoin-transport';
 import type { LedgerCardanoTransport } from './ledger-cardano-transport';
 import type { ContextualLaceInit } from '@lace-contract/module';
 import type { HwAccountConnector } from '@lace-contract/onboarding-v2';
 
 export interface HwAccountConnectorDependencies {
-  transport: LedgerCardanoTransport;
+  cardanoTransport: LedgerCardanoTransport;
+  bitcoinTransport: LedgerBitcoinTransport;
 }
 
 export const makeLoadHwAccountConnector =
@@ -29,7 +33,7 @@ export const makeLoadHwAccountConnector =
             walletId,
             targetNetworks,
           } = props;
-          const publicKey = await dependencies.transport.getXpub(
+          const publicKey = await dependencies.cardanoTransport.getXpub(
             device,
             accountIndex,
           );
@@ -62,4 +66,7 @@ export const makeLoadHwAccountConnector =
           });
         },
       },
+      makeBitcoinHwAccountConnector({
+        transport: dependencies.bitcoinTransport,
+      }),
     ];

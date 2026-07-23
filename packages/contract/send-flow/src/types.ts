@@ -7,13 +7,13 @@ import type {
   TxErrorTranslationKeys,
 } from '@lace-contract/tx-executor';
 import type { AccountId, AnyWallet } from '@lace-contract/wallet-repo';
+import type { BigNumber, Option } from '@lace-lib/util';
 import type {
   BlockchainAssigned,
   ErrorObject,
   JsonType,
   StateObject,
 } from '@lace-lib/util-store';
-import type { BigNumber, Option } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
 
 export type { TxErrorTranslationKeys } from '@lace-contract/tx-executor';

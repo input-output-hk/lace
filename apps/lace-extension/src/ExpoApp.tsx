@@ -97,9 +97,11 @@ const detectViewId = async (): Promise<ViewId> => {
 
 // same initialization for side-panel and popupWindow
 const loadUiScript = async () => {
-  const viewId = await detectViewId();
-
-  const store = await connectStore({ runtime });
+  // detectViewId and connectStore are independent — run concurrently
+  const [viewId, store] = await Promise.all([
+    detectViewId(),
+    connectStore({ runtime }),
+  ]);
   const moduleInitProps = await createExtensionModuleLoader({
     view: {
       id: viewId,

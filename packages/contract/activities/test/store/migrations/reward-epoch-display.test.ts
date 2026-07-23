@@ -1,5 +1,5 @@
 import { AccountId } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { ActivityType } from '../../../src/const';

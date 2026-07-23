@@ -18,6 +18,7 @@ export const AddWalletHardware = ({
     instructionText,
     onBackPress,
     onConnect,
+    onSelectDevice,
     connectButtonLabel,
     isConnecting,
     error,
@@ -49,6 +50,7 @@ export const AddWalletHardware = ({
       instructionText={error ?? instructionText}
       onBackPress={onBackPress}
       onConnect={onConnect}
+      onSelectDevice={onSelectDevice}
       connectButtonLabel={connectButtonLabel}
       isLoading={isConnecting}
       isError={isError}

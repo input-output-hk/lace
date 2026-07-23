@@ -60,6 +60,7 @@ export { useNavigationObservability } from './navigation-observability';
 export {
   NavigationControls,
   findLastRouteIndexByName,
+  getFocusedSheetPosition,
   onSheetClose,
   handleInteractiveSheetDismiss,
   sheetStackScreenListeners,

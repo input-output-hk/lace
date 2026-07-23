@@ -1,6 +1,10 @@
 import { isDuplicateString } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
 import {
+  getMaxHwAccountIndex,
+  isDeviceAccountSelection,
+} from '@lace-contract/onboarding-v2';
+import {
   isHardwareWallet as checkIsHardwareWallet,
   WalletId,
   WalletType,
@@ -24,6 +28,7 @@ import {
   getHwBlockchainOptions,
   getUsedAccountIndices,
   isAccountFormValid,
+  MAX_ACCOUNT_INDEX,
   TRANSLATION_KEYS,
 } from './addAccountHelpers';
 
@@ -92,6 +97,27 @@ export const useAddAccount = (
     selectedBlockchain,
   );
 
+  const isDeviceSelectedAccount = useMemo(
+    () =>
+      !!wallet &&
+      isDeviceAccountSelection(loadedHwBlockchainSupport, {
+        walletType: wallet.type,
+        blockchainName: selectedBlockchain,
+      }),
+    [wallet, loadedHwBlockchainSupport, selectedBlockchain],
+  );
+
+  const maxAccountIndex = useMemo(
+    () =>
+      (wallet && isHardwareWallet
+        ? getMaxHwAccountIndex(loadedHwBlockchainSupport, {
+            walletType: wallet.type,
+            blockchainName: selectedBlockchain,
+          })
+        : undefined) ?? MAX_ACCOUNT_INDEX,
+    [wallet, isHardwareWallet, loadedHwBlockchainSupport, selectedBlockchain],
+  );
+
   const accountNamesOnSelectedNetwork = useLaceSelector(
     'wallets.selectAccountNamesByNetworkId',
     networkId,
@@ -107,6 +133,12 @@ export const useAddAccount = (
   );
 
   const { hasAvailableIndices, nextAccountIndex, usedIndices } = useMemo(() => {
+    if (isDeviceSelectedAccount)
+      return {
+        hasAvailableIndices: true,
+        nextAccountIndex: 0,
+        usedIndices: new Set<number>(),
+      };
     if (!wallet || !networkId)
       return {
         hasAvailableIndices: false,
@@ -117,7 +149,10 @@ export const useAddAccount = (
       account => account.blockchainNetworkId === networkId,
     );
     const usedIndices = getUsedAccountIndices(accounts);
-    const nextAccountIndex = calculateNextAccountIndex(usedIndices);
+    const nextAccountIndex = calculateNextAccountIndex(
+      usedIndices,
+      maxAccountIndex,
+    );
     return nextAccountIndex === undefined
       ? {
           hasAvailableIndices: false,
@@ -129,7 +164,7 @@ export const useAddAccount = (
           nextAccountIndex,
           usedIndices,
         };
-  }, [wallet?.accounts, networkId]);
+  }, [wallet?.accounts, networkId, isDeviceSelectedAccount, maxAccountIndex]);
 
   const isConfirmEnabled = useMemo(
     () =>
@@ -222,7 +257,7 @@ export const useAddAccount = (
       walletId: WalletId(walletId),
       blockchain: selectedBlockchain,
       accountName: accountName,
-      accountIndex,
+      accountIndex: isDeviceSelectedAccount ? 0 : accountIndex,
       // HW wallets authenticate via the physical device — no password prompt.
       authenticationPromptConfig: isHardwareWallet
         ? undefined
@@ -241,6 +276,7 @@ export const useAddAccount = (
     networkId,
     isHardwareWallet,
     isMnemonicRequiredForSelectedBlockchain,
+    isDeviceSelectedAccount,
   ]);
 
   const handleBlockchainChange = useCallback((value: string) => {
@@ -253,8 +289,12 @@ export const useAddAccount = (
 
   const accountIndexDropdownItems = useMemo(
     () =>
-      generateAccountIndexDropdownItems(usedIndices, accountIndexItemUsedLabel),
-    [usedIndices, accountIndexItemUsedLabel],
+      generateAccountIndexDropdownItems(
+        usedIndices,
+        accountIndexItemUsedLabel,
+        maxAccountIndex,
+      ),
+    [usedIndices, accountIndexItemUsedLabel, maxAccountIndex],
   );
 
   const secondaryButton = useMemo<ButtonConfig>(
@@ -300,6 +340,12 @@ export const useAddAccount = (
     setAccountIndex(nextAccountIndex);
   }, [nextAccountIndex]);
 
+  // A device cap that loads after the user picked an index above it would
+  // otherwise survive into the add-account request.
+  useEffect(() => {
+    if (accountIndex > maxAccountIndex) setAccountIndex(nextAccountIndex);
+  }, [accountIndex, maxAccountIndex, nextAccountIndex]);
+
   useEffect(() => {
     return () => {
       setLoading(false);
@@ -325,6 +371,7 @@ export const useAddAccount = (
     accountIndex,
     accountIndexDropdownItems,
     hasAvailableIndices,
+    showAccountIndexSelection: !isDeviceSelectedAccount,
     allIndicesUsedMessage,
     isNoRecoveryPhraseModalVisible,
     closeNoRecoveryPhraseModal,

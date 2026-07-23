@@ -1,4 +1,3 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
 import {
   appLockActions as actions,
   PAUSE_NETWORK_POLLING_FEATURE_FLAG,
@@ -6,8 +5,9 @@ import {
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { ViewId } from '@lace-contract/module';
 import { viewsActions, SidePanelViewId } from '@lace-contract/views';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
 import { lastValueFrom, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -23,11 +23,12 @@ import {
   wireIsWalletActiveObservable,
 } from '../../src/store/side-effects';
 
+import type * as Core from '@lace-lib/core';
 import type { Subscription } from 'rxjs';
 
-vi.mock('@cardano-sdk/key-management', () => ({
-  emip3decrypt: vi.fn(),
-  emip3encrypt: vi.fn(),
+vi.mock('@lace-lib/core', async importActual => ({
+  ...(await importActual<typeof Core>()),
+  SecretBox: { open: vi.fn(), seal: vi.fn() },
 }));
 
 const testAuthSecret = AuthSecret(ByteArray.fromUTF8('test-password'));
@@ -153,7 +154,7 @@ describe('module app-lock side effects', () => {
     });
 
     it('returns true when decryption succeeds', async () => {
-      vi.mocked(emip3decrypt).mockResolvedValue(new Uint8Array([1]));
+      vi.mocked(SecretBox.open).mockResolvedValue(new Uint8Array([1]));
 
       subscription = verifyAuthSecret(
         {} as never,
@@ -169,7 +170,7 @@ describe('module app-lock side effects', () => {
       );
 
       expect(result).toBe(true);
-      expect(emip3decrypt).toHaveBeenCalledWith(
+      expect(SecretBox.open).toHaveBeenCalledWith(
         ByteArray.fromHex(testSentinel),
         testAuthSecret,
       );
@@ -190,11 +191,13 @@ describe('module app-lock side effects', () => {
       );
 
       expect(result).toBe(false);
-      expect(emip3decrypt).not.toHaveBeenCalled();
+      expect(SecretBox.open).not.toHaveBeenCalled();
     });
 
     it('returns false when decryption fails', async () => {
-      vi.mocked(emip3decrypt).mockRejectedValue(new Error('decryption failed'));
+      vi.mocked(SecretBox.open).mockRejectedValue(
+        new Error('decryption failed'),
+      );
 
       subscription = verifyAuthSecret(
         {} as never,

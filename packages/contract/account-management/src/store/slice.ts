@@ -27,8 +27,6 @@ export type LastAddedAccount = {
 };
 
 export type RestoreWalletFlowState = {
-  passphrase: string;
-  recoveryPhrase: string[];
   selectedBlockchains: BlockchainName[];
 };
 
@@ -101,31 +99,11 @@ const slice = createSlice({
       state.lastHardwareWalletCreationError = payload.reason;
       state.isLoading = false;
     },
-    setRestoreWalletRecoveryPhrase: (
-      state,
-      {
-        payload,
-      }: PayloadAction<{ passphrase: string; recoveryPhrase: string[] }>,
-    ) => {
-      state.restoreWalletFlow = {
-        passphrase: payload.passphrase,
-        recoveryPhrase: payload.recoveryPhrase,
-        selectedBlockchains: state.restoreWalletFlow?.selectedBlockchains ?? [],
-      };
-    },
     setRestoreWalletSelectedBlockchains: (
       state,
       { payload }: PayloadAction<BlockchainName[]>,
     ) => {
-      if (!state.restoreWalletFlow) {
-        state.restoreWalletFlow = {
-          passphrase: '',
-          recoveryPhrase: [],
-          selectedBlockchains: payload,
-        };
-        return;
-      }
-      state.restoreWalletFlow.selectedBlockchains = payload;
+      state.restoreWalletFlow = { selectedBlockchains: payload };
     },
     clearRestoreWalletFlow: state => {
       state.restoreWalletFlow = null;

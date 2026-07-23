@@ -503,7 +503,7 @@ describe('useCollateralState', () => {
       fees: [{ tokenId: 'lovelace', amount: '200000' }],
     };
     const adaPrices = {
-      'cardano:ada': { price: 0.5, lastUpdated: 0 },
+      'cardano:lovelace': { price: 0.5, lastUpdated: 0 },
     };
 
     it('includes fiat values on mainnet with TOKEN_PRICING flag', () => {

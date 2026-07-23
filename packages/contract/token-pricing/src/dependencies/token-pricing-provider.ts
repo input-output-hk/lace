@@ -12,6 +12,7 @@ export interface TokenPricingProvider {
     requests: TokenPriceRequest[],
     timeRange: TimeRange,
   ): Observable<TokenPriceHistoryResponse[]>;
+  fetchSupportedCurrencies?(): Observable<string[]>;
 }
 
 export interface TokenPricingProviderDependency {

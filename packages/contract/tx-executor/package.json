@@ -10,9 +10,9 @@
     "@lace-contract/module": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-redacted": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

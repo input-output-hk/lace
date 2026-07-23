@@ -1,8 +1,8 @@
-import { senderOrigin } from '@lace-sdk/dapp-connector';
+import { senderOrigin } from '@lace-lib/dapp-connector';
 import {
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import { firstValueFrom, Observable, of } from 'rxjs';
 // TODO: MOBILE hoist those side effect dependencies to extension-specific module
@@ -36,8 +36,9 @@ import type {
   MidnightNetwork,
   MidnightSDKNetworkId,
 } from '@lace-contract/midnight-context';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
-import type { WithLogger } from '@lace-sdk/util';
+import type { AccountId } from '@lace-contract/wallet-repo';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
+import type { WithLogger } from '@lace-lib/util';
 import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import type { Runtime } from 'webextension-polyfill';
 
@@ -50,6 +51,7 @@ type ConnectMidnightDappConnectorParams<T> = {
   wallets$: Observable<MidnightWalletsByAccountId>;
   supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   isUnlocked$: Observable<boolean>;
+  getAccountIdForOrigin: (origin: string) => AccountId | undefined;
   onPendingActivity?: (activity: Activity) => void;
 };
 
@@ -98,6 +100,7 @@ export const initializeMidnightDappConnectorSideEffectDependencies = ({
     handleRequests,
     supportedNetworksIds$,
     isUnlocked$,
+    getAccountIdForOrigin,
     onPendingActivity,
   }: ConnectMidnightDappConnectorParams<T>): Observable<T> =>
     new Observable(_subscriber => {
@@ -111,6 +114,7 @@ export const initializeMidnightDappConnectorSideEffectDependencies = ({
           ),
           supportedNetworksIds$,
           isUnlocked$,
+          getAccountIdForOrigin,
           onPendingActivity,
           logger,
         });

@@ -1,6 +1,6 @@
 import { signerAuthFromPrompt } from '@lace-contract/signer';
 import { genericErrorResults } from '@lace-contract/tx-executor';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { catchError, defer, map, of } from 'rxjs';
 
 import type { BitcoinSignerContext } from '@lace-contract/bitcoin-context';

@@ -20,13 +20,13 @@ import type {
   InMemoryWalletAccount,
   WalletId,
 } from '@lace-contract/wallet-repo';
-import type { Serializable } from '@lace-lib/util-store';
 import type {
   BigNumber,
   ByteArray,
   HexBytes,
   MakePropertiesObservable,
-} from '@lace-sdk/util';
+} from '@lace-lib/util';
+import type { Serializable } from '@lace-lib/util-store';
 import type {
   DustSecretKey,
   RawTokenType,

@@ -17,21 +17,6 @@ export interface DRepDisplayInfo {
 }
 
 /**
- * Formats a stake credential into a bech32 reward address.
- *
- * @param networkId - The Cardano network ID
- * @param stakeCredential - The stake credential to format
- * @returns The bech32-encoded reward address
- */
-export const formatStakeAddress = (
-  networkId: Cardano.NetworkId,
-  stakeCredential: Cardano.Credential,
-): string =>
-  Cardano.RewardAddress.fromCredentials(networkId, stakeCredential)
-    .toAddress()
-    .toBech32();
-
-/**
  * Formats a stake credential as its raw key/script hash (hex string).
  * Used for display in certificate views where the label is "Stake Key Hash".
  *

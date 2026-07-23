@@ -1,7 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import * as Crypto from '@cardano-sdk/crypto';
 import {
-  emip3decrypt,
   InMemoryKeyAgent,
   KeyPurpose,
   util,
@@ -14,7 +13,8 @@ import {
 } from '@lace-contract/cardano-context';
 import { createAddAccounts } from '@lace-contract/in-memory';
 import { createBlockchainNetworkTargetResolver } from '@lace-contract/network';
-import { HexBytes } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { HexBytes } from '@lace-lib/util';
 
 import type { AvailableAddons } from '.';
 import type { SerializableInMemoryKeyAgentData } from '@cardano-sdk/key-management';
@@ -95,7 +95,7 @@ export const createAccounts: CreateInMemoryWalletAccounts<
 }) => {
   const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
 
-  const rootPrivateKey = await emip3decrypt(
+  const rootPrivateKey = await SecretBox.open(
     Buffer.from(encryptedRootPrivateKey, 'hex'),
     password,
   );
@@ -196,6 +196,10 @@ export const createBlockchainSpecificWalletData: CreateBlockchainSpecificWalletD
     {
       logger: dependencies.logger,
       bip32Ed25519: await Crypto.SodiumBip32Ed25519.create(),
+      rootPrivateKeyEncryption: {
+        encrypt: SecretBox.seal,
+        decrypt: SecretBox.open,
+      },
     },
   );
 

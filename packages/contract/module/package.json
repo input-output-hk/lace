@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@lace-sdk/util": "*",
+    "@lace-lib/util": "*",
     "redux-persist": "*"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "name": "@lace-lib/cnight-dust-designation",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/crypto": "0.4.7",
+    "@cardano-sdk/tx-construction": "0.29.0",
+    "@cardano-sdk/util": "0.17.2",
+    "@scure/base": "1.2.6",
+    "type-fest": "^4.41.0"
+  }
+}

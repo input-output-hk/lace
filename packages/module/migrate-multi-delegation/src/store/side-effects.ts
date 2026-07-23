@@ -11,9 +11,12 @@ import {
   type CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import { signerAuthFromPrompt } from '@lace-contract/signer';
-import { type AnyWallet } from '@lace-contract/wallet-repo';
+import {
+  isHardwareAccountType,
+  type AnyWallet,
+} from '@lace-contract/wallet-repo';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import { mapHwSigningError } from '@lace-lib/util-hw';
-import { BigNumber, HexBytes } from '@lace-sdk/util';
 import {
   catchError,
   combineLatest,
@@ -22,6 +25,7 @@ import {
   endWith,
   exhaustMap,
   filter,
+  from,
   map,
   mergeMap,
   of,
@@ -48,7 +52,7 @@ import type {
   SideEffectDependencies,
 } from '@lace-contract/module';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 type SideEffectDeps = Parameters<SideEffect>[2];
@@ -214,7 +218,7 @@ export const buildMultidelegationMigrationTx =
       });
     }
 
-    return of(builder.build());
+    return from(builder.build());
   };
 
 export type SignTxResult = {
@@ -239,9 +243,7 @@ export type AccountContext = {
 
 const isHardwareAccount = (
   account: MultiDelegationAccount['account'],
-): boolean =>
-  account.accountType === 'HardwareLedger' ||
-  account.accountType === 'HardwareTrezor';
+): boolean => isHardwareAccountType(account.accountType);
 
 export const signTx =
   (
@@ -581,7 +583,7 @@ export const buildVoteDelegationTx =
     )!.address;
     builder.setChangeAddress(primaryRewardAccountAddress);
 
-    return of(builder.build());
+    return from(builder.build());
   };
 
 export const makePrepareVoteDelegation =

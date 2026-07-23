@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
+import { Timestamp, Ok, Err } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Timestamp, Ok, Err } from '@lace-sdk/util';
 import { EMPTY, of } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 

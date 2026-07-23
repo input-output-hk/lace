@@ -1,6 +1,6 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { genericErrorResults } from '@lace-contract/tx-executor';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import * as ledgerV6 from '@midnight-ntwrk/ledger-v8';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';

@@ -598,6 +598,7 @@ describe('onboarding-v2 side effects', () => {
       device: mockDevice,
       accountIndex: 0,
       blockchainName: 'Cardano' as BlockchainName,
+      password: 'pwd',
     });
 
     // Mock auth secret with a fill() method (mimics Uint8Array)
@@ -631,7 +632,7 @@ describe('onboarding-v2 side effects', () => {
         })),
       } as WalletEntity;
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
         createWallet.mockReturnValue(cold('(a|)', { a: mockHwWallet }));
 
         return {
@@ -640,13 +641,7 @@ describe('onboarding-v2 side effects', () => {
               attemptCreateHardwareWallet$: cold('-a', { a: defaultPayload }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', {
-                a: { password: 'pwd' },
-              }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,
@@ -680,6 +675,224 @@ describe('onboarding-v2 side effects', () => {
       vi.restoreAllMocks();
     });
 
+    it('creates an air-gapped wallet, calling createWallet without a device', () => {
+      const logger = createLogger();
+      const createWallet = vi.fn();
+      const airGappedId = HardwareIntegrationId('seed-signer');
+      const airGappedWallet: WalletEntity = {
+        ...mockHwWallet,
+        type: WalletType.HardwareSeedSigner,
+      };
+      const onboardedAt = 1_700_000_000_000;
+      vi.spyOn(Date, 'now').mockReturnValue(onboardedAt);
+      const stampedAirGappedWallet = {
+        ...airGappedWallet,
+        accounts: airGappedWallet.accounts.map(account => ({
+          ...account,
+          metadata: { ...account.metadata, onboardedAt },
+        })),
+      } as WalletEntity;
+
+      const sideEffect = createHwWalletCreationSideEffect({
+        hwConnectors: [{ id: airGappedId, createWallet }],
+        platform: 'ios',
+        setupAppLock: () => of(true),
+      });
+
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
+        createWallet.mockReturnValue(cold('(a|)', { a: airGappedWallet }));
+
+        const airGappedPayload =
+          actions.onboardingV2.attemptCreateHardwareWallet({
+            optionId: airGappedId,
+            accountIndex: 0,
+            blockchainName: 'Cardano' as BlockchainName,
+            password: 'pwd',
+          });
+
+        return {
+          actionObservables: {
+            onboardingV2: {
+              attemptCreateHardwareWallet$: cold('-a', { a: airGappedPayload }),
+            },
+          },
+          stateObservables: {},
+          dependencies: {
+            actions: actionsBag,
+            logger,
+            secureStore: createMockSecureStore(),
+            __getState: () => ({} as never),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actionsBag.wallets.addWallet(stampedAirGappedWallet),
+              b: actionsBag.onboardingV2.createWalletSuccess({
+                walletId: airGappedWallet.walletId,
+                isRecovery: false,
+                walletType: WalletType.HardwareSeedSigner,
+                blockchains: ['Cardano' as BlockchainName],
+              }),
+            });
+
+            flush();
+
+            expect(createWallet).toHaveBeenCalledWith(expect.anything(), {
+              blockchainName: 'Cardano',
+              device: undefined,
+              accountIndex: 0,
+              derivationType: undefined,
+            });
+          },
+        };
+      });
+
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('resolves a connector by optionIds when the option id differs from its id', () => {
+      const logger = createLogger();
+      const createWallet = vi.fn();
+      const connectorId = HardwareIntegrationId('seed-signer');
+      const bitcoinOptionId = HardwareIntegrationId('seed-signer-bitcoin');
+      const bitcoinWallet: WalletEntity = {
+        ...mockHwWallet,
+        type: WalletType.HardwareSeedSigner,
+      };
+      const onboardedAt = 1_700_000_000_000;
+      vi.spyOn(Date, 'now').mockReturnValue(onboardedAt);
+      const stampedBitcoinWallet = {
+        ...bitcoinWallet,
+        accounts: bitcoinWallet.accounts.map(account => ({
+          ...account,
+          metadata: { ...account.metadata, onboardedAt },
+        })),
+      } as WalletEntity;
+
+      const sideEffect = createHwWalletCreationSideEffect({
+        hwConnectors: [
+          {
+            id: connectorId,
+            optionIds: [connectorId, bitcoinOptionId],
+            createWallet,
+          },
+        ],
+        platform: 'ios',
+        setupAppLock: () => of(true),
+      });
+
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
+        createWallet.mockReturnValue(cold('(a|)', { a: bitcoinWallet }));
+
+        const bitcoinPayload = actions.onboardingV2.attemptCreateHardwareWallet(
+          {
+            optionId: bitcoinOptionId,
+            accountIndex: 0,
+            blockchainName: 'Bitcoin' as BlockchainName,
+            password: 'pwd',
+          },
+        );
+
+        return {
+          actionObservables: {
+            onboardingV2: {
+              attemptCreateHardwareWallet$: cold('-a', { a: bitcoinPayload }),
+            },
+          },
+          stateObservables: {},
+          dependencies: {
+            actions: actionsBag,
+            logger,
+            secureStore: createMockSecureStore(),
+            __getState: () => ({} as never),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actionsBag.wallets.addWallet(stampedBitcoinWallet),
+              b: actionsBag.onboardingV2.createWalletSuccess({
+                walletId: bitcoinWallet.walletId,
+                isRecovery: false,
+                walletType: WalletType.HardwareSeedSigner,
+                blockchains: ['Cardano' as BlockchainName],
+              }),
+            });
+
+            flush();
+
+            expect(createWallet).toHaveBeenCalledWith(expect.anything(), {
+              blockchainName: 'Bitcoin',
+              device: undefined,
+              accountIndex: 0,
+              derivationType: undefined,
+            });
+          },
+        };
+      });
+
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('surfaces the specific wrong-script-type reason for a Bitcoin export rejection (not generic)', () => {
+      const logger = createLogger();
+      const createWallet = vi.fn();
+      const connectorId = HardwareIntegrationId('seed-signer');
+      const bitcoinOptionId = HardwareIntegrationId('seed-signer-bitcoin');
+      const wrongScriptTypeError = Object.assign(
+        new Error('SEED_SIGNER_WRONG_SCRIPT_TYPE'),
+        { name: 'SEED_SIGNER_WRONG_SCRIPT_TYPE' },
+      );
+
+      const sideEffect = createHwWalletCreationSideEffect({
+        hwConnectors: [
+          {
+            id: connectorId,
+            optionIds: [connectorId, bitcoinOptionId],
+            createWallet,
+          },
+        ],
+        platform: 'ios',
+        setupAppLock: () => of(true),
+      });
+
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
+        createWallet.mockReturnValue(
+          cold('#', undefined, wrongScriptTypeError),
+        );
+
+        const bitcoinPayload = actions.onboardingV2.attemptCreateHardwareWallet(
+          {
+            optionId: bitcoinOptionId,
+            accountIndex: 0,
+            blockchainName: 'Bitcoin' as BlockchainName,
+            password: 'pwd',
+          },
+        );
+
+        return {
+          actionObservables: {
+            onboardingV2: {
+              attemptCreateHardwareWallet$: cold('-a', { a: bitcoinPayload }),
+            },
+          },
+          stateObservables: {},
+          dependencies: {
+            actions: actionsBag,
+            logger,
+            secureStore: createMockSecureStore(),
+            __getState: () => ({} as never),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actionsBag.onboardingV2.createWalletFailure({
+                reason: 'wrong-script-type',
+              }),
+            });
+
+            flush();
+          },
+        };
+      });
+    });
+
     it('fails with creation-failed when no pending password is set', () => {
       const logger = createLogger();
       const createWallet = vi.fn();
@@ -690,18 +903,25 @@ describe('onboarding-v2 side effects', () => {
         setupAppLock: createMockSetupAppLock(),
       });
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
+        const noPasswordPayload =
+          actions.onboardingV2.attemptCreateHardwareWallet({
+            optionId: ledgerId,
+            device: mockDevice,
+            accountIndex: 0,
+            blockchainName: 'Cardano' as BlockchainName,
+            password: '',
+          });
+
         return {
           actionObservables: {
             onboardingV2: {
-              attemptCreateHardwareWallet$: cold('-a', { a: defaultPayload }),
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: noPasswordPayload,
+              }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', { a: null }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,
@@ -737,13 +957,14 @@ describe('onboarding-v2 side effects', () => {
         setupAppLock: createMockSetupAppLock(),
       });
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
         const unknownPayload = actions.onboardingV2.attemptCreateHardwareWallet(
           {
             optionId: HardwareIntegrationId('trezor'),
             device: mockDevice,
             accountIndex: 0,
             blockchainName: 'Cardano' as BlockchainName,
+            password: 'pwd',
           },
         );
 
@@ -753,13 +974,7 @@ describe('onboarding-v2 side effects', () => {
               attemptCreateHardwareWallet$: cold('-a', { a: unknownPayload }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', {
-                a: { password: 'pwd' },
-              }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,
@@ -798,7 +1013,7 @@ describe('onboarding-v2 side effects', () => {
         setupAppLock: () => of(true),
       });
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
         createWallet.mockReturnValue(cold('#', undefined, transportError));
 
         return {
@@ -807,13 +1022,7 @@ describe('onboarding-v2 side effects', () => {
               attemptCreateHardwareWallet$: cold('-a', { a: defaultPayload }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', {
-                a: { password: 'pwd' },
-              }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,
@@ -884,7 +1093,7 @@ describe('onboarding-v2 side effects', () => {
         setupAppLock: () => of(true),
       });
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
         createWallet.mockReturnValue(
           cold(
             '#',
@@ -899,13 +1108,7 @@ describe('onboarding-v2 side effects', () => {
               attemptCreateHardwareWallet$: cold('-a', { a: defaultPayload }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', {
-                a: { password: 'pwd' },
-              }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,
@@ -937,7 +1140,7 @@ describe('onboarding-v2 side effects', () => {
         setupAppLock: () => of(false),
       });
 
-      testSideEffect(sideEffect, ({ cold, hot, expectObservable, flush }) => {
+      testSideEffect(sideEffect, ({ cold, expectObservable, flush }) => {
         createWallet.mockReturnValue(cold('(a|)', { a: mockHwWallet }));
 
         return {
@@ -946,13 +1149,7 @@ describe('onboarding-v2 side effects', () => {
               attemptCreateHardwareWallet$: cold('-a', { a: defaultPayload }),
             },
           },
-          stateObservables: {
-            onboardingV2: {
-              selectPendingCreateWallet$: hot('a', {
-                a: { password: 'pwd' },
-              }),
-            },
-          },
+          stateObservables: {},
           dependencies: {
             actions: actionsBag,
             logger,

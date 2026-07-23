@@ -35,6 +35,12 @@ export interface OnboardingDesktopLoginProps {
   isNextLoading?: boolean;
   passwordStrengthFeedback?: string;
   inputError?: string;
+  /**
+   * Optional guidance clarifying that the password cannot be reset/recovered
+   * and that the wallet is restorable only via the recovery phrase. Rendered
+   * above the primary action when provided.
+   */
+  passwordRecoveryNote?: string;
 }
 
 export const OnboardingDesktopLogin: React.FC<OnboardingDesktopLoginProps> = ({
@@ -56,6 +62,7 @@ export const OnboardingDesktopLogin: React.FC<OnboardingDesktopLoginProps> = ({
   isNextLoading = false,
   passwordStrengthFeedback,
   inputError,
+  passwordRecoveryNote,
 }) => {
   const styles = getStyles();
 
@@ -93,6 +100,13 @@ export const OnboardingDesktopLogin: React.FC<OnboardingDesktopLoginProps> = ({
                         />
                       ),
                       onPress: onToggleNewPasswordVisibility,
+                      // Keep out of the keyboard tab order so Tab moves
+                      // password -> confirm and Space cannot accidentally
+                      // toggle reveal (NWL R1 audit I-101). Still clickable.
+                      // tabIndex covers web/react-native-web, where focusable
+                      // alone does not reliably drop it from the tab order.
+                      focusable: false,
+                      tabIndex: -1,
                       testID: isNewPasswordVisible
                         ? 'new-password-hide-icon'
                         : 'new-password-show-icon',
@@ -116,6 +130,11 @@ export const OnboardingDesktopLogin: React.FC<OnboardingDesktopLoginProps> = ({
                         />
                       ),
                       onPress: onToggleConfirmPasswordVisibility,
+                      // Out of the tab order for the same reason as the
+                      // new-password toggle above (NWL R1 audit I-101);
+                      // tabIndex covers web where focusable alone is unreliable.
+                      focusable: false,
+                      tabIndex: -1,
                       testID: isConfirmPasswordVisible
                         ? 'confirm-password-hide-icon'
                         : 'confirm-password-show-icon',
@@ -136,6 +155,15 @@ export const OnboardingDesktopLogin: React.FC<OnboardingDesktopLoginProps> = ({
                   </Text.S>
                 </View>
               </View>
+
+              {passwordRecoveryNote ? (
+                <Text.S
+                  variant="secondary"
+                  style={styles.recoveryNote}
+                  testID="password-recovery-note">
+                  {passwordRecoveryNote}
+                </Text.S>
+              ) : null}
 
               <Button.Primary
                 label={nextButtonLabel}
@@ -174,6 +202,11 @@ const getStyles = () =>
     warningText: {
       paddingHorizontal: spacing.S,
       minHeight: 48,
+    },
+    recoveryNote: {
+      paddingHorizontal: spacing.S,
+      paddingBottom: spacing.M,
+      textAlign: 'center',
     },
     invisibleText: {
       opacity: 0,

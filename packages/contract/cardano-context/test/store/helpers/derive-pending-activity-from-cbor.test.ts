@@ -2,7 +2,7 @@ import { Cardano, Serialization } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber, HexBytes } from '@lace-sdk/util';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { derivePendingActivityFromCbor } from '../../../src/store/helpers/derive-pending-activity-from-cbor';

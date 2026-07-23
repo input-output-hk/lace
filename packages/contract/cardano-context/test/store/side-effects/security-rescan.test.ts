@@ -1,6 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import { analyticsActions } from '@lace-contract/analytics';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import { firstValueFrom, of, toArray } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

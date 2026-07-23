@@ -15,6 +15,12 @@ const nm = (...segments: string[]) =>
 const resolveAlias = {
   // rolldown can't resolve @scure/bip39 subpath exports from monorepo context.
   '@scure/bip39/wordlists/english.js': nm('@scure/bip39/wordlists/english.js'),
+  // uuid v11's exports map lists the `node` condition before `browser`, so the
+  // build's active node condition wins and pulls dist/esm/* which does
+  // `import { randomFillSync } from 'crypto'` — a named export the crypto
+  // polyfill doesn't provide. The browser build uses the global Web Crypto API
+  // (crypto.getRandomValues/randomUUID) and needs no polyfill.
+  uuid: nm('uuid/dist/esm-browser/index.js'),
 };
 
 // @cardano-sdk/key-management depends on @emurgo/cardano-message-signing-nodejs

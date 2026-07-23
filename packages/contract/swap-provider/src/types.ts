@@ -1,5 +1,5 @@
 import type { TranslationKey } from '@lace-contract/i18n';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 // --- Error model ---

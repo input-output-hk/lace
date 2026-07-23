@@ -3,6 +3,7 @@ import {
   ADA_DECIMALS,
   type CardanoAddressData,
   getAdaTokenTickerByNetwork,
+  LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
 import {
@@ -27,6 +28,11 @@ import type { Cardano } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type { StakeDelegationSheetProps } from '@lace-lib/ui-toolkit';
 
+/**
+ * Statuses safe to reset on unmount.
+ * - 'Processing' excluded: resetting mid-submission could orphan a submitted tx.
+ * - 'Success' excluded: DelegationSuccessSheet owns the reset on its unmount.
+ */
 const RESETTABLE_STATUSES = [
   'Idle',
   'CalculatingFees',
@@ -113,7 +119,7 @@ export const useNewDelegation = (
         ? priceAmountInUsd({
             amount: controlledAmount,
             decimals: ADA_DECIMALS,
-            priceId: CardanoTokenPriceId('ada'),
+            priceId: CardanoTokenPriceId(LOVELACE_TOKEN_ID),
             prices: tokenPricesRef.current,
           })
         : undefined;
@@ -124,7 +130,6 @@ export const useNewDelegation = (
         delegatedValue: usd === undefined ? 'UNKNOWN' : bucketUsdValue(usd),
         ...(ticker && { ticker }),
       });
-      resetDelegationFlow();
       return;
     }
 

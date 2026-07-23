@@ -1,5 +1,5 @@
+import { Err, Ok } from '@lace-lib/util';
 import { HttpClient } from '@lace-lib/util-provider';
-import { Err, Ok } from '@lace-sdk/util';
 import memoize from 'lodash/memoize';
 import { from } from 'rxjs';
 

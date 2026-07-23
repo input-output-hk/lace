@@ -10,7 +10,7 @@ import {
 
 import type { Cip30FullWalletApi } from './types';
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
-import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
+import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 import type { Logger } from 'ts-log';
 
 /**

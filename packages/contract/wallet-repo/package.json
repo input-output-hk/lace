@@ -8,8 +8,9 @@
   "dependencies": {
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
+    "@lace-lib/core": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-hw": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util-store": "*"
   }
 }

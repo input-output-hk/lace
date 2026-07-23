@@ -199,11 +199,17 @@ export const canSignAnyInput = async (
     inputResolver,
   );
 
+  // Passing scripts matches RequireSignature key hashes nested in native
+  // scripts, consistent with in-memory signing. HW wallets differ: Ledger and
+  // mobile Trezor don't thread scripts into their agents, so for a HW account
+  // this can report a signable input the HW signer can't actually witness.
+  // Revisit before wiring this into a HW signing flow.
   const keyPaths = util.ownSignatureKeyPaths(
     tx.body,
     knownAddresses,
     txInKeyPathMap,
     dRepKeyHash,
+    tx.witness.scripts,
   );
 
   return keyPaths.length > 0;

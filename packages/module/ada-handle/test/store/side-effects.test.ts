@@ -1,8 +1,8 @@
 import { Cardano } from '@cardano-sdk/core';
 import { addressesActions, type Address } from '@lace-contract/addresses';
 import { type TokenId } from '@lace-contract/tokens';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, HexBytes } from '@lace-sdk/util';
 import { describe, it } from 'vitest';
 
 import { trackOwnHandleAliases } from '../../src/store/side-effects';

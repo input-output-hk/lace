@@ -1,4 +1,3 @@
-import { Response } from 'node-fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HttpClient, HttpClientError, buildUrl } from '../src';

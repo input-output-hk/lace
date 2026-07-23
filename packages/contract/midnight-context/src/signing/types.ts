@@ -8,7 +8,7 @@ import type {
   SignerFactory,
   TransactionSigner,
 } from '@lace-contract/signer';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 /** Midnight signer context including user authentication for signing. */
 export interface MidnightSignerContext extends SignerContext {

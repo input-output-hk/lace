@@ -69,6 +69,8 @@ export interface TransactionInfo {
   outputsCount: number;
   /** Transaction fee in lovelace */
   fee: bigint;
+  /** Current treasury donation in lovelace, if any */
+  donation?: Cardano.Lovelace;
   /** Transaction validity interval start (slot number) */
   validityIntervalStart?: Cardano.Slot;
   /** Transaction time-to-live (slot number) */
@@ -317,6 +319,7 @@ export const inspectTransaction = async (
       inputsCount: body.inputs.length,
       outputsCount: body.outputs.length,
       fee: body.fee,
+      donation: body.donation,
       validityIntervalStart: body.validityInterval?.invalidBefore,
       ttl: body.validityInterval?.invalidHereafter,
       hasCollateral: (body.collaterals?.length ?? 0) > 0,

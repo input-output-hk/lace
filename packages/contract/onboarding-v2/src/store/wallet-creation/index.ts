@@ -23,8 +23,4 @@ export {
   selectPasswordStrategy,
 } from './password-strategies';
 
-export {
-  computeWalletId,
-  createInMemoryWalletEntityFactory,
-  encryptRecoveryPhrase,
-} from './wallet-entity';
+export { createInMemoryWalletEntityFactory } from './wallet-entity';

@@ -1,7 +1,7 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { getTestAuthSecretDeps } from '@lace-contract/authentication-prompt';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { describe, expect, test, vi } from 'vitest';
 
 import { makeConfirmTx } from '../../../src/store/tx-executor/confirm-tx';

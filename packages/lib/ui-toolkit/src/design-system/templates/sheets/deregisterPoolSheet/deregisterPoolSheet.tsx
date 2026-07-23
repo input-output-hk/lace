@@ -15,6 +15,8 @@ export type DeregisterPoolSheetProps = {
   sourceAccountName: string;
   sourceAccountImage?: { uri: string };
   depositReturn: string;
+  /** Omit to hide the staking rewards row. */
+  withdrawalAmount?: string;
   transactionFee: string;
   total: string;
   onCancel: () => void;
@@ -31,6 +33,7 @@ export const DeregisterPoolSheet = ({
   sourceAccountName,
   sourceAccountImage,
   depositReturn,
+  withdrawalAmount,
   transactionFee,
   total,
 }: DeregisterPoolSheetProps) => {
@@ -123,6 +126,19 @@ export const DeregisterPoolSheet = ({
               {depositReturn} {coin}
             </Text.M>
           </Row>
+
+          {withdrawalAmount ? (
+            <Row
+              style={staticStyles.breakdownRow}
+              testID="deregister-pool-staking-rewards">
+              <Text.S variant="secondary">
+                {t('v2.deregister-pool.rewards-withdrawn')}
+              </Text.S>
+              <Text.M variant="primary">
+                {withdrawalAmount} {coin}
+              </Text.M>
+            </Row>
+          ) : null}
 
           {/* Transaction Fee */}
           <Row

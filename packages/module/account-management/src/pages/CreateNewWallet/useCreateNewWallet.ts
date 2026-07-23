@@ -35,7 +35,7 @@ type CreateWalletOption = {
 };
 
 export const useCreateNewWallet = (
-  _props: CreateNewWalletSheetProps,
+  props: CreateNewWalletSheetProps,
 ): CreateNewWalletSheetModel => {
   const { t } = useTranslation();
   const [walletName, setWalletName] = useState('');
@@ -43,8 +43,10 @@ export const useCreateNewWallet = (
     BlockchainName[]
   >([]);
   const [submittedName, setSubmittedName] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   const isLoading = useLaceSelector('accountManagement.getIsLoading');
+  const isBusy = isLoading || isCreating;
   const allWallets = useLaceSelector('wallets.selectAll');
   const existingWalletNames = useMemo(
     () => (allWallets ?? []).map(w => w.metadata.name),
@@ -95,6 +97,17 @@ export const useCreateNewWallet = (
     );
   }, [availableBlockchains]);
 
+  useEffect(() => {
+    if (isLoading) setIsCreating(false);
+  }, [isLoading]);
+
+  useEffect(() => {
+    const unsubscribe = props.navigation.addListener('focus', () => {
+      setIsCreating(false);
+    });
+    return unsubscribe;
+  }, [props.navigation]);
+
   const toggleBlockchain = useCallback(
     (blockchainName: BlockchainName, enabled: boolean) => {
       setSelectedBlockchains(previous => {
@@ -113,20 +126,23 @@ export const useCreateNewWallet = (
   }, []);
 
   const handleCreate = useCallback(() => {
+    if (isCreating) return;
+
     const trimmedName = walletName.trim();
     if (!trimmedName || selectedBlockchains.length === 0) return;
 
+    setIsCreating(true);
     setSubmittedName(trimmedName);
     attemptCreateWallet({
       walletName: trimmedName,
       blockchains: selectedBlockchains,
     });
-  }, [attemptCreateWallet, selectedBlockchains, walletName]);
+  }, [attemptCreateWallet, isCreating, selectedBlockchains, walletName]);
 
   const isCreateDisabled =
     !walletName.trim() ||
     selectedBlockchains.length === 0 ||
-    isLoading ||
+    isBusy ||
     !!walletNameError;
 
   const options = useMemo<CreateWalletSheetTemplateProps['options']>(
@@ -136,13 +152,13 @@ export const useCreateNewWallet = (
         label: blockchainName,
         Icon,
         selected: selectedBlockchains.includes(blockchainName),
-        disabled: isLoading,
+        disabled: isBusy,
         onToggle: (selected: boolean) => {
           toggleBlockchain(blockchainName, selected);
         },
         testID,
       })),
-    [availableBlockchains, isLoading, selectedBlockchains, toggleBlockchain],
+    [availableBlockchains, isBusy, selectedBlockchains, toggleBlockchain],
   );
 
   return {
@@ -159,6 +175,6 @@ export const useCreateNewWallet = (
     confirmLabel: t('v2.account-management.create-wallet.confirm'),
     onConfirm: handleCreate,
     isConfirmDisabled: isCreateDisabled,
-    isLoading,
+    isLoading: isBusy,
   };
 };

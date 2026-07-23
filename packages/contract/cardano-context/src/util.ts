@@ -19,13 +19,15 @@ import type { AnyAccount } from '@lace-contract/wallet-repo';
 export const LOVELACE_VALUE = 1_000_000;
 export const DEFAULT_DECIMALS = 2;
 
-export const isCardanoAccount = (
-  account: AnyAccount,
-): account is AnyAccount<
+export type CardanoWalletAccount = AnyAccount<
   CardanoBip32AccountProps,
   CardanoBip32AccountProps,
   CardanoMultiSigAccountProps
-> => account.blockchainName === 'Cardano';
+>;
+
+export const isCardanoAccount = (
+  account: AnyAccount,
+): account is CardanoWalletAccount => account.blockchainName === 'Cardano';
 
 export const isCardanoAddress = (
   address: AnyAddress,

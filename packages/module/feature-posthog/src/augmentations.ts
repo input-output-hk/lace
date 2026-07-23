@@ -1,5 +1,5 @@
 import type { PostHogFeatureDependencies } from './store/dependencies';
-import type { Seconds } from '@lace-sdk/util';
+import type { Seconds } from '@lace-lib/util';
 
 declare module '@lace-contract/module' {
   interface AppConfig {

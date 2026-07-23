@@ -1,3 +1,4 @@
+import { clearRestoreWalletSecrets } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
 import { isHardwareOption } from '@lace-contract/onboarding-v2';
 import {
@@ -30,6 +31,7 @@ export const useAddWalletPage = ({ navigation }: AddWalletScreenProps) => {
 
   const handleRestoreWallet = useCallback(() => {
     clearRestoreWalletFlow();
+    clearRestoreWalletSecrets();
     NavigationControls.navigate(SheetRoutes.RestoreWalletRecoveryPhrase, {
       hasNestedScrolling: true,
     });

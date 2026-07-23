@@ -6,8 +6,8 @@ import {
 } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
 import { walletsActions } from '@lace-contract/wallet-repo';
+import { Err, Ok, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Err, Ok, Timestamp } from '@lace-sdk/util';
 import { EMPTY, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

@@ -83,21 +83,11 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('STAKING_CENTER') },
   {
     key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
+    // The currency list itself is the static FIAT_CURRENCIES allowlist in
+    // @lace-contract/token-pricing, gated by CoinGecko. This flag only carries
+    // an optional manual hide-list applied on top.
     payload: {
-      currencies: [
-        { name: 'USD', ticker: '$' },
-        { name: 'EUR', ticker: '€' },
-        { name: 'GBP', ticker: '£' },
-        { name: 'JPY', ticker: '¥' },
-        { name: 'CAD', ticker: 'C$' },
-        { name: 'AUD', ticker: 'A$' },
-        { name: 'CHF', ticker: 'CHF' },
-        { name: 'BRL', ticker: 'R$' },
-        { name: 'INR', ticker: '₹' },
-        { name: 'KRW', ticker: '₩' },
-        { name: 'VND', ticker: '₫' },
-        { name: 'MXN', ticker: 'MXN' },
-      ],
+      currency_choice_exclusions: [] as string[],
     },
   },
   {

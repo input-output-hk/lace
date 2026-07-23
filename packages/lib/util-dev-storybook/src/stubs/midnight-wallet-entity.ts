@@ -3,7 +3,7 @@ import {
   MidnightNetworkId,
 } from '@lace-contract/midnight-context';
 import { WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import { encryptedRecoveryPhrase } from '../const';
 

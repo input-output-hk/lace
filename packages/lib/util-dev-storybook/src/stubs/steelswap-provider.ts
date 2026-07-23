@@ -8,7 +8,7 @@ import {
   swapProviderDependencyContract,
   type SwapProvider,
 } from '@lace-contract/swap-provider';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import { NEVER, of } from 'rxjs';
 
 import type { LaceModuleMap } from '@lace-contract/module';

@@ -1,4 +1,4 @@
-import { Milliseconds } from '@lace-sdk/util';
+import { Milliseconds } from '@lace-lib/util';
 import {
   BehaviorSubject,
   catchError,

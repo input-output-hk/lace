@@ -31,7 +31,7 @@ import { migrateV1Actions } from '../../src/store/slice';
 import { preparePreloadedState } from '../../src/store/v1-data/prepare-preloaded-state';
 
 import type { AnyWallet, InMemoryWallet } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 const walletId1 = WalletId('wallet-1');
 const accountId1 = AccountId('account-1');

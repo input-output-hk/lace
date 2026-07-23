@@ -20,8 +20,8 @@ vi.mock('@lace-lib/util-render', async importOriginal => {
 });
 
 describe('computeFiatForFee', () => {
-  const bitcoinPriceId = 'bitcoin:btc';
-  const cardanoPriceId = 'cardano:ada';
+  const bitcoinPriceId = 'bitcoin:bitcoin';
+  const cardanoPriceId = 'cardano:lovelace';
 
   const baseParams: ComputeFiatForFeeParams = {
     rawAmount: '1000',

@@ -15,6 +15,7 @@ export const OnboardingHardwareWallet = (
     instructionText,
     onBackPress,
     onConnect,
+    onSelectDevice,
     connectButtonLabel,
     isConnecting,
     error,
@@ -28,6 +29,7 @@ export const OnboardingHardwareWallet = (
       instructionText={error ?? instructionText}
       onBackPress={onBackPress}
       onConnect={onConnect}
+      onSelectDevice={onSelectDevice}
       connectButtonLabel={connectButtonLabel}
       isLoading={isConnecting}
     />

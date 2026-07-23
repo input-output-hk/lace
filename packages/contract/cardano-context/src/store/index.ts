@@ -15,3 +15,4 @@ export default inferStoreContext({
 export { cardanoContextActions, cardanoContextSelectors } from './slice';
 export type * from './slice';
 export * from './collateral-flow';
+export * from './night-designation-flow';

@@ -7,6 +7,7 @@ import { walletsSelectors } from '@lace-contract/wallet-repo';
 import {
   NavigationContainer,
   NavigationControls,
+  getFocusedSheetPosition,
   laceStackNavigatorProps,
   navigationRef,
   navigationTheme,
@@ -21,6 +22,7 @@ import {
   BaseTemplate,
   GlobalToast,
   isAndroid,
+  SheetPositionContext,
   spacing,
   Splash,
   useTheme,
@@ -316,7 +318,7 @@ export const Router = ({
       <ConfigProvider
         viewId={moduleInitProps.viewId!}
         appConfig={moduleInitProps.runtime.config}>
-        <>
+        <SheetPositionContext.Provider value={sheetPositionSource}>
           {dialogsToRender}
           <TrueSheetProvider>
             <BaseTemplate>
@@ -346,11 +348,13 @@ export const Router = ({
           </TrueSheetProvider>
           {pages.globalOverlays}
           <GlobalToast toast={toast} onHide={hideToast} />
-        </>
+        </SheetPositionContext.Provider>
       </ConfigProvider>
     </SendProvider>
   );
 };
+
+const sheetPositionSource = { getSheetTop: getFocusedSheetPosition };
 
 const getStyles = ({ insets }: { insets: EdgeInsets }) =>
   StyleSheet.create({

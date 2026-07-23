@@ -8,9 +8,9 @@ import {
   WalletType,
 } from '@lace-contract/wallet-repo';
 import { walletsActions } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { HardwareIntegrationId } from '@lace-lib/util-hw';
-import { HexBytes } from '@lace-sdk/util';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -1041,6 +1041,179 @@ describe('createAddAccountSideEffect', () => {
     );
   });
 
+  it('dispatches attemptAddAccountFailed when the connector returns no accounts', () => {
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('ledger'),
+        walletType: WalletType.HardwareLedger,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable }) => {
+        connectAccountMock.mockImplementation(() => cold('(a|)', { a: [] }));
+        const wallets$ = hot('a', { a: [baseHardwareWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: hwWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actions.accountManagement.attemptAddAccountFailed({
+                walletId: hwWalletId,
+                errorTitle: 'hw-error.network-mismatch.title',
+                errorDescription: 'hw-error.network-mismatch.subtitle',
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('dispatches attemptAddAccountFailed with network-mismatch copy when a connected account is for a non-target network', () => {
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('ledger'),
+        walletType: WalletType.HardwareLedger,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    const wrongNetworkAccount = {
+      accountId: AccountId('hw-acc-testnet'),
+      walletId: hwWalletId,
+      blockchainName: 'Cardano',
+      networkType: 'testnet',
+      blockchainNetworkId: BlockchainNetworkId('cardano-2'),
+      metadata: { name: 'Account #1' },
+      blockchainSpecific: { accountIndex },
+      accountType: 'HardwareLedger' as const,
+    };
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable }) => {
+        connectAccountMock.mockImplementation(() =>
+          cold('(a|)', { a: [wrongNetworkAccount] }),
+        );
+        const wallets$ = hot('a', { a: [baseHardwareWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: hwWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actions.accountManagement.attemptAddAccountFailed({
+                walletId: hwWalletId,
+                errorTitle: 'hw-error.network-mismatch.title',
+                errorDescription: 'hw-error.network-mismatch.subtitle',
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('dispatches attemptAddAccountFailed with duplicate-account copy when a connected account already exists in the wallet', () => {
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('ledger'),
+        walletType: WalletType.HardwareLedger,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    const duplicateAccount = {
+      ...baseHardwareWallet.accounts[0],
+      metadata: { name: 'Account #0 rescanned' },
+    };
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable }) => {
+        connectAccountMock.mockImplementation(() =>
+          cold('(a|)', { a: [duplicateAccount] }),
+        );
+        const wallets$ = hot('a', { a: [baseHardwareWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: hwWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actions.accountManagement.attemptAddAccountFailed({
+                walletId: hwWalletId,
+                errorTitle: 'hw-error.duplicate-account.title',
+                errorDescription: 'hw-error.duplicate-account.subtitle',
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
   it('dispatches attemptAddAccountFailed when no HW connector matches wallet type', () => {
     // Only Trezor connector, but wallet is Ledger
     const hwConnectors = [
@@ -1299,6 +1472,301 @@ describe('createAddAccountSideEffect', () => {
                 derivationType: 'ICARUS_TREZOR',
               }),
             );
+          },
+        };
+      },
+    );
+  });
+
+  it('calls seed-signer connectAccount without a device and adds the account', () => {
+    const seedSignerWalletId = WalletId('seed-signer-w1');
+    const seedSignerWallet: AnyWallet = {
+      walletId: seedSignerWalletId,
+      metadata: { name: 'Seed Signer 1', order: 0 },
+      accounts: [
+        {
+          accountId: AccountId('ss-acc-0'),
+          walletId: seedSignerWalletId,
+          blockchainName: 'Cardano',
+          networkType: 'mainnet',
+          blockchainNetworkId: BlockchainNetworkId('cardano-764824073'),
+          metadata: { name: 'Account #0' },
+          blockchainSpecific: { accountIndex: 0 },
+          accountType: 'HardwareSeedSigner',
+        },
+      ],
+      blockchainSpecific: {},
+      type: WalletType.HardwareSeedSigner,
+    } as AnyWallet;
+
+    const ssNewAccount = {
+      accountId: AccountId('ss-acc-1'),
+      walletId: seedSignerWalletId,
+      blockchainName: 'Cardano',
+      networkType: 'mainnet',
+      blockchainNetworkId: BlockchainNetworkId('cardano-764824073'),
+      metadata: { name: 'Account #2' },
+      blockchainSpecific: { accountIndex },
+      accountType: 'HardwareSeedSigner' as const,
+    };
+
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('seed-signer'),
+        walletType: WalletType.HardwareSeedSigner,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable, flush }) => {
+        connectAccountMock.mockImplementation(() =>
+          cold('(a|)', { a: [ssNewAccount] }),
+        );
+        const wallets$ = hot('a', { a: [seedSignerWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: seedSignerWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn().mockReturnValue({}),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actions.wallets.updateWallet({
+                id: seedSignerWalletId,
+                changes: {
+                  accounts: [
+                    ...seedSignerWallet.accounts,
+                    {
+                      ...ssNewAccount,
+                      metadata: {
+                        ...ssNewAccount.metadata,
+                        onboardedAt: ONBOARDED_AT,
+                      },
+                    },
+                  ],
+                } as Partial<HardwareWallet>,
+              }),
+              b: actions.accountManagement.accountAdded({
+                walletId: seedSignerWalletId,
+                blockchain,
+                accountIndex,
+                walletType: WalletType.HardwareSeedSigner,
+              }),
+            });
+            flush();
+            expect(connectAccountMock).toHaveBeenCalledWith(
+              {},
+              expect.objectContaining({
+                walletId: seedSignerWalletId,
+                accountIndex,
+                device: undefined,
+              }),
+            );
+          },
+        };
+      },
+    );
+  });
+
+  it('calls keystone connectAccount without a device and adds the account', () => {
+    const keystoneWalletId = WalletId('keystone-w1');
+    const keystoneWallet: AnyWallet = {
+      walletId: keystoneWalletId,
+      metadata: { name: 'Keystone 1', order: 0 },
+      accounts: [
+        {
+          accountId: AccountId('ks-acc-0'),
+          walletId: keystoneWalletId,
+          blockchainName: 'Cardano',
+          networkType: 'mainnet',
+          blockchainNetworkId: BlockchainNetworkId('cardano-764824073'),
+          metadata: { name: 'Account #0' },
+          blockchainSpecific: { accountIndex: 0 },
+          accountType: 'HardwareKeystone',
+        },
+      ],
+      blockchainSpecific: {},
+      type: WalletType.HardwareKeystone,
+    } as AnyWallet;
+
+    const ksNewAccount = {
+      accountId: AccountId('ks-acc-1'),
+      walletId: keystoneWalletId,
+      blockchainName: 'Cardano',
+      networkType: 'mainnet',
+      blockchainNetworkId: BlockchainNetworkId('cardano-764824073'),
+      metadata: { name: 'Account #2' },
+      blockchainSpecific: { accountIndex },
+      accountType: 'HardwareKeystone' as const,
+    };
+
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('keystone'),
+        walletType: WalletType.HardwareKeystone,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable, flush }) => {
+        connectAccountMock.mockImplementation(() =>
+          cold('(a|)', { a: [ksNewAccount] }),
+        );
+        const wallets$ = hot('a', { a: [keystoneWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: keystoneWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn().mockReturnValue({}),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actions.wallets.updateWallet({
+                id: keystoneWalletId,
+                changes: {
+                  accounts: [
+                    ...keystoneWallet.accounts,
+                    {
+                      ...ksNewAccount,
+                      metadata: {
+                        ...ksNewAccount.metadata,
+                        onboardedAt: ONBOARDED_AT,
+                      },
+                    },
+                  ],
+                } as Partial<HardwareWallet>,
+              }),
+              b: actions.accountManagement.accountAdded({
+                walletId: keystoneWalletId,
+                blockchain,
+                accountIndex,
+                walletType: WalletType.HardwareKeystone,
+              }),
+            });
+            flush();
+            expect(connectAccountMock).toHaveBeenCalledWith(
+              {},
+              expect.objectContaining({
+                walletId: keystoneWalletId,
+                accountIndex,
+                device: undefined,
+              }),
+            );
+          },
+        };
+      },
+    );
+  });
+
+  it('surfaces seed-signer QR cancel as attemptAddAccountFailed', () => {
+    const seedSignerWalletId = WalletId('seed-signer-w1');
+    const seedSignerWallet: AnyWallet = {
+      walletId: seedSignerWalletId,
+      metadata: { name: 'Seed Signer 1', order: 0 },
+      accounts: [
+        {
+          accountId: AccountId('ss-acc-0'),
+          walletId: seedSignerWalletId,
+          blockchainName: 'Cardano',
+          networkType: 'mainnet',
+          blockchainNetworkId: BlockchainNetworkId('cardano-764824073'),
+          metadata: { name: 'Account #0' },
+          blockchainSpecific: { accountIndex: 0 },
+          accountType: 'HardwareSeedSigner',
+        },
+      ],
+      blockchainSpecific: {},
+      type: WalletType.HardwareSeedSigner,
+    } as AnyWallet;
+
+    const connectAccountMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: HardwareIntegrationId('seed-signer'),
+        walletType: WalletType.HardwareSeedSigner,
+        connectAccount: connectAccountMock,
+        createWallet: vi.fn(),
+      },
+    ];
+
+    testSideEffect(
+      createAddAccountSideEffect(hwConnectors),
+      ({ cold, hot, expectObservable }) => {
+        connectAccountMock.mockImplementation(() =>
+          cold(
+            '#',
+            undefined,
+            new Error('Seed signer QR exchange was cancelled'),
+          ),
+        );
+        const wallets$ = hot('a', { a: [seedSignerWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId: seedSignerWalletId,
+                  blockchain,
+                  accountIndex,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actions.accountManagement.attemptAddAccountFailed({
+                walletId: seedSignerWalletId,
+                errorTitle: 'hw-error.unauthorized.title',
+                errorDescription: 'hw-error.unauthorized.subtitle',
+              }),
+            });
           },
         };
       },
@@ -2651,6 +3119,53 @@ describe('createWalletCreationSideEffect', () => {
       payload: { route: SheetRoutes.SuccessCreateNewWallet },
     });
   });
+
+  it('clears loading and does not create a wallet when the password prompt is cancelled', async () => {
+    authenticate.mockReturnValue(of(false));
+    const emissions: unknown[] = [];
+    const sideEffect = createWalletCreationSideEffect(createIntegrations());
+
+    const sideEffect$ = sideEffect(
+      {
+        accountManagement: {
+          attemptCreateWallet$: of(
+            actions.accountManagement.attemptCreateWallet({
+              walletName,
+              blockchains,
+            }),
+          ),
+        },
+      } as never,
+      {
+        wallets: { selectAll$: of([existingWallet]) },
+        network: {
+          selectActiveNetworkId$: of(() =>
+            BlockchainNetworkId('cardano-764824073'),
+          ),
+        },
+      } as never,
+      {
+        actions,
+        authenticate,
+        accessAuthSecret,
+        logger: dummyLogger,
+      } as never,
+    );
+
+    await new Promise<void>(resolve => {
+      sideEffect$.subscribe({
+        next: action => emissions.push(action),
+        complete: resolve,
+      });
+    });
+
+    expect(emissions).toEqual([
+      actions.accountManagement.setLoading(true),
+      actions.accountManagement.setLoading(false),
+    ]);
+    expect(accessAuthSecret).not.toHaveBeenCalled();
+    expect(initializeWalletMock).not.toHaveBeenCalled();
+  });
 });
 
 describe('createHardwareWalletCreationSideEffect', () => {
@@ -2700,11 +3215,11 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, {}),
-      ({ cold, hot, expectObservable }) => {
+      ({ cold, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           cold('(a|)', { a: walletEntity }),
         );
-        const wallets$ = hot('a', { a: [existingWallet] });
+        const wallets$ = cold('a', { a: [existingWallet] });
 
         return {
           actionObservables: {
@@ -2741,6 +3256,77 @@ describe('createHardwareWalletCreationSideEffect', () => {
     );
   });
 
+  it('calls the connector createWallet with no device for an air-gapped (seed signer) option and adds the wallet', () => {
+    const seedSignerOptionId = HardwareIntegrationId('seed-signer');
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: seedSignerOptionId,
+        walletType: WalletType.HardwareSeedSigner,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+    const airGappedPayload = {
+      optionId: seedSignerOptionId,
+      accountIndex: 0,
+      blockchainName: 'Cardano' as const,
+    };
+    const seedSignerEntity = {
+      ...walletEntity,
+      walletId: WalletId('seed-signer-1'),
+      type: WalletType.HardwareSeedSigner,
+    } as unknown as HardwareWallet;
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable, flush }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: seedSignerEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet(
+                  airGappedPayload,
+                ),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(abcd)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.wallets.addWallet({
+                ...seedSignerEntity,
+                metadata: { ...seedSignerEntity.metadata, order: 1 },
+              }),
+              c: actions.accountManagement.setLoading(false),
+              d: actions.views.setActiveSheetPage({
+                route: SheetRoutes.SuccessCreateNewWallet,
+                params: { walletId: seedSignerEntity.walletId },
+              }),
+            });
+            flush();
+            expect(createWalletMock).toHaveBeenCalledTimes(1);
+            expect(createWalletMock).toHaveBeenCalledWith(
+              undefined,
+              expect.objectContaining({ device: undefined }),
+            );
+          },
+        };
+      },
+    );
+  });
+
   it('dispatches hardwareWalletCreationFailed with "generic" when no connector matches', () => {
     const hwConnectors = [
       {
@@ -2753,8 +3339,8 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, {}),
-      ({ cold, hot, expectObservable }) => {
-        const wallets$ = hot('a', { a: [] });
+      ({ cold, expectObservable }) => {
+        const wallets$ = cold('a', { a: [] });
 
         return {
           actionObservables: {
@@ -2797,11 +3383,11 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, {}),
-      ({ cold, hot, expectObservable }) => {
+      ({ cold, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           throwError(() => new Error('Failed to connect to device')),
         );
-        const wallets$ = hot('a', { a: [existingWallet] });
+        const wallets$ = cold('a', { a: [existingWallet] });
 
         return {
           actionObservables: {
@@ -2845,11 +3431,11 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, {}),
-      ({ cold, hot, expectObservable }) => {
+      ({ cold, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           throwError(() => new Error('User cancelled the operation')),
         );
-        const wallets$ = hot('a', { a: [existingWallet] });
+        const wallets$ = cold('a', { a: [existingWallet] });
 
         return {
           actionObservables: {
@@ -2893,7 +3479,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, {}),
-      ({ cold, hot, expectObservable }) => {
+      ({ cold, expectObservable }) => {
         // First attempt: connector never emits (stays in-flight).
         // Second attempt: connector emits immediately → reaches success path.
         createWalletMock
@@ -2901,7 +3487,7 @@ describe('createHardwareWalletCreationSideEffect', () => {
           .mockImplementationOnce(() =>
             cold<HardwareWallet>('(a|)', { a: walletEntity }),
           );
-        const wallets$ = hot('a', { a: [existingWallet] });
+        const wallets$ = cold('a', { a: [existingWallet] });
 
         return {
           actionObservables: {
@@ -2998,11 +3584,318 @@ describe('createHardwareWalletCreationSideEffect', () => {
 
     testSideEffect(
       createHardwareWalletCreationSideEffect(hwConnectors, cardanoIdentity),
-      ({ cold, hot, expectObservable }) => {
+      ({ cold, expectObservable }) => {
         createWalletMock.mockImplementation(() =>
           cold('(a|)', { a: duplicateEntity }),
         );
-        const wallets$ = hot('a', { a: [migratedWallet] });
+        const wallets$ = cold('a', { a: [migratedWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet(
+                  payload,
+                ),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.accountManagement.hardwareWalletCreationFailed({
+                reason: 'already-added',
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('dispatches hardwareWalletCreationFailed with "already-added" when the created walletId already exists (no blockchain identity)', () => {
+    const seedSignerOptionId = HardwareIntegrationId('seed-signer-bitcoin');
+    const collidingEntity = {
+      walletId: WalletId('seed-signer-deadbeef'),
+      type: WalletType.HardwareSeedSigner,
+      metadata: { name: 'Seed Signer', order: 0 },
+      accounts: [],
+      blockchainSpecific: {},
+    } as unknown as HardwareWallet;
+
+    const existingSeedSignerWallet = {
+      ...collidingEntity,
+      metadata: { name: 'Seed Signer', order: 0 },
+    } as unknown as AnyWallet;
+
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: seedSignerOptionId,
+        walletType: WalletType.HardwareSeedSigner,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: collidingEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingSeedSignerWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet({
+                  optionId: seedSignerOptionId,
+                  accountIndex: 0,
+                  blockchainName: 'Bitcoin' as const,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(ab)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.accountManagement.hardwareWalletCreationFailed({
+                reason: 'already-added',
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('merges new accounts into the existing wallet when the device wallet already exists', () => {
+    const mainnetAccount = {
+      accountId: AccountId('hw-1-0-mainnet'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #0' },
+    };
+    const testnetAccount = {
+      accountId: AccountId('hw-1-0-testnet4'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #0' },
+    };
+    const existingLedgerWallet = {
+      ...walletEntity,
+      accounts: [mainnetAccount],
+    } as unknown as AnyWallet;
+    const mergedEntity = {
+      ...walletEntity,
+      accounts: [testnetAccount],
+    } as unknown as HardwareWallet;
+
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: mergedEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingLedgerWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet(
+                  payload,
+                ),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(abcd)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.wallets.updateWallet({
+                id: walletEntity.walletId,
+                changes: {
+                  accounts: [
+                    mainnetAccount,
+                    {
+                      ...testnetAccount,
+                      metadata: {
+                        ...testnetAccount.metadata,
+                        onboardedAt: ONBOARDED_AT,
+                      },
+                    },
+                  ],
+                } as unknown as Partial<HardwareWallet>,
+              }),
+              c: actions.accountManagement.setLoading(false),
+              d: actions.views.setActiveSheetPage({
+                route: SheetRoutes.SuccessCreateNewWallet,
+                params: { walletId: walletEntity.walletId },
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('merges against the wallet list as of connector completion, not attempt dispatch', () => {
+    const mainnetAccount = {
+      accountId: AccountId('hw-1-0-mainnet'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #0' },
+    };
+    const concurrentAccount = {
+      accountId: AccountId('hw-1-1-mainnet'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #1' },
+    };
+    const testnetAccount = {
+      accountId: AccountId('hw-1-0-testnet4'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #0' },
+    };
+    const walletAtDispatch = {
+      ...walletEntity,
+      accounts: [mainnetAccount],
+    } as unknown as AnyWallet;
+    const walletAtCompletion = {
+      ...walletEntity,
+      accounts: [mainnetAccount, concurrentAccount],
+    } as unknown as AnyWallet;
+    const mergedEntity = {
+      ...walletEntity,
+      accounts: [testnetAccount],
+    } as unknown as HardwareWallet;
+
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('---(a|)', { a: mergedEntity }),
+        );
+        const wallets$ = cold('a-b', {
+          a: [walletAtDispatch],
+          b: [walletAtCompletion],
+        });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet(
+                  payload,
+                ),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a--(bcd)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.wallets.updateWallet({
+                id: walletEntity.walletId,
+                changes: {
+                  accounts: [
+                    mainnetAccount,
+                    concurrentAccount,
+                    {
+                      ...testnetAccount,
+                      metadata: {
+                        ...testnetAccount.metadata,
+                        onboardedAt: ONBOARDED_AT,
+                      },
+                    },
+                  ],
+                } as unknown as Partial<HardwareWallet>,
+              }),
+              c: actions.accountManagement.setLoading(false),
+              d: actions.views.setActiveSheetPage({
+                route: SheetRoutes.SuccessCreateNewWallet,
+                params: { walletId: walletEntity.walletId },
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('dispatches hardwareWalletCreationFailed with "already-added" when the device wallet already has every produced account', () => {
+    const mainnetAccount = {
+      accountId: AccountId('hw-1-0-mainnet'),
+      blockchainName: 'Bitcoin',
+      metadata: { name: 'Account #0' },
+    };
+    const existingLedgerWallet = {
+      ...walletEntity,
+      accounts: [mainnetAccount],
+    } as unknown as AnyWallet;
+    const duplicateEntity = {
+      ...walletEntity,
+      accounts: [mainnetAccount],
+    } as unknown as HardwareWallet;
+
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: duplicateEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingLedgerWallet] });
 
         return {
           actionObservables: {

@@ -5,6 +5,12 @@ import type { HwBlockchainSupport } from '@lace-contract/onboarding-v2';
 import type { AnyAccount, WalletType } from '@lace-contract/wallet-repo';
 import type { BlockchainName } from '@lace-lib/util-store';
 
+/**
+ * App-wide highest selectable account index. Mirrors
+ * DEFAULT_MAX_ACCOUNT_INDEX in @lace-lib/ui-toolkit
+ * (onboardingHardwareWalletSetup.tsx), which governs the onboarding and
+ * add-wallet pickers for uncapped devices. Change both together.
+ */
 export const MAX_ACCOUNT_INDEX = 49;
 
 /**
@@ -59,8 +65,9 @@ export const getAccountIndexText = (
 export const generateAccountIndexDropdownItems = (
   usedIndices: Set<number>,
   usedLabel: string,
+  maxAccountIndex: number = MAX_ACCOUNT_INDEX,
 ): Array<{ id: string; text: string; value: number; disabled?: boolean }> =>
-  Array.from({ length: MAX_ACCOUNT_INDEX + 1 }, (_, index) => index).map(
+  Array.from({ length: maxAccountIndex + 1 }, (_, index) => index).map(
     index => ({
       id: index.toString(),
       text: getAccountIndexText(index, usedIndices, usedLabel),
@@ -73,8 +80,11 @@ export const generateAccountIndexDropdownItems = (
  * Calculates the next available account index from the used indices
  * Returns undefined if all indices are used
  */
-export const calculateNextAccountIndex = (usedIndices: Set<number>) => {
-  for (let index = 0; index <= MAX_ACCOUNT_INDEX; index++) {
+export const calculateNextAccountIndex = (
+  usedIndices: Set<number>,
+  maxAccountIndex: number = MAX_ACCOUNT_INDEX,
+) => {
+  for (let index = 0; index <= maxAccountIndex; index++) {
     if (!usedIndices.has(index)) return index;
   }
   return undefined;

@@ -42,17 +42,17 @@ vi.mock('webextension-polyfill', () => ({
   },
 }));
 
-// Mock @lace-sdk/dapp-connector
-vi.mock('@lace-sdk/dapp-connector', () => ({
+// Mock @lace-lib/dapp-connector
+vi.mock('@lace-lib/dapp-connector', () => ({
   senderOrigin: (sender: Runtime.MessageSender) => sender.url,
 }));
 
-// Mock @lace-sdk/extension-messaging
+// Mock @lace-lib/extension-messaging
 const mockExposeApi = vi.fn();
 const mockShutdown = vi.fn();
 
-vi.mock('@lace-sdk/extension-messaging', async () => {
-  const actual = await vi.importActual('@lace-sdk/extension-messaging');
+vi.mock('@lace-lib/extension-messaging', async () => {
+  const actual = await vi.importActual('@lace-lib/extension-messaging');
   return {
     ...actual,
     exposeApi: (...arguments_: unknown[]) => {

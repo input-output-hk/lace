@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { applyInFlightUtxoAdjustments } from '../src/apply-in-flight-utxo-adjustments';

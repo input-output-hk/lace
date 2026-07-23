@@ -1,7 +1,7 @@
 import { Serialization } from '@cardano-sdk/core';
 
 import type { Cardano } from '@cardano-sdk/core';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 export type CardanoTxId = Cardano.TransactionId & HexBytes;
 

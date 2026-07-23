@@ -3,3 +3,4 @@ export * from './logger';
 export * from './config';
 export * from './initialize-store';
 export * from './load-modules';
+export * from './native-argon2';

@@ -1,3 +1,4 @@
+import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { CardanoTokenPriceId } from '@lace-contract/token-pricing';
 import { useMemo } from 'react';
 
@@ -8,7 +9,7 @@ export const useAdaPrice = () => {
 
   const tokenPrices = useLaceSelector('tokenPricing.selectPrices');
   const adaPrice = useMemo(
-    () => tokenPrices?.[CardanoTokenPriceId('ada')]?.price || 1,
+    () => tokenPrices?.[CardanoTokenPriceId(LOVELACE_TOKEN_ID)]?.price || 1,
     [tokenPrices],
   );
 

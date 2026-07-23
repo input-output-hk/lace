@@ -1,4 +1,3 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
 import { deepEquals, Percent } from '@cardano-sdk/util';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import {
@@ -9,7 +8,8 @@ import {
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
 import { whileActive } from '@lace-contract/wallet-active-state';
-import { BigNumber, ByteArray, HexBytes, Timestamp } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { BigNumber, ByteArray, HexBytes, Timestamp } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { createKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import isEqual from 'lodash/isEqual';
@@ -602,7 +602,7 @@ const decryptKey = async (
   encryptedKey: HexBytes,
   authSecret: AuthSecret,
 ): Promise<ByteArray> =>
-  ByteArray(await emip3decrypt(ByteArray.fromHex(encryptedKey), authSecret));
+  ByteArray(await SecretBox.open(ByteArray.fromHex(encryptedKey), authSecret));
 
 /**
  * Pre-computes ledger key objects from decrypted key buffers and assembles

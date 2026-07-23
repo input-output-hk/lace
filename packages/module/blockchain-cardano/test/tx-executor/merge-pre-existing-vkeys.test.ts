@@ -1,6 +1,6 @@
 import { Serialization } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { mergePreExistingVkeys } from '../../src/tx-executor-implementation/merge-pre-existing-vkeys';

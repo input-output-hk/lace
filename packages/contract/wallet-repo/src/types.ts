@@ -1,8 +1,8 @@
 import type { AccountId, AccountIdentityKey, WalletId } from './value-objects';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 import type { NetworkType } from '@lace-contract/network';
+import type { HexBytes, Timestamp } from '@lace-lib/util';
 import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
-import type { HexBytes, Timestamp } from '@lace-sdk/util';
 
 export enum WalletType {
   /***
@@ -25,6 +25,20 @@ export enum WalletType {
    * Keys are managed by an external Trezor device
    */
   HardwareTrezor = 'HardwareTrezor',
+  /**
+   * Keys are managed by an external Cardano Seed Signer device.
+   * Like other hardware wallets it is watch-only; it additionally
+   * persists the device master fingerprint (xfp) so signing requests
+   * can target the right device seed.
+   */
+  HardwareSeedSigner = 'HardwareSeedSigner',
+  /**
+   * Keys are managed by an external Keystone device.
+   * Like other hardware wallets it is watch-only; the device communicates
+   * exclusively over QR codes and is identified by its BIP-32 master
+   * fingerprint (xfp) so signing requests can target the right device seed.
+   */
+  HardwareKeystone = 'HardwareKeystone',
   /**
    * Requires more than 1 set of keys to spend from this wallet.
    * Some (or all) co-signers are other wallet (InMemory/Hardware)
@@ -75,7 +89,11 @@ export interface LazyInMemoryWalletAccount<BlockchainSpecific = unknown>
 }
 export interface HardwareWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
-  accountType: 'HardwareLedger' | 'HardwareTrezor';
+  accountType:
+    | 'HardwareKeystone'
+    | 'HardwareLedger'
+    | 'HardwareSeedSigner'
+    | 'HardwareTrezor';
 }
 export interface MultiSigWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
@@ -120,8 +138,20 @@ export type HardwareWalletTrezor<BlockchainSpecificAccountProps = unknown> =
     type: WalletType.HardwareTrezor;
     accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
   };
+export type HardwareWalletSeedSigner<BlockchainSpecificAccountProps = unknown> =
+  WalletBase<BlockchainSpecificHardwareWalletData> & {
+    type: WalletType.HardwareSeedSigner;
+    accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
+  };
+export type HardwareWalletKeystone<BlockchainSpecificAccountProps = unknown> =
+  WalletBase<BlockchainSpecificHardwareWalletData> & {
+    type: WalletType.HardwareKeystone;
+    accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
+  };
 export type HardwareWallet<BlockchainSpecificAccountProps = unknown> =
+  | HardwareWalletKeystone<BlockchainSpecificAccountProps>
   | HardwareWalletLedger<BlockchainSpecificAccountProps>
+  | HardwareWalletSeedSigner<BlockchainSpecificAccountProps>
   | HardwareWalletTrezor<BlockchainSpecificAccountProps>;
 export type MultiSigWallet<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificMultiSigWalletData> & {

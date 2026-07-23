@@ -9,9 +9,9 @@ import type {
   TokenId,
 } from '@lace-contract/tokens';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { BigNumber, Timestamp } from '@lace-lib/util';
 import type { UICustomisation } from '@lace-lib/util-render';
 import type { BlockchainName } from '@lace-lib/util-store';
-import type { BigNumber, Timestamp } from '@lace-sdk/util';
 
 type BlockchainSpecificPart<BlockchainSpecificMetadata = unknown> = {
   blockchainSpecific?: BlockchainSpecificMetadata;

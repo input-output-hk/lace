@@ -41,7 +41,8 @@ export type DerivationType = 'ICARUS_TREZOR' | 'ICARUS' | 'LEDGER';
 /** Payload for dispatching hardware wallet creation via side effect. */
 export interface AttemptCreateHardwareWalletPayload {
   optionId: HardwareIntegrationId;
-  device: DeviceDescriptor;
+  /** Undefined for air-gapped devices; the connector resolves identity via the QR account-export. */
+  device?: DeviceDescriptor;
   accountIndex: number;
   derivationType?: DerivationType;
   blockchainName: BlockchainName;

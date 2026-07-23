@@ -15,6 +15,7 @@
     "@lace-contract/network": "*",
     "@lace-contract/recovery-phrase": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
     "@lace-lib/navigation": "*",
     "@lace-lib/ui-toolkit": "*",
     "@lace-lib/util-hw": "*",

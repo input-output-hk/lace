@@ -1,7 +1,7 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
+import { SecretBox } from '@lace-lib/core';
+import { HexBytes } from '@lace-lib/util';
 import { Redacted } from '@lace-lib/util-redacted';
-import { HexBytes } from '@lace-sdk/util';
 import { from, switchMap, throwError } from 'rxjs';
 
 import {
@@ -65,7 +65,7 @@ export class BitcoinInMemoryTransactionSigner
     try {
       const encryptedSeed = Buffer.from(encryptedRootPrivateKey, 'hex');
 
-      const decryptedBytes = await emip3decrypt(encryptedSeed, authSecret);
+      const decryptedBytes = await SecretBox.open(encryptedSeed, authSecret);
 
       rootPrivateKey = Redacted.make(Buffer.from(decryptedBytes));
 

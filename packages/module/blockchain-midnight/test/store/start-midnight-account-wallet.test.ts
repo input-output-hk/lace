@@ -1,6 +1,6 @@
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import * as LaceSdkUtil from '@lace-sdk/util';
+import * as LaceSdkUtil from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import * as WalletSdk from '@midnight-ntwrk/wallet-sdk';
 import * as WalletSdkDustWallet from '@midnight-ntwrk/wallet-sdk/dust';
@@ -58,8 +58,8 @@ vi.mock('@midnight-ntwrk/wallet-sdk-address-format', () => ({
   },
 }));
 
-vi.mock('@lace-sdk/util', async () => {
-  const actual = await vi.importActual<typeof LaceSdkUtil>('@lace-sdk/util');
+vi.mock('@lace-lib/util', async () => {
+  const actual = await vi.importActual<typeof LaceSdkUtil>('@lace-lib/util');
   return {
     __esModule: true,
     ...actual,

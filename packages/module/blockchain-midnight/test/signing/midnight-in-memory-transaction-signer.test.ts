@@ -3,7 +3,7 @@ import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

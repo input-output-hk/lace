@@ -253,6 +253,25 @@ describe('useSendResult', () => {
       expect(result.current.headerTitle).toBe('v2.send-flow.success.title');
       expect(result.current.subtitle).toBe('v2.send-flow.success.subtitle');
     });
+
+    it.each(['HardwareLedger', 'HardwareSeedSigner', 'HardwareTrezor'])(
+      'returns hw-signing title and subtitle while processing for %s wallet',
+      walletType => {
+        mockUseLaceSelector.mockReturnValue({
+          status: 'Processing',
+          wallet: { type: walletType },
+        });
+
+        const { result } = renderHook(() => useSendResult(createMockProps()));
+
+        expect(result.current.headerTitle).toBe(
+          'v2.send-flow.hw-signing.title',
+        );
+        expect(result.current.subtitle).toBe(
+          'v2.send-flow.hw-signing.subtitle',
+        );
+      },
+    );
   });
 
   describe('footer buttons', () => {

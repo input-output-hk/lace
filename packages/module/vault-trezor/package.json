@@ -6,9 +6,10 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/hardware-trezor": "0.7.33",
+    "@cardano-sdk/hardware-trezor": "0.7.38",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",
+    "@lace-contract/bitcoin-context": "*",
     "@lace-contract/cardano-context": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/i18n": "*",
@@ -18,8 +19,11 @@
     "@lace-contract/onboarding-v2": "*",
     "@lace-contract/signer": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-sdk/util": "*",
+    "@lace-lib/bitcoin-air-gapped-protocol": "*",
+    "@lace-lib/util": "*",
     "@trezor/connect-mobile": "^9.7.2",
+    "@trezor/connect-web": "9.4.0",
+    "bitcoinjs-lib": "^6.1.7",
     "buffer": "^6.0.3"
   },
   "devDependencies": {

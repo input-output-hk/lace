@@ -1,6 +1,6 @@
 import { createRawToken, createToken } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 
 import { DUST_TOKEN_DECIMALS } from './const';
 import {

@@ -4,7 +4,7 @@ import {
   INDEFINITE_TIMEOUT_OPTION_VALUE,
 } from '@lace-contract/app-lock';
 import { useTranslation } from '@lace-contract/i18n';
-import { Milliseconds } from '@lace-sdk/util';
+import { Milliseconds } from '@lace-lib/util';
 import { useCallback, useMemo } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';

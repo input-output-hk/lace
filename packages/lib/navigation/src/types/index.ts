@@ -16,6 +16,7 @@ import type {
   DeviceDescriptor,
   HardwareIntegrationId,
 } from '@lace-lib/util-hw';
+import type { BlockchainName } from '@lace-lib/util-store';
 import type {
   TrueSheetNavigationOptions,
   TrueSheetScreenProps,
@@ -88,8 +89,11 @@ export type StackParameterList = {
         hardwareSetup?: {
           optionId: HardwareIntegrationId;
           walletType: WalletType;
-          device: DeviceDescriptor;
+          /** Undefined for air-gapped devices: no wired device is scanned. */
+          device?: DeviceDescriptor;
           derivationTypes?: Array<'ICARUS_TREZOR' | 'ICARUS' | 'LEDGER'>;
+          /** Resolved from the explicit blockchain selection step. */
+          blockchainName: BlockchainName;
         };
       }
     | undefined;
@@ -97,8 +101,11 @@ export type StackParameterList = {
   [StackRoutes.OnboardingHardwareSetup]: {
     optionId: HardwareIntegrationId;
     walletType: WalletType;
-    device: DeviceDescriptor;
+    /** Undefined for air-gapped devices: no wired device is scanned. */
+    device?: DeviceDescriptor;
     derivationTypes?: Array<'ICARUS_TREZOR' | 'ICARUS' | 'LEDGER'>;
+    /** Resolved from the explicit blockchain selection step. */
+    blockchainName: BlockchainName;
   };
   [StackRoutes.DappExternalWebView]: DappConnectorSheetParams & {
     canFavorite?: boolean;
@@ -134,8 +141,12 @@ export type SheetParameterList = {
   [SheetRoutes.AddWalletHardware]: undefined;
   [SheetRoutes.AddWalletHardwareSetup]: {
     optionId: HardwareIntegrationId;
-    device: DeviceDescriptor;
+    // Undefined for air-gapped devices; the connector resolves identity via the
+    // QR account-export. Wired (Ledger/Trezor) flows still pass it.
+    device?: DeviceDescriptor;
     derivationTypes?: DerivationType[];
+    // Resolved from the explicit blockchain selection step.
+    blockchainName: BlockchainName;
   };
   [SheetRoutes.SuccessCreateNewWallet]: {
     walletId: WalletId;

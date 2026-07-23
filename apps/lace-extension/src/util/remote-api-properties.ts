@@ -1,12 +1,12 @@
-import { RemoteApiPropertyType } from '@lace-sdk/extension-messaging';
+import { RemoteApiPropertyType } from '@lace-lib/extension-messaging';
 
 import type { RemoteStore } from './types';
 import type { FeatureFlag } from '@lace-contract/feature';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 
 export const remoteStoreApiProperties: RemoteApiProperties<RemoteStore> = {
   dispatch: RemoteApiPropertyType.MethodReturningPromise,
-  getState: RemoteApiPropertyType.MethodReturningPromise,
+  getFirstPaintState: RemoteApiPropertyType.MethodReturningPromise,
   state$: RemoteApiPropertyType.HotObservable,
 };
 

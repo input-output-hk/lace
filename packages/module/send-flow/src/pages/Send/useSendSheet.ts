@@ -15,6 +15,7 @@ import {
 import { TokenId, type Token } from '@lace-contract/tokens';
 import { navigationRef, SheetRoutes } from '@lace-lib/navigation';
 import { useTheme } from '@lace-lib/ui-toolkit';
+import { BigNumber } from '@lace-lib/util';
 import {
   convertAmountToDenominated,
   parseLocaleNumber,
@@ -23,7 +24,6 @@ import {
   getLocaleSeparators,
   valueToLocale,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import debounce from 'lodash/fp/debounce';
 import React, {
   useState,
@@ -488,11 +488,11 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     ],
   );
 
-  const handleQrCodePress = async () => {
+  const handleQrCodePress = useCallback(async () => {
     // Camera permission handled inside QrScanner screen
     trackEvent('send | qr code | press');
     navigate(SheetRoutes.QrScanner);
-  };
+  }, [navigate, trackEvent]);
 
   const handleContactsPress = useCallback(() => {
     if (!selectedAccountId) return;
@@ -698,7 +698,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     [sendFlowState],
   );
 
-  const handleReviewTransactionPress = () => {
+  const handleReviewTransactionPress = useCallback(() => {
     if (
       !selectedAccountId ||
       !recipientAddress ||
@@ -720,7 +720,17 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
 
     // Only dispatch confirm - navigation happens reactively via useEffect when state becomes 'Summary'
     dispatchConfirm();
-  };
+  }, [
+    selectedAccountId,
+    recipientAddress,
+    isReviewTransactionEnabled,
+    accounts,
+    trackEvent,
+    debouncedAddressDispatch,
+    debouncedAmountsSync,
+    debouncedNoteDispatch,
+    dispatchConfirm,
+  ]);
 
   // Reactive navigation: navigate to ReviewTransaction when state machine transitions to Summary
   useEffect(() => {
@@ -742,19 +752,22 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     }
   }, [sendFlowState.status, accounts, selectedAccountId, navigate]);
 
-  const handleRemoveAsset = (tokenId: string) => {
-    trackEvent('send | remove asset');
-    dispatchFormDataChanged({
-      data: {
-        fieldName: 'tokenTransfers.removeToken',
-        id: TokenId(tokenId),
-      },
-    });
-    // Also remove from local assetInputValues to prevent stale values
-    setAssetInputValues(previous =>
-      previous.filter(item => item.tokenId !== tokenId),
-    );
-  };
+  const handleRemoveAsset = useCallback(
+    (tokenId: string) => {
+      trackEvent('send | remove asset');
+      dispatchFormDataChanged({
+        data: {
+          fieldName: 'tokenTransfers.removeToken',
+          id: TokenId(tokenId),
+        },
+      });
+      // Also remove from local assetInputValues to prevent stale values
+      setAssetInputValues(previous =>
+        previous.filter(item => item.tokenId !== tokenId),
+      );
+    },
+    [trackEvent, dispatchFormDataChanged, setAssetInputValues],
+  );
 
   const onSelectAccount = useCallback(
     (accountId: AccountId) => {
@@ -801,26 +814,29 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       : t('v2.send-flow.form.account.text');
   }, [accounts, t]);
 
-  const copies = {
-    headerTitle: t('v2.send-flow.sheet-title'),
-    sourceAccountLabel: t('v2.send-flow.form.empty-account.label'),
-    recipientLabel: t('v2.send-flow.address.label'),
-    assetsTitle: t('v2.send-flow.form.tokens.title'),
-    reviewTransactionLabel: t('v2.send-flow.form.review-transaction.label'),
-    accountDropdownTitle: t(
-      'v2.send-flow.form.empty-account.dropdown-placeholder',
-    ),
-    balanceLabel: t('v2.send-flow.form.balance-label'),
-    noteLabel: t('v2.send-flow.form.empty-note-placeholder', {
-      length: NOTE_SECTION_MAX_LENGTH,
+  const copies = useMemo(
+    () => ({
+      headerTitle: t('v2.send-flow.sheet-title'),
+      sourceAccountLabel: t('v2.send-flow.form.empty-account.label'),
+      recipientLabel: t('v2.send-flow.address.label'),
+      assetsTitle: t('v2.send-flow.form.tokens.title'),
+      reviewTransactionLabel: t('v2.send-flow.form.review-transaction.label'),
+      accountDropdownTitle: t(
+        'v2.send-flow.form.empty-account.dropdown-placeholder',
+      ),
+      balanceLabel: t('v2.send-flow.form.balance-label'),
+      noteLabel: t('v2.send-flow.form.empty-note-placeholder', {
+        length: NOTE_SECTION_MAX_LENGTH,
+      }),
+      estimatedFeeLabel: t('v2.send-flow.review-transaction.estimated-fee'),
+      accountText,
+      customFeeLabel: t('v2.send-flow.form.custom-fee-label'),
+      assetErrors: assetErrorsFromStateMachine,
+      addButtonLabel: t('v2.send-flow.form.add-asset-button-label'),
+      maxButtonLabel: t('v2.send-flow.form.max-button-label'),
     }),
-    estimatedFeeLabel: t('v2.send-flow.review-transaction.estimated-fee'),
-    accountText,
-    customFeeLabel: t('v2.send-flow.form.custom-fee-label'),
-    assetErrors: assetErrorsFromStateMachine,
-    addButtonLabel: t('v2.send-flow.form.add-asset-button-label'),
-    maxButtonLabel: t('v2.send-flow.form.max-button-label'),
-  };
+    [t, accountText, assetErrorsFromStateMachine],
+  );
 
   const sheetFooterTitleRow = useMemo(() => {
     const SheetFooterTitleRowComponent =
@@ -942,6 +958,67 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     });
   }, [sendFlowState.status, dispatchFormDataChanged]);
 
+  const utils = useMemo(
+    () => ({
+      isReviewTransactionEnabled,
+      isAddAssetButtonEnabled:
+        isAddAssetButtonEnabled && canSendMoreThanOneAsset,
+      noteSectionLength: NOTE_SECTION_MAX_LENGTH,
+      shouldShowNoteSection,
+      shouldShowMaxButton,
+      shouldShowRemoveAsset,
+      recipientErrorMessage,
+      txBuildError,
+      theme,
+      shouldShowFiatConversion,
+      NoticeComponent,
+      FeeSection,
+    }),
+    [
+      isReviewTransactionEnabled,
+      isAddAssetButtonEnabled,
+      canSendMoreThanOneAsset,
+      shouldShowNoteSection,
+      shouldShowMaxButton,
+      shouldShowRemoveAsset,
+      recipientErrorMessage,
+      txBuildError,
+      theme,
+      shouldShowFiatConversion,
+      NoticeComponent,
+      FeeSection,
+    ],
+  );
+
+  const actions = useMemo(
+    () => ({
+      onQrCodePress: handleQrCodePress,
+      onContactsPress: handleContactsPress,
+      onAddAssetPress: handleAddAsset,
+      onRemoveAsset: handleRemoveAsset,
+      onMaxAmountPress: handleMaxAmountPress,
+      onReviewTransactionPress: handleReviewTransactionPress,
+      onSelectAccount,
+      onNoteChange: handleNoteChange,
+      handleInputChange,
+      onClearNote: handleClearNote,
+      onRecipientAddressChange: handleRecipientAddressChange,
+    }),
+    [
+      handleQrCodePress,
+      handleContactsPress,
+      handleAddAsset,
+      handleRemoveAsset,
+      handleMaxAmountPress,
+      handleReviewTransactionPress,
+      onSelectAccount,
+      handleNoteChange,
+      handleInputChange,
+      handleClearNote,
+      handleRecipientAddressChange,
+    ],
+  );
+
   const sendSheetProps = {
     copies,
     sheetFooterTitleRow,
@@ -958,34 +1035,8 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       addressSelected: recipientAddress,
       assetInputValues: mergedAssetInputValues,
     },
-    utils: {
-      isReviewTransactionEnabled,
-      isAddAssetButtonEnabled:
-        isAddAssetButtonEnabled && canSendMoreThanOneAsset,
-      noteSectionLength: NOTE_SECTION_MAX_LENGTH,
-      shouldShowNoteSection,
-      shouldShowMaxButton,
-      shouldShowRemoveAsset,
-      recipientErrorMessage,
-      txBuildError,
-      theme,
-      shouldShowFiatConversion,
-      NoticeComponent,
-      FeeSection,
-    },
-    actions: {
-      onQrCodePress: handleQrCodePress,
-      onContactsPress: handleContactsPress,
-      onAddAssetPress: handleAddAsset,
-      onRemoveAsset: handleRemoveAsset,
-      onMaxAmountPress: handleMaxAmountPress,
-      onReviewTransactionPress: handleReviewTransactionPress,
-      onSelectAccount,
-      onNoteChange: handleNoteChange,
-      handleInputChange,
-      onClearNote: handleClearNote,
-      onRecipientAddressChange: handleRecipientAddressChange,
-    },
+    utils,
+    actions,
   };
 
   return {

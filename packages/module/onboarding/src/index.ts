@@ -10,6 +10,7 @@ import {
   ModuleName,
 } from '@lace-contract/module';
 import {
+  hwBlockchainSupportAddonContract,
   onboardingOptionsAddonContract,
   onboardingV2StoreContract,
 } from '@lace-contract/onboarding-v2';
@@ -46,6 +47,7 @@ const dependsOnContracts = combineContracts([
   authenticationPromptStoreContract,
   internalAuthSecretApiAddonContract,
   onboardingOptionsAddonContract,
+  hwBlockchainSupportAddonContract,
   requestHWConnectionAddonContract,
 ] as const);
 

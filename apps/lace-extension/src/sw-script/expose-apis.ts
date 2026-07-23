@@ -1,5 +1,5 @@
 import { FEATURE_FLAGS_CHANNEL } from '@lace-contract/dapp-connector';
-import { exposeApi } from '@lace-sdk/extension-messaging';
+import { exposeApi } from '@lace-lib/extension-messaging';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 

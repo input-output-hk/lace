@@ -9,7 +9,7 @@ import {
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import { of } from 'rxjs';
 
 import type { LaceModuleMap } from '@lace-contract/module';

@@ -1,11 +1,11 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
-import { AppLogger } from '@lace-sdk/util';
+import { AppLogger } from '@lace-lib/util';
 
 import { defaultFeatureFlags } from '../feature-flags';
 
 import { ENV } from './config';
 
-import type { LogLevel } from '@lace-sdk/util';
+import type { LogLevel } from '@lace-lib/util';
 
 const LOG_LEVELS = new Set<string>([
   'debug',

@@ -6,10 +6,11 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/key-management": "0.29.13",
+    "@cardano-sdk/key-management": "0.29.18",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
     "ts-log": "^2.2.7"
   }
 }

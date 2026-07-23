@@ -1,5 +1,5 @@
-import type { TokenTransferValue } from '../hooks';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 
 /**
  * The type of a transaction based on the net balance change.

@@ -1,17 +1,17 @@
-import { createObservableHook } from '@lace-lib/util-store';
 import {
   ChannelName,
   consumeRemoteApi,
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
+import { createObservableHook } from '@lace-lib/util-store';
 import { finalize, firstValueFrom } from 'rxjs';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
-import type { WithLogger, MakePropertiesObservable } from '@lace-sdk/util';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
+import type { WithLogger, MakePropertiesObservable } from '@lace-lib/util';
 
 type SetupAuthenticationChannel = {
   setup: (authSecret: AuthSecret) => Promise<boolean>;

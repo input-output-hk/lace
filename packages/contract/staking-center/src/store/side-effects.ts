@@ -1,8 +1,12 @@
 import { ActivityType } from '@lace-contract/activities';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { makeConfirmTx, makeSubmitTx } from '@lace-contract/tx-executor';
-import { firstStateOfStatus, serializeError } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
+import {
+  dropStaleResult,
+  firstStateOfStatus,
+  serializeError,
+} from '@lace-lib/util-store';
 import {
   catchError,
   from,
@@ -13,12 +17,30 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import type { DelegationStateCalculatingFees } from './types';
+import type {
+  DelegationFlowState,
+  DelegationStateCalculatingFees,
+} from './types';
 import type { SideEffect } from '../contract';
 import type { BuildDelegationTx } from '@lace-contract/cardano-context';
 import type { LaceInit } from '@lace-contract/module';
 import type { ConfirmTx, SubmitTx } from '@lace-contract/tx-executor';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
+
+// Statuses in which the machine handles each side-effect's RESULT event (see
+// `state-machine.ts`). A result arriving while the machine is outside these — a race,
+// or a close-all teardown — is stale and dropped (see `dropStaleResult`), otherwise the
+// machine throws "handler not found for status X and event Y". Keep in sync with the
+// state machine's handlers.
+const FEE_CALCULATION_HANDLED_STATES = new Set<DelegationFlowState['status']>([
+  'CalculatingFees',
+]);
+const CONFIRMATION_HANDLED_STATES = new Set<DelegationFlowState['status']>([
+  'AwaitingConfirmation',
+]);
+const PROCESSING_HANDLED_STATES = new Set<DelegationFlowState['status']>([
+  'Processing',
+]);
 
 type MakeFeeCalculationParams = {
   buildDelegationTx: BuildDelegationTx;
@@ -116,6 +138,13 @@ export const makeFeeCalculation =
           );
         },
       ),
+      dropStaleResult(
+        selectDelegationFlowState$,
+        action =>
+          actions.delegationFlow.feeCalculationCompleted.match(action) ||
+          actions.delegationFlow.feeCalculationFailed.match(action),
+        FEE_CALCULATION_HANDLED_STATES,
+      ),
     );
 
 export const makeDelegationAwaitingConfirmation =
@@ -156,6 +185,11 @@ export const makeDelegationAwaitingConfirmation =
             );
           }),
         ),
+      ),
+      dropStaleResult(
+        selectDelegationFlowState$,
+        actions.delegationFlow.confirmationCompleted.match,
+        CONFIRMATION_HANDLED_STATES,
       ),
     );
 
@@ -235,6 +269,11 @@ export const makeDelegationProcessing =
             );
           }),
         ),
+      ),
+      dropStaleResult(
+        selectDelegationFlowState$,
+        actions.delegationFlow.processingResulted.match,
+        PROCESSING_HANDLED_STATES,
       ),
     );
 

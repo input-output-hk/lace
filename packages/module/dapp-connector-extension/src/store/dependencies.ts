@@ -3,9 +3,18 @@ import {
   AuthenticatorErrorCode,
   DappId,
 } from '@lace-contract/dapp-connector';
-import { exposeAuthenticatorApi, senderOrigin } from '@lace-sdk/dapp-connector';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
-import { mergeMap, tap } from 'rxjs';
+import { exposeAuthenticatorApi, senderOrigin } from '@lace-lib/dapp-connector';
+import {
+  BehaviorSubject,
+  filter,
+  firstValueFrom,
+  map,
+  mergeMap,
+  Observable,
+  Subject,
+  take,
+  tap,
+} from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 import { ExtensionConnectionContextId } from '../value-objects';
@@ -16,12 +25,12 @@ import type {
   DappConnectorPlatformDependencies,
 } from '@lace-contract/dapp-connector';
 import type { LaceInitSync } from '@lace-contract/module';
-import type { BlockchainName } from '@lace-lib/util-store';
-import type { AuthenticatorApi } from '@lace-sdk/dapp-connector';
+import type { AuthenticatorApi } from '@lace-lib/dapp-connector';
 import type {
   ChannelName,
   MinimalRuntime,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
+import type { BlockchainName } from '@lace-lib/util-store';
 import type { Logger } from 'ts-log';
 
 type ConnectAuthenticator = {
@@ -78,6 +87,37 @@ const createConnectAuthenticator =
     };
 
     return new Observable<AccessRequest>(subscriber => {
+      // Connected ports (tab+frame) → connection epoch. cancelled$ compares the
+      // captured epoch, not membership, so a refresh (reconnect under the same
+      // contextId, new epoch) still cancels the stale queued request.
+      const connectedContexts$ = new BehaviorSubject<
+        Map<ReturnType<typeof ExtensionConnectionContextId>, number>
+      >(new Map());
+      let connectionEpoch = 0;
+      // Returns the epoch the context is connected under, assigning a fresh one
+      // if it is not currently tracked. A reconnect therefore never reuses a
+      // prior request's captured epoch.
+      const markConnected = (
+        contextId: ReturnType<typeof ExtensionConnectionContextId>,
+      ): number => {
+        const existing = connectedContexts$.value.get(contextId);
+        if (existing !== undefined) return existing;
+        connectionEpoch += 1;
+        const epoch = connectionEpoch;
+        connectedContexts$.next(
+          new Map(connectedContexts$.value).set(contextId, epoch),
+        );
+        return epoch;
+      };
+      const markDisconnected = (
+        contextId: ReturnType<typeof ExtensionConnectionContextId>,
+      ) => {
+        if (!connectedContexts$.value.has(contextId)) return;
+        const next = new Map(connectedContexts$.value);
+        next.delete(contextId);
+        connectedContexts$.next(next);
+      };
+
       const authenticator: AuthenticatorApi = {
         haveAccess: async sender => {
           if (!(await hasAccounts())) return false;
@@ -91,7 +131,28 @@ const createConnectAuthenticator =
           const dappOrigin = senderOrigin(sender) || '';
           if (!dappOrigin) throw new Error('Unknown dapp origin');
 
+          // Capture the epoch BEFORE assertHasAccounts(): a disconnect during
+          // the await must win. Capturing after would re-add the gone port under
+          // a fresh epoch and mask the drop, wedging the queue. (See
+          // AccessRequest.cancelled$.)
+          const senderTabId = sender.tab?.id;
+          const senderFrameId = sender.frameId;
+          let cancelled$: Observable<void> | undefined;
+          if (senderTabId !== undefined && senderFrameId !== undefined) {
+            const contextId = ExtensionConnectionContextId(
+              senderTabId,
+              senderFrameId,
+            );
+            const epoch = markConnected(contextId);
+            cancelled$ = connectedContexts$.pipe(
+              filter(connected => connected.get(contextId) !== epoch),
+              take(1),
+              map(() => undefined),
+            );
+          }
+
           await assertHasAccounts();
+
           return new Promise(resolve => {
             subscriber.next({
               dapp: {
@@ -106,6 +167,7 @@ const createConnectAuthenticator =
                 imageUrl: sender.tab?.favIconUrl || '',
               },
               windowId: sender.tab?.windowId,
+              cancelled$,
               done: (granted: boolean) => {
                 if (granted) {
                   emitDappConnected(dappOrigin, sender.tab?.id, sender.frameId);
@@ -134,6 +196,15 @@ const createConnectAuthenticator =
         // Subscribe to port connections and emit connection events for authorized dapps
         connectSubscription = api.messenger.connect$
           .pipe(
+            tap(port => {
+              // Track every connected port (authorized or not) so a later
+              // authorize request from it can detect its own disconnect.
+              const tabId = port.sender?.tab?.id;
+              const frameId = port.sender?.frameId;
+              if (tabId !== undefined && frameId !== undefined) {
+                markConnected(ExtensionConnectionContextId(tabId, frameId));
+              }
+            }),
             mergeMap(async port => {
               if (!port.sender) {
                 logger.warn('Missing sender on port connect');
@@ -172,9 +243,11 @@ const createConnectAuthenticator =
                 return;
               }
 
-              dappDisconnected$.next(
-                ExtensionConnectionContextId(tabId, frameId),
-              );
+              const contextId = ExtensionConnectionContextId(tabId, frameId);
+              // Drop from the connected map so any request pending on this port
+              // (active or still queued) cancels when it is next observed.
+              markDisconnected(contextId);
+              dappDisconnected$.next(contextId);
             }),
           )
           .subscribe();
@@ -186,6 +259,7 @@ const createConnectAuthenticator =
       return () => {
         connectSubscription?.unsubscribe();
         disconnectSubscription?.unsubscribe();
+        connectedContexts$.complete();
         api?.shutdown();
       };
     });

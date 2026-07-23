@@ -1,5 +1,5 @@
 import { BlockchainNetworkId } from '@lace-contract/network';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -417,6 +417,87 @@ describe('wallets/slice', () => {
               ),
             ),
         ).toBe(true);
+      });
+    });
+
+    describe('selectWalletsHiddenByActiveNetwork', () => {
+      const mainnetOnlyWallet: HardwareWallet = {
+        accounts: [
+          {
+            ...createHwAccount('mainnet-only', 0),
+            networkType: 'mainnet',
+            blockchainNetworkId: BlockchainNetworkId('cardano-mainnet'),
+            walletId: WalletId('mainnet-only'),
+          },
+        ],
+        metadata: { name: 'Mainnet only', order: 2 },
+        blockchainSpecific: {},
+        type: WalletType.HardwareSeedSigner,
+        walletId: WalletId('mainnet-only'),
+      };
+
+      const mainnetOnlyInMemoryWallet: InMemoryWallet = {
+        accounts: [
+          {
+            accountType: 'InMemory',
+            accountId: AccountId('im-mainnet-only'),
+            networkType: 'mainnet',
+            blockchainNetworkId: BlockchainNetworkId('cardano-mainnet'),
+            walletId: WalletId('im-mainnet-only'),
+            blockchainName: 'Cardano',
+            blockchainSpecific: {},
+            metadata: { name: 'Mainnet only in-memory account' },
+          },
+        ],
+        metadata: { name: 'Mainnet only in-memory', order: 3 },
+        blockchainSpecific: {},
+        type: WalletType.InMemory,
+        walletId: WalletId('im-mainnet-only'),
+        encryptedRecoveryPhrase: HexBytes('0'.repeat(64)),
+        isPassphraseConfirmed: true,
+      };
+
+      const stateWithHidden = {
+        ...state,
+        wallets: {
+          ...state.wallets,
+          entities: {
+            ...state.wallets.entities,
+            [mainnetOnlyWallet.walletId]: mainnetOnlyWallet,
+            [mainnetOnlyInMemoryWallet.walletId]: mainnetOnlyInMemoryWallet,
+          },
+          ids: [
+            ...state.wallets.ids,
+            mainnetOnlyWallet.walletId,
+            mainnetOnlyInMemoryWallet.walletId,
+          ],
+        },
+      } as State;
+
+      it('returns wallets whose accounts are all on a non-active network', () => {
+        const hidden =
+          selectors.wallets.selectWalletsHiddenByActiveNetwork(stateWithHidden);
+        expect(hidden.map(w => w.walletId)).toContain('mainnet-only');
+      });
+
+      it('returns hidden software wallets, not only hardware ones', () => {
+        const hidden =
+          selectors.wallets.selectWalletsHiddenByActiveNetwork(stateWithHidden);
+        expect(hidden.map(w => w.walletId)).toContain('im-mainnet-only');
+      });
+
+      it('does not return wallets that have an active-network account', () => {
+        const hidden =
+          selectors.wallets.selectWalletsHiddenByActiveNetwork(stateWithHidden);
+        expect(hidden.map(w => w.walletId)).not.toContain(
+          storedHardwareWallet.walletId,
+        );
+      });
+
+      it('returns no wallets when every wallet has an active-network account', () => {
+        const hidden =
+          selectors.wallets.selectWalletsHiddenByActiveNetwork(state);
+        expect(hidden).toEqual([]);
       });
     });
 

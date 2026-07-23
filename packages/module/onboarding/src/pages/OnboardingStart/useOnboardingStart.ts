@@ -2,16 +2,13 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useConfig } from '@lace-contract/app';
 import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
+import { clearPendingCreateWalletSecrets } from '@lace-contract/onboarding-v2';
 import { StackRoutes } from '@lace-lib/navigation';
 import { openUrl, useTheme } from '@lace-lib/ui-toolkit';
 import { useCallback, useState, useEffect, useMemo } from 'react';
 import { Platform } from 'react-native';
 
-import {
-  useDispatchLaceAction,
-  useLaceSelector,
-  useLoadModules,
-} from '../../hooks';
+import { useLaceSelector, useLoadModules } from '../../hooks';
 
 import type { OnboardingOption } from '@lace-contract/onboarding-v2';
 import type { StackScreenProps } from '@lace-lib/navigation';
@@ -24,9 +21,6 @@ export const useOnboardingStart = ({
   const { theme } = useTheme();
   const { appConfig } = useConfig();
   const { trackEvent } = useAnalytics();
-  const clearPendingCreateWallet = useDispatchLaceAction(
-    'onboardingV2.clearPendingCreateWallet',
-  );
   // Whether the device has ANY form of authentication (PIN, passcode, biometrics)
   // Use this for enforcement checks
   const isDeviceAuthAvailable = useLaceSelector(
@@ -46,15 +40,15 @@ export const useOnboardingStart = ({
 
   const handleCreateWallet = useCallback(() => {
     trackEvent('onboarding | new wallet | press');
-    clearPendingCreateWallet();
+    clearPendingCreateWalletSecrets();
     navigation.navigate(StackRoutes.OnboardingDesktopLogin);
-  }, [clearPendingCreateWallet, navigation, trackEvent]);
+  }, [navigation, trackEvent]);
 
   const handleRestoreWallet = useCallback(() => {
     trackEvent('onboarding | restore wallet | press');
-    clearPendingCreateWallet();
+    clearPendingCreateWalletSecrets();
     navigation.navigate(StackRoutes.OnboardingRestoreWallet);
-  }, [clearPendingCreateWallet, navigation, trackEvent]);
+  }, [navigation, trackEvent]);
 
   const handleConnectHardwareWallet = useCallback(() => {
     trackEvent('onboarding | hardware wallet | connect | press');

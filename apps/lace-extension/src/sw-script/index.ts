@@ -1,4 +1,4 @@
-import { getBackgroundMessenger } from '@lace-sdk/extension-messaging';
+import { getBackgroundMessenger } from '@lace-lib/extension-messaging';
 import { runtime } from 'webextension-polyfill';
 
 import { logger } from '../util/logger';

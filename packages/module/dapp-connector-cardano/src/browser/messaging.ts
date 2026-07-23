@@ -1,4 +1,4 @@
-import { ChannelName } from '@lace-sdk/extension-messaging';
+import { ChannelName } from '@lace-lib/extension-messaging';
 
 /**
  * Channel for authenticator API communication (enable, isEnabled).

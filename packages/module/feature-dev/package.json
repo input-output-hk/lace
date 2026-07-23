@@ -14,7 +14,7 @@
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

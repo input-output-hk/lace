@@ -1,5 +1,5 @@
-import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 
 import type { BitcoinSpecificInMemoryWalletData } from '@lace-contract/bitcoin-context';
 import type { CardanoSpecificInMemoryWalletData } from '@lace-contract/cardano-context';
@@ -35,7 +35,7 @@ export const tryDecrypt = async (
 ): Promise<boolean> => {
   let decrypted: Uint8Array | undefined;
   try {
-    decrypted = await emip3decrypt(
+    decrypted = await SecretBox.open(
       ByteArray.fromHex(encryptedRecoveryPhrase),
       password,
     );
@@ -61,12 +61,12 @@ const reEncryptHexBytes = async (
   encrypted: HexBytes,
   context: ReEncryptContext,
 ): Promise<HexBytes> => {
-  const decrypted = await emip3decrypt(
+  const decrypted = await SecretBox.open(
     ByteArray.fromHex(encrypted),
     context.oldPassword,
   );
   context.intermediateBuffers.push(decrypted);
-  const reEncrypted = await emip3encrypt(decrypted, context.newPassword);
+  const reEncrypted = await SecretBox.seal(decrypted, context.newPassword);
   return HexBytes.fromByteArray(reEncrypted);
 };
 

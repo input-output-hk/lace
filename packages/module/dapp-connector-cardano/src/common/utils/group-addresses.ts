@@ -1,7 +1,7 @@
 import { constructTokenId, type TokensMetadataMap } from './asset-utils';
 
-import type { TokenTransferValue } from '../hooks';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { StoredTokenMetadata } from '@lace-contract/tokens';
 
 /**

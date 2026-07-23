@@ -3,6 +3,7 @@ import { addressesStoreContract } from '@lace-contract/addresses';
 import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
 import { failuresStoreContract } from '@lace-contract/failures';
+import { featureStoreContract } from '@lace-contract/feature';
 import {
   combineContracts,
   combineStore,
@@ -60,6 +61,7 @@ export const cardanoProviderStoreContract = inferContractContext({
     syncStoreContract,
     failuresStoreContract,
     analyticsStoreContract,
+    featureStoreContract,
   ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),

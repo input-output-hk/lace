@@ -4,6 +4,7 @@ import {
   analyticsStoreContract,
   analyticsProviderDependencyContract,
 } from '@lace-contract/analytics';
+import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
 import {
   combineContracts,
@@ -41,6 +42,7 @@ const analyticsPosthogModule = inferModuleContext({
     networkStoreContract,
     viewsStoreContract,
     tokenPricingStoreContract,
+    cardanoProviderStoreContract,
   ] as const),
   store,
   feature: {

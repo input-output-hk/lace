@@ -121,6 +121,20 @@ const patchNxConfig = nxConfig => {
     ) {
       return { type: 'empty' };
     }
+    // Stub expo-camera's web QR scanner. Its module top-level synchronously spawns
+    // a Web Worker that importScripts() jsQR from https://cdn.jsdelivr.net — remotely
+    // hosted code, forbidden under MV3 CSP. QR scanning is mobile-only (the scan
+    // button is gated `!isWeb` in RecipientInput), so on web this hook is never
+    // invoked and CameraView never mounts. With EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH
+    // the optimizer eager-evaluates the module at boot, firing the CDN load on app
+    // load; stubbing removes both the dead code and the CSP violation. Mirror of the
+    // @sentry lazyLoadIntegration stub above.
+    if (
+      context.originModulePath.includes('expo-camera') &&
+      moduleName.includes('useWebQRScanner')
+    ) {
+      return { type: 'empty' };
+    }
     // Exclude @effect/platform's HttpApiScalar module - it contains a CDN reference to
     // @scalar/api-reference (cdn.jsdelivr.net) that violates Chrome Web Store MV3 policy
     // which prohibits remotely hosted code. HttpApiScalar is server-side API docs tooling
@@ -158,7 +172,6 @@ const patchNxConfig = nxConfig => {
       const overridePath = path.resolve(
         projectRoot,
         'src',
-        'app',
         'feature-flags.override.ts',
       );
 

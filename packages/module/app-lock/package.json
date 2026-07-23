@@ -6,14 +6,15 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/key-management": "0.29.13",
+    "@cardano-sdk/key-management": "0.29.18",
     "@lace-contract/app-lock": "*",
     "@lace-contract/authentication-prompt": "*",
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-active-state": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/core": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

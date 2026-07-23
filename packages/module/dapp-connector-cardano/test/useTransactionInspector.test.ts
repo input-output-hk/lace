@@ -14,6 +14,10 @@ const VALID_TX_CBOR =
 const SIMPLE_TX_CBOR =
   '84a300d9010282825820027b68d4c11e97d7e065cc2702912cb1a21b6d0e56c6a74dd605889a5561138500825820d3c887d17486d483a2b46b58b01cb9344745f15fdd8f8e70a57f854cdd88a633010182a2005839005cf6c91279a859a072601779fb33bb07c34e1d641d45df51ff63b967f15db05f56035465bf8900a09bdaa16c3d8b8244fea686524408dd8001821a00e4e1c0a1581c0b0d621b5c26d0a1fd0893a4b04c19d860296a69ede1fbcfc5179882a1474e46542d30303101a200583900dc435fc2638f6684bd1f9f6f917d80c92ae642a4a33a412e516479e64245236ab8056760efceebbff57e8cab220182be3e36439e520a6454011a0d294e28021a00029eb9a0f5f6';
 
+// Transaction CBOR carrying a non-zero current treasury donation (1 ADA)
+const DONATION_TX_CBOR =
+  '84a40082825820027b68d4c11e97d7e065cc2702912cb1a21b6d0e56c6a74dd605889a5561138500825820d3c887d17486d483a2b46b58b01cb9344745f15fdd8f8e70a57f854cdd88a633010182825839005cf6c91279a859a072601779fb33bb07c34e1d641d45df51ff63b967f15db05f56035465bf8900a09bdaa16c3d8b8244fea686524408dd80821a00e4e1c0a1581c0b0d621b5c26d0a1fd0893a4b04c19d860296a69ede1fbcfc5179882a1474e46542d3030310182583900dc435fc2638f6684bd1f9f6f917d80c92ae642a4a33a412e516479e64245236ab8056760efceebbff57e8cab220182be3e36439e520a64541a0d294e28021a00029eb9161a000f4240a0f5f6';
+
 describe('inspectTransaction', () => {
   describe('with valid transaction', () => {
     it('parses transaction and returns basic info', async () => {
@@ -84,6 +88,23 @@ describe('inspectTransaction', () => {
       expect(info.certificatesCount).toBe(0);
       expect(info.hasWithdrawals).toBe(false);
       expect(info.hasMint).toBe(false);
+    });
+
+    it('leaves donation undefined when the transaction has none', async () => {
+      const result = await inspectTransaction(SIMPLE_TX_CBOR);
+      const info = result.transactionInfo!;
+
+      expect(info.donation).toBeUndefined();
+    });
+  });
+
+  describe('with a treasury donation', () => {
+    it('extracts the donation amount', async () => {
+      const result = await inspectTransaction(DONATION_TX_CBOR);
+
+      expect(result.error).toBeNull();
+      expect(result.transactionInfo).not.toBeNull();
+      expect(result.transactionInfo!.donation).toBe(1_000_000n);
     });
   });
 

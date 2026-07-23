@@ -1,8 +1,8 @@
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { formatDate, formatTime } from '@lace-lib/util-render';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import {
@@ -66,6 +66,7 @@ const mockT = vi.fn((key: string) => {
     'activity.history.registration': 'Registration',
     'activity.history.deregistration': 'Deregistration',
     'activity.history.withdrawal': 'Withdrawal',
+    'activity.history.night-designation': 'NIGHT Designation',
     'activity.assets.nfts': 'NFTs',
     'activity.assets.tokens': 'Tokens',
     'activity.assets.mixed': 'Mixed',
@@ -549,6 +550,35 @@ describe('formatAndGroupActivitiesByDate', () => {
         status: 'deregistration',
         info: {
           title: 'Deregistration',
+        },
+      });
+    });
+
+    it('formats NightDesignation activity correctly', () => {
+      const activity: Activity = {
+        accountId,
+        activityId: 'night-designation-activity',
+        timestamp: Timestamp(fakeNowTimestamp),
+        tokenBalanceChanges: [
+          { tokenId: tokenId1, amount: BigNumber(-2000000n) },
+        ],
+        type: ActivityType.NightDesignation,
+      };
+
+      const result = formatAndGroupActivitiesByDate({
+        activities: [activity],
+        t: mockT,
+        tokensMetadataByTokenId,
+      });
+
+      expect(result[0].items[0]).toMatchObject({
+        id: activity.activityId,
+        rowKey: activityListRowKey(activity),
+        iconBackground: 'secondary',
+        iconName: 'Moon',
+        status: 'nightDesignation',
+        info: {
+          title: 'NIGHT Designation',
         },
       });
     });

@@ -1,9 +1,9 @@
 import { Cardano } from '@cardano-sdk/core';
 import { CardanoNetworkId } from '@lace-contract/cardano-context';
-import { Err, None, Ok, Some } from '@lace-sdk/util';
+import { Err, None, Ok, Some } from '@lace-lib/util';
 
 import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { Option, Result } from '@lace-sdk/util';
+import type { Option, Result } from '@lace-lib/util';
 
 export const invalidAddressError = new Error('Invalid Cardano Address');
 export const unknownNetworkError = new Error(

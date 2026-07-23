@@ -1,195 +1,178 @@
-import { describe, expect, it } from 'vitest';
+/**
+ * @vitest-environment jsdom
+ */
+
+import { NavigationControls } from '@lace-lib/navigation';
+import { renderHook, act } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import * as hooksModule from '../src/hooks';
+import { useFiatCurrencySheet } from '../src/pages/FiatCurrencySheet/useFiatCurrencySheet';
 
 import type { CurrencyPreference } from '@lace-contract/token-pricing';
 
-describe('FiatCurrencySheet Currency Selection Logic', () => {
-  it('should parse feature flag currencies correctly', () => {
-    const mockFeatureFlag = {
-      key: 'SUPPORTED_CURRENCIES',
-      payload: {
-        currencies: [
-          { name: 'USD', ticker: '$' },
-          { name: 'EUR', ticker: '€' },
-          { name: 'GBP', ticker: '£' },
-        ],
-      },
-    };
+const mockDispatch = vi.fn();
 
-    const currencies = mockFeatureFlag.payload
-      .currencies as CurrencyPreference[];
+vi.mock('../src/hooks', () => ({
+  useLaceSelector: vi.fn(),
+  useDispatchLaceAction: vi.fn((key: string) => (argument: unknown) => {
+    mockDispatch(key, argument);
+  }),
+}));
 
-    expect(currencies).toHaveLength(3);
-    expect(currencies[0]).toEqual({ name: 'USD', ticker: '$' });
-    expect(currencies[1]).toEqual({ name: 'EUR', ticker: '€' });
-    expect(currencies[2]).toEqual({ name: 'GBP', ticker: '£' });
-  });
+// `t` echoes the key, except it resolves USD's full-name key so we can assert
+// that a description is attached only when a translation exists.
+vi.mock('@lace-contract/i18n', () => ({
+  useTranslation: () => ({
+    t: (key: string) =>
+      key === 'v2.sheets.fiatCurrency.currencyFullName.USD' ? 'US Dollar' : key,
+  }),
+}));
 
-  it('should handle feature flag with all supported currencies', () => {
-    const mockFeatureFlag = {
-      key: 'SUPPORTED_CURRENCIES',
-      payload: {
-        currencies: [
-          { name: 'USD', ticker: '$' },
-          { name: 'EUR', ticker: '€' },
-          { name: 'GBP', ticker: '£' },
-          { name: 'JPY', ticker: '¥' },
-          { name: 'CAD', ticker: 'C$' },
-          { name: 'AUD', ticker: 'A$' },
-          { name: 'CHF', ticker: 'CHF' },
-          { name: 'CNY', ticker: '¥' },
-          { name: 'BRL', ticker: 'R$' },
-          { name: 'INR', ticker: '₹' },
-          { name: 'KRW', ticker: '₩' },
-          { name: 'VND', ticker: '₫' },
-          { name: 'MXN', ticker: 'MXN' },
-        ],
-      },
-    };
+vi.mock('@lace-contract/analytics', () => ({
+  useAnalytics: () => ({ trackEvent: vi.fn() }),
+}));
 
-    const currencies = mockFeatureFlag.payload
-      .currencies as CurrencyPreference[];
+vi.mock('@lace-lib/navigation', () => ({
+  NavigationControls: { closeSheet: vi.fn() },
+}));
 
-    expect(currencies).toHaveLength(13);
+const USD: CurrencyPreference = { name: 'USD', ticker: '$' };
+const EUR: CurrencyPreference = { name: 'EUR', ticker: '€' };
+const GBP: CurrencyPreference = { name: 'GBP', ticker: '£' };
 
-    currencies.forEach(currency => {
-      expect(currency).toHaveProperty('name');
-      expect(currency).toHaveProperty('ticker');
-      expect(typeof currency.name).toBe('string');
-      expect(typeof currency.ticker).toBe('string');
+describe('useFiatCurrencySheet', () => {
+  const mockUseLaceSelector = vi.mocked(hooksModule.useLaceSelector);
+
+  const mockSelectors = ({
+    preference,
+    supported,
+  }: {
+    preference: CurrencyPreference | undefined;
+    supported: CurrencyPreference[];
+  }) => {
+    mockUseLaceSelector.mockImplementation((key: string) => {
+      if (key === 'tokenPricing.selectCurrencyPreference') return preference;
+      if (key === 'tokenPricing.selectSupportedCurrencyPreferences') {
+        return supported;
+      }
+      throw new Error(`Unexpected useLaceSelector: ${key}`);
     });
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('should map currencies to radio options correctly', () => {
-    const currencies: CurrencyPreference[] = [
-      { name: 'USD', ticker: '$' },
-      { name: 'EUR', ticker: '€' },
-      { name: 'GBP', ticker: '£' },
-    ];
+  it('maps the supported currencies to radio options with translated descriptions', () => {
+    mockSelectors({ preference: USD, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
 
-    const radioOptions = currencies.map(currency => ({
-      label: currency.name,
-      value: currency.name,
-    }));
-
-    expect(radioOptions).toHaveLength(3);
-    expect(radioOptions[0]).toEqual({ label: 'USD', value: 'USD' });
-    expect(radioOptions[1]).toEqual({ label: 'EUR', value: 'EUR' });
-    expect(radioOptions[2]).toEqual({ label: 'GBP', value: 'GBP' });
+    expect(result.current.radioOptions).toEqual([
+      { label: 'USD', value: 'USD', description: 'US Dollar' },
+      { label: 'EUR', value: 'EUR', description: undefined },
+      { label: 'GBP', value: 'GBP', description: undefined },
+    ]);
   });
 
-  it('should handle major currencies with correct tickers', () => {
-    const currencies: CurrencyPreference[] = [
-      { name: 'USD', ticker: '$' },
-      { name: 'EUR', ticker: '€' },
-      { name: 'GBP', ticker: '£' },
-    ];
-
-    const usd = currencies.find(c => c.name === 'USD');
-    const eur = currencies.find(c => c.name === 'EUR');
-    const gbp = currencies.find(c => c.name === 'GBP');
-
-    expect(usd?.ticker).toBe('$');
-    expect(eur?.ticker).toBe('€');
-    expect(gbp?.ticker).toBe('£');
+  it('uses the persisted currency when it is still selectable', () => {
+    mockSelectors({ preference: EUR, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+    expect(result.current.value).toBe('EUR');
   });
 
-  it('should synchronize currency ref with external updates', () => {
-    const persistedCurrency: CurrencyPreference = { name: 'USD', ticker: '$' };
-    const externallyUpdatedCurrency: CurrencyPreference = {
-      name: 'EUR',
-      ticker: '€',
-    };
-
-    const initialCurrencyRef = { current: persistedCurrency };
-    const resolvedSelectedCurrency = externallyUpdatedCurrency;
-    initialCurrencyRef.current = resolvedSelectedCurrency;
-
-    expect(initialCurrencyRef.current).toEqual(externallyUpdatedCurrency);
-
-    const cancelBehavior = initialCurrencyRef.current;
-    expect(cancelBehavior).toEqual(externallyUpdatedCurrency);
-    expect(cancelBehavior).not.toEqual(persistedCurrency);
-  });
-
-  it('should validate selected currency exists in supported list', () => {
-    const supportedCurrencies: CurrencyPreference[] = [
-      { name: 'USD', ticker: '$' },
-      { name: 'EUR', ticker: '€' },
-      { name: 'GBP', ticker: '£' },
-    ];
-
-    const validCurrency: CurrencyPreference = { name: 'USD', ticker: '$' };
-    const isValidSupported = supportedCurrencies.some(
-      c => c.name === validCurrency?.name,
-    );
-    expect(isValidSupported).toBe(true);
-
-    const invalidCurrency: CurrencyPreference = { name: 'MXN', ticker: 'MXN' };
-    const isInvalidSupported = supportedCurrencies.some(
-      c => c.name === invalidCurrency?.name,
-    );
-    expect(isInvalidSupported).toBe(false);
-
-    const DEFAULT_CURRENCY: CurrencyPreference = { name: 'USD', ticker: '$' };
-    const resolvedCurrency = isValidSupported
-      ? validCurrency
-      : DEFAULT_CURRENCY;
-    expect(resolvedCurrency).toEqual(validCurrency);
-
-    const resolvedInvalidCurrency = isInvalidSupported
-      ? invalidCurrency
-      : DEFAULT_CURRENCY;
-    expect(resolvedInvalidCurrency).toEqual(DEFAULT_CURRENCY);
-  });
-
-  it('should handle missing selected currency gracefully', () => {
-    const supportedCurrencies: CurrencyPreference[] = [
-      { name: 'USD', ticker: '$' },
-      { name: 'EUR', ticker: '€' },
-    ];
-    const DEFAULT_CURRENCY: CurrencyPreference = { name: 'USD', ticker: '$' };
-
-    const undefinedCurrency: CurrencyPreference | undefined = undefined;
-    const isSupported = supportedCurrencies.some(
-      c =>
-        c.name === (undefinedCurrency as CurrencyPreference | undefined)?.name,
-    );
-
-    expect(isSupported).toBe(false);
-    const resolvedCurrency: CurrencyPreference =
-      isSupported && undefinedCurrency ? undefinedCurrency : DEFAULT_CURRENCY;
-    expect(resolvedCurrency).toEqual(DEFAULT_CURRENCY);
-  });
-
-  it('should fallback to default when feature flag has no currencies', () => {
-    const DEFAULT_CURRENCY: CurrencyPreference = { name: 'USD', ticker: '$' };
-
-    const currencies: CurrencyPreference[] = [];
-    const result =
-      Array.isArray(currencies) && currencies.length > 0
-        ? currencies
-        : [DEFAULT_CURRENCY];
-
-    expect(result).toEqual([DEFAULT_CURRENCY]);
-  });
-
-  it('should fallback to default when feature flag payload is malformed', () => {
-    const DEFAULT_CURRENCY: CurrencyPreference = { name: 'USD', ticker: '$' };
-
-    const malformedCases = [
-      null,
-      undefined,
-      {},
-      { currencies: null },
-      { currencies: undefined },
-      { currencies: 'not-an-array' },
-    ];
-
-    malformedCases.forEach(malformed => {
-      const currencies = Array.isArray(malformed)
-        ? malformed
-        : [DEFAULT_CURRENCY];
-      expect(currencies).toEqual([DEFAULT_CURRENCY]);
+  it('falls back to the default when the persisted currency is not selectable', () => {
+    mockSelectors({
+      preference: { name: 'JPY', ticker: '¥' },
+      supported: [USD, EUR],
     });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+    expect(result.current.value).toBe('USD');
+  });
+
+  it('updates the temporary selection on change', () => {
+    mockSelectors({ preference: USD, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+
+    act(() => {
+      result.current.onChange('EUR');
+    });
+
+    expect(result.current.value).toBe('EUR');
+  });
+
+  it('dispatches the new currency and closes the sheet on confirm', () => {
+    mockSelectors({ preference: USD, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+
+    act(() => {
+      result.current.onChange('EUR');
+    });
+    act(() => {
+      result.current.onConfirm();
+    });
+
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch.mock.calls[0]).toEqual([
+      'tokenPricing.setCurrencyPreference',
+      EUR,
+    ]);
+    expect(NavigationControls.closeSheet).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not dispatch on confirm when the selection is unchanged', () => {
+    mockSelectors({ preference: USD, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+
+    act(() => {
+      result.current.onConfirm();
+    });
+
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(NavigationControls.closeSheet).toHaveBeenCalledTimes(1);
+  });
+
+  it('reverts the temporary selection and does not dispatch on cancel', () => {
+    mockSelectors({ preference: USD, supported: [USD, EUR, GBP] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+
+    act(() => {
+      result.current.onChange('EUR');
+    });
+    expect(result.current.value).toBe('EUR');
+
+    act(() => {
+      result.current.onClose();
+    });
+
+    expect(result.current.value).toBe('USD');
+    expect(mockDispatch).not.toHaveBeenCalled();
+    expect(NavigationControls.closeSheet).toHaveBeenCalledTimes(1);
+  });
+
+  it('resets the temporary selection when a currency becomes unsupported mid-session', () => {
+    mockSelectors({ preference: EUR, supported: [USD, EUR, GBP] });
+    const { result, rerender } = renderHook(() => useFiatCurrencySheet());
+    expect(result.current.value).toBe('EUR');
+
+    mockSelectors({ preference: EUR, supported: [USD, GBP] });
+    rerender();
+
+    expect(result.current.value).toBe('USD');
+  });
+
+  it('resolves to the first supported currency when the persisted one is gone and USD is absent', () => {
+    mockSelectors({
+      preference: { name: 'JPY', ticker: '¥' },
+      supported: [EUR, GBP],
+    });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+    expect(result.current.value).toBe('EUR');
+  });
+
+  it('resolves to the default when the supported list is empty', () => {
+    mockSelectors({ preference: { name: 'JPY', ticker: '¥' }, supported: [] });
+    const { result } = renderHook(() => useFiatCurrencySheet());
+    expect(result.current.value).toBe('USD');
   });
 });

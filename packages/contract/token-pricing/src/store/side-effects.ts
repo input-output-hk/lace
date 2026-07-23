@@ -1,10 +1,13 @@
 import { whileActive } from '@lace-contract/wallet-active-state';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { createByBlockchainNameSelector } from '@lace-lib/util-store';
+import { retryBackoff } from 'backoff-rxjs';
 import {
   concat,
   catchError,
   distinctUntilChanged,
   EMPTY,
+  exhaustMap,
   filter,
   interval,
   map,
@@ -18,10 +21,12 @@ import {
 import {
   DEFAULT_CURRENCY_PREFERENCE,
   POLLING_INTERVAL_MS,
+  SUPPORTED_CURRENCIES_FEATURE_FLAG,
   TOKEN_PRICING_NETWORK_TYPE,
 } from '../const';
 import { shouldFetchPrice, shouldFetchPriceHistory } from '../utils';
 
+import type { CurrencyChoiceFeatureFlagPayload } from '../const';
 import type { ActionCreators, SideEffect } from '../contract';
 import type { TokenPricingProvider } from '../dependencies';
 import type {
@@ -134,6 +139,111 @@ const fetchAndSetPriceHistory = ({
       logger.error('Failed to fetch price history:', error);
       return EMPTY;
     }),
+  );
+
+/**
+ * Fetches CoinGecko's supported vs_currencies list — which gates the selectable
+ * currencies — on each wallet activation, storing it in Redux.
+ *
+ * Per-activation refetching (repeats absorbed by the provider's TTL cache) keeps
+ * a currency CoinGecko later drops from staying selectable for the rest of the
+ * session; a boot-time outage recovers on the next activation.
+ */
+export const fetchAndStoreSupportedCurrencies: SideEffect = (
+  _,
+  {},
+  { tokenPricingProvider, actions, logger, isWalletActive$ },
+) => {
+  if (!tokenPricingProvider?.fetchSupportedCurrencies) return EMPTY;
+
+  return isWalletActive$.pipe(
+    filter(Boolean),
+    exhaustMap(() =>
+      tokenPricingProvider.fetchSupportedCurrencies!().pipe(
+        retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+        map(currencies =>
+          actions.tokenPricing.setSupportedCurrencies(currencies),
+        ),
+        catchError(error => {
+          logger.error(
+            'Failed to fetch supported currencies from CoinGecko:',
+            error,
+          );
+          return EMPTY;
+        }),
+      ),
+    ),
+  );
+};
+
+/**
+ * Mirrors the SUPPORTED_CURRENCIES feature-flag payload's
+ * `currency_choice_exclusions` into the token-pricing slice, so the currency
+ * selector and the fallback side-effect read the hide-list from one place.
+ */
+export const syncCurrencyChoiceExclusions: SideEffect = (
+  _,
+  { features: { selectLoadedFeatures$, selectNextFeatureFlags$ } },
+  { actions },
+) => {
+  const getExclusions = (
+    featureFlags: { key: string; payload?: unknown }[],
+  ): string[] => {
+    const flag = featureFlags.find(
+      f => f.key === SUPPORTED_CURRENCIES_FEATURE_FLAG,
+    );
+    const payload = flag?.payload as
+      | CurrencyChoiceFeatureFlagPayload
+      | undefined;
+    const exclusions = payload?.currency_choice_exclusions;
+    return Array.isArray(exclusions)
+      ? exclusions.map(code => code.toLowerCase())
+      : [];
+  };
+
+  return merge(
+    selectLoadedFeatures$.pipe(
+      map(({ featureFlags }) => getExclusions(featureFlags)),
+    ),
+    selectNextFeatureFlags$.pipe(
+      filter(Boolean),
+      map(({ features }) => getExclusions(features)),
+    ),
+  ).pipe(
+    distinctUntilChanged(
+      (a, b) =>
+        a.length === b.length && a.every((code, index) => code === b[index]),
+    ),
+    map(exclusions =>
+      actions.tokenPricing.setCurrencyChoiceExclusions(exclusions),
+    ),
+  );
+};
+
+/**
+ * Moves the user off a currency they can no longer select (as decided by
+ * `selectCurrencyFallback`), silently — see `CurrencyFallbackDecision` for why
+ * the CoinGecko-removal case is not distinguishable enough to report.
+ *
+ * Gated on wallet activity: the correction dispatches setCurrencyPreference,
+ * which drives an on-demand price fetch that must not run while locked (ADR 25).
+ * `whileActive` stays at the end of the pipe.
+ */
+export const fallbackCurrencyWhenUnsupported: SideEffect = (
+  _,
+  { tokenPricing },
+  { actions, isWalletActive$ },
+) =>
+  (
+    tokenPricing.selectCurrencyFallback$ ?? of({ fallback: false as const })
+  ).pipe(
+    filter(decision => decision.fallback),
+    switchMap(() =>
+      of(
+        actions.tokenPricing.setCurrencyPreference(DEFAULT_CURRENCY_PREFERENCE),
+      ),
+    ),
+    whileActive(isWalletActive$),
   );
 
 export const clearPricesWhenDisabled: SideEffect = (
@@ -498,6 +608,9 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
   return [
     clearPricesWhenDisabled,
     clearPricingDataOnTestnet,
+    fetchAndStoreSupportedCurrencies,
+    syncCurrencyChoiceExclusions,
+    fallbackCurrencyWhenUnsupported,
     makePollPrices(selectMapper),
     makeFetchPricesForNewTokens(selectMapper),
     makeFetchPricesOnDemand(selectMapper),

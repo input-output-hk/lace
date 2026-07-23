@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TokenId } from '@lace-contract/tokens';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, it, expect, vi } from 'vitest';
 
 import { BitcoinTokenPriceId, tokenPricingActions } from '../../src';
 import {
+  DEFAULT_CURRENCY_PREFERENCE,
+  SUPPORTED_CURRENCIES_FEATURE_FLAG,
+} from '../../src/const';
+import {
   clearPricesWhenDisabled,
   clearPricingDataOnTestnet,
+  fetchAndStoreSupportedCurrencies,
+  syncCurrencyChoiceExclusions,
+  fallbackCurrencyWhenUnsupported,
   makePollPrices,
   makeFetchPricesForNewTokens,
   makeFetchPricesOnDemand,
@@ -24,6 +31,7 @@ import {
 } from '../test-helpers';
 
 import type { SetPricesPayload } from '../../src';
+import type { CurrencyFallbackDecision } from '../../src/store/selectors';
 import type { TokenIdMapper, TokenPriceRequest } from '../../src/types';
 import type { NetworkType } from '@lace-contract/network';
 import type { Token } from '@lace-contract/tokens';
@@ -1944,6 +1952,356 @@ describe('side-effects', () => {
           };
         },
       );
+    });
+  });
+
+  describe('fetchAndStoreSupportedCurrencies', () => {
+    const activeDeps = (
+      mockProvider: ReturnType<typeof createMockProvider>,
+      log = logger,
+    ) => ({
+      tokenPricingProvider: mockProvider,
+      actions: tokenPricingActions,
+      logger: log,
+      isWalletActive$: of(true),
+    });
+
+    it('fetches and stores the supported list on wallet activation', () => {
+      const currencies = ['usd', 'eur', 'gbp'];
+      const mockProvider = createMockProvider(
+        undefined,
+        undefined,
+        of(currencies),
+      );
+
+      testSideEffect(
+        fetchAndStoreSupportedCurrencies,
+        ({ expectObservable }) => ({
+          stateObservables: {},
+          dependencies: activeDeps(mockProvider),
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(a|)', {
+              a: tokenPricingActions.tokenPricing.setSupportedCurrencies(
+                currencies,
+              ),
+            });
+          },
+        }),
+      );
+    });
+
+    it('does not fetch while the wallet is inactive', () => {
+      const mockProvider = createMockProvider(
+        undefined,
+        undefined,
+        of(['usd']),
+      );
+
+      testSideEffect(fetchAndStoreSupportedCurrencies, ({ hot, flush }) => ({
+        stateObservables: {},
+        dependencies: {
+          tokenPricingProvider: mockProvider,
+          actions: tokenPricingActions,
+          logger,
+          isWalletActive$: hot('f', { f: false }),
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(mockProvider.fetchSupportedCurrencies).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('completes immediately when provider has no fetchSupportedCurrencies', () => {
+      const mockProvider = createMockProvider();
+
+      testSideEffect(
+        fetchAndStoreSupportedCurrencies,
+        ({ expectObservable }) => ({
+          stateObservables: {},
+          dependencies: activeDeps(mockProvider),
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('|');
+          },
+        }),
+      );
+    });
+
+    it('completes immediately when the provider is undefined', () => {
+      testSideEffect(
+        fetchAndStoreSupportedCurrencies,
+        ({ expectObservable }) => ({
+          stateObservables: {},
+          dependencies: {
+            tokenPricingProvider: undefined,
+            actions: tokenPricingActions,
+            logger,
+            isWalletActive$: of(true),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('|');
+          },
+        }),
+      );
+    });
+
+    it('logs the error after retries are exhausted', () => {
+      const loggerSpy = { ...logger, error: vi.fn() };
+      const mockProvider = createMockProvider(
+        undefined,
+        undefined,
+        throwError(() => new Error('Network error')),
+      );
+
+      testSideEffect(fetchAndStoreSupportedCurrencies, ({ flush }) => ({
+        stateObservables: {},
+        dependencies: activeDeps(mockProvider, loggerSpy),
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(loggerSpy.error).toHaveBeenCalledWith(
+            'Failed to fetch supported currencies from CoinGecko:',
+            expect.any(Error),
+          );
+        },
+      }));
+    });
+
+    it('refetches on each wallet activation', () => {
+      const mockProvider = createMockProvider(
+        undefined,
+        undefined,
+        of(['usd', 'eur']),
+      );
+
+      testSideEffect(fetchAndStoreSupportedCurrencies, ({ hot, flush }) => ({
+        stateObservables: {},
+        dependencies: {
+          tokenPricingProvider: mockProvider,
+          actions: tokenPricingActions,
+          logger,
+          // Two activations (e.g. unlock, background→foreground); the provider's
+          // TTL cache decides whether each hits the network.
+          isWalletActive$: hot('t 2200ms t', { t: true }),
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(mockProvider.fetchSupportedCurrencies).toHaveBeenCalledTimes(
+            2,
+          );
+        },
+      }));
+    });
+  });
+
+  describe('syncCurrencyChoiceExclusions', () => {
+    const flagWith = (exclusions: unknown) => ({
+      modules: [],
+      featureFlags: [
+        {
+          key: SUPPORTED_CURRENCIES_FEATURE_FLAG,
+          payload: { currency_choice_exclusions: exclusions },
+        },
+      ],
+    });
+    // selectNextFeatureFlags emits a { features } payload, unlike loadedFeatures.
+    const nextFlagWith = (exclusions: unknown) => ({
+      added: [],
+      removed: [],
+      updated: [],
+      features: [
+        {
+          key: SUPPORTED_CURRENCIES_FEATURE_FLAG,
+          payload: { currency_choice_exclusions: exclusions },
+        },
+      ],
+    });
+
+    it('mirrors the flag exclusions into the slice (lowercased)', () => {
+      testSideEffect(
+        syncCurrencyChoiceExclusions,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', { a: flagWith(['RUB', 'ves']) }),
+              selectNextFeatureFlags$: cold('a', { a: null }),
+            },
+          },
+          dependencies: { actions: tokenPricingActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([
+                'rub',
+                'ves',
+              ]),
+            });
+          },
+        }),
+      );
+    });
+
+    it('mirrors exclusions from a runtime flag refresh (selectNextFeatureFlags)', () => {
+      testSideEffect(
+        syncCurrencyChoiceExclusions,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', {
+                a: { modules: [], featureFlags: [] },
+              }),
+              selectNextFeatureFlags$: cold('-a', { a: nextFlagWith(['RUB']) }),
+            },
+          },
+          dependencies: { actions: tokenPricingActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('ab', {
+              a: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions(
+                [],
+              ),
+              b: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([
+                'rub',
+              ]),
+            });
+          },
+        }),
+      );
+    });
+
+    it('de-dupes an unchanged refresh and re-dispatches a changed one', () => {
+      testSideEffect(
+        syncCurrencyChoiceExclusions,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', { a: flagWith(['rub']) }),
+              selectNextFeatureFlags$: cold('-ab', {
+                a: nextFlagWith(['RUB']),
+                b: nextFlagWith(['eur']),
+              }),
+            },
+          },
+          dependencies: { actions: tokenPricingActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a-b', {
+              a: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([
+                'rub',
+              ]),
+              b: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([
+                'eur',
+              ]),
+            });
+          },
+        }),
+      );
+    });
+
+    it('emits an empty list when the flag is absent', () => {
+      testSideEffect(
+        syncCurrencyChoiceExclusions,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', {
+                a: { modules: [], featureFlags: [] },
+              }),
+              selectNextFeatureFlags$: cold('|'),
+            },
+          },
+          dependencies: { actions: tokenPricingActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions(
+                [],
+              ),
+            });
+          },
+        }),
+      );
+    });
+
+    it('emits an empty list when the payload is present but not an array', () => {
+      testSideEffect(
+        syncCurrencyChoiceExclusions,
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', { a: flagWith('rub') }),
+              selectNextFeatureFlags$: cold('|'),
+            },
+          },
+          dependencies: { actions: tokenPricingActions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions(
+                [],
+              ),
+            });
+          },
+        }),
+      );
+    });
+  });
+
+  describe('fallbackCurrencyWhenUnsupported', () => {
+    const fallbackAction =
+      tokenPricingActions.tokenPricing.setCurrencyPreference(
+        DEFAULT_CURRENCY_PREFERENCE,
+      );
+
+    // The fall-back decision lives in selectCurrencyFallback (unit tested in
+    // selectors.test.ts); here we drive it directly and assert the side-effect's
+    // action + wallet-active gating.
+    const run = (
+      decision: CurrencyFallbackDecision,
+      activeMarble: string,
+      assert: (emissions: unknown[]) => void,
+    ) => {
+      testSideEffect(
+        fallbackCurrencyWhenUnsupported,
+        ({ cold, hot, flush }) => ({
+          stateObservables: {
+            tokenPricing: {
+              selectCurrencyFallback$: cold('a', { a: decision }),
+            },
+          },
+          dependencies: {
+            actions: tokenPricingActions,
+            isWalletActive$: hot(activeMarble, { t: true, f: false }),
+          },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            assert(emissions);
+          },
+        }),
+      );
+    };
+
+    it('switches to default when a fallback is required', () => {
+      run({ fallback: true }, 't', emissions => {
+        expect(emissions).toEqual([fallbackAction]);
+      });
+    });
+
+    it('does nothing when the decision is no-fallback', () => {
+      run({ fallback: false }, 't', emissions => {
+        expect(emissions).toEqual([]);
+      });
+    });
+
+    it('does NOT switch while the wallet is inactive', () => {
+      run({ fallback: true }, 'f', emissions => {
+        expect(emissions).toEqual([]);
+      });
+    });
+
+    it('switches once the wallet becomes active', () => {
+      run({ fallback: true }, 'f-t', emissions => {
+        expect(emissions).toEqual([fallbackAction]);
+      });
     });
   });
 });

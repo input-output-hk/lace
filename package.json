@@ -7,16 +7,17 @@
     "configs/*",
     "packages/module/*",
     "packages/contract/*",
-    "packages/lib/*",
-    "packages/sdk/*"
+    "packages/lib/*"
   ],
   "scripts": {
     "build": "nx run-many --target=build",
     "check": "run-s check:*",
+    "check:extension-locales": "node scripts/validate-locales.mjs",
     "check:format": "prettier --check .",
+    "check:i18n-provenance": "node scripts/check-i18n-provenance.js",
     "check:lint": "nx run-many --target=lint --max-warnings=0",
-    "check:locales": "node scripts/validate-locales.mjs",
     "check:package-json": "eslint '**/package.json'",
+    "check:shared-lib-purity": "node scripts/check-shared-lib-purity.mjs",
     "check:types": "nx run-many --target=type-check-src,type-check-test",
     "dev": "nx run-many --target=dev",
     "docs:contract": "babel-node --config-file=./scripts/babel.config.json --extensions=\".ts,.tsx\"  scripts/generate-contract-diagram.ts",
@@ -43,6 +44,12 @@
     ]
   },
   "overrides": {
+    "websocket-driver": "0.7.5",
+    "path-to-regexp@0.1.12": "0.1.13",
+    "path-to-regexp@8.3.0": "8.4.2",
+    "yaml@1.10.2": "1.10.3",
+    "morgan": "1.11.0",
+    "uuid@13.0.0": "13.0.2",
     "react-native-ble-plx": "3.5.1",
     "libsodium-sumo": "0.7.10",
     "libsodium-wrappers-sumo": "0.7.10",
@@ -51,36 +58,83 @@
     "react-is": "19.1.0",
     "react-remove-scroll": "2.6.3",
     "koa": "3.1.2",
-    "serialize-javascript": "7.0.4",
+    "serialize-javascript": "7.0.5",
     "tar-fs": "3.1.2",
-    "flatted": "3.4.1",
-    "fast-xml-parser": "5.5.6",
+    "flatted": "3.4.2",
+    "fast-xml-parser": "5.7.0",
     "minimatch": "9.0.7",
     "eslint-plugin-import": {
       "minimatch": "3.1.5"
     },
-    "undici": "6.24.1",
+    "undici": "6.27.0",
     "cheerio": {
-      "undici": "7.24.4"
+      "undici": "7.28.0"
     },
     "testcontainers": {
-      "undici": "7.24.4"
+      "undici": "7.28.0"
     },
     "cross-spawn": "7.0.6",
-    "tar": "7.5.11"
+    "tar": "7.5.16",
+    "protobufjs": "7.6.3",
+    "shell-quote": "1.8.4",
+    "tmp": "0.2.7",
+    "postcss": "8.5.10",
+    "qs": "6.15.3",
+    "form-data@^4": "4.0.6",
+    "@ledgerhq/react-native-hw-transport-ble": {
+      "uuid": "^11.1.1"
+    },
+    "xcode": {
+      "uuid": "^11.1.1"
+    },
+    "jayson": {
+      "uuid": "^11.1.1"
+    },
+    "@tootallnate/once": "2.0.1",
+    "@xmldom/xmldom": "0.8.13",
+    "@module-federation/dts-plugin": {
+      "ws": "8.21.0"
+    },
+    "vite": {
+      "esbuild": "0.28.1"
+    },
+    "tsx": {
+      "esbuild": "0.28.1"
+    },
+    "@nx/js": {
+      "picomatch": "4.0.4"
+    },
+    "@nx/rollup": {
+      "picomatch": "4.0.4"
+    },
+    "@nx/vite": {
+      "picomatch": "4.0.4"
+    },
+    "@nx/workspace": {
+      "picomatch": "4.0.4"
+    },
+    "@cardano-sdk/core": {
+      "ip-address": "10.2.0"
+    },
+    "@cardano-sdk/wallet": {
+      "uuid": "^11.1.1"
+    },
+    "@sentry/webpack-plugin": {
+      "uuid": "^11.1.1"
+    }
   },
   "dependencies": {
     "@cardano-foundation/ledgerjs-hw-app-cardano": "^7.1.4",
-    "@cardano-sdk/core": "0.46.12",
-    "@cardano-sdk/crypto": "0.4.5",
-    "@cardano-sdk/hardware-ledger": "0.16.23",
-    "@cardano-sdk/hardware-trezor": "0.7.33",
-    "@cardano-sdk/key-management": "0.29.13",
-    "@cardano-sdk/tx-construction": "0.28.11",
-    "@cardano-sdk/util": "0.17.1",
-    "@cardano-sdk/util-dev": "0.25.32",
-    "@cardano-sdk/util-rxjs": "0.9.31",
-    "@cardano-sdk/wallet": "0.54.4",
+    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/crypto": "0.4.7",
+    "@cardano-sdk/hardware-ledger": "0.16.28",
+    "@cardano-sdk/hardware-trezor": "0.7.38",
+    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/tx-construction": "0.29.0",
+    "@cardano-sdk/util": "0.17.2",
+    "@cardano-sdk/util-dev": "0.25.37",
+    "@cardano-sdk/util-rxjs": "0.9.36",
+    "@cardano-sdk/wallet": "0.55.0",
     "@expo/metro-runtime": "^6.1.0",
     "@hugeicons-pro/core-solid-rounded": "^3.1.0",
     "@hugeicons-pro/core-stroke-rounded": "^3.1.0",
@@ -142,7 +196,7 @@
     "tslib": "^2.3.0",
     "type-fest": "^4.41.0",
     "typescript-eslint": "^8.46.2",
-    "uuid": "^9.0.1",
+    "uuid": "^11.1.1",
     "webextension-polyfill": "~0.12.0"
   },
   "devDependencies": {
@@ -167,7 +221,7 @@
     "@nx/web": "22.5.4",
     "@nx/webpack": "22.5.4",
     "@nx/workspace": "22.5.4",
-    "@redux-devtools/cli": "4.0.4",
+    "@redux-devtools/cli": "5.0.0",
     "@redux-devtools/remote": "^0.9.5",
     "@reduxjs/toolkit": "^2.2.2",
     "@storybook/icons": "^2.0.1",
@@ -194,7 +248,6 @@
     "@wdio/config": "9.27.0",
     "@wdio/cucumber-framework": "9.27.0",
     "@wdio/globals": "9.27.0",
-    "@wdio/lighthouse-service": "9.27.0",
     "@wdio/local-runner": "9.27.0",
     "@wdio/spec-reporter": "9.27.0",
     "@wdio/types": "9.27.0",

@@ -1,8 +1,8 @@
-import { senderOrigin } from '@lace-sdk/dapp-connector';
+import { senderOrigin } from '@lace-lib/dapp-connector';
 import {
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
@@ -38,8 +38,8 @@ import type {
   AnyAccount,
   AnyWallet,
 } from '@lace-contract/wallet-repo';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
-import type { WithLogger } from '@lace-sdk/util';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
+import type { WithLogger } from '@lace-lib/util';
 import type { Subject } from 'rxjs';
 import type { Runtime } from 'webextension-polyfill';
 

@@ -1,6 +1,6 @@
 import { testSideEffect } from '@lace-lib/util-dev';
 import { BehaviorSubject, NEVER, Subject, of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   authenticationPromptActions as actions,
@@ -224,6 +224,16 @@ describe('authenticateSideEffect', () => {
 });
 
 describe('makeAuthenticationPromptVerifying', () => {
+  // verifiedPassword stamps `at: Date.now()` in its prepare callback, which the
+  // RxJS TestScheduler's virtual clock does not control. Freeze the wall clock
+  // so the expected action and the emitted action sample the same instant.
+  beforeEach(() => {
+    vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('noop when not in verifying state', () => {
     const { accessSecretFromAuthFlow } = getTestAuthSecretDeps();
 
@@ -251,6 +261,7 @@ describe('makeAuthenticationPromptVerifying', () => {
                   success: true,
                 } satisfies AuthenticationPromptSliceStateCompleting,
               }),
+              selectFailedPasswordAttempts$: cold('a', { a: 0 }),
             },
           },
         };
@@ -291,6 +302,7 @@ describe('makeAuthenticationPromptVerifying', () => {
                 status: 'VerifyingPassword',
               } satisfies AuthenticationPromptSliceStateVerifying,
             }),
+            selectFailedPasswordAttempts$: cold('a', { a: 0 }),
           },
         },
       }),
@@ -327,6 +339,7 @@ describe('makeAuthenticationPromptVerifying', () => {
                 status: 'VerifyingPassword',
               } satisfies AuthenticationPromptSliceStateVerifying,
             }),
+            selectFailedPasswordAttempts$: cold('a', { a: 0 }),
           },
         },
       }),
@@ -375,6 +388,7 @@ describe('makeAuthenticationPromptVerifying', () => {
                   success: true,
                 } satisfies AuthenticationPromptSliceStateCompleting,
               }),
+              selectFailedPasswordAttempts$: cold('a', { a: 0 }),
             },
           },
         };

@@ -8,7 +8,7 @@ import { type TextInput as RNTextInputType } from 'react-native';
 import { spacing } from '../../../design-tokens';
 import { CustomTextInput } from '../../atoms/customTextInput/customTextInput';
 
-import { useFieldContext } from './mnemonicForm';
+import { useFieldContext } from './mnemonicFormContexts';
 
 export type MnemonicTextInputProps = React.ComponentProps<
   typeof CustomTextInput

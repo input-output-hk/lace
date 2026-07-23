@@ -22,7 +22,7 @@ import type {
   InMemoryWallet,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 /**
  * Signer factory for {@link WalletType.InMemory} Cardano accounts.

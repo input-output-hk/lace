@@ -8,23 +8,18 @@ import {
 import type { TokenPriceId } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 
-const getTokenPriceId = (token: Token): TokenPriceId => {
-  const identifier = getTokenIdentifier(token);
-  return BitcoinTokenPriceId(identifier);
-};
+const getTokenPriceId = (token: Token): TokenPriceId =>
+  BitcoinTokenPriceId(token.tokenId);
 
 const getTokenPriceRequest = (
   token: Token,
   fiatCurrency: string,
-): TokenPriceRequest => {
-  const identifier = getTokenIdentifier(token);
-  return {
-    priceId: BitcoinTokenPriceId(identifier),
-    blockchain: 'Bitcoin',
-    identifier,
-    fiatCurrency,
-  };
-};
+): TokenPriceRequest => ({
+  priceId: BitcoinTokenPriceId(token.tokenId),
+  blockchain: 'Bitcoin',
+  identifier: getTokenIdentifier(token),
+  fiatCurrency,
+});
 
 export const createTokenIdMapper = (): TokenIdMapper => ({
   blockchainName: 'Bitcoin',

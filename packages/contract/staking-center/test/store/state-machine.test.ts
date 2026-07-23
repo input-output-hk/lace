@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
+import { BigNumber } from '@lace-lib/util';
 import { makeStateMachineExecutor } from '@lace-lib/util-dev';
-import { BigNumber } from '@lace-sdk/util';
 import { describe, expect, it, vi } from 'vitest';
 
 import { delegationFlowMachine } from '../../src/store/state-machine';

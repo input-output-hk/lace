@@ -1,5 +1,5 @@
+import { BigNumber } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber } from '@lace-sdk/util';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

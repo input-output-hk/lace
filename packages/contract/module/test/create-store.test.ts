@@ -143,6 +143,12 @@ describe('createStore', () => {
     }
   });
 
+  it('returns a reducer-initial snapshot of every registered slice', async () => {
+    const { initialState } = await makeStore([]);
+
+    expect(initialState).toHaveProperty('test', 'state');
+  });
+
   describe('createStateObservables', () => {
     interface User {
       id: string;

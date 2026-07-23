@@ -14,12 +14,20 @@ import { StyleSheet, View } from 'react-native';
 
 import ShieldExclamation from '../assets/icons/shield-exclamation.component.svg';
 
+import { MidnightAccountSelector } from './midnight-account-selector';
+
+import type { AnyAccount } from '@lace-contract/wallet-repo';
+
 export interface MidnightDappConnectProps {
   onAuthorize: () => void;
   onCancel: () => void;
   imageUrl?: string;
   name: string;
   url: string;
+  accounts: AnyAccount[];
+  walletNameByWalletId: Record<string, string>;
+  selectedAccount: AnyAccount | null;
+  onSelectAccount: (account: AnyAccount) => void;
 }
 
 const styles = StyleSheet.create({
@@ -30,6 +38,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.M,
   },
   section: { marginVertical: spacing.M },
+  descriptionHeading: { marginTop: spacing.M, marginBottom: spacing.S },
 });
 
 const PERMISSION_KEYS = [
@@ -44,6 +53,10 @@ export const MidnightDappConnect = ({
   imageUrl,
   name,
   url,
+  accounts,
+  walletNameByWalletId,
+  selectedAccount,
+  onSelectAccount,
 }: MidnightDappConnectProps) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
@@ -55,9 +68,11 @@ export const MidnightDappConnect = ({
 
   return (
     <DappConnectorLayoutV2
+      fillViewport
       primaryButton={{
         label: t('dapp-connector.connect-dapp.authorize'),
         action: onAuthorize,
+        disabled: !selectedAccount,
       }}
       secondaryButton={{
         label: t('dapp-connector.connect-dapp.cancel'),
@@ -67,6 +82,14 @@ export const MidnightDappConnect = ({
         <Text.M>{t('dapp-connector.connect-dapp.title')}</Text.M>
       </View>
       <DappInfoCard imageUrl={imageUrl} name={name} url={url} />
+      <View style={styles.section}>
+        <MidnightAccountSelector
+          accounts={accounts}
+          walletNameByWalletId={walletNameByWalletId}
+          selectedAccount={selectedAccount}
+          onSelectAccount={onSelectAccount}
+        />
+      </View>
       <Row
         alignItems="flex-start"
         gap={spacing.S}
@@ -75,11 +98,11 @@ export const MidnightDappConnect = ({
         <ShieldExclamation />
         <Text.S>{t('dapp-connector.connect-dapp.info')}</Text.S>
       </Row>
-      <View style={styles.section}>
-        <Text.M testID="midnight-dapp-connect-description-heading">
-          {t('dapp-connector.connect-dapp.description-heading')}
-        </Text.M>
-      </View>
+      <Text.M
+        style={styles.descriptionHeading}
+        testID="midnight-dapp-connect-description-heading">
+        {t('dapp-connector.connect-dapp.description-heading')}
+      </Text.M>
       <Column gap={spacing.S} testID="midnight-dapp-connect-description-list">
         {PERMISSION_KEYS.map((key, index) => (
           <Row

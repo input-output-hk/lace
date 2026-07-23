@@ -2,11 +2,11 @@ import { FEATURE_FLAGS_CHANNEL } from '@lace-contract/dapp-connector';
 import {
   authenticatorApiProperties,
   injectGlobal,
-} from '@lace-sdk/dapp-connector';
+} from '@lace-lib/dapp-connector';
 import {
   consumeRemoteApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 
 import { APIError } from '../common/api-error';
 
@@ -24,8 +24,8 @@ import type {
   FeatureFlagProbe,
   InjectDependencies,
 } from '@lace-contract/dapp-connector';
-import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 
 /**
  * Remote API properties configuration for CIP-30 wallet methods.

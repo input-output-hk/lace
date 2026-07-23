@@ -1,4 +1,4 @@
-import { type Milliseconds } from '@lace-sdk/util';
+import { type Milliseconds } from '@lace-lib/util';
 
 /**
  * Defines the configuration options for a rate limiter.

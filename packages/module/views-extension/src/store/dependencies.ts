@@ -6,7 +6,7 @@ import {
   consumeMessengerRemoteApi,
   generalizeBackgroundMessenger,
   getBackgroundMessenger,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import {
   catchError,
   combineLatest,
@@ -28,7 +28,7 @@ import type { ExtensionViewApi } from '../messaging';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { View } from '@lace-contract/views';
 import type { OpenViewPayload, ViewLocation } from '@lace-contract/views';
-import type { MinimalPort } from '@lace-sdk/extension-messaging';
+import type { MinimalPort } from '@lace-lib/extension-messaging';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 import type { Runtime } from 'webextension-polyfill';

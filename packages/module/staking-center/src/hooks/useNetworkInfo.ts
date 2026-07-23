@@ -1,5 +1,4 @@
-import { formatEpochEnd } from '@lace-lib/util-render';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useLaceSelector, useSearchStakePools } from '../hooks';
 import { calculateEpochEnd, calculateEpochFromSlot } from '../utils/epochUtils';
@@ -21,26 +20,6 @@ export const useNetworkInfo = (): NetworkInfoCardProps => {
     return calculateEpochEnd(currentEpoch, eraSummaries).getTime();
   }, [tip, eraSummaries]);
 
-  const [endEpochValue, setEndEpochValue] = useState<string | undefined>(() =>
-    epochEndTimestamp !== undefined
-      ? formatEpochEnd(epochEndTimestamp)
-      : undefined,
-  );
-
-  useEffect(() => {
-    if (epochEndTimestamp === undefined) {
-      setEndEpochValue(undefined);
-      return;
-    }
-    setEndEpochValue(formatEpochEnd(epochEndTimestamp));
-    const interval = setInterval(() => {
-      setEndEpochValue(formatEpochEnd(epochEndTimestamp));
-    }, 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, [epochEndTimestamp]);
-
   return useMemo((): NetworkInfoCardProps => {
     const currentEpochValue =
       !tip || !eraSummaries
@@ -57,13 +36,18 @@ export const useNetworkInfo = (): NetworkInfoCardProps => {
       stakedValue = `${formatPercentages(stakedPercentage)} %`;
     }
 
-    return { currentEpochValue, endEpochValue, totalPoolsValue, stakedValue };
+    return {
+      currentEpochValue,
+      epochEndTimestamp,
+      totalPoolsValue,
+      stakedValue,
+    };
   }, [
     tip,
     eraSummaries,
     networkData,
     isLoading,
     totalPoolsCount,
-    endEpochValue,
+    epochEndTimestamp,
   ]);
 };

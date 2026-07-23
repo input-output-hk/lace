@@ -78,32 +78,38 @@ export const useCustomizeAccount = (
     NavigationControls.navigate(SheetRoutes.CustomizeAccountSuccess);
   }, [account, accountId, nameValue, trackEvent, updateAccount, walletId]);
 
-  const onCancel = () => {
+  const onCancel = useCallback(() => {
     resetForm();
     NavigationControls.closeSheet();
-  };
+  }, [resetForm]);
 
-  const onSuccessConfirm = () => {
+  const onSuccessConfirm = useCallback(() => {
     NavigationControls.closeSheet();
-  };
+  }, []);
 
   useEffect(() => {
     resetForm();
   }, [resetForm]);
 
-  const actions = {
-    onSubmit: handleConfirm,
-    onCancel,
-    onChangeText: setNameValue,
-    onSuccessConfirm,
-  };
+  const actions = useMemo(
+    () => ({
+      onSubmit: handleConfirm,
+      onCancel,
+      onChangeText: setNameValue,
+      onSuccessConfirm,
+    }),
+    [handleConfirm, onCancel, onSuccessConfirm],
+  );
 
-  const copies = {
-    headerTitle,
-    inputLabel,
-    secondaryButtonLabel,
-    primaryButtonLabel,
-  };
+  const copies = useMemo(
+    () => ({
+      headerTitle,
+      inputLabel,
+      secondaryButtonLabel,
+      primaryButtonLabel,
+    }),
+    [headerTitle, inputLabel, secondaryButtonLabel, primaryButtonLabel],
+  );
 
   const utils = {
     nameValue,

@@ -1,4 +1,4 @@
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 
 import type {
   AddressValidationResult,

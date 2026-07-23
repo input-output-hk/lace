@@ -268,6 +268,12 @@ const SwapSelectToken = ({
 
   return (
     <GenericFlashList<DisplayToken>
+      // Key by length on web so a search-filter shrink can't leave FlashList's
+      // recycler holding indices past the new layout array (getLayout throws
+      // "index out of bounds"). `displayTokens` is fully materialized, so length
+      // is stable during scroll and only churns on filter/async-token arrival.
+      // Native handles remounting itself (stable key). See commit body.
+      key={isWeb ? `swap-select-token-${displayTokens.length}` : undefined}
       data={displayTokens}
       renderItem={renderItem}
       keyExtractor={item => item.tokenId}

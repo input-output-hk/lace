@@ -8,6 +8,7 @@ import {
 import accountManagement from '@lace-module/account-management';
 import adaHandle from '@lace-module/ada-handle';
 import addressBook from '@lace-module/address-book';
+import airGappedQrExchangeHost from '@lace-module/air-gapped-qr-exchange-host';
 import analyticsDev from '@lace-module/analytics-dev';
 import analyticsPosthog from '@lace-module/analytics-posthog';
 import appActivityWeb from '@lace-module/app-activity-web';
@@ -23,6 +24,7 @@ import blockchainCardanoUI from '@lace-module/blockchain-cardano-ui';
 import blockchainMidnight from '@lace-module/blockchain-midnight';
 import cardanoCollateralFlow from '@lace-module/cardano-collateral-flow';
 import blockfrostProvider from '@lace-module/cardano-provider-blockfrost';
+import cardanoSync from '@lace-module/cardano-sync';
 import cryptoCardanoSdk from '@lace-module/crypto-cardano-sdk';
 import dappConnectorCardano from '@lace-module/dapp-connector-cardano';
 import dappConnectorExtension from '@lace-module/dapp-connector-extension';
@@ -52,7 +54,9 @@ import testApi from '@lace-module/test-api';
 import tokenPricingCoinGecko from '@lace-module/token-pricing-coingecko';
 import vaultInMemory from '@lace-module/vault-in-memory';
 import vaultInMemoryUI from '@lace-module/vault-in-memory-ui';
+import vaultKeystone from '@lace-module/vault-keystone';
 import vaultLedger from '@lace-module/vault-ledger';
+import vaultSeedSigner from '@lace-module/vault-seed-signer';
 import vaultTrezor from '@lace-module/vault-trezor';
 import views from '@lace-module/views-extension';
 
@@ -74,6 +78,7 @@ export const allModules: LaceModule[] = [
   authenticationPromptUiV2Extension,
   blockchainCardano,
   cardanoCollateralFlow,
+  cardanoSync,
   blockchainBitcoin,
   blockfrostProvider,
   cryptoCardanoSdk,
@@ -87,6 +92,7 @@ export const allModules: LaceModule[] = [
   onboarding,
   posthogExtension,
   secureStore,
+  airGappedQrExchangeHost,
   sendFlow,
   storageExtension,
   testApi,
@@ -97,6 +103,8 @@ export const allModules: LaceModule[] = [
   vaultInMemoryUI,
   vaultLedger,
   vaultTrezor,
+  vaultSeedSigner,
+  vaultKeystone,
   views,
   accountManagement,
   blockchainBitcoinUI,

@@ -1,11 +1,11 @@
-import { RemoteApiPropertyType } from '@lace-sdk/extension-messaging';
+import { RemoteApiPropertyType } from '@lace-lib/extension-messaging';
 
 import type {
   CallHistoryMethodPayload,
   HistoryMethod,
   ViewLocation,
 } from '@lace-contract/views';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 import type { Observable } from 'rxjs';
 
 export interface ExtensionViewApi {

@@ -1,6 +1,6 @@
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { WalletId } from '@lace-contract/wallet-repo';
-import type { ByteArray } from '@lace-sdk/util';
+import type { ByteArray } from '@lace-lib/util';
 
 export type RequestRecoveryPhraseParams = {
   walletId: WalletId;

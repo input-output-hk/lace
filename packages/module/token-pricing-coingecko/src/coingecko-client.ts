@@ -4,8 +4,8 @@ import { COINGECKO_ENDPOINTS } from './const';
 import {
   buildPriceUrl,
   extractPriceData,
-  getSupportedCurrency,
   getTimeRangeParams,
+  normalizeCurrency,
 } from './utils';
 
 import type { CoinGeckoCoinsList, CoinGeckoPriceData } from './types';
@@ -29,6 +29,21 @@ type FetchPriceHistoryParams = {
 };
 
 export const coingeckoClient = {
+  fetchSupportedCurrencies: async (baseUrl: string): Promise<string[]> => {
+    const url = `${baseUrl}${COINGECKO_ENDPOINTS.SUPPORTED_VS_CURRENCIES}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        throw new Error('CoinGecko rate limit exceeded');
+      }
+      throw new Error(`CoinGecko API error: ${response.status}`);
+    }
+
+    return (await response.json()) as string[];
+  },
+
   fetchCoinsList: async (baseUrl: string): Promise<CoinGeckoCoinsList> => {
     const url = `${baseUrl}${COINGECKO_ENDPOINTS.COINS_LIST}?include_platform=true`;
 
@@ -56,9 +71,8 @@ export const coingeckoClient = {
     // Fetch each token individually for better proxy caching
     // This ensures that when one token's price changes, we don't invalidate the cache for all tokens
     const fetchPromises = coinGeckoIds.map(async coinId => {
-      const supportedCurrency = getSupportedCurrency(currency);
       const url = buildPriceUrl(baseUrl, coinId, {
-        currency: supportedCurrency,
+        currency,
         includeUsd: true,
       });
 
@@ -110,7 +124,9 @@ export const coingeckoClient = {
         ':id',
         coinId,
       );
-      const url = `${baseUrl}${endpoint}?vs_currency=${currency.toLowerCase()}&from=${from}&to=${to}`;
+      const url = `${baseUrl}${endpoint}?vs_currency=${normalizeCurrency(
+        currency,
+      )}&from=${from}&to=${to}`;
 
       const response = await fetch(url);
 

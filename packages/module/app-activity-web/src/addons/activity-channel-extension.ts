@@ -8,13 +8,13 @@ import {
   consumeRemoteApi,
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 
 const activityChannelConfig = {
   baseChannel: ChannelName('activity-channel'),

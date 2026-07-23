@@ -6,7 +6,7 @@ import {
   BitcoinNetworkId,
 } from '@lace-contract/bitcoin-context';
 import { WalletId } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it } from 'vitest';
 
@@ -90,8 +90,6 @@ describe('blockchain-bitcoin', () => {
                   'xpub6D6iVRqEpdW2Xr8p4aDf5A1kdjJAvSpSV7FY36GpjF3ybci3epuzvRiKyCG8uiBiepqnrmjWJaAss8UUEmu3Ti6Po5QJJmxJZKAFUcrjzUS',
                 taproot:
                   'xpub6Br3nT6tDyKRbx9MSUudKzha1ZZxy7BH5P9YgDADJGeZqkViyDx33NR84d8oidkpEUxCo2fyQ1WrezofdeKmntAgJuWzvfbFNb8XKTi2s54',
-                electrumNativeSegWit:
-                  'xpub6CBMUK6f1kHkHuqnW3Dq5L6LY45uQ4Z3Rp3FMjmwgKoJm5TCLSkT9CuRQWPurAcLU8p8frx2btQxJR3U3A3Qiu4aFE9ZnuX5RybY7uqaPdb',
               },
             },
             metadata: {
@@ -116,8 +114,6 @@ describe('blockchain-bitcoin', () => {
                   'xpub6CTkaGL7rFuS3iRzZAJvPGgdWwmRuvdUn1DAkkJLKwVGsDrchN2JgEKdvsZ5BXXeEumkLLU1TSqoaZYBpDRGgDhdAmUMBebd4JETJLpeFcN',
                 taproot:
                   'xpub6CVn6B8AxQFEqoTYSStLgmvosMgAKp2qCdNudKpm6bBssoWsJDAX73cBGfXHKAc9twc8LuH6DBqMw3XKeU3VyjSYnQhJXhPnFDEw7fDYrsB',
-                electrumNativeSegWit:
-                  'xpub6CC9UfdP3FecuyQhaRNUf488cukmELm1SLW2BQDJwP5kxLqZ2JWcuH9CswC4x2CTPNLBMeXCFSN7TmyJyHYHMgZR156WqYfDwi5E4yE7Zis',
               },
             },
             metadata: {
@@ -167,8 +163,6 @@ describe('blockchain-bitcoin', () => {
               'xpub6CTkaGL7rFuS3iRzZAJvPGgdWwmRuvdUn1DAkkJLKwVGsDrchN2JgEKdvsZ5BXXeEumkLLU1TSqoaZYBpDRGgDhdAmUMBebd4JETJLpeFcN',
             taproot:
               'xpub6CVn6B8AxQFEqoTYSStLgmvosMgAKp2qCdNudKpm6bBssoWsJDAX73cBGfXHKAc9twc8LuH6DBqMw3XKeU3VyjSYnQhJXhPnFDEw7fDYrsB',
-            electrumNativeSegWit:
-              'xpub6CC9UfdP3FecuyQhaRNUf488cukmELm1SLW2BQDJwP5kxLqZ2JWcuH9CswC4x2CTPNLBMeXCFSN7TmyJyHYHMgZR156WqYfDwi5E4yE7Zis',
           },
         },
         metadata: {

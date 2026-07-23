@@ -1,11 +1,11 @@
 import { BitcoinNetworkId } from '@lace-contract/bitcoin-context';
-import { Err, None, Ok, Some } from '@lace-sdk/util';
+import { Err, None, Ok, Some } from '@lace-lib/util';
 
 import { AddressValidationResult, validateBitcoinAddress } from './common';
 
 import type { BitcoinNetwork } from '@lace-contract/bitcoin-context';
 import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { Option, Result } from '@lace-sdk/util';
+import type { Option, Result } from '@lace-lib/util';
 
 /**
  * Returns a human-readable error message based on the address validation result.

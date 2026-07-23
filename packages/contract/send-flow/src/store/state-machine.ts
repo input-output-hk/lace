@@ -1,5 +1,5 @@
+import { BigNumber } from '@lace-lib/util';
 import { createStateMachine } from '@lace-lib/util-store';
-import { BigNumber } from '@lace-sdk/util';
 
 import { isFormCorrect } from './is-form-correct';
 import {

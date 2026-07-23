@@ -17,13 +17,11 @@ import {
 } from '../utils';
 
 import { useLaceSelector } from './storeHooks';
-import {
-  useDappTxInspection,
-  type TokenTransferValue,
-} from './useDappTxInspection';
+import { useDappTxInspection } from './useDappTxInspection';
 
 import type { TransactionInfo } from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 import type { AccountId } from '@lace-contract/wallet-repo';

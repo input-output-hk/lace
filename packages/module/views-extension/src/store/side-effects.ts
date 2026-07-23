@@ -1,5 +1,5 @@
 import { toEmpty } from '@cardano-sdk/util-rxjs';
-import { RemoteApiShutdownError } from '@lace-sdk/extension-messaging';
+import { RemoteApiShutdownError } from '@lace-lib/extension-messaging';
 import {
   EMPTY,
   catchError,

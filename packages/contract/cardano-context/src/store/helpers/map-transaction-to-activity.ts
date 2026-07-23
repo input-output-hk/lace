@@ -5,7 +5,7 @@ import {
 import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, Err, Ok, type Result, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Err, Ok, type Result, Timestamp } from '@lace-lib/util';
 import { catchError, from, mergeMap, of } from 'rxjs';
 
 import {
@@ -15,6 +15,7 @@ import {
 } from '../../security';
 
 import { assetProvider } from './get-fallback-asset';
+import { classifyTxAsNightDesignation } from './night-designation-script-addresses';
 
 import type {
   CardanoPaymentAddress,
@@ -38,6 +39,7 @@ export type MapTransactionToActivityParams = {
   protocolParameters: RequiredProtocolParameters;
   resolveInput: Cardano.ResolveInput;
   logger: Logger;
+  isNightDesignationEnabled: boolean;
 };
 
 /**
@@ -67,6 +69,7 @@ export const mapTransactionToActivity = ({
   protocolParameters,
   resolveInput,
   logger,
+  isNightDesignationEnabled,
 }: MapTransactionToActivityParams): Observable<Result<Activity, Error>> => {
   const txSummaryInspector = createTxInspector({
     summary: transactionSummaryInspector({
@@ -87,9 +90,41 @@ export const mapTransactionToActivity = ({
     }),
   });
 
+  // cNIGHT DUST designation detection — script-address registry match
+  // (deterministic, read-only against the tx body). The action variant
+  // (designate / update / deregister) is inferred from the mint entry +
+  // script-UTxO presence and carried on
+  // `blockchainSpecific.Cardano.nightDesignation` so the UI doesn't need
+  // to re-parse the tx CBOR. The target dust pubkey isn't extracted
+  // on-chain (it needs inline-datum PlutusData decoding); the
+  // pending-activity side-effect supplies it from the slice state for
+  // the pre-confirmation surface.
+  const nightDesignationClassification = classifyTxAsNightDesignation(
+    txDetails.body.inputs,
+    txDetails.body.outputs,
+    txDetails.body.mint,
+  );
+
   return from(txSummaryInspector(txDetails)).pipe(
     mergeMap(async ({ summary }) => {
-      // See src/security/exploits/deterministicNonce202606/ for what this is checking.
+      const tokenBalanceChanges = [
+        ...Array.from(summary.assets.entries()).map(([assetId, assetInfo]) => ({
+          tokenId: TokenId(assetId),
+          amount: BigNumber(assetInfo.amount),
+        })),
+        // TODO: handle different networks and ADA token id correctly
+        // https://input-output.atlassian.net/browse/LW-13023
+        {
+          tokenId: TokenId('lovelace'),
+          amount: BigNumber(summary.coins),
+        },
+      ];
+
+      // Signature-based compromise detection (deterministicNonce202606) runs for
+      // EVERY tx regardless of classification — the check keys off the witness
+      // signature, not send/receive semantics, so a designation signed by a
+      // compromised key must still be flagged. See
+      // src/security/exploits/deterministicNonce202606/ for what this checks.
       const ownKeyHashes = computeOwnKeyHashes(accountAddresses, rewardAccount);
       const ownWitnesses = filterOwnWitnesses(
         txDetails.witness.signatures,
@@ -100,37 +135,48 @@ export const mapTransactionToActivity = ({
           deterministicNonce202606.txIsCompromised(txDetails.id, signature),
         ),
       );
-      const isSecondFi202606Compromised = compromiseChecks.some(Boolean);
+      const security = {
+        exploits: {
+          deterministicNonce202606: compromiseChecks.some(Boolean),
+        },
+      };
+
+      if (
+        isNightDesignationEnabled &&
+        nightDesignationClassification !== undefined
+      ) {
+        return Ok({
+          accountId,
+          activityId: txDetails.id,
+          timestamp: Timestamp(txDetails.blockTime * 1000),
+          tokenBalanceChanges,
+          type: ActivityType.NightDesignation,
+          blockchainSpecific: {
+            Cardano: {
+              consumedInputs: [],
+              producedOutputs: [],
+              slot: txDetails.blockHeader.slot,
+              nightDesignation: {
+                action: nightDesignationClassification.action,
+              },
+              security,
+            },
+          },
+        });
+      }
 
       return Ok({
         accountId,
         activityId: txDetails.id,
         timestamp: Timestamp(txDetails.blockTime * 1000),
-        tokenBalanceChanges: [
-          ...Array.from(summary.assets.entries()).map(
-            ([assetId, assetInfo]) => ({
-              tokenId: TokenId(assetId),
-              amount: BigNumber(assetInfo.amount),
-            }),
-          ),
-          // TODO: handle different networks and ADA token id correctly
-          // https://input-output.atlassian.net/browse/LW-13023
-          {
-            tokenId: TokenId('lovelace'),
-            amount: BigNumber(summary.coins),
-          },
-        ],
+        tokenBalanceChanges,
         type: summary.coins > 0 ? ActivityType.Receive : ActivityType.Send,
         blockchainSpecific: {
           Cardano: {
             consumedInputs: [],
             producedOutputs: [],
             slot: txDetails.blockHeader.slot,
-            security: {
-              exploits: {
-                deterministicNonce202606: isSecondFi202606Compromised,
-              },
-            },
+            security,
           },
         },
       });

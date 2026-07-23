@@ -6,11 +6,11 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/util": "0.17.1",
+    "@cardano-sdk/util": "0.17.2",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

@@ -1,11 +1,13 @@
 import { util } from '@cardano-sdk/key-management';
+import { setRestoreWalletSecrets } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
+import { WalletId } from '@lace-contract/wallet-repo';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { useCallback } from 'react';
 
-import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
+import { useLaceSelector, useRestoreWalletSecrets } from '../../hooks';
 
-import { computeWalletId, parseRecoveryPhrase } from './utils';
+import { parseRecoveryPhrase } from './utils';
 
 import type { SheetScreenProps } from '@lace-lib/navigation';
 import type { RestoreWalletRecoverySheetTemplateProps } from '@lace-lib/ui-toolkit/src/design-system/templates/sheets/restoreWalletRecoverySheet';
@@ -17,13 +19,8 @@ export const useRestoreWalletRecoveryPhraseSheet = (
   _props: RestoreWalletRecoveryPhraseSheetProps,
 ): RestoreWalletRecoverySheetTemplateProps => {
   const { t } = useTranslation();
-  const restoreWalletFlow = useLaceSelector(
-    'accountManagement.getRestoreWalletFlow',
-  );
+  const restoreSecrets = useRestoreWalletSecrets();
   const allWallets = useLaceSelector('wallets.selectAll');
-  const setRecoveryPhrase = useDispatchLaceAction(
-    'accountManagement.setRestoreWalletRecoveryPhrase',
-  );
 
   const validator = useCallback(
     (passphrase: string): string | undefined => {
@@ -34,7 +31,7 @@ export const useRestoreWalletRecoveryPhraseSheet = (
 
       // Check if wallet already exists
       const recoveryPhrase = parseRecoveryPhrase(passphrase);
-      const walletId = computeWalletId(recoveryPhrase);
+      const walletId = WalletId.deriveFromMnemonic(recoveryPhrase);
       const existingWallet = allWallets.find(w => w.walletId === walletId);
 
       if (existingWallet) {
@@ -47,20 +44,17 @@ export const useRestoreWalletRecoveryPhraseSheet = (
     [allWallets, t],
   );
 
-  const handleNext = useCallback(
-    (passphrase: string) => {
-      const recoveryPhrase = parseRecoveryPhrase(passphrase);
-      if (!recoveryPhrase.length) return;
+  const handleNext = useCallback((passphrase: string) => {
+    const recoveryPhrase = parseRecoveryPhrase(passphrase);
+    if (!recoveryPhrase.length) return;
 
-      setRecoveryPhrase({ passphrase, recoveryPhrase });
-      NavigationControls.navigate(
-        SheetRoutes.RestoreWalletSelectBlockchains,
-        { hasNestedScrolling: true },
-        { reset: false },
-      );
-    },
-    [setRecoveryPhrase],
-  );
+    setRestoreWalletSecrets({ recoveryPhrase });
+    NavigationControls.navigate(
+      SheetRoutes.RestoreWalletSelectBlockchains,
+      { hasNestedScrolling: true },
+      { reset: false },
+    );
+  }, []);
 
   return {
     title: t('v2.account-management.restore-wallet.enter-passphrase.title'),
@@ -73,7 +67,9 @@ export const useRestoreWalletRecoveryPhraseSheet = (
     pasteButtonLabel: t('v2.generic.btn.paste'),
     nextButtonLabel: t('v2.generic.btn.next'),
     validator,
-    initialPassphrase: restoreWalletFlow?.passphrase ?? '',
+    initialPassphrase: restoreSecrets.recoveryPhrase
+      ? util.joinMnemonicWords(restoreSecrets.recoveryPhrase)
+      : '',
     onNext: handleNext,
   };
 };

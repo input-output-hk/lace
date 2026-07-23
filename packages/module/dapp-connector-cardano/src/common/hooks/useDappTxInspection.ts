@@ -6,6 +6,10 @@ import {
   tokenTransferInspector,
   transactionSummaryInspector,
 } from '@cardano-sdk/core';
+import {
+  computeNetFlows,
+  type TokenTransferValue,
+} from '@lace-contract/cardano-context';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { dummyLogger } from 'ts-log';
 
@@ -14,17 +18,9 @@ import { createDappInputResolver } from '../utils/create-dapp-input-resolver';
 
 import { useDispatchLaceAction, useLaceSelector } from './storeHooks';
 
-import type {
-  TokenTransferValue as SdkTokenTransferValue,
-  TransactionSummaryInspection,
-} from '@cardano-sdk/core';
+import type { TransactionSummaryInspection } from '@cardano-sdk/core';
 
 const TIMEOUT = Milliseconds(6000);
-
-export type TokenTransferValue = {
-  coins: bigint;
-  assets: Map<Cardano.AssetId, bigint>;
-};
 
 export interface UseDappTxInspectionResult {
   isLoading: boolean;
@@ -40,103 +36,6 @@ const EMPTY: UseDappTxInspectionResult = {
   fromAddresses: new Map(),
   toAddresses: new Map(),
   summary: null,
-};
-
-const toV2TokenTransferValue = (
-  entry: SdkTokenTransferValue,
-): TokenTransferValue => {
-  const assets = new Map<Cardano.AssetId, bigint>();
-  for (const [assetId, { amount }] of entry.assets) {
-    assets.set(assetId, amount);
-  }
-  return { coins: entry.coins, assets };
-};
-
-/**
- * Filter the `from`/`to` maps from `tokenTransferInspector` so only assets
- * actually leaving the wallet — or moving to/from addresses outside it —
- * appear in the UI's From/To sections.
- *
- * Own addresses are treated as a single "your wallet" unit: the inputs they
- * contribute and the outputs they receive are summed and netted against each
- * other. For a certificate-only transaction that spends a UTXO and sends
- * change back to a (possibly different) own address, this collapses to a
- * single From entry of `fee + deposit` ADA with no assets — everything else
- * stayed inside the wallet. Foreign addresses are kept per-address since
- * they always represent value "changing address".
- */
-export const computeNetFlows = (
-  fromRaw: Map<Cardano.PaymentAddress, SdkTokenTransferValue>,
-  toRaw: Map<Cardano.PaymentAddress, SdkTokenTransferValue>,
-  ownAddresses: readonly Cardano.PaymentAddress[],
-): {
-  from: Map<Cardano.PaymentAddress, TokenTransferValue>;
-  to: Map<Cardano.PaymentAddress, TokenTransferValue>;
-} => {
-  const ownSet = new Set(ownAddresses);
-  const from = new Map<Cardano.PaymentAddress, TokenTransferValue>();
-  const to = new Map<Cardano.PaymentAddress, TokenTransferValue>();
-
-  // SDK fromRaw entries carry signed net values (negative coins = net outflow).
-  // Preserve the sign from the inspector so callers can reason about direction.
-  for (const [address, entry] of fromRaw) {
-    if (!ownSet.has(address)) from.set(address, toV2TokenTransferValue(entry));
-  }
-  for (const [address, entry] of toRaw) {
-    if (!ownSet.has(address)) to.set(address, toV2TokenTransferValue(entry));
-  }
-
-  // The SDK's tokenTransferInspector uses signed net values:
-  //   fromAddress entries have negative coins (net outflow from that address)
-  //   toAddress entries have positive coins (net inflow to that address)
-  // Accumulate both maps directly — the sign is already encoded in entry.coins.
-  let walletNetCoins = 0n;
-  const walletNetAssets = new Map<Cardano.AssetId, bigint>();
-  let representative: Cardano.PaymentAddress | undefined;
-
-  const accumulateOwn = (
-    entries: Map<Cardano.PaymentAddress, SdkTokenTransferValue>,
-  ) => {
-    for (const [address, entry] of entries) {
-      if (!ownSet.has(address)) continue;
-      if (representative === undefined) representative = address;
-      walletNetCoins += entry.coins;
-      for (const [assetId, { amount }] of entry.assets) {
-        walletNetAssets.set(
-          assetId,
-          (walletNetAssets.get(assetId) ?? 0n) + amount,
-        );
-      }
-    }
-  };
-  accumulateOwn(fromRaw);
-  accumulateOwn(toRaw);
-
-  if (representative === undefined) return { from, to };
-
-  // negative net = wallet is sender; positive net = wallet is receiver
-  // Asset amounts and coin amounts preserve the sign so callers can reason about direction.
-  const leavingAssets = new Map<Cardano.AssetId, bigint>();
-  const incomingAssets = new Map<Cardano.AssetId, bigint>();
-  for (const [assetId, net] of walletNetAssets) {
-    if (net < 0n) leavingAssets.set(assetId, net);
-    else if (net > 0n) incomingAssets.set(assetId, net);
-  }
-
-  if (walletNetCoins < 0n || leavingAssets.size > 0) {
-    from.set(representative, {
-      coins: walletNetCoins < 0n ? walletNetCoins : 0n,
-      assets: leavingAssets,
-    });
-  }
-  if (walletNetCoins > 0n || incomingAssets.size > 0) {
-    to.set(representative, {
-      coins: walletNetCoins > 0n ? walletNetCoins : 0n,
-      assets: incomingAssets,
-    });
-  }
-
-  return { from, to };
 };
 
 /**

@@ -4,7 +4,6 @@ import { it, describe, expect } from 'vitest';
 import {
   AddressType,
   deriveBip39Seed,
-  deriveElectrumSeed,
   ChainType,
   deriveAccountRootKeyPair,
   deriveChildPublicKey,
@@ -119,16 +118,6 @@ describe('seed derivation', () => {
       expect(seed.toString('hex')).toBe(expectedSeedHex);
     });
   });
-
-  it('deriveElectrumSeed', () => {
-    const mnemonic =
-      'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
-    const expectedSeed =
-      'b24af40d049942cb7e7ea70ce919f5e665782a751ee51fb372bb13b76b1bbca307bc4c12dca4baa037e7cfe915ff7bc02167abe97a5bdc2766f8878c54c59fc4';
-
-    const seed = deriveElectrumSeed(mnemonic, '');
-    expect(seed.toString('hex')).toBe(expectedSeed);
-  });
 });
 
 // Vectors for key derivation generated with https://iancoleman.io/bip39/
@@ -196,9 +185,6 @@ describe('getExtendedPubKeys', () => {
     );
     expect(keys.mainnet.segWit).toBe(
       'xpub6C6nQwHaWbSrzs5tZ1q7m5R9cPK9eYpNMFesiXsYrgc1P8bvLLAet9JfHjYXKjToD8cBRswJXXbbFpXgwsswVPAZzKMa1jUp2kVkGVUaJa7',
-    );
-    expect(keys.mainnet.electrumNativeSegWit).toBe(
-      'xpub6BiChRN7aqq51RA7RnAmKhqKdGckPncrHWLrj1xoj6ZMfdMJ1dX4Ysh9V3yEhpFCpC3BapjR83xPKY693XXTEU6qgWU3qZs78WBHA15uhYf',
     );
   });
 });

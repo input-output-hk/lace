@@ -21,7 +21,7 @@ import {
 } from '@lace-contract/dapp-connector';
 import { FolderId, TokenId } from '@lace-contract/tokens';
 import { WalletType, WalletId } from '@lace-contract/wallet-repo';
-import { HexBytes, Timestamp } from '@lace-sdk/util';
+import { HexBytes, Timestamp } from '@lace-lib/util';
 import omit from 'lodash/omit';
 import uniqBy from 'lodash/uniqBy';
 
@@ -123,13 +123,14 @@ const mapBitcoinAccountProps = ({
 }): BlockchainAccountProps[] => {
   const bitcoinNetwork =
     networkType === 'mainnet' ? BitcoinNetwork.Mainnet : BitcoinNetwork.Testnet;
+  const { electrumNativeSegWit: _dropped, ...extendedAccountPublicKeys } =
+    metadata.bitcoin!.extendedAccountPublicKeys[networkType];
   return [
     {
       accountId: BitcoinAccountId(walletId, accountIndex, bitcoinNetwork),
       blockchainSpecific: {
         accountIndex,
-        extendedAccountPublicKeys:
-          metadata.bitcoin!.extendedAccountPublicKeys[networkType],
+        extendedAccountPublicKeys,
       } satisfies BitcoinBip32AccountProps,
       blockchainNetworkId: BitcoinNetworkId(bitcoinNetwork),
     },

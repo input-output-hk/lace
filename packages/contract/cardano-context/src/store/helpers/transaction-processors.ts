@@ -12,7 +12,7 @@ import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
 import type { TokenId } from '@lace-contract/tokens';
 import type { TokenMetadata } from '@lace-contract/tokens';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 

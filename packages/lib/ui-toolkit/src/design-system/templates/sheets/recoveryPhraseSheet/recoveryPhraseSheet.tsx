@@ -6,7 +6,7 @@ import { Button, Loader, Column, Text } from '../../../atoms';
 import { RecoveryPhrase } from '../../../molecules';
 import { Sheet, footerHeight } from '../../../organisms';
 
-import type { ByteArray } from '@lace-sdk/util';
+import type { ByteArray } from '@lace-lib/util';
 
 interface RecoveryPhraseSheetTemplateProps {
   mnemonicWords: ByteArray[] | null;

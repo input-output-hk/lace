@@ -1,5 +1,5 @@
 import { WalletId, walletsActions } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { reducers } from '../../src/store';

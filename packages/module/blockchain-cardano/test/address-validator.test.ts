@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { CardanoNetworkId } from '@lace-contract/cardano-context';
-import { None, Some } from '@lace-sdk/util';
+import { None, Some } from '@lace-lib/util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as addressValidator from '../src/address-validator';
