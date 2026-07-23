@@ -4,7 +4,7 @@ import {
   consumeRemoteApi,
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { Platform } from 'react-native';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';

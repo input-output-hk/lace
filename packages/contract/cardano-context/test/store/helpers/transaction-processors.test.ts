@@ -1,5 +1,5 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import { defer, of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

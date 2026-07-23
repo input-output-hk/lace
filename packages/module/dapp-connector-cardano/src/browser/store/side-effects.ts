@@ -1,7 +1,5 @@
 import { Serialization } from '@cardano-sdk/core';
-import * as Crypto from '@cardano-sdk/crypto';
-import { blake2b } from '@cardano-sdk/crypto';
-import { Bip32Account, KeyRole } from '@cardano-sdk/key-management';
+import { KeyRole } from '@cardano-sdk/key-management';
 import {
   buildCip30SignTxWitnessSet,
   countTransactionSignatures,
@@ -11,9 +9,10 @@ import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
-import { WalletType } from '@lace-contract/wallet-repo';
+import { isHardwareWallet } from '@lace-contract/wallet-repo';
+import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
+import { HexBytes } from '@lace-lib/util';
 import { mapHwSigningError } from '@lace-lib/util-hw';
-import { HexBytes } from '@lace-sdk/util';
 import {
   debounceTime,
   EMPTY,
@@ -199,24 +198,13 @@ const createSignTransactionWrapper = ({
     );
     const localUtxos = availableAccountUtxos[accountId] ?? [];
 
-    const { accountIndex, extendedAccountPublicKey } =
-      account.blockchainSpecific as {
-        accountIndex: number;
-        extendedAccountPublicKey: Bip32PublicKeyHex;
-      };
+    const { extendedAccountPublicKey } = account.blockchainSpecific as {
+      extendedAccountPublicKey: Bip32PublicKeyHex;
+    };
 
-    const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
-    const bip32Account = new Bip32Account(
-      { extendedAccountPublicKey, accountIndex, chainId },
-      { blake2b, bip32Ed25519 },
+    const dRepKeyHash = hashEd25519PublicKey(
+      await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
     );
-    const dRepPubKey = await bip32Account.derivePublicKey({
-      index: 0,
-      role: KeyRole.DRep,
-    });
-    const dRepKeyHash = Crypto.Ed25519PublicKey.fromHex(dRepPubKey)
-      .hash()
-      .hex();
 
     if (
       !partialSign &&
@@ -249,9 +237,8 @@ const createSignTransactionWrapper = ({
       utxo: localUtxos,
       auth,
     };
-    const signer = signerFactory.createTransactionSigner(signerContext);
-
     try {
+      const signer = signerFactory.createTransactionSigner(signerContext);
       const result = await firstValueFrom(
         signer.sign({ serializedTx: HexBytes(txCbor) }),
       );
@@ -275,10 +262,9 @@ const createSignTransactionWrapper = ({
       if (error instanceof AuthenticationCancelledError) {
         signingResult$.next({ type: 'cancelled' });
       } else {
-        const isHwWallet =
-          wallet.type === WalletType.HardwareLedger ||
-          wallet.type === WalletType.HardwareTrezor;
-        const hwErrorKeys = isHwWallet ? mapHwSigningError(error) : undefined;
+        const hwErrorKeys = isHardwareWallet(wallet)
+          ? mapHwSigningError(error)
+          : undefined;
         signingResult$.next({ type: 'error', hwErrorKeys });
       }
       throw error;
@@ -557,6 +543,13 @@ const handleAuthorizeDappUI = ({
             filter(({ payload }) => payload === targetSidePanel.id),
             map(() => ({ type: 'reject' as const })),
           ),
+          // On a dropped connection the contract resolves the request as denied
+          // and emits failed. Dismiss the now-stale sheet without authorizing —
+          // a late confirm must not grant access the dApp already saw refused.
+          authorizeDapp.failed$.pipe(
+            filter(({ payload }) => payload.dapp.id === dapp.id),
+            map(() => ({ type: 'cancelled' as const })),
+          ),
         ).pipe(take(1));
 
         return merge(
@@ -582,6 +575,12 @@ const handleAuthorizeDappUI = ({
                   }),
                 ];
               }
+              if (result.type === 'cancelled') {
+                return [
+                  actions.views.setActiveSheetPage(null),
+                  actions.cardanoDappConnector.clearPendingAuthRequest(),
+                ];
+              }
               return [
                 actions.views.setActiveSheetPage(null),
                 actions.cardanoDappConnector.clearPendingAuthRequest(),
@@ -605,77 +604,107 @@ const handleAuthorizeDappUI = ({
         rejectConnect$.pipe(map(() => ({ type: 'reject' as const }))),
       ).pipe(take(1));
 
+      // Subscribed eagerly via the race below (before the popup registers) so
+      // a drop during the opening gap isn't missed. Closes the popup and
+      // clears the request; never authorizes (the contract already denied it).
+      const cancelled$ = authorizeDapp.failed$.pipe(
+        filter(({ payload }) => payload.dapp.id === dapp.id),
+        take(1),
+        mergeMap(() =>
+          merge(
+            of(actions.cardanoDappConnector.clearPendingAuthRequest()),
+            selectOpenViews$.pipe(
+              map(views =>
+                views.find(
+                  view => view.location === CARDANO_DAPP_CONNECT_LOCATION,
+                ),
+              ),
+              filter(Boolean),
+              take(1),
+              map(view => actions.views.closeView(view.id)),
+            ),
+          ),
+        ),
+      );
+
       return merge(
         openAction$,
         of(pendingAuthRequest),
-        selectOpenViews$.pipe(
-          map(views =>
-            views.find(view => view.location === CARDANO_DAPP_CONNECT_LOCATION),
-          ),
-          filter(Boolean),
-          take(1),
-          switchMap(dappConnectorView =>
-            race(
-              confirmOrReject$.pipe(
-                mergeMap(result => {
-                  const baseActions = [
-                    actions.views.closeView(dappConnectorView.id),
-                    actions.cardanoDappConnector.clearPendingAuthRequest(),
-                  ];
-                  if (result.type === 'confirm') {
+        race(
+          cancelled$,
+          selectOpenViews$.pipe(
+            map(views =>
+              views.find(
+                view => view.location === CARDANO_DAPP_CONNECT_LOCATION,
+              ),
+            ),
+            filter(Boolean),
+            take(1),
+            switchMap(dappConnectorView =>
+              race(
+                confirmOrReject$.pipe(
+                  mergeMap(result => {
+                    const baseActions = [
+                      actions.views.closeView(dappConnectorView.id),
+                      actions.cardanoDappConnector.clearPendingAuthRequest(),
+                    ];
+                    if (result.type === 'confirm') {
+                      return [
+                        ...baseActions,
+                        actions.cardanoDappConnector.confirmAuth({
+                          authorized: true,
+                          account: result.account,
+                        }),
+                        actions.cardanoDappConnector.setSessionAccountForOrigin(
+                          {
+                            origin: dapp.origin,
+                            accountId: result.account.accountId,
+                          },
+                        ),
+                        actions.authorizeDapp.completed({
+                          authorized: true,
+                          dapp,
+                          blockchainName: 'Cardano',
+                        }),
+                      ];
+                    }
                     return [
                       ...baseActions,
-                      actions.cardanoDappConnector.confirmAuth({
-                        authorized: true,
-                        account: result.account,
-                      }),
-                      actions.cardanoDappConnector.setSessionAccountForOrigin({
-                        origin: dapp.origin,
-                        accountId: result.account.accountId,
-                      }),
                       actions.authorizeDapp.completed({
-                        authorized: true,
+                        authorized: false,
                         dapp,
-                        blockchainName: 'Cardano',
                       }),
                     ];
-                  }
-                  return [
-                    ...baseActions,
+                  }),
+                ),
+                merge(
+                  viewDisconnected$.pipe(
+                    filter(({ payload }) => payload === dappConnectorView.id),
+                  ),
+                  locationChanged$.pipe(
+                    filter(
+                      ({ payload }) =>
+                        payload.viewId === dappConnectorView.id &&
+                        payload.location !== CARDANO_DAPP_CONNECT_LOCATION,
+                    ),
+                  ),
+                  detectViewClosure({
+                    dappConnectorView,
+                    selectOpenViews$,
+                  }),
+                ).pipe(
+                  take(1),
+                  mergeMap(() => [
+                    actions.cardanoDappConnector.clearPendingAuthRequest(),
                     actions.authorizeDapp.completed({
                       authorized: false,
                       dapp,
                     }),
-                  ];
-                }),
-              ),
-              merge(
-                viewDisconnected$.pipe(
-                  filter(({ payload }) => payload === dappConnectorView.id),
-                ),
-                locationChanged$.pipe(
-                  filter(
-                    ({ payload }) =>
-                      payload.viewId === dappConnectorView.id &&
-                      payload.location !== CARDANO_DAPP_CONNECT_LOCATION,
-                  ),
-                ),
-                detectViewClosure({
-                  dappConnectorView,
-                  selectOpenViews$,
-                }),
-              ).pipe(
-                take(1),
-                mergeMap(() => [
-                  actions.cardanoDappConnector.clearPendingAuthRequest(),
-                  actions.authorizeDapp.completed({
-                    authorized: false,
-                    dapp,
-                  }),
-                ]),
-                takeUntil(
-                  merge(authorizeDapp.completed$, authorizeDapp.failed$).pipe(
-                    filter(({ payload }) => payload.dapp.id === dapp.id),
+                  ]),
+                  takeUntil(
+                    merge(authorizeDapp.completed$, authorizeDapp.failed$).pipe(
+                      filter(({ payload }) => payload.dapp.id === dapp.id),
+                    ),
                   ),
                 ),
               ),
@@ -725,7 +754,7 @@ export const promptCardanoAuthorizeDapp: SideEffect = (
     debounceTime(100),
     tap(({ payload }) => {
       logger.debug(
-        '[promptCardanoAuthorizeDapp] Passed Cardano filter and debounce, entering exhaustMap for:',
+        '[promptCardanoAuthorizeDapp] Passed Cardano filter and debounce, entering switchMap for:',
         payload.dapp.origin,
       );
     }),
@@ -735,7 +764,11 @@ export const promptCardanoAuthorizeDapp: SideEffect = (
       selectAll$,
       selectSessionAccountByOrigin$,
     ),
-    exhaustMap(
+    // switchMap, not exhaustMap: a fresh enable() must supersede a previous
+    // prompt that can no longer resolve (dApp disconnected mid-sheet);
+    // exhaustMap would swallow it, hanging the dApp on reconnect. Safe because
+    // the contract serializes starts, so we never cancel a prompt still in use.
+    switchMap(
       ([
         {
           payload: { dapp, windowId },

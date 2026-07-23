@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
-import type { Timestamp } from '@lace-sdk/util';
+import type { Timestamp } from '@lace-lib/util';
 
 dayjs.extend(utc);
 

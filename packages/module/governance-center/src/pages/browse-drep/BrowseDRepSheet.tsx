@@ -3,25 +3,71 @@ import { toHttpImageUrl } from '@lace-contract/governance-center';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   Button,
+  Card,
   Column,
   DRepCard,
   EmptyStateMessage,
   GenericFlashList,
+  Icon,
   Row,
   SearchBar,
   Shimmer,
   spacing,
   Sheet,
   Text,
+  useTheme,
 } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Pressable } from 'react-native-gesture-handler';
 
 import { DRepFilterDropdown } from './DRepFilterDropdown';
 import { useBrowseDRep } from './useBrowseDRep';
 
-import type { DRepSummary } from '@lace-contract/cardano-context';
+import type {
+  BrowseDRepListItem,
+  DefaultDelegationOption,
+} from './useBrowseDRep';
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
+
+const OPTION_TEST_IDS: Record<DefaultDelegationOption['type'], string> = {
+  alwaysAbstain: 'drep-option-abstain',
+  alwaysNoConfidence: 'drep-option-no-confidence',
+};
+
+const DelegationOptionRow = ({
+  option,
+  onPress,
+}: {
+  option: DefaultDelegationOption;
+  onPress: (type: DefaultDelegationOption['type']) => void;
+}) => {
+  const { theme } = useTheme();
+  const handlePress = useCallback(() => {
+    onPress(option.type);
+  }, [onPress, option.type]);
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      style={styles.optionPressable}
+      testID={OPTION_TEST_IDS[option.type]}>
+      <Card
+        cardStyle={[
+          styles.optionCard,
+          { backgroundColor: theme.background.primary },
+        ]}>
+        <Row alignItems="center" gap={spacing.S}>
+          <Column style={styles.optionInfo} gap={spacing.XS}>
+            <Text.S>{option.title}</Text.S>
+            <Text.XS variant="secondary">{option.description}</Text.XS>
+          </Column>
+          <Icon name="CaretRight" size={16} />
+        </Row>
+      </Card>
+    </Pressable>
+  );
+};
 
 const SKELETON_ITEMS = [0, 1, 2, 3];
 
@@ -33,7 +79,6 @@ export const BrowseDRepSheet = (
   const { t } = useTranslation();
   const { trackEvent } = useAnalytics();
   const {
-    dReps,
     isLoading,
     hasError,
     retry,
@@ -46,6 +91,8 @@ export const BrowseDRepSheet = (
     hasActiveFilters,
     promotedDReps,
     onSelectDRep,
+    onSelectDefaultOption,
+    listItems,
   } = useBrowseDRep(accountId);
 
   useEffect(() => {
@@ -59,23 +106,37 @@ export const BrowseDRepSheet = (
   }, [navigation, t]);
 
   const renderItem = useCallback(
-    ({ item }: { item: DRepSummary }) => (
-      <View style={styles.cardWrapper}>
-        <DRepCard
-          drepId={item.drepId}
-          amount={item.amount}
-          isActive={item.isActive}
-          name={item.name}
-          cip105DrepId={item.cip105DrepId}
-          votingPowerLovelace={item.amount}
-          avatarUri={toHttpImageUrl(item.metadata?.imageUrl)}
-          onPress={() => {
-            onSelectDRep(item.drepId);
-          }}
-        />
-      </View>
-    ),
-    [onSelectDRep],
+    ({ item }: { item: BrowseDRepListItem }) => {
+      if (item.kind === 'option') {
+        return (
+          <View style={styles.cardWrapper}>
+            <DelegationOptionRow
+              option={item.option}
+              onPress={onSelectDefaultOption}
+            />
+          </View>
+        );
+      }
+
+      const { summary } = item;
+      return (
+        <View style={styles.cardWrapper}>
+          <DRepCard
+            drepId={summary.drepId}
+            amount={summary.amount}
+            isActive={summary.isActive}
+            name={summary.name}
+            cip105DrepId={summary.cip105DrepId}
+            votingPowerLovelace={summary.amount}
+            avatarUri={toHttpImageUrl(summary.metadata?.imageUrl)}
+            onPress={() => {
+              onSelectDRep(summary.drepId);
+            }}
+          />
+        </View>
+      );
+    },
+    [onSelectDRep, onSelectDefaultOption],
   );
 
   const ListHeaderComponent = useMemo(
@@ -181,17 +242,23 @@ export const BrowseDRepSheet = (
   }, [isLoading, hasError, retry, t]);
 
   const keyExtractor = useCallback(
-    (dRep: DRepSummary) => `drep-item-${dRep.drepId}`,
+    (item: BrowseDRepListItem) =>
+      item.kind === 'option'
+        ? `drep-option-${item.option.type}`
+        : `drep-item-${item.summary.drepId}`,
     [],
   );
 
+  const getItemType = useCallback((item: BrowseDRepListItem) => item.kind, []);
+
   return (
     <View style={styles.container} testID="browse-drep-content">
-      <GenericFlashList<DRepSummary>
+      <GenericFlashList<BrowseDRepListItem>
         style={styles.list}
-        data={dReps}
+        data={listItems}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
+        getItemType={getItemType}
         ListHeaderComponent={ListHeaderComponent}
         ListEmptyComponent={ListEmptyComponent}
         contentContainerStyle={styles.content}
@@ -233,5 +300,14 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     paddingVertical: spacing.XL,
+  },
+  optionPressable: {
+    width: '100%',
+  },
+  optionCard: {
+    padding: spacing.M,
+  },
+  optionInfo: {
+    flex: 1,
   },
 });

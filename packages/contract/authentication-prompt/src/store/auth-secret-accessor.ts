@@ -1,4 +1,4 @@
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 import { BehaviorSubject, filter, finalize, switchMap, take, tap } from 'rxjs';
 
 import { AuthSecret } from '../value-objects';

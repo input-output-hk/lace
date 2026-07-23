@@ -1,8 +1,8 @@
 import { Cardano, ProviderFailure } from '@cardano-sdk/core';
 import { logger } from '@cardano-sdk/util-dev';
 import { CardanoPaymentAddress } from '@lace-contract/cardano-context';
+import { Timestamp } from '@lace-lib/util';
 import { HttpClientError, ProviderError } from '@lace-lib/util-provider';
-import { Timestamp } from '@lace-sdk/util';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -149,6 +149,25 @@ describe('BlockfrostActivityProvider', () => {
 
       // Verify txDetails properties
       expect(txDetails.blockTime).toEqual(txDetailsResponse.block_time);
+    });
+
+    it('copies treasury donation from the parsed cbor into the body', async () => {
+      // Same tx as txCborResponse but with a treasury donation (map key 22) of 1_000_000 lovelace.
+      const txCborWithDonation: Responses['tx_content_cbor'] = {
+        cbor: '84a400818258207577617e7378a6a3f6f09185c662feeb86428366430b263e399879152c9e55fe01018282583900f84435ea4e419e66b7b2f5e639137c42faf38c55a35cb5549d47872ce1efac84e56a57f4e8bfc75efcac6941ad0bee0e7f0bb4cd2bc7c04d1a01298be0825839001d67cd7aeaaedee4fe73ecaabe7cc892a48fb450119dda0ddd76f9252e7b13f6d9124a16ddfec464771f57e184571fb3cb8f8b3c1a7558681ace1ce4cd021a0002917d161a000f4240a100818258207afdd392701bfe44e3b6a59f173177685689a6672e7b71647ea7087ea1aaf5a158400ba94aff77ac8c05e4df45ff4e2cfc70ee8e92bf0efade11507122da68b8b18bbc1a7b7b08538681c083232a8cb9d964380f2bb899ab4b18a6384887b80a6301f5f6',
+      };
+
+      mockResponses(request, [
+        [`txs/${txId}`, { data: txDetailsResponse }],
+        [`txs/${txId}/cbor`, { data: txCborWithDonation }],
+        [`txs/${txId}/utxos`, { data: txUtxosResponse }],
+      ]);
+
+      const txDetails = (
+        await firstValueFrom(provider.getTransactionDetails(txId))
+      ).unwrap();
+
+      expect(txDetails.body.donation).toEqual(1_000_000n);
     });
 
     it('handles error on tx details fetch', async () => {

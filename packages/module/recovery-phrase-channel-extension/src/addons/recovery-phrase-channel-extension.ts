@@ -3,7 +3,7 @@ import {
   consumeRemoteApi,
   exposeApi,
   RemoteApiPropertyType,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { of } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
@@ -13,7 +13,7 @@ import type {
   RecoveryPhraseChannel,
   RecoveryPhraseChannelExtension,
 } from '@lace-contract/recovery-phrase';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 
 const mnemonicChannelConfig = {
   baseChannel: ChannelName('recovery-phrase-provision-channel'),

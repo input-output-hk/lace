@@ -11,9 +11,12 @@ export const AddWalletHardwareSetup = (
   const {
     title,
     onBackPress,
+    hasAccountSetup,
     accountIndex,
     setAccountIndex,
+    maxAccountIndex,
     accountLabel,
+    instructionText,
     derivationTypeOptions,
     derivationType,
     handleDerivationTypeChange,
@@ -56,9 +59,12 @@ export const AddWalletHardwareSetup = (
       embedded
       title={title}
       onBackPress={onBackPress}
+      showAccountSetup={hasAccountSetup}
       accountIndex={accountIndex}
       onAccountIndexChange={setAccountIndex}
+      maxAccountIndex={maxAccountIndex}
       accountLabel={accountLabel}
+      instructionText={instructionText}
       derivationTypeOptions={derivationTypeOptions}
       derivationType={derivationType}
       onDerivationTypeChange={handleDerivationTypeChange}

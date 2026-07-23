@@ -1,13 +1,20 @@
+import { ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import {
   BITCOIN_TOKEN_ID,
   BitcoinNetwork,
 } from '@lace-contract/bitcoin-context';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Err, HexBytes, Ok, Timestamp } from '@lace-lib/util';
+import {
+  address as bitcoinAddress,
+  networks,
+  Transaction,
+} from 'bitcoinjs-lib';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { decodeUnsignedTxFromString } from '../../src/common';
 import {
   applyInFlightUtxoAdjustments,
   makeBuildTx,
@@ -263,17 +270,18 @@ describe('applyInFlightUtxoAdjustments (bitcoin)', () => {
   });
 });
 
-describe('makeBuildTx in-flight wiring (bitcoin)', () => {
-  const tokenTransfer = {
-    normalizedAmount: BigNumber(1_000_000n),
+const makeTokenTransfer = (normalizedAmount: bigint): TokenTransfer =>
+  ({
+    normalizedAmount: BigNumber(normalizedAmount),
     token: {
       accountId: testAccountId,
       blockchainName: 'Bitcoin',
       tokenId: BITCOIN_TOKEN_ID,
     },
-  } as unknown as TokenTransfer;
+  } as unknown as TokenTransfer);
 
-  const buildParams = {
+const makeBuildParams = (normalizedAmount: bigint): BuildTxParamsShape =>
+  ({
     accountId: testAccountId,
     blockchainName: 'Bitcoin',
     serializedTx: '',
@@ -281,39 +289,31 @@ describe('makeBuildTx in-flight wiring (bitcoin)', () => {
     txParams: [
       {
         address: recipientAddress,
-        tokenTransfers: [tokenTransfer],
+        tokenTransfers: [makeTokenTransfer(normalizedAmount)],
         blockchainSpecific: {
           memo: '',
           feeRate: { feeOption: 'Low' as const },
         },
       },
     ],
-  } as unknown as BuildTxParamsShape;
+  } as unknown as BuildTxParamsShape);
 
-  const logger = {
-    debug: vi.fn(),
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-    trace: vi.fn(),
-  };
+const logger = {
+  debug: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  info: vi.fn(),
+  trace: vi.fn(),
+};
 
-  const makeMockWallet = (utxos: BitcoinUTxO[]) => ({
-    network: BitcoinNetwork.Testnet,
-    utxos$: of(utxos),
-    addresses$: of([
-      {
-        address: ownAddress,
-        addressType: 'NativeSegWit',
-        network: BitcoinNetwork.Testnet,
-        account: 0,
-        chain: 0,
-        index: 0,
-        publicKeyHex:
-          '03797dd653040d344fd048c1ad05d4cbcb2178b30c6a0c4276994795f3e833da41',
-      },
-    ]),
-    address: {
+const makeMockWallet = (
+  utxos: BitcoinUTxO[],
+  walletOverrides: Record<string, unknown> = {},
+) => ({
+  network: BitcoinNetwork.Testnet,
+  utxos$: of(utxos),
+  addresses$: of([
+    {
       address: ownAddress,
       addressType: 'NativeSegWit',
       network: BitcoinNetwork.Testnet,
@@ -323,27 +323,45 @@ describe('makeBuildTx in-flight wiring (bitcoin)', () => {
       publicKeyHex:
         '03797dd653040d344fd048c1ad05d4cbcb2178b30c6a0c4276994795f3e833da41',
     },
-    getCurrentFeeMarket: () =>
-      of({
-        unwrap: () => ({
-          fast: { feeRate: 0.001, targetConfirmationTime: 60 },
-          standard: { feeRate: 0.0005, targetConfirmationTime: 600 },
-          slow: { feeRate: 0.0001, targetConfirmationTime: 6000 },
-        }),
+  ]),
+  address: {
+    address: ownAddress,
+    addressType: 'NativeSegWit',
+    network: BitcoinNetwork.Testnet,
+    account: 0,
+    chain: 0,
+    index: 0,
+    publicKeyHex:
+      '03797dd653040d344fd048c1ad05d4cbcb2178b30c6a0c4276994795f3e833da41',
+  },
+  getCurrentFeeMarket: () =>
+    of({
+      unwrap: () => ({
+        fast: { feeRate: 0.001, targetConfirmationTime: 60 },
+        standard: { feeRate: 0.0005, targetConfirmationTime: 600 },
+        slow: { feeRate: 0.0001, targetConfirmationTime: 6000 },
       }),
-  });
+    }),
+  ...walletOverrides,
+});
 
-  const makeDeps = (utxos: BitcoinUTxO[]): SideEffectDependencies =>
-    ({
-      bitcoinAccountWallets$: of({
-        [testAccountId]: makeMockWallet(utxos),
-      }),
-      logger,
-    } as unknown as SideEffectDependencies);
+const makeDeps = (
+  utxos: BitcoinUTxO[],
+  walletOverrides: Record<string, unknown> = {},
+): SideEffectDependencies =>
+  ({
+    bitcoinAccountWallets$: of({
+      [testAccountId]: makeMockWallet(utxos, walletOverrides),
+    }),
+    logger,
+  } as unknown as SideEffectDependencies);
 
-  const toPendingActivities$ = (
-    pendingByAccount: Record<string, Activity[]> = {},
-  ) => of(pendingByAccount as PendingActivitiesByAccount);
+const toPendingActivities$ = (
+  pendingByAccount: Record<string, Activity[]> = {},
+) => of(pendingByAccount as PendingActivitiesByAccount);
+
+describe('makeBuildTx in-flight wiring (bitcoin)', () => {
+  const buildParams = makeBuildParams(1_000_000n);
 
   it('builds successfully when no pending activities exist', async () => {
     const deps = makeDeps([
@@ -414,5 +432,139 @@ describe('makeBuildTx in-flight wiring (bitcoin)', () => {
     );
     const result = await firstValueFrom(buildTx(buildParams));
     expect(result.success).toBe(true);
+  });
+});
+
+describe('makeBuildTx previous transaction embedding (bitcoin)', () => {
+  const masterFingerprint = 'f23f9fd2';
+  const ownOutputScript = bitcoinAddress.toOutputScript(
+    ownAddress,
+    networks.testnet,
+  );
+
+  const makeRawPreviousTx = (satoshisPerOutput: number[], seed: number) => {
+    const tx = new Transaction();
+    tx.version = 2;
+    tx.addInput(Buffer.alloc(32, seed), 0);
+    for (const satoshis of satoshisPerOutput) {
+      tx.addOutput(ownOutputScript, satoshis);
+    }
+    return { rawTxHex: tx.toHex(), txId: tx.getId() };
+  };
+
+  const previousTxA = makeRawPreviousTx([10_000_000, 5_000_000], 1);
+  const previousTxB = makeRawPreviousTx([8_000_000], 2);
+  const rawTxHexByTxId: Record<string, string> = {
+    [previousTxA.txId]: previousTxA.rawTxHex,
+    [previousTxB.txId]: previousTxB.rawTxHex,
+  };
+
+  const hardwareUtxos = [
+    makeUtxo({ txId: previousTxA.txId, index: 0, satoshis: 10_000_000 }),
+    makeUtxo({ txId: previousTxA.txId, index: 1, satoshis: 5_000_000 }),
+    makeUtxo({ txId: previousTxB.txId, index: 0, satoshis: 8_000_000 }),
+  ];
+
+  it('embeds nonWitnessUtxo for every input of a hardware account, fetching shared previous txs once', async () => {
+    const getRawTransaction = vi.fn((txId: string) =>
+      of(Ok(rawTxHexByTxId[txId])),
+    );
+    const deps = makeDeps(hardwareUtxos, {
+      masterFingerprint,
+      getRawTransaction,
+    });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(buildTx(makeBuildParams(20_000_000n)));
+
+    expect(result.success).toBe(true);
+    if (!result.success) throw new Error('Expected a successful build');
+
+    const { context: psbt } = decodeUnsignedTxFromString(
+      HexBytes(result.serializedTx),
+    );
+    expect(psbt.data.inputs).toHaveLength(3);
+    psbt.txInputs.forEach((input, index) => {
+      const txId = Buffer.from(input.hash).reverse().toString('hex');
+      expect(psbt.data.inputs[index].witnessUtxo).toBeDefined();
+      expect(psbt.data.inputs[index].nonWitnessUtxo).toEqual(
+        Buffer.from(rawTxHexByTxId[txId], 'hex'),
+      );
+    });
+
+    expect(getRawTransaction).toHaveBeenCalledTimes(2);
+    expect(getRawTransaction).toHaveBeenCalledWith(previousTxA.txId);
+    expect(getRawTransaction).toHaveBeenCalledWith(previousTxB.txId);
+  });
+
+  it('does not fetch previous transactions nor embed nonWitnessUtxo for in-memory accounts', async () => {
+    const getRawTransaction = vi.fn((txId: string) =>
+      of(Ok(rawTxHexByTxId[txId])),
+    );
+    const deps = makeDeps(hardwareUtxos, { getRawTransaction });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(buildTx(makeBuildParams(20_000_000n)));
+
+    expect(result.success).toBe(true);
+    if (!result.success) throw new Error('Expected a successful build');
+
+    const { context: psbt } = decodeUnsignedTxFromString(
+      HexBytes(result.serializedTx),
+    );
+    for (const input of psbt.data.inputs) {
+      expect(input.nonWitnessUtxo).toBeUndefined();
+    }
+    expect(getRawTransaction).not.toHaveBeenCalled();
+  });
+
+  it('fails the build when a fetched previous transaction does not hash to the requested txid', async () => {
+    const getRawTransaction = vi.fn((txId: string) =>
+      of(
+        Ok(
+          txId === previousTxA.txId
+            ? previousTxB.rawTxHex
+            : rawTxHexByTxId[txId],
+        ),
+      ),
+    );
+    const deps = makeDeps(hardwareUtxos, {
+      masterFingerprint,
+      getRawTransaction,
+    });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(buildTx(makeBuildParams(20_000_000n)));
+
+    expect(result).toEqual({
+      success: false,
+      errorTranslationKey: 'tx-executor.building-error.generic',
+    });
+  });
+
+  it('fails the build through the error translation path when a previous tx fetch fails', async () => {
+    const getRawTransaction = vi.fn(() =>
+      of(
+        Err(
+          new ProviderError(
+            ProviderFailure.ConnectionFailure,
+            undefined,
+            'Raw tx fetch failed',
+          ),
+        ),
+      ),
+    );
+    const deps = makeDeps(hardwareUtxos, {
+      masterFingerprint,
+      getRawTransaction,
+    });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(buildTx(makeBuildParams(20_000_000n)));
+
+    expect(result).toEqual({
+      success: false,
+      errorTranslationKey: 'tx-executor.building-error.generic',
+    });
   });
 });

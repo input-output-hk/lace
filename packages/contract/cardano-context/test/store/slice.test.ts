@@ -7,8 +7,8 @@ import {
   WalletType,
   walletsActions,
 } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {

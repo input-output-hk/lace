@@ -9,6 +9,7 @@ import { createMigrate, createTransform } from 'redux-persist';
 
 import { MAX_ACTIVITIES_PER_ACCOUNT } from '../const';
 
+import { resetRewardActivities } from './migrations/reset-reward-activity-dates';
 import { rewardEpochDisplay } from './migrations/reward-epoch-display';
 import { activitiesReducers, type ActivitiesSliceState } from './slice';
 
@@ -41,10 +42,11 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
   reducers: activitiesReducers,
   persistConfig: {
     activities: {
-      version: 2,
+      version: 3,
       whitelist: ['activities'],
       migrate: createMigrate({
         2: rewardEpochDisplay,
+        3: resetRewardActivities,
       }),
       transforms: [activitiesTransform],
     },

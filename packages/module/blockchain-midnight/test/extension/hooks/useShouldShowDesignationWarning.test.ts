@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

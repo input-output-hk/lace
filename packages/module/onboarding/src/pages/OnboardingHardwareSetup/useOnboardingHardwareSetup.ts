@@ -1,13 +1,36 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
+import {
+  clearPendingCreateWalletSecrets,
+  getDerivationTypesForBlockchain,
+  getMaxHwAccountIndex,
+  getPendingCreateWalletPasswordUtf8,
+  isDeviceAccountSelection,
+} from '@lace-contract/onboarding-v2';
 import { StackRoutes, TabRoutes } from '@lace-lib/navigation';
 import { useHwWalletSetupForm } from '@lace-lib/util-hw/extension-ui';
 import { useCallback, useEffect } from 'react';
 
-import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
+import {
+  useDispatchLaceAction,
+  useLaceSelector,
+  useLoadModules,
+} from '../../hooks';
 
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { StackScreenProps } from '@lace-lib/navigation';
 import type { HardwareErrorCategory } from '@lace-lib/util-hw';
+
+/**
+ * Import instruction shown when the device dictates account selection. The
+ * text walks the user through the device's own export screen, so it is picked
+ * per onboarding option id; unknown options fall back to the Seed Signer
+ * wording.
+ */
+const deviceImportInstructionKey = (optionId: string): TranslationKey =>
+  optionId === 'keystone-bitcoin'
+    ? 'v2.keystone-bitcoin.import.instruction'
+    : 'v2.seed-signer-bitcoin.import.instruction';
 
 export const useOnboardingHardwareSetup = ({
   navigation,
@@ -15,7 +38,8 @@ export const useOnboardingHardwareSetup = ({
 }: StackScreenProps<StackRoutes.OnboardingHardwareSetup>) => {
   const { t } = useTranslation();
   const { trackEvent } = useAnalytics();
-  const { optionId, walletType, device, derivationTypes } = route.params;
+  const { optionId, walletType, device, derivationTypes, blockchainName } =
+    route.params;
 
   const attemptCreateHardwareWallet = useDispatchLaceAction(
     'onboardingV2.attemptCreateHardwareWallet',
@@ -32,6 +56,18 @@ export const useOnboardingHardwareSetup = ({
     'onboardingV2.selectLastCreatedWalletId',
   );
 
+  const loadedHwBlockchainSupport = useLoadModules(
+    'addons.loadHwBlockchainSupport',
+  );
+
+  const hasAccountSetup = !isDeviceAccountSelection(loadedHwBlockchainSupport, {
+    optionId,
+  });
+
+  const maxAccountIndex = getMaxHwAccountIndex(loadedHwBlockchainSupport, {
+    optionId,
+  });
+
   const {
     accountIndex,
     setAccountIndex,
@@ -40,8 +76,11 @@ export const useOnboardingHardwareSetup = ({
     derivationTypeOptions,
     error,
   } = useHwWalletSetupForm({
-    derivationTypes,
+    derivationTypes: hasAccountSetup
+      ? getDerivationTypesForBlockchain(blockchainName, derivationTypes)
+      : undefined,
     errorCategory: createWalletError as HardwareErrorCategory | null,
+    maxAccountIndex,
   });
 
   const handleDerivationTypeChange = useCallback(
@@ -69,6 +108,7 @@ export const useOnboardingHardwareSetup = ({
 
   useEffect(() => {
     if (!lastCreatedWalletId) return;
+    clearPendingCreateWalletSecrets();
     resetCreateWalletStatus();
     navigateHome();
   }, [lastCreatedWalletId, navigateHome, resetCreateWalletStatus]);
@@ -81,13 +121,13 @@ export const useOnboardingHardwareSetup = ({
       ...(derivationType && { derivationType }),
       accountIndex,
     });
-    // TODO: use loadHwBlockchainSupport addon to show blockchain selector when > 1
     attemptCreateHardwareWallet({
       optionId,
       device,
-      accountIndex,
-      derivationType,
-      blockchainName: 'Cardano',
+      accountIndex: hasAccountSetup ? accountIndex : 0,
+      derivationType: hasAccountSetup ? derivationType : undefined,
+      blockchainName,
+      password: getPendingCreateWalletPasswordUtf8() ?? '',
     });
   }, [
     isCreating,
@@ -97,6 +137,8 @@ export const useOnboardingHardwareSetup = ({
     device,
     accountIndex,
     derivationType,
+    blockchainName,
+    hasAccountSetup,
     trackEvent,
   ]);
 
@@ -106,8 +148,10 @@ export const useOnboardingHardwareSetup = ({
   }, [isCreating, navigation]);
 
   return {
+    hasAccountSetup,
     accountIndex,
     setAccountIndex,
+    maxAccountIndex,
     derivationType,
     handleDerivationTypeChange,
     derivationTypeOptions,
@@ -117,6 +161,9 @@ export const useOnboardingHardwareSetup = ({
     onBackPress: handleBackPress,
     title: t('onboarding.hardware-wallet-setup.title'),
     accountLabel: t('onboarding.hardware-wallet-setup.account-label'),
+    instructionText: hasAccountSetup
+      ? undefined
+      : t(deviceImportInstructionKey(optionId)),
     derivationTypeLabel: t(
       'onboarding.hardware-wallet-setup.derivation-type-label',
     ),

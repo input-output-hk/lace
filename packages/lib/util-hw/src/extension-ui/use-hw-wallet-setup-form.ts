@@ -1,5 +1,5 @@
 import { useTranslation } from '@lace-contract/i18n';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { type DerivationType } from '../types';
 
@@ -8,6 +8,12 @@ import type { HardwareErrorCategory } from '../classify-hardware-error';
 export interface UseHwWalletSetupFormProps {
   derivationTypes?: DerivationType[];
   errorCategory: HardwareErrorCategory | null | undefined;
+  /**
+   * Highest selectable account index (inclusive). A selection above it is
+   * clamped down to it, covering caps that load after the user has already
+   * picked an index. Unset means no limit.
+   */
+  maxAccountIndex?: number;
 }
 
 export interface DerivationTypeOption {
@@ -28,6 +34,7 @@ export interface UseHwWalletSetupFormResult {
 export const useHwWalletSetupForm = ({
   derivationTypes,
   errorCategory,
+  maxAccountIndex,
 }: UseHwWalletSetupFormProps): UseHwWalletSetupFormResult => {
   const { t } = useTranslation();
 
@@ -35,6 +42,12 @@ export const useHwWalletSetupForm = ({
   const [derivationType, setDerivationType] = useState<
     DerivationType | undefined
   >(derivationTypes?.[0]);
+
+  useEffect(() => {
+    if (maxAccountIndex !== undefined && accountIndex > maxAccountIndex) {
+      setAccountIndex(maxAccountIndex);
+    }
+  }, [maxAccountIndex, accountIndex]);
 
   const handleDerivationTypeChange = useCallback((value: string) => {
     setDerivationType(value as DerivationType);

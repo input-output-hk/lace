@@ -28,6 +28,11 @@ import {
 } from './collateral-flow/slice';
 import { getRewardSpendableDate, mapRewardToActivity } from './helpers';
 import {
+  nightDesignationFlowActions,
+  nightDesignationFlowReducers,
+  nightDesignationFlowSelectors,
+} from './night-designation-flow';
+import {
   isAddressDiscoveryOperation,
   isThoroughAddressDiscoveryOperation,
 } from './side-effects/sync-operation-utils';
@@ -66,7 +71,7 @@ import type {
 } from '@lace-contract/activities';
 import type { TokenId } from '@lace-contract/tokens';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 import type {
   PayloadAction,
   StateFromReducersMapObject,
@@ -1387,6 +1392,7 @@ const selectNeedsSecurityRescan = markParameterizedSelector(
 export const cardanoContextReducers = {
   [slice.name]: slice.reducer,
   ...collateralFlowReducers,
+  ...nightDesignationFlowReducers,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1412,6 +1418,7 @@ export const cardanoContextActions = {
     }>('cardanoContext/submitTxFailed'),
   },
   ...collateralFlowActions,
+  ...nightDesignationFlowActions,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1445,6 +1452,7 @@ export const cardanoContextSelectors = {
     selectNeedsSecurityRescan,
   },
   ...collateralFlowSelectors,
+  ...nightDesignationFlowSelectors,
 };
 
 export type CardanoContextStoreState = StateFromReducersMapObject<

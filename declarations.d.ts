@@ -68,6 +68,28 @@ declare module '@trezor/connect-mobile' {
     path: number[];
   }
 
+  interface TrezorConnectGetPublicKeyBundleItem {
+    path: TrezorConnectBip32Path;
+    coin?: string;
+    showOnTrezor?: boolean;
+  }
+
+  interface TrezorConnectGetPublicKeyBundleParams {
+    bundle: TrezorConnectGetPublicKeyBundleItem[];
+  }
+
+  interface TrezorConnectHdNodePayload {
+    path: number[];
+    serializedPath: string;
+    childNum: number;
+    xpub: string;
+    xpubSegwit?: string;
+    chainCode: string;
+    publicKey: string;
+    fingerprint: number;
+    depth: number;
+  }
+
   interface TrezorConnectFeaturesPayload {
     [key: string]: unknown;
     device_id?: string;
@@ -94,6 +116,59 @@ declare module '@trezor/connect-mobile' {
         device?: TrezorConnectDeviceInfo;
       }
     | { success: false; payload: TrezorConnectUnsuccessfulPayload };
+
+  interface TrezorConnectBitcoinTxInput {
+    prev_hash: string;
+    prev_index: number;
+    amount: string | number;
+    address_n: number[];
+    script_type?: string;
+    sequence?: number;
+  }
+
+  interface TrezorConnectBitcoinTxOutput {
+    address?: string;
+    address_n?: number[];
+    amount: string | number;
+    script_type?: string;
+    op_return_data?: string;
+  }
+
+  interface TrezorConnectBitcoinRefTxInput {
+    prev_hash: string;
+    prev_index: number;
+    script_sig: string;
+    sequence: number;
+  }
+
+  interface TrezorConnectBitcoinRefTxBinOutput {
+    amount: string | number;
+    script_pubkey: string;
+  }
+
+  interface TrezorConnectBitcoinRefTransaction {
+    hash: string;
+    version: number;
+    lock_time: number;
+    inputs: TrezorConnectBitcoinRefTxInput[];
+    bin_outputs: TrezorConnectBitcoinRefTxBinOutput[];
+  }
+
+  interface TrezorConnectSignTransactionParams {
+    coin: string;
+    inputs: TrezorConnectBitcoinTxInput[];
+    outputs: TrezorConnectBitcoinTxOutput[];
+    refTxs?: TrezorConnectBitcoinRefTransaction[];
+    version?: number;
+    locktime?: number;
+    push?: boolean;
+  }
+
+  interface TrezorConnectSignedBitcoinTxPayload {
+    signatures: string[];
+    serializedTx: string;
+    txid?: string;
+  }
 
   interface TrezorConnectCardanoSignTransactionParams {
     [key: string]: unknown;
@@ -127,6 +202,12 @@ declare module '@trezor/connect-mobile' {
     cardanoSignTransaction: (
       params: TrezorConnectCardanoSignTransactionParams,
     ) => Promise<TrezorConnectResult<TrezorConnectCardanoSignedTxPayload>>;
+    getPublicKey: (
+      params: TrezorConnectGetPublicKeyBundleParams,
+    ) => Promise<TrezorConnectResult<TrezorConnectHdNodePayload[]>>;
+    signTransaction: (
+      params: TrezorConnectSignTransactionParams,
+    ) => Promise<TrezorConnectResult<TrezorConnectSignedBitcoinTxPayload>>;
     getFeatures: () => Promise<
       TrezorConnectResult<TrezorConnectFeaturesPayload>
     >;

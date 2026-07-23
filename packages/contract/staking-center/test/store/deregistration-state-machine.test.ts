@@ -29,6 +29,7 @@ const testAccountId = createTestAccountId();
 const testWallet = createMockWallet(testAccountId);
 const testFees = createTestFees();
 const testDepositReturn = TEST_DEPOSIT_RETURN;
+const testWithdrawalAmount = '5000000';
 const testSerializedTx = TEST_SERIALIZED_TX;
 const testTxId = TEST_TX_ID;
 const txErrorTranslationKeys: TxErrorTranslationKeys =
@@ -51,6 +52,7 @@ const stateSummary = execute(
     fees: testFees,
     serializedTx: testSerializedTx,
     wallet: testWallet,
+    withdrawalAmount: testWithdrawalAmount,
   }),
 ) as StateWithStatusOf<'Summary'>;
 
@@ -113,6 +115,7 @@ describe('deregistrationFlow stateMachine', () => {
         fees: testFees,
         serializedTx: testSerializedTx,
         wallet: testWallet,
+        withdrawalAmount: testWithdrawalAmount,
       });
     });
 
@@ -147,6 +150,7 @@ describe('deregistrationFlow stateMachine', () => {
         fees: testFees,
         serializedTx: testSerializedTx,
         wallet: testWallet,
+        withdrawalAmount: testWithdrawalAmount,
       });
     });
 
@@ -211,6 +215,7 @@ describe('deregistrationFlow stateMachine', () => {
         accountId: testAccountId,
         depositReturn: testDepositReturn,
         fees: testFees,
+        withdrawalAmount: testWithdrawalAmount,
       });
     });
 

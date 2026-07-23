@@ -1,20 +1,22 @@
-import { createSlotTimeCalc, epochSlotsCalc, Cardano } from '@cardano-sdk/core';
+import { createSlotTimeCalc, Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 
 import {
   ActivityKind,
   type CardanoRewardActivity,
   type Reward,
+  type CardanoRewardAccount,
 } from '../../types';
 import { RewardActivityId } from '../../value-objects';
+
+import { getEpochFirstSlot } from './get-epoch-first-slot';
 
 import type {
   MissingActivityData,
   MissingRewardData,
 } from './find-missing-activities';
-import type { CardanoRewardAccount } from '../../types';
 import type { EraSummary } from '@cardano-sdk/core';
 import type { AccountId } from '@lace-contract/wallet-repo';
 
@@ -36,9 +38,7 @@ export const getRewardSpendableDate = (
   // Cast needed: SDK functions don't mutate but expect mutable type
   const mutableEraSummaries = eraSummaries as EraSummary[];
   const slotTimeCalc = createSlotTimeCalc(mutableEraSummaries);
-  return slotTimeCalc(
-    epochSlotsCalc(spendableEpoch, mutableEraSummaries).firstSlot,
-  );
+  return slotTimeCalc(getEpochFirstSlot(spendableEpoch, mutableEraSummaries));
 };
 
 export const isRewardActivity = (

@@ -6,11 +6,11 @@ import {
   genericErrorResults,
   type TxExecutorImplementation,
 } from '@lace-contract/tx-executor';
-import { WalletType } from '@lace-contract/wallet-repo';
+import { isHardwareWallet } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
 import { mapHwSigningError } from '@lace-lib/util-hw';
 import { filterRedacted } from '@lace-lib/util-redacted';
 import { serializeError, type ErrorObject } from '@lace-lib/util-store';
-import { HexBytes } from '@lace-sdk/util';
 import { catchError, map, of, switchMap } from 'rxjs';
 
 import { mergePreExistingVkeys } from './merge-pre-existing-vkeys';
@@ -90,10 +90,6 @@ export const makeConfirmTx = (
     );
   };
 };
-
-const isHardwareWallet = (wallet: AnyWallet): boolean =>
-  wallet.type === WalletType.HardwareLedger ||
-  wallet.type === WalletType.HardwareTrezor;
 
 const hwAwareConfirmTxError = (error: Error, wallet: AnyWallet) => {
   if (!isHardwareWallet(wallet)) {

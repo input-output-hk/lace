@@ -12,8 +12,7 @@ bitcoin.initEccLib(ecc);
  * Enum representing different Bitcoin address types.
  *
  * Bitcoin supports multiple address formats, each optimized for different use cases, including backward compatibility,
- * SegWit improvements, and modern Taproot addresses. This enum standardizes the available address types,
- * including a specific type used by Electrum for Native SegWit.
+ * SegWit improvements, and modern Taproot addresses. This enum standardizes the available address types.
  */
 export enum AddressType {
   /**
@@ -48,14 +47,6 @@ export enum AddressType {
    * Starts with `bc1p` (e.g., `bc1p5cyxnux...`).
    */
   Taproot = 'Taproot',
-
-  /**
-   * Electrum's implementation of Native SegWit uses a custom derivation scheme, with `m/0'` as the root path instead
-   * of the BIP-84 standard `m/84'/0'/0'`. Is not directly compatible with other wallets that expect standard BIP-84 paths.
-   *
-   * Starts with `bc1q` (similar to Native SegWit).
-   */
-  ElectrumNativeSegWit = 'ElectrumNativeSegWit',
 }
 
 /**
@@ -66,7 +57,7 @@ export enum AddressType {
  * This function derives the appropriate Bitcoin address based on the specified address type.
  *
  * @param {Buffer} publicKey - The public key (compressed, 33 bytes).
- * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot, ElectrumNativeSegWit).
+ * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot).
  * @param {bitcoin.networks.Network} network - The Bitcoin network (e.g., `bitcoin.networks.bitcoin` for mainnet or `bitcoin.networks.testnet`).
  * @returns {string} The derived Bitcoin address as a string.
  *
@@ -106,7 +97,6 @@ export const deriveAddressByType = (
      * - Example: bc1qw508d6qejxtdg4y5r3zarvaryvaxxpcs
      */
     case AddressType.NativeSegWit:
-    case AddressType.ElectrumNativeSegWit: // Electrum uses the same format but different derivation paths
       return bitcoin.payments.p2wpkh({ pubkey: pubkeyBuffer, network })
         .address!;
 

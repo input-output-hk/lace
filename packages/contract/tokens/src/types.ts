@@ -1,8 +1,8 @@
 import type { TokenId } from './';
 import type { Address } from '@lace-contract/addresses';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { BigNumber } from '@lace-lib/util';
 import type { BlockchainAssigned } from '@lace-lib/util-store';
-import type { BigNumber } from '@lace-sdk/util';
 
 type BlockchainSpecificMetadataPart<BlockchainSpecificMetadata = unknown> = {
   blockchainSpecific: BlockchainSpecificMetadata;

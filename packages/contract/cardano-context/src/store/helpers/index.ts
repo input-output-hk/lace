@@ -1,6 +1,7 @@
 export * from './derive-pending-activity-from-cbor';
 export * from './extract-unique-stake-keys';
 export * from './get-activity-type-from-delegation-entry';
+export * from './get-epoch-first-slot';
 export * from './get-top-on-chain-activity-id';
 export * from './group-cardano-addresses-by-account';
 export * from './find-missing-activities';

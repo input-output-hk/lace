@@ -9,6 +9,7 @@
     "@lace-contract/bitcoin-context": "*",
     "@lace-contract/module": "*",
     "@lace-lib/util-provider": "*",
+    "backoff-rxjs": "^7.0.0",
     "bottleneck": "^2.19.5",
     "ts-log": "^2.2.7"
   },

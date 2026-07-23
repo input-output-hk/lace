@@ -6,13 +6,14 @@ import {
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { assetProvider } from '../../../src/store/helpers/get-fallback-asset';
 import { mapTransactionToActivity } from '../../../src/store/helpers/map-transaction-to-activity';
+import { classifyTxAsNightDesignation } from '../../../src/store/helpers/night-designation-script-addresses';
 import {
   CardanoRewardAccount,
   CardanoPaymentAddress,
@@ -48,6 +49,14 @@ vi.mock('@cardano-sdk/core', async importActual => {
     transactionSummaryInspector: vi.fn(),
   };
 });
+
+// The cNIGHT classification predicate is exhaustively tested in
+// night-designation-script-addresses.test.ts; here we mock it to verify the
+// mapping GLUE (classification → NightDesignation activity + metadata).
+vi.mock(
+  '../../../src/store/helpers/night-designation-script-addresses',
+  () => ({ classifyTxAsNightDesignation: vi.fn() }),
+);
 
 describe('mapTransactionToActivity', () => {
   const mockTxId =
@@ -180,6 +189,7 @@ describe('mapTransactionToActivity', () => {
         protocolParameters: mockProtocolParameters,
         resolveInput: mockResolveInput,
         logger,
+        isNightDesignationEnabled: true,
       });
 
       expect(transactionSummaryInspector).toHaveBeenCalledWith({
@@ -221,6 +231,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
+          isNightDesignationEnabled: true,
         }),
       );
 
@@ -251,6 +262,99 @@ describe('mapTransactionToActivity', () => {
       }
     });
 
+    it.each(['designate', 'update', 'deregister'] as const)(
+      'maps a classified %s tx to a NightDesignation activity carrying the action metadata',
+      async action => {
+        (
+          classifyTxAsNightDesignation as unknown as ReturnType<typeof vi.fn>
+        ).mockReturnValueOnce({ action });
+        mockTxSummaryInspector.mockReturnValue(
+          of({ summary: { coins: -2000000n, assets: new Map() } }),
+        );
+
+        const result = await firstValueFrom(
+          mapTransactionToActivity({
+            accountId: AccountId('account1'),
+            txDetails: mockTxDetails,
+            accountAddresses: mockAccountAddresses.map(addr =>
+              CardanoPaymentAddress(addr),
+            ),
+            rewardAccount: CardanoRewardAccount(mockRewardAccount),
+            protocolParameters: mockProtocolParameters,
+            resolveInput: mockResolveInput,
+            logger,
+            isNightDesignationEnabled: true,
+          }),
+        );
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value).toMatchObject({
+            accountId: AccountId('account1'),
+            activityId: mockTxId,
+            type: ActivityType.NightDesignation,
+            blockchainSpecific: {
+              Cardano: {
+                slot: mockTxDetails.blockHeader.slot,
+                nightDesignation: { action },
+                // Compromise detection runs for designation txs too — a
+                // NightDesignation activity still carries security.exploits.
+                security: { exploits: { deterministicNonce202606: false } },
+              },
+            },
+          });
+        }
+      },
+    );
+
+    it('classifies a designation tx as Send/Receive when the cNIGHT designation flag is off', async () => {
+      (
+        classifyTxAsNightDesignation as unknown as ReturnType<typeof vi.fn>
+      ).mockReturnValueOnce({ action: 'designate' });
+      mockTxSummaryInspector.mockReturnValue(
+        of({ summary: { coins: -2000000n, assets: new Map() } }),
+      );
+
+      const result = await firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails: mockTxDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: false,
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toEqual({
+          accountId: AccountId('account1'),
+          activityId: mockTxId,
+          timestamp: Timestamp(mockBlockTime * 1000),
+          tokenBalanceChanges: [
+            { tokenId: TokenId('lovelace'), amount: BigNumber(-2000000n) },
+          ],
+          type: ActivityType.Send,
+          blockchainSpecific: {
+            Cardano: {
+              consumedInputs: [],
+              producedOutputs: [],
+              slot: mockTxDetails.blockHeader.slot,
+              security: {
+                exploits: { deterministicNonce202606: false },
+              },
+            },
+          },
+        });
+        expect(result.value.type).not.toBe(ActivityType.NightDesignation);
+      }
+    });
+
     it('should return Ok with correct activity for send transaction', async () => {
       const mockSummary = {
         coins: -500000n,
@@ -270,6 +374,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
+          isNightDesignationEnabled: true,
         }),
       );
 

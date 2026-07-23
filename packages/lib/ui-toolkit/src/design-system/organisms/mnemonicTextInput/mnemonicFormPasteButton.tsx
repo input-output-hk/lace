@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button } from '../../atoms';
 import { Clipboard } from '../../util';
 
-import { useFieldContext } from './mnemonicForm';
+import { useFieldContext } from './mnemonicFormContexts';
 
 const PASTE_ICON_SIZE = 18;
 

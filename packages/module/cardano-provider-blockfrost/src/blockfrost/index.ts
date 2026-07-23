@@ -1,2 +1,1 @@
-export * from './blockfrost-provider';
-export * from './provider';
+export * from '@lace-lib/cardano-provider-core';

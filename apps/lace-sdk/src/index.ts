@@ -1,4 +1,4 @@
-// Value objects from @lace-sdk/util
+// Value objects from @lace-lib/util
 export {
   BigNumber,
   HexBytes,
@@ -13,8 +13,8 @@ export {
   TimeSpan,
   Ok,
   Err,
-} from '@lace-sdk/util';
-export type { Result } from '@lace-sdk/util';
+} from '@lace-lib/util';
+export type { Result } from '@lace-lib/util';
 
 // Cryptographic value objects from @lace-lib/crypto
 export { EntropyHex, Mnemonic } from '@lace-lib/crypto';
@@ -65,8 +65,12 @@ export type { GetMnemonicWords } from './cardano-lazy-in-memory-signer-factory';
 export { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 export type * from '@lace-contract/wallet-repo';
 
-// Transaction building
+// Transaction building (simple, certificates, and Plutus smart contracts)
 export { TransactionBuilder } from '@lace-contract/cardano-context';
+export type {
+  PlutusContext,
+  ScriptInputProps,
+} from '@lace-contract/cardano-context';
 export { createTxBuilder, waitForNetworkInfo } from './create-tx-builder';
 
 // Transaction signing

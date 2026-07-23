@@ -1,6 +1,7 @@
 import { createMigrate } from 'redux-persist';
 
 import {
+  normalizeHardwareWalletIds,
   setBlockchainNetworkId,
   updateMidnightAccountIds,
 } from '../migrations';
@@ -21,10 +22,11 @@ const storeExports: LaceInit<LaceModuleStoreInit> = async () => {
     reducers: walletsReducers,
     persistConfig: {
       wallets: {
-        version: 4,
+        version: 5,
         migrate: createMigrate({
           3: setBlockchainNetworkId,
           4: updateMidnightAccountIds,
+          5: normalizeHardwareWalletIds,
         }),
       },
     },

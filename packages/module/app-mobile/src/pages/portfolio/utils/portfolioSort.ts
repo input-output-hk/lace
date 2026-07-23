@@ -1,7 +1,7 @@
 import { getTokenPriceId } from '@lace-contract/token-pricing';
 import { ORDERS } from '@lace-lib/ui-toolkit';
+import { BigNumber } from '@lace-lib/util';
 import { getTokenFiatValueTruncated } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 
 import type { TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';

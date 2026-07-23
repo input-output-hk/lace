@@ -128,6 +128,7 @@ type PasswordRetrievalActions = {
     androidKeystoreRecovery?: { attemptNumber: number; maxAttempts: number };
   }) => unknown;
   biometricCanceled: () => unknown;
+  setDeviceAuthReady: (payload: { deviceAuthReady: boolean }) => unknown;
 };
 
 /**
@@ -440,6 +441,14 @@ const handleSuccessfulRetrieval = (
   );
 };
 
+const dispatchBiometricFallback = (
+  context: PasswordRetrievalContext,
+): Observable<unknown> =>
+  from([
+    context.authenticationPrompt.setDeviceAuthReady({ deviceAuthReady: false }),
+    context.authenticationPrompt.biometricCanceled(),
+  ]);
+
 /**
  * Handles lockout error - user failed biometrics too many times.
  * Falls back to password prompt instead of blocking the user.
@@ -449,7 +458,7 @@ const handleLockoutError = (
 ): Observable<unknown> => {
   context.retryState.reset();
   tryClearPasswordFlag(context.secureStore);
-  return of(context.authenticationPrompt.biometricCanceled());
+  return dispatchBiometricFallback(context);
 };
 
 /**
@@ -468,7 +477,7 @@ const handleUnknownError = (
   ) {
     context.retryState.reset();
     tryClearPasswordFlag(context.secureStore);
-    return of(context.authenticationPrompt.biometricCanceled());
+    return dispatchBiometricFallback(context);
   }
 
   return of(
@@ -488,7 +497,7 @@ const handleNotAvailableError = (
 ): Observable<unknown> => {
   context.retryState.reset();
   tryClearPasswordFlag(context.secureStore);
-  return of(context.authenticationPrompt.biometricCanceled());
+  return dispatchBiometricFallback(context);
 };
 
 /**
@@ -500,7 +509,7 @@ const handleNotFoundError = (
 ): Observable<unknown> => {
   context.retryState.reset();
   tryClearPasswordFlag(context.secureStore);
-  return of(context.authenticationPrompt.biometricCanceled());
+  return dispatchBiometricFallback(context);
 };
 
 /**
@@ -558,7 +567,7 @@ const handlePreAuthFailure = (
   if (reason === 'lockout') {
     context.retryState.reset();
     tryClearPasswordFlag(context.secureStore);
-    return of(context.authenticationPrompt.biometricCanceled());
+    return dispatchBiometricFallback(context);
   }
 
   // Both 'failed' and 'cancelled' count toward retry limit
@@ -566,7 +575,7 @@ const handlePreAuthFailure = (
   if (context.retryState.get() >= MAX_UNKNOWN_ERROR_RETRIES) {
     context.retryState.reset();
     tryClearPasswordFlag(context.secureStore);
-    return of(context.authenticationPrompt.biometricCanceled());
+    return dispatchBiometricFallback(context);
   }
 
   const currentAttempt = context.retryState.get();
@@ -605,7 +614,7 @@ const handleAndroidKeystoreBugRetry = async (
   if (retryCount > MAX_UNKNOWN_ERROR_RETRIES) {
     context.retryState.reset();
     tryClearPasswordFlag(context.secureStore);
-    return of(context.authenticationPrompt.biometricCanceled());
+    return dispatchBiometricFallback(context);
   }
 
   // Show biometrics-only prompt (no PIN fallback option)

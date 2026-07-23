@@ -1,5 +1,5 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
-import { Milliseconds } from '@lace-sdk/util';
+import { Milliseconds } from '@lace-lib/util';
 
 import type { TranslationKey } from '@lace-contract/i18n';
 

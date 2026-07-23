@@ -1,22 +1,39 @@
-import { supportedNetworkIds } from '@lace-contract/cardano-context';
 import { WalletType } from '@lace-contract/wallet-repo';
 
+import {
+  buildBitcoinAccounts,
+  exportBitcoinAccountKeys,
+} from '../bitcoin/hw-account-connector';
 import { cardanoAccountsFromXpub } from '../cardano-accounts-from-xpub';
-import { TREZOR_ONBOARDING_OPTION_ID } from '../const';
+import {
+  TREZOR_BITCOIN_ONBOARDING_OPTION_ID,
+  TREZOR_ONBOARDING_OPTION_ID,
+} from '../const';
+import { defaultTargetNetworks } from '../default-target-networks';
 import {
   getCardanoXpubViaDeepLink,
+  TrezorMobileMissingDeviceIdError,
   walletIdFromTrezorDeviceId,
 } from '../mobile/cardano-xpub';
+import { getTrezorConnect } from '../mobile/trezor-connect-bridge';
 
 import type { AvailableMobileAddons } from '..';
-import type { ContextualLaceInit } from '@lace-contract/module';
-import type { HwWalletConnector } from '@lace-contract/onboarding-v2';
+import type { ContextualLaceInit, State } from '@lace-contract/module';
+import type {
+  CreateHardwareWalletProps,
+  HwWalletConnector,
+} from '@lace-contract/onboarding-v2';
+import type {
+  HardwareWalletAccount,
+  WalletId,
+} from '@lace-contract/wallet-repo';
 
 /**
  * On mobile, Trezor Suite owns device communication and every Trezor Connect
  * call is a deep-link round-trip. The discovery addon returns a placeholder
  * descriptor without talking to Suite; the real `device_id` is fetched
- * alongside the xpub in `createWallet` and used to derive the wallet id.
+ * alongside the xpubs in `createWallet` and used to derive the wallet id, so
+ * Cardano and Bitcoin accounts of one physical device share one wallet.
  */
 const findTrezorConnector = async (
   loadModules: Parameters<
@@ -33,33 +50,74 @@ const findTrezorConnector = async (
   return connector;
 };
 
+interface WalletParts {
+  walletId: WalletId;
+  accounts: HardwareWalletAccount[];
+}
+
+const createCardanoWalletParts = async (
+  state: State,
+  props: CreateHardwareWalletProps,
+): Promise<WalletParts> => {
+  const { publicKey, deviceId } = await getCardanoXpubViaDeepLink(
+    props.accountIndex,
+    props.derivationType,
+  );
+  const walletId = walletIdFromTrezorDeviceId(deviceId);
+  return {
+    walletId,
+    accounts: cardanoAccountsFromXpub({
+      state,
+      walletId,
+      accountIndex: props.accountIndex,
+      accountName: `Account #${props.accountIndex}`,
+      targetNetworks: defaultTargetNetworks('Cardano'),
+      publicKey,
+    }),
+  };
+};
+
+const createBitcoinWalletParts = async (
+  props: CreateHardwareWalletProps,
+): Promise<WalletParts> => {
+  const connect = await getTrezorConnect();
+  const deviceExport = await exportBitcoinAccountKeys(connect, {
+    accountIndex: props.accountIndex,
+    targetNetworks: defaultTargetNetworks('Bitcoin'),
+  });
+  if (!deviceExport.deviceId) throw new TrezorMobileMissingDeviceIdError();
+  const walletId = walletIdFromTrezorDeviceId(deviceExport.deviceId);
+  return {
+    walletId,
+    accounts: buildBitcoinAccounts({
+      walletId,
+      accountIndex: props.accountIndex,
+      accountName: `Account #${props.accountIndex}`,
+      deviceExport,
+    }),
+  };
+};
+
 const loadHwWalletConnector: ContextualLaceInit<
   HwWalletConnector,
   AvailableMobileAddons
 > = ({ loadModules }) => ({
   id: TREZOR_ONBOARDING_OPTION_ID,
+  optionIds: [TREZOR_ONBOARDING_OPTION_ID, TREZOR_BITCOIN_ONBOARDING_OPTION_ID],
   walletType: WalletType.HardwareTrezor,
   createWallet: async (state, props) => {
-    if (props.blockchainName !== 'Cardano') {
+    if (
+      props.blockchainName !== 'Cardano' &&
+      props.blockchainName !== 'Bitcoin'
+    ) {
       throw new Error(
-        `Trezor mobile only supports Cardano, got: ${props.blockchainName}`,
+        `Trezor mobile only supports Cardano and Bitcoin, got: ${props.blockchainName}`,
       );
     }
-    const { publicKey, deviceId } = await getCardanoXpubViaDeepLink(
-      props.accountIndex,
-      props.derivationType,
-    );
-
-    const walletId = walletIdFromTrezorDeviceId(deviceId);
-
-    const accounts = cardanoAccountsFromXpub({
-      state,
-      walletId,
-      accountIndex: props.accountIndex,
-      accountName: `Account #${props.accountIndex}`,
-      targetNetworks: new Set(supportedNetworkIds.keys()),
-      publicKey,
-    });
+    const { walletId, accounts } =
+      props.blockchainName === 'Bitcoin'
+        ? await createBitcoinWalletParts(props)
+        : await createCardanoWalletParts(state, props);
 
     return {
       walletId,
@@ -76,7 +134,7 @@ const loadHwWalletConnector: ContextualLaceInit<
   connectAccount: async (state, props) => {
     if (!props.device) {
       throw new Error(
-        'Trezor device descriptor missing — re-discover the device before adding accounts',
+        'Trezor device descriptor missing - re-discover the device before adding accounts',
       );
     }
     const connector = await findTrezorConnector(

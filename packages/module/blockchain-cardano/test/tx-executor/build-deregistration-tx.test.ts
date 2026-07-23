@@ -1,6 +1,6 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -276,7 +276,7 @@ describe('makeBuildDeregistrationTx', () => {
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.depositReturn).toBe('2000000');
-      // Verify TX includes withdrawal by decoding and checking body
+      expect(result.withdrawalAmount).toBe('5000000');
       const tx = Serialization.Transaction.fromCbor(
         Serialization.TxCBOR(result.serializedTx),
       );
@@ -304,7 +304,7 @@ describe('makeBuildDeregistrationTx', () => {
 
     expect(result.success).toBe(true);
     if (result.success) {
-      // Verify TX does not include withdrawal
+      expect(result.withdrawalAmount).toBe('0');
       const tx = Serialization.Transaction.fromCbor(
         Serialization.TxCBOR(result.serializedTx),
       );

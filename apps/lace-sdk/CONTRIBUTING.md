@@ -86,7 +86,7 @@ Config: `tsdown.config.ts`
 
 ### Key behaviors
 
-- **`dts: false`** — declaration files are generated separately via `tsc -p tsconfig.build.json` because tsdown's rolldown-plugin-dts cannot handle merged type+value re-exports (the value object pattern used by `@lace-sdk/util`). When tsdown's DTS support matures or internal packages add `isolatedDeclarations`-compliant annotations, this can be switched to `dts: true`.
+- **`dts: false`** — declaration files are generated separately via `tsc -p tsconfig.build.json` because tsdown's rolldown-plugin-dts cannot handle merged type+value re-exports (the value object pattern used by `@lace-lib/util`). When tsdown's DTS support matures or internal packages add `isolatedDeclarations`-compliant annotations, this can be switched to `dts: true`.
 - tsdown resolves `@lace-*` packages via **tsconfig path aliases** from `tsconfig.base.json`. If a new internal package doesn't resolve, check that it has a path alias there.
 
 ## Declaration Files (.d.ts)

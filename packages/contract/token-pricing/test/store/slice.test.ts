@@ -15,10 +15,12 @@ import type {
   TokenPricingState,
 } from '../../src/types';
 
-const createStore = (preloadedState?: { tokenPricing: TokenPricingState }) =>
+const createStore = (preloadedState?: {
+  tokenPricing: Partial<TokenPricingState>;
+}) =>
   configureStore({
     reducer: tokenPricingReducers,
-    preloadedState,
+    preloadedState: preloadedState as { tokenPricing: TokenPricingState },
   });
 
 const defaultCurrencyPreference: CurrencyPreference =
@@ -254,6 +256,84 @@ describe('tokenPricing slice', () => {
         const store = createStore();
         const state = store.getState().tokenPricing;
         expect(state.currencyPreference).toEqual(defaultCurrencyPreference);
+      });
+    });
+
+    describe('setSupportedCurrencies', () => {
+      it('should set the supported currencies list', () => {
+        const store = createStore();
+        const currencies = ['usd', 'eur', 'gbp'];
+
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setSupportedCurrencies(currencies),
+        );
+
+        const state = store.getState().tokenPricing;
+        expect(state.supportedVsCurrencies).toEqual(currencies);
+      });
+
+      it('should start as null (not yet fetched)', () => {
+        const store = createStore();
+        expect(store.getState().tokenPricing.supportedVsCurrencies).toBeNull();
+      });
+
+      it('should replace a previously set list', () => {
+        const store = createStore();
+
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setSupportedCurrencies(['usd']),
+        );
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setSupportedCurrencies([
+            'eur',
+            'gbp',
+          ]),
+        );
+
+        expect(store.getState().tokenPricing.supportedVsCurrencies).toEqual([
+          'eur',
+          'gbp',
+        ]);
+      });
+    });
+
+    describe('setCurrencyChoiceExclusions', () => {
+      it('should set the currency choice exclusions list', () => {
+        const store = createStore();
+
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([
+            'rub',
+            'ves',
+          ]),
+        );
+
+        expect(store.getState().tokenPricing.currencyChoiceExclusions).toEqual([
+          'rub',
+          'ves',
+        ]);
+      });
+
+      it('should start as an empty list', () => {
+        const store = createStore();
+        expect(store.getState().tokenPricing.currencyChoiceExclusions).toEqual(
+          [],
+        );
+      });
+
+      it('should replace a previously set list', () => {
+        const store = createStore();
+
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions(['rub']),
+        );
+        store.dispatch(
+          tokenPricingActions.tokenPricing.setCurrencyChoiceExclusions([]),
+        );
+
+        expect(store.getState().tokenPricing.currencyChoiceExclusions).toEqual(
+          [],
+        );
       });
     });
 

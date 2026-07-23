@@ -3,7 +3,7 @@ import {
   genericErrorResults,
   type TxExecutorImplementation,
 } from '@lace-contract/tx-executor';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { combineLatest, mergeMap, map, of, take } from 'rxjs';
 
 import type { AnyAddress } from '@lace-contract/addresses';

@@ -1,5 +1,5 @@
 import { Serialization } from '@cardano-sdk/core';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 /**
  * The signer replaces vkey witnesses with its own. For internal flows where the

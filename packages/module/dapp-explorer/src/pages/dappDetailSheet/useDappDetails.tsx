@@ -91,56 +91,58 @@ export const useDappDetails = (
     }
   }, [selectedDapp]);
 
-  if (!selectedDapp) return null;
+  return useMemo<DappDetailsTemplateProps | null>(() => {
+    if (!selectedDapp) return null;
 
-  const statistics = shouldShowStatistics
-    ? {
-        title: t('v2.dapp-explorer.header.statistics'),
-        subtitle: t('v2.dapp-explorer.header.last', {
-          period: '30d',
-        }),
-        labels: {
-          transactions: t('v2.dapp-explorer.header.transactions'),
-          volume: t('v2.dapp-explorer.header.volume'),
-          users: t('v2.dapp-explorer.header.users'),
-        },
-        values: {
-          transactions: '',
-          volume: '',
-          users: '',
-        },
-      }
-    : undefined;
-
-  const warning =
-    selectedDapp.scam_status?.toLowerCase() === 'scam'
-      ? t('v2.dapp-explorer.scam-warning')
+    const statistics = shouldShowStatistics
+      ? {
+          title: t('v2.dapp-explorer.header.statistics'),
+          subtitle: t('v2.dapp-explorer.header.last', {
+            period: '30d',
+          }),
+          labels: {
+            transactions: t('v2.dapp-explorer.header.transactions'),
+            volume: t('v2.dapp-explorer.header.volume'),
+            users: t('v2.dapp-explorer.header.users'),
+          },
+          values: {
+            transactions: '',
+            volume: '',
+            users: '',
+          },
+        }
       : undefined;
 
-  return {
-    testID: 'dapp-detail-sheet',
-    warning,
-    header: {
-      name: selectedDapp.name,
-      categories: selectedDapp.categories,
-      logoUrl: selectedDapp.logoUrl ?? undefined,
-      // TODO: re-implement ratings when tx-cart exists so multiple votes can be added to a single tx
-      rating: null,
-    },
-    statistics,
-    details: {
-      title: t('v2.dapp-explorer.header.details'),
-      description: selectedDapp.description ?? '',
-    },
-    socialLinks: {
-      title: t('v2.dapp-explorer.header.contact'),
-      links: selectedDapp.socialLinks,
-    },
-    primaryButton: {
-      label: t('v2.generic.btn.launchDapp'),
-      onPress: handleLaunchDapp,
-      testID: 'dapp-detail-sheet-launch-dapp-button',
-      preIconName: 'Link',
-    },
-  };
+    const warning =
+      selectedDapp.scam_status?.toLowerCase() === 'scam'
+        ? t('v2.dapp-explorer.scam-warning')
+        : undefined;
+
+    return {
+      testID: 'dapp-detail-sheet',
+      warning,
+      header: {
+        name: selectedDapp.name,
+        categories: selectedDapp.categories,
+        logoUrl: selectedDapp.logoUrl ?? undefined,
+        // TODO: re-implement ratings when tx-cart exists so multiple votes can be added to a single tx
+        rating: null,
+      },
+      statistics,
+      details: {
+        title: t('v2.dapp-explorer.header.details'),
+        description: selectedDapp.description ?? '',
+      },
+      socialLinks: {
+        title: t('v2.dapp-explorer.header.contact'),
+        links: selectedDapp.socialLinks,
+      },
+      primaryButton: {
+        label: t('v2.generic.btn.launchDapp'),
+        onPress: handleLaunchDapp,
+        testID: 'dapp-detail-sheet-launch-dapp-button',
+        preIconName: 'Link',
+      },
+    };
+  }, [selectedDapp, shouldShowStatistics, handleLaunchDapp, t]);
 };

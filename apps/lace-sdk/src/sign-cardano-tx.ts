@@ -12,7 +12,7 @@ import {
   type InMemoryWallet,
   type LazyInMemoryWallet,
 } from '@lace-contract/wallet-repo';
-import { ByteArray, Err, HexBytes, Ok } from '@lace-sdk/util';
+import { ByteArray, Err, HexBytes, Ok } from '@lace-lib/util';
 import { firstValueFrom, of, throwError } from 'rxjs';
 
 import type { GroupedAddress } from '@cardano-sdk/key-management';
@@ -29,7 +29,7 @@ import type { networkSelectors } from '@lace-contract/network';
 import type { SignerAuth, SignerFactory } from '@lace-contract/signer';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { walletsSelectors } from '@lace-contract/wallet-repo';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 
 type RequiredObservables = StateObservables<
   typeof addressesSelectors &

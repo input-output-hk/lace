@@ -91,6 +91,48 @@ describe('CoinGeckoProvider', () => {
       });
     });
 
+    it('resolves two same-ticker tokens to distinct prices by their AssetId', async () => {
+      const coinsList = [
+        {
+          id: 'wrong-dip',
+          symbol: 'dip',
+          name: 'Wrong DIP',
+          platforms: { cardano: 'aaaa444950' },
+        },
+        {
+          id: 'correct-dip',
+          symbol: 'dip',
+          name: 'Correct DIP',
+          platforms: { cardano: 'bbbb444950' },
+        },
+      ];
+      const dipA: TokenPriceRequest = {
+        priceId: CardanoTokenPriceId('aaaa444950'),
+        blockchain: 'Cardano',
+        identifier: 'dip',
+        contractAddress: 'aaaa444950',
+        fiatCurrency: 'USD',
+      };
+      const dipB: TokenPriceRequest = {
+        priceId: CardanoTokenPriceId('bbbb444950'),
+        blockchain: 'Cardano',
+        identifier: 'dip',
+        contractAddress: 'bbbb444950',
+        fiatCurrency: 'USD',
+      };
+
+      mockFetchResponse(coinsList);
+      mockFetchResponse({ 'wrong-dip': { usd: 0.0003 } });
+      mockFetchResponse({ 'correct-dip': { usd: 0.5 } });
+
+      const result = await firstValueFrom(provider.fetchPrices([dipA, dipB]));
+
+      expect(dipA.priceId).not.toBe(dipB.priceId);
+      expect(result).toHaveLength(2);
+      expect(result.find(r => r.priceId === dipA.priceId)?.price).toBe(0.0003);
+      expect(result.find(r => r.priceId === dipB.priceId)?.price).toBe(0.5);
+    });
+
     it('should request prices using request fiat currency', async () => {
       mockFetchResponse(mockCoinsList);
       mockFetchResponse({
@@ -135,6 +177,59 @@ describe('CoinGeckoProvider', () => {
       );
       expect(listCalls).toHaveLength(1);
       expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+
+    it('fetches the coins list once for concurrent requests', async () => {
+      fetchMock.mockImplementation(async (url: string) => ({
+        ok: true,
+        status: 200,
+        json: async () =>
+          url.includes('/coins/list')
+            ? mockCoinsList
+            : { cardano: { usd: 0.5 }, bitcoin: { usd: 45000 } },
+      }));
+
+      // Fire both before either resolves: they must share one coins-list fetch.
+      await Promise.all([
+        firstValueFrom(provider.fetchPrices([createRequest('ada')])),
+        firstValueFrom(provider.fetchPrices([createRequest('btc', 'Bitcoin')])),
+      ]);
+
+      const listCalls = fetchMock.mock.calls.filter((call: unknown[]) =>
+        (call[0] as string).includes('/coins/list'),
+      );
+      expect(listCalls).toHaveLength(1);
+    });
+
+    it('fetches the coins list once when prices and history are fetched together', async () => {
+      // Reproduces wallet activation: a price fetch and per-range history
+      // fetches fire concurrently and must not each re-download the list.
+      fetchMock.mockImplementation(async (url: string) => ({
+        ok: true,
+        status: 200,
+        json: async () => {
+          if (url.includes('/coins/list')) return mockCoinsList;
+          if (url.includes('/market_chart/range')) {
+            return { prices: [[1_700_000_000_000, 0.5]] };
+          }
+          return { cardano: { usd: 0.5 } };
+        },
+      }));
+
+      await Promise.all([
+        firstValueFrom(provider.fetchPrices([createRequest('ada')])),
+        firstValueFrom(
+          provider.fetchPriceHistory([createRequest('ada')], '24H'),
+        ),
+        firstValueFrom(
+          provider.fetchPriceHistory([createRequest('ada')], '7D'),
+        ),
+      ]);
+
+      const listCalls = fetchMock.mock.calls.filter((call: unknown[]) =>
+        (call[0] as string).includes('/coins/list'),
+      );
+      expect(listCalls).toHaveLength(1);
     });
 
     it('should match tokens by blockchain availability and prefer specific matches', async () => {
@@ -185,6 +280,99 @@ describe('CoinGeckoProvider', () => {
       expect(priceCalls[0]?.[0]).not.toContain(',');
       expect(priceCalls[1]?.[0]).toContain('ids=bitcoin');
       expect(priceCalls[1]?.[0]).not.toContain(',');
+    });
+  });
+
+  describe('fetchSupportedCurrencies', () => {
+    it('should return currencies from the API', async () => {
+      const currencies = ['usd', 'eur', 'gbp'];
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => currencies,
+      });
+
+      const result = await firstValueFrom(provider.fetchSupportedCurrencies());
+
+      expect(result).toEqual(currencies);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${testBaseUrl}/simple/supported_vs_currencies`,
+      );
+    });
+
+    it('should cache the result and not refetch on subsequent calls', async () => {
+      const currencies = ['usd', 'eur'];
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => currencies,
+      });
+
+      const first = await firstValueFrom(provider.fetchSupportedCurrencies());
+      const second = await firstValueFrom(provider.fetchSupportedCurrencies());
+
+      expect(first).toEqual(currencies);
+      expect(second).toEqual(currencies);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('refetches after the cache TTL expires so a dropped currency is picked up', async () => {
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(0);
+      fetchMock
+        .mockResolvedValueOnce({ ok: true, json: async () => ['usd', 'eur'] })
+        .mockResolvedValueOnce({ ok: true, json: async () => ['usd'] });
+
+      expect(await firstValueFrom(provider.fetchSupportedCurrencies())).toEqual(
+        ['usd', 'eur'],
+      );
+
+      // Within the 1h TTL → served from cache, no new request.
+      nowSpy.mockReturnValue(59 * 60 * 1000);
+      expect(await firstValueFrom(provider.fetchSupportedCurrencies())).toEqual(
+        ['usd', 'eur'],
+      );
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      // Past the TTL → refetches and reflects CoinGecko dropping 'eur'.
+      nowSpy.mockReturnValue(61 * 60 * 1000);
+      expect(await firstValueFrom(provider.fetchSupportedCurrencies())).toEqual(
+        ['usd'],
+      );
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('should propagate errors from the API', async () => {
+      fetchMock.mockResolvedValueOnce({ ok: false, status: 429 });
+
+      await expect(
+        firstValueFrom(provider.fetchSupportedCurrencies()),
+      ).rejects.toThrow('CoinGecko rate limit exceeded');
+    });
+
+    it('re-fetches on resubscription so retryBackoff can recover (defer)', async () => {
+      // First subscription fails; a resubscription (what retryBackoff does)
+      // must issue a NEW request rather than replay one settled promise.
+      fetchMock
+        .mockResolvedValueOnce({ ok: false, status: 429 })
+        .mockResolvedValueOnce({ ok: true, json: async () => ['usd'] });
+
+      const supported$ = provider.fetchSupportedCurrencies();
+      await expect(firstValueFrom(supported$)).rejects.toThrow();
+      const result = await firstValueFrom(supported$);
+
+      expect(result).toEqual(['usd']);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not cache an empty result (refetches on the next call)', async () => {
+      fetchMock
+        .mockResolvedValueOnce({ ok: true, json: async () => [] })
+        .mockResolvedValueOnce({ ok: true, json: async () => ['usd'] });
+
+      const first = await firstValueFrom(provider.fetchSupportedCurrencies());
+      const second = await firstValueFrom(provider.fetchSupportedCurrencies());
+
+      expect(first).toEqual([]);
+      expect(second).toEqual(['usd']);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
     });
   });
 

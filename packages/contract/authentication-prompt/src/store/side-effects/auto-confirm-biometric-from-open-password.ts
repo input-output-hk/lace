@@ -31,15 +31,17 @@ export const makeAutoConfirmBiometricFromOpenPassword =
     const confirmed$ = of(actions.authenticationPrompt.confirmedBiometric());
 
     return firstStateOfStatus(selectState$, 'OpenBiometric').pipe(
-      switchMap(() =>
-        deferBiometricExtension
+      switchMap(() => {
+        return deferBiometricExtension
           ? deferBiometricExtension
               .createWaitUntilBiometricPromptAllowed()
               .pipe(
                 take(1),
-                switchMap(() => confirmed$),
+                switchMap(() => {
+                  return confirmed$;
+                }),
               )
-          : confirmed$,
-      ),
+          : confirmed$;
+      }),
     );
   };

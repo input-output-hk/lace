@@ -1,10 +1,6 @@
 import { useAnalytics } from '@lace-contract/analytics';
-import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
-import { useTranslation } from '@lace-contract/i18n';
-import {
-  DEFAULT_CURRENCY_PREFERENCE,
-  type CurrencyPreference,
-} from '@lace-contract/token-pricing';
+import { useTranslation, type I18nMessages } from '@lace-contract/i18n';
+import { DEFAULT_CURRENCY_PREFERENCE } from '@lace-contract/token-pricing';
 import { NavigationControls } from '@lace-lib/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -20,30 +16,25 @@ export const useFiatCurrencySheet = () => {
     'tokenPricing.setCurrencyPreference',
   );
 
-  // Read supported currencies from feature flags
-  const loadedFeatures = useLaceSelector('features.selectLoadedFeatures');
-  const supportedCurrencies = useMemo<CurrencyPreference[]>(() => {
-    const featureFlags = loadedFeatures?.featureFlags || [];
-    const currencyFlag = featureFlags.find(
-      (flag: FeatureFlag) =>
-        flag.key === FeatureFlagKey('SUPPORTED_CURRENCIES'),
-    ) as FeatureFlag<{ currencies: CurrencyPreference[] }> | undefined;
-
-    const currencies = currencyFlag?.payload?.currencies;
-
-    return Array.isArray(currencies)
-      ? currencies
-      : [DEFAULT_CURRENCY_PREFERENCE];
-  }, [loadedFeatures]);
+  // Authoritative, already-filtered list (CoinGecko support + hide-list applied
+  // in the selector) — do not re-filter here.
+  const supportedCurrencies = useLaceSelector(
+    'tokenPricing.selectSupportedCurrencyPreferences',
+  );
 
   const resolvedSelectedCurrency = useMemo(() => {
-    const isSupported = supportedCurrencies.some(
-      c => c.name === selectedCurrencyFromState?.name,
+    if (
+      supportedCurrencies.some(c => c.name === selectedCurrencyFromState?.name)
+    ) {
+      return selectedCurrencyFromState;
+    }
+    return (
+      supportedCurrencies.find(
+        c => c.name === DEFAULT_CURRENCY_PREFERENCE.name,
+      ) ??
+      supportedCurrencies[0] ??
+      DEFAULT_CURRENCY_PREFERENCE
     );
-
-    return isSupported
-      ? selectedCurrencyFromState
-      : DEFAULT_CURRENCY_PREFERENCE;
   }, [selectedCurrencyFromState, supportedCurrencies]);
 
   const [temporarySelectedCurrency, setTemporarySelectedCurrency] = useState(
@@ -54,13 +45,14 @@ export const useFiatCurrencySheet = () => {
 
   useEffect(() => {
     setTemporarySelectedCurrency(currentValue => {
-      if (currentValue?.name === resolvedSelectedCurrency?.name) {
-        return currentValue;
-      }
+      const isTemporaryStillSupported = supportedCurrencies.some(
+        c => c.name === currentValue?.name,
+      );
+      if (isTemporaryStillSupported) return currentValue;
       return resolvedSelectedCurrency;
     });
     initialCurrencyRef.current = resolvedSelectedCurrency;
-  }, [resolvedSelectedCurrency]);
+  }, [resolvedSelectedCurrency, supportedCurrencies]);
 
   const handleCurrencySelect = useCallback(
     (currencyCode: string) => {
@@ -86,12 +78,12 @@ export const useFiatCurrencySheet = () => {
     trackEvent('currency sheet | confirm | press', {
       currency: temporarySelectedCurrency?.name,
     });
-    if (temporarySelectedCurrency?.name !== resolvedSelectedCurrency?.name) {
+    if (temporarySelectedCurrency?.name !== selectedCurrencyFromState?.name) {
       setCurrency(temporarySelectedCurrency);
     }
     NavigationControls.closeSheet();
   }, [
-    resolvedSelectedCurrency,
+    selectedCurrencyFromState,
     setCurrency,
     temporarySelectedCurrency,
     trackEvent,
@@ -104,11 +96,18 @@ export const useFiatCurrencySheet = () => {
 
   const radioOptions = useMemo(
     () =>
-      supportedCurrencies.map(currency => ({
-        label: currency.name,
-        value: currency.name,
-      })),
-    [supportedCurrencies],
+      supportedCurrencies.map(currency => {
+        const translationKey =
+          `v2.sheets.fiatCurrency.currencyFullName.${currency.name}` as keyof I18nMessages;
+        const fullName = t(translationKey);
+        return {
+          label: currency.name,
+          value: currency.name,
+          description:
+            fullName !== (translationKey as string) ? fullName : undefined,
+        };
+      }),
+    [supportedCurrencies, t],
   );
 
   return {

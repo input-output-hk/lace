@@ -44,12 +44,11 @@ export {
   BlockfrostTxSubmitProvider,
   BlockfrostUtxoProvider,
 } from './blockfrost';
-export { BlockfrostToCardanoSDK } from './blockfrost/blockfrost-to-cardano-sdk';
-
 export {
+  BlockfrostToCardanoSDK,
   createBlockfrostHttpClient,
   type CreateBlockfrostHttpClientProps,
-} from './create-blockfrost-http-client';
+} from '@lace-lib/cardano-provider-core';
 
 export { HttpClient, isNotFoundError } from '@lace-lib/util-provider';
 export type { RateLimiter } from '@lace-lib/util-provider';

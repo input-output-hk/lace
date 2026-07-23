@@ -1,9 +1,9 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
+import { BigNumber, Err, Ok, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber, Err, Ok, Timestamp } from '@lace-sdk/util';
 import { defer, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

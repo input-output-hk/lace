@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/key-management": "0.29.13",
+    "@cardano-sdk/key-management": "0.29.18",
     "@lace-contract/address-book": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app-lock": "*",
@@ -18,13 +18,14 @@
     "@lace-contract/tokens": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
     "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-render": "*",
-    "@lace-sdk/util": "*",
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {
-    "@cardano-sdk/web-extension": "0.39.40",
+    "@cardano-sdk/web-extension": "0.39.45",
     "@lace-lib/util-dev": "*",
     "@types/zxcvbn": "4.4.5"
   }

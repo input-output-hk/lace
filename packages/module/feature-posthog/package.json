@@ -15,8 +15,8 @@
     "@lace-contract/storage": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-lib/util-render": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*",
+    "@lace-lib/util-render": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

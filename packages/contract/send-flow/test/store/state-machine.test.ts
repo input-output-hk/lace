@@ -1,6 +1,6 @@
 import { TokenId } from '@lace-contract/tokens';
+import { BigNumber } from '@lace-lib/util';
 import { makeStateMachineExecutor } from '@lace-lib/util-dev';
-import { BigNumber } from '@lace-sdk/util';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createFormInitialState } from '../../src/store/form-initial-state';

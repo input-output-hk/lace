@@ -4,7 +4,7 @@ import {
   BitcoinNetwork,
 } from '@lace-contract/bitcoin-context';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 import { describe, expect, it } from 'vitest';
 

@@ -1,6 +1,6 @@
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { WalletId, WalletType, AccountId } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import type { InMemoryWallet } from '@lace-contract/wallet-repo';
 

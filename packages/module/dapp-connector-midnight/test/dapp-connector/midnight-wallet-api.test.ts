@@ -14,7 +14,7 @@ import { MidnightWalletApi } from '../../src/midnight-wallet-api';
 import { testWalletApi, testWalletProperties } from './testWallet';
 
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
-import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
+import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 import type { Mock } from 'vitest';
 
 export const stubAuthenticator = () => {
@@ -94,16 +94,15 @@ describe('MidnightWalletApi', () => {
       expect(decodedApi).toHaveProperty('hintUsage');
     });
 
-    it('resolves with decoded api when dapp is already approved', async () => {
-      (authenticator.haveAccess as Mock).mockResolvedValue(true);
+    it('re-requests access on every connect, even when already approved', async () => {
+      (authenticator.requestAccess as Mock).mockResolvedValue(true);
       const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
-      expect(authenticator.requestAccess).not.toHaveBeenCalled();
+      expect(authenticator.requestAccess).toHaveBeenCalled();
       expect(decodedApi).toHaveProperty('getUnshieldedBalances');
       expect(decodedApi).toHaveProperty('getShieldedBalances');
     });
 
     it('throws APIError when access is not granted', async () => {
-      (authenticator.haveAccess as Mock).mockResolvedValue(false);
       (authenticator.requestAccess as Mock).mockResolvedValue(false);
       await expect(
         walletApi.connect(NetworkId.NetworkId.Preview),
@@ -171,27 +170,9 @@ describe('MidnightWalletApi', () => {
       expect(authenticator.requestAccess).not.toHaveBeenCalled();
     });
 
-    it('throws APIError with InternalError when authenticator throws NoWalletAvailable via haveAccess', async () => {
-      (authenticator.haveAccess as Mock).mockRejectedValue(
-        new AuthenticatorError(
-          AuthenticatorErrorCode.NoWalletAvailable,
-          'No wallet available for Midnight',
-        ),
-      );
-
-      await expect(
-        walletApi.connect(NetworkId.NetworkId.Preview),
-      ).rejects.toThrow(
-        new APIError(
-          ErrorCodes.InternalError,
-          'No Midnight wallet available. Please create or restore a wallet first.',
-        ),
-      );
-    });
-
     it('does not call checkNetworkSupport when authenticator throws NoWalletAvailable', async () => {
       vi.mocked(testWalletApi.checkNetworkSupport).mockClear();
-      (authenticator.haveAccess as Mock).mockRejectedValue(
+      (authenticator.requestAccess as Mock).mockRejectedValue(
         new AuthenticatorError(
           AuthenticatorErrorCode.NoWalletAvailable,
           'No wallet available for Midnight',
@@ -229,7 +210,7 @@ describe('MidnightWalletApi', () => {
         name: 'AuthenticatorError',
         code: AuthenticatorErrorCode.NoWalletAvailable,
       });
-      (authenticator.haveAccess as Mock).mockRejectedValue(serializedError);
+      (authenticator.requestAccess as Mock).mockRejectedValue(serializedError);
 
       await expect(
         walletApi.connect(NetworkId.NetworkId.Preview),
@@ -242,7 +223,7 @@ describe('MidnightWalletApi', () => {
     });
 
     it('re-throws unexpected errors from authenticator', async () => {
-      (authenticator.haveAccess as Mock).mockRejectedValue(
+      (authenticator.requestAccess as Mock).mockRejectedValue(
         new Error('Network failure'),
       );
 

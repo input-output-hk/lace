@@ -1,0 +1,5 @@
+{
+  "tolerance": "permissive",
+  "shippedLanguages": ["en", "es", "ja"],
+  "translationsRoots": ["packages/contract/i18n/src/translations"]
+}

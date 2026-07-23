@@ -1,5 +1,5 @@
 import * as ecc from '@bitcoinerlab/secp256k1';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 
 import type {

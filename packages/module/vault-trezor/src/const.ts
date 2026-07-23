@@ -5,6 +5,15 @@ export const FEATURE_FLAG_TREZOR = FeatureFlagKey('VAULT_TREZOR');
 
 export const TREZOR_ONBOARDING_OPTION_ID = HardwareIntegrationId('trezor');
 
+/**
+ * Per-blockchain option id for the Bitcoin flavour of the Trezor tile. The
+ * device is one physical unit, but onboarding resolves a blockchain-specific
+ * option id so the blockchain picker can route the Bitcoin flow to the
+ * Bitcoin account connector.
+ */
+export const TREZOR_BITCOIN_ONBOARDING_OPTION_ID =
+  HardwareIntegrationId('trezor-bitcoin');
+
 // Trezor WebUSB firmware descriptor (Model T / Safe 3).
 export const TREZOR_USB_VENDOR_ID = 0x12_09;
 export const TREZOR_USB_PRODUCT_ID = 0x53_c1;

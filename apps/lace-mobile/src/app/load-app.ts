@@ -4,7 +4,7 @@ import {
   loadedSelectors,
 } from '@lace-contract/module';
 
-import { initializeStore } from './util';
+import { initializeStore, registerNativeArgon2id } from './util';
 
 import type { LaceStore } from './util';
 import type { ModuleInitProps, ViewId } from '@lace-contract/module';
@@ -15,6 +15,7 @@ export type Init = {
 };
 
 export const loadMobileScript = async (viewId: ViewId): Promise<Init> => {
+  registerNativeArgon2id();
   const [store, moduleInitProps] = await initializeStore(viewId);
   const initializers = await moduleInitProps.loadModules(
     'addons.loadInitializeMobileView',

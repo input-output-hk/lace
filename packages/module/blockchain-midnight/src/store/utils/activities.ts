@@ -1,7 +1,7 @@
 import { ActivityType } from '@lace-contract/activities';
 import { toUnshieldedTokenType } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';

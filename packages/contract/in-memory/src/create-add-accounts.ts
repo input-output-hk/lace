@@ -1,4 +1,4 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
+import { SecretBox } from '@lace-lib/core';
 import { CustomError } from 'ts-custom-error';
 
 import type {
@@ -99,7 +99,7 @@ export const createAddAccounts = <
       if (!wallet.encryptedRecoveryPhrase) {
         throw new RecoveryPhraseUnavailableError();
       }
-      const recoveryPhraseBytes = await emip3decrypt(
+      const recoveryPhraseBytes = await SecretBox.open(
         Buffer.from(wallet.encryptedRecoveryPhrase, 'hex'),
         password,
       );

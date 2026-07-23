@@ -7,8 +7,8 @@ import {
   CardanoNetworkId,
   CardanoPaymentAddress,
 } from '@lace-contract/cardano-context';
-import { HexBytes, None, Timestamp, Uri } from '@lace-sdk/util';
-import { Some } from '@lace-sdk/util';
+import { HexBytes, None, Timestamp, Uri } from '@lace-lib/util';
+import { Some } from '@lace-lib/util';
 import { catchError, from, map, of } from 'rxjs';
 
 import { HandleType } from '../value-objects';

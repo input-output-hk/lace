@@ -1,6 +1,10 @@
 import { Cardano } from '@cardano-sdk/core';
 import { logger } from '@cardano-sdk/util-dev';
-import { CardanoRewardAccount } from '@lace-contract/cardano-context';
+import {
+  CardanoRewardAccount,
+  type CardanoPaymentAddress,
+} from '@lace-contract/cardano-context';
+import { HttpClientError } from '@lace-lib/util-provider';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 
@@ -129,6 +133,88 @@ describe('BlockfrostUtxoProvider', () => {
     );
 
     expect(result.isErr()).toBe(true);
+  });
+
+  describe('getUtxosAtAddress', () => {
+    // cNIGHT dust-generator testnet script address (enterprise, addr_test1w…).
+    const scriptAddress = Cardano.PaymentAddress(
+      'addr_test1wplxjzranravtp574s2wz00md7vz9rzpucu252je68u9a8qzjheng',
+    ) as unknown as CardanoPaymentAddress;
+
+    it('returns the address UTxOs with inline datums populated', async () => {
+      mockResponses(request, [
+        [
+          `addresses/${scriptAddress}/utxos?order=desc&page=1&count=100`,
+          {
+            data: [
+              {
+                address: scriptAddress,
+                tx_hash:
+                  '768c63e27a1c816a83dc7b07e78af673b2400de8849ea7e7b734ae1333d100d2',
+                output_index: 1,
+                amount: [{ unit: 'lovelace', quantity: '5000000' }],
+                block: 'block',
+                data_hash: null,
+                // Plutus Constr 0 [] — a valid inline datum.
+                inline_datum: 'd87980',
+                reference_script_hash: null,
+              },
+            ],
+            status: 200,
+          },
+        ],
+      ]);
+
+      const result = await firstValueFrom(
+        provider.getUtxosAtAddress({ address: scriptAddress }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value).toHaveLength(1);
+        const [input, output] = result.value[0];
+        expect(input.index).toBe(1);
+        expect(output.address).toEqual(scriptAddress);
+        // The inline datum must round-trip — the script-spend build relies on it.
+        expect(output.datum).toBeDefined();
+        expect(output.datumHash).toBeUndefined();
+      }
+    });
+
+    it('treats a 404 (address never funded) as an empty UTxO set', async () => {
+      const notFound = new HttpClientError(404, 'Not Found');
+      notFound.status = 404;
+      mockResponses(request, [
+        [
+          `addresses/${scriptAddress}/utxos?order=desc&page=1&count=100`,
+          notFound,
+        ],
+      ]);
+
+      const result = await firstValueFrom(
+        provider.getUtxosAtAddress({ address: scriptAddress }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) expect(result.value).toEqual([]);
+    });
+
+    it('surfaces non-404 errors as Err', async () => {
+      const serverError = new HttpClientError(500, 'Server Error');
+      serverError.status = 500;
+      mockResponses(request, [
+        [
+          `addresses/${scriptAddress}/utxos?order=desc&page=1&count=100`,
+          serverError,
+        ],
+      ]);
+
+      const result = await firstValueFrom(
+        provider.getUtxosAtAddress({ address: scriptAddress }),
+      );
+
+      expect(result.isErr()).toBe(true);
+    });
   });
 
   it('should paginate across multiple pages', async () => {

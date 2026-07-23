@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { FeatureFlagKey } from '@lace-contract/feature';
 import { TokenId } from '@lace-contract/tokens';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 
 import { CardanoNetworkId } from './value-objects';
 
@@ -49,6 +49,8 @@ export const SECURITY_SCAN_WINDOW_START = Timestamp(
   Date.parse('2025-12-01T00:00:00Z'),
 );
 
+export const FEATURE_FLAG_CNIGHT_DESIGNATION =
+  FeatureFlagKey('CNIGHT_DESIGNATION');
 export const LOVELACE_TOKEN_ID = TokenId('lovelace');
 export const ADA_DECIMALS = 6;
 export const COLLATERAL_AMOUNT_LOVELACES = 5_000_000; // 5 ADA in lovelace

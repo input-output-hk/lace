@@ -7,7 +7,7 @@ import {
   type CardanoBip32AccountProps,
 } from '@lace-contract/cardano-context';
 import { WalletId } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it } from 'vitest';
 

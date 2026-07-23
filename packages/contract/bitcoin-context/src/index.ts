@@ -2,6 +2,7 @@ import './augmentations';
 
 export * from './contract';
 export * from './const';
+export * from './bip32-derivation';
 export * from './bitcoin-data-provider';
 export type * from './types';
 export { BitcoinNetwork, BitcoinAddress } from './types';

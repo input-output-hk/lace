@@ -5,7 +5,7 @@ import {
   MidnightUnshieldedAddress,
   NIGHT_TOKEN_ID,
 } from '@lace-contract/midnight-context';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { BehaviorSubject, NEVER, of } from 'rxjs';
 
 import type {

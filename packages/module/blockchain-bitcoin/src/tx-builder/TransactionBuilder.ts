@@ -1,4 +1,7 @@
-import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
+import {
+  BitcoinNetwork,
+  bitcoinFullDerivationPath,
+} from '@lace-contract/bitcoin-context';
 import { payments, script, Psbt } from 'bitcoinjs-lib';
 import * as bitcoin from 'bitcoinjs-lib';
 
@@ -29,6 +32,8 @@ export class TransactionBuilder {
   private readonly outputs: { address: string; value: number }[] = [];
   private utxos: BitcoinUTxO[] = [];
   private changeAddress?: string;
+  private changeDerivation?: DerivedAddress;
+  private changeMasterFingerprint?: string;
   private readonly signers: DerivedAddress[] = [];
   private inputSelector: InputSelector = new GreedyInputSelector();
   private opReturnData?: Buffer;
@@ -83,6 +88,26 @@ export class TransactionBuilder {
       );
     }
     this.changeAddress = changeAddress;
+    return this;
+  }
+
+  /**
+   * Sets the change address together with its derivation and the account master
+   * fingerprint, so the change output can be stamped with a BIP-32 key-origin an
+   * air-gapped device uses to recognize change. When the master fingerprint is
+   * absent (in-memory accounts) no key-origin is stamped.
+   *
+   * @param changeDerivation - The change address and its derivation path/pubkey.
+   * @param masterFingerprint - Device xfp as 8-char hex, or undefined.
+   * @returns The builder instance for chaining.
+   */
+  public setChange(
+    changeDerivation: DerivedAddress,
+    masterFingerprint?: string,
+  ): this {
+    this.setChangeAddress(changeDerivation.address);
+    this.changeDerivation = changeDerivation;
+    this.changeMasterFingerprint = masterFingerprint;
     return this;
   }
 
@@ -248,6 +273,8 @@ export class TransactionBuilder {
       });
     }
 
+    this.stampChangeOutput(coinselectOutputs);
+
     const opReturnOutput = this.opReturnData ? 1 : 0;
     const vBytes =
       selectedUTxOs.length * INPUT_SIZE +
@@ -262,5 +289,48 @@ export class TransactionBuilder {
       vBytes,
       signers: this.signers,
     };
+  }
+
+  /**
+   * Stamps the change output with a BIP-32 key-origin (master fingerprint +
+   * change pubkey + full derivation path) so an air-gapped device recognizes it
+   * as the wallet's own change instead of a third-party spend. No-ops unless a
+   * change output is present, its derivation was provided via setChange, and a
+   * master fingerprint is known (in-memory accounts skip stamping, leaving the
+   * PSBT byte-identical for that path).
+   *
+   * @param finalOutputs - The outputs selected by coin selection, in PSBT order.
+   */
+  private stampChangeOutput(
+    finalOutputs: { address: string; value: number }[],
+  ): void {
+    const { changeDerivation, changeMasterFingerprint } = this;
+    if (!changeDerivation || !changeMasterFingerprint) {
+      return;
+    }
+    // The coin selector always appends the change output last, so a self-send
+    // (recipient address equals change address) yields two outputs with that
+    // address; findLastIndex targets the change one, not the recipient.
+    const changeOutputIndex = finalOutputs.findLastIndex(
+      output => output.address === changeDerivation.address,
+    );
+    if (changeOutputIndex === -1) {
+      return;
+    }
+    this.psbt.updateOutput(changeOutputIndex, {
+      bip32Derivation: [
+        {
+          masterFingerprint: Buffer.from(changeMasterFingerprint, 'hex'),
+          pubkey: Buffer.from(changeDerivation.publicKeyHex, 'hex'),
+          path: bitcoinFullDerivationPath({
+            addressType: changeDerivation.addressType,
+            network: this.network,
+            account: changeDerivation.account,
+            chain: changeDerivation.chain,
+            index: changeDerivation.index,
+          }),
+        },
+      ],
+    });
   }
 }

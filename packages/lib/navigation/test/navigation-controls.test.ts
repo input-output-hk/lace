@@ -231,6 +231,58 @@ describe('NavigationControls', () => {
         }),
       );
     });
+
+    it('defers presenting a sheet route until an in-flight dismissal settles, then presents fresh', () => {
+      const mockNavigate = vi.mocked(navigationRef.navigate);
+      const mockIsReady = vi.mocked(navigationRef.isReady);
+      const mockGetRootState = vi.mocked(navigationRef.getRootState);
+      const mockGetCurrentRoute = vi.mocked(navigationRef.getCurrentRoute);
+      const mockAddListener = vi.mocked(navigationRef.addListener);
+
+      mockIsReady.mockReturnValue(true);
+
+      const openState = {
+        index: 1,
+        routes: [
+          { key: 'root', name: SheetRoutes.RootStack },
+          { key: 'send', name: SheetRoutes.Send, params: {} },
+        ],
+      } as unknown as NavigationState;
+      mockGetRootState.mockReturnValue(openState);
+      mockGetCurrentRoute.mockReturnValue({
+        key: 'send',
+        name: SheetRoutes.Send,
+      } as never);
+
+      NavigationControls.closeSheet();
+      expect(mockPopToTop).toHaveBeenCalledOnce();
+
+      NavigationControls.navigate(SheetRoutes.Send, {
+        accountId: 'acc-1' as AccountId,
+      });
+
+      // Must NOT present into the still-closing route.
+      expect(mockNavigate).not.toHaveBeenCalled();
+
+      const settledState = {
+        index: 0,
+        routes: [{ key: 'root', name: SheetRoutes.RootStack }],
+      } as unknown as NavigationState;
+      mockGetRootState.mockReturnValue(settledState);
+      mockGetCurrentRoute.mockReturnValue({
+        key: 'root',
+        name: SheetRoutes.RootStack,
+      } as never);
+
+      const latestStateListener = mockAddListener.mock.calls
+        .filter(([event]) => event === 'state')
+        .at(-1)?.[1] as (event: { data: { state: NavigationState } }) => void;
+      latestStateListener({ data: { state: settledState } });
+
+      expect(mockNavigate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: SheetRoutes.Send }),
+      );
+    });
   });
 
   describe('closeSheet', () => {

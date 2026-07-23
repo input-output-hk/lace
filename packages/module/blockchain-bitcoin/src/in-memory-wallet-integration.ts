@@ -1,4 +1,3 @@
-import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
 import {
   allSupportedNetworks,
   BitcoinAccountId,
@@ -8,7 +7,8 @@ import {
 } from '@lace-contract/bitcoin-context';
 import { createAddAccounts } from '@lace-contract/in-memory';
 import { createBlockchainNetworkTargetResolver } from '@lace-contract/network';
-import { HexBytes } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { HexBytes } from '@lace-lib/util';
 import * as bip39 from 'bip39';
 
 import { getExtendedPubKeys } from './common';
@@ -49,7 +49,7 @@ const resolveTargetNetworks = createBlockchainNetworkTargetResolver(
  * @param passphrase - The passphrase to use for encryption.
  */
 const encryptBitcoinSeed = async (seed: Buffer, passphrase: Uint8Array) => {
-  const seedEncrypted = await emip3encrypt(seed, passphrase);
+  const seedEncrypted = await SecretBox.seal(seed, passphrase);
   return HexBytes.fromByteArray(seedEncrypted);
 };
 
@@ -105,7 +105,7 @@ export const createAccounts: CreateInMemoryWalletAccounts<
   accountName,
   targetNetworks,
 }) => {
-  const seed = await emip3decrypt(
+  const seed = await SecretBox.open(
     Buffer.from(encryptedRootPrivateKey, 'hex'),
     password,
   );

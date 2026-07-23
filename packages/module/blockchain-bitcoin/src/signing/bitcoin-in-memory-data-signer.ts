@@ -1,6 +1,6 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
 import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
+import { SecretBox } from '@lace-lib/core';
 import { Redacted } from '@lace-lib/util-redacted';
 import * as bitcoin from 'bitcoinjs-lib';
 import { from, switchMap, throwError } from 'rxjs';
@@ -20,7 +20,7 @@ import type {
   BitcoinSignDataResult,
 } from '@lace-contract/bitcoin-context';
 import type { SignerAuth } from '@lace-contract/signer';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 interface BitcoinDataSignerProps {
@@ -74,7 +74,7 @@ export class BitcoinInMemoryDataSigner implements BitcoinDataSigner {
 
     try {
       const encryptedSeed = Buffer.from(this.#encryptedRootPrivateKey, 'hex');
-      const decryptedBytes = await emip3decrypt(encryptedSeed, authSecret);
+      const decryptedBytes = await SecretBox.open(encryptedSeed, authSecret);
       rootPrivateKey = Redacted.make(Buffer.from(decryptedBytes));
 
       const rootKeyPair = deriveAccountRootKeyPair({

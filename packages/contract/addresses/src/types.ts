@@ -1,12 +1,12 @@
 import type { AddressAlias, AddressAliasType } from './value-objects';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { Address } from '@lace-lib/core';
+import type { Timestamp, Option, Uri } from '@lace-lib/util';
 import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
-import type { Timestamp, Option, Uri } from '@lace-sdk/util';
 import type { Observable } from 'rxjs';
-import type { Tagged } from 'type-fest';
 
-export type Address = Tagged<string, 'Address'>;
+export type { Address };
 
 export interface AnyBlockchainAddress<Data = unknown> {
   address: Address;

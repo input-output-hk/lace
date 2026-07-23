@@ -1,6 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, it, expect } from 'vitest';
 
 import { getActivityTypeFromDelegationEntry } from '../../../src/store/helpers/get-activity-type-from-delegation-entry';

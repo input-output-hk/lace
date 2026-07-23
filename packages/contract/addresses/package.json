@@ -8,7 +8,8 @@
   "dependencies": {
     "@lace-contract/module": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/core": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*"
   }
 }

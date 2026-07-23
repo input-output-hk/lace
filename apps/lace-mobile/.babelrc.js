@@ -11,7 +11,6 @@ module.exports = function (api) {
             '@lace-contract': '../../packages/contract',
             '@lace-lib': '../../packages/lib',
             '@lace-module': '../../packages/module',
-            '@lace-sdk': '../../packages/sdk',
           },
         },
       ],

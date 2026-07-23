@@ -17,11 +17,11 @@ import {
   TIMEOUT_DURATION,
   useTheme,
 } from '@lace-lib/ui-toolkit';
+import { BigNumber } from '@lace-lib/util';
 import {
   formatAmountToLocale,
   getTokenPriceDisplayProps,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useWindowDimensions } from 'react-native';
 
@@ -37,6 +37,8 @@ export enum SelectedAssetView {
   Assets = 0,
   Nfts = 1,
 }
+
+const EMPTY_RESTRICTION_MESSAGES: string[] = [];
 
 export const useAddAssets = (accountId: AccountId, blockchainName: string) => {
   const { t } = useTranslation();
@@ -248,17 +250,20 @@ export const useAddAssets = (accountId: AccountId, blockchainName: string) => {
     [trackEvent],
   );
 
-  const onToggleNftSelection = (index: number) => {
-    const nftKey = `${index}`;
-    setSelectedNfts(previous => {
-      const isCurrentlySelected = previous[nftKey] || false;
-      return {
-        ...previous,
-        [nftKey]: !isCurrentlySelected,
-      };
-    });
-    trackEvent('send | add assets sheet | toggle nft selection', { index });
-  };
+  const onToggleNftSelection = useCallback(
+    (index: number) => {
+      const nftKey = `${index}`;
+      setSelectedNfts(previous => {
+        const isCurrentlySelected = previous[nftKey] || false;
+        return {
+          ...previous,
+          [nftKey]: !isCurrentlySelected,
+        };
+      });
+      trackEvent('send | add assets sheet | toggle nft selection', { index });
+    },
+    [setSelectedNfts, trackEvent],
+  );
 
   const currentAccount = accounts.find(a => a.accountId === accountId);
 
@@ -277,28 +282,37 @@ export const useAddAssets = (accountId: AccountId, blockchainName: string) => {
 
   const isBitcoin = false; // TODO: handle isBitcoin
 
-  const restrictionMessages = txRestrictions?.tokenRestrictions.messages ?? [];
+  const restrictionMessages = useMemo(
+    () =>
+      txRestrictions?.tokenRestrictions.messages ?? EMPTY_RESTRICTION_MESSAGES,
+    [txRestrictions],
+  );
 
-  const labels = {
-    headerTitle: t('v2.send-flow.form.asset-select.title'),
-    selectedLabel: t('v2.send-flow.form.asset-select.selected-label'),
-    tokensLabel: t('v2.send-flow.form.asset-select.selected-label-tokens'),
-    nftsLabel: !isBitcoin
-      ? t('v2.send-flow.form.asset-select.selected-label-nfts')
-      : t('v2.send-flow.form.asset-select.selected-label-bitctoin-nfts'),
-    emptyStateMessage: t('v2.send-flow.form.asset-select.empty-state-message'),
-    cancelLabel: t('v2.send-flow.asset-select-cancel-button'),
-    confirmLabel: t('v2.send-flow.asset-select-confirm-button'),
-    restrictionMessages,
-  };
+  const labels = useMemo(
+    () => ({
+      headerTitle: t('v2.send-flow.form.asset-select.title'),
+      selectedLabel: t('v2.send-flow.form.asset-select.selected-label'),
+      tokensLabel: t('v2.send-flow.form.asset-select.selected-label-tokens'),
+      nftsLabel: !isBitcoin
+        ? t('v2.send-flow.form.asset-select.selected-label-nfts')
+        : t('v2.send-flow.form.asset-select.selected-label-bitctoin-nfts'),
+      emptyStateMessage: t(
+        'v2.send-flow.form.asset-select.empty-state-message',
+      ),
+      cancelLabel: t('v2.send-flow.asset-select-cancel-button'),
+      confirmLabel: t('v2.send-flow.asset-select-confirm-button'),
+      restrictionMessages,
+    }),
+    [t, isBitcoin, restrictionMessages],
+  );
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
     trackEvent('send | add assets sheet | close');
     // Navigate back to Send sheet
     navigate(SheetRoutes.Send, {
       accountId,
     });
-  };
+  }, [trackEvent, navigate, accountId]);
 
   const onConfirm = useCallback(() => {
     const nftTokens = availableTokens.filter(token => token.metadata?.isNft);
@@ -353,13 +367,22 @@ export const useAddAssets = (accountId: AccountId, blockchainName: string) => {
     accountId,
   ]);
 
-  const actions = {
-    onClose,
-    onAssetsSelectionChanged,
-    setSelectedAssetView,
-    onToggleNftSelection,
-    onConfirm,
-  };
+  const actions = useMemo(
+    () => ({
+      onClose,
+      onAssetsSelectionChanged,
+      setSelectedAssetView,
+      onToggleNftSelection,
+      onConfirm,
+    }),
+    [
+      onClose,
+      onAssetsSelectionChanged,
+      setSelectedAssetView,
+      onToggleNftSelection,
+      onConfirm,
+    ],
+  );
 
   const values = {
     selectedAssetView,

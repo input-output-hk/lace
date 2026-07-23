@@ -1,6 +1,6 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import type { Milliseconds } from '@lace-sdk/util';
+import type { Milliseconds } from '@lace-lib/util';
 
 export type ReportActivityChannel = {
   reportActivity: () => Promise<void>;

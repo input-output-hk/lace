@@ -1,8 +1,11 @@
 import { TrezorKeyAgent } from '@cardano-sdk/hardware-trezor';
 import { CommunicationType, KeyPurpose } from '@cardano-sdk/key-management';
 
+import { makeBitcoinHwAccountConnector } from '../bitcoin/hw-account-connector';
 import { cardanoAccountsFromXpub } from '../cardano-accounts-from-xpub';
 import { TREZOR_MANIFEST } from '../const';
+
+import { getTrezorBitcoinConnectWeb } from './trezor-bitcoin-connect-web';
 
 import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
@@ -54,6 +57,7 @@ const loadHwAccountConnector: ContextualLaceInit<
       });
     },
   },
+  makeBitcoinHwAccountConnector({ getConnect: getTrezorBitcoinConnectWeb }),
 ];
 
 export default loadHwAccountConnector;

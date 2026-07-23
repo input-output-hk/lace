@@ -2,8 +2,8 @@ import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
 import { TokenId } from '@lace-contract/tokens';
+import { BigNumber, Ok, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Ok, Timestamp } from '@lace-sdk/util';
 import { defer, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
@@ -47,6 +47,12 @@ const actions = {
 };
 
 const noFailureSelector = (_id: FailureId): Failure | undefined => undefined;
+
+// cNIGHT designation classification is gated behind the CNIGHT_DESIGNATION
+// flag (default off). These tests don't exercise designation, so an empty
+// loaded-features set keeps the flag off and the side-effect on its
+// pre-feature Send/Receive path.
+const emptyLoadedFeatures = { modules: [], featureFlags: [] };
 
 describe('cardano-context side effects', () => {
   const mockTxId =
@@ -205,6 +211,9 @@ describe('cardano-context side effects', () => {
               failures: {
                 selectFailureById$: cold('a', { a: noFailureSelector }),
               },
+              features: {
+                selectLoadedFeatures$: cold('a', { a: emptyLoadedFeatures }),
+              },
             },
             dependencies: {
               cardanoProvider: {
@@ -315,6 +324,9 @@ describe('cardano-context side effects', () => {
               failures: {
                 selectFailureById$: cold('a', { a: noFailureSelector }),
               },
+              features: {
+                selectLoadedFeatures$: cold('a', { a: emptyLoadedFeatures }),
+              },
             },
             dependencies: {
               cardanoProvider:
@@ -408,6 +420,9 @@ describe('cardano-context side effects', () => {
             },
             failures: {
               selectFailureById$: cold('a', { a: noFailureSelector }),
+            },
+            features: {
+              selectLoadedFeatures$: cold('a', { a: emptyLoadedFeatures }),
             },
           },
           dependencies: {
@@ -522,6 +537,9 @@ describe('cardano-context side effects', () => {
               }),
             },
             failures: { selectFailureById$ },
+            features: {
+              selectLoadedFeatures$: cold('a', { a: emptyLoadedFeatures }),
+            },
           },
           dependencies: {
             cardanoProvider: {

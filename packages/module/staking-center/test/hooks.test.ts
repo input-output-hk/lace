@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

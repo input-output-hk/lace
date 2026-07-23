@@ -14,6 +14,7 @@ import type {
   Dapp,
 } from '@lace-contract/dapp-connector';
 import type { View } from '@lace-contract/views';
+import type { AnyAccount, AnyWallet } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 import type { RunHelpers } from 'rxjs/testing';
 
@@ -30,6 +31,10 @@ type CompletedAction = Action<
   'authorizeDapp/completed'
 >;
 type FailedAction = Action<AuthorizeDappFailed, 'authorizeDapp/failed'>;
+type ConfirmConnectAction = Action<
+  { account: AnyAccount; dappId: DappId },
+  'midnightDappConnector/confirmConnect'
+>;
 
 const actions = {
   ...midnightDappConnectorActions,
@@ -72,6 +77,30 @@ describe('promptMidnightAuthorizeDapp', () => {
     dapp,
   });
 
+  const testAccount = {
+    accountId: 'midnight-account-0',
+    blockchainName: 'Midnight',
+    walletId: 'wallet-0',
+    metadata: { name: 'Midnight 0' },
+  } as unknown as AnyAccount;
+
+  const confirmConnectValue: ConfirmConnectAction = {
+    payload: { account: testAccount, dappId: dapp.id },
+    type: 'midnightDappConnector/confirmConnect',
+  };
+
+  const setSessionAccountExpected =
+    actions.midnightDappConnector.setSessionAccountForOrigin({
+      origin: dapp.origin,
+      accountId: testAccount.accountId,
+    });
+
+  const completedAuthorizedExpected = actions.authorizeDapp.completed({
+    authorized: true,
+    dapp,
+    blockchainName: 'Midnight',
+  });
+
   const makeDependencies = () => ({
     logger: {
       info: vi.fn(),
@@ -83,6 +112,29 @@ describe('promptMidnightAuthorizeDapp', () => {
     actions,
   });
 
+  const buildStateObservables = (
+    helpers: Readonly<RunHelpers>,
+    overrides: {
+      authorizedDapps?: Record<string, Array<{ dapp: { origin: string } }>>;
+      accounts?: AnyAccount[];
+      wallets?: AnyWallet[];
+    } = {},
+  ) => ({
+    dappConnector: {
+      selectAuthorizedDapps$: helpers.hot('a', {
+        a: overrides.authorizedDapps ?? {},
+      }),
+    },
+    wallets: {
+      selectActiveNetworkAccounts$: helpers.hot<AnyAccount[]>('a', {
+        a: overrides.accounts ?? [],
+      }),
+      selectAll$: helpers.hot<AnyWallet[]>('a', {
+        a: overrides.wallets ?? [],
+      }),
+    },
+  });
+
   const buildActionObservables = (
     helpers: Readonly<RunHelpers>,
     overrides: {
@@ -91,6 +143,7 @@ describe('promptMidnightAuthorizeDapp', () => {
       locationChanged$?: Observable<LocationChangedAction>;
       authorizeDappCompleted$?: Observable<CompletedAction>;
       authorizeDappFailed$?: Observable<FailedAction>;
+      confirmConnect$?: Observable<ConfirmConnectAction>;
     } = {},
   ) => ({
     authorizeDapp: {
@@ -98,6 +151,10 @@ describe('promptMidnightAuthorizeDapp', () => {
       completed$:
         overrides.authorizeDappCompleted$ ?? helpers.hot<CompletedAction>(''),
       failed$: overrides.authorizeDappFailed$ ?? helpers.hot<FailedAction>(''),
+    },
+    midnightDappConnector: {
+      confirmConnect$:
+        overrides.confirmConnect$ ?? helpers.hot<ConfirmConnectAction>(''),
     },
     views: {
       viewConnected$:
@@ -113,10 +170,114 @@ describe('promptMidnightAuthorizeDapp', () => {
     testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
       dependencies: makeDependencies(),
       actionObservables: buildActionObservables(helpers),
-      stateObservables: {},
+      stateObservables: buildStateObservables(helpers),
       assertion: sideEffect$ => {
         helpers.expectObservable(sideEffect$).toBe('- 100ms a', {
           a: openViewExpected,
+        });
+      },
+    }));
+  });
+
+  it('binds the selected account and completes authorized when confirmConnect emits', () => {
+    testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
+      dependencies: makeDependencies(),
+      actionObservables: buildActionObservables(helpers, {
+        viewConnected$: helpers.cold<ViewConnectedAction>('---b', {
+          b: viewConnectedValue,
+        }),
+        confirmConnect$: helpers.cold<ConfirmConnectAction>('-----c', {
+          c: confirmConnectValue,
+        }),
+      }),
+      stateObservables: buildStateObservables(helpers),
+      assertion: sideEffect$ => {
+        helpers.expectObservable(sideEffect$).toBe('- 100ms a 4ms (bc)', {
+          a: openViewExpected,
+          b: setSessionAccountExpected,
+          c: completedAuthorizedExpected,
+        });
+      },
+    }));
+  });
+
+  it('completes authorized when confirmConnect emits before the view connects', () => {
+    testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
+      dependencies: makeDependencies(),
+      actionObservables: buildActionObservables(helpers, {
+        confirmConnect$: helpers.cold<ConfirmConnectAction>('---c', {
+          c: confirmConnectValue,
+        }),
+      }),
+      stateObservables: buildStateObservables(helpers),
+      assertion: sideEffect$ => {
+        helpers.expectObservable(sideEffect$).toBe('- 100ms a 2ms (bc)', {
+          a: openViewExpected,
+          b: setSessionAccountExpected,
+          c: completedAuthorizedExpected,
+        });
+      },
+    }));
+  });
+
+  it('binds the account when confirm races a simultaneous popup close', () => {
+    testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
+      dependencies: makeDependencies(),
+      actionObservables: buildActionObservables(helpers, {
+        viewConnected$: helpers.cold<ViewConnectedAction>('---b', {
+          b: viewConnectedValue,
+        }),
+        confirmConnect$: helpers.cold<ConfirmConnectAction>('-----c', {
+          c: confirmConnectValue,
+        }),
+        viewDisconnected$: helpers.cold<ViewDisconnectedAction>('-----d', {
+          d: { payload: viewId, type: 'views/viewDisconnected' },
+        }),
+      }),
+      stateObservables: buildStateObservables(helpers),
+      assertion: sideEffect$ => {
+        helpers.expectObservable(sideEffect$).toBe('- 100ms a 4ms (bc)', {
+          a: openViewExpected,
+          b: setSessionAccountExpected,
+          c: completedAuthorizedExpected,
+        });
+      },
+    }));
+  });
+
+  it('ignores a confirmConnect emitted for a different dapp', () => {
+    testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
+      dependencies: makeDependencies(),
+      actionObservables: buildActionObservables(helpers, {
+        confirmConnect$: helpers.cold<ConfirmConnectAction>('---c', {
+          c: {
+            payload: { account: testAccount, dappId: DappId('other-dapp') },
+            type: 'midnightDappConnector/confirmConnect',
+          },
+        }),
+      }),
+      stateObservables: buildStateObservables(helpers),
+      assertion: sideEffect$ => {
+        helpers.expectObservable(sideEffect$).toBe('- 100ms a', {
+          a: openViewExpected,
+        });
+      },
+    }));
+  });
+
+  it('auto-grants without a picker for a persisted single-account wallet', () => {
+    testSideEffect(promptMidnightAuthorizeDapp, helpers => ({
+      dependencies: makeDependencies(),
+      actionObservables: buildActionObservables(helpers),
+      stateObservables: buildStateObservables(helpers, {
+        authorizedDapps: { Midnight: [{ dapp: { origin: dapp.origin } }] },
+        accounts: [testAccount],
+        wallets: [{ walletId: 'wallet-0' } as unknown as AnyWallet],
+      }),
+      assertion: sideEffect$ => {
+        helpers.expectObservable(sideEffect$).toBe('- 100ms (ab)', {
+          a: setSessionAccountExpected,
+          b: completedAuthorizedExpected,
         });
       },
     }));
@@ -133,7 +294,7 @@ describe('promptMidnightAuthorizeDapp', () => {
           c: { payload: viewId, type: 'views/viewDisconnected' },
         }),
       }),
-      stateObservables: {},
+      stateObservables: buildStateObservables(helpers),
       assertion: sideEffect$ => {
         helpers.expectObservable(sideEffect$).toBe('- 100ms a 7ms b', {
           a: openViewExpected,
@@ -157,7 +318,7 @@ describe('promptMidnightAuthorizeDapp', () => {
           },
         }),
       }),
-      stateObservables: {},
+      stateObservables: buildStateObservables(helpers),
       assertion: sideEffect$ => {
         helpers.expectObservable(sideEffect$).toBe('- 100ms a 7ms b', {
           a: openViewExpected,
@@ -184,7 +345,7 @@ describe('promptMidnightAuthorizeDapp', () => {
           },
         }),
       }),
-      stateObservables: {},
+      stateObservables: buildStateObservables(helpers),
       assertion: sideEffect$ => {
         helpers.expectObservable(sideEffect$).toBe('- 100ms a', {
           a: openViewExpected,
@@ -210,7 +371,7 @@ describe('promptMidnightAuthorizeDapp', () => {
           },
         }),
       }),
-      stateObservables: {},
+      stateObservables: buildStateObservables(helpers),
       assertion: sideEffect$ => {
         helpers.expectObservable(sideEffect$).toBe('- 100ms a', {
           a: openViewExpected,

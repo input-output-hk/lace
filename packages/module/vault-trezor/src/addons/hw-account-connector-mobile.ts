@@ -1,5 +1,7 @@
+import { makeBitcoinHwAccountConnector } from '../bitcoin/hw-account-connector';
 import { cardanoAccountsFromXpub } from '../cardano-accounts-from-xpub';
 import { getCardanoXpubViaDeepLink } from '../mobile/cardano-xpub';
+import { getTrezorConnect } from '../mobile/trezor-connect-bridge';
 
 import type { AvailableMobileAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
@@ -37,6 +39,7 @@ const loadHwAccountConnector: ContextualLaceInit<
       });
     },
   },
+  makeBitcoinHwAccountConnector({ getConnect: getTrezorConnect }),
 ];
 
 export default loadHwAccountConnector;

@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { CardanoRewardAccount } from '@lace-contract/cardano-context';
+import { BigNumber } from '@lace-lib/util';
 import { HttpClientError } from '@lace-lib/util-provider';
-import { BigNumber } from '@lace-sdk/util';
 import { firstValueFrom } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,7 +1,7 @@
-import { RemoteApiPropertyType } from '@lace-sdk/extension-messaging';
+import { RemoteApiPropertyType } from '@lace-lib/extension-messaging';
 
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
-import type { RemoteApiProperties } from '@lace-sdk/extension-messaging';
+import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 import type { Observable } from 'rxjs';
 
 export type SupportedNetworkIds$ = Observable<MidnightSDKNetworkId[]>;

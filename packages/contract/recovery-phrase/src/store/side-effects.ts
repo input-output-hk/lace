@@ -1,6 +1,6 @@
-import { emip3decrypt } from '@cardano-sdk/key-management';
 import { WalletType } from '@lace-contract/wallet-repo';
-import { ByteArray } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray } from '@lace-lib/util';
 import { switchMap, from, take, tap } from 'rxjs';
 
 import {
@@ -40,7 +40,7 @@ export const createRecoveryPhraseSideEffect =
             switchMap(() =>
               accessAuthSecret(authSecret =>
                 from(
-                  emip3decrypt(
+                  SecretBox.open(
                     ByteArray.fromHex(encryptedRecoveryPhrase),
                     authSecret,
                   ).then(ByteArray),

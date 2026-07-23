@@ -2,8 +2,7 @@
  * Tests for error classification in biometric authentication flow.
  * These test the discriminateSecureStoreError function through side effect integration.
  */
-import { of } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of, toArray } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import {
@@ -64,7 +63,7 @@ describe('discriminateSecureStoreError - error classification', () => {
           t: mockTranslation,
           localAuthentication: createMockLocalAuth(),
         } as unknown as Parameters<typeof sideEffect>[2],
-      ),
+      ).pipe(toArray()),
     );
   };
 
@@ -73,14 +72,18 @@ describe('discriminateSecureStoreError - error classification', () => {
       const result = await runErrorClassificationTest(
         'User canceled authentication',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('classifies "user denied" as cancelled', async () => {
       const result = await runErrorClassificationTest(
         'User denied the request',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
   });
 
@@ -89,32 +92,48 @@ describe('discriminateSecureStoreError - error classification', () => {
       const result = await runErrorClassificationTest(
         'Too many attempts. Try again later.',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('classifies "biometric locked" as lockout', async () => {
       const result = await runErrorClassificationTest(
         'Biometric locked. Please wait.',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
+
     it('classifies "key permanently invalidated" as lockout', async () => {
       const result = await runErrorClassificationTest(
         'Key permanently invalidated due to biometric change',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
   });
 
   describe('auth_failed errors - allows retry', () => {
     it('classifies "authentication failed" as auth_failed', async () => {
       const result = await runErrorClassificationTest('Authentication failed');
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'auth_failed',
         }),
-      );
+      ]);
     });
   });
 
@@ -123,14 +142,24 @@ describe('discriminateSecureStoreError - error classification', () => {
       const result = await runErrorClassificationTest(
         'No user authentication method configured for this device',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
 
     it('classifies "no secure lock screen" as not_available', async () => {
       const result = await runErrorClassificationTest(
         'No secure lock screen has been set up',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
   });
 
@@ -139,7 +168,12 @@ describe('discriminateSecureStoreError - error classification', () => {
       const result = await runErrorClassificationTest(
         'No password stored in secure store',
       );
-      expect(result).toEqual(actions.authenticationPrompt.biometricCanceled());
+      expect(result).toEqual([
+        actions.authenticationPrompt.setDeviceAuthReady({
+          deviceAuthReady: false,
+        }),
+        actions.authenticationPrompt.biometricCanceled(),
+      ]);
     });
   });
 
@@ -148,12 +182,12 @@ describe('discriminateSecureStoreError - error classification', () => {
       const result = await runErrorClassificationTest(
         'Some unexpected error occurred',
       );
-      expect(result).toEqual(
+      expect(result).toEqual([
         actions.authenticationPrompt.verifiedBiometric({
           success: false,
           failureReason: 'unknown',
         }),
-      );
+      ]);
     });
   });
 });

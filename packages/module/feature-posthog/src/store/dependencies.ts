@@ -1,5 +1,5 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
-import { Seconds } from '@lace-sdk/util';
+import { Seconds } from '@lace-lib/util';
 import {
   BehaviorSubject,
   catchError,

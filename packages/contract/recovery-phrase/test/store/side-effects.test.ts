@@ -1,8 +1,8 @@
-import * as keyManagement from '@cardano-sdk/key-management';
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { WalletId, WalletType } from '@lace-contract/wallet-repo';
+import * as core from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,14 +13,17 @@ import type { OnMnemonicRequest } from '../../src/mnemonic-channel';
 import type { AccessAuthSecret } from '@lace-contract/authentication-prompt';
 import type { AnyWallet, InMemoryWallet } from '@lace-contract/wallet-repo';
 
-vi.mock('@cardano-sdk/key-management', async importOriginal => {
+vi.mock('@lace-lib/core', async importOriginal => {
   const original = await importOriginal<
     // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-    typeof import('@cardano-sdk/key-management')
+    typeof import('@lace-lib/core')
   >();
   return {
     ...original,
-    emip3decrypt: vi.fn().mockImplementation(original.emip3decrypt),
+    SecretBox: {
+      ...original.SecretBox,
+      open: vi.fn().mockImplementation(original.SecretBox.open),
+    },
   };
 });
 
@@ -32,7 +35,7 @@ const inMemoryWallet = {
   walletId,
   type: WalletType.InMemory,
   encryptedRecoveryPhrase: HexBytes.fromByteArray(
-    await keyManagement.emip3encrypt(recoveryPhrase, password),
+    await core.emip3encrypt(recoveryPhrase, password),
   ),
 } as InMemoryWallet;
 
@@ -222,7 +225,7 @@ describe('createRecoveryPhraseSideEffect', () => {
   });
 
   it('decrypts the recovery phrase using the auth secret after successful authentication', () => {
-    const emip3decryptSpy = vi.spyOn(keyManagement, 'emip3decrypt');
+    const openSpy = vi.spyOn(core.SecretBox, 'open');
     testSideEffect(
       createRecoveryPhraseSideEffect(onMnemonicRequest),
       ({ cold, flush }) => ({
@@ -239,7 +242,7 @@ describe('createRecoveryPhraseSideEffect', () => {
           sideEffect$.subscribe();
           flush();
 
-          expect(emip3decryptSpy).toHaveBeenCalledWith(
+          expect(openSpy).toHaveBeenCalledWith(
             ByteArray.fromHex(inMemoryWallet.encryptedRecoveryPhrase!),
             AuthSecret.fromUTF8('pass'),
           );
@@ -249,7 +252,7 @@ describe('createRecoveryPhraseSideEffect', () => {
   });
 
   it('exposes recovery phrase as ByteArray', () => {
-    vi.mocked(keyManagement.emip3decrypt).mockReturnValue({
+    vi.mocked(core.SecretBox.open).mockReturnValue({
       // @ts-expect-error just simulating promise here for the rxjs's from
       then: () => [recoveryPhrase],
     });

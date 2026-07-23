@@ -1,8 +1,8 @@
 import { CardanoTxId } from '@lace-contract/cardano-context';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import { filter, firstValueFrom, merge, map, timeout } from 'rxjs';
 
-import type { HexBytes, Result } from '@lace-sdk/util';
+import type { HexBytes, Result } from '@lace-lib/util';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Observable } from 'rxjs';
 

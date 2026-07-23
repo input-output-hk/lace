@@ -6,9 +6,8 @@ import {
   CardanoPaymentAddress,
   toContractAddress,
 } from '@lace-contract/cardano-context';
+import { toContractTokenMetadata } from '@lace-lib/cardano-provider-core';
 import { describe, expect, it } from 'vitest';
-
-import { toContractTokenMetadata } from '../../src/store/util';
 
 import type { AnyBlockchainAddress } from '@lace-contract/addresses';
 import type {

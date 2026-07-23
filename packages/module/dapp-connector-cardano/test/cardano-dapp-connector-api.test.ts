@@ -2,13 +2,14 @@ import { Cardano, Serialization } from '@cardano-sdk/core';
 import { AddressType, KeyRole } from '@cardano-sdk/key-management';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { of } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { APIErrorCode } from '../src/common/api-error';
 import { CardanoDappConnectorApi } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 
 import type { Paginate, SenderContext } from '../src/browser/types';
+import type { SigningResult } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { CardanoConfirmationCallback } from '../src/common/store/dependencies/create-confirmation-callback';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { Address, AnyAddress } from '@lace-contract/addresses';
@@ -58,7 +59,10 @@ vi.mock('@cardano-sdk/crypto', async () => {
   return {
     ...actual,
     SodiumBip32Ed25519: {
-      create: vi.fn().mockResolvedValue({}),
+      create: vi.fn().mockResolvedValue({
+        derivePublicKey: vi.fn().mockReturnValue('0'.repeat(128)),
+        getRawPublicKey: vi.fn().mockReturnValue('0'.repeat(64)),
+      }),
     },
     // Mock Ed25519PublicKey for DRep key hash computation
     Ed25519PublicKey: {
@@ -899,6 +903,205 @@ describe('CardanoDappConnectorApi', () => {
         'signData',
         { address: PAYMENT_ADDRESS_1, payload: 'deadbeef' },
       );
+    });
+
+    it('emits hw error keys when signing fails for a seed signer wallet', async () => {
+      const accountId = AccountId('acc-1');
+      const walletId = WalletId('wallet-1');
+
+      const mockAccount: AnyAccount = {
+        accountId,
+        walletId,
+        accountIndex: 0,
+        accountType: 'HardwareSeedSigner',
+        name: 'Test Account',
+        blockchainName: 'Cardano',
+        blockchainSpecific: {
+          accountIndex: 0,
+          chainId: {
+            networkId: 0,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          },
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+      } as unknown as AnyAccount;
+
+      const mockWallet = {
+        walletId,
+        name: 'Test Wallet',
+        type: WalletType.HardwareSeedSigner,
+        metadata: {},
+        blockchainSpecific: {},
+      } as unknown as InMemoryWallet;
+
+      const mockAddresses = [
+        {
+          address: PAYMENT_ADDRESS_1,
+          accountId,
+          blockchainName: 'Cardano',
+          data: {
+            type: 0,
+            index: 0,
+            networkId: 0,
+            accountIndex: 0,
+            rewardAccount: REWARD_ACCOUNT,
+            stakeKeyDerivationPath: { role: 2, index: 0 },
+          },
+        } as unknown as AnyAddress,
+      ];
+
+      const mockConfirmation = vi.fn().mockResolvedValue({
+        isConfirmed: true,
+      }) as unknown as CardanoConfirmationCallback;
+
+      const mockSignerFactory = {
+        createDataSigner: () => ({
+          signData: () =>
+            throwError(() => new Error('user rejected on device')),
+        }),
+      };
+
+      const signingResults: SigningResult[] = [];
+      const signingResult$ = new Subject<SigningResult>();
+      signingResult$.subscribe(result => signingResults.push(result));
+
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of(mockAddresses),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([mockAccount]),
+        allWallets$: of([mockWallet]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        userConfirmationRequest: mockConfirmation,
+        submitTransaction: vi.fn(),
+        signerFactory: mockSignerFactory as unknown as CardanoSignerFactory,
+        signingResult$,
+        authenticate: vi
+          .fn()
+          .mockReturnValue(of(true)) as unknown as Authenticate,
+        accessAuthSecret: vi
+          .fn()
+          .mockImplementation((callback: (secret: Uint8Array) => unknown) =>
+            callback(new Uint8Array([1, 2, 3])),
+          ) as unknown as AccessAuthSecret,
+      });
+
+      await expect(
+        api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender),
+      ).rejects.toThrow('user rejected on device');
+
+      expect(signingResults).toEqual([
+        {
+          type: 'error',
+          hwErrorKeys: {
+            title: 'hw-error.unauthorized.title',
+            subtitle: 'hw-error.unauthorized.subtitle',
+          },
+        },
+      ]);
+    });
+
+    it('emits error signing result when the signer factory throws for an unsupported account', async () => {
+      const accountId = AccountId('acc-1');
+      const walletId = WalletId('wallet-1');
+
+      const mockAccount: AnyAccount = {
+        accountId,
+        walletId,
+        accountIndex: 0,
+        accountType: 'InMemory',
+        name: 'Test Account',
+        blockchainName: 'Cardano',
+        blockchainSpecific: {
+          accountIndex: 0,
+          chainId: {
+            networkId: 0,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          },
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+      } as unknown as AnyAccount;
+
+      const mockWallet = {
+        walletId,
+        name: 'Test Wallet',
+        type: WalletType.InMemory,
+        metadata: {},
+        blockchainSpecific: {
+          Cardano: {
+            encryptedRootPrivateKey: 'a'.repeat(192),
+          },
+        },
+      } as unknown as InMemoryWallet;
+
+      const mockAddresses = [
+        {
+          address: PAYMENT_ADDRESS_1,
+          accountId,
+          blockchainName: 'Cardano',
+          data: {
+            type: 0,
+            index: 0,
+            networkId: 0,
+            accountIndex: 0,
+            rewardAccount: REWARD_ACCOUNT,
+            stakeKeyDerivationPath: { role: 2, index: 0 },
+          },
+        } as unknown as AnyAddress,
+      ];
+
+      const mockConfirmation = vi.fn().mockResolvedValue({
+        isConfirmed: true,
+      }) as unknown as CardanoConfirmationCallback;
+
+      const mockSignerFactory = {
+        createDataSigner: () => {
+          throw new Error(
+            'No signer factory registered for account type "InMemory"',
+          );
+        },
+      };
+
+      const signingResults: SigningResult[] = [];
+      const signingResult$ = new Subject<SigningResult>();
+      signingResult$.subscribe(result => signingResults.push(result));
+
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of(mockAddresses),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([mockAccount]),
+        allWallets$: of([mockWallet]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        userConfirmationRequest: mockConfirmation,
+        submitTransaction: vi.fn(),
+        signerFactory: mockSignerFactory as unknown as CardanoSignerFactory,
+        signingResult$,
+        authenticate: vi
+          .fn()
+          .mockReturnValue(of(true)) as unknown as Authenticate,
+        accessAuthSecret: vi
+          .fn()
+          .mockImplementation((callback: (secret: Uint8Array) => unknown) =>
+            callback(new Uint8Array([1, 2, 3])),
+          ) as unknown as AccessAuthSecret,
+      });
+
+      await expect(
+        api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender),
+      ).rejects.toThrow('No signer factory registered');
+
+      expect(signingResults).toEqual([
+        { type: 'error', hwErrorKeys: undefined },
+      ]);
     });
   });
 

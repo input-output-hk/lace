@@ -20,6 +20,7 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
     <SheetStack.Screen
       name={SheetRoutes.RecoveryPhraseVerification}
       component={RecoveryPhraseVerification}
+      options={{ detents: [1], scrollable: true }}
     />
     <SheetStack.Screen
       name={SheetRoutes.SuccessRecoveryPhraseVerification}

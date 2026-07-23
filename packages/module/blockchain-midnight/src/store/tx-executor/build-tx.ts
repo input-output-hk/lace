@@ -5,7 +5,7 @@ import {
   midnightWallets$,
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, HexBytes } from '@lace-sdk/util';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { nativeToken } from '@midnight-ntwrk/ledger-v8';
 import {
@@ -41,7 +41,7 @@ import type {
   TxExecutorImplementation,
   TxParamsBundle,
 } from '@lace-contract/tx-executor';
-import type { WithLogger } from '@lace-sdk/util';
+import type { WithLogger } from '@lace-lib/util';
 import type {
   DustRegistration,
   SignatureEnabled,

@@ -12,11 +12,6 @@ const { ApolloModule } = NativeModules as {
       index: number,
     ): Promise<string>;
     blake2bHash(inputHex: string, outLength: number): Promise<string>;
-    derivePublicKeySync(
-      extendedAccountPublicKeyHex: Crypto.Bip32PublicKeyHex,
-      derivationIndices: Crypto.BIP32Path,
-    ): Crypto.Bip32PublicKeyHex;
-    blake2bHashSync(inputHex: string, outLength: number): string;
   };
 };
 

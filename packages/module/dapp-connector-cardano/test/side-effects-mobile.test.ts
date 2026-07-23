@@ -1,7 +1,7 @@
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { Ok, Timestamp } from '@lace-lib/util';
 import { type DeepPartialTilObservable } from '@lace-lib/util-dev';
-import { Ok, Timestamp } from '@lace-sdk/util';
 import { firstValueFrom, of, take, toArray } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 

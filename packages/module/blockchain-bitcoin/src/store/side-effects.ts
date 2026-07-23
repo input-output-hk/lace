@@ -6,7 +6,7 @@ import {
   BitcoinNetworkId,
 } from '@lace-contract/bitcoin-context';
 import { whileActive } from '@lace-contract/wallet-active-state';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import {
   combineLatest,
   distinctUntilChanged,
@@ -52,7 +52,7 @@ import type {
   AccountId,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
-import type { Milliseconds, Result } from '@lace-sdk/util';
+import type { Milliseconds, Result } from '@lace-lib/util';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 
@@ -301,6 +301,7 @@ export const createBitcoinWallet = ({
     accountIndex: account.blockchainSpecific.accountIndex,
     extendedAccountPublicKeys:
       account.blockchainSpecific.extendedAccountPublicKeys,
+    masterFingerprint: account.blockchainSpecific.masterFingerprint,
     network: mapNetworkTypeToBitcoinNetwork(account.networkType),
     walletId: account.walletId,
   };

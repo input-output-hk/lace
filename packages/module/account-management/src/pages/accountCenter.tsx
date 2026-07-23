@@ -3,7 +3,7 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
 import { resolveAccountNameSuffix } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
-import { WalletType } from '@lace-contract/wallet-repo';
+import { isHardwareWallet, WalletType } from '@lace-contract/wallet-repo';
 import {
   NavigationControls,
   SheetRoutes,
@@ -19,6 +19,7 @@ import {
   Icon,
   PageHeaderSection,
   PageContainerTemplate,
+  Text,
   usePageHeaderCollapseScroll,
 } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useMemo } from 'react';
@@ -58,6 +59,9 @@ export const AccountCenter = ({
   const { trackEvent } = useAnalytics();
   const wallets: AnyWallet[] = useLaceSelector(
     'wallets.selectActiveNetworkWallets',
+  );
+  const walletsHiddenByNetwork: AnyWallet[] = useLaceSelector(
+    'wallets.selectWalletsHiddenByActiveNetwork',
   );
   const visibleAccountsResult = useLaceSelector(
     'wallets.selectActiveNetworkAccounts',
@@ -163,6 +167,8 @@ export const AccountCenter = ({
     () => ({
       [WalletType.HardwareLedger]: <Icon name="HardwareWallet" />,
       [WalletType.HardwareTrezor]: <Icon name="HardwareWallet" />,
+      [WalletType.HardwareSeedSigner]: <Icon name="HardwareWallet" />,
+      [WalletType.HardwareKeystone]: <Icon name="HardwareWallet" />,
       [WalletType.InMemory]: <Icon name="BinaryCode" />,
       [WalletType.LazyInMemory]: <Icon name="BinaryCode" />,
       [WalletType.MultiSig]: <Icon name="Wallet" />,
@@ -292,15 +298,51 @@ export const AccountCenter = ({
     [handleAddWallet, t, theme, collapseScrollY],
   );
 
+  const hasHiddenHardwareWallet = useMemo(
+    () => walletsHiddenByNetwork.some(isHardwareWallet),
+    [walletsHiddenByNetwork],
+  );
+  const hasHiddenSoftwareWallet = useMemo(
+    () => walletsHiddenByNetwork.some(wallet => !isHardwareWallet(wallet)),
+    [walletsHiddenByNetwork],
+  );
+
   const ListFooterComponent = useCallback(
     () => (
       <>
+        {walletsHiddenByNetwork.length > 0 ? (
+          <View
+            style={styles.networkEmptyState}
+            testID="account-center-network-empty-state">
+            <Text.Header>
+              {t('v2.account-management.network-empty-state.title')}
+            </Text.Header>
+            {hasHiddenHardwareWallet ? (
+              <Text.M>
+                {t('v2.account-management.network-empty-state.description')}
+              </Text.M>
+            ) : null}
+            {hasHiddenSoftwareWallet ? (
+              <Text.M>
+                {t(
+                  'v2.account-management.network-empty-state.description-software',
+                )}
+              </Text.M>
+            ) : null}
+          </View>
+        ) : null}
         {accountCenterWalletsUICustomisations.map(({ Wallets, key }) => (
           <Wallets key={key} />
         ))}
       </>
     ),
-    [accountCenterWalletsUICustomisations],
+    [
+      accountCenterWalletsUICustomisations,
+      walletsHiddenByNetwork,
+      hasHiddenHardwareWallet,
+      hasHiddenSoftwareWallet,
+      t,
+    ],
   );
 
   return (
@@ -342,5 +384,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: spacing.L,
+  },
+  networkEmptyState: {
+    gap: spacing.XS,
+    paddingVertical: spacing.M,
   },
 });

@@ -12,11 +12,11 @@
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
+    "@lace-lib/extension-messaging": "*",
     "@lace-lib/navigation": "*",
     "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-render": "*",
-    "@lace-sdk/extension-messaging": "*",
-    "@lace-sdk/util": "*",
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {

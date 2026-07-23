@@ -1,6 +1,6 @@
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { FolderId, TokenId } from '../../src';

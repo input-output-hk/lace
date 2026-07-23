@@ -149,6 +149,14 @@ export type CreateStoreResult<
   ActionCreators extends ScopedActionCreators,
 > = {
   actionObservables: ActionObservables<ActionCreators>;
+  /**
+   * Root state with every loaded slice at its reducer-initial value. Derived
+   * from the combined reducer, so it can never drift from the registered
+   * slices and contains only slices that are actually loaded. The extension
+   * SW→UI bridge uses it to seed first-paint `getState` with empty heavy
+   * reference catalogs (see `create-remote-store`).
+   */
+  initialState: State;
   stateObservables: StateObservables<Selectors>;
   store: Store<State, Action>;
   /** Completes all side-effect epics. Call on teardown to prevent zombie subscriptions. */
@@ -208,6 +216,18 @@ export const createStore = async <
       ),
     ),
   );
+
+  // Snapshot of every loaded slice at its reducer-initial value. Computed from
+  // the combined reducer (pure, side-effect free) so it stays in sync with the
+  // registered slices. persistReducer-wrapped slices return their inner initial
+  // value here (no `_persist` until a PERSIST/REHYDRATE action), which is fine:
+  // the only consumer (the extension bridge) seeds first-paint state with these
+  // and lets `state$` backfill the full slice.
+  // Cast: in this package's isolated typecheck `State` is the un-augmented
+  // empty interface, so the combined reducer's action type narrows to `never`.
+  const initialState = (reducer as Reducer<State>)(undefined, {
+    type: '@@lace/initial-state-snapshot',
+  });
 
   const toEpic =
     (sideEffect: AnyLaceSideEffect): LaceReduxObservableEpic =>
@@ -332,6 +352,7 @@ export const createStore = async <
   );
   return {
     store,
+    initialState,
     teardown: () => {
       epicTeardown$.next();
       epicTeardown$.complete();

@@ -2,11 +2,11 @@ import {
   isCardanoAddress,
   LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
+import { BigNumber } from '@lace-lib/util';
 import {
   createUICustomisation,
   formatAmountRawToDenominated,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 
 import type {
   ActivitiesItemUICustomisation,

@@ -326,10 +326,16 @@ export const formatRawToLocale = (
 
 export const rawToBigInt = (rawValue: string, decimals: number): bigint => {
   if (!rawValue || rawValue.trim() === '') return 0n;
-  const normalized = convertAmountToNormalized(rawValue, decimals);
-
-  const integerPart = parseInt(normalized.split('.')[0], 10);
-  return BigInt(integerPart || '0');
+  // Scale with BigNumber and take the integer part via toFixed: parseInt loses
+  // precision above 2^53 and BigNumber.toString() emits exponential notation at
+  // >=1e21, both corrupting large amounts (audit finding L-204). toFixed never
+  // emits exponential; ROUND_DOWN truncates toward zero as before. Non-finite
+  // values (NaN, +/-Infinity) would make BigInt() throw, so keep the 0n fallback.
+  const scaled = new BigNumberJs(rawValue).times(
+    new BigNumberJs(10).pow(decimals),
+  );
+  if (!scaled.isFinite()) return 0n;
+  return BigInt(scaled.toFixed(0, BigNumberJs.ROUND_DOWN));
 };
 
 export const bigIntToRaw = (bigIntValue: bigint, decimals: number): string => {

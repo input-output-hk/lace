@@ -1,6 +1,6 @@
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import { createInMemoryWalletEntityFactory } from '@lace-contract/onboarding-v2';
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 import { dummyLogger } from 'ts-log';
 
 import type { LaceWallet } from './create-lace-wallet';

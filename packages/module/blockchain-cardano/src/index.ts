@@ -39,7 +39,7 @@ import {
   walletRepoStoreContract,
 } from '@lace-contract/wallet-repo';
 
-import store from './store';
+import store from './store/full';
 
 import type {
   LaceModuleMap,

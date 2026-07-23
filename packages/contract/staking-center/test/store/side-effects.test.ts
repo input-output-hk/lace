@@ -4,8 +4,8 @@ import { Cardano } from '@cardano-sdk/core';
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -442,6 +442,143 @@ describe('staking-center side effects', () => {
                 result: submitResult,
               }),
             });
+          },
+        }),
+      );
+    });
+  });
+
+  // Marble: status transitions to an advanced state (frame 3) before the stale
+  // result lands (frame 5), so `dropStaleResult` must suppress it.
+  describe('drops stale results after the flow advances', () => {
+    const advancedState = {
+      status: 'Success',
+      accountId: testAccountId,
+      poolId: testPoolId,
+    } as DelegationFlowState;
+
+    it('drops "feeCalculationFailed" once the machine has left CalculatingFees', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeFeeCalculation({
+              buildDelegationTx: () =>
+                cold('-----a', {
+                  a: {
+                    success: false,
+                    error: new Error('late'),
+                  } as BuildDelegationTxResult,
+                }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            delegationFlow: {
+              selectDelegationFlowState$: cold('a--b', {
+                a: {
+                  status: 'CalculatingFees',
+                  accountId: testAccountId,
+                  poolId: testPoolId,
+                } as DelegationFlowState,
+                b: advancedState,
+              }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [testWallet] }),
+            },
+          },
+          dependencies: {
+            actions: stakingCenterActions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('');
+          },
+        }),
+      );
+    });
+
+    it('drops "confirmationCompleted" once the machine has left AwaitingConfirmation', () => {
+      const confirmResult: TxConfirmationResult = {
+        success: true,
+        serializedTx: testSerializedTx,
+      };
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDelegationAwaitingConfirmation({
+              confirmTx: (_, mapResult) =>
+                cold('-----a', { a: mapResult(confirmResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            delegationFlow: {
+              selectDelegationFlowState$: cold('a--b', {
+                a: {
+                  status: 'AwaitingConfirmation',
+                  accountId: testAccountId,
+                  poolId: testPoolId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  confirmButtonEnabled: false,
+                  deposit: testDeposit,
+                  fees: testFees,
+                } as DelegationFlowState,
+                b: advancedState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: stakingCenterActions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('');
+          },
+        }),
+      );
+    });
+
+    it('drops "processingResulted" once the machine has left Processing', () => {
+      const submitResult: TxSubmissionResult = {
+        success: false,
+        errorTranslationKeys: {
+          title: 'v2.staking.delegation.error.title',
+          subtitle: 'v2.staking.delegation.error.subtitle',
+        },
+      };
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDelegationProcessing({
+              submitTx: (_, mapResult) =>
+                cold('-----a', { a: mapResult(submitResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            delegationFlow: {
+              selectDelegationFlowState$: cold('a--b', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  poolId: testPoolId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  deposit: testDeposit,
+                  fees: testFees,
+                } as DelegationFlowState,
+                b: advancedState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: { ...stakingCenterActions, ...activitiesActions },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('');
           },
         }),
       );

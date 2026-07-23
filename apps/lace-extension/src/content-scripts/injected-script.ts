@@ -1,4 +1,4 @@
-import { createInjectedRuntime } from '@lace-sdk/extension-messaging';
+import { createInjectedRuntime } from '@lace-lib/extension-messaging';
 import '@lace-contract/dapp-connector';
 
 import { createContentScriptModuleLoader, logger } from '../util';

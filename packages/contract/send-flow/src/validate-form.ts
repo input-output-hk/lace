@@ -1,5 +1,5 @@
 import { type Token } from '@lace-contract/tokens';
-import { BigNumber, None } from '@lace-sdk/util';
+import { BigNumber, None } from '@lace-lib/util';
 import { of, map, mergeMap } from 'rxjs';
 
 import type {
@@ -14,7 +14,7 @@ import type {
 import type { Address, AddressAliasResolver } from '@lace-contract/addresses';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { Option } from '@lace-sdk/util';
+import type { Option } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 

@@ -2,6 +2,7 @@ import Foundation
 import ApolloLibrary
 import React
 import Blake2
+import Argon2Swift
 
 @objc(ApolloModule)
 class ApolloModule: NSObject {
@@ -47,6 +48,50 @@ class ApolloModule: NSObject {
       } catch {
         rejecter("CRYPTO_ERROR",
                  "blake2bHash falló: \(error.localizedDescription)",
+                 error)
+      }
+    }
+  }
+
+  /**
+   Derives a key from the given password and salt using Argon2id (version 1.3).
+   Byte parameters are hex-encoded; resolves with the hex-encoded derived key.
+   */
+  @objc func argon2id(
+    _ passwordHex: String,
+    saltHex: String,
+    memoryKb: NSNumber,
+    iterations: NSNumber,
+    parallelism: NSNumber,
+    outLen: NSNumber,
+    resolver: @escaping RCTPromiseResolveBlock,
+    rejecter: @escaping RCTPromiseRejectBlock
+  ) {
+    DispatchQueue.global(qos: .userInitiated).async {
+      do {
+        guard var passwordData = Data(hex: passwordHex),
+              let saltData = Data(hex: saltHex) else {
+          throw NSError(domain: "CryptoNative", code: 0,
+                        userInfo: [NSLocalizedDescriptionKey: "Invalid hex input"])
+        }
+        defer { passwordData.resetBytes(in: 0..<passwordData.count) }
+        let result = try Argon2Swift.hashPasswordBytes(
+          password: passwordData,
+          salt: Salt(bytes: saltData),
+          iterations: iterations.intValue,
+          memory: memoryKb.intValue,
+          parallelism: parallelism.intValue,
+          length: outLen.intValue,
+          type: .id,
+          version: .V13
+        )
+        var derivedKey = result.hashData()
+        let derivedKeyHex = derivedKey.hexEncodedString()
+        derivedKey.resetBytes(in: 0..<derivedKey.count)
+        resolver(derivedKeyHex)
+      } catch {
+        rejecter("ARGON2_ERROR",
+                 "Failed to compute argon2id: \(error.localizedDescription)",
                  error)
       }
     }

@@ -11,11 +11,11 @@ import {
   useSendFlow,
 } from '@lace-contract/send-flow';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
+import { BigNumber } from '@lace-lib/util';
 import {
   convertAmountToDenominated,
   valueToLocale,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import debounce from 'lodash/fp/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -419,19 +419,22 @@ export const useDustDesignationSheet = (
   const dustTokenTicker = getDustTokenTickerByNetwork(networkType);
   const nightTokenTicker = getNightTokenTickerByNetwork(networkType);
 
-  const copies = {
-    sheetTitle: t('designation-flow.drawer.title', { dustTokenTicker }),
-    formDescription: t('designation-flow.form.description', {
-      dustTokenTicker,
+  const copies = useMemo(
+    () => ({
+      sheetTitle: t('designation-flow.drawer.title', { dustTokenTicker }),
+      formDescription: t('designation-flow.form.description', {
+        dustTokenTicker,
+      }),
+      dustStartsLabel: t('designation-flow.form.dust-designation-starts'),
+      dustStartsValue: t('designation-flow.form.dust-designation-starts.value'),
+      estimatedFeeLabel: t('v2.send-flow.review-transaction.estimated-fee'),
+      designateButtonLabel: t('designation-flow.form.send-button'),
+      reviewTitle: t('v2.send-flow.review-transaction.sheet-header'),
+      designatingLabel: t('designation-flow.tx-info.token-label.pre-tx'),
+      nextButtonLabel: t('designation-flow.form.send-button'),
     }),
-    dustStartsLabel: t('designation-flow.form.dust-designation-starts'),
-    dustStartsValue: t('designation-flow.form.dust-designation-starts.value'),
-    estimatedFeeLabel: t('v2.send-flow.review-transaction.estimated-fee'),
-    designateButtonLabel: t('designation-flow.form.send-button'),
-    reviewTitle: t('v2.send-flow.review-transaction.sheet-header'),
-    designatingLabel: t('designation-flow.tx-info.token-label.pre-tx'),
-    nextButtonLabel: t('designation-flow.form.send-button'),
-  };
+    [t, dustTokenTicker],
+  );
 
   return {
     currentStep,

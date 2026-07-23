@@ -1,0 +1,100 @@
+import { Buffer } from 'buffer';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+import {
+  AirGappedQrExchangeCancelledError,
+  airGappedQrExchangeHook,
+} from '@lace-contract/air-gapped-qr-exchange';
+import { CardanoUrType } from '@lace-lib/cardano-seed-signer-protocol';
+import { of, throwError } from 'rxjs';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { exportAccounts } from '../../src/cardano/account-export';
+
+vi.mock('@lace-contract/cardano-context', () => ({
+  CardanoAccountId: (
+    walletId: string,
+    accountIndex: number,
+    networkMagic: number,
+  ) => `${walletId}-${accountIndex}-${networkMagic}`,
+  MasterFingerprint: (hex: string) => hex,
+  supportedNetworkIds: new Map([['cardano-1', 1]]),
+  getNetworkDetails: vi.fn(),
+}));
+
+/**
+ * Fixture-backed coverage for the onboarding account-export flow. Unlike
+ * account-export.test.ts (which encodes synthetic responses), this feeds the
+ * committed golden device bytes through the real parser so the module is proven
+ * against genuine Cardano SeedSigner companion evidence.
+ */
+interface Evidence {
+  account: {
+    response_cbor: string;
+    decoded: {
+      master_fingerprint: string;
+      keys: { account_index: number; xpub: string }[];
+    };
+  };
+}
+
+const evidence = JSON.parse(
+  readFileSync(
+    join(
+      __dirname,
+      '../../../../lib/cardano-seed-signer-protocol/test/fixtures/companion-evidence.json',
+    ),
+    'utf8',
+  ),
+) as Evidence;
+
+const fixtureResponseCbor = (): Uint8Array =>
+  new Uint8Array(Buffer.from(evidence.account.response_cbor, 'hex'));
+
+const triggerSpy = vi.spyOn(airGappedQrExchangeHook, 'trigger');
+
+vi.mock('uuid', () => ({
+  v4: () => '00000000-0000-0000-0000-000000000001',
+}));
+
+describe('exportAccounts (golden fixtures)', () => {
+  beforeEach(() => {
+    triggerSpy.mockReset();
+  });
+
+  it('parses the committed account-export response into the fixture xpub and fingerprint', async () => {
+    triggerSpy.mockReturnValue(
+      of({ urType: CardanoUrType.Account, cbor: fixtureResponseCbor() }),
+    );
+
+    const result = await exportAccounts([0]);
+
+    const expectedKey = evidence.account.decoded.keys[0];
+    expect(result.keys).toHaveLength(1);
+    expect(result.keys[0].accountIndex).toBe(expectedKey.account_index);
+    expect(result.keys[0].extendedAccountPublicKey).toBe(expectedKey.xpub);
+    expect(result.keys[0].masterFingerprint).toBe(
+      evidence.account.decoded.master_fingerprint,
+    );
+    expect(result.walletId).toBeTruthy();
+  });
+
+  it('propagates a cancelled exchange', async () => {
+    triggerSpy.mockReturnValue(
+      throwError(() => new AirGappedQrExchangeCancelledError()),
+    );
+
+    await expect(exportAccounts([0])).rejects.toBeInstanceOf(
+      AirGappedQrExchangeCancelledError,
+    );
+  });
+
+  it('throws on a malformed device response', async () => {
+    triggerSpy.mockReturnValue(
+      of({ urType: CardanoUrType.Account, cbor: new Uint8Array([0xa0]) }),
+    );
+
+    await expect(exportAccounts([0])).rejects.toThrow();
+  });
+});

@@ -4,8 +4,8 @@ import {
   LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
 import { makeBuildTx } from '@lace-contract/tx-executor';
+import { BigNumber } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
-import { BigNumber } from '@lace-sdk/util';
 import { of, switchMap, withLatestFrom } from 'rxjs';
 
 import type { CollateralFlowSideEffectParams } from './types';

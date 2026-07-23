@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { CardanoNetworkId } from '@lace-contract/cardano-context';
 import { BlockchainNetworkId } from '@lace-contract/network';
-import { None, Some } from '@lace-sdk/util';
+import { None, Some } from '@lace-lib/util';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as addressValidator from '../src/validate-address';

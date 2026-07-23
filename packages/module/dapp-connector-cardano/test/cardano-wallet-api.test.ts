@@ -18,7 +18,7 @@ import {
 
 import type { Cip30FullWalletApi } from '../src/browser/types';
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
-import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
+import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 
 // Mock browser globals for Node.js test environment
 Object.defineProperty(globalThis, 'location', {

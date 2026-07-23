@@ -199,6 +199,17 @@ export const NavigationControls = {
     let strategy: NavigateStrategy = 'push';
 
     if (!isStackRoute(route)) {
+      // A sheet dismissal is still settling; presenting now lands in the
+      // closing route and is swallowed. Defer until the cascade settles, then
+      // present fresh — dismissSheetsAndThen clears activeDismissal first, so
+      // this recurses without re-deferring.
+      if (activeDismissal) {
+        dismissSheetsAndThen(navigation, () => {
+          NavigationControls.navigate(route, params, options);
+        });
+        return;
+      }
+
       const rootState = navigation.getRootState() as
         | NavigationState
         | undefined;
@@ -407,7 +418,40 @@ export const handleInteractiveSheetDismiss = (
  * dismiss into a whole-stack close. Shared by every platform's Router so the
  * behaviour can't drift between them, and unit-testable in isolation.
  */
+/**
+ * Last reported on-screen Y position (dp) per presented sheet, keyed by route
+ * key, sourced from the TrueSheet navigator's `sheetPositionChange` events.
+ * On Android's new architecture, measurement APIs resolve from the shadow
+ * tree and don't account for where TrueSheet natively positions the sheet;
+ * overlay components (e.g. ui-toolkit's DropdownMenu Modal) offset their
+ * measured anchors by the focused sheet's position.
+ */
+const sheetPositionsByRouteKey = new Map<string, number>();
+
+export const getFocusedSheetPosition = (): number | undefined => {
+  const routeKey = navigationRef.current?.getCurrentRoute()?.key;
+  return routeKey === undefined
+    ? undefined
+    : sheetPositionsByRouteKey.get(routeKey);
+};
+
 export const sheetStackScreenListeners = {
+  sheetDidDismiss: (event: { target?: string }): void => {
+    if (event.target !== undefined) {
+      sheetPositionsByRouteKey.delete(event.target);
+    }
+  },
+  sheetPositionChange: (event: {
+    target?: string;
+    data?: { position?: number };
+  }): void => {
+    if (
+      event.target !== undefined &&
+      typeof event.data?.position === 'number'
+    ) {
+      sheetPositionsByRouteKey.set(event.target, event.data.position);
+    }
+  },
   sheetWillDismiss: (event: { target?: string }): void => {
     handleInteractiveSheetDismiss(event.target);
   },

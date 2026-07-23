@@ -1,8 +1,8 @@
 import { Cardano } from '@cardano-sdk/core';
 import { TokenId } from '@lace-contract/tokens';
 import { tokensActions } from '@lace-contract/tokens';
+import { BigNumber } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber } from '@lace-sdk/util';
 import { describe, it } from 'vitest';
 
 import { LOVELACE_TOKEN_ID } from '../../../src/const';

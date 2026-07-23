@@ -7,6 +7,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@lace-contract/analytics": "*",
+    "@lace-contract/cardano-context": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
@@ -14,9 +15,9 @@
     "@lace-contract/token-pricing": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util": "*",
     "@lace-lib/util-redacted": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

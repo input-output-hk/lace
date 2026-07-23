@@ -3,7 +3,7 @@ import {
   BitcoinNetwork,
   type BitcoinProvider,
 } from '@lace-contract/bitcoin-context';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 import isEqual from 'lodash/isEqual';
 import {
@@ -44,7 +44,7 @@ import type {
   BitcoinUTxO,
   BitcoinInputEntry,
 } from '@lace-contract/bitcoin-context';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable, Subscription } from 'rxjs';
 import type { Logger } from 'ts-log';
 
@@ -85,6 +85,7 @@ export class BitcoinWallet {
   public isLoadingHistory$ = new BehaviorSubject<boolean>(false);
   public readonly network: BitcoinNetwork;
   public readonly address: DerivedAddress;
+  public readonly masterFingerprint?: string;
 
   private readonly nextCursor$ = new BehaviorSubject<string | null | undefined>(
     undefined,
@@ -121,6 +122,7 @@ export class BitcoinWallet {
     this.historyDepth = historyDepth;
     this.provider = provider;
     this.info = info;
+    this.masterFingerprint = info.masterFingerprint;
 
     // TODO: Allow this to be injected.
     this.inputResolver = new BlockchainInputResolver(provider, this.network);
@@ -171,6 +173,17 @@ export class BitcoinWallet {
 
   public getAddress(): Observable<Result<DerivedAddress, ProviderError>> {
     return of(Ok(this.address));
+  }
+
+  /**
+   * Fetches the raw serialized transaction (hex) for a given transaction id.
+   *
+   * @param txId 32-byte transaction ID in hexadecimal form.
+   */
+  public getRawTransaction(
+    txId: string,
+  ): Observable<Result<string, ProviderError>> {
+    return this.provider.getRawTransaction({ network: this.network }, txId);
   }
 
   /**

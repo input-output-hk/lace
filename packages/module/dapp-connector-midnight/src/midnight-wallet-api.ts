@@ -6,7 +6,7 @@ import { FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR } from './const';
 import { type ExtendedDAppConnectorWalletAPI } from './types';
 
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
-import type { RemoteAuthenticator } from '@lace-sdk/dapp-connector';
+import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 import type {
   ConnectedAPI,
   KeyMaterialProvider,
@@ -69,22 +69,18 @@ export class MidnightWalletApi {
       );
     }
 
-    // Authenticate before checkNetworkSupport: if the user has no Midnight
-    // wallet, the authenticator rejects with NoWalletAvailable immediately.
-    // checkNetworkSupport would fail with a misleading network-mismatch error
-    // because there is no wallet to check the network against.
+    // Always re-request access (mirrors Cardano enable) so authorization and the
+    // per-origin account binding are re-evaluated on every connect, letting a
+    // returning dApp pick a different account and re-establishing the binding
+    // after a service worker restart. Done before checkNetworkSupport so a
+    // missing wallet surfaces NoWalletAvailable instead of a network mismatch.
     try {
-      if (!(await this.#authenticator.haveAccess())) {
-        if (!(await this.#authenticator.requestAccess())) {
-          throw new APIError(
-            ErrorCodes.Rejected,
-            'Access to wallet api denied',
-          );
-        }
-        this.#logger.debug(
-          `${location.origin} has been granted access to wallet api`,
-        );
+      if (!(await this.#authenticator.requestAccess())) {
+        throw new APIError(ErrorCodes.Rejected, 'Access to wallet api denied');
       }
+      this.#logger.debug(
+        `${location.origin} has been granted access to wallet api`,
+      );
     } catch (error: unknown) {
       if (error instanceof APIError) throw error;
       const authenticatorError = error as

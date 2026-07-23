@@ -8,7 +8,7 @@ import {
   toUnshieldedTokenType,
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { BigNumber, HexBytes, Milliseconds } from '@lace-sdk/util';
+import { BigNumber, HexBytes, Milliseconds } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import {
   InMemoryTransactionHistoryStorage,
@@ -66,7 +66,7 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { WithLogger } from '@lace-sdk/util';
+import type { WithLogger } from '@lace-lib/util';
 import type { DefaultConfiguration } from '@midnight-ntwrk/wallet-sdk/facade';
 import type { Subscription } from 'rxjs';
 

@@ -34,6 +34,30 @@ describe('produce next state', () => {
     expect(state.second.nested === initialState.second.nested).toBeTruthy();
   });
 
+  it('backfills a slice that is empty in the seed but populated in the remote state', () => {
+    // Mirrors the first-paint bridge seed: a deferred catalog ships empty, then
+    // state$ delivers the full slice and produceNextState patches it in.
+    const seed = {
+      first: { some: 'some', prop: 'prop' },
+      deferredCatalog: {},
+    };
+    const remote = {
+      first: { some: 'some', prop: 'prop' },
+      deferredCatalog: { entries: [1, 2, 3] },
+    };
+
+    const state = produceNextState(
+      seed as unknown as State,
+      remote as unknown as State,
+    ) as unknown as typeof remote;
+
+    // The empty catalog is replaced by the populated one.
+    expect(state.deferredCatalog).toEqual({ entries: [1, 2, 3] });
+    // Root ref changes, untouched sub-paths stay referentially equal.
+    expect((state as unknown) !== seed).toBeTruthy();
+    expect(state.first === seed.first).toBeTruthy();
+  });
+
   it('makes an immutable update of changed sub-paths of state', () => {
     const clonedState = JSON.parse(
       JSON.stringify(initialState),

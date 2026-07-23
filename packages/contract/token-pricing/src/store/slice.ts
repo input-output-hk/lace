@@ -22,6 +22,8 @@ const initialState: TokenPricingState = {
     failedTokenIds: [],
   },
   currencyPreference: DEFAULT_CURRENCY_PREFERENCE,
+  supportedVsCurrencies: null,
+  currencyChoiceExclusions: [],
 };
 
 export interface SetPricesPayload {
@@ -123,6 +125,15 @@ export const slice = createSlice({
     ) => {
       state.currencyPreference = payload;
     },
+    setSupportedCurrencies: (state, { payload }: PayloadAction<string[]>) => {
+      state.supportedVsCurrencies = payload;
+    },
+    setCurrencyChoiceExclusions: (
+      state,
+      { payload }: PayloadAction<string[]>,
+    ) => {
+      state.currencyChoiceExclusions = payload;
+    },
   },
   selectors: {
     selectPrices: state => state.prices,
@@ -134,6 +145,8 @@ export const slice = createSlice({
       Object.values(state.prices).some(price => price.isStale),
     selectPriceHistory: state => state.priceHistory,
     selectCurrencyPreference: state => state.currencyPreference,
+    selectSupportedVsCurrencies: state => state.supportedVsCurrencies,
+    selectCurrencyChoiceExclusions: state => state.currencyChoiceExclusions,
   },
 });
 

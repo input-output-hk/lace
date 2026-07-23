@@ -2,8 +2,8 @@ import '../../src/augmentations';
 
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -47,6 +47,7 @@ describe('deregistration side effects', () => {
         serializedTx: testSerializedTx,
         fees: testFees,
         depositReturn: testDepositReturn,
+        withdrawalAmount: '0',
       };
 
       testSideEffect(
@@ -85,6 +86,61 @@ describe('deregistration side effects', () => {
                   fees: testFees,
                   serializedTx: testSerializedTx,
                   wallet: testWallet,
+                  withdrawalAmount: '0',
+                },
+              ),
+            });
+          },
+        }),
+      );
+    });
+
+    it('forwards non-zero withdrawalAmount in "feeCalculationCompleted"', () => {
+      const buildDeregistrationTxResult: BuildDeregistrationTxResult = {
+        success: true,
+        serializedTx: testSerializedTx,
+        fees: testFees,
+        depositReturn: testDepositReturn,
+        withdrawalAmount: '5000000',
+      };
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDeregistrationFeeCalculation({
+              buildDeregistrationTx: () =>
+                cold('a', { a: buildDeregistrationTxResult }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            deregistrationFlow: {
+              selectDeregistrationFlowState$: cold('a', {
+                a: {
+                  status: 'CalculatingFees',
+                  accountId: testAccountId,
+                } as DeregistrationFlowState,
+              }),
+            },
+            wallets: {
+              selectAll$: cold('a', {
+                a: [testWallet],
+              }),
+            },
+          },
+          dependencies: {
+            actions: stakingCenterActions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: stakingCenterActions.deregistrationFlow.feeCalculationCompleted(
+                {
+                  depositReturn: testDepositReturn,
+                  fees: testFees,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  withdrawalAmount: '5000000',
                 },
               ),
             });
@@ -210,6 +266,7 @@ describe('deregistration side effects', () => {
                   confirmButtonEnabled: false,
                   depositReturn: testDepositReturn,
                   fees: testFees,
+                  withdrawalAmount: '0',
                 } as DeregistrationFlowState,
               }),
             },
@@ -261,6 +318,7 @@ describe('deregistration side effects', () => {
                   confirmButtonEnabled: false,
                   depositReturn: testDepositReturn,
                   fees: testFees,
+                  withdrawalAmount: '0',
                 } as DeregistrationFlowState,
               }),
             },
@@ -308,6 +366,7 @@ describe('deregistration side effects', () => {
                   wallet: testWallet,
                   depositReturn: testDepositReturn,
                   fees: testFees,
+                  withdrawalAmount: '0',
                 } as DeregistrationFlowState,
               }),
             },
@@ -331,7 +390,149 @@ describe('deregistration side effects', () => {
                       },
                       {
                         tokenId: LOVELACE_TOKEN_ID,
-                        amount: BigNumber(2000000n), // Deposit return is POSITIVE
+                        amount: BigNumber(2000000n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              b: stakingCenterActions.deregistrationFlow.processingResulted({
+                result: submitResult,
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('includes withdrawal change in pending activity when withdrawalAmount > 0', () => {
+      const submitResult: TxSubmissionResult = {
+        success: true,
+        txId: testTxId,
+      };
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDeregistrationProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult(submitResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            deregistrationFlow: {
+              selectDeregistrationFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  depositReturn: testDepositReturn,
+                  fees: testFees,
+                  withdrawalAmount: '5000000',
+                } as DeregistrationFlowState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: { ...stakingCenterActions, ...activitiesActions },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: testTxId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(-200000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(2000000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(5000000n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                  },
+                ],
+              }),
+              b: stakingCenterActions.deregistrationFlow.processingResulted({
+                result: submitResult,
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
+    it('omits deposit return from pending activity when depositReturn is zero', () => {
+      const submitResult: TxSubmissionResult = {
+        success: true,
+        txId: testTxId,
+      };
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDeregistrationProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult(submitResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            deregistrationFlow: {
+              selectDeregistrationFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  depositReturn: '0',
+                  fees: testFees,
+                  withdrawalAmount: '5000000',
+                } as DeregistrationFlowState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: { ...stakingCenterActions, ...activitiesActions },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: testTxId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(-200000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(5000000n),
                       },
                     ],
                     type: ActivityType.Pending,
@@ -377,6 +578,7 @@ describe('deregistration side effects', () => {
                   wallet: testWallet,
                   depositReturn: testDepositReturn,
                   fees: testFees,
+                  withdrawalAmount: '0',
                 } as DeregistrationFlowState,
               }),
             },
@@ -422,6 +624,7 @@ describe('deregistration side effects', () => {
                   wallet: testWallet,
                   depositReturn: '0',
                   fees: testFees,
+                  withdrawalAmount: '0',
                 } as DeregistrationFlowState,
               }),
             },
@@ -443,7 +646,6 @@ describe('deregistration side effects', () => {
                         tokenId: LOVELACE_TOKEN_ID,
                         amount: BigNumber(-200000n),
                       },
-                      // No deposit return entry when it's 0
                     ],
                     type: ActivityType.Pending,
                   },

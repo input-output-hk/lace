@@ -168,21 +168,54 @@ describe('useDeregistration', () => {
     });
 
     it('should show actual fees when state is for the same account', () => {
-      // Account A's Summary state is in the store
       const stateForAccountA = {
         status: 'Summary',
         accountId: mockAccountIdA,
         fees: [{ amount: '200000' }],
         depositReturn: '2000000',
+        withdrawalAmount: '0',
       };
 
       setupDefaultMocks(mockAccountIdA, stateForAccountA);
 
       const { result } = renderHook(() => useDeregistration(mockAccountIdA));
 
-      // Props should show actual fees
       expect(result.current?.depositReturn).toBe('+2.000000');
       expect(result.current?.transactionFee).toBe('-0.200000');
+    });
+
+    it('should pass undefined for withdrawalAmount when rewards are zero', () => {
+      const stateForAccountA = {
+        status: 'Summary',
+        accountId: mockAccountIdA,
+        fees: [{ amount: '200000' }],
+        depositReturn: '2000000',
+        withdrawalAmount: '0',
+      };
+
+      setupDefaultMocks(mockAccountIdA, stateForAccountA);
+
+      const { result } = renderHook(() => useDeregistration(mockAccountIdA));
+
+      expect(result.current?.withdrawalAmount).toBeUndefined();
+      expect(result.current?.total).toBe('+1.800000');
+    });
+
+    it('should format withdrawalAmount and include it in total when rewards exist', () => {
+      const stateForAccountA = {
+        status: 'Summary',
+        accountId: mockAccountIdA,
+        fees: [{ amount: '200000' }],
+        depositReturn: '2000000',
+        withdrawalAmount: '5000000',
+      };
+
+      setupDefaultMocks(mockAccountIdA, stateForAccountA);
+
+      const { result } = renderHook(() => useDeregistration(mockAccountIdA));
+
+      expect(result.current?.withdrawalAmount).toBe('+5.000000');
+      expect(result.current?.total).toBe('+6.800000');
     });
 
     it('should reset when Success state belongs to different account', () => {

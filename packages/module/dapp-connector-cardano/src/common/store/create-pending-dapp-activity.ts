@@ -1,6 +1,6 @@
 import { Serialization } from '@cardano-sdk/core';
 import { derivePendingActivityFromCbor } from '@lace-contract/cardano-context';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';

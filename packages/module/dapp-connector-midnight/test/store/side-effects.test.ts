@@ -2,10 +2,10 @@ import { authenticationPromptActions } from '@lace-contract/authentication-promp
 import { DappId } from '@lace-contract/dapp-connector';
 import { ViewId } from '@lace-contract/module';
 import { viewsActions } from '@lace-contract/views';
-import { WalletId } from '@lace-contract/wallet-repo';
+import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { connectDappConnectorApi } from '../../src/store/side-effects';
@@ -51,6 +51,124 @@ const prepareState = ({
     wallet,
   };
 };
+
+describe('connectDappConnectorApi - getAccountIdForOrigin', () => {
+  const baseActionObservables = () => ({
+    midnightDappConnector: {
+      confirmDappTx$: EMPTY,
+      rejectDappTx$: EMPTY,
+      confirmSignData$: EMPTY,
+      rejectSignData$: EMPTY,
+    },
+  });
+
+  const baseStateObservables = () => ({
+    views: { selectOpenViews$: EMPTY },
+    appLock: { isUnlocked$: EMPTY },
+    dappConnector: { selectAuthorizedDapps$: EMPTY },
+    midnightContext: {
+      selectCurrentNetwork$: EMPTY,
+      selectSupportedNetworksIds$: EMPTY,
+    },
+  });
+
+  it('passes getAccountIdForOrigin that resolves origin to account id from selectSessionAccountByOrigin$', () => {
+    testSideEffect(connectDappConnectorApi, ({ cold, flush }) => {
+      const origin = 'https://test-dapp.com';
+      const accountId = AccountId('account-123');
+
+      const selectSessionAccountByOrigin$ = cold('a', {
+        a: { [origin]: accountId } as Record<string, AccountId>,
+      });
+
+      let capturedGetAccountIdForOrigin:
+        | ((o: string) => AccountId | undefined)
+        | undefined;
+
+      const connectMidnightDappConnector = vi.fn(
+        ({
+          getAccountIdForOrigin,
+        }: {
+          getAccountIdForOrigin: (o: string) => AccountId | undefined;
+        }) => {
+          capturedGetAccountIdForOrigin = getAccountIdForOrigin;
+          return EMPTY;
+        },
+      );
+
+      return {
+        dependencies: {
+          connectMidnightDappConnector,
+          midnightWallets$: new BehaviorSubject({}),
+          actions,
+          authenticate: vi.fn(),
+          accessAuthSecret: vi.fn(),
+        },
+        actionObservables: baseActionObservables(),
+        stateObservables: {
+          ...baseStateObservables(),
+          midnightDappConnector: { selectSessionAccountByOrigin$ },
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(capturedGetAccountIdForOrigin?.(origin)).toBe(accountId);
+          expect(
+            capturedGetAccountIdForOrigin?.('unknown-origin'),
+          ).toBeUndefined();
+        },
+      };
+    });
+  });
+
+  it('updates getAccountIdForOrigin when selectSessionAccountByOrigin$ emits a new mapping', () => {
+    testSideEffect(connectDappConnectorApi, ({ cold, flush }) => {
+      const origin = 'https://test-dapp.com';
+      const accountIdA = AccountId('account-a');
+      const accountIdB = AccountId('account-b');
+
+      const selectSessionAccountByOrigin$ = cold('ab', {
+        a: { [origin]: accountIdA } as Record<string, AccountId>,
+        b: { [origin]: accountIdB } as Record<string, AccountId>,
+      });
+
+      let capturedGetAccountIdForOrigin:
+        | ((o: string) => AccountId | undefined)
+        | undefined;
+
+      const connectMidnightDappConnector = vi.fn(
+        ({
+          getAccountIdForOrigin,
+        }: {
+          getAccountIdForOrigin: (o: string) => AccountId | undefined;
+        }) => {
+          capturedGetAccountIdForOrigin = getAccountIdForOrigin;
+          return EMPTY;
+        },
+      );
+
+      return {
+        dependencies: {
+          connectMidnightDappConnector,
+          midnightWallets$: new BehaviorSubject({}),
+          actions,
+          authenticate: vi.fn(),
+          accessAuthSecret: vi.fn(),
+        },
+        actionObservables: baseActionObservables(),
+        stateObservables: {
+          ...baseStateObservables(),
+          midnightDappConnector: { selectSessionAccountByOrigin$ },
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+          expect(capturedGetAccountIdForOrigin?.(origin)).toBe(accountIdB);
+        },
+      };
+    });
+  });
+});
 
 // TODO: skipping tests until dapp connector is fully implemented and tested
 describe.skip('connectDappConnectorApi', () => {

@@ -1,4 +1,4 @@
-import { emip3decrypt, emip3encrypt, util } from '@cardano-sdk/key-management';
+import { util } from '@cardano-sdk/key-management';
 import { createAddAccounts } from '@lace-contract/in-memory';
 import {
   MidnightAccountId,
@@ -7,7 +7,8 @@ import {
   supportedNetworkIds,
 } from '@lace-contract/midnight-context';
 import { createBlockchainNetworkTargetResolver } from '@lace-contract/network';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import { HDWallet, Roles } from '@midnight-ntwrk/wallet-sdk/hd';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import * as bip39 from 'bip39';
@@ -45,7 +46,7 @@ const deriveAndEncryptKey = async <D extends DerivationPath<keyof RolesMap>>(
 
   const keyHex = ByteArray(derivationResult.key);
   return HexBytes.fromByteArray(
-    ByteArray(await emip3encrypt(keyHex, password)),
+    ByteArray(await SecretBox.seal(keyHex, password)),
   );
 };
 
@@ -148,7 +149,10 @@ export const createAccounts: CreateInMemoryWalletAccounts<
   targetNetworks,
 }) => {
   const targetSdkNetworkIds = resolveTargetNetworks(targetNetworks);
-  const seed = await emip3decrypt(Buffer.from(encryptedSeed, 'hex'), password);
+  const seed = await SecretBox.open(
+    Buffer.from(encryptedSeed, 'hex'),
+    password,
+  );
 
   const accounts = await Promise.all(
     targetSdkNetworkIds.map(async networkId =>
@@ -215,7 +219,7 @@ export const createBlockchainSpecificWalletData: CreateBlockchainSpecificWalletD
 
   try {
     const encryptedSeed = HexBytes.fromByteArray(
-      ByteArray(await emip3encrypt(seed, password)),
+      ByteArray(await SecretBox.seal(seed, password)),
     );
     return { encryptedSeed };
   } finally {

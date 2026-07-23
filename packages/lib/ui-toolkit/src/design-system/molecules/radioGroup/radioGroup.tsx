@@ -11,6 +11,7 @@ import type { IconName } from '../../atoms';
 export interface RadioGroupOption {
   value: string;
   label?: string;
+  description?: string;
   preIcon?: IconName;
   postIcon?: IconName;
   showInfoPostIcon?: boolean;
@@ -73,6 +74,13 @@ export const RadioGroup = ({
               {!!option.label && (
                 <Text.S testID={`option-label-${option.value}`}>
                   {option.label}
+                </Text.S>
+              )}
+              {!!option.description && (
+                <Text.S
+                  variant="secondary"
+                  testID={`option-description-${option.value}`}>
+                  {option.description}
                 </Text.S>
               )}
               {option.postIcon && (

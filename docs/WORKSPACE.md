@@ -15,11 +15,10 @@ flowchart TB
     contract-package["@lace-contract/*"]
     contract-package2["@lace-contract/*"]
   end
-  subgraph lib["packages/(lib|sdk)"]
+  subgraph lib["packages/lib"]
     direction TB
     lib-package2["@lace-lib/*"]
     lib-package["@lace-lib/*"]
-    lib-sdk["@lace-sdk/*"]
   end
   app -- Load --> module
   module -- Implement --> contract
@@ -28,6 +27,5 @@ flowchart TB
   app -- Utilize --> lib
   module -- Utilize --> lib
   contract -- Utilize --> lib
-  lib-package -- Utilize --> lib-sdk
   lib-package <-- Utilize --> lib-package2
 ```

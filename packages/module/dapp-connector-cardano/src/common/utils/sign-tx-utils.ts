@@ -1,4 +1,7 @@
-import { ADA_DECIMALS } from '@lace-contract/cardano-context';
+import {
+  ADA_DECIMALS,
+  LOVELACE_TOKEN_ID,
+} from '@lace-contract/cardano-context';
 import { CardanoTokenPriceId } from '@lace-contract/token-pricing';
 import { valueToLocale } from '@lace-lib/util-render';
 
@@ -13,7 +16,7 @@ export const calculateAdaFiatValue = (
 ): string | undefined => {
   if (!tokenPrices || !currencyTicker) return undefined;
 
-  const adaPriceId = CardanoTokenPriceId('ADA');
+  const adaPriceId = CardanoTokenPriceId(LOVELACE_TOKEN_ID);
   const adaPrice = tokenPrices[adaPriceId];
   if (!adaPrice) return undefined;
 

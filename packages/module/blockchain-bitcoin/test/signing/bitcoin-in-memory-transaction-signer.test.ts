@@ -1,15 +1,23 @@
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { BitcoinInMemoryTransactionSigner } from '../../src/signing/bitcoin-in-memory-transaction-signer';
 
 import type { SignerAuth } from '@lace-contract/signer';
+import type * as Core from '@lace-lib/core';
 
-vi.mock('@cardano-sdk/key-management', () => ({
-  emip3decrypt: vi.fn().mockResolvedValue(new Uint8Array(64)),
-}));
+vi.mock('@lace-lib/core', async importActual => {
+  const actual = await importActual<typeof Core>();
+  return {
+    ...actual,
+    SecretBox: {
+      ...actual.SecretBox,
+      open: vi.fn().mockResolvedValue(new Uint8Array(64)),
+    },
+  };
+});
 
 vi.mock('../../src/common', () => ({
   decodeUnsignedTxFromString: vi.fn().mockReturnValue({

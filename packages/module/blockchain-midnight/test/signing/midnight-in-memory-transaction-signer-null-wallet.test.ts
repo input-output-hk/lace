@@ -1,6 +1,6 @@
 import { getTestAuthSecretDeps } from '@lace-contract/authentication-prompt';
 import { signerAuthFromPrompt } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

@@ -6,8 +6,8 @@ import {
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { WalletId } from '@lace-contract/wallet-repo';
-import { ByteArray } from '@lace-sdk/util';
-import { HexBytes } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
+import { HexBytes } from '@lace-lib/util';
 import { Roles } from '@midnight-ntwrk/wallet-sdk-hd';
 import * as MidnightWalledSdkHd from '@midnight-ntwrk/wallet-sdk-hd';
 import bip39 from 'bip39';
@@ -25,12 +25,16 @@ import type {
 } from '@lace-contract/in-memory';
 import type { RolesMap } from '@lace-contract/midnight-context';
 
-vi.mock('@cardano-sdk/key-management', async () => {
-  const actual = await vi.importActual('@cardano-sdk/key-management');
+vi.mock('@lace-lib/core', async () => {
+  const actual = await vi.importActual('@lace-lib/core');
   return {
     ...actual,
     emip3encrypt: vi.fn().mockImplementation((data: Buffer) => data),
     emip3decrypt: vi.fn().mockImplementation((data: Buffer) => data),
+    SecretBox: {
+      seal: vi.fn().mockImplementation((data: Uint8Array) => data),
+      open: vi.fn().mockImplementation((data: Uint8Array) => data),
+    },
   };
 });
 

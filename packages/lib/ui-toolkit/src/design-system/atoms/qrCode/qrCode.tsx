@@ -70,6 +70,7 @@ export const QrCode = ({
 
     return (
       <View
+        testID={`qr-code-chain-icon-${chainType}`}
         style={[
           qrCodeStyle.logoContainer,
           {

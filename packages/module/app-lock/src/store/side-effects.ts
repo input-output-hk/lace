@@ -1,6 +1,6 @@
-import { emip3decrypt, emip3encrypt } from '@cardano-sdk/key-management';
 import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '@lace-contract/app-lock';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
+import { SecretBox } from '@lace-lib/core';
+import { ByteArray, HexBytes } from '@lace-lib/util';
 import {
   catchError,
   distinctUntilChanged,
@@ -33,10 +33,10 @@ const sentinelBytes = ByteArray.fromUTF8('Ada Lovelace');
 
 type PrepareSentinel = (authSecret: AuthSecret) => Observable<HexBytes>;
 
-// Extracting from(emip3encrypt(sentinelBytes, authSecret)) simplifies testing
+// Extracting from(SecretBox.seal(sentinelBytes, authSecret)) simplifies testing
 //  of makeSetupAppLock
 const prepareEncryptedSentinel: PrepareSentinel = authSecret =>
-  from(emip3encrypt(sentinelBytes, authSecret)).pipe(
+  from(SecretBox.seal(sentinelBytes, authSecret)).pipe(
     map(ByteArray),
     map(HexBytes.fromByteArray),
   );
@@ -100,7 +100,7 @@ export const verifyAuthSecret: SideEffect = (
       switchMap(sentinel => {
         if (!sentinel) return of(false);
         return from(
-          emip3decrypt(ByteArray.fromHex(sentinel), authSecret)
+          SecretBox.open(ByteArray.fromHex(sentinel), authSecret)
             .then(() => true)
             .catch(() => false),
         );

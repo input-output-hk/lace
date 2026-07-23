@@ -1,4 +1,4 @@
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 import { describe, it, expect } from 'vitest';
 
 import { mnemonicToString, mnemonicToByteArrayWords } from '../src/utils';

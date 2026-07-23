@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import * as CardanoContext from '@lace-contract/cardano-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import activitiesListUiCustomisation from '../../src/exposed-modules/activities-item-ui-customisation';

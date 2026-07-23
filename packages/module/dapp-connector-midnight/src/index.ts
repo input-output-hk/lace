@@ -22,6 +22,7 @@ import {
   renderRootAddonContract,
   viewsStoreContract,
 } from '@lace-contract/views';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR } from './const';
 import { dappConnectorApi } from './dapp-connector-api';
@@ -51,6 +52,7 @@ const dependsOnContracts = combineContracts([
   authenticationPromptStoreContract,
   viewsStoreContract,
   dappConnectorStoreContract,
+  walletRepoStoreContract,
 ] as const);
 
 const willLoad = (featureFlags: ReadonlyArray<{ key: string }>) =>

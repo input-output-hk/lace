@@ -1,6 +1,6 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { ByteArray, Milliseconds } from '@lace-sdk/util';
+import { ByteArray, Milliseconds } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { defer, EMPTY, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';

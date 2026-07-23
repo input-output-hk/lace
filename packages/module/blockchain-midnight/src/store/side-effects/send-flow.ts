@@ -6,7 +6,7 @@ import {
   isUnshieldedAddress,
   isValidMidnightAddress,
 } from '@lace-contract/midnight-context';
-import { None, Some } from '@lace-sdk/util';
+import { None, Some } from '@lace-lib/util';
 import { of, switchMap } from 'rxjs';
 
 import { onAddressValidationRequest } from '../../exported-modules/address-validator';
@@ -15,7 +15,7 @@ import { onGetTransactionAnalyticsPayloadRequest } from '../../exported-modules/
 import type { SideEffect } from '../../';
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { AddressError } from '@lace-contract/send-flow';
-import type { Option } from '@lace-sdk/util';
+import type { Option } from '@lace-lib/util';
 
 type ValidateAddressParams = Parameters<
   Parameters<typeof onAddressValidationRequest>[0]

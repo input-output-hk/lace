@@ -1,10 +1,21 @@
-import { Serialization } from '@cardano-sdk/core';
+import {
+  coalesceValueQuantities,
+  Serialization,
+  subtractValueQuantities,
+} from '@cardano-sdk/core';
+import { minAdaRequired } from '@cardano-sdk/tx-construction';
 import { HexBlob } from '@cardano-sdk/util';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import {
+  InputSelectionError,
+  InputSelectionFailure,
+} from '../../src/input-selection/InputSelectionError';
 import { LargeFirstCoinSelector } from '../../src/input-selection/LargeFirstCoinSelector';
+import { RoundRobinRandomCoinSelector } from '../../src/input-selection/RoundRobinRandomCoinSelector';
 import {
   balanceTransaction,
+  correctFeeAfterEvaluation,
   isTransactionBalanced,
 } from '../../src/tx-builder/balancing';
 
@@ -164,7 +175,7 @@ describe('balanceTransaction', () => {
     const resolvedInputs = newDefaultUtxoList();
     const coinSelector = new LargeFirstCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo: resolvedInputs,
       preSelectedUtxo: undefined,
@@ -191,7 +202,7 @@ describe('balanceTransaction', () => {
     const resolvedInputs = newDefaultUtxoList();
     const coinSelector = new LargeFirstCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo: resolvedInputs,
       preSelectedUtxo: undefined,
@@ -221,7 +232,7 @@ describe('balanceTransaction', () => {
     const body = { ...tx.body, donation: 123_456n };
     const txWithDonation: Cardano.Tx = { ...tx, body };
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: txWithDonation,
       availableUtxo: resolvedInputs,
       preSelectedUtxo: undefined,
@@ -248,7 +259,7 @@ describe('balanceTransaction', () => {
     const resolvedInputs = newDefaultUtxoList();
     const coinSelector = new LargeFirstCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo: resolvedInputs,
       preSelectedUtxo: undefined,
@@ -271,7 +282,7 @@ describe('balanceTransaction', () => {
     const resolvedInputs = newDefaultUtxoList();
     const coinSelector = new LargeFirstCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo: resolvedInputs,
       preSelectedUtxo: undefined,
@@ -286,6 +297,298 @@ describe('balanceTransaction', () => {
       protocolParameters: protocol,
     });
     expect(isBalanced).toBe(true);
+  });
+});
+
+describe('balanceTransaction with RoundRobinRandomCoinSelector', () => {
+  const changeAddr =
+    'addr_test1qqnqfr70emn3kyywffxja44znvdw0y4aeyh0vdc3s3rky48vlp50u6nrq5s7k6h89uqrjnmr538y6e50crvz6jdv3vqqxah5fk';
+  const seed = 42n;
+
+  const fixtures: Array<{ name: string; unbalancedTx: () => Cardano.Tx }> = [
+    {
+      name: 'simple transfer with assets',
+      unbalancedTx: () =>
+        newTransactionWithoutInputs(BALANCED_TX_CBOR, 15_000_000n),
+    },
+    {
+      name: 'ADA-only transfer close to the pool total',
+      unbalancedTx: () =>
+        newTransactionWithoutInputsNoAssets(BALANCED_TX_CBOR, 234_827_000n),
+    },
+    {
+      name: 'complex transaction with scripts and certificates',
+      unbalancedTx: () =>
+        newTransactionWithoutInputs(COMPLEX_TX_CBOR, 15_000_000n),
+    },
+  ];
+
+  it.each(fixtures)(
+    'balances the $name with min-ADA compliant change',
+    ({ unbalancedTx }) => {
+      const protocol = initProtocolParameters();
+      const resolvedInputs = newDefaultUtxoList();
+
+      const { tx: balanced } = balanceTransaction({
+        unbalancedTx: unbalancedTx(),
+        availableUtxo: resolvedInputs,
+        preSelectedUtxo: undefined,
+        protocolParameters: protocol,
+        coinSelector: new RoundRobinRandomCoinSelector({ seed }),
+        changeAddress: createAddress(changeAddr),
+      });
+
+      expect(
+        isTransactionBalanced({
+          transaction: balanced,
+          resolvedInputs,
+          protocolParameters: protocol,
+        }),
+      ).toBe(true);
+
+      const changeOutputs = balanced.body.outputs.filter(
+        output => output.address === createAddress(changeAddr),
+      );
+      expect(changeOutputs.length).toBeGreaterThan(0);
+      for (const changeOutput of changeOutputs) {
+        expect(changeOutput.value.coins).toBeGreaterThanOrEqual(
+          minAdaRequired(changeOutput, BigInt(protocol.coinsPerUtxoByte)),
+        );
+      }
+    },
+  );
+});
+
+describe('fallback coin selector', () => {
+  const changeAddr =
+    'addr_test1qqnqfr70emn3kyywffxja44znvdw0y4aeyh0vdc3s3rky48vlp50u6nrq5s7k6h89uqrjnmr538y6e50crvz6jdv3vqqxah5fk';
+
+  class ThrowingCoinSelector implements CoinSelector {
+    public calls = 0;
+
+    public constructor(
+      private readonly error: unknown = new InputSelectionError(
+        InputSelectionFailure.UtxoFullyDepleted,
+        'pool depleted while funding change',
+      ),
+    ) {}
+
+    public select(): CoinSelectorResult {
+      this.calls += 1;
+      throw this.error;
+    }
+  }
+
+  /**
+   * Never returns the surplus as change, so the loop exhausts its iterations
+   * instead of converging.
+   */
+  class NeverBalancingCoinSelector implements CoinSelector {
+    public select({ availableUtxo }: CoinSelectorParams): CoinSelectorResult {
+      return { selection: availableUtxo, remaining: [], changeOutputs: [] };
+    }
+  }
+
+  class FailsOnSecondCallCoinSelector implements CoinSelector {
+    public calls = 0;
+    private readonly delegate = new LargeFirstCoinSelector();
+
+    public select(params: CoinSelectorParams): CoinSelectorResult {
+      this.calls += 1;
+      if (this.calls > 1) {
+        throw new InputSelectionError(
+          InputSelectionFailure.UtxoFullyDepleted,
+          'pool depleted on a later iteration',
+        );
+      }
+      return this.delegate.select(params);
+    }
+  }
+
+  class SubMinAdaChangeCoinSelector implements CoinSelector {
+    public select({
+      availableUtxo,
+      changeAddress,
+    }: CoinSelectorParams): CoinSelectorResult {
+      return {
+        selection: availableUtxo,
+        remaining: [],
+        changeOutputs: [{ address: changeAddress, value: { coins: 1n } }],
+      };
+    }
+  }
+
+  const balanceWithSelectors = (
+    coinSelector: CoinSelector,
+    fallbackCoinSelector?: CoinSelector,
+    unbalancedTx = newTransactionWithoutInputs(BALANCED_TX_CBOR, 15_000_000n),
+  ) =>
+    balanceTransaction({
+      unbalancedTx,
+      availableUtxo: newDefaultUtxoList(),
+      preSelectedUtxo: undefined,
+      protocolParameters: initProtocolParameters(),
+      coinSelector,
+      fallbackCoinSelector,
+      changeAddress: createAddress(changeAddr),
+    });
+
+  it('retries with the fallback and uses its selection when the primary selector throws', () => {
+    const fallback = new LargeFirstCoinSelector();
+    const fallbackSpy = vi.spyOn(fallback, 'select');
+
+    const { tx: balanced } = balanceWithSelectors(
+      new ThrowingCoinSelector(),
+      fallback,
+    );
+
+    expect(fallbackSpy).toHaveBeenCalled();
+    const lastResult = fallbackSpy.mock.results.at(-1)
+      ?.value as CoinSelectorResult;
+    expect(balanced.body.inputs).toEqual(
+      lastResult.selection.map(([input]) => input),
+    );
+    expect(
+      isTransactionBalanced({
+        transaction: balanced,
+        resolvedInputs: newDefaultUtxoList(),
+        protocolParameters: initProtocolParameters(),
+      }),
+    ).toBe(true);
+  });
+
+  it('never invokes the fallback when the primary selector succeeds', () => {
+    const fallback = new LargeFirstCoinSelector();
+    const fallbackSpy = vi.spyOn(fallback, 'select');
+
+    const { tx: balanced } = balanceWithSelectors(
+      new LargeFirstCoinSelector(),
+      fallback,
+    );
+
+    expect(fallbackSpy).not.toHaveBeenCalled();
+    expect(
+      isTransactionBalanced({
+        transaction: balanced,
+        resolvedInputs: newDefaultUtxoList(),
+        protocolParameters: initProtocolParameters(),
+      }),
+    ).toBe(true);
+  });
+
+  it('re-runs the whole loop with the fallback when the primary fails on a later iteration', () => {
+    const primary = new FailsOnSecondCallCoinSelector();
+
+    const { tx: balanced } = balanceWithSelectors(
+      primary,
+      new LargeFirstCoinSelector(),
+      newTransactionWithoutInputsNoAssets(BALANCED_TX_CBOR, 234_827_000n),
+    );
+
+    expect(primary.calls).toBe(2);
+    expect(
+      isTransactionBalanced({
+        transaction: balanced,
+        resolvedInputs: newDefaultUtxoList(),
+        protocolParameters: initProtocolParameters(),
+      }),
+    ).toBe(true);
+  });
+
+  it('retries with the fallback when the primary path exhausts the balancing iterations', () => {
+    const { tx: balanced } = balanceWithSelectors(
+      new NeverBalancingCoinSelector(),
+      new LargeFirstCoinSelector(),
+    );
+
+    expect(
+      isTransactionBalanced({
+        transaction: balanced,
+        resolvedInputs: newDefaultUtxoList(),
+        protocolParameters: initProtocolParameters(),
+      }),
+    ).toBe(true);
+  });
+
+  it('surfaces the fallback failure, keeping its discriminator, when both selectors fail', () => {
+    const fallbackError = new InputSelectionError(
+      InputSelectionFailure.BalanceInsufficient,
+      'Insufficient ADA: short by 42 lovelace',
+    );
+
+    let caught: unknown;
+    try {
+      balanceWithSelectors(
+        new ThrowingCoinSelector(),
+        new ThrowingCoinSelector(fallbackError),
+      );
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(InputSelectionError);
+    expect((caught as InputSelectionError).failure).toBe(
+      InputSelectionFailure.BalanceInsufficient,
+    );
+    expect((caught as Error).message).toMatch(/fallback coin selector/);
+    expect((caught as Error).message).toMatch(/short by 42 lovelace/);
+  });
+
+  it('wraps a fallback iteration exhaustion in an error naming the fallback', () => {
+    expect(() =>
+      balanceWithSelectors(
+        new NeverBalancingCoinSelector(),
+        new NeverBalancingCoinSelector(),
+      ),
+    ).toThrow(
+      'Failed to balance transaction with fallback coin selector: Failed to balance transaction',
+    );
+  });
+
+  it('stringifies a non-Error fallback failure', () => {
+    expect(() =>
+      balanceWithSelectors(
+        new ThrowingCoinSelector(),
+        new ThrowingCoinSelector('selector exploded'),
+      ),
+    ).toThrow(
+      'Failed to balance transaction with fallback coin selector: selector exploded',
+    );
+  });
+
+  it('rethrows the primary failure unchanged when no fallback is configured', () => {
+    const primaryError = new InputSelectionError(
+      InputSelectionFailure.UtxoFullyDepleted,
+      'pool depleted while funding change',
+    );
+
+    let caught: unknown;
+    try {
+      balanceWithSelectors(new ThrowingCoinSelector(primaryError));
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBe(primaryError);
+  });
+
+  it('does not retry when the fallback is the same instance as the primary', () => {
+    const selector = new ThrowingCoinSelector();
+
+    expect(() => balanceWithSelectors(selector, selector)).toThrow(
+      'pool depleted while funding change',
+    );
+    expect(selector.calls).toBe(1);
+  });
+
+  it('propagates a selector contract violation without falling back', () => {
+    const fallback = new LargeFirstCoinSelector();
+    const fallbackSpy = vi.spyOn(fallback, 'select');
+
+    expect(() =>
+      balanceWithSelectors(new SubMinAdaChangeCoinSelector(), fallback),
+    ).toThrow(/below the minimum UTxO value/);
+    expect(fallbackSpy).not.toHaveBeenCalled();
   });
 });
 
@@ -345,6 +648,7 @@ describe('empty selection fallback', () => {
       return {
         selection: [],
         remaining: params.availableUtxo,
+        changeOutputs: [],
       };
     }
   }
@@ -431,7 +735,7 @@ describe('empty selection fallback', () => {
     const protocol = initProtocolParameters();
     const coinSelector = new EmptySelectionCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo,
       preSelectedUtxo: undefined,
@@ -440,12 +744,10 @@ describe('empty selection fallback', () => {
       changeAddress: createAddress(changeAddr),
     });
 
-    // Verify the ADA-only UTxO was selected (should be the second one)
     expect(balanced.body.inputs).toHaveLength(1);
     expect(balanced.body.inputs[0].txId).toBe(adaOnlyUtxo[0].txId);
     expect(balanced.body.inputs[0].index).toBe(adaOnlyUtxo[0].index);
 
-    // Also verify the transaction is balanced
     const isBalancedResult = isTransactionBalanced({
       transaction: balanced,
       resolvedInputs: availableUtxo,
@@ -486,7 +788,7 @@ describe('empty selection fallback', () => {
     const protocol = initProtocolParameters();
     const coinSelector = new EmptySelectionCoinSelector();
 
-    const balanced = balanceTransaction({
+    const { tx: balanced } = balanceTransaction({
       unbalancedTx: tx,
       availableUtxo,
       preSelectedUtxo: undefined,
@@ -495,17 +797,297 @@ describe('empty selection fallback', () => {
       changeAddress: createAddress(changeAddr),
     });
 
-    // Verify the first UTxO was selected as fallback
     expect(balanced.body.inputs).toHaveLength(1);
     expect(balanced.body.inputs[0].txId).toBe(utxoWithAssets1[0].txId);
     expect(balanced.body.inputs[0].index).toBe(utxoWithAssets1[0].index);
 
-    // Also verify the transaction is balanced
     const isBalancedResult = isTransactionBalanced({
       transaction: balanced,
       resolvedInputs: availableUtxo,
       protocolParameters: protocol,
     });
     expect(isBalancedResult).toBe(true);
+  });
+
+  it('tops up the forced selection when its change is below min-ADA', () => {
+    const smallAdaOnlyUtxo = createAdaOnlyUtxo(
+      '027b68d4c11e97d7e065cc2702912cb1a21b6d0e56c6a74dd605889a55611385',
+      0,
+      1_400_000n,
+    );
+    const bigAdaOnlyUtxo = createAdaOnlyUtxo(
+      'd3c887d17486d483a2b46b58b01cb9344745f15fdd8f8e70a57f854cdd88a633',
+      1,
+      10_000_000n,
+    );
+    const availableUtxo = [smallAdaOnlyUtxo, bigAdaOnlyUtxo];
+
+    const tx = newTransactionWithoutInputsNoAssets(
+      BALANCED_TX_CBOR,
+      1_000_000n,
+    );
+    const protocol = initProtocolParameters();
+
+    const { tx: balanced } = balanceTransaction({
+      unbalancedTx: tx,
+      availableUtxo,
+      preSelectedUtxo: undefined,
+      protocolParameters: protocol,
+      coinSelector: new EmptySelectionCoinSelector(),
+      changeAddress: createAddress(changeAddr),
+    });
+
+    expect(balanced.body.inputs).toHaveLength(2);
+    const changeOutputs = balanced.body.outputs.filter(
+      output => output.address === createAddress(changeAddr),
+    );
+    expect(changeOutputs.length).toBeGreaterThan(0);
+    for (const changeOutput of changeOutputs) {
+      expect(changeOutput.value.coins).toBeGreaterThanOrEqual(
+        minAdaRequired(changeOutput, BigInt(protocol.coinsPerUtxoByte)),
+      );
+    }
+
+    const isBalancedResult = isTransactionBalanced({
+      transaction: balanced,
+      resolvedInputs: availableUtxo,
+      protocolParameters: protocol,
+    });
+    expect(isBalancedResult).toBe(true);
+  });
+
+  it('throws a typed InputSelectionError when the pool cannot fund the forced change min-ADA', () => {
+    const smallAdaOnlyUtxo = createAdaOnlyUtxo(
+      '027b68d4c11e97d7e065cc2702912cb1a21b6d0e56c6a74dd605889a55611385',
+      0,
+      1_400_000n,
+    );
+
+    const tx = newTransactionWithoutInputsNoAssets(
+      BALANCED_TX_CBOR,
+      1_000_000n,
+    );
+
+    let caught: unknown;
+    try {
+      balanceTransaction({
+        unbalancedTx: tx,
+        availableUtxo: [smallAdaOnlyUtxo],
+        preSelectedUtxo: undefined,
+        protocolParameters: initProtocolParameters(),
+        coinSelector: new EmptySelectionCoinSelector(),
+        changeAddress: createAddress(changeAddr),
+      });
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(InputSelectionError);
+    expect((caught as InputSelectionError).failure).toBe(
+      InputSelectionFailure.UtxoFullyDepleted,
+    );
+  });
+});
+
+describe('selector-provided change outputs', () => {
+  const changeAddr =
+    'addr_test1qqnqfr70emn3kyywffxja44znvdw0y4aeyh0vdc3s3rky48vlp50u6nrq5s7k6h89uqrjnmr538y6e50crvz6jdv3vqqxah5fk';
+
+  // Mock coin selector that selects everything and splits the change coin in
+  // two, honoring the exact-balance invariant.
+  class SplittingCoinSelector implements CoinSelector {
+    public select({
+      availableUtxo,
+      targetValue,
+      changeAddress,
+    }: CoinSelectorParams): CoinSelectorResult {
+      const total = coalesceValueQuantities(
+        availableUtxo.map(([, out]) => out.value),
+      );
+      const change = subtractValueQuantities([total, targetValue]);
+      const half = change.coins / 2n;
+      return {
+        selection: availableUtxo,
+        remaining: [],
+        changeOutputs: [
+          {
+            address: changeAddress,
+            value: { coins: half, assets: change.assets },
+          },
+          { address: changeAddress, value: { coins: change.coins - half } },
+        ],
+      };
+    }
+  }
+
+  // Mock coin selector whose change output violates the min-ADA rule.
+  class SubMinAdaChangeCoinSelector implements CoinSelector {
+    public select({
+      availableUtxo,
+      changeAddress,
+    }: CoinSelectorParams): CoinSelectorResult {
+      return {
+        selection: availableUtxo,
+        remaining: [],
+        changeOutputs: [{ address: changeAddress, value: { coins: 1n } }],
+      };
+    }
+  }
+
+  it('appends every change output returned by the selector', () => {
+    const tx = newTransactionWithoutInputs(BALANCED_TX_CBOR, 15_000_000n);
+    const protocol = initProtocolParameters();
+    const resolvedInputs = newDefaultUtxoList();
+
+    const { tx: balanced } = balanceTransaction({
+      unbalancedTx: tx,
+      availableUtxo: resolvedInputs,
+      preSelectedUtxo: undefined,
+      protocolParameters: protocol,
+      coinSelector: new SplittingCoinSelector(),
+      changeAddress: createAddress(changeAddr),
+    });
+
+    const changeOutputs = balanced.body.outputs.filter(
+      output => output.address === createAddress(changeAddr),
+    );
+    expect(changeOutputs).toHaveLength(2);
+
+    const isBalanced = isTransactionBalanced({
+      transaction: balanced,
+      resolvedInputs,
+      protocolParameters: protocol,
+    });
+    expect(isBalanced).toBe(true);
+  });
+
+  it('rejects a selector result whose change output is below min-ADA', () => {
+    const tx = newTransactionWithoutInputs(BALANCED_TX_CBOR, 15_000_000n);
+    const protocol = initProtocolParameters();
+    const resolvedInputs = newDefaultUtxoList();
+
+    expect(() =>
+      balanceTransaction({
+        unbalancedTx: tx,
+        availableUtxo: resolvedInputs,
+        preSelectedUtxo: undefined,
+        protocolParameters: protocol,
+        coinSelector: new SubMinAdaChangeCoinSelector(),
+        changeAddress: createAddress(changeAddr),
+      }),
+    ).toThrow(/below the minimum UTxO value/);
+  });
+});
+
+describe('correctFeeAfterEvaluation', () => {
+  const changeAddr =
+    'addr_test1qqnqfr70emn3kyywffxja44znvdw0y4aeyh0vdc3s3rky48vlp50u6nrq5s7k6h89uqrjnmr538y6e50crvz6jdv3vqqxah5fk';
+  const otherAddr =
+    'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp';
+
+  class UnevenSplitCoinSelector implements CoinSelector {
+    public select({
+      availableUtxo,
+      targetValue,
+      changeAddress,
+    }: CoinSelectorParams): CoinSelectorResult {
+      const total = coalesceValueQuantities(
+        availableUtxo.map(([, out]) => out.value),
+      );
+      const change = subtractValueQuantities([total, targetValue]);
+      const quarter = change.coins / 4n;
+      return {
+        selection: availableUtxo,
+        remaining: [],
+        changeOutputs: [
+          {
+            address: changeAddress,
+            value: { coins: quarter, assets: change.assets },
+          },
+          { address: changeAddress, value: { coins: change.coins - quarter } },
+        ],
+      };
+    }
+  }
+
+  const balanceWithUnevenSplitChange = () => {
+    const protocol = initProtocolParameters();
+    const availableUtxo = newDefaultUtxoList();
+    const { tx: balanced, selection } = balanceTransaction({
+      unbalancedTx: newTransactionWithoutInputs(BALANCED_TX_CBOR, 15_000_000n),
+      availableUtxo,
+      preSelectedUtxo: undefined,
+      protocolParameters: protocol,
+      coinSelector: new UnevenSplitCoinSelector(),
+      changeAddress: createAddress(changeAddr),
+    });
+    return { balanced, protocol, selection };
+  };
+
+  const overpayFee = (tx: Cardano.Tx, extra: bigint): Cardano.Tx => ({
+    ...tx,
+    body: { ...tx.body, fee: tx.body.fee + extra },
+  });
+
+  it('refunds the fee saving into the change output with the larger coins and returns the evaluated fee', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+    const overpaidTx = overpayFee(balanced, 100_000n);
+    const overpaidFee = overpaidTx.body.fee;
+
+    const changeIndexes = overpaidTx.body.outputs.flatMap((output, index) =>
+      output.address === createAddress(changeAddr) ? [index] : [],
+    );
+    expect(changeIndexes).toHaveLength(2);
+    const [smallerIndex, largerIndex] = changeIndexes;
+    expect(overpaidTx.body.outputs[largerIndex].value.coins).toBeGreaterThan(
+      overpaidTx.body.outputs[smallerIndex].value.coins,
+    );
+
+    const { outputs, fee } = correctFeeAfterEvaluation({
+      balancedTx: overpaidTx,
+      evaluatedRedeemers: [],
+      resolvedInputs: selection,
+      protocolParameters: protocol,
+      changeAddress: createAddress(changeAddr),
+    });
+
+    expect(fee).toBeLessThan(overpaidFee);
+    const saving = overpaidFee - fee;
+    expect(outputs[largerIndex].value.coins).toBe(
+      overpaidTx.body.outputs[largerIndex].value.coins + saving,
+    );
+    expect(outputs[smallerIndex]).toEqual(
+      overpaidTx.body.outputs[smallerIndex],
+    );
+
+    const correctedTx: Cardano.Tx = {
+      ...overpaidTx,
+      body: { ...overpaidTx.body, outputs, fee },
+    };
+    const second = correctFeeAfterEvaluation({
+      balancedTx: correctedTx,
+      evaluatedRedeemers: [],
+      resolvedInputs: selection,
+      protocolParameters: protocol,
+      changeAddress: createAddress(changeAddr),
+    });
+    expect(second.fee).toBe(fee);
+    expect(second.outputs).toEqual(outputs);
+  });
+
+  it('returns outputs and fee unchanged when no output is at the change address', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+    const overpaidTx = overpayFee(balanced, 100_000n);
+
+    const { outputs, fee } = correctFeeAfterEvaluation({
+      balancedTx: overpaidTx,
+      evaluatedRedeemers: [],
+      resolvedInputs: selection,
+      protocolParameters: protocol,
+      changeAddress: createAddress(otherAddr),
+    });
+
+    expect(fee).toBe(overpaidTx.body.fee);
+    expect(outputs).toBe(overpaidTx.body.outputs);
   });
 });

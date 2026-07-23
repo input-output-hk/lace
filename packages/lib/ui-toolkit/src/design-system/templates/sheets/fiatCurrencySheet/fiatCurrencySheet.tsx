@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { RadioGroup } from '../../../molecules';
-import { Sheet } from '../../../organisms';
+import { Sheet, footerHeight } from '../../../organisms';
 
 interface FiatCurrencySheetProps {
-  radioOptions: Array<{ label: string; value: string }>;
+  radioOptions: Array<{ label: string; value: string; description?: string }>;
   value: string;
   onChange: (value: string) => void;
   testID?: string;
@@ -32,6 +32,7 @@ export const FiatCurrencySheet = ({
 
 const styles = StyleSheet.create({
   container: {
-    padding: spacing.L,
+    padding: spacing.M,
+    paddingBottom: footerHeight.horizontal,
   },
 });

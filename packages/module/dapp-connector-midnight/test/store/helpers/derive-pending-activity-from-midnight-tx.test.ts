@@ -3,7 +3,7 @@ import {
   toUnshieldedTokenType,
 } from '@lace-contract/midnight-context';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

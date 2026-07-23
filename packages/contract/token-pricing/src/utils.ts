@@ -9,7 +9,7 @@ import type {
 } from './types';
 import type { TokenPriceId } from './value-objects';
 import type { Token } from '@lace-contract/tokens';
-import type { BigNumber } from '@lace-sdk/util';
+import type { BigNumber } from '@lace-lib/util';
 
 /**
  * Extract the identifier for a token across all blockchains.
@@ -51,13 +51,13 @@ export const shouldFetchPriceHistory = (
  * Supports Cardano and Bitcoin tokens.
  */
 export const getTokenPriceId = (token: Token): TokenPriceId | null => {
-  const identifier = getTokenIdentifier(token);
-
+  // Keyed by the unique on-chain tokenId, NOT the ticker: tickers are not unique
+  // (two different Cardano native tokens can share one), so a ticker key collides.
   switch (token.blockchainName) {
     case 'Cardano':
-      return CardanoTokenPriceId(identifier);
+      return CardanoTokenPriceId(token.tokenId);
     case 'Bitcoin':
-      return BitcoinTokenPriceId(identifier);
+      return BitcoinTokenPriceId(token.tokenId);
     case 'Midnight':
       // Midnight tokens are not priced
       return null;

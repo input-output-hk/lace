@@ -1,4 +1,4 @@
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import { from } from 'rxjs';
 
 import {

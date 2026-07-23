@@ -1,4 +1,4 @@
-import type { ByteArray } from '@lace-sdk/util';
+import type { ByteArray } from '@lace-lib/util';
 import type { Tagged } from 'type-fest';
 
 /**

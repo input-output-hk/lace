@@ -1,4 +1,4 @@
-import { WalletType } from '@lace-contract/wallet-repo';
+import { isHardwareWallet } from '@lace-contract/wallet-repo';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
@@ -51,10 +51,7 @@ export const CardanoDappSignData = () => {
     const wallet = allWallets.find(w =>
       w.accounts.some(a => a.accountId === accountId),
     );
-    return (
-      wallet?.type === WalletType.HardwareLedger ||
-      wallet?.type === WalletType.HardwareTrezor
-    );
+    return wallet ? isHardwareWallet(wallet) : false;
   })();
 
   const [isHwSigning, setIsHwSigning] = useState(false);

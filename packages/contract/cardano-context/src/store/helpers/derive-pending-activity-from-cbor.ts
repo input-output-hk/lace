@@ -1,7 +1,7 @@
 import { Serialization } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 
 import type { CardanoInFlightUtxoActivityMetadata } from '../../augmentations';
 import type { CardanoPaymentAddress } from '../../types';
@@ -11,7 +11,7 @@ import type {
   BlockchainSpecificActivityMetadata,
 } from '@lace-contract/activities';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 const LOVELACE_TOKEN_ID = TokenId('lovelace');
 

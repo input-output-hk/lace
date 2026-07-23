@@ -1,14 +1,16 @@
 // copied from Lace v1 and adjusted to vitest
 // https://github.com/input-output-hk/lace/blob/27873f3b5dd8ec0e6926a5dd1653986a97ac81e8/packages/cardano/src/wallet/lib/__tests__/blockfrost-input-resolver.test.ts
 import {
+  BlockfrostInputResolverProvider,
+  BlockfrostToCardanoSDK,
+} from '@lace-lib/cardano-provider-core';
+import {
   HttpClientError,
   ProviderError,
   ProviderFailure,
 } from '@lace-lib/util-provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BlockfrostToCardanoSDK } from '../../../src/blockfrost/blockfrost-to-cardano-sdk';
-import { BlockfrostInputResolverProvider } from '../../../src/blockfrost/provider/blockfrost-input-resolver-provider';
 import { mockResponses } from '../util';
 
 import type { Cardano } from '@cardano-sdk/core';

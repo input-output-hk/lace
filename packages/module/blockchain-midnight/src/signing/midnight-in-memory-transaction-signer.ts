@@ -4,7 +4,7 @@ import {
   midnightWallets$,
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { BigNumber, HexBytes } from '@lace-sdk/util';
+import { BigNumber, HexBytes } from '@lace-lib/util';
 import { nativeToken } from '@midnight-ntwrk/ledger-v8';
 import {
   DustAddress,

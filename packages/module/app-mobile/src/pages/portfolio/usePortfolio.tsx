@@ -70,6 +70,8 @@ const calculateTokenFiatValue = (
 const WALLET_ICONS = {
   [WalletType.HardwareLedger]: <Icon name="HardwareWallet" size={15} />,
   [WalletType.HardwareTrezor]: <Icon name="HardwareWallet" size={15} />,
+  [WalletType.HardwareSeedSigner]: <Icon name="HardwareWallet" size={15} />,
+  [WalletType.HardwareKeystone]: <Icon name="HardwareWallet" size={15} />,
   [WalletType.InMemory]: <Icon name="Wallet" size={15} />,
   [WalletType.LazyInMemory]: <Icon name="Wallet" size={15} />,
   [WalletType.MultiSig]: <Icon name="HardwareWallet" size={15} />,

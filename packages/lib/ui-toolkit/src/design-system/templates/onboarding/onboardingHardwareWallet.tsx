@@ -1,21 +1,24 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../design-tokens';
 import { Button, Text } from '../../atoms';
-import { Logos } from '../../atoms/icons/customIcons';
+import { Blockchains, Logos } from '../../atoms/icons/customIcons';
 import { NavigationHeader } from '../../molecules';
 import { footerHeight, Sheet } from '../../organisms';
 
 import { OnboardingLayout } from './OnboardingLayout';
 
-import type { LogoIconName } from '../../atoms/icons/customIcons';
+import type {
+  BlockchainIconName,
+  LogoIconName,
+} from '../../atoms/icons/customIcons';
 
 export interface HardwareWalletDevice {
   id: string;
   name: string;
   models: string[];
-  logo?: LogoIconName;
+  logo?: BlockchainIconName | LogoIconName;
 }
 
 export interface OnboardingHardwareWalletProps {
@@ -25,6 +28,11 @@ export interface OnboardingHardwareWalletProps {
   instructionText: string;
   onBackPress: () => void;
   onConnect: () => void;
+  /**
+   * When provided, each listed device is pressable and selecting one routes by
+   * device id (wired devices run the scan, air-gapped devices skip it).
+   */
+  onSelectDevice?: (deviceId: string) => void;
   connectButtonLabel: string;
   isLoading?: boolean;
   isError?: boolean;
@@ -40,6 +48,7 @@ export const OnboardingHardwareWallet = ({
   instructionText,
   onBackPress,
   onConnect,
+  onSelectDevice,
   connectButtonLabel,
   isLoading = false,
   isError = false,
@@ -54,6 +63,7 @@ export const OnboardingHardwareWallet = ({
         supportedDevices={supportedDevices}
         instructionText={instructionText}
         isError={isError}
+        onSelectDevice={onSelectDevice}
       />
     );
   }
@@ -79,7 +89,10 @@ export const OnboardingHardwareWallet = ({
           </View>
 
           <View style={fullScreenStyles.devicesContainer}>
-            <DeviceList supportedDevices={supportedDevices} />
+            <DeviceList
+              supportedDevices={supportedDevices}
+              onSelectDevice={onSelectDevice}
+            />
           </View>
 
           <View style={fullScreenStyles.instructionContainer}>
@@ -113,11 +126,17 @@ type EmbeddedProps = Omit<
   | 'title'
 >;
 
+/**
+ * Sheet-hosted variant. Errors render above the device list because the list
+ * can outgrow the sheet viewport, which would push a bottom-anchored error
+ * below the fold; regular instructions keep the bottom slot.
+ */
 const EmbeddedHardwareWallet = ({
   subtitle,
   supportedDevices,
   instructionText,
   isError = false,
+  onSelectDevice,
 }: EmbeddedProps) => {
   const { theme } = useTheme();
   const styles = useMemo(
@@ -130,6 +149,15 @@ const EmbeddedHardwareWallet = ({
     ? [styles.centered, { color: theme.data.negative }]
     : styles.centered;
 
+  const instruction = (
+    <InstructionText
+      variant="primary"
+      style={instructionStyle}
+      testID="onboarding-hw-instructions">
+      {instructionText}
+    </InstructionText>
+  );
+
   return (
     <Sheet.Scroll
       testID="onboarding-hw-sheet"
@@ -141,32 +169,36 @@ const EmbeddedHardwareWallet = ({
         {subtitle}
       </Text.S>
 
+      {isError && instruction}
+
       <View style={styles.devicesContainer}>
-        <DeviceList supportedDevices={supportedDevices} />
+        <DeviceList
+          supportedDevices={supportedDevices}
+          onSelectDevice={onSelectDevice}
+        />
       </View>
 
       <View style={styles.spacer} />
 
-      <InstructionText
-        variant="primary"
-        style={instructionStyle}
-        testID="onboarding-hw-instructions">
-        {instructionText}
-      </InstructionText>
+      {!isError && instruction}
     </Sheet.Scroll>
   );
 };
 
 const DeviceList = ({
   supportedDevices,
+  onSelectDevice,
 }: {
   supportedDevices: HardwareWalletDevice[];
+  onSelectDevice?: (deviceId: string) => void;
 }) => (
   <>
     {supportedDevices.map(device => {
-      const DeviceLogo = device.logo ? Logos[device.logo] : null;
-      return (
-        <View style={deviceStyles.deviceOption} key={device.id}>
+      const DeviceLogo = device.logo
+        ? { ...Logos, ...Blockchains }[device.logo]
+        : null;
+      const content = (
+        <>
           {DeviceLogo && (
             <DeviceLogo
               style={deviceStyles.deviceLogo}
@@ -180,6 +212,26 @@ const DeviceList = ({
               {device.models.join(', ')}
             </Text.S>
           </View>
+        </>
+      );
+
+      if (onSelectDevice) {
+        return (
+          <Pressable
+            style={deviceStyles.deviceOption}
+            key={device.id}
+            onPress={() => {
+              onSelectDevice(device.id);
+            }}
+            testID={`hardware-wallet-device-select-${device.id}`}>
+            {content}
+          </Pressable>
+        );
+      }
+
+      return (
+        <View style={deviceStyles.deviceOption} key={device.id}>
+          {content}
         </View>
       );
     })}

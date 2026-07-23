@@ -9,7 +9,11 @@ const store: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => ({
   persistConfig: {
     authenticationPrompt: {
       version: 1,
-      whitelist: ['deviceAuthReady'],
+      whitelist: [
+        'deviceAuthReady',
+        'failedPasswordAttempts',
+        'unlockBackoffUntil',
+      ],
     },
   },
   sideEffects: await initializeSideEffects(props, dependencies),

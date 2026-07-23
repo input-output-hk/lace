@@ -4,7 +4,7 @@ import {
   type Activity,
 } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 
 import { ActivityKind } from '../../types';
 import { CardanoPaymentAddress } from '../../types';

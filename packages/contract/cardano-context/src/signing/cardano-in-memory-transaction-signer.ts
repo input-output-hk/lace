@@ -1,6 +1,6 @@
 import { Serialization } from '@cardano-sdk/core';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { from, switchMap, throwError } from 'rxjs';
 
 import type {
@@ -71,6 +71,7 @@ export class CardanoInMemoryTransactionSigner
     const signatures = await keyAgent.signTransaction(tx.body(), {
       knownAddresses: this.#props.knownAddresses,
       utxo: this.#props.utxo,
+      scripts: tx.toCore().witness.scripts,
     });
 
     const witnessSet = tx.witnessSet();

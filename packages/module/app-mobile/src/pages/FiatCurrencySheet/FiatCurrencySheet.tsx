@@ -48,5 +48,11 @@ export const FiatCurrencySheet = ({
     fiatCurrencySheetProps.onConfirm,
   ]);
 
-  return <FiatCurrencySheetTemplate {...fiatCurrencySheetProps} />;
+  return (
+    <FiatCurrencySheetTemplate
+      radioOptions={fiatCurrencySheetProps.radioOptions}
+      value={fiatCurrencySheetProps.value}
+      onChange={fiatCurrencySheetProps.onChange}
+    />
+  );
 };

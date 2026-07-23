@@ -1,16 +1,16 @@
+import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
 import {
-  Ed25519PublicKey,
-  SodiumBip32Ed25519,
-  blake2b,
-} from '@cardano-sdk/crypto';
-import {
-  Bip32Account,
   InMemoryKeyAgent,
   KeyPurpose,
   KeyRole,
   util,
 } from '@cardano-sdk/key-management';
-import { ByteArray } from '@lace-sdk/util';
+import {
+  deriveBip32PublicKey,
+  hashEd25519PublicKey,
+  SecretBox,
+} from '@lace-lib/core';
+import { ByteArray } from '@lace-lib/util';
 import { dummyLogger } from 'ts-log';
 
 import { createInputResolver } from '../util';
@@ -19,7 +19,7 @@ import type { CardanoKeyAgent } from './types';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex, Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 export type CreateCardanoKeyAgentFromMnemonicProps = {
   accountIndex: number;
@@ -77,19 +77,26 @@ export const createCardanoKeyAgentFromEncryptedRoot = async ({
   authSecret,
 }: CreateCardanoKeyAgentFromEncryptedRootProps): Promise<CardanoKeyAgent> => {
   const bip32Ed25519 = await SodiumBip32Ed25519.create();
+  const encryptedRootPrivateKeyBytes = ByteArray.fromHex(
+    encryptedRootPrivateKey,
+  );
 
   const keyAgent = new InMemoryKeyAgent(
     {
       accountIndex,
       chainId,
-      encryptedRootPrivateKeyBytes: [
-        ...ByteArray.fromHex(encryptedRootPrivateKey),
-      ],
+      encryptedRootPrivateKeyBytes: [...encryptedRootPrivateKeyBytes],
       extendedAccountPublicKey,
       getPassphrase: async () => authSecret,
       purpose: KeyPurpose.STANDARD,
     },
-    { bip32Ed25519, logger: dummyLogger },
+    {
+      bip32Ed25519,
+      logger: dummyLogger,
+      rootPrivateKeyEncryption: SecretBox.isSealed(encryptedRootPrivateKeyBytes)
+        ? { encrypt: SecretBox.seal, decrypt: SecretBox.open }
+        : undefined,
+    },
   );
 
   return wrapInMemoryKeyAgent(keyAgent);
@@ -103,21 +110,11 @@ export type DeriveDRepKeyHashProps = {
 
 /** Derives the CIP-95 DRep public-key hash for the given account. */
 export const deriveDRepKeyHash = async ({
-  accountIndex,
-  chainId,
   extendedAccountPublicKey,
-}: DeriveDRepKeyHashProps): Promise<Ed25519KeyHashHex> => {
-  const bip32Ed25519 = await SodiumBip32Ed25519.create();
-  const bip32Account = new Bip32Account(
-    { accountIndex, chainId, extendedAccountPublicKey },
-    { blake2b, bip32Ed25519 },
+}: DeriveDRepKeyHashProps): Promise<Ed25519KeyHashHex> =>
+  hashEd25519PublicKey(
+    await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
   );
-  const dRepPubKey = await bip32Account.derivePublicKey({
-    index: 0,
-    role: KeyRole.DRep,
-  });
-  return Ed25519PublicKey.fromHex(dRepPubKey).hash().hex();
-};
 
 const wrapInMemoryKeyAgent = (keyAgent: InMemoryKeyAgent): CardanoKeyAgent => ({
   signTransaction: async (txBody, context) => {
@@ -129,6 +126,7 @@ const wrapInMemoryKeyAgent = (keyAgent: InMemoryKeyAgent): CardanoKeyAgent => ({
     return keyAgent.signTransaction(txBody, {
       knownAddresses: context.knownAddresses,
       txInKeyPathMap,
+      scripts: context.scripts,
     });
   },
   signBlob: async (derivationPath, blob) =>

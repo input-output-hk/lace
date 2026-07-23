@@ -1,7 +1,7 @@
 import { isNotNil } from '@cardano-sdk/util';
 import { CardanoNetworkId } from '@lace-contract/cardano-context';
 import { whileActive } from '@lace-contract/wallet-active-state';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import {
   combineLatest,
   concat,
@@ -32,7 +32,7 @@ import type {
   StakePoolsNetworkData,
 } from '../types';
 import type { Cardano, ProviderError } from '@cardano-sdk/core';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours

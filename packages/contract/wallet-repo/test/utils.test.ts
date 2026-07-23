@@ -1,9 +1,11 @@
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { WalletType } from '../src/types';
 import {
   findWalletSharingIdentity,
+  isHardwareAccountType,
+  isHardwareWallet,
   stampAccountsOnboardedAt,
   stampWalletOnboardedAt,
 } from '../src/utils';
@@ -37,6 +39,52 @@ const hwWallet = (walletId: string, xpub: string): AnyWallet =>
     ],
     blockchainSpecific: {},
   } as unknown as AnyWallet);
+
+const walletOfType = (type: WalletType): AnyWallet =>
+  ({
+    walletId: WalletId('wallet'),
+    type,
+    metadata: { name: 'wallet', order: 0 },
+    accounts: [],
+    blockchainSpecific: {},
+  } as unknown as AnyWallet);
+
+describe('isHardwareWallet', () => {
+  it('returns true for Ledger, Trezor, Seed Signer and Keystone wallets', () => {
+    expect(isHardwareWallet(walletOfType(WalletType.HardwareLedger))).toBe(
+      true,
+    );
+    expect(isHardwareWallet(walletOfType(WalletType.HardwareTrezor))).toBe(
+      true,
+    );
+    expect(isHardwareWallet(walletOfType(WalletType.HardwareSeedSigner))).toBe(
+      true,
+    );
+    expect(isHardwareWallet(walletOfType(WalletType.HardwareKeystone))).toBe(
+      true,
+    );
+  });
+
+  it('returns false for non-hardware wallets', () => {
+    expect(isHardwareWallet(walletOfType(WalletType.InMemory))).toBe(false);
+    expect(isHardwareWallet(walletOfType(WalletType.LazyInMemory))).toBe(false);
+    expect(isHardwareWallet(walletOfType(WalletType.MultiSig))).toBe(false);
+  });
+});
+
+describe('isHardwareAccountType', () => {
+  it('returns true for the hardware account types', () => {
+    expect(isHardwareAccountType('HardwareLedger')).toBe(true);
+    expect(isHardwareAccountType('HardwareTrezor')).toBe(true);
+    expect(isHardwareAccountType('HardwareSeedSigner')).toBe(true);
+    expect(isHardwareAccountType('HardwareKeystone')).toBe(true);
+  });
+
+  it('returns false for software account types', () => {
+    expect(isHardwareAccountType('InMemory')).toBe(false);
+    expect(isHardwareAccountType('MultiSig')).toBe(false);
+  });
+});
 
 describe('findWalletSharingIdentity', () => {
   it('returns the existing wallet that shares an account identity key', () => {

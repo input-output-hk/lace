@@ -1,5 +1,6 @@
 import { useTranslation } from '@lace-contract/i18n';
-import React from 'react';
+import { formatEpochEnd } from '@lace-lib/util-render';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme } from '../../../design-tokens';
@@ -10,14 +11,72 @@ import type { Theme } from '../../../design-tokens';
 
 export type NetworkInfoCardProps = {
   currentEpochValue?: string;
-  endEpochValue?: string;
+  epochEndTimestamp?: number;
   totalPoolsValue?: string;
   stakedValue?: string;
 };
 
+const CardElement = ({
+  title,
+  value,
+  flexValue,
+}: {
+  title: string;
+  value?: string;
+  flexValue?: number;
+}) => {
+  const { theme } = useTheme();
+  return (
+    <Column
+      style={[
+        styles(theme).elementColumn,
+        flexValue ? { flex: flexValue } : undefined,
+      ]}>
+      <Text.XS variant="secondary">{title}</Text.XS>
+      {value !== undefined ? (
+        <Text.M variant="primary" numberOfLines={1}>
+          {value}
+        </Text.M>
+      ) : (
+        <Shimmer.M width="medium" />
+      )}
+    </Column>
+  );
+};
+
+// Live epoch-end countdown. Owns its own 1s interval so each tick re-renders
+// only this leaf, not the surrounding NetworkInfoCard / page subtree.
+const EpochCountdown = ({
+  title,
+  timestamp,
+}: {
+  title: string;
+  timestamp?: number;
+}) => {
+  const [value, setValue] = useState<string | undefined>(() =>
+    timestamp === undefined ? undefined : formatEpochEnd(timestamp),
+  );
+
+  useEffect(() => {
+    if (timestamp === undefined) {
+      setValue(undefined);
+      return;
+    }
+    setValue(formatEpochEnd(timestamp));
+    const interval = setInterval(() => {
+      setValue(formatEpochEnd(timestamp));
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [timestamp]);
+
+  return <CardElement title={title} value={value} />;
+};
+
 export const NetworkInfoCard = ({
   currentEpochValue,
-  endEpochValue,
+  epochEndTimestamp,
   totalPoolsValue,
   stakedValue,
 }: NetworkInfoCardProps) => {
@@ -39,31 +98,6 @@ export const NetworkInfoCard = ({
   const { currentEpochTitle, endEpochTitle, totalPoolsTitle, stakedTitle } =
     copies;
 
-  const CardElement = ({
-    title,
-    value,
-    flexValue,
-  }: {
-    title: string;
-    value?: string;
-    flexValue?: number;
-  }) => (
-    <Column
-      style={[
-        styles(theme).elementColumn,
-        flexValue ? { flex: flexValue } : undefined,
-      ]}>
-      <Text.XS variant="secondary">{title}</Text.XS>
-      {value !== undefined ? (
-        <Text.M variant="primary" numberOfLines={1}>
-          {value}
-        </Text.M>
-      ) : (
-        <Shimmer.M width="medium" />
-      )}
-    </Column>
-  );
-
   return (
     <Card cardStyle={style.card} blur={!isWeb}>
       <Text.M>{t('v2.pages.browse-pool.network-info-card.title')}</Text.M>
@@ -76,7 +110,10 @@ export const NetworkInfoCard = ({
           </Column>
           <Column gap={spacing.M} style={style.flexElement}>
             <CardElement title={stakedTitle} value={stakedValue} />
-            <CardElement title={endEpochTitle} value={endEpochValue} />
+            <EpochCountdown
+              title={endEpochTitle}
+              timestamp={epochEndTimestamp}
+            />
           </Column>
         </Row>
       </Column>

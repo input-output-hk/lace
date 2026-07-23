@@ -5,7 +5,7 @@ import { spacing } from '../../../design-tokens';
 import { Row } from '../../atoms';
 import { MnemonicWord } from '../mnemonicWord/mnemonicWord';
 
-import type { ByteArray } from '@lace-sdk/util';
+import type { ByteArray } from '@lace-lib/util';
 
 export type RecoveryPhraseProps = {
   words: ByteArray[];

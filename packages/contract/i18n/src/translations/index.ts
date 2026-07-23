@@ -115,9 +115,14 @@ export type I18nMessages = Record<NestedKeyOf<typeof en>, string>;
 const _en: typeof en = es;
 const _es: typeof es = en;
 const _ja: typeof ja = en;
+// `_ja` above only catches `en` missing a `ja` key; this catches the reverse —
+// `ja` missing an `en` key (the gap that let 22 en/es keys ship without `ja`).
+const _enJa: typeof en = ja;
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 _en;
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 _es;
 // eslint-disable-next-line @typescript-eslint/no-unused-expressions
 _ja;
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+_enJa;

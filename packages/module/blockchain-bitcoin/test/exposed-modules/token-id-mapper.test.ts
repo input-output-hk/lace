@@ -1,6 +1,6 @@
+import { BITCOIN_TOKEN_ID } from '@lace-contract/bitcoin-context';
 import { BitcoinTokenPriceId } from '@lace-contract/token-pricing';
-import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, it, expect } from 'vitest';
 
 import { createTokenIdMapper } from '../../src/exposed-modules/token-id-mapper';
@@ -10,7 +10,7 @@ import type { Token } from '@lace-contract/tokens';
 import type { AccountId } from '@lace-contract/wallet-repo';
 
 const createMockBitcoinToken = (): Token => ({
-  tokenId: TokenId('btc'),
+  tokenId: BITCOIN_TOKEN_ID,
   blockchainName: 'Bitcoin',
   accountId: 'test-account' as AccountId,
   address: 'test-address' as Address,
@@ -40,8 +40,8 @@ describe('Bitcoin TokenIdMapper', () => {
     it('should return BitcoinTokenPriceId for any Bitcoin token', () => {
       const token = createMockBitcoinToken();
       const priceId = mapper.getTokenPriceId(token);
-      expect(priceId).toBe(BitcoinTokenPriceId('btc'));
-      expect(priceId).toBe('bitcoin:btc');
+      expect(priceId).toBe(BitcoinTokenPriceId(BITCOIN_TOKEN_ID));
+      expect(priceId).toBe('bitcoin:bitcoin');
     });
   });
 
@@ -51,7 +51,7 @@ describe('Bitcoin TokenIdMapper', () => {
       const request = mapper.getTokenPriceRequest(token, 'USD');
 
       expect(request).toEqual({
-        priceId: BitcoinTokenPriceId('btc'),
+        priceId: BitcoinTokenPriceId(BITCOIN_TOKEN_ID),
         blockchain: 'Bitcoin',
         identifier: 'BTC',
         fiatCurrency: 'USD',
@@ -63,7 +63,7 @@ describe('Bitcoin TokenIdMapper', () => {
       const request = mapper.getTokenPriceRequest(token, 'EUR');
 
       expect(request).toEqual({
-        priceId: BitcoinTokenPriceId('btc'),
+        priceId: BitcoinTokenPriceId(BITCOIN_TOKEN_ID),
         blockchain: 'Bitcoin',
         identifier: 'BTC',
         fiatCurrency: 'EUR',

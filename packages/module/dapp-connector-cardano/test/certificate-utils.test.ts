@@ -5,46 +5,11 @@ import { describe, expect, it } from 'vitest';
 import {
   formatDeposit,
   formatDRepId,
-  formatStakeAddress,
   formatStakeKeyHash,
   getDRepDisplayInfo,
 } from '../src/common/utils';
 
 describe('certificate-utils', () => {
-  describe('formatStakeAddress', () => {
-    it('formats a stake credential as a bech32 reward address for mainnet', () => {
-      const networkId = Cardano.NetworkId.Mainnet;
-      const stakeCredential: Cardano.Credential = {
-        type: Cardano.CredentialType.KeyHash,
-        hash: Crypto.Ed25519KeyHashHex(
-          '00000000000000000000000000000000000000000000000000000000',
-        ),
-      };
-
-      const result = formatStakeAddress(networkId, stakeCredential);
-
-      expect(result).toBe(
-        'stake1uyqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq28lj8u',
-      );
-    });
-
-    it('formats a stake credential as a bech32 reward address for testnet', () => {
-      const networkId = Cardano.NetworkId.Testnet;
-      const stakeCredential: Cardano.Credential = {
-        type: Cardano.CredentialType.KeyHash,
-        hash: Crypto.Ed25519KeyHashHex(
-          '00000000000000000000000000000000000000000000000000000000',
-        ),
-      };
-
-      const result = formatStakeAddress(networkId, stakeCredential);
-
-      expect(result).toBe(
-        'stake_test1uqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqdd4srp',
-      );
-    });
-  });
-
   describe('formatStakeKeyHash', () => {
     it('returns the credential hash as hex string', () => {
       const stakeCredential: Cardano.Credential = {

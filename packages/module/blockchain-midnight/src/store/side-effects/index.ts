@@ -8,8 +8,8 @@ import {
   MidnightNetworkId,
   MidnightSDKNetworkIds,
 } from '@lace-contract/midnight-context';
+import { Milliseconds, Timestamp } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
-import { Milliseconds, Timestamp } from '@lace-sdk/util';
 import { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import omit from 'lodash/omit.js';

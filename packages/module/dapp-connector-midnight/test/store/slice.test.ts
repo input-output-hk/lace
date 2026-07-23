@@ -1,4 +1,5 @@
 import { DappId } from '@lace-contract/dapp-connector';
+import { AccountId } from '@lace-contract/wallet-repo';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -24,6 +25,7 @@ describe('midnight dapp connector slice', () => {
     initialState = {
       proveTxRequest: null,
       signDataRequest: null,
+      sessionAccountByOrigin: {},
     };
   });
 
@@ -91,6 +93,63 @@ describe('midnight dapp connector slice', () => {
         expect(state.signDataRequest).toBeNull();
       });
     });
+
+    describe('setSessionAccountForOrigin', () => {
+      it('should bind an account id to an origin', () => {
+        const action = actions.midnightDappConnector.setSessionAccountForOrigin(
+          {
+            origin: 'http://test-dapp.com',
+            accountId: AccountId('account-0'),
+          },
+        );
+        const state = reducers.midnightDappConnector(initialState, action);
+
+        expect(state.sessionAccountByOrigin).toEqual({
+          'http://test-dapp.com': AccountId('account-0'),
+        });
+      });
+
+      it('should keep bindings for other origins independent', () => {
+        const stateWithBinding: MidnightDappConnectorState = {
+          ...initialState,
+          sessionAccountByOrigin: {
+            'http://other-dapp.com': AccountId('account-1'),
+          },
+        };
+        const action = actions.midnightDappConnector.setSessionAccountForOrigin(
+          {
+            origin: 'http://test-dapp.com',
+            accountId: AccountId('account-0'),
+          },
+        );
+        const state = reducers.midnightDappConnector(stateWithBinding, action);
+
+        expect(state.sessionAccountByOrigin).toEqual({
+          'http://other-dapp.com': AccountId('account-1'),
+          'http://test-dapp.com': AccountId('account-0'),
+        });
+      });
+
+      it('should overwrite an existing binding for the same origin', () => {
+        const stateWithBinding: MidnightDappConnectorState = {
+          ...initialState,
+          sessionAccountByOrigin: {
+            'http://test-dapp.com': AccountId('account-0'),
+          },
+        };
+        const action = actions.midnightDappConnector.setSessionAccountForOrigin(
+          {
+            origin: 'http://test-dapp.com',
+            accountId: AccountId('account-1'),
+          },
+        );
+        const state = reducers.midnightDappConnector(stateWithBinding, action);
+
+        expect(state.sessionAccountByOrigin).toEqual({
+          'http://test-dapp.com': AccountId('account-1'),
+        });
+      });
+    });
   });
 
   describe('selectors', () => {
@@ -123,6 +182,19 @@ describe('midnight dapp connector slice', () => {
         selectors.midnightDappConnector.selectSignDataRequest(state);
 
       expect(selected).toEqual(signDataRequest);
+    });
+
+    it('should select the session account mapping', () => {
+      const sessionAccountByOrigin = {
+        'http://test-dapp.com': AccountId('account-0'),
+      };
+      const state = {
+        midnightDappConnector: { ...initialState, sessionAccountByOrigin },
+      };
+      const selected =
+        selectors.midnightDappConnector.selectSessionAccountByOrigin(state);
+
+      expect(selected).toEqual(sessionAccountByOrigin);
     });
   });
 });

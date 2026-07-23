@@ -42,11 +42,13 @@ export const deregistrationFlowMachine = createStateMachine(
           fees,
           serializedTx,
           wallet,
+          withdrawalAmount,
         }: {
           depositReturn: string;
           fees: FeeEntry[];
           serializedTx: string;
           wallet: AnyWallet;
+          withdrawalAmount: string;
         },
       ) => ({
         accountId,
@@ -56,6 +58,7 @@ export const deregistrationFlowMachine = createStateMachine(
         serializedTx,
         status: 'Summary',
         wallet,
+        withdrawalAmount,
       }),
       feeCalculationFailed: (
         { accountId },
@@ -84,7 +87,7 @@ export const deregistrationFlowMachine = createStateMachine(
     },
     AwaitingConfirmation: {
       confirmationCompleted: (
-        { accountId, depositReturn, fees, wallet },
+        { accountId, depositReturn, fees, wallet, withdrawalAmount },
         { result }: { result: TxConfirmationResult },
       ) => {
         if (result.success) {
@@ -95,6 +98,7 @@ export const deregistrationFlowMachine = createStateMachine(
             serializedTx: result.serializedTx,
             status: 'Processing',
             wallet,
+            withdrawalAmount,
           };
         }
 
@@ -109,7 +113,7 @@ export const deregistrationFlowMachine = createStateMachine(
     },
     Processing: {
       processingResulted: (
-        { accountId, depositReturn, fees },
+        { accountId, depositReturn, fees, withdrawalAmount },
         { result }: { result: TxSubmissionResult },
       ) => {
         if (result.success) {
@@ -119,6 +123,7 @@ export const deregistrationFlowMachine = createStateMachine(
             fees,
             status: 'Success',
             txId: result.txId,
+            withdrawalAmount,
           };
         }
 

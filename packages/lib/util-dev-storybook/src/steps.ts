@@ -88,8 +88,10 @@ export const click = async (
  * @param params - Configuration object
  * @param params.canvas - The testing canvas context
  * @param params.testId - The test ID of the input element
- * @param params.text - The text to type
- * @param params.clear - If true, clears the input field before typing
+ * @param params.text - The text to type; pass '' or '{none}' together with
+ * `clear` to empty the field without typing a replacement
+ * @param params.clear - If true, replaces the field's existing text by typing
+ * over a select-all selection; only supported on input/textarea elements
  */
 export const inputText = async (params: {
   canvas: Canvas;
@@ -106,7 +108,34 @@ export const inputText = async (params: {
     options,
   );
   if (params.clear) {
-    await userEvent.clear(inputElement);
+    // Don't use userEvent.clear(): its single deleteContentBackward event gets
+    // swallowed on controlled RN-web inputs under load, so typing then appends
+    // to the stale value. Type over a select-all selection instead, so every
+    // character round-trips React state. '{none}'/empty clears via Backspace.
+    if (typeof (inputElement as HTMLInputElement).value !== 'string') {
+      // Without a value, the selection below collapses to offset 0 and the
+      // text would be silently PREPENDED to the existing content.
+      throw new TypeError(
+        `inputText: clear is only supported on input/textarea elements, ` +
+          `got <${inputElement.tagName.toLowerCase()}> for testId "${
+            params.testId
+          }"`,
+      );
+    }
+    const isClearOnly = params.text === '' || params.text === '{none}';
+    await userEvent.type(
+      inputElement,
+      isClearOnly ? '{Backspace}' : params.text,
+      {
+        ...NO_POINTER_EVENTS_CHECK,
+        initialSelectionStart: 0,
+        // Native setSelectionRange clamps the end to the current value
+        // length, so this selects all even if the value changed between the
+        // findByTestId above and type()'s internal click.
+        initialSelectionEnd: Number.MAX_SAFE_INTEGER,
+      },
+    );
+    return;
   }
   await userEvent.type(inputElement, params.text, NO_POINTER_EVENTS_CHECK);
 };

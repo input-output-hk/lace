@@ -1,13 +1,16 @@
-import { createFormHook, createFormHookContexts } from '@tanstack/react-form';
+import { createFormHook } from '@tanstack/react-form';
 
+import { fieldContext, formContext } from './mnemonicFormContexts';
 import { MnemonicNextButton } from './mnemonicFormNextButton';
 import { MnemonicPasteButton } from './mnemonicFormPasteButton';
 import { MnemonicTextInput } from './mnemonicTextInput';
 
-export const { fieldContext, useFieldContext, formContext, useFormContext } =
-  createFormHookContexts();
+export { useFieldContext, useFormContext } from './mnemonicFormContexts';
 
-export const { useAppForm } = createFormHook({
+// NOT `export const { useAppForm } = createFormHook(...)`: Expo's experimental
+// tree-shaking (EXPO_UNSTABLE_TREE_SHAKING) cannot link destructured exports to
+// their importers and drops them, leaving `useAppForm` undefined at runtime.
+const appForm = createFormHook({
   fieldContext,
   formContext,
   fieldComponents: {
@@ -17,3 +20,5 @@ export const { useAppForm } = createFormHook({
   },
   formComponents: {},
 });
+
+export const useAppForm = appForm.useAppForm;

@@ -8,7 +8,7 @@ import {
   OPTIONS,
   ORDERS,
 } from '@lace-lib/ui-toolkit';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { BrowsePoolSortOption } from '@lace-contract/staking-center';
@@ -88,61 +88,87 @@ export const useBrowsePoolFiltersSheet = (
     [t],
   );
 
-  const navigate = (option?: BrowsePoolSortOption) => {
-    NavigationControls.navigate(
-      SheetRoutes.BrowsePool,
-      {
-        accountId: params.accountId,
-        searchQuery: params.searchQuery,
-        browsePoolSortOption: option,
-        browsePoolSortOrder: option ? localOrder : undefined,
-      },
-      { reset: true },
-    );
-  };
-
-  return {
-    title: t('v2.pages.browse-pool.filter.more-options'),
-    testID,
-    cancelButtonLabel: t('v2.generic.btn.clear'),
-    confirmButtonLabel: t('v2.generic.btn.apply'),
-
-    dropdownLabel: t(SORT_BY_LABEL_KEY),
-    dropdownItems,
-    selectedOption: localOption,
-    selectedOrder: localOption
-      ? localOrder
-      : getDefaultSortOrder(OPTIONS.TICKER),
-
-    onSelectOption: (index: number) => {
-      const option = BROWSE_POOL_OPTIONS[index];
-      if (!option) return;
-      setLocalOption(option);
-      setLocalOrder(getDefaultSortOrder(option));
-    },
-    onClearOption: () => {
-      setLocalOption(undefined);
-      setLocalOrder(ORDERS.ASC);
-    },
-    onToggleOrder: () => {
-      if (!localOption) return;
-      setLocalOrder(previous =>
-        previous === ORDERS.ASC ? ORDERS.DESC : ORDERS.ASC,
+  const navigate = useCallback(
+    (option?: BrowsePoolSortOption) => {
+      NavigationControls.navigate(
+        SheetRoutes.BrowsePool,
+        {
+          accountId: params.accountId,
+          searchQuery: params.searchQuery,
+          browsePoolSortOption: option,
+          browsePoolSortOrder: option ? localOrder : undefined,
+        },
+        { reset: true },
       );
     },
+    [params.accountId, params.searchQuery, localOrder],
+  );
 
-    onConfirm: () => {
-      if (localOption) {
-        trackEvent('staking | pool | sort | press', {
-          sortBy: localOption,
-          sortOrder: localOrder,
-        });
-      }
-      navigate(localOption);
-    },
-    onCancel: () => {
-      setLocalOption(undefined);
-      navigate(undefined);
-    },
-  };
+  const onSelectOption = useCallback((index: number) => {
+    const option = BROWSE_POOL_OPTIONS[index];
+    if (!option) return;
+    setLocalOption(option);
+    setLocalOrder(getDefaultSortOrder(option));
+  }, []);
+
+  const onClearOption = useCallback(() => {
+    setLocalOption(undefined);
+    setLocalOrder(ORDERS.ASC);
+  }, []);
+
+  const onToggleOrder = useCallback(() => {
+    if (!localOption) return;
+    setLocalOrder(previous =>
+      previous === ORDERS.ASC ? ORDERS.DESC : ORDERS.ASC,
+    );
+  }, [localOption]);
+
+  const onConfirm = useCallback(() => {
+    if (localOption) {
+      trackEvent('staking | pool | sort | press', {
+        sortBy: localOption,
+        sortOrder: localOrder,
+      });
+    }
+    navigate(localOption);
+  }, [localOption, localOrder, trackEvent, navigate]);
+
+  const onCancel = useCallback(() => {
+    setLocalOption(undefined);
+    navigate(undefined);
+  }, [navigate]);
+
+  // Stable ref: the consumer feeds this into navigation.setOptions (see commit).
+  return useMemo<BrowsePoolFiltersSheetModel>(
+    () => ({
+      title: t('v2.pages.browse-pool.filter.more-options'),
+      testID,
+      cancelButtonLabel: t('v2.generic.btn.clear'),
+      confirmButtonLabel: t('v2.generic.btn.apply'),
+
+      dropdownLabel: t(SORT_BY_LABEL_KEY),
+      dropdownItems,
+      selectedOption: localOption,
+      selectedOrder: localOption
+        ? localOrder
+        : getDefaultSortOrder(OPTIONS.TICKER),
+
+      onSelectOption,
+      onClearOption,
+      onToggleOrder,
+      onConfirm,
+      onCancel,
+    }),
+    [
+      t,
+      dropdownItems,
+      localOption,
+      localOrder,
+      onSelectOption,
+      onClearOption,
+      onToggleOrder,
+      onConfirm,
+      onCancel,
+    ],
+  );
 };

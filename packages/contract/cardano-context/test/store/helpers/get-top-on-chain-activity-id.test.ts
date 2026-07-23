@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { describe, expect, it } from 'vitest';
 
 import { getTopOnChainActivity } from '../../../src/store/helpers/get-top-on-chain-activity-id';

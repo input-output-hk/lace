@@ -12,7 +12,7 @@ import type {
   AnyAccount,
   AnyWallet,
 } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 
 const mockAccountId = 'account-1' as AccountId;
 const mockAuth: SignerAuth = {

@@ -1,6 +1,6 @@
 import { coalesceValueQuantities } from '@cardano-sdk/core';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import groupBy from 'lodash/groupBy';
 import {
   combineLatest,

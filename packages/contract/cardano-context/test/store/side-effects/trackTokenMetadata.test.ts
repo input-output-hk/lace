@@ -6,8 +6,8 @@ import {
 import { addressesActions } from '@lace-contract/addresses';
 import { failuresActions } from '@lace-contract/failures';
 import { tokensActions } from '@lace-contract/tokens';
+import { Milliseconds, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Milliseconds, Ok } from '@lace-sdk/util';
 import { defer, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

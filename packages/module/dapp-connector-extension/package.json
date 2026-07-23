@@ -9,8 +9,8 @@
     "@lace-contract/dapp-connector": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
-    "@lace-sdk/dapp-connector": "*",
-    "@lace-sdk/extension-messaging": "*",
+    "@lace-lib/dapp-connector": "*",
+    "@lace-lib/extension-messaging": "*",
     "rxjs": "^7.8.1",
     "type-fest": "^4.32.0",
     "webextension-polyfill": "^0.10.0"

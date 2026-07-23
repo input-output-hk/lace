@@ -48,6 +48,7 @@ interface AddAccountSheetProps {
   accountIndex?: number;
   accountIndexDropdownItems?: DropdownItem[];
   hasAvailableIndices?: boolean;
+  showAccountIndexSelection?: boolean;
   allIndicesUsedMessage?: string;
 }
 
@@ -69,6 +70,7 @@ export const AddAccountSheet = ({
   accountIndex,
   accountIndexDropdownItems = [],
   hasAvailableIndices = true,
+  showAccountIndexSelection = true,
   allIndicesUsedMessage = '',
 }: AddAccountSheetProps) => {
   const { theme } = useTheme();
@@ -133,31 +135,32 @@ export const AddAccountSheet = ({
           onChange={onBlockchainChange}
           direction="column"
         />
-        {!hasAvailableIndices ? (
-          <Row
-            alignItems="center"
-            gap={spacing.M}
-            style={styles.errorMessageContainer}>
-            <Icon
-              name="InformationCircle"
-              size={24}
-              testID={`${testID}-error-icon`}
+        {showAccountIndexSelection &&
+          (!hasAvailableIndices ? (
+            <Row
+              alignItems="center"
+              gap={spacing.M}
+              style={styles.errorMessageContainer}>
+              <Icon
+                name="InformationCircle"
+                size={24}
+                testID={`${testID}-error-icon`}
+              />
+              <Text.M
+                style={styles.errorMessageText}
+                testID={`${testID}-error-message`}>
+                {allIndicesUsedMessage}
+              </Text.M>
+            </Row>
+          ) : (
+            <DropdownMenu
+              title={accountIndexInputLabel}
+              items={accountIndexDropdownItems}
+              selectedItemId={selectedAccountId}
+              onSelectItem={handleAccountIndexSelect}
+              testID={accountIndexInputTestID}
             />
-            <Text.M
-              style={styles.errorMessageText}
-              testID={`${testID}-error-message`}>
-              {allIndicesUsedMessage}
-            </Text.M>
-          </Row>
-        ) : (
-          <DropdownMenu
-            title={accountIndexInputLabel}
-            items={accountIndexDropdownItems}
-            selectedItemId={selectedAccountId}
-            onSelectItem={handleAccountIndexSelect}
-            testID={accountIndexInputTestID}
-          />
-        )}
+          ))}
       </Column>
     </DropdownMenuViewport>
   );

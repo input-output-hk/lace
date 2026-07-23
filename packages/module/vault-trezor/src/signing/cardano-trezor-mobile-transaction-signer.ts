@@ -13,7 +13,7 @@ import {
 } from '@cardano-sdk/hardware-trezor';
 import { util } from '@cardano-sdk/key-management';
 import { createInputResolver } from '@lace-contract/cardano-context';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { from } from 'rxjs';
 
 import { DERIVATION_TYPE_TO_TREZOR } from '../mobile/derivation-type';

@@ -9,12 +9,12 @@ import { useTranslation } from '@lace-contract/i18n';
 import { getTokenPriceId } from '@lace-contract/token-pricing';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { getAssetImageUrl, TokenItem, isAndroid } from '@lace-lib/ui-toolkit';
+import { BigNumber } from '@lace-lib/util';
 import {
   formatAmountToLocale,
   getTokenPriceDisplayProps,
   type TokenPriceDisplayProps,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import React, {
   useCallback,
   useEffect,

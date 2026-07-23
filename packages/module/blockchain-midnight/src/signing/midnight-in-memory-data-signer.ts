@@ -1,5 +1,5 @@
 import { midnightWallets$ } from '@lace-contract/midnight-context';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { map, switchMap, take } from 'rxjs';
 
 import type {

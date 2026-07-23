@@ -1,5 +1,5 @@
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 
 import {
   DUST_TOKEN_TICKER,

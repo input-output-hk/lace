@@ -1,6 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
+import { BigNumber } from '@lace-lib/util';
 import { formatAmountRawToDenominated } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 
 import { LOVELACE_TOKEN_ID } from './const';
 import { convertLovelacesToAda } from './util';

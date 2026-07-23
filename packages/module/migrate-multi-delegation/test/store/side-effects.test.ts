@@ -11,10 +11,10 @@ import {
 } from '@lace-contract/cardano-context';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
+import { BigNumber, HexBytes, Ok, Err } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { Serializable } from '@lace-lib/util-store';
-import { BigNumber, HexBytes, Ok, Err } from '@lace-sdk/util';
-import { EMPTY, map, of, Subject, throwError } from 'rxjs';
+import { EMPTY, firstValueFrom, map, of, Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -55,7 +55,7 @@ import type {
   InMemoryWallet,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 import type { RunHelpers } from 'rxjs/testing';
 import type { Mocked } from 'vitest';
 
@@ -464,12 +464,12 @@ describe('migrate-multi-delegation side-effects', () => {
         addStakeDeregistrationCertificate: vi.fn().mockReturnThis(),
         addRewardsWithdrawal: vi.fn().mockReturnThis(),
         setChangeAddress: vi.fn().mockReturnThis(),
-        build: vi.fn().mockReturnValue(mockTx),
+        build: vi.fn().mockResolvedValue(mockTx),
         mockTx,
       });
     };
 
-    it('builds tx with inputs, deregistration certs, withdrawals, and change address', () => {
+    it('builds tx with inputs, deregistration certs, withdrawals, and change address', async () => {
       const mockBuilder = createMockBuilder();
       const logger = createLogger();
 
@@ -504,15 +504,13 @@ describe('migrate-multi-delegation side-effects', () => {
         utxos,
       ];
 
-      createTestScheduler().run(({ expectObservable }) => {
-        const result$ = buildMultidelegationMigrationTx(
-          multiDelegationAccount,
-          { logger } as SideEffectDependencies,
-          false,
-        )(builderInput);
+      const result$ = buildMultidelegationMigrationTx(
+        multiDelegationAccount,
+        { logger } as SideEffectDependencies,
+        false,
+      )(builderInput);
 
-        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
-      });
+      expect(await firstValueFrom(result$)).toBe(mockBuilder.mockTx);
 
       expect(mockBuilder.addInput).toHaveBeenCalledTimes(2);
       expect(
@@ -534,7 +532,7 @@ describe('migrate-multi-delegation side-effects', () => {
       expect(mockBuilder.build).toHaveBeenCalled();
     });
 
-    it('skips withdrawal when withdrawable amount is 0', () => {
+    it('skips withdrawal when withdrawable amount is 0', async () => {
       const mockBuilder = createMockBuilder();
       const logger = createLogger();
 
@@ -569,15 +567,13 @@ describe('migrate-multi-delegation side-effects', () => {
         utxos,
       ];
 
-      createTestScheduler().run(({ expectObservable }) => {
-        const result$ = buildMultidelegationMigrationTx(
-          multiDelegationAccount,
-          { logger } as SideEffectDependencies,
-          false,
-        )(builderInput);
+      const result$ = buildMultidelegationMigrationTx(
+        multiDelegationAccount,
+        { logger } as SideEffectDependencies,
+        false,
+      )(builderInput);
 
-        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
-      });
+      expect(await firstValueFrom(result$)).toBe(mockBuilder.mockTx);
 
       expect(
         mockBuilder.addStakeDeregistrationCertificate,
@@ -585,7 +581,7 @@ describe('migrate-multi-delegation side-effects', () => {
       expect(mockBuilder.addRewardsWithdrawal).not.toHaveBeenCalled();
     });
 
-    it('adds collateral output when hasCollateral is true', () => {
+    it('adds collateral output when hasCollateral is true', async () => {
       const mockBuilder = createMockBuilder();
       const logger = createLogger();
 
@@ -616,15 +612,13 @@ describe('migrate-multi-delegation side-effects', () => {
         utxos,
       ];
 
-      createTestScheduler().run(({ expectObservable }) => {
-        const result$ = buildMultidelegationMigrationTx(
-          multiDelegationAccount,
-          { logger } as SideEffectDependencies,
-          true,
-        )(builderInput);
+      const result$ = buildMultidelegationMigrationTx(
+        multiDelegationAccount,
+        { logger } as SideEffectDependencies,
+        true,
+      )(builderInput);
 
-        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
-      });
+      expect(await firstValueFrom(result$)).toBe(mockBuilder.mockTx);
 
       expect(mockBuilder.addOutput).toHaveBeenCalledWith({
         address: address0,
@@ -1310,12 +1304,12 @@ describe('migrate-multi-delegation side-effects', () => {
         setUnspentOutputs: vi.fn().mockReturnThis(),
         addVoteDelegationCertificate: vi.fn().mockReturnThis(),
         setChangeAddress: vi.fn().mockReturnThis(),
-        build: vi.fn().mockReturnValue(mockTx),
+        build: vi.fn().mockResolvedValue(mockTx),
         mockTx,
       });
     };
 
-    it('builds tx with vote delegation certificates and coin selection', () => {
+    it('builds tx with vote delegation certificates and coin selection', async () => {
       const mockBuilder = createMockBuilder();
 
       const affectedKeys = [
@@ -1329,17 +1323,15 @@ describe('migrate-multi-delegation side-effects', () => {
         },
       ];
 
-      createTestScheduler().run(({ expectObservable }) => {
-        const result$ = buildVoteDelegationTx(
-          multiDelegationAccount,
-          affectedKeys,
-        )([
-          { builder: mockBuilder, protocolParameters: mockProtocolParameters },
-          utxos,
-        ]);
+      const result$ = buildVoteDelegationTx(
+        multiDelegationAccount,
+        affectedKeys,
+      )([
+        { builder: mockBuilder, protocolParameters: mockProtocolParameters },
+        utxos,
+      ]);
 
-        expectObservable(result$).toBe('(a|)', { a: mockBuilder.mockTx });
-      });
+      expect(await firstValueFrom(result$)).toBe(mockBuilder.mockTx);
 
       // Uses coin selection, not addInput
       expect(mockBuilder.setUnspentOutputs).toHaveBeenCalledWith(utxos);

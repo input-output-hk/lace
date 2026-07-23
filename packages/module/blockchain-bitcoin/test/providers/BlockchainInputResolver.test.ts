@@ -1,5 +1,5 @@
 import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
-import { Ok, Err } from '@lace-sdk/util';
+import { Ok, Err } from '@lace-lib/util';
 import { of } from 'rxjs';
 import { it, describe, expect, beforeEach, vi } from 'vitest';
 

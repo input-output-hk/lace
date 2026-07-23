@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument */
 import { BitcoinNetwork } from '@lace-contract/bitcoin-context';
 import { WalletId } from '@lace-contract/wallet-repo';
-import { Ok } from '@lace-sdk/util';
+import { Ok } from '@lace-lib/util';
 import { EMPTY, firstValueFrom, of } from 'rxjs';
 import { it, describe, expect, beforeEach, vi } from 'vitest';
 
@@ -83,8 +83,6 @@ describe('BitcoinWallet', () => {
           'xpub6CrzGDoCVV56RUEdoKWVVXCA5JUJr9PQMQvXaUiGKjfBzZgwkJtKtHfvz3rCDnVL4qriaeZixHARX5MifcSDzZMnwBGVng5AqLZrsE1sUg1',
         taproot:
           'xpub6CZnCLkMMgC8aDH1yMeQeZnLGk7qeRxSG8pwHQvb2dkbXAuRopV57RoZLBUqBWMmiqxCaDDwpVWFCfLLAAJkWW4NCy4CKB4U2UUx95hnTYN',
-        electrumNativeSegWit:
-          'xpub6Bju9NoEG4m4x95tv1uX5fu7cCKf3ormkGbV3qtsvnwRqUmqcmCrej8RGQGmxWJRN23gfpZstUZ1uMnxUgkHju5udzPXqrJqDsq719UwXHj',
       },
     };
 

@@ -1,10 +1,10 @@
 import { loadedActionCreators, loadedSelectors } from '@lace-contract/module';
+import { BigNumber } from '@lace-lib/util';
 import {
   createContextualUseLoadModules,
   createUseDispatchLaceAction,
   createUseLaceSelectorHook,
 } from '@lace-lib/util-render';
-import { BigNumber } from '@lace-sdk/util';
 import { useEffect, useMemo, useState } from 'react';
 
 import { estimateROS } from './utils';

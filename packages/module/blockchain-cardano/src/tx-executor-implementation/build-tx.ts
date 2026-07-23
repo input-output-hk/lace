@@ -10,7 +10,7 @@ import {
   LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -158,7 +158,7 @@ const getBuildTxData = async ({
   };
 };
 
-const buildTx = ({
+const buildTx = async ({
   networkMagic,
   protocolParameters,
   changeAddress,
@@ -199,7 +199,7 @@ const buildTx = ({
     builder.transferValue(address, value);
   }
 
-  const tx = builder.build();
+  const tx = await builder.build();
   const core = tx.toCore();
 
   return { core, tx, success: true as const };
@@ -224,7 +224,7 @@ export const makeBuildTx =
         txParams,
       });
 
-      const { core, tx } = buildTx({
+      const { core, tx } = await buildTx({
         networkMagic,
         protocolParameters,
         changeAddress,
@@ -288,7 +288,7 @@ export const makePreviewTx =
         })) as [TokenTransfer, ...TokenTransfer[]],
       };
 
-      const { core } = buildTx({
+      const { core } = await buildTx({
         networkMagic,
         protocolParameters,
         changeAddress,

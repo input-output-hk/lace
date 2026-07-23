@@ -8,12 +8,13 @@ import {
   makeSubmitTx,
 } from '@lace-contract/tx-executor';
 import { isAccountVisibleOnNetwork } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import {
   createByBlockchainNameSelector,
+  dropStaleResult,
   firstStateOfStatus,
   isStatus,
 } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import {
   filter,
   from,
@@ -68,7 +69,6 @@ import type {
   TxParams,
 } from '@lace-contract/tx-executor';
 import type { ByBlockchainNameSelector, JsonType } from '@lace-lib/util-store';
-import type { Observable } from 'rxjs';
 
 type SendFlowStatus = SendFlowSliceState['status'];
 
@@ -90,41 +90,6 @@ const AWAITING_CONFIRMATION_STATES = new Set<SendFlowStatus>([
 ]);
 const PROCESSING_STATES = new Set<SendFlowStatus>(['Processing']);
 const DISCARDING_STATES = new Set<SendFlowStatus>(['DiscardingTx']);
-
-/**
- * Side-effects deliver their results asynchronously, so a result can arrive after the
- * machine has already advanced past — or torn down from — the state that owns it (a
- * race, or an abrupt close-all teardown). Dispatching it then makes the machine log
- * "handler not found for status X and event Y".
- *
- * This operator drops the side-effect's RESULT action (identified by its RTK matcher)
- * when the live machine status is no longer one that handles it, while passing every
- * other emitted action through untouched (e.g. the tx-executor's intermediate
- * `txPhaseRequested`). It is scoped to a single result type, so a genuinely misrouted
- * event from another producer still surfaces — only this producer's own stale result
- * is suppressed.
- */
-const dropStaleResult =
-  (
-    state$: Observable<{ status: string }>,
-    isResultAction: (action: { type: string }) => boolean,
-    handledIn: ReadonlySet<string>,
-  ) =>
-  <A extends { type: string }>(source$: Observable<A>): Observable<A> => {
-    // A synchronously-delivered result means no transition happened since the
-    // side-effect fired, so the machine is still in a handling state. Seeding
-    // `withLatestFrom` with a handled status keeps such a result from being dropped
-    // before `state$` emits; any later state change overrides the seed.
-    const [seedStatus = ''] = handledIn;
-    return source$.pipe(
-      withLatestFrom(state$.pipe(startWith({ status: seedStatus }))),
-      filter(
-        ([action, state]) =>
-          !isResultAction(action) || handledIn.has(state.status),
-      ),
-      map(([action]) => action),
-    );
-  };
 
 export const syncSendFlowFeatureFlagPayload: SideEffect = (
   _,

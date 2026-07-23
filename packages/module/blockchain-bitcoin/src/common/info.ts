@@ -4,19 +4,15 @@ import type { WalletId } from '@lace-contract/wallet-repo';
 /**
  * Extended account public keys for a Bitcoin wallet.
  *
- * @typedef {Object} ExtendedAccountPublicKeys
- * @property {string} legacy - The extended public key for legacy addresses (base58 encoded).
- * @property {string} segWit - The extended public key for SegWit addresses (base58 encoded).
- * @property {string} nativeSegWit - The extended public key for Native SegWit addresses (base58 encoded).
- * @property {string} taproot - The extended public key for Taproot addresses (base58 encoded).
- * @property {string} electrumNativeSegWit - The extended public key for Electrum Native SegWit addresses (base58 encoded).
+ * In-memory wallets populate every script type from the seed. A watch-only
+ * hardware account only exports the active Native SegWit key, so the other
+ * script types are optional and absent there.
  */
 export type ExtendedAccountPublicKeys = {
-  legacy: string;
-  segWit: string;
   nativeSegWit: string;
-  taproot: string;
-  electrumNativeSegWit: string;
+  legacy?: string;
+  segWit?: string;
+  taproot?: string;
 };
 
 export type BitcoinWalletInfo = {
@@ -24,4 +20,10 @@ export type BitcoinWalletInfo = {
   network: BitcoinNetwork;
   accountIndex: number;
   extendedAccountPublicKeys: ExtendedAccountPublicKeys;
+  /**
+   * Device master fingerprint (xfp) as 8-char lowercase hex, present for
+   * watch-only hardware accounts so the change output's key-origin can target
+   * the device seed. Absent for in-memory accounts.
+   */
+  masterFingerprint?: string;
 };

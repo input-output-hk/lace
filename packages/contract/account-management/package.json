@@ -9,7 +9,8 @@
     "@lace-contract/authentication-prompt": "*",
     "@lace-contract/in-memory": "*",
     "@lace-contract/network": "*",
-    "@lace-contract/wallet-repo": "*"
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

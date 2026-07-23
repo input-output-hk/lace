@@ -1,5 +1,6 @@
+import { Serialization } from '@cardano-sdk/core';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -21,6 +22,7 @@ vi.mock('@cardano-sdk/core', () => {
     body: vi.fn().mockReturnValue(mockTxBody),
     auxiliaryData: vi.fn().mockReturnValue(mockAuxiliaryData),
     witnessSet: vi.fn().mockReturnValue(mockWitnessSet),
+    toCore: vi.fn().mockReturnValue({ witness: { scripts: [] } }),
   };
 
   const mockSignedTx = {
@@ -81,13 +83,19 @@ describe('CardanoInMemoryTransactionSigner', () => {
     expect(result.signatureCount).toBe(1);
   });
 
-  it('passes knownAddresses and utxo from constructor to the key agent', async () => {
+  it('passes knownAddresses, utxo, and native scripts from the tx to the key agent', async () => {
     const knownAddresses = [{ address: 'addr1' }] as unknown as Parameters<
       CardanoKeyAgent['signTransaction']
     >[1]['knownAddresses'];
     const utxo = [[{}, {}]] as unknown as Parameters<
       CardanoKeyAgent['signTransaction']
     >[1]['utxo'];
+    const scripts = [{ kind: 0, keyHash: 'key-hash' }] as unknown as Parameters<
+      CardanoKeyAgent['signTransaction']
+    >[1]['scripts'];
+
+    const tx = Serialization.Transaction.fromCbor('tx-cbor-hex' as never);
+    vi.mocked(tx.toCore).mockReturnValue({ witness: { scripts } } as never);
 
     const keyAgent: CardanoKeyAgent = {
       signTransaction: vi.fn().mockResolvedValue(new Map()),
@@ -112,6 +120,38 @@ describe('CardanoInMemoryTransactionSigner', () => {
     expect(keyAgent.signTransaction).toHaveBeenCalledWith(expect.anything(), {
       knownAddresses,
       utxo,
+      scripts,
+    });
+  });
+
+  it('signs without crashing when the tx carries no scripts', async () => {
+    const tx = Serialization.Transaction.fromCbor('tx-cbor-hex' as never);
+    vi.mocked(tx.toCore).mockReturnValue({ witness: {} } as never);
+
+    const keyAgent: CardanoKeyAgent = {
+      signTransaction: vi.fn().mockResolvedValue(new Map()),
+      signBlob: vi.fn(),
+    };
+
+    const withKeyAgent$ = vi.fn(
+      (use: (keyAgent: CardanoKeyAgent) => Observable<unknown>) =>
+        use(keyAgent),
+    ) as unknown as WithCardanoKeyAgent$;
+    const signer = new CardanoInMemoryTransactionSigner({
+      withKeyAgent$,
+      knownAddresses: [],
+      utxo: [],
+      auth: createMockAuth(),
+    });
+
+    await firstValueFrom(
+      signer.sign({ serializedTx: HexBytes('tx-cbor-hex') }),
+    );
+
+    expect(keyAgent.signTransaction).toHaveBeenCalledWith(expect.anything(), {
+      knownAddresses: [],
+      utxo: [],
+      scripts: undefined,
     });
   });
 

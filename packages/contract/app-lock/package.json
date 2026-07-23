@@ -11,8 +11,8 @@
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

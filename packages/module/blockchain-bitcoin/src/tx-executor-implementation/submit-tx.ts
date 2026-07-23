@@ -2,7 +2,7 @@ import {
   genericErrorResults,
   type TxExecutorImplementation,
 } from '@lace-contract/tx-executor';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { of, catchError, combineLatest, map, mergeMap, take } from 'rxjs';
 
 import { derivePendingActivityFromRawTx } from '../store/helpers/derive-pending-activity-from-raw-tx';

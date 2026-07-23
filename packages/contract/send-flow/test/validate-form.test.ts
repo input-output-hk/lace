@@ -6,7 +6,7 @@ import {
 } from '@lace-contract/addresses';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, None, Some, Timestamp } from '@lace-sdk/util';
+import { BigNumber, None, Some, Timestamp } from '@lace-lib/util';
 import { produce } from 'immer';
 import merge from 'lodash/fp/merge';
 import { firstValueFrom, of } from 'rxjs';
@@ -22,7 +22,7 @@ import type {
 import type { AddressValidationResult, StateOpen } from '../src/types';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { DeepPartial } from '@lace-sdk/util';
+import type { DeepPartial } from '@lace-lib/util';
 
 const availableBalance = 10n;
 const validForm: StateOpen['form'] = {

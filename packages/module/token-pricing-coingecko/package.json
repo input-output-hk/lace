@@ -11,7 +11,7 @@
     "@lace-contract/sync": "*",
     "@lace-contract/token-pricing": "*",
     "@lace-contract/tokens": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

@@ -2,7 +2,7 @@ import type { RawToken } from '../types';
 import type { FolderId, TokenId } from '../value-objects';
 import type { Address } from '@lace-contract/addresses';
 import type { WalletEntity } from '@lace-contract/wallet-repo';
-import type { BigNumber } from '@lace-sdk/util';
+import type { BigNumber } from '@lace-lib/util';
 
 export type Folder = {
   id: FolderId;

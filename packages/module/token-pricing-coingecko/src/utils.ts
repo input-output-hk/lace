@@ -1,30 +1,26 @@
 import { DEFAULT_CURRENCY } from '@lace-contract/token-pricing';
 
-import { COINGECKO_ENDPOINTS, CURRENCY_MAP } from './const';
+import { COINGECKO_ENDPOINTS } from './const';
 
 import type { CoinGeckoCoinEntry, CoinGeckoPriceData } from './types';
 import type { TimeRange } from '@lace-lib/ui-toolkit';
 
-export type SupportedCurrency = keyof typeof CURRENCY_MAP;
-
-const isSupportedCurrency = (
-  currency: string,
-): currency is SupportedCurrency => {
-  return Object.keys(CURRENCY_MAP).includes(currency);
-};
-
-export const getSupportedCurrency = (currency: string): SupportedCurrency => {
-  const upperCurrency = currency.toUpperCase();
-  return isSupportedCurrency(upperCurrency) ? upperCurrency : DEFAULT_CURRENCY;
-};
+/**
+ * Normalises a fiat currency code to a lowercase ISO-style string.
+ * Falls back to DEFAULT_CURRENCY for codes that would cause CoinGecko to
+ * reject the request (empty, numeric, or otherwise malformed).
+ */
+export const normalizeCurrency = (currency: string): string =>
+  /^[a-zA-Z]{2,6}$/.test(currency)
+    ? currency.toLowerCase()
+    : DEFAULT_CURRENCY.toLowerCase();
 
 export const buildPriceUrl = (
   baseUrl: string,
   coinGeckoId: string,
   { currency, includeUsd = false }: { currency: string; includeUsd?: boolean },
 ): string => {
-  const supportedCurrency = getSupportedCurrency(currency);
-  const vsCurrency = CURRENCY_MAP[supportedCurrency];
+  const vsCurrency = normalizeCurrency(currency);
   const vsCurrencies =
     includeUsd && vsCurrency !== 'usd' ? `${vsCurrency},usd` : vsCurrency;
 
@@ -32,15 +28,40 @@ export const buildPriceUrl = (
 };
 
 /**
- * Finds a CoinGecko ID by matching the identifier against symbol or name.
+ * Finds a CoinGecko ID for a token.
+ *
+ * When a `contractAddress` is provided (the token's unique on-chain asset id,
+ * e.g. a Cardano `AssetId`), the coin is matched by comparing it against the
+ * provider's per-asset platform value (`coin.platforms[blockchain]`). This is
+ * the only correct match for native assets, because multiple unrelated coins
+ * can share a ticker symbol. If no platform value matches, `undefined` is
+ * returned — surfacing no price is preferable to a wrong price from a ticker
+ * collision.
+ *
+ * When no `contractAddress` is provided (chain-native coins such as ADA/BTC),
+ * the coin is matched by ticker symbol, then name.
  */
 export const findCoinGeckoId = (
-  identifier: string,
-  blockchain: string,
+  {
+    identifier,
+    blockchain,
+    contractAddress,
+  }: { identifier: string; blockchain: string; contractAddress?: string },
   coinsList: CoinGeckoCoinEntry[],
 ): string | undefined => {
-  const normalizedIdentifier = identifier.toLowerCase();
   const normalizedBlockchain = blockchain.toLowerCase();
+
+  if (contractAddress) {
+    const normalizedContractAddress = contractAddress.toLowerCase();
+    const platformMatch = coinsList.find(
+      coin =>
+        coin.platforms[normalizedBlockchain]?.toLowerCase() ===
+        normalizedContractAddress,
+    );
+    return platformMatch?.id;
+  }
+
+  const normalizedIdentifier = identifier.toLowerCase();
 
   // Find all coins matching by symbol
   const symbolMatches = coinsList.filter(
@@ -81,7 +102,7 @@ const selectBestMatch = (
 
   // Prefer coin with the blockchain key in platforms
   const blockchainMatch = matches.find(coin =>
-    Object.prototype.hasOwnProperty.call(coin.platforms, blockchain),
+    Object.hasOwn(coin.platforms, blockchain),
   );
   if (blockchainMatch) {
     return blockchainMatch.id;
@@ -108,8 +129,7 @@ export const extractPriceData = (
   priceInfo: Record<string, number>,
   currency = DEFAULT_CURRENCY,
 ): CoinGeckoPriceData | null => {
-  const supportedCurrency = getSupportedCurrency(currency);
-  const cgCurrency = CURRENCY_MAP[supportedCurrency];
+  const cgCurrency = normalizeCurrency(currency);
 
   if (!priceInfo[cgCurrency]) {
     return null;

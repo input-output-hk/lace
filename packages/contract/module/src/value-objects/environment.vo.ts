@@ -1,7 +1,7 @@
 import { InvalidStringError } from '@cardano-sdk/util';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 
-import type { Result } from '@lace-sdk/util';
+import type { Result } from '@lace-lib/util';
 
 export type Environment = 'development' | 'production' | 'test';
 export const Environment = (

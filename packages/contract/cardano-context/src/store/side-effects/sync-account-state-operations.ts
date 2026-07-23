@@ -1,4 +1,4 @@
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 
 import {
   CardanoSyncOperationType,

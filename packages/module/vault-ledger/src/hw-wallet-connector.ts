@@ -1,10 +1,15 @@
-import { supportedNetworkIds } from '@lace-contract/cardano-context';
+import { supportedNetworkIds as bitcoinSupportedNetworkIds } from '@lace-contract/bitcoin-context';
+import { supportedNetworkIds as cardanoSupportedNetworkIds } from '@lace-contract/cardano-context';
 import { HardwareWalletId, WalletType } from '@lace-contract/wallet-repo';
 
-import { LEDGER_ONBOARDING_OPTION_ID } from './const';
+import {
+  LEDGER_BITCOIN_ONBOARDING_OPTION_ID,
+  LEDGER_ONBOARDING_OPTION_ID,
+} from './const';
 
 import type { AvailableAddons } from '.';
 import type { ContextualLaceInit } from '@lace-contract/module';
+import type { BlockchainNetworkId } from '@lace-contract/network';
 import type {
   DeviceDescriptor,
   HwWalletConnector,
@@ -34,14 +39,39 @@ const findLedgerConnector = async (
   return connector;
 };
 
+/**
+ * All Lace-supported network ids of the blockchain being onboarded. Wallet
+ * creation targets every supported network, and the ids must belong to the
+ * requested blockchain so the Bitcoin connector is never fed Cardano network
+ * ids (and vice versa).
+ */
+const defaultTargetNetworks = (
+  blockchainName: string,
+): Set<BlockchainNetworkId> => {
+  if (blockchainName === 'Cardano') {
+    return new Set(cardanoSupportedNetworkIds.keys());
+  }
+  if (blockchainName === 'Bitcoin') {
+    return new Set(bitcoinSupportedNetworkIds.keys());
+  }
+  throw new Error(`No supported networks for ${blockchainName} on Ledger`);
+};
+
 export const makeLoadHwWalletConnector =
   (
     dependencies: HwWalletConnectorDependencies = {},
   ): ContextualLaceInit<HwWalletConnector, AvailableAddons> =>
   ({ loadModules }) => ({
     id: LEDGER_ONBOARDING_OPTION_ID,
+    optionIds: [
+      LEDGER_ONBOARDING_OPTION_ID,
+      LEDGER_BITCOIN_ONBOARDING_OPTION_ID,
+    ],
     walletType: WalletType.HardwareLedger,
     createWallet: async (state, props) => {
+      if (!props.device) {
+        throw new Error('Ledger wallet creation requires a connected device');
+      }
       const connector = await findLedgerConnector(
         loadModules,
         props.blockchainName,
@@ -53,7 +83,7 @@ export const makeLoadHwWalletConnector =
         accountIndex: props.accountIndex,
         accountName: `Account #${props.accountIndex}`,
         derivationType: props.derivationType,
-        targetNetworks: new Set(supportedNetworkIds.keys()),
+        targetNetworks: defaultTargetNetworks(props.blockchainName),
       });
       return {
         walletId,

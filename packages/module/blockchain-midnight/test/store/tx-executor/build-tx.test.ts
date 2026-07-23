@@ -2,7 +2,7 @@ import { createTestScheduler } from '@cardano-sdk/util-dev';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { TokenId } from '@lace-contract/tokens';
 import { genericErrorResults } from '@lace-contract/tx-executor';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';

@@ -5,6 +5,7 @@ import {
   MidnightSDKNetworkId,
   MidnightSDKNetworkIds,
 } from '@lace-contract/midnight-context';
+import { senderOrigin } from '@lace-lib/dapp-connector';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { httpClientProvingProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -30,6 +31,7 @@ import type {
   MidnightNetworkConfig,
   MidnightNetwork,
 } from '@lace-contract/midnight-context';
+import type { AccountId } from '@lace-contract/wallet-repo';
 import type {
   ConnectedAPI,
   TokenType,
@@ -63,6 +65,7 @@ export interface MidnightDappConnectorApiOptions {
   userConfirmTransaction: ConfirmationCallback;
   supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   isUnlocked$: Observable<boolean>;
+  getAccountIdForOrigin: (origin: string) => AccountId | undefined;
   onPendingActivity?: (activity: Activity) => void;
   logger?: Logger;
 }
@@ -81,6 +84,7 @@ export class MidnightDappConnectorApi
   private readonly supportedNetworksIds$: Observable<MidnightSDKNetworkId[]>;
   private readonly isUnlocked$: Observable<boolean>;
   readonly #userConfirmationRequest: ConfirmationCallback;
+  readonly #getAccountIdForOrigin: (origin: string) => AccountId | undefined;
   readonly #onPendingActivity?: (activity: Activity) => void;
   readonly #logger?: Logger;
 
@@ -90,6 +94,7 @@ export class MidnightDappConnectorApi
     this.supportedNetworksIds$ = options.supportedNetworksIds$;
     this.network$ = options.network$;
     this.isUnlocked$ = options.isUnlocked$;
+    this.#getAccountIdForOrigin = options.getAccountIdForOrigin;
     this.#onPendingActivity = options.onPendingActivity;
     this.#logger = options.logger;
     this.networkConfig$ = options.network$.pipe(
@@ -141,22 +146,24 @@ export class MidnightDappConnectorApi
   }
 
   public async getNetworkId(): Promise<string> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.pickAnyWallet();
     return wallet.networkId.toString();
   }
 
-  public async getDustAddress(): Promise<{ dustAddress: string }> {
-    const wallet = await this.ensureWallet();
+  public async getDustAddress({
+    sender,
+  }: SenderContext): Promise<{ dustAddress: string }> {
+    const wallet = await this.ensureWallet(sender);
     return await firstValueFrom(
       wallet.address$.pipe(map(({ dust }) => ({ dustAddress: dust }))),
     );
   }
 
-  public async getDustBalance(): Promise<{
+  public async getDustBalance({ sender }: SenderContext): Promise<{
     cap: bigint;
     balance: bigint;
   }> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
     return await firstValueFrom(
       wallet.state().pipe(
         map(state => {
@@ -180,12 +187,12 @@ export class MidnightDappConnectorApi
     );
   }
 
-  public async getShieldedAddresses(): Promise<{
+  public async getShieldedAddresses({ sender }: SenderContext): Promise<{
     shieldedAddress: string;
     shieldedCoinPublicKey: string;
     shieldedEncryptionPublicKey: string;
   }> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
     const [{ shielded: shieldedAddress }, state] = await Promise.all([
       firstValueFrom(wallet.address$),
       firstValueFrom(wallet.state()),
@@ -201,17 +208,19 @@ export class MidnightDappConnectorApi
     };
   }
 
-  public async getShieldedBalances(): Promise<Record<TokenType, bigint>> {
-    const wallet = await this.ensureWallet();
+  public async getShieldedBalances({
+    sender,
+  }: SenderContext): Promise<Record<TokenType, bigint>> {
+    const wallet = await this.ensureWallet(sender);
     return await firstValueFrom(
       wallet.state().pipe(map(state => state.shielded.balances)),
     );
   }
 
-  public async getUnshieldedAddress(): Promise<{
+  public async getUnshieldedAddress({ sender }: SenderContext): Promise<{
     unshieldedAddress: string;
   }> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
     return await firstValueFrom(
       wallet.address$.pipe(
         map(({ unshielded }) => ({ unshieldedAddress: unshielded })),
@@ -219,8 +228,10 @@ export class MidnightDappConnectorApi
     );
   }
 
-  public async getUnshieldedBalances(): Promise<Record<TokenType, bigint>> {
-    const wallet = await this.ensureWallet();
+  public async getUnshieldedBalances({
+    sender,
+  }: SenderContext): Promise<Record<TokenType, bigint>> {
+    const wallet = await this.ensureWallet(sender);
     return await firstValueFrom(
       wallet.state().pipe(map(state => state.unshielded.balances)),
     );
@@ -240,7 +251,7 @@ export class MidnightDappConnectorApi
       senderContext,
     );
 
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
     const deserializedTx = await this.deserializeSealedTransaction(tx);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
@@ -294,7 +305,7 @@ export class MidnightDappConnectorApi
       senderContext,
     );
 
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
     const deserializedTx = await this.deserializeUnsealedTransaction(tx);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
@@ -337,8 +348,9 @@ export class MidnightDappConnectorApi
   public async makeTransfer(
     desiredOutputs: DesiredOutput[],
     options: { payFees?: boolean } | undefined,
+    { sender }: SenderContext,
   ): Promise<{ tx: string }> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
 
     const combinedTransfers = this.groupOutputsByKind(
       desiredOutputs,
@@ -391,7 +403,7 @@ export class MidnightDappConnectorApi
   }
 
   public async getConfiguration(): Promise<Configuration> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.pickAnyWallet();
 
     const networkConfig = await firstValueFrom(this.networkConfig$);
     if (!networkConfig) {
@@ -424,8 +436,11 @@ export class MidnightDappConnectorApi
     };
   }
 
-  public async submitTransaction(tx: string): Promise<void> {
-    const wallet = await this.ensureWallet();
+  public async submitTransaction(
+    tx: string,
+    { sender }: SenderContext,
+  ): Promise<void> {
+    const wallet = await this.ensureWallet(sender);
     const deserializedTx = await this.deserializeSealedTransaction(tx);
 
     // Capture wallet state BEFORE submission. The SDK may optimistically remove
@@ -498,12 +513,13 @@ export class MidnightDappConnectorApi
   public async makeIntent(
     desiredInputs: DesiredInput[],
     desiredOutputs: DesiredOutput[],
-    options: {
-      intentId: number | 'random';
-      payFees: boolean;
-    },
+    ...optionsAndSender: [
+      options: { intentId: number | 'random'; payFees: boolean },
+      senderContext: SenderContext,
+    ]
   ): Promise<{ tx: string }> {
-    const wallet = await this.ensureWallet();
+    const [options, { sender }] = optionsAndSender;
+    const wallet = await this.ensureWallet(sender);
 
     const swapInputs = desiredInputs.reduce<CombinedSwapInputs>(
       (inputs, { kind, type, value }) => {
@@ -582,7 +598,7 @@ export class MidnightDappConnectorApi
     options: SignDataOptions,
     { sender }: SenderContext,
   ): Promise<Signature> {
-    const wallet = await this.ensureWallet();
+    const wallet = await this.ensureWallet(sender);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
@@ -672,11 +688,25 @@ export class MidnightDappConnectorApi
     };
   }
 
-  private async ensureWallet(): Promise<MidnightWallet> {
-    const pickFirst = (wallets: MidnightWalletsByAccountId) =>
-      Object.values(wallets)[0] ?? null;
+  /**
+   * Resolves the wallet bound to the requesting dApp's origin. Each dApp is
+   * bound to a specific account at authorization time; this looks that account
+   * up rather than defaulting to the first wallet.
+   */
+  private async ensureWallet(
+    sender?: Runtime.MessageSender,
+  ): Promise<MidnightWallet> {
+    const origin = sender ? senderOrigin(sender) : null;
+    const accountId = origin ? this.#getAccountIdForOrigin(origin) : undefined;
 
-    let wallet = pickFirst(await firstValueFrom(this.wallets$));
+    if (!accountId) {
+      throw new APIError(
+        ErrorCodes.InternalError,
+        'No account is connected for this dApp. Please reconnect.',
+      );
+    }
+
+    let wallet = (await firstValueFrom(this.wallets$))[accountId] ?? null;
 
     if (!wallet) {
       const { isConfirmed } = await this.#userConfirmationRequest(
@@ -687,14 +717,26 @@ export class MidnightDappConnectorApi
       if (!isConfirmed) {
         throw new APIError(ErrorCodes.Rejected, 'User rejects wallet unlock');
       }
-    }
 
-    wallet = pickFirst(await firstValueFrom(this.wallets$));
+      wallet = (await firstValueFrom(this.wallets$))[accountId] ?? null;
+    }
 
     if (!wallet) {
       throw new APIError(ErrorCodes.InternalError, 'Wallet is unavailable');
     }
 
+    return wallet;
+  }
+
+  /**
+   * Returns any available wallet. Used only for network-level data
+   * (network id, configuration) that is identical across all accounts.
+   */
+  private async pickAnyWallet(): Promise<MidnightWallet> {
+    const wallet = Object.values(await firstValueFrom(this.wallets$))[0];
+    if (!wallet) {
+      throw new APIError(ErrorCodes.InternalError, 'Wallet is unavailable');
+    }
     return wallet;
   }
 

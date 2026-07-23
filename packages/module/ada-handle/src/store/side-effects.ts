@@ -1,5 +1,5 @@
 import { Asset, Cardano } from '@cardano-sdk/core';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 
 import { Handle, HandleType } from '../value-objects';

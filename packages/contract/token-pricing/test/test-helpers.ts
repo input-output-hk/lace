@@ -12,7 +12,7 @@ import type {
 import type { Address } from '@lace-contract/addresses';
 import type { Token } from '@lace-contract/tokens';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { BigNumber } from '@lace-sdk/util';
+import type { BigNumber } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 export const createMockToken = (tokenId: string): Token => ({
@@ -77,6 +77,7 @@ export const createMockPriceHistoryResponse = (
 export const createMockProvider = (
   fetchPricesReturn?: Observable<TokenPriceResponse[]>,
   fetchPriceHistoryReturn?: Observable<TokenPriceHistoryResponse[]>,
+  fetchSupportedCurrenciesReturn?: Observable<string[]>,
 ): TokenPricingProvider => ({
   fetchPrices: fetchPricesReturn
     ? vi.fn().mockReturnValue(fetchPricesReturn)
@@ -84,4 +85,9 @@ export const createMockProvider = (
   fetchPriceHistory: fetchPriceHistoryReturn
     ? vi.fn().mockReturnValue(fetchPriceHistoryReturn)
     : vi.fn(),
+  ...(fetchSupportedCurrenciesReturn && {
+    fetchSupportedCurrencies: vi
+      .fn()
+      .mockReturnValue(fetchSupportedCurrenciesReturn),
+  }),
 });

@@ -16,7 +16,7 @@ import {
   Row,
   assets,
 } from '@lace-lib/ui-toolkit';
-import { ByteArray } from '@lace-sdk/util';
+import { ByteArray } from '@lace-lib/util';
 import { ImageBackground } from 'expo-image';
 import React, {
   useCallback,

@@ -3,10 +3,14 @@
  */
 import { Cardano } from '@cardano-sdk/core';
 import { renderHook } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import * as hooksModule from '../../src/hooks';
 import { useNetworkInfo } from '../../src/hooks/useNetworkInfo';
+import {
+  calculateEpochEnd,
+  calculateEpochFromSlot,
+} from '../../src/utils/epochUtils';
 
 import type { EraSummary, Milliseconds } from '@cardano-sdk/core';
 
@@ -17,15 +21,6 @@ vi.mock('../../src/hooks', async importOriginal => {
     ...actual,
     useLaceSelector: vi.fn(),
     useSearchStakePools: vi.fn(),
-  };
-});
-
-vi.mock('@lace-lib/util-render', async importOriginal => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const actual = await importOriginal<typeof import('@lace-lib/util-render')>();
-  return {
-    ...actual,
-    formatEpochEnd: vi.fn(() => '01d 02h 03m'),
   };
 });
 
@@ -55,7 +50,6 @@ describe('useNetworkInfo', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
 
     mockUseLaceSelector.mockImplementation((selector: string) => {
       if (selector === 'cardanoContext.selectTip') return tip;
@@ -70,10 +64,6 @@ describe('useNetworkInfo', () => {
       isLoading: false,
       totalPoolsCount: 3142,
     });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   it('returns currentEpochValue derived from tip slot', () => {
@@ -93,9 +83,13 @@ describe('useNetworkInfo', () => {
     expect(result.current.stakedValue).toMatch(/%/);
   });
 
-  it('returns endEpochValue from formatEpochEnd', () => {
+  it('returns epochEndTimestamp derived from tip slot and era summaries', () => {
     const { result } = renderHook(() => useNetworkInfo());
-    expect(result.current.endEpochValue).toBe('01d 02h 03m');
+    const expected = calculateEpochEnd(
+      calculateEpochFromSlot(tip.slot, eraSummaries),
+      eraSummaries,
+    ).getTime();
+    expect(result.current.epochEndTimestamp).toBe(expected);
   });
 
   it('returns undefined currentEpochValue when tip is undefined', () => {

@@ -12,8 +12,8 @@ import {
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { syncActions } from '@lace-contract/sync';
 import { TokenId, tokensActions } from '@lace-contract/tokens';
+import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, HexBytes, Timestamp } from '@lace-sdk/util';
 import { createKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';

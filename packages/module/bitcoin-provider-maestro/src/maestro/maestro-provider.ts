@@ -40,6 +40,7 @@ export class MaestroBitcoinProvider {
   protected logger: Logger;
   readonly #client: HttpClient;
   readonly #txCache = new Map<string, BitcoinTransactionHistoryEntry>();
+  readonly #rawTxCache = new Map<string, string>();
 
   /**
    * Creates a new instance of the Maestro Bitcoin provider.
@@ -99,6 +100,35 @@ export class MaestroBitcoinProvider {
     if (entry.confirmations > 0) this.#txCache.set(txHash, entry);
 
     return entry;
+  }
+
+  /**
+   * Fetches the raw serialized transaction (hex) for a given transaction hash.
+   *
+   * Raw bytes of confirmed transactions are immutable, so they are cached
+   * indefinitely; unconfirmed transactions are re-fetched on every call.
+   *
+   * @param {string} txHash - The hash of the transaction to retrieve, in hexadecimal format.
+   * @returns {Promise<string>} A promise that resolves to the raw transaction hex.
+   *
+   * @throws {Error} Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
+   * incorrect transaction hash, or the transaction not existing in the blockchain.
+   */
+  public async getRawTransaction(txHash: string): Promise<string> {
+    if (this.#rawTxCache.has(txHash)) {
+      return this.#rawTxCache.get(txHash)!;
+    }
+
+    const {
+      data: { data },
+    } = await this.request<MaestroTransactionResponse>(
+      `/rpc/transaction/${txHash}`,
+      { params: { verbose: true } },
+    );
+
+    if (data.confirmations > 0) this.#rawTxCache.set(txHash, data.hex);
+
+    return data.hex;
   }
 
   /**

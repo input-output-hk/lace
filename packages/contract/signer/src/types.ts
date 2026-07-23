@@ -4,7 +4,7 @@ import type {
   AnyAccount,
   AnyWallet,
 } from '@lace-contract/wallet-repo';
-import type { HexBytes } from '@lace-sdk/util';
+import type { HexBytes } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 /** Authentication interface for signers that need user credentials. */

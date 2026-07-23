@@ -56,6 +56,7 @@ export const SignDataV2 = ({
 
   return (
     <DappConnectorLayoutV2
+      fillViewport
       primaryButton={{
         label: t('dapp-connector.sign-data.sign'),
         action: confirmSignData,

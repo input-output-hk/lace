@@ -1,6 +1,6 @@
 import { markParameterizedSelector } from '@lace-contract/module';
 import { walletsActions } from '@lace-contract/wallet-repo';
-import { Timestamp } from '@lace-sdk/util';
+import { Timestamp } from '@lace-lib/util';
 import { createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 

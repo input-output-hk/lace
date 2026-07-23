@@ -33,6 +33,8 @@ export type DeregistrationStateSummary = StateObject<
     fees: FeeEntry[];
     serializedTx: string;
     wallet: AnyWallet;
+    /** Staking rewards withdrawn in lovelace as string (positive value, '0' when no rewards) */
+    withdrawalAmount: string;
   }
 >;
 
@@ -46,6 +48,8 @@ export type DeregistrationStateAwaitingConfirmation = StateObject<
     fees: FeeEntry[];
     serializedTx: string;
     wallet: AnyWallet;
+    /** Staking rewards withdrawn in lovelace as string (positive value, '0' when no rewards) */
+    withdrawalAmount: string;
   }
 >;
 
@@ -58,6 +62,8 @@ export type DeregistrationStateProcessing = StateObject<
     fees: FeeEntry[];
     serializedTx: string;
     wallet: AnyWallet;
+    /** Staking rewards withdrawn in lovelace as string (positive value, '0' when no rewards) */
+    withdrawalAmount: string;
   }
 >;
 
@@ -69,6 +75,8 @@ export type DeregistrationStateSuccess = StateObject<
     depositReturn: string;
     fees: FeeEntry[];
     txId: string;
+    /** Staking rewards withdrawn in lovelace as string (positive value, '0' when no rewards) */
+    withdrawalAmount: string;
   }
 >;
 

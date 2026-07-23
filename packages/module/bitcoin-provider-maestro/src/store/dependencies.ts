@@ -1,8 +1,14 @@
-import { HttpClient, buildUrl } from '@lace-lib/util-provider';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
+import {
+  HttpClient,
+  PROVIDER_REQUEST_RETRY_CONFIG,
+  buildUrl,
+} from '@lace-lib/util-provider';
+import { retryBackoff } from 'backoff-rxjs';
 import Bottleneck from 'bottleneck';
 import memoize from 'lodash/memoize';
-import { from } from 'rxjs';
+import { defer, from, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { MaestroBitcoinProvider } from '../maestro';
 
@@ -112,6 +118,17 @@ export const initializeDependencies: LaceInit<
             .getTransaction(txHash)
             .then(Ok<BitcoinTransactionHistoryEntry>)
             .catch(Err<ProviderError>),
+        );
+      },
+      getRawTransaction: (context, txHash) => {
+        const provider = getMaestroApiProvider(
+          getMaestroConfig(context, maestroConfig),
+          logger,
+        );
+        return defer(async () => provider.getRawTransaction(txHash)).pipe(
+          retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+          map(Ok<string>),
+          catchError((error: ProviderError) => of(Err<ProviderError>(error))),
         );
       },
       getTransactions: (

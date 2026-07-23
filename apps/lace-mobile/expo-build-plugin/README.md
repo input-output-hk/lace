@@ -11,13 +11,13 @@ This plugin is implemented in JavaScript (CommonJS) and runs directly without a 
 ### iOS
 
 - **Apollo wrapper**: Integrates the Apollo wrapper into the Xcode project.
-- **Podfile modifications**: Adds `Blake2` and `ApolloLibrary` pods to the Podfile.
+- **Podfile modifications**: Adds `Blake2`, `Argon2Swift`, and `ApolloLibrary` pods to the Podfile. `ApolloLibrary` uses a locally vendored, `:sha256`-pinned podspec (`apollo-ios/ApolloLibrary.podspec`) so CocoaPods verifies the fetched xcframework before use (NWL Mobile audit M-308) — see [Updating Apollo](#updating-apollo).
 
 ### Android
 
 - **Maven repository**: Adds `mavenLocal()` repository to the project's build.gradle.
 - **Dependencies**:
-  - Adds `apollo-android` (version 1.6.0) with exclusions to app build.gradle.
+  - Adds `apollo-android` (version 1.8.4) with exclusions to app build.gradle.
   - Adds `bcprov-jdk18on` (version 1.80) to app build.gradle.
 - **Dependency resolution**: Injects a subprojects block in project build.gradle that:
   - Forces `bcprov-jdk18on` version 1.80
@@ -34,3 +34,24 @@ This plugin is implemented in JavaScript (CommonJS) and runs directly without a 
 - **Dynamic version code**:
   - Configures app to read the version code from a `build-number` file.
   - Works with CI/CD pipeline to automatically increment version code for each release.
+
+## Updating Apollo
+
+Apollo is pinned per platform, and the two should be kept on the same version.
+The update script below warns when the iOS and Android pins drift.
+
+- **iOS** — the `ApolloLibrary` pod is a locally vendored podspec
+  (`apollo-ios/ApolloLibrary.podspec`) that adds a `:sha256` integrity check on
+  the fetched xcframework. Do **not** hand-edit the version, URL, or digest.
+  Bump it with:
+
+  ```sh
+  ./apollo-ios/update-apollo-podspec.sh <version>   # e.g. 1.8.4
+  ```
+
+  The script fetches the release asset, computes the digest, and rewrites the
+  podspec — and warns if the iOS and Android versions have drifted.
+
+- **Android** — the version lives in `src/gradle-deps.json`
+  (`org.hyperledger.identus:apollo-android:<version>`), resolved via Maven
+  (already checksummed). Update it there.

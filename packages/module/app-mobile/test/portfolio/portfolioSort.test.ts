@@ -1,4 +1,4 @@
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('@lace-lib/ui-toolkit', () => ({

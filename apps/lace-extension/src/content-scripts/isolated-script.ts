@@ -1,11 +1,11 @@
 import { FEATURE_FLAGS_CHANNEL } from '@lace-contract/dapp-connector';
-import { authenticatorApiProperties } from '@lace-sdk/dapp-connector';
+import { authenticatorApiProperties } from '@lace-lib/dapp-connector';
 import {
   ChannelName,
   RemoteApiPropertyType,
   consumeRemoteApi,
   runContentScriptMessageProxy,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { runtime } from 'webextension-polyfill';
 
 import { createContentScriptModuleLoader, logger } from '../util';

@@ -50,7 +50,7 @@ type FetchParams = {
 };
 
 /**
- * `BigNumber` here is the `@lace-sdk/util` Tagged-string type, so strict
+ * `BigNumber` here is the `@lace-lib/util` Tagged-string type, so strict
  * equality is correct for the numeric fields too — do not switch to `.eq()`.
  *
  * If a new field is added to {@link RewardAccountInfo}, the field-count

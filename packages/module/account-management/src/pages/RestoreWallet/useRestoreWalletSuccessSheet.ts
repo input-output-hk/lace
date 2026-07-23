@@ -1,3 +1,4 @@
+import { clearRestoreWalletSecrets } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import { useCallback, useEffect } from 'react';
@@ -29,6 +30,7 @@ export const useRestoreWalletSuccessSheet = ({
 
   useEffect(() => {
     clearRestoreWalletFlow();
+    clearRestoreWalletSecrets();
   }, [clearRestoreWalletFlow]);
 
   return {

@@ -1,5 +1,5 @@
 import { DappId } from '@lace-contract/dapp-connector';
-import { senderOrigin } from '@lace-sdk/dapp-connector';
+import { senderOrigin } from '@lace-lib/dapp-connector';
 import { Subject } from 'rxjs';
 
 import type { Dapp } from '@lace-contract/dapp-connector';

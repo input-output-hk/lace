@@ -3,7 +3,7 @@ import {
   BITCOIN_TOKEN_ID,
   BitcoinNetwork,
 } from '@lace-contract/bitcoin-context';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 
 import type { Activity } from '@lace-contract/activities';

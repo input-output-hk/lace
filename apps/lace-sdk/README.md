@@ -303,6 +303,26 @@ const cborHex = tx.toCbor();
 
 `waitForNetworkInfo(wallet)` resolves once the provider has fetched protocol parameters — call it before `createTxBuilder` to guarantee success. `createTxBuilder` returns a `Result<TransactionBuilder, Error>` so callers can handle the not-ready case without exceptions.
 
+### Plutus smart contracts
+
+`TransactionBuilder` expresses the **full** Cardano transaction domain — simple transfers, certificates, and Plutus spends (mint, script-spend, script-withdrawal with redeemers, collateral, required signers). For Plutus transactions, supply a `PlutusContext` (full protocol cost models, an execution-units evaluator, and an input resolver) via `setPlutusContext` before `build()`. `build()` selects inputs, balances, evaluates ex-units, and computes the script-data-hash, returning an **unsigned** transaction:
+
+```typescript
+const tx = await builder
+  .setChangeAddress(changeAddress)
+  .setUnspentOutputs(coverUtxos)
+  .setPlutusContext({ costModels, txEvaluator, inputResolver })
+  .attachScript(plutusScript)
+  .mintAssets(new Map([[assetId, 1n]]), redeemer)
+  .setCollateral([collateralInput], collateralReturn)
+  .addRequiredSigner(paymentKeyHash)
+  .build();
+
+// tx.toCbor() is unsigned — hand it to signCardanoTx → submitCardanoTx
+```
+
+`build()` is async only because Plutus ex-units evaluation is async; non-Plutus builds resolve synchronously.
+
 ## Transaction Signing
 
 Sign a Cardano transaction using an in-memory wallet without the authentication prompt UI:
@@ -356,15 +376,15 @@ A full working example with Web3Auth social login, wallet creation, and state su
 
 ### Functions
 
-| Function                                    | Description                                               |
-| ------------------------------------------- | --------------------------------------------------------- |
-| `createLaceWallet(props)`                   | Create a headless wallet instance with modules and config |
-| `createInMemoryWalletEntity(wallet, props)` | Create a password-protected wallet entity from a mnemonic |
-| `Mnemonic.deriveFrom(entropyHex)`           | Derive a 24-word BIP39 mnemonic from hex-encoded entropy  |
-| `createTxBuilder(wallet)`                   | Create a `TransactionBuilder` from wallet state           |
-| `waitForNetworkInfo(wallet)`                | Wait for Cardano network info to be available             |
-| `signCardanoTx(wallet, props)`              | Sign a Cardano transaction with an in-memory wallet       |
-| `submitCardanoTx(wallet, props)`            | Submit a signed Cardano transaction to the network        |
+| Function                                    | Description                                                      |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `createLaceWallet(props)`                   | Create a headless wallet instance with modules and config        |
+| `createInMemoryWalletEntity(wallet, props)` | Create a password-protected wallet entity from a mnemonic        |
+| `Mnemonic.deriveFrom(entropyHex)`           | Derive a 24-word BIP39 mnemonic from hex-encoded entropy         |
+| `createTxBuilder(wallet)`                   | Create a `TransactionBuilder` from wallet state (Plutus-capable) |
+| `waitForNetworkInfo(wallet)`                | Wait for Cardano network info to be available                    |
+| `signCardanoTx(wallet, props)`              | Sign a Cardano transaction with an in-memory wallet              |
+| `submitCardanoTx(wallet, props)`            | Submit a signed Cardano transaction to the network               |
 
 ### Types
 

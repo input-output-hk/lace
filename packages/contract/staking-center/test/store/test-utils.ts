@@ -1,6 +1,6 @@
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 
 import type { TxErrorTranslationKeys } from '@lace-contract/tx-executor';
 import type { AnyWallet } from '@lace-contract/wallet-repo';

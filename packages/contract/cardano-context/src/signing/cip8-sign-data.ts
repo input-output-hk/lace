@@ -1,6 +1,6 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 
 import type {
   CardanoKeyAgent,
@@ -157,7 +157,11 @@ const createCoseKey = (
 };
 
 export interface Cip8SignDataParams {
-  keyAgent: CardanoKeyAgent;
+  /**
+   * Only signBlob is required: COSE assembly happens here, so any signer able
+   * to sign the Sig_structure bytes (in-memory or hardware) can be plugged in.
+   */
+  keyAgent: Pick<CardanoKeyAgent, 'signBlob'>;
   request: CardanoSignDataRequest;
   knownAddresses: GroupedAddress[];
   dRepKeyHash?: Ed25519KeyHashHex;

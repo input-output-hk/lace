@@ -1,12 +1,11 @@
-import { typedLaceContext, type ViewId } from '@lace-contract/module';
-import { SidePanelViewId } from '@lace-contract/views';
+import { typedLaceContext } from '@lace-contract/module';
 import {
   createNonBackgroundMessenger,
   exposeMessengerApi,
-} from '@lace-sdk/extension-messaging';
+} from '@lace-lib/extension-messaging';
 import { createBrowserHistory } from 'history';
 import { Observable, of } from 'rxjs';
-import { runtime, tabs, windows } from 'webextension-polyfill';
+import { runtime } from 'webextension-polyfill';
 
 import { CONNECTION_CHANNEL } from './const';
 import { extensionViewApiProperties } from './messaging';
@@ -36,24 +35,19 @@ const initializeExtensionView: ContextualLaceInit<
   InitializeExtensionView,
   AvailableAddons
 > =
-  (_, { logger }) =>
+  ({ viewId }, { logger }) =>
   async (_store, context) => {
     typedLaceContext<Selectors, ActionCreators>(context);
 
-    // Detect view ID: popupWindow has a tab, side panel does not
-    const selfTab = await tabs.getCurrent();
-    let selfViewId: ViewId;
-    if (selfTab?.id) {
-      selfViewId = selfTab.id as ViewId;
-    } else {
-      const currentWindow = await windows.getCurrent();
-      selfViewId = SidePanelViewId(currentWindow.id!);
+    if (!viewId) {
+      logger.error('Initialize extension view: missing viewId');
+      return;
     }
 
     const messenger = createNonBackgroundMessenger(
       { baseChannel: CONNECTION_CHANNEL },
       { logger, runtime },
-    ).deriveChannel(selfViewId.toString());
+    ).deriveChannel(viewId.toString());
 
     try {
       exposeMessengerApi(

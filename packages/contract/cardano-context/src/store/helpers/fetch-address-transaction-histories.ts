@@ -1,8 +1,8 @@
+import { Err, Ok, Result } from '@lace-lib/util';
 import {
   PROVIDER_REQUEST_RETRY_CONFIG,
   isRetriableError,
 } from '@lace-lib/util-provider';
-import { Err, Ok, Result } from '@lace-sdk/util';
 import { retryBackoff } from 'backoff-rxjs';
 import {
   EMPTY,

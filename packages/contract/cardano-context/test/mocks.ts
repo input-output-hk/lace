@@ -2,7 +2,7 @@ import { Cardano } from '@cardano-sdk/core';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { BigNumber, HexBytes, Timestamp } from '@lace-sdk/util';
+import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 
 import {
   CardanoAccountId,
@@ -14,7 +14,6 @@ import type {
   CardanoBip32AccountProps,
   CardanoTransactionHistoryItem,
 } from '../src';
-import type { GetTransactionDataParams } from '../src/store/helpers/get-transaction-summary-data';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type { RawToken, TokenContextData } from '@lace-contract/tokens';
@@ -296,52 +295,6 @@ export const createTransactionHistoryItem = ({
   blockNumber: Cardano.BlockNo(blockNumber),
   blockTime: Timestamp(blockTime),
 });
-
-export const outgoingTransactionOutput: GetTransactionDataParams = {
-  addrInputs: [],
-  addrOutputs: [
-    {
-      amount: 3n,
-      assetList: [],
-      addr: 'addr_test1qphhr294v0w0rzgk7kz4ynsp8hwt82ha6nsp8yk6h04fhzsuryus5g7pm3lq85msee5pdtqlnv2crdc83kk2tvhsefcsu2snle',
-    },
-    {
-      amount: 279n,
-      assetList: [],
-      addr: 'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
-    },
-  ],
-  accountAddresses: [
-    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
-  ],
-  isIncomingTransaction: false,
-};
-
-export const incomingTransactionOutput: GetTransactionDataParams = {
-  addrInputs: [
-    {
-      amount: 58389439n,
-      assetList: [],
-      addr: 'addr_test1qphhr294v0w0rzgk7kz4ynsp8hwt82ha6nsp8yk6h04fhzsuryus5g7pm3lq85msee5pdtqlnv2crdc83kk2tvhsefcsu2snle',
-    },
-  ],
-  addrOutputs: [
-    {
-      amount: 1000n,
-      assetList: [],
-      addr: 'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
-    },
-    {
-      amount: 58389439n,
-      assetList: [],
-      addr: 'addr_test1qqt3r9kd56aq9ajynjkz8hdfw3kc0pcv3tpzug8azxls62tvvz7nw9gmznn65g4ksrrfvyzhz52knc3mqxdyya47gz2qmcjmcq',
-    },
-  ],
-  accountAddresses: [
-    'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95',
-  ],
-  isIncomingTransaction: true,
-};
 
 // Cardano UTxOs:
 

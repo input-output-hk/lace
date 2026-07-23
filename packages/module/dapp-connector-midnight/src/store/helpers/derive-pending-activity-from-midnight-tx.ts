@@ -4,7 +4,7 @@ import {
   toUnshieldedTokenType,
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 
 import type { Activity } from '@lace-contract/activities';
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';

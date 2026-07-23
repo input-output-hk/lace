@@ -1,3 +1,4 @@
+import { Cardano, Serialization } from '@cardano-sdk/core';
 import { AddressType } from '@cardano-sdk/key-management';
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import {
@@ -5,19 +6,19 @@ import {
   clearAuthSecret,
   propagateAuthSecret,
 } from '@lace-contract/authentication-prompt/src/store/auth-secret-accessor';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import { firstValueFrom, from, of, switchMap } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { CardanoInMemoryDataSigner } from '../../src/signing/cardano-in-memory-data-signer';
+import { CardanoInMemoryTransactionSigner } from '../../src/signing/cardano-in-memory-transaction-signer';
 import {
   createCardanoKeyAgentFromEncryptedRoot,
   deriveDRepKeyHash,
 } from '../../src/signing/cardano-key-agent';
 
 import type { WithCardanoKeyAgent$ } from '../../src/signing/cardano-in-memory-transaction-signer';
-import type { Cardano } from '@cardano-sdk/core';
-import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
+import type { Ed25519KeyHashHex, Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { SignerAuth } from '@lace-contract/signer';
 
@@ -83,5 +84,49 @@ describe('Cardano in-memory signing — real auth-secret zeroing (LW-14969)', ()
 
     expect(result.signature).toBeDefined();
     expect(result.key).toBeDefined();
+  });
+
+  it('produces a witness for a key required only via a native script (LW-15097)', async () => {
+    propagateAuthSecret(AuthSecret.fromUTF8(PASSWORD));
+    const auth: SignerAuth = { authenticate: () => of(true), accessAuthSecret };
+    const signer = new CardanoInMemoryTransactionSigner({
+      withKeyAgent$,
+      knownAddresses,
+      utxo: [],
+      auth,
+    });
+
+    const ownPaymentKeyHash = Cardano.Address.fromBech32(FIXTURE_ADDRESS)
+      .asBase()!
+      .getPaymentCredential().hash as unknown as Ed25519KeyHashHex;
+
+    const tx: Cardano.Tx = {
+      id: Cardano.TransactionId(`${'0'.repeat(63)}1`),
+      body: {
+        inputs: [
+          { txId: Cardano.TransactionId(`${'0'.repeat(63)}2`), index: 0 },
+        ],
+        outputs: [{ address: FIXTURE_ADDRESS, value: { coins: 1_000_000n } }],
+        fee: 170_000n,
+      },
+      witness: {
+        signatures: new Map(),
+        scripts: [
+          {
+            __type: Cardano.ScriptType.Native,
+            kind: Cardano.NativeScriptKind.RequireSignature,
+            keyHash: ownPaymentKeyHash,
+          },
+        ],
+      },
+    };
+
+    const serializedTx = HexBytes(
+      Serialization.Transaction.fromCore(tx).toCbor(),
+    );
+
+    const result = await firstValueFrom(signer.sign({ serializedTx }));
+
+    expect(result.signatureCount).toBe(1);
   });
 });

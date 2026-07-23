@@ -10,7 +10,7 @@ import { lockStateMachine } from './state-machine';
 
 import type { LockState, LockStateMachineEvent } from './state-machine';
 export type { LockState } from './state-machine';
-import type { HexBytes, Milliseconds } from '@lace-sdk/util';
+import type { HexBytes, Milliseconds } from '@lace-lib/util';
 import type {
   PayloadAction,
   StateFromReducersMapObject,

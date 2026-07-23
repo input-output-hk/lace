@@ -72,6 +72,11 @@ export default defineConfig(
           message:
             'Do not name a local type/interface after a `@lace-contract/module` augmentation target (`Action`, `AppConfig`, `LaceAddons`, `SideEffectDependencies`, `State`). The lace-sdk types bundler renames the clashing contract declaration but not its augmentations, producing incomplete types. Use a domain-specific name (e.g. `AuthenticationPromptState`) and keep augmentations inside `declare module` blocks in `augmentations.ts`.',
         },
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            'dangerouslySetInnerHTML is a raw-HTML XSS sink. Attacker-controlled metadata (token / NFT / dApp fields) must never reach it — render images via <Image>/<Avatar> with a validated URL (see getAssetImageUrl). Banned as a regression fence for NWL R1 audit M-301.',
+        },
       ],
       'prefer-arrow-functions/prefer-arrow-functions': 'error',
       'import/order': [
@@ -115,38 +120,21 @@ export default defineConfig(
           allow: [],
           depConstraints: [
             {
-              sourceTag: 'scope:sdk',
-              onlyDependOnLibsWithTags: ['scope:sdk'],
-            },
-            {
               sourceTag: 'scope:lib',
-              onlyDependOnLibsWithTags: [
-                'scope:sdk',
-                'scope:lib',
-                'scope:contract',
-              ],
+              onlyDependOnLibsWithTags: ['scope:lib', 'scope:contract'],
             },
             {
               sourceTag: 'scope:contract',
-              onlyDependOnLibsWithTags: [
-                'scope:sdk',
-                'scope:lib',
-                'scope:contract',
-              ],
+              onlyDependOnLibsWithTags: ['scope:lib', 'scope:contract'],
             },
             {
               sourceTag: 'scope:module',
-              onlyDependOnLibsWithTags: [
-                'scope:lib',
-                'scope:sdk',
-                'scope:contract',
-              ],
+              onlyDependOnLibsWithTags: ['scope:lib', 'scope:contract'],
             },
             {
               sourceTag: 'scope:app',
               onlyDependOnLibsWithTags: [
                 'scope:lib',
-                'scope:sdk',
                 'scope:contract',
                 'scope:module',
               ],
@@ -243,13 +231,6 @@ export default defineConfig(
       return rest;
     })(),
   },
-  // File-specific overrides
-  {
-    files: ['side-effects.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-argument': 'off',
-    },
-  },
   // Allow `@lace-contract/module` augmentation targets to be declared in
   // their source file (the only place they are valid as top-level names).
   // Matched when ESLint runs from the workspace root; the same exemption is
@@ -325,29 +306,6 @@ export default defineConfig(
       '@typescript-eslint/no-unsafe-argument': ['off'],
       '@typescript-eslint/no-non-null-assertion': 'off',
       'import/no-default-export': ['off'],
-    },
-  },
-  {
-    files: ['*.spec.tsx', '*.spec.ts', '*.test.ts'],
-    rules: {
-      'functional/no-expression-statements': ['off'],
-      'functional/no-return-void': ['off'],
-      'unicorn/no-useless-promise-resolve-reject': ['off'],
-      'functional/no-classes': ['off'],
-      '@typescript-eslint/no-empty-function': ['off'],
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      'functional/prefer-immutable-types': 'off',
-      '@typescript-eslint/no-dynamic-delete': 'off',
-      'sonarjs/no-duplicate-string': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      'promise/no-callback-in-promise': 'off',
-      '@typescript-eslint/no-misused-promises': 'off',
-      '@typescript-eslint/explicit-member-accessibility': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
   {

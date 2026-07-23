@@ -2,7 +2,7 @@ import {
   TransactionBuilder,
   cardanoContextSelectors,
 } from '@lace-contract/cardano-context';
-import { Err, Ok } from '@lace-sdk/util';
+import { Err, Ok } from '@lace-lib/util';
 import {
   type Observable,
   combineLatest,
@@ -15,7 +15,7 @@ import {
 import type { Cardano } from '@cardano-sdk/core';
 import type { RequiredProtocolParameters } from '@lace-contract/cardano-context';
 import type { State, StateObservables } from '@lace-contract/module';
-import type { Milliseconds, Result } from '@lace-sdk/util';
+import type { Milliseconds, Result } from '@lace-lib/util';
 
 // Derived from the cardano-context contract — single source of truth.
 // Resolved concretely (not generic) so StateObservables can evaluate

@@ -23,6 +23,9 @@ export const PasswordAuthPromptContainer = ({
   const shouldShowBiometricUnlockOffer = useLaceSelector(
     'authenticationPrompt.selectShowBiometricUnlockOffer',
   );
+  const unlockBackoffUntil = useLaceSelector(
+    'authenticationPrompt.selectUnlockBackoffUntil',
+  );
   const onCancel = useDispatchLaceAction(
     'authenticationPrompt.cancelled',
     true,
@@ -51,6 +54,7 @@ export const PasswordAuthPromptContainer = ({
           },
           onSwitchToBiometric,
           shouldShowBiometricUnlockOffer,
+          unlockBackoffUntil,
         })}
       </PasswordAuthPromptOverlay>
     </SheetSafeOverlay>

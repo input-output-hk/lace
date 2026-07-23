@@ -8,8 +8,8 @@ import {
 import { ActivityType } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
 import { TokenId } from '@lace-contract/tokens';
+import { BigNumber, Err, Ok, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Err, Ok, Timestamp } from '@lace-sdk/util';
 import { of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

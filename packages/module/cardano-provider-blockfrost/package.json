@@ -14,8 +14,10 @@
     "@lace-contract/cardano-stake-pools": "*",
     "@lace-contract/crypto": "*",
     "@lace-contract/module": "*",
-    "@lace-lib/util-provider": "*",
-    "bottleneck": "^2.19.5"
+    "@lace-lib/cardano-provider-core": "*",
+    "@lace-lib/core": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-provider": "*"
   },
   "devDependencies": {
     "@blockfrost/blockfrost-js": "^6.0.0",

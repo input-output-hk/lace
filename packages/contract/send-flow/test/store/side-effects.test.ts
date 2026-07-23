@@ -3,8 +3,8 @@ import { analyticsActions } from '@lace-contract/analytics';
 import { BlockchainNetworkId, type NetworkType } from '@lace-contract/network';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 

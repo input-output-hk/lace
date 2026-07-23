@@ -68,3 +68,48 @@ describe('HardwareWalletId.parse', () => {
     expect(HardwareWalletId.parse('')).toBeNull();
   });
 });
+
+describe('HardwareWalletId', () => {
+  it('canonicalizes Ledger productIds so ids are stable across interface bit drift', () => {
+    const withCardanoApp = HardwareWalletId({
+      kind: 'usb',
+      vendorId: 11_415,
+      productId: 16_405,
+      serialNumber: '0001',
+    });
+    const withBitcoinApp = HardwareWalletId({
+      kind: 'usb',
+      vendorId: 11_415,
+      productId: 16_401,
+      serialNumber: '0001',
+    });
+    expect(withCardanoApp).toBe('usb-hw-11415-16384-0001');
+    expect(withBitcoinApp).toBe(withCardanoApp);
+  });
+
+  it('keeps the full productId for non-Ledger vendors', () => {
+    expect(
+      HardwareWalletId({
+        kind: 'usb',
+        vendorId: 4617,
+        productId: 21_441,
+        serialNumber: 'ABC',
+      }),
+    ).toBe('usb-hw-4617-21441-ABC');
+  });
+
+  it('round-trips a canonicalized id through parse', () => {
+    const walletId = HardwareWalletId({
+      kind: 'usb',
+      vendorId: 11_415,
+      productId: 16_405,
+      serialNumber: '0001',
+    });
+    expect(HardwareWalletId.parse(walletId)).toEqual({
+      kind: 'usb',
+      vendorId: 11_415,
+      productId: 16_384,
+      serialNumber: '0001',
+    });
+  });
+});

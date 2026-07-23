@@ -1,8 +1,8 @@
 import { ActivityType } from '@lace-contract/activities';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
 import { makeConfirmTx, makeSubmitTx } from '@lace-contract/tx-executor';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
-import { BigNumber, Timestamp } from '@lace-sdk/util';
 import {
   catchError,
   from,
@@ -105,6 +105,7 @@ export const makeDeregistrationFeeCalculation =
                   fees: result.fees,
                   serializedTx: result.serializedTx,
                   wallet,
+                  withdrawalAmount: result.withdrawalAmount,
                 }),
               );
             }),
@@ -175,12 +176,10 @@ export const makeDeregistrationProcessing =
           result => result,
         ).pipe(
           mergeMap(value => {
-            // Pass through txPhaseRequested action (first emission)
             if (!('success' in value)) {
               return of(value);
             }
 
-            // Handle submission result (second emission)
             const result = value;
 
             if (result.success) {
@@ -189,8 +188,9 @@ export const makeDeregistrationProcessing =
                 amount: BigNumber(-BigNumber.valueOf(fee.amount)),
               }));
 
-              // Deposit return is positive (user receives this back)
-              const depositReturnAmount = BigInt(state.depositReturn || '0');
+              const depositReturnAmount = /^\d+$/.test(state.depositReturn)
+                ? BigInt(state.depositReturn)
+                : 0n;
               const depositReturnChange =
                 depositReturnAmount > 0n
                   ? [
@@ -201,11 +201,30 @@ export const makeDeregistrationProcessing =
                     ]
                   : [];
 
+              const withdrawalAmountBigInt = /^\d+$/.test(
+                state.withdrawalAmount,
+              )
+                ? BigInt(state.withdrawalAmount)
+                : 0n;
+              const withdrawalChange =
+                withdrawalAmountBigInt > 0n
+                  ? [
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(withdrawalAmountBigInt),
+                      },
+                    ]
+                  : [];
+
               const pendingActivity = {
                 accountId: state.accountId,
                 activityId: result.txId,
                 timestamp: Timestamp(Date.now()),
-                tokenBalanceChanges: [...feeChanges, ...depositReturnChange],
+                tokenBalanceChanges: [
+                  ...feeChanges,
+                  ...depositReturnChange,
+                  ...withdrawalChange,
+                ],
                 type: ActivityType.Pending,
               };
 

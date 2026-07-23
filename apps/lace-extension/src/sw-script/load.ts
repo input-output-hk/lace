@@ -113,7 +113,7 @@ const reduxPersistStorage = createReduxPersistStorage(storageModule);
 const initializers = await loadModules('addons.loadInitializeAppContext');
 await runInitializers(initializers);
 
-const { store } = await createStore(
+const { store, initialState } = await createStore(
   {
     loadModules,
     runtime: moduleInitProps.runtime,
@@ -130,7 +130,7 @@ const { store } = await createStore(
   },
   { logger, reduxPersistStorage },
 );
-const remoteStore = createRemoteStore(store);
+const remoteStore = createRemoteStore(store, initialState);
 
 const featureFlags: FeatureFlagApi = {
   getFeatureFlags: async () => loadedFeatureFlags,

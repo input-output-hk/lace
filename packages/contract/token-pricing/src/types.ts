@@ -29,7 +29,15 @@ export type BaseTokenPrice = {
   fiatCurrency: string;
 };
 
-export type TokenPriceRequest = BaseTokenPrice;
+export type TokenPriceRequest = BaseTokenPrice & {
+  /**
+   * Unique on-chain asset identifier that disambiguates tokens sharing a ticker:
+   * the provider matches it against its per-asset contract addresses (e.g.
+   * CoinGecko `platforms`). For Cardano this is the `AssetId` (policyId +
+   * assetName hex); undefined for chain-native coins (ADA, BTC), which have none.
+   */
+  contractAddress?: string;
+};
 
 export type TokenPriceResponse = BaseTokenPrice & {
   price: number;
@@ -84,4 +92,12 @@ export interface TokenPricingState {
   priceHistory: Record<TokenPriceId, TokenPriceHistory>;
   metadata: PricingMetadata;
   currencyPreference: CurrencyPreference;
+  /** Lowercase currency codes supported by CoinGecko. null = not yet fetched. */
+  supportedVsCurrencies: string[] | null;
+  /**
+   * Lowercase currency codes to hide even if CoinGecko still supports them,
+   * synced from the SUPPORTED_CURRENCIES feature flag payload. Not persisted;
+   * re-synced from the flag on load.
+   */
+  currencyChoiceExclusions: string[];
 }

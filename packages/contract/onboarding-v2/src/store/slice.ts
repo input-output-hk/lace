@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import type { AttemptCreateHardwareWalletPayload } from '../types';
+import type { AttemptCreateHardwareWalletActionPayload } from '../types';
 import type { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import type { HardwareErrorCategory } from '@lace-lib/util-hw';
 import type { BlockchainName } from '@lace-lib/util-store';
@@ -8,11 +8,6 @@ import type {
   PayloadAction,
   StateFromReducersMapObject,
 } from '@reduxjs/toolkit';
-
-export type PendingCreateWallet = {
-  password?: string;
-  recoveryPhrase?: string[];
-};
 
 export type CreateWalletPayload = {
   walletName: string;
@@ -47,41 +42,18 @@ export type OnboardingV2SliceState = {
   isCreatingWallet: boolean;
   createWalletError: CreateWalletErrorReason | null;
   lastCreatedWalletId: WalletId | null;
-  pendingCreateWallet: PendingCreateWallet | null;
 };
 
 const initialState: OnboardingV2SliceState = {
   isCreatingWallet: false,
   createWalletError: null,
   lastCreatedWalletId: null,
-  pendingCreateWallet: null,
 };
 
 const slice = createSlice({
   name: 'onboardingV2',
   initialState,
   reducers: {
-    setPendingCreateWallet: (
-      state,
-      { payload }: Readonly<PayloadAction<Partial<PendingCreateWallet>>>,
-    ) => {
-      const merged = {
-        ...state.pendingCreateWallet,
-        ...payload,
-      };
-
-      const nextPending = Object.fromEntries(
-        Object.entries(merged).filter(([, value]) => value !== undefined),
-      ) as PendingCreateWallet;
-
-      state.pendingCreateWallet =
-        Object.keys(nextPending).length > 0 ? nextPending : null;
-      state.createWalletError = null;
-      state.lastCreatedWalletId = null;
-    },
-    clearPendingCreateWallet: state => {
-      state.pendingCreateWallet = null;
-    },
     attemptCreateWallet: (
       state,
       _action: Readonly<PayloadAction<CreateWalletPayload>>,
@@ -92,7 +64,9 @@ const slice = createSlice({
     },
     attemptCreateHardwareWallet: (
       state,
-      _action: Readonly<PayloadAction<AttemptCreateHardwareWalletPayload>>,
+      _action: Readonly<
+        PayloadAction<AttemptCreateHardwareWalletActionPayload>
+      >,
     ) => {
       state.isCreatingWallet = true;
       state.createWalletError = null;
@@ -105,7 +79,6 @@ const slice = createSlice({
       state.isCreatingWallet = false;
       state.createWalletError = null;
       state.lastCreatedWalletId = payload.walletId;
-      state.pendingCreateWallet = null;
     },
     createWalletFailure: (
       state,
@@ -125,7 +98,6 @@ const slice = createSlice({
     selectIsCreatingWallet: ({ isCreatingWallet }) => isCreatingWallet,
     selectCreateWalletError: ({ createWalletError }) => createWalletError,
     selectLastCreatedWalletId: ({ lastCreatedWalletId }) => lastCreatedWalletId,
-    selectPendingCreateWallet: ({ pendingCreateWallet }) => pendingCreateWallet,
   },
 });
 

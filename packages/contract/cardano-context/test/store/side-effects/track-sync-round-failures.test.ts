@@ -1,7 +1,7 @@
 import { failuresActions } from '@lace-contract/failures';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { Timestamp } from '@lace-sdk/util';
 import { of } from 'rxjs';
 import { describe, it } from 'vitest';
 

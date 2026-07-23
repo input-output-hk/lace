@@ -15,8 +15,8 @@
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-lib/util-store": "*",
-    "@lace-sdk/util": "*"
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

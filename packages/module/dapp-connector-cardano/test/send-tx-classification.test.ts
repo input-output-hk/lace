@@ -16,10 +16,10 @@ import {
   tokenTransferInspector,
   transactionSummaryInspector,
 } from '@cardano-sdk/core';
+import { computeNetFlows } from '@lace-contract/cardano-context';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it } from 'vitest';
 
-import { computeNetFlows } from '../src/common/hooks/useDappTxInspection';
 import { createDappAssetProvider } from '../src/common/utils/create-dapp-asset-provider';
 import { createDappInputResolver } from '../src/common/utils/create-dapp-input-resolver';
 

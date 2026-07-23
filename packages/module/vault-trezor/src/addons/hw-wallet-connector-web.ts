@@ -1,11 +1,12 @@
-import { supportedNetworkIds } from '@lace-contract/cardano-context';
 import { HardwareWalletId, WalletType } from '@lace-contract/wallet-repo';
 
 import {
+  TREZOR_BITCOIN_ONBOARDING_OPTION_ID,
   TREZOR_ONBOARDING_OPTION_ID,
   TREZOR_USB_PRODUCT_ID,
   TREZOR_USB_VENDOR_ID,
 } from '../const';
+import { defaultTargetNetworks } from '../default-target-networks';
 
 import type { AvailableAddons } from '..';
 import type { ContextualLaceInit } from '@lace-contract/module';
@@ -51,8 +52,12 @@ const loadHwWalletConnector: ContextualLaceInit<
   AvailableAddons
 > = ({ loadModules }) => ({
   id: TREZOR_ONBOARDING_OPTION_ID,
+  optionIds: [TREZOR_ONBOARDING_OPTION_ID, TREZOR_BITCOIN_ONBOARDING_OPTION_ID],
   walletType: WalletType.HardwareTrezor,
   createWallet: async (state, props) => {
+    if (!props.device) {
+      throw new Error('Trezor wallet creation requires a connected device');
+    }
     const connector = await findTrezorConnector(
       loadModules,
       props.blockchainName,
@@ -64,7 +69,7 @@ const loadHwWalletConnector: ContextualLaceInit<
       accountIndex: props.accountIndex,
       accountName: `Account #${props.accountIndex}`,
       derivationType: props.derivationType,
-      targetNetworks: new Set(supportedNetworkIds.keys()),
+      targetNetworks: defaultTargetNetworks(props.blockchainName),
     });
     return {
       walletId,

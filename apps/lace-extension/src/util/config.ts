@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { isMidnightSDKTestNetworkId } from '@lace-contract/midnight-context';
 import { Environment } from '@lace-contract/module';
-import { Milliseconds, Seconds } from '@lace-sdk/util';
+import { Milliseconds, Seconds } from '@lace-lib/util';
 import { cleanEnv, str, num, makeValidator } from 'envalid';
 
 import defaultFeatureFlags from '../feature-flags';

@@ -1,5 +1,5 @@
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber } from '@lace-sdk/util';
+import { BigNumber } from '@lace-lib/util';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import {
@@ -55,26 +55,21 @@ const createMockPrice = (lastUpdated: number): TokenPrice => ({
 
 describe('utils', () => {
   describe('getTokenPriceId', () => {
-    it('should return CardanoTokenPriceId for Cardano tokens using ticker', () => {
-      const token = createMockToken('ada', 1000n, 6, 'Cardano');
-      const priceId = getTokenPriceId(token);
-      expect(priceId).toBe(CardanoTokenPriceId('ADA'));
-    });
-
-    it('should return CardanoTokenPriceId for Cardano tokens using name when no ticker', () => {
+    it('derives the Cardano price ID from the tokenId, not the ticker', () => {
       const token: Token = {
-        ...createMockToken('some-policy-id', 1000n, 6, 'Cardano'),
+        ...createMockToken('policy-dip-1', 1000n, 6, 'Cardano'),
         metadata: {
-          name: 'My Token',
+          ticker: 'DIP',
+          name: 'DIP',
           decimals: 6,
           blockchainSpecific: {},
         },
       };
       const priceId = getTokenPriceId(token);
-      expect(priceId).toBe(CardanoTokenPriceId('My Token'));
+      expect(priceId).toBe(CardanoTokenPriceId('policy-dip-1'));
     });
 
-    it('should return CardanoTokenPriceId using tokenId when no metadata', () => {
+    it('derives the Cardano price ID from the tokenId when no metadata', () => {
       const token: Token = {
         ...createMockToken('some-token-id', 1000n, 6, 'Cardano'),
         metadata: undefined,
@@ -83,10 +78,10 @@ describe('utils', () => {
       expect(priceId).toBe(CardanoTokenPriceId('some-token-id'));
     });
 
-    it('should return BitcoinTokenPriceId for Bitcoin tokens', () => {
-      const token = createMockToken('btc', 100000000n, 8, 'Bitcoin');
+    it('derives the Bitcoin price ID from the tokenId', () => {
+      const token = createMockToken('bitcoin', 100000000n, 8, 'Bitcoin');
       const priceId = getTokenPriceId(token);
-      expect(priceId).toBe(BitcoinTokenPriceId('btc'));
+      expect(priceId).toBe(BitcoinTokenPriceId('bitcoin'));
     });
 
     it('should return null for unsupported blockchains', () => {

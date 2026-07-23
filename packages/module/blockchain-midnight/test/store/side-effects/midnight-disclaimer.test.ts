@@ -7,8 +7,8 @@ import {
   WalletId,
   WalletType,
 } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { HexBytes } from '@lace-sdk/util';
 import { describe, it } from 'vitest';
 
 import { FEATURE_FLAG_MIDNIGHT_DISCLAIMER } from '../../../src/const';

@@ -1,10 +1,9 @@
-import * as Crypto from '@cardano-sdk/crypto';
-import { blake2b } from '@cardano-sdk/crypto';
-import { AddressType, Bip32Account } from '@cardano-sdk/key-management';
+import { AddressType } from '@cardano-sdk/key-management';
 import {
   isCardanoAccount,
   toContractAddress,
 } from '@lace-contract/cardano-context';
+import { Bip32Account } from '@lace-lib/core';
 import { filter, firstValueFrom } from 'rxjs';
 
 import { APIError, APIErrorCode } from '../api-error';
@@ -71,10 +70,9 @@ export const createDeriveNextAddress = ({
     const { accountIndex, extendedAccountPublicKey, chainId } =
       account.blockchainSpecific;
 
-    const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
     const bip32Account = new Bip32Account(
       { extendedAccountPublicKey, accountIndex, chainId },
-      { blake2b, bip32Ed25519 },
+      await Bip32Account.createDefaultDependencies(),
     );
     const newGroupedAddress = await bip32Account.deriveAddress(
       { type: AddressType.External, index: maxIndex + 1 },

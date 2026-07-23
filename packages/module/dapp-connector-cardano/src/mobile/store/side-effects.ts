@@ -1,7 +1,5 @@
 import { Serialization } from '@cardano-sdk/core';
-import * as Crypto from '@cardano-sdk/crypto';
-import { blake2b } from '@cardano-sdk/crypto';
-import { Bip32Account, KeyRole } from '@cardano-sdk/key-management';
+import { KeyRole } from '@cardano-sdk/key-management';
 import {
   buildCip30SignTxWitnessSet,
   cardanoAccountUnspendableUtxos$,
@@ -16,9 +14,9 @@ import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
-import { WalletType } from '@lace-contract/wallet-repo';
+import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
-import { HexBytes } from '@lace-sdk/util';
+import { HexBytes } from '@lace-lib/util';
 import {
   catchError,
   filter,
@@ -523,13 +521,13 @@ export const handleSignDataConfirmation: SideEffect = (
         }
 
         const wallet = allWallets.find(w => w.walletId === account.walletId);
-        if (!wallet || wallet.type !== WalletType.InMemory) {
+        if (!wallet || !signerFactory.canSign(account)) {
           const errorResponse: WebViewResponse = {
             id: requestId,
             success: false,
             error: {
               code: APIErrorCode.InternalError,
-              info: `Wallet not found or not InMemory type`,
+              info: `Wallet not found or signing not supported for this account`,
             },
             timestamp: Date.now(),
           };
@@ -767,13 +765,13 @@ export const handleSignTxConfirmation: SideEffect = (
         }
 
         const wallet = allWallets.find(w => w.walletId === account.walletId);
-        if (!wallet || wallet.type !== WalletType.InMemory) {
+        if (!wallet || !signerFactory.canSign(account)) {
           const errorResponse: WebViewResponse = {
             id: requestId,
             success: false,
             error: {
               code: APIErrorCode.InternalError,
-              info: `Wallet not found or not InMemory type`,
+              info: `Wallet not found or signing not supported for this account`,
             },
             timestamp: Date.now(),
           };
@@ -804,29 +802,21 @@ export const handleSignTxConfirmation: SideEffect = (
           accountId,
         );
 
-        const { accountIndex, extendedAccountPublicKey } =
-          account.blockchainSpecific as {
-            accountIndex: number;
-            extendedAccountPublicKey: Bip32PublicKeyHex;
-          };
+        const { extendedAccountPublicKey } = account.blockchainSpecific as {
+          extendedAccountPublicKey: Bip32PublicKeyHex;
+        };
 
         const localUtxos = availableAccountUtxos[accountId] ?? [];
 
         return from(
           (async () => {
-            const bip32Ed25519 = await Crypto.SodiumBip32Ed25519.create();
-            const bip32Account = new Bip32Account(
-              { extendedAccountPublicKey, accountIndex, chainId },
-              { blake2b, bip32Ed25519 },
+            const dRepKeyHash = hashEd25519PublicKey(
+              await deriveBip32PublicKey(
+                extendedAccountPublicKey,
+                KeyRole.DRep,
+                0,
+              ),
             );
-            const dRepPubKey = await bip32Account.derivePublicKey({
-              index: 0,
-              role: KeyRole.DRep,
-            });
-            const dRepKeyHash = Crypto.Ed25519PublicKey.fromHex(dRepPubKey)
-              .hash()
-              .hex();
-
             return { dRepKeyHash };
           })(),
         ).pipe(

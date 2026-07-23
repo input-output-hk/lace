@@ -2,12 +2,12 @@ import {
   isValidMidnightAddress,
   MidnightNetworkId,
 } from '@lace-contract/midnight-context';
-import { Err, None, Ok, Some } from '@lace-sdk/util';
+import { Err, None, Ok, Some } from '@lace-lib/util';
 
 import type { AddressBookAddressValidator } from '@lace-contract/address-book';
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { Option, Result } from '@lace-sdk/util';
+import type { Option, Result } from '@lace-lib/util';
 
 const invalidAddressError = new Error('Invalid Midnight Address');
 const unknownNetworkError = new Error(

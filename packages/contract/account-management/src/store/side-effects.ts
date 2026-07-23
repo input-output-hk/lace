@@ -1,5 +1,5 @@
-import * as Crypto from '@cardano-sdk/crypto';
-import { emip3encrypt, util } from '@cardano-sdk/key-management';
+import { util } from '@cardano-sdk/key-management';
+import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { createSecureStorePasswordManager } from '@lace-contract/authentication-prompt';
 import {
   type AnyWallet,
@@ -13,9 +13,9 @@ import {
   stampAccountsOnboardedAt,
   stampWalletOnboardedAt,
 } from '@lace-contract/wallet-repo';
+import { encryptRecoveryPhrase } from '@lace-lib/core';
 import { classifyHardwareError } from '@lace-lib/util-hw';
 import { toItemsByBlockchainName } from '@lace-lib/util-store';
-import { ByteArray, HexBytes } from '@lace-sdk/util';
 import {
   defer,
   filter,
@@ -34,6 +34,7 @@ import {
 
 import {
   generateUniqueAccountName,
+  getAccountIndex,
   getAllAccountNames,
   isDuplicateString,
 } from '../utils';
@@ -41,7 +42,6 @@ import {
 import type { SideEffect } from '..';
 import type { AddInMemoryWalletAccountProps } from './slice';
 import type { SheetRoutes, StackRoutes, TabRoutes } from '../routes';
-import type { HexBlob } from '@cardano-sdk/util';
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
 import type { LaceInit, State } from '@lace-contract/module';
@@ -86,38 +86,6 @@ const conditionalFailure = <A extends Action>(
   return shouldSuppress ? (EMPTY as Observable<A>) : of(failureAction);
 };
 
-// This is now done in the current onboarding in a util file
-// When we have the new onboarding, we can move to a separate contract
-// and use it in the modules required
-const computeWalletId = (recoveryPhrase: string[]): WalletId => {
-  const phrase = util.joinMnemonicWords(recoveryPhrase);
-  const phraseHex = Buffer.from(phrase, 'utf8').toString('hex') as HexBlob;
-
-  const BYTES_MIN = 16;
-  const digest = Crypto.blake2b.hash<Crypto.Hash32ByteBase16>(
-    phraseHex,
-    BYTES_MIN,
-  );
-
-  const walletIdHex = Crypto.blake2b.hash<Crypto.Hash32ByteBase16>(
-    digest as HexBlob,
-    BYTES_MIN,
-  );
-
-  return WalletId(walletIdHex);
-};
-
-const encryptRecoveryPhrase = async (
-  recoveryPhrase: string[],
-  password: AuthSecret,
-) => {
-  const walletEncrypted = await emip3encrypt(
-    ByteArray.fromUTF8(util.joinMnemonicWords(recoveryPhrase)),
-    password,
-  );
-  return HexBytes.fromByteArray(ByteArray(walletEncrypted));
-};
-
 const createWalletEntity = async ({
   walletName,
   blockchains,
@@ -154,7 +122,7 @@ const createWalletEntity = async ({
   const recoveryPhrase = isRecoveryFlow
     ? [...providedRecoveryPhrase]
     : util.generateMnemonicWords();
-  const walletId = computeWalletId(recoveryPhrase);
+  const walletId = WalletId.deriveFromMnemonic(recoveryPhrase);
   const encryptedRecoveryPhrase = await encryptRecoveryPhrase(
     recoveryPhrase,
     password,
@@ -398,7 +366,7 @@ export const createInMemoryWalletAddAccountSideEffect =
 /** Promise-based {@link HwWalletConnector} with async methods wrapped to return Observables. */
 type ObservableHwWalletConnector = Pick<
   HwWalletConnector,
-  'id' | 'walletType'
+  'id' | 'optionIds' | 'walletType'
 > & {
   connectAccount: (
     state: State,
@@ -410,12 +378,22 @@ type ObservableHwWalletConnector = Pick<
   ) => Observable<WalletEntity>;
 };
 
+/** True when the connector serves the given onboarding option id. */
+const connectorServesOption = (
+  connector: Pick<HwWalletConnector, 'id' | 'optionIds'>,
+  optionId: HwWalletConnector['id'],
+): boolean =>
+  connector.id === optionId ||
+  (connector.optionIds?.includes(optionId) ?? false);
+
 /**
  * Creates the side effect that handles adding accounts to any wallet type.
  * Branches by wallet type:
- * - InMemory → dispatches `attemptAddInMemoryWalletAccount` (auth prompt handled there)
- * - HW (Ledger/Trezor) → parses device, finds connector, calls `connectAccount` inline
- * - MultiSig → not yet implemented
+ * - InMemory: dispatches `attemptAddInMemoryWalletAccount` (auth prompt handled there)
+ * - HW (Ledger/Trezor): parses device, finds connector, calls `connectAccount` inline
+ * - HW (SeedSigner): air-gapped, finds connector, calls `connectAccount` with no device
+ *   (the connector runs the QR account-export exchange)
+ * - MultiSig: not yet implemented
  */
 export const createAddAccountSideEffect =
   (hwConnectors: ObservableHwWalletConnector[]): SideEffect =>
@@ -462,11 +440,20 @@ export const createAddAccountSideEffect =
             );
 
           case WalletType.HardwareLedger:
-          case WalletType.HardwareTrezor: {
-            // Parse device from usb-hw-* wallet ID. Null for v1 wallets
-            // with legacy ID format — the HW connector resolves those
-            // from navigator.usb.getDevices().
-            const device = HardwareWalletId.parse(walletId) ?? undefined;
+          case WalletType.HardwareTrezor:
+          case WalletType.HardwareSeedSigner:
+          case WalletType.HardwareKeystone: {
+            // Air-gapped devices (seed signer, keystone) have no USB/BLE
+            // device: the connector derives identity from the QR
+            // account-export exchange and ignores device. Ledger/Trezor parse
+            // the device from the usb-hw-* wallet ID (null for v1 wallets
+            // with legacy IDs -- the connector resolves those from
+            // navigator.usb.getDevices()).
+            const device =
+              wallet.type === WalletType.HardwareSeedSigner ||
+              wallet.type === WalletType.HardwareKeystone
+                ? undefined
+                : HardwareWalletId.parse(walletId) ?? undefined;
 
             const connector = hwConnectors.find(
               c => c.walletType === wallet.type,
@@ -498,8 +485,63 @@ export const createAddAccountSideEffect =
                 targetNetworks,
               })
               .pipe(
-                mergeMap(newAccounts =>
-                  from([
+                mergeMap(newAccounts => {
+                  if (newAccounts.length === 0) {
+                    logger.warn(
+                      'HW connector returned no accounts for the target networks',
+                      { walletId, blockchain },
+                    );
+                    return conditionalFailure(
+                      !!shouldSuppressAccountStatus,
+                      actions.accountManagement.attemptAddAccountFailed({
+                        walletId,
+                        errorTitle: 'hw-error.network-mismatch.title',
+                        errorDescription: 'hw-error.network-mismatch.subtitle',
+                      }),
+                    );
+                  }
+
+                  const wrongNetworkAccount = newAccounts.find(
+                    account => !targetNetworks.has(account.blockchainNetworkId),
+                  );
+                  if (wrongNetworkAccount) {
+                    logger.warn('HW account is for a non-target network', {
+                      walletId,
+                      accountId: wrongNetworkAccount.accountId,
+                      blockchainNetworkId:
+                        wrongNetworkAccount.blockchainNetworkId,
+                    });
+                    return conditionalFailure(
+                      !!shouldSuppressAccountStatus,
+                      actions.accountManagement.attemptAddAccountFailed({
+                        walletId,
+                        errorTitle: 'hw-error.network-mismatch.title',
+                        errorDescription: 'hw-error.network-mismatch.subtitle',
+                      }),
+                    );
+                  }
+
+                  const duplicateAccount = newAccounts.find(account =>
+                    wallet.accounts.some(
+                      existing => existing.accountId === account.accountId,
+                    ),
+                  );
+                  if (duplicateAccount) {
+                    logger.warn('HW account already exists in wallet', {
+                      walletId,
+                      accountId: duplicateAccount.accountId,
+                    });
+                    return conditionalFailure(
+                      !!shouldSuppressAccountStatus,
+                      actions.accountManagement.attemptAddAccountFailed({
+                        walletId,
+                        errorTitle: 'hw-error.duplicate-account.title',
+                        errorDescription: 'hw-error.duplicate-account.subtitle',
+                      }),
+                    );
+                  }
+
+                  return from([
                     actions.wallets.updateWallet({
                       id: walletId,
                       changes: {
@@ -512,11 +554,13 @@ export const createAddAccountSideEffect =
                     actions.accountManagement.accountAdded({
                       walletId,
                       blockchain,
-                      accountIndex,
+                      accountIndex: newAccounts[0]
+                        ? getAccountIndex(newAccounts[0])
+                        : accountIndex,
                       walletType: wallet.type,
                     }),
-                  ]),
-                ),
+                  ]);
+                }),
                 catchError((error: unknown) => {
                   const hwErrorCategory = classifyHardwareError(error);
                   logger.warn('Failed to add HW account', {
@@ -525,7 +569,8 @@ export const createAddAccountSideEffect =
                     hwErrorCategory,
                     error,
                   });
-                  return of(
+                  return conditionalFailure(
+                    !!shouldSuppressAccountStatus,
                     actions.accountManagement.attemptAddAccountFailed({
                       walletId,
                       errorTitle: `hw-error.${hwErrorCategory}.title`,
@@ -626,7 +671,15 @@ export const createAccountAddFailedSheetSideEffect: SideEffect = (
  *    the wallet entity via the service worker
  * 4) On success: dispatches `wallets.addWallet` with order set to the current
  *    wallet count, clears loading, and navigates to `SuccessCreateNewWallet`
- * 5) On failure: dispatches `accountManagement.hardwareWalletCreationFailed`
+ * 5) When the device's wallet already exists, merges the accounts the
+ *    connector produced into it instead of failing, so a device serving a
+ *    network the wallet has no account for yet (e.g. the other Ledger
+ *    Bitcoin app) can be added even while that wallet is hidden by the
+ *    active network filter; only fully duplicate accounts fail. The wallet
+ *    list is sampled after the connector emits, not when the attempt was
+ *    dispatched: device approval takes seconds, and merging against a stale
+ *    snapshot could drop or duplicate accounts added in the meantime
+ * 6) On failure: dispatches `accountManagement.hardwareWalletCreationFailed`
  *    with the classified {@link HardwareErrorCategory}
  *
  * Unlike the onboarding flow, this side effect does not bootstrap the app lock
@@ -643,9 +696,10 @@ export const createHardwareWalletCreationSideEffect =
     { actions, logger, __getState },
   ) =>
     attemptCreateHardwareWallet$.pipe(
-      withLatestFrom(selectAll$),
-      switchMap(([{ payload }, wallets]) => {
-        const connector = hwConnectors.find(c => c.id === payload.optionId);
+      switchMap(({ payload }) => {
+        const connector = hwConnectors.find(c =>
+          connectorServesOption(c, payload.optionId),
+        );
         if (!connector) {
           logger.error(
             `Hardware wallet connector not found for ${payload.optionId}`,
@@ -667,8 +721,45 @@ export const createHardwareWalletCreationSideEffect =
               derivationType: payload.derivationType,
             })
             .pipe(
-              mergeMap(entity => {
+              blockingWithLatestFrom(selectAll$),
+              mergeMap(([entity, wallets]) => {
+                const existingWallet = wallets.find(
+                  wallet =>
+                    wallet.walletId === entity.walletId &&
+                    wallet.type === entity.type,
+                );
+                if (existingWallet) {
+                  const newAccounts = entity.accounts.filter(account =>
+                    existingWallet.accounts.every(
+                      existing => existing.accountId !== account.accountId,
+                    ),
+                  );
+                  if (newAccounts.length === 0) {
+                    return of(
+                      actions.accountManagement.hardwareWalletCreationFailed({
+                        reason: 'already-added',
+                      }),
+                    );
+                  }
+                  return from([
+                    actions.wallets.updateWallet({
+                      id: existingWallet.walletId,
+                      changes: {
+                        accounts: [
+                          ...existingWallet.accounts,
+                          ...stampAccountsOnboardedAt(newAccounts),
+                        ],
+                      } as Partial<HardwareWallet>,
+                    }),
+                    actions.accountManagement.setLoading(false),
+                    actions.views.setActiveSheetPage({
+                      route: SuccessCreateNewWalletRoute,
+                      params: { walletId: existingWallet.walletId },
+                    }),
+                  ]);
+                }
                 if (
+                  wallets.some(wallet => wallet.walletId === entity.walletId) ||
                   findWalletSharingIdentity(
                     entity,
                     wallets,
@@ -744,17 +835,20 @@ export const createWalletCreationSideEffect =
           );
         }
 
-        return authenticate({
-          cancellable: true,
-          confirmButtonLabel:
-            'authentication-prompt.confirm-button-label.create-wallet',
-          message: 'authentication-prompt.message.create-wallet',
-        }).pipe(
-          filter(Boolean),
-          switchMap(() =>
-            concat(
-              of(actions.accountManagement.setLoading(true)),
-              accessAuthSecret(authSecret =>
+        return concat(
+          of(actions.accountManagement.setLoading(true)),
+          authenticate({
+            cancellable: true,
+            confirmButtonLabel:
+              'authentication-prompt.confirm-button-label.create-wallet',
+            message: 'authentication-prompt.message.create-wallet',
+          }).pipe(
+            switchMap(confirmed => {
+              if (!confirmed) {
+                return of(actions.accountManagement.setLoading(false));
+              }
+
+              return accessAuthSecret(authSecret =>
                 from(
                   createWalletEntity({
                     walletName: trimmedName,
@@ -787,8 +881,8 @@ export const createWalletCreationSideEffect =
                   logger.error('Failed to create wallet', error);
                   return of(actions.accountManagement.setLoading(false));
                 }),
-              ),
-            ),
+              );
+            }),
           ),
         );
       }),
@@ -981,6 +1075,7 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
   const observableHwConnectors: ObservableHwWalletConnector[] =
     hwConnectors.map(c => ({
       id: c.id,
+      optionIds: c.optionIds,
       walletType: c.walletType,
       connectAccount: (state, props) =>
         defer(() => from(c.connectAccount(state, props))),

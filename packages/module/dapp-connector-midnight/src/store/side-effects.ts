@@ -1,4 +1,12 @@
-import { EMPTY, merge, of, Subject, switchMap } from 'rxjs';
+import {
+  EMPTY,
+  ignoreElements,
+  merge,
+  of,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 import {
   proveTransaction$,
@@ -13,6 +21,7 @@ import type {
 } from './dependencies/create-confirmation-callback';
 import type { ActionType } from '@lace-contract/module';
 import type { LaceInitSync } from '@lace-contract/module';
+import type { AccountId } from '@lace-contract/wallet-repo';
 
 const isRequestOfType = <R extends RequestType>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +45,7 @@ export const connectDappConnectorApi: SideEffect = (
     appLock: { isUnlocked$ },
     dappConnector: { selectAuthorizedDapps$ },
     midnightContext: { selectCurrentNetwork$, selectSupportedNetworksIds$ },
+    midnightDappConnector: { selectSessionAccountByOrigin$ },
   },
   {
     connectMidnightDappConnector,
@@ -47,12 +57,21 @@ export const connectDappConnectorApi: SideEffect = (
 ) => {
   const pendingActivityDispatch$ = new Subject<ActionType<ActionCreators>>();
 
+  let sessionAccountByOrigin: Record<string, AccountId> = {};
+  const updateAccountMapping$ = selectSessionAccountByOrigin$.pipe(
+    tap(mapping => {
+      sessionAccountByOrigin = mapping;
+    }),
+    ignoreElements(),
+  );
+
   const connector$ = connectMidnightDappConnector({
     wallets$: midnightWallets$,
     authorizedDapps$: selectAuthorizedDapps$,
     network$: selectCurrentNetwork$,
     supportedNetworksIds$: selectSupportedNetworksIds$,
     isUnlocked$,
+    getAccountIdForOrigin: (origin: string) => sessionAccountByOrigin[origin],
     onPendingActivity: activity => {
       pendingActivityDispatch$.next(
         actions.activities.upsertActivities({
@@ -103,7 +122,7 @@ export const connectDappConnectorApi: SideEffect = (
     },
   });
 
-  return merge(connector$, pendingActivityDispatch$);
+  return merge(connector$, pendingActivityDispatch$, updateAccountMapping$);
 };
 
 export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {

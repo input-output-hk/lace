@@ -3,8 +3,8 @@ import { logger } from '@cardano-sdk/util-dev';
 import { CardanoPaymentAddress } from '@lace-contract/cardano-context';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { BigNumber } from '@lace-lib/util';
 import { HttpClientError } from '@lace-lib/util-provider';
-import { BigNumber } from '@lace-sdk/util';
 import { firstValueFrom } from 'rxjs';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

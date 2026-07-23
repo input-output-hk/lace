@@ -19,8 +19,8 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { InfoRow } from './InfoRow';
 import { TokenAmount } from './TokenAmount';
 
-import type { TokenTransferValue } from '../../hooks';
 import type { Cardano } from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { TFunction } from '@lace-contract/i18n';
 import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
 

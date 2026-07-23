@@ -6,7 +6,7 @@ import type {
 } from './bitcoin-data-provider';
 import type { BitcoinNetworkId } from './value-objects';
 import type { Address } from '@lace-contract/addresses';
-import type { HexBytes, Milliseconds } from '@lace-sdk/util';
+import type { HexBytes, Milliseconds } from '@lace-lib/util';
 import type { EmptyObject, Tagged } from 'type-fest';
 
 export type BitcoinAddress = Address & Tagged<string, 'BitcoinAddress'>;
@@ -40,24 +40,32 @@ export interface BitcoinFeeMarketProviderConfig {}
 
 /**
  * Extended account public keys for a Bitcoin wallet.
+ *
+ * In-memory wallets derive every script type from the seed. A watch-only
+ * hardware account (e.g. an air-gapped Seed Signer) only exports the active
+ * Native SegWit key, so the other script types are optional and absent there.
  */
 export type BitcoinExtendedAccountPublicKeys = {
-  /** The extended public key for legacy addresses (base58 encoded). */
-  legacy: string;
-  /** The extended public key for SegWit addresses (base58 encoded). */
-  segWit: string;
   /** The extended public key for Native SegWit addresses (base58 encoded). */
   nativeSegWit: string;
+  /** The extended public key for legacy addresses (base58 encoded). */
+  legacy?: string;
+  /** The extended public key for SegWit addresses (base58 encoded). */
+  segWit?: string;
   /** The extended public key for Taproot addresses (base58 encoded). */
-  taproot: string;
-  /** The extended public key for Electrum Native SegWit addresses (base58 encoded). */
-  electrumNativeSegWit: string;
+  taproot?: string;
 };
 
 export type BitcoinBip32AccountProps = {
   accountIndex: number;
   extendedAccountPublicKeys: BitcoinExtendedAccountPublicKeys;
   networkId?: BitcoinNetworkId;
+  /**
+   * Device master fingerprint (xfp) as 8-char lowercase hex, present for a
+   * watch-only hardware account so PSBT input key-origins can target the device
+   * seed. Absent for in-memory accounts.
+   */
+  masterFingerprint?: string;
 };
 
 export type BitcoinAnyAccountProps = BitcoinBip32AccountProps;

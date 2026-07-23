@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Button } from '../../atoms';
 
-import { useFieldContext } from './mnemonicForm';
+import { useFieldContext } from './mnemonicFormContexts';
 import { type MnemonicFormData } from './mnemonicFormOptions';
 
 const WORD_COUNT_LENGTHS = {
