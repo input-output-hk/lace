@@ -9,7 +9,7 @@ import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { formatAmountToLocale } from '@lace-lib/util-render';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -119,6 +119,16 @@ export const useNewDRepDelegation = (
     }
   }, [dRep, t]);
 
+  const onCancelPress = useCallback(() => {
+    NavigationControls.closeSheet();
+  }, []);
+
+  const onDelegatePress = useCallback(() => {
+    // The machine ignores delegationRequested outside Summary; guarding here
+    // keeps the press a no-op without logging "handler not found".
+    if (flowStateRef.current?.status === 'Summary') delegationRequested();
+  }, [delegationRequested]);
+
   const summaryState =
     flowState &&
     (flowState.status === 'Summary' ||
@@ -181,56 +191,73 @@ export const useNewDRepDelegation = (
     };
   }, [t, depositLovelace, drepDisplayValue, stakeKeyHash]);
 
-  const rawTransaction = summaryState?.serializedTx
-    ? {
-        title: t('v2.governance.delegation-confirmation.raw-tx'),
-        cbor: summaryState.serializedTx,
-      }
-    : undefined;
+  const serializedTx = summaryState?.serializedTx;
+  const rawTransaction = useMemo<DRepDelegationSheetProps['rawTransaction']>(
+    () =>
+      serializedTx
+        ? {
+            title: t('v2.governance.delegation-confirmation.raw-tx'),
+            cbor: serializedTx,
+          }
+        : undefined,
+    [serializedTx, t],
+  );
 
-  const isLoading = !flowState || flowState.status === 'CalculatingFees';
+  // Memoized: the screen feeds these props into `navigation.setOptions`, so a
+  // fresh object on every render would re-set the sheet options in a loop.
+  return useMemo<DRepDelegationSheetProps | null>(() => {
+    if (!flowState || flowState.status === 'CalculatingFees') return null;
 
-  if (isLoading) return null;
+    const isTxInFlight =
+      flowState.status === 'AwaitingConfirmation' ||
+      flowState.status === 'Processing';
 
-  const isTxInFlight =
-    flowState.status === 'AwaitingConfirmation' ||
-    flowState.status === 'Processing';
-
-  return {
-    headerTitle: t('v2.governance.delegation-confirmation.title'),
-    drepLabel: t('v2.governance.delegation-confirmation.drep-label'),
-    drepValue: drepDisplayValue,
-    drepName: drepSummary?.name,
-    drepAvatarUri: toHttpImageUrl(drepSummary?.metadata?.imageUrl),
-    sourceAccountLabel: t('v2.governance.delegation-confirmation.account'),
-    sourceAccountName: account?.metadata?.name ?? accountIdString,
-    totalBreakdownLabel: t('v2.governance.delegation-confirmation.total'),
-    stakeKeyDepositLabel: depositAda
-      ? t('v2.governance.delegation-confirmation.stake-key-deposit')
-      : undefined,
-    stakeKeyDepositAda: depositAda,
-    transactionFeeLabel: t(
-      'v2.governance.delegation-confirmation.transaction-fee',
-    ),
+    return {
+      headerTitle: t('v2.governance.delegation-confirmation.title'),
+      drepLabel: t('v2.governance.delegation-confirmation.drep-label'),
+      drepValue: drepDisplayValue,
+      drepName: drepSummary?.name,
+      drepAvatarUri: toHttpImageUrl(drepSummary?.metadata?.imageUrl),
+      sourceAccountLabel: t('v2.governance.delegation-confirmation.account'),
+      sourceAccountName: account?.metadata?.name ?? accountIdString,
+      totalBreakdownLabel: t('v2.governance.delegation-confirmation.total'),
+      stakeKeyDepositLabel: depositAda
+        ? t('v2.governance.delegation-confirmation.stake-key-deposit')
+        : undefined,
+      stakeKeyDepositAda: depositAda,
+      transactionFeeLabel: t(
+        'v2.governance.delegation-confirmation.transaction-fee',
+      ),
+      transactionFeeAda,
+      totalLabel: t('v2.governance.delegation-confirmation.total'),
+      totalAda,
+      certificate,
+      rawTransaction,
+      cancelButtonLabel: t(
+        'v2.governance.delegation-confirmation.button.cancel',
+      ),
+      delegateButtonLabel: t(
+        'v2.governance.delegation-confirmation.button.delegate',
+      ),
+      delegateButtonDisabled:
+        flowState.status !== 'Summary' || !flowState.confirmButtonEnabled,
+      delegateButtonLoading: isTxInFlight,
+      onCancelPress,
+      onDelegatePress,
+    };
+  }, [
+    t,
+    flowState,
+    drepDisplayValue,
+    drepSummary,
+    account,
+    accountIdString,
+    depositAda,
     transactionFeeAda,
-    totalLabel: t('v2.governance.delegation-confirmation.total'),
     totalAda,
     certificate,
     rawTransaction,
-    cancelButtonLabel: t('v2.governance.delegation-confirmation.button.cancel'),
-    delegateButtonLabel: t(
-      'v2.governance.delegation-confirmation.button.delegate',
-    ),
-    delegateButtonDisabled:
-      flowState.status !== 'Summary' || !flowState.confirmButtonEnabled,
-    delegateButtonLoading: isTxInFlight,
-    onCancelPress: () => {
-      NavigationControls.closeSheet();
-    },
-    onDelegatePress: () => {
-      // The machine ignores delegationRequested outside Summary; guarding here
-      // keeps the press a no-op without logging "handler not found".
-      if (flowState.status === 'Summary') delegationRequested();
-    },
-  };
+    onCancelPress,
+    onDelegatePress,
+  ]);
 };

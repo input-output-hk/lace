@@ -137,6 +137,13 @@ export const findLastRouteIndexByName = (
   return -1;
 };
 
+/** First index in the root stack `routes` matching any of `routeNames`. */
+const findFirstRouteIndexByName = (
+  state: NavigationState | undefined,
+  routeNames: readonly string[],
+): number =>
+  state?.routes?.findIndex(route => routeNames.includes(route.name)) ?? -1;
+
 const countDismissibleSheetRoutes = (
   state: NavigationState | undefined,
 ): number => {
@@ -353,6 +360,38 @@ export const NavigationControls = {
     // firing a stale action.
     dismissSheetsAndThen(navigation, () => undefined);
   },
+  /**
+   * Dismisses only the sheets a self-contained sub-flow presented, revealing
+   * the sheet it was launched from. Unlike {@link NavigationControls.closeSheet},
+   * the launching sheet stays presented and mounted — a caller awaiting the
+   * sub-flow's outcome still has its React state when that outcome arrives.
+   *
+   * Falls back to a full `closeSheet` when the sub-flow's sheets sit directly
+   * on the base route: there is nothing to reveal, and that path waits for the
+   * native dismissal cascade to settle.
+   */
+  closeSheets: (routes: readonly SheetRoutes[]): void => {
+    const navigation = getMainNavigation();
+    if (!navigation) return;
+
+    const rootState = navigation.getRootState() as NavigationState | undefined;
+    const lowestIndex = findFirstRouteIndexByName(rootState, routes);
+
+    // -1: none presented. 0: the base route can never be one of them.
+    if (lowestIndex <= 0 || !rootState) return;
+
+    if (lowestIndex === 1) {
+      NavigationControls.closeSheet();
+      return;
+    }
+
+    const popCount =
+      (rootState.index ?? rootState.routes.length - 1) + 1 - lowestIndex;
+    if (popCount <= 0) return;
+
+    notifySheetCloseListeners();
+    navigation.dispatch(StackActions.pop(popCount));
+  },
 };
 
 type SheetStateRoute = NavigationState['routes'][number] & {
@@ -390,9 +429,9 @@ export const handleInteractiveSheetDismiss = (
   const rootState = navigation.getRootState() as NavigationState | undefined;
   if (!rootState?.routes?.length) return;
 
-  const dismissingRoute = rootState.routes.find(
+  const dismissingRoute: SheetStateRoute | undefined = rootState.routes.find(
     route => route.key === routeKey,
-  ) as SheetStateRoute | undefined;
+  );
   if (!dismissingRoute) return;
 
   // Programmatic dismiss (button → goBack/pop): route pre-marked `closing`.

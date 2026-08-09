@@ -118,7 +118,8 @@ const getAccountWalletInstance = async ({
   const indexerClientConnection = {
     indexerHttpUrl: config.indexerAddress,
     indexerWsUrl: convertHttpUrlToWebsocket(config.indexerAddress),
-    keepAlive: 45_000,
+    // Must stay under the Blockfrost proxy's ~30s idle timeout.
+    keepAlive: 15_000,
   };
   const { networkId } = account.blockchainSpecific;
 

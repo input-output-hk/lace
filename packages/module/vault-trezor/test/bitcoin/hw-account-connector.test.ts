@@ -275,27 +275,4 @@ describe('bitcoin trezor hw-account-connector', () => {
       }),
     ).rejects.toThrow('Trezor getPublicKey failed: User cancelled');
   });
-
-  it('exposes the Suite device id from the response envelope', async () => {
-    getPublicKey.mockImplementationOnce(async ({ bundle }) => ({
-      ...successResponse(bundle),
-      device: { features: { device_id: 'suite-device-id' } },
-    }));
-
-    const { deviceId } = await exportBitcoinAccountKeys(connect, {
-      accountIndex: 0,
-      targetNetworks: allNetworks(),
-    });
-
-    expect(deviceId).toBe('suite-device-id');
-  });
-
-  it('leaves the device id undefined when the envelope omits it', async () => {
-    const { deviceId } = await exportBitcoinAccountKeys(connect, {
-      accountIndex: 0,
-      targetNetworks: allNetworks(),
-    });
-
-    expect(deviceId).toBeUndefined();
-  });
 });

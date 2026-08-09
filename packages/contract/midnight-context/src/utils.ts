@@ -38,7 +38,7 @@ import type {
 } from '@lace-contract/wallet-repo';
 
 export const convertHttpUrlToWebsocket = (url: string) =>
-  `${url.replace(/(http)(s)?:\/\//, 'ws$2://')}/ws`;
+  `${url.replace(/(http)(s)?:\/\//, 'ws$2://').replace(/\/+$/, '')}/ws`;
 
 // TODO: LW-13716 to be removed once Midnight starts to differentiate token types
 //  by kind (shielded, unshielded). As of now shielded tokens have identical

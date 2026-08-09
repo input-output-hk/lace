@@ -53,19 +53,19 @@ export const DEFAULT_NETWORKS_CONFIG: MidnightNetworksConfig = {
     indexerAddress: 'http://localhost:8088/api/v4/graphql',
   },
   [NetworkId.NetworkId.MainNet]: {
-    nodeAddress: 'https://rpc.mainnet.midnight.network',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc',
     proofServerAddress: 'http://localhost:6300',
-    indexerAddress: 'https://indexer.mainnet.midnight.network/api/v4/graphql',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
   },
   [NetworkId.NetworkId.PreProd]: {
-    nodeAddress: 'https://rpc.preprod.midnight.network',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc',
     proofServerAddress: 'http://localhost:6300',
-    indexerAddress: 'https://indexer.preprod.midnight.network/api/v4/graphql',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
   },
   [NetworkId.NetworkId.Preview]: {
-    nodeAddress: 'https://rpc.preview.midnight.network',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preview-rpc',
     proofServerAddress: 'http://localhost:6300',
-    indexerAddress: 'https://indexer.preview.midnight.network/api/v4/graphql',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
   },
   [NetworkId.NetworkId.QaNet]: {
     nodeAddress: 'https://rpc.qanet.midnight.network',
