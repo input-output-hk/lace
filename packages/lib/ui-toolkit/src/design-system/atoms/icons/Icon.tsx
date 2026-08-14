@@ -30,11 +30,19 @@ export const Icon = ({
   strokeWidth,
   ...props
 }: HugeIconProps) => {
+  const { theme } = useTheme();
+
   if (name in CustomIcons) {
     const IconComponent = CustomIcons[name as CustomIconName];
-    return <IconComponent size={size} testID={props?.testID} {...props} />;
+    return (
+      <IconComponent
+        size={size}
+        color={color}
+        testID={props?.testID}
+        {...props}
+      />
+    );
   }
-  const { theme } = useTheme();
 
   const defaultColor = color ?? theme.icons.background;
   const icon = iconMap[name as HugeIconName];
