@@ -87,8 +87,6 @@ const plainNativeSegWitXpub = (
 export interface BitcoinDeviceExport {
   /** Device master fingerprint (xfp) as 8-char lowercase hex. */
   masterFingerprint: string;
-  /** Trezor device_id from the response envelope, when the host provides it. */
-  deviceId?: string;
   /** One plain (xpub/tpub) native-segwit account xpub per target network. */
   keys: { network: BitcoinNetwork; nativeSegWit: string }[];
 }
@@ -116,13 +114,9 @@ export const exportBitcoinAccountKeys = async (
   if (!response.success) {
     throw new Error(`Trezor getPublicKey failed: ${response.payload.error}`);
   }
-  const device = response.device as
-    | { features?: { device_id?: string | null } }
-    | undefined;
   const [probeNode, ...accountNodes] = response.payload;
   return {
     masterFingerprint: fingerprintToHex(probeNode.fingerprint),
-    deviceId: device?.features?.device_id ?? undefined,
     keys: networks.map((network, index) => ({
       network,
       nativeSegWit: plainNativeSegWitXpub(accountNodes[index], network),

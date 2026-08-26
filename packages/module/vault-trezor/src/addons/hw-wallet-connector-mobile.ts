@@ -10,12 +10,9 @@ import {
   TREZOR_ONBOARDING_OPTION_ID,
 } from '../const';
 import { defaultTargetNetworks } from '../default-target-networks';
-import {
-  getCardanoXpubViaDeepLink,
-  TrezorMobileMissingDeviceIdError,
-  walletIdFromTrezorDeviceId,
-} from '../mobile/cardano-xpub';
+import { getCardanoXpubViaDeepLink } from '../mobile/cardano-xpub';
 import { getTrezorConnect } from '../mobile/trezor-connect-bridge';
+import { trezorMobileWalletId } from '../mobile/wallet-id';
 
 import type { AvailableMobileAddons } from '..';
 import type { ContextualLaceInit, State } from '@lace-contract/module';
@@ -30,10 +27,13 @@ import type {
 
 /**
  * On mobile, Trezor Suite owns device communication and every Trezor Connect
- * call is a deep-link round-trip. The discovery addon returns a placeholder
- * descriptor without talking to Suite; the real `device_id` is fetched
- * alongside the xpubs in `createWallet` and used to derive the wallet id, so
- * Cardano and Bitcoin accounts of one physical device share one wallet.
+ * call is a deep-link round-trip — an app switch the user sees. The discovery
+ * addon returns a placeholder descriptor without talking to Suite, and each
+ * blockchain derives its wallet id from the seed identity that comes back with
+ * the keys it exports, so `createWallet` costs exactly one round-trip.
+ *
+ * Consequence: the two blockchains key off different curves, so one physical
+ * device onboarded from scratch on each yields two wallet entries.
  */
 const findTrezorConnector = async (
   loadModules: Parameters<
@@ -59,11 +59,11 @@ const createCardanoWalletParts = async (
   state: State,
   props: CreateHardwareWalletProps,
 ): Promise<WalletParts> => {
-  const { publicKey, deviceId } = await getCardanoXpubViaDeepLink(
+  const { publicKey, seedIdentity } = await getCardanoXpubViaDeepLink(
     props.accountIndex,
     props.derivationType,
   );
-  const walletId = walletIdFromTrezorDeviceId(deviceId);
+  const walletId = trezorMobileWalletId(seedIdentity);
   return {
     walletId,
     accounts: cardanoAccountsFromXpub({
@@ -85,8 +85,9 @@ const createBitcoinWalletParts = async (
     accountIndex: props.accountIndex,
     targetNetworks: defaultTargetNetworks('Bitcoin'),
   });
-  if (!deviceExport.deviceId) throw new TrezorMobileMissingDeviceIdError();
-  const walletId = walletIdFromTrezorDeviceId(deviceExport.deviceId);
+  // The master fingerprint is the seed identity here: the `m/84'` probe that
+  // yields it already rides in the account-key bundle.
+  const walletId = trezorMobileWalletId(deviceExport.masterFingerprint);
   return {
     walletId,
     accounts: buildBitcoinAccounts({

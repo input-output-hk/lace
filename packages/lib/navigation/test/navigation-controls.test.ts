@@ -345,6 +345,67 @@ describe('NavigationControls', () => {
       expect(mockDispatch).not.toHaveBeenCalled();
     });
   });
+
+  describe('closeSheets', () => {
+    const stateWith = (...names: SheetRoutes[]): NavigationState =>
+      ({
+        index: names.length,
+        routes: [
+          { key: 'root', name: SheetRoutes.RootStack },
+          ...names.map(name => ({ key: name, name })),
+        ],
+      } as unknown as NavigationState);
+
+    beforeEach(() => {
+      vi.mocked(navigationRef.isReady).mockReturnValue(true);
+    });
+
+    it('pops the listed sheets and leaves the sheet underneath presented', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(
+          SheetRoutes.AddWalletHardware,
+          SheetRoutes.HardwareWalletDiscoveryResults,
+          SheetRoutes.HardwareWalletDiscoveryError,
+        ) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+        SheetRoutes.HardwareWalletDiscoveryError,
+      ]);
+
+      expect(mockPop).toHaveBeenCalledWith(2);
+      expect(mockPopToTop).not.toHaveBeenCalled();
+    });
+
+    it('falls back to a full dismissal when the listed sheets sit on the base route', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(SheetRoutes.HardwareWalletDiscoveryResults) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+        SheetRoutes.HardwareWalletDiscoveryError,
+      ]);
+
+      expect(mockPopToTop).toHaveBeenCalledOnce();
+      expect(mockPop).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when none of the listed sheets are presented', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(SheetRoutes.AddWalletHardware) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+      ]);
+
+      expect(mockPop).not.toHaveBeenCalled();
+      expect(mockPopToTop).not.toHaveBeenCalled();
+      expect(vi.mocked(navigationRef.dispatch)).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('handleInteractiveSheetDismiss', () => {
