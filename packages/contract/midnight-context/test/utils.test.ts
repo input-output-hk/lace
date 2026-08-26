@@ -22,6 +22,10 @@ const testCases = [
     input: 'https://indexer.preview.midnight.network/api/v3/graphql',
     output: 'wss://indexer.preview.midnight.network/api/v3/graphql/ws',
   },
+  {
+    input: 'https://blockfrost.lw.iog.io/midnight-preview/',
+    output: 'wss://blockfrost.lw.iog.io/midnight-preview/ws',
+  },
 ];
 
 describe('utils', () => {

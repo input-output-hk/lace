@@ -1,13 +1,20 @@
 import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme } from '../../../../design-tokens';
-import { Icon, Text } from '../../../atoms';
-import { footerHeight, Sheet } from '../../../organisms';
+import { Column, Icon, Text } from '../../../atoms';
+import { footerHeight } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens';
 
+/**
+ * Success body for a completed vote delegation. Renders the content only: the
+ * screen that owns this template passes header/footer to the sheet through
+ * navigation options, because a header/footer rendered as a sibling of the
+ * content falls outside the sheet's bounds and clips off-screen. `onGoTo…` is
+ * consumed by that screen's footer button. Mirrors `DelegationSuccess`.
+ */
 export interface DRepDelegationSuccessProps {
   onGoToGovernanceCenter: () => void;
   testID?: string;
@@ -15,29 +22,23 @@ export interface DRepDelegationSuccessProps {
 
 const getStyles = (theme: Theme) =>
   StyleSheet.create({
-    headerTitle: {
-      color: theme.text.primary,
-      textAlign: 'center',
-    },
-    contentContainer: {
-      paddingBottom: footerHeight.horizontal,
-    },
     content: {
       alignItems: 'center',
       justifyContent: 'center',
-      paddingVertical: spacing.XL,
+      padding: spacing.XL,
+      paddingBottom: footerHeight.horizontal,
     },
     icon: {
       marginBottom: spacing.L,
     },
     message: {
+      color: theme.text.primary,
       textAlign: 'center',
       paddingHorizontal: spacing.M,
     },
   });
 
 export const DRepDelegationSuccess = ({
-  onGoToGovernanceCenter,
   testID = 'drep-delegation-success-sheet',
 }: DRepDelegationSuccessProps) => {
   const { theme } = useTheme();
@@ -45,30 +46,11 @@ export const DRepDelegationSuccess = ({
   const { t } = useTranslation();
 
   return (
-    <>
-      <Sheet.Header title={t('v2.governance.delegation-success.title')} />
-      <Sheet.Scroll
-        testID={testID}
-        contentContainerStyle={styles.contentContainer}>
-        <View style={styles.content}>
-          <Icon
-            name="RelievedFace"
-            variant="solid"
-            size={60}
-            style={styles.icon}
-          />
-          <Text.M style={styles.message}>
-            {t('v2.governance.delegation-success.subtitle')}
-          </Text.M>
-        </View>
-      </Sheet.Scroll>
-      <Sheet.Footer
-        primaryButton={{
-          label: t('v2.governance.delegation-success.button'),
-          onPress: onGoToGovernanceCenter,
-          testID: `${testID}-go-to-governance-center-button`,
-        }}
-      />
-    </>
+    <Column style={styles.content} testID={testID}>
+      <Icon name="RelievedFace" variant="solid" size={60} style={styles.icon} />
+      <Text.M style={styles.message}>
+        {t('v2.governance.delegation-success.subtitle')}
+      </Text.M>
+    </Column>
   );
 };

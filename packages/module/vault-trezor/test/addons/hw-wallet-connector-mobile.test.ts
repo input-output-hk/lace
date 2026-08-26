@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import loadHwWalletConnector from '../../src/addons/hw-wallet-connector-mobile';
-import {
-  TrezorMobileMissingDeviceIdError,
-  walletIdFromTrezorDeviceId,
-} from '../../src/mobile/cardano-xpub';
+import { trezorMobileWalletId } from '../../src/mobile/wallet-id';
 
 import type { TrezorGetPublicKeyBundleItem } from '../../src/trezor-bitcoin-connect';
 import type {
@@ -17,6 +14,8 @@ const CHAIN_CODE = '07'.repeat(32);
 // The secp256k1 generator point G — a public constant, not a secret.
 // prettier-ignore
 const PUBLIC_KEY = '0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'; // gitleaks:allow
+
+const MASTER_FINGERPRINT = 0xde_ad_be_ef;
 
 const hoisted = vi.hoisted(() => ({
   getPublicKey: vi.fn(),
@@ -37,14 +36,13 @@ const node = (fingerprint: number) => ({
   xpub: 'zpub-ignored',
 });
 
-const bundleResponse = (deviceId?: string) =>
+const bundleResponse = (masterFingerprint = MASTER_FINGERPRINT) =>
   hoisted.getPublicKey.mockResolvedValue({
     success: true,
     payload: [
-      node(0xde_ad_be_ef),
+      node(masterFingerprint),
       ...Array.from({ length: 2 }, () => node(0x01_02_03_04)),
     ],
-    device: deviceId ? { features: { device_id: deviceId } } : undefined,
   });
 
 const device: DeviceDescriptor = {
@@ -73,6 +71,7 @@ const getConnector = (): HwWalletConnector =>
 describe('trezor hw-wallet-connector (mobile)', () => {
   beforeEach(() => {
     hoisted.getPublicKey.mockReset();
+    bundleResponse();
     vi.mocked(bitcoinConnector.connectHardwareAccounts).mockClear();
   });
 
@@ -84,22 +83,33 @@ describe('trezor hw-wallet-connector (mobile)', () => {
     expect(getConnector().optionIds).toEqual(['trezor', 'trezor-bitcoin']);
   });
 
-  it('createWallet derives the Bitcoin wallet id from the Suite device id so Cardano and Bitcoin share one wallet', async () => {
-    bundleResponse('suite-device-id');
-
+  it('createWallet derives the Bitcoin wallet id from the master fingerprint', async () => {
     const wallet = await getConnector().createWallet(
       {} as never,
       { blockchainName: 'Bitcoin', accountIndex: 0 } as never,
     );
 
-    expect(wallet.walletId).toBe(walletIdFromTrezorDeviceId('suite-device-id'));
+    expect(wallet.walletId).toBe(trezorMobileWalletId('deadbeef'));
     expect(wallet.type).toBe('HardwareTrezor');
     expect(wallet.metadata).toMatchObject({ name: 'Trezor', order: 0 });
   });
 
-  it('createWallet builds one watch-only Bitcoin account per network', async () => {
-    bundleResponse('suite-device-id');
+  it('createWallet gives two devices two wallet ids', async () => {
+    const first = await getConnector().createWallet(
+      {} as never,
+      { blockchainName: 'Bitcoin', accountIndex: 0 } as never,
+    );
 
+    bundleResponse(0x01_ab_cd_ef);
+    const second = await getConnector().createWallet(
+      {} as never,
+      { blockchainName: 'Bitcoin', accountIndex: 0 } as never,
+    );
+
+    expect(second.walletId).not.toBe(first.walletId);
+  });
+
+  it('createWallet builds one watch-only Bitcoin account per network', async () => {
     const wallet = await getConnector().createWallet(
       {} as never,
       { blockchainName: 'Bitcoin', accountIndex: 0 } as never,
@@ -115,8 +125,6 @@ describe('trezor hw-wallet-connector (mobile)', () => {
   });
 
   it('createWallet requests the fingerprint probe and both network paths in one deep-link round-trip', async () => {
-    bundleResponse('suite-device-id');
-
     await getConnector().createWallet(
       {} as never,
       { blockchainName: 'Bitcoin', accountIndex: 4 } as never,
@@ -133,17 +141,6 @@ describe('trezor hw-wallet-connector (mobile)', () => {
     ]);
   });
 
-  it('createWallet throws when Suite omits the device id', async () => {
-    bundleResponse();
-
-    await expect(
-      getConnector().createWallet(
-        {} as never,
-        { blockchainName: 'Bitcoin', accountIndex: 0 } as never,
-      ),
-    ).rejects.toThrow(TrezorMobileMissingDeviceIdError);
-  });
-
   it('createWallet rejects unsupported blockchains', async () => {
     await expect(
       getConnector().createWallet(
@@ -157,7 +154,7 @@ describe('trezor hw-wallet-connector (mobile)', () => {
     const accounts = await getConnector().connectAccount(
       {} as never,
       {
-        walletId: walletIdFromTrezorDeviceId('suite-device-id'),
+        walletId: trezorMobileWalletId('deadbeef'),
         blockchainName: 'Bitcoin',
         device,
         accountIndex: 1,
@@ -175,7 +172,7 @@ describe('trezor hw-wallet-connector (mobile)', () => {
       getConnector().connectAccount(
         {} as never,
         {
-          walletId: walletIdFromTrezorDeviceId('suite-device-id'),
+          walletId: trezorMobileWalletId('deadbeef'),
           blockchainName: 'Bitcoin',
           accountIndex: 1,
           accountName: 'Bitcoin #1',
