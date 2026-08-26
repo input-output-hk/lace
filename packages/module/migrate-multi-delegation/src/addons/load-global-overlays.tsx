@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { AIR_GAPPED_QR_SCAN_LOCATION } from '@lace-contract/air-gapped-qr-exchange';
+import { useConfig } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import { Modal } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -12,6 +14,8 @@ import type { ContextualLaceInit } from '@lace-contract/module';
 
 const MultiDelegationMigrationPrompt = () => {
   const { t } = useTranslation();
+  const { viewId } = useConfig();
+  const openViews = useLaceSelector('views.selectOpenViewsMap');
   const isInStakingTab = useIsInStakingTab();
   const multiDelegationAccounts = useLaceSelector(
     'migrateMultiDelegation.selectMultiDelegationAccounts',
@@ -47,6 +51,13 @@ const MultiDelegationMigrationPrompt = () => {
   }, [multiDelegationAccount, onMigrate]);
 
   const handleDismissError = useCallback(() => onReset(), [onReset]);
+
+  // Never render in the air-gapped scanner tab: the awaitingHwConfirmation
+  // modal is undismissable and would cover the QR the signing device has to
+  // scan, wedging the migration for air-gapped wallets on the extension.
+  if (openViews[viewId]?.location === AIR_GAPPED_QR_SCAN_LOCATION) {
+    return null;
+  }
 
   return (
     <>

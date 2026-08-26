@@ -7,6 +7,8 @@
   "main": "src/index.ts",
   "dependencies": {
     "@lace-contract/addresses": "*",
+    "@lace-contract/air-gapped-qr-exchange": "*",
+    "@lace-contract/app": "*",
     "@lace-contract/cardano-context": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
