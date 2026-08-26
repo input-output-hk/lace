@@ -11,6 +11,9 @@ export const FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER = FeatureFlagKey(
 export const FEATURE_FLAG_MIDNIGHT_INDEXER_URLS = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_INDEXER_URLS',
 );
+export const FEATURE_FLAG_MIDNIGHT_NODE_URLS = FeatureFlagKey(
+  'BLOCKCHAIN_MIDNIGHT_NODE_URLS',
+);
 
 export const defaultTxTtlLength = 60 * 60 * 1000;
 
@@ -53,18 +56,21 @@ export const DEFAULT_NETWORKS_CONFIG: MidnightNetworksConfig = {
     indexerAddress: 'http://localhost:8088/api/v4/graphql',
   },
   [NetworkId.NetworkId.MainNet]: {
-    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc/',
     proofServerAddress: 'http://localhost:6300',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
   },
   [NetworkId.NetworkId.PreProd]: {
-    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc/',
     proofServerAddress: 'http://localhost:6300',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
   },
   [NetworkId.NetworkId.Preview]: {
-    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preview-rpc',
+    nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preview-rpc/',
     proofServerAddress: 'http://localhost:6300',
+    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
   },
   [NetworkId.NetworkId.QaNet]: {

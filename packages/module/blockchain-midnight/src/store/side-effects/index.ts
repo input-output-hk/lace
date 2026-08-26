@@ -2,7 +2,6 @@ import { deepEquals } from '@cardano-sdk/util';
 import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import {
   convertHttpUrlToWebsocket,
-  getValidNetworkStringPayload,
   hasMidnightAccount,
   isInMemoryMidnightAccount,
   MidnightNetworkId,
@@ -12,7 +11,6 @@ import { Milliseconds, Timestamp } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
 import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import omit from 'lodash/omit.js';
 import {
   catchError,
   combineLatest,
@@ -34,9 +32,6 @@ import {
 } from 'rxjs';
 
 import {
-  FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_INDEXER_URLS,
-  FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_NODE_URLS,
-  FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
   FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
   FeatureFlagKeysByNetworkId,
   GatedMidnightSDKNetworkId,
@@ -56,7 +51,6 @@ import type {
   MidnightAccountProps,
   SerializedMidnightWallet,
   MidnightSDKNetworkId,
-  MidnightNetworkConfig,
 } from '@lace-contract/midnight-context';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { TestnetOption } from '@lace-contract/network';
@@ -343,111 +337,6 @@ const getFeatureFlagByName = (
   featureFlagName: string,
 ) =>
   featureFlags.find(featureFlag => featureFlag.key === featureFlagName) || null;
-
-/*
-  This side effect is responsible for setting the remote proof server address
-  based on loading or updating the feature flag. If the feature flag is not present or the payload
-  is incorrect, it will log an error and do nothing.
-  Currently available for Testnet network only.
-*/
-export const setFeatureFlagsNetworksConfigOverrides: SideEffect = (
-  _,
-  {
-    features: { selectLoadedFeatures$, selectNextFeatureFlags$ },
-    midnightContext: {
-      selectNetworksConfigFeatureFlagsOverrides$,
-      selectSupportedNetworksIds$,
-    },
-  },
-  { actions },
-) => {
-  return merge(
-    // Listen to and unify the shape of loaded / next features
-    selectLoadedFeatures$,
-    selectNextFeatureFlags$.pipe(
-      map(nextFeatureFlags => ({
-        featureFlags: nextFeatureFlags?.features ?? [],
-      })),
-    ),
-  ).pipe(
-    map(({ featureFlags }) => ({
-      remoteProofServer: getFeatureFlagByName(
-        featureFlags,
-        FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
-      ),
-      indexerUrls: getFeatureFlagByName(
-        featureFlags,
-        FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_INDEXER_URLS,
-      ),
-      nodeUrls: getFeatureFlagByName(
-        featureFlags,
-        FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_NODE_URLS,
-      ),
-    })),
-    distinctUntilChanged(deepEquals),
-    withLatestFrom(
-      selectNetworksConfigFeatureFlagsOverrides$,
-      selectSupportedNetworksIds$,
-    ),
-    switchMap(
-      ([
-        { remoteProofServer, indexerUrls, nodeUrls },
-        featureFlagsNetworksConfigOverrides,
-        supportedNetworksIds,
-      ]) => {
-        const remoteProofServerOverrides =
-          (remoteProofServer &&
-            getValidNetworkStringPayload(
-              supportedNetworksIds,
-              remoteProofServer,
-            )) ||
-          {};
-
-        const indexerUrlsOverrides =
-          (indexerUrls &&
-            getValidNetworkStringPayload(supportedNetworksIds, indexerUrls)) ||
-          {};
-
-        const nodeUrlsOverrides =
-          (nodeUrls &&
-            getValidNetworkStringPayload(supportedNetworksIds, nodeUrls)) ||
-          {};
-
-        return merge(
-          ...supportedNetworksIds.map(networkId => {
-            const existing = featureFlagsNetworksConfigOverrides[networkId];
-            const config: Partial<MidnightNetworkConfig> = {
-              ...omit(existing, [
-                'nodeAddress',
-                'proofServerAddress',
-                'indexerAddress',
-              ]),
-              ...(nodeUrlsOverrides[networkId]
-                ? { nodeAddress: nodeUrlsOverrides[networkId] }
-                : {}),
-              ...(remoteProofServerOverrides[networkId]
-                ? {
-                    proofServerAddress: remoteProofServerOverrides[networkId],
-                  }
-                : {}),
-              ...(indexerUrlsOverrides[networkId]
-                ? { indexerAddress: indexerUrlsOverrides[networkId] }
-                : {}),
-            };
-
-            return of(
-              actions.midnightContext.setUserNetworkConfigOverride({
-                networkId,
-                config,
-                featureFlagsOverrides: {},
-              }),
-            );
-          }),
-        );
-      },
-    ),
-  );
-};
 
 /**
  * Synchronizes the list of supported Midnight networks based on feature flags.
@@ -753,7 +642,6 @@ export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
         ...[
           registerMidnightBlockchainNetworks,
           syncSupportedNetworksWithFeatureFlags,
-          setFeatureFlagsNetworksConfigOverrides,
           autoDismissMidnightWalletFailure,
           updateActivities,
           loadActivityDetails,

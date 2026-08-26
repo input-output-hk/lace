@@ -3,6 +3,7 @@ import { createMigrate } from 'redux-persist';
 import { initializeSideEffects } from './side-effects';
 import { initialState, midnightContextReducers } from './slice';
 
+import type { MidnightSDKNetworkId } from '../const';
 import type { MidnightContextSliceState } from './slice';
 import type {
   LaceInit,
@@ -25,7 +26,7 @@ const store: LaceInit<LaceModuleStoreInit> = ({
   },
   persistConfig: {
     midnightContext: {
-      version: 9,
+      version: 10,
       whitelist: [
         'userNetworksConfigOverrides',
         'isActivityPageHeaderBannerDismissed',
@@ -85,6 +86,28 @@ const store: LaceInit<LaceModuleStoreInit> = ({
         9: state => {
           const typedState = state as PersistedState<MidnightContextSliceState>;
           typedState.publicKeysByAccount = {};
+          return typedState;
+        },
+        10: state => {
+          const typedState = state as PersistedState<MidnightContextSliceState>;
+          // nodeAddress and indexerAddress are not user-settable — the Midnight
+          // settings sheet only offers a proof-server choice. Any persisted value
+          // was written by the (now removed) setFeatureFlagsNetworksConfigOverrides
+          // side effect, which copied feature flag values into this user-override
+          // slot. Left in place they permanently shadow later flag changes, and a
+          // startup emission with no flags could clear them to `undefined`, falling
+          // back to whatever the defaults happen to be after an upgrade.
+          //
+          // proofServerAddress is kept: it is a genuine user choice (local vs
+          // remote) and cannot be distinguished from a flag-derived value.
+          const overrides = typedState.userNetworksConfigOverrides;
+          for (const networkId in overrides) {
+            const networkOverrides =
+              overrides[networkId as MidnightSDKNetworkId];
+            if (!networkOverrides) continue;
+            delete networkOverrides.nodeAddress;
+            delete networkOverrides.indexerAddress;
+          }
           return typedState;
         },
       }),
