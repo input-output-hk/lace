@@ -11,6 +11,7 @@ import {
   DEFAULT_NETWORKS_CONFIG,
   EMPTY_PARTIAL_NETWORKS_CONFIG,
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
+  FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
 } from '../const';
 import { MidnightSDKNetworkId } from '../const';
@@ -30,6 +31,7 @@ import type {
   ShouldAcknowledgeMidnightDisclaimer,
 } from '../types';
 import type { MidnightAccountId } from '../value-objects';
+import type { FeatureFlagKey } from '@lace-contract/feature';
 import type {
   PayloadAction,
   StateFromReducersMapObject,
@@ -294,6 +296,21 @@ const selectDustToken = createSelector(
 );
 
 /**
+ * Every config field a feature flag can override, and the flag that carries it.
+ * All three must stay on this derived path: a field routed through a side effect
+ * into `userNetworksConfigOverrides` instead shadows later flag changes and is
+ * indistinguishable from a genuine user setting.
+ */
+const NETWORK_CONFIG_FEATURE_FLAG_KEYS: [
+  keyof MidnightNetworkConfig,
+  FeatureFlagKey,
+][] = [
+  ['nodeAddress', FEATURE_FLAG_MIDNIGHT_NODE_URLS],
+  ['indexerAddress', FEATURE_FLAG_MIDNIGHT_INDEXER_URLS],
+  ['proofServerAddress', FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER],
+];
+
+/**
  * Derives feature flag network config overrides directly from loaded features.
  * Since loaded features ARE persisted, this selector produces the correct value
  * immediately on startup — eliminating the oscillation caused by the previous
@@ -304,29 +321,24 @@ const selectNetworksConfigFeatureFlagsOverrides = createSelector(
   slice.selectors.selectSupportedNetworksIds,
   (loadedFeatures, supportedNetworksIds): PartialMidnightNetworksConfig => {
     const { featureFlags } = loadedFeatures;
-    const proofServerFlag = featureFlags.find(
-      f => f.key === FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+    const overridesByConfigKey = NETWORK_CONFIG_FEATURE_FLAG_KEYS.map(
+      ([configKey, flagKey]) => {
+        const flag = featureFlags.find(f => f.key === flagKey);
+        return [
+          configKey,
+          flag ? getValidNetworkStringPayload(supportedNetworksIds, flag) : {},
+        ] as const;
+      },
     );
-    const indexerFlag = featureFlags.find(
-      f => f.key === FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
-    );
-    const proofOverrides = proofServerFlag
-      ? getValidNetworkStringPayload(supportedNetworksIds, proofServerFlag)
-      : {};
-    const indexerOverrides = indexerFlag
-      ? getValidNetworkStringPayload(supportedNetworksIds, indexerFlag)
-      : {};
 
     const result = { ...EMPTY_PARTIAL_NETWORKS_CONFIG };
     for (const networkId of supportedNetworksIds) {
-      result[networkId] = {
-        ...(proofOverrides[networkId]
-          ? { proofServerAddress: proofOverrides[networkId] }
-          : {}),
-        ...(indexerOverrides[networkId]
-          ? { indexerAddress: indexerOverrides[networkId] }
-          : {}),
-      };
+      const config: Partial<MidnightNetworkConfig> = {};
+      for (const [configKey, overrides] of overridesByConfigKey) {
+        const value = overrides[networkId];
+        if (value) config[configKey] = value;
+      }
+      result[networkId] = config;
     }
     return result;
   },

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
+  FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
 } from '../../src/const';
 import { MidnightSDKNetworkIds } from '../../src/const';
@@ -586,6 +587,76 @@ describe('midnight slice', () => {
 
         expect(overrides[testNetworkId]).toEqual({
           indexerAddress: 'https://indexer.example.com',
+        });
+      });
+
+      it('should derive node override from feature flags', () => {
+        const state: WithNetworkTestState = {
+          midnightContext: initialState,
+          network: networkState,
+          features: {
+            loaded: {
+              modules: [],
+              featureFlags: [
+                {
+                  key: FEATURE_FLAG_MIDNIGHT_NODE_URLS,
+                  payload: {
+                    [testNetworkId]: 'https://rpc.example.com',
+                  },
+                },
+              ],
+            },
+          },
+        };
+        const overrides =
+          selectors.midnightContext.selectNetworksConfigFeatureFlagsOverrides(
+            state,
+          );
+
+        expect(overrides[testNetworkId]).toEqual({
+          nodeAddress: 'https://rpc.example.com',
+        });
+      });
+
+      it('should derive all three overrides from feature flags', () => {
+        const state: WithNetworkTestState = {
+          midnightContext: initialState,
+          network: networkState,
+          features: {
+            loaded: {
+              modules: [],
+              featureFlags: [
+                {
+                  key: FEATURE_FLAG_MIDNIGHT_NODE_URLS,
+                  payload: {
+                    [testNetworkId]: 'https://rpc.example.com',
+                  },
+                },
+                {
+                  key: FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
+                  payload: {
+                    [testNetworkId]: 'https://indexer.example.com',
+                  },
+                },
+                {
+                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  payload: {
+                    [testNetworkId]: 'https://remote-proof-server.example.com',
+                  },
+                },
+              ],
+            },
+          },
+        };
+        const overrides =
+          selectors.midnightContext.selectNetworksConfigFeatureFlagsOverrides(
+            state,
+          );
+
+        expect(overrides[testNetworkId]).toEqual({
+          nodeAddress: 'https://rpc.example.com',
+          indexerAddress: 'https://indexer.example.com',
+          proofServerAddress: 'https://remote-proof-server.example.com',
         });
       });
 

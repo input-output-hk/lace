@@ -42,10 +42,10 @@ const featureFlags: FeatureFlag[] = [
     key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_NODE_URLS'),
     payload: {
       undeployed: 'http://localhost:9944',
-      preprod: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc',
-      preview: 'https://blockfrost.lw.iog.io/midnight-preview-rpc',
+      preprod: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc/',
+      preview: 'https://blockfrost.lw.iog.io/midnight-preview-rpc/',
       qanet: 'https://rpc.qanet.midnight.network',
-      mainnet: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc',
+      mainnet: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc/',
     },
   },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_PREPROD_SUPPORT') },

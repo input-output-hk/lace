@@ -69,6 +69,7 @@ const transformManifest = (content, mode) => {
             'http://localhost:6300',
             'http://localhost:8088',
             'http://localhost:9944',
+            'https://*.midnight.network',
             'https://blockfrost.lw.iog.io',
           ]
             .flatMap(url => [url, convertHttpToWebSocket(url)])
