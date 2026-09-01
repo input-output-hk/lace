@@ -2,8 +2,12 @@ import { Cardano } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
 import { describe, expect, it } from 'vitest';
 
-import { APIError, APIErrorCode } from '../src/common/api-error';
-import { addrToDisplay, addrToSignWith } from '../src/common/store/util';
+import { DataSignError, DataSignErrorCode } from '../src/common/api-error';
+import {
+  addrToDisplay,
+  addrToSignWith,
+  isSignDataSignerResolving,
+} from '../src/common/store/util';
 
 import type { Ed25519KeyHashHex, Hash28ByteBase16 } from '@cardano-sdk/crypto';
 
@@ -67,6 +71,7 @@ const paymentAddressHex = String(
 const enterpriseAddressBech32 = Cardano.Address.fromBytes(
   HexBlob(enterpriseAddressTestnetHex),
 ).toBech32() as Cardano.PaymentAddress;
+const enterpriseScriptAddressHex = `70${drepKeyHashHex}`;
 
 const expectEnterpriseKeyAddressWithHash = (
   result: Cardano.PaymentAddress | Cardano.RewardAccount,
@@ -163,17 +168,19 @@ describe('addrToSignWith', () => {
     expect(addrToSignWith(paymentAddressHex)).toBe(paymentAddress);
   });
 
-  it('throws APIError for unrecognised input', () => {
+  it('throws DataSignError AddressNotPK for unrecognised input', () => {
     expect(() => addrToSignWith('not-a-valid-address')).toThrow(
-      new APIError(
-        APIErrorCode.InternalError,
+      new DataSignError(
+        DataSignErrorCode.AddressNotPK,
         'Invalid address format for signing',
       ),
     );
   });
 
-  it('throws APIError for hex strings whose length is neither 56 nor 58', () => {
-    expect(() => addrToSignWith(`${drepKeyHashHex}aaaa`)).toThrow(APIError);
+  it('throws DataSignError for hex strings whose length is neither 56 nor 58', () => {
+    expect(() => addrToSignWith(`${drepKeyHashHex}aaaa`)).toThrow(
+      DataSignError,
+    );
   });
 });
 
@@ -310,6 +317,44 @@ describe('addrToDisplay', () => {
       expect(credential.hash).toBe(drepKeyHashHex);
       expect(credential.type).toBe(Cardano.CredentialType.ScriptHash);
     });
+  });
+});
+
+describe('isSignDataSignerResolving', () => {
+  it.each<[label: string, input: string]>([
+    ['hex testnet enterprise key address', enterpriseAddressTestnetHex],
+    ['hex mainnet enterprise key address', enterpriseAddressMainnetHex],
+    ['bech32 enterprise key address', enterpriseAddressBech32],
+  ])('holds a %s until the DRep key hash arrives', (_label, input) => {
+    expect(isSignDataSignerResolving(input)).toBe(true);
+  });
+
+  it('resolves once the account DRep key hash matches', () => {
+    expect(
+      isSignDataSignerResolving(
+        enterpriseAddressTestnetHex,
+        accountDRepKeyHash,
+      ),
+    ).toBe(false);
+  });
+
+  it('resolves once a non-matching DRep key hash rules the DRep request out', () => {
+    expect(
+      isSignDataSignerResolving(enterpriseAddressTestnetHex, otherKeyHash),
+    ).toBe(false);
+  });
+
+  it.each<[label: string, input: string]>([
+    ['bech32 base payment address', paymentAddress],
+    ['hex base payment address', paymentAddressHex],
+    ['bech32 reward account', rewardAccount],
+    ['hex reward address', rewardAccountTestnetHex],
+    ['hex enterprise script address', enterpriseScriptAddressHex],
+    ['CIP-129 bech32 DRep ID', drepIdCip129Bech32],
+    ['CIP-105 bech32 DRep ID', drepIdCip105Bech32],
+    ['hex DRep key hash', drepKeyHashHex],
+  ])('never holds an unambiguous %s', (_label, input) => {
+    expect(isSignDataSignerResolving(input)).toBe(false);
   });
 });
 

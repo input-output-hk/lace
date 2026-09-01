@@ -1,6 +1,7 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
 
 import { APIError, APIErrorCode } from '../common/api-error';
+import { supportedCip30Extensions } from '../common/cip30-extensions';
 import {
   CIP30_API_VERSION,
   FEATURE_FLAG_CARDANO_DAPP_CONNECTOR,
@@ -104,13 +105,11 @@ export const createCardanoWalletApi = (
   const icon: WalletIcon = properties.icon || WALLET_ICON;
 
   /**
-   * List of supported CIP extensions.
-   * Declares support for CIP-95 (Governance) and CIP-142 (Network Magic).
+   * List of supported CIP extensions, derived from the single-source
+   * registry so this can never disagree with getExtensions().
    */
-  const supportedExtensions: readonly Cip30Extension[] = [
-    { cip: 95 },
-    { cip: 142 },
-  ];
+  const supportedExtensions: readonly Cip30Extension[] =
+    supportedCip30Extensions();
 
   const logger = dependencies.logger;
   const authenticator = dependencies.authenticator;
@@ -154,6 +153,9 @@ export const createCardanoWalletApi = (
           api.cip95?.getUnregisteredPubStakeKeys ??
           flatApi.getUnregisteredPubStakeKeys!
         ).bind(api.cip95 ?? api),
+        // CIP-95 signData is the same extended implementation as the flat
+        // method; namespaced so cip95-first dApps find it.
+        signData: api.signData.bind(api),
       },
       cip142: {
         getNetworkMagic: (
@@ -182,7 +184,10 @@ export const createCardanoWalletApi = (
    * Always round-trips to the SW so authorization is re-evaluated on each
    * call. Concurrent calls are deduplicated via `pendingEnable`.
    *
-   * @param _extensions - Optional list of CIP extensions to enable (not yet implemented)
+   * @param _extensions - Optional CIP extensions to enable. Accepted per
+   *   CIP-30 but not used to gate the API: every registered extension is
+   *   always enabled (the spec permits enabling more than requested), so
+   *   feature detection stays honest for dApps that skip the request.
    * @returns Promise resolving to the enabled wallet API object
    * @throws APIError with Refused code if user denies access
    */

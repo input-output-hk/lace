@@ -14,13 +14,6 @@ import { TotalBreakdown } from '../stakeDelegationSheet/TotalBreakdown';
 // The raw CBOR and hashes are unbroken strings that would clip otherwise.
 const breakAllStyle = { wordBreak: 'break-all' } as TextStyle;
 
-/**
- * Confirmation body for a vote delegation. Renders the scrollable content only:
- * the header/footer props are consumed by the screen that owns this template
- * and passed to the sheet through navigation options, because a header/footer
- * rendered as a sibling of `Sheet.Scroll` falls outside the sheet's bounds and
- * clips off-screen. Mirrors `StakeDelegationSheet`.
- */
 export interface DRepDelegationSheetProps {
   // Header
   headerTitle: string;
@@ -64,6 +57,7 @@ export interface DRepDelegationSheetProps {
 }
 
 export const DRepDelegationSheet = ({
+  headerTitle,
   drepLabel,
   drepValue,
   drepName,
@@ -79,6 +73,12 @@ export const DRepDelegationSheet = ({
   totalAda,
   certificate,
   rawTransaction,
+  onCancelPress,
+  onDelegatePress,
+  cancelButtonLabel,
+  delegateButtonLabel,
+  delegateButtonDisabled,
+  delegateButtonLoading,
   testID = 'drep-delegation-sheet',
 }: DRepDelegationSheetProps) => {
   const { theme } = useTheme();
@@ -90,96 +90,113 @@ export const DRepDelegationSheet = ({
   }, [copyToClipboard, cbor]);
 
   return (
-    <Sheet.Scroll testID={testID} contentContainerStyle={styles.sheetContent}>
-      <Column style={styles.content} gap={spacing.L}>
-        <Column gap={spacing.M}>
-          <Column gap={spacing.XS}>
-            <Text.M variant="secondary">{drepLabel}</Text.M>
-            <Row alignItems="center" gap={spacing.S}>
-              <Avatar
-                size={32}
-                shape="rounded"
-                content={{
-                  ...(drepAvatarUri !== undefined && {
-                    img: { uri: drepAvatarUri },
-                  }),
-                }}
-                fallbackIcon="User"
-                testID={`${testID}-drep-avatar`}
-              />
-              <Text.M
-                numberOfLines={1}
-                ellipsizeMode="middle"
-                style={styles.drepValue}
-                testID={`${testID}-drep-value`}>
-                {drepName ?? drepValue}
+    <>
+      <Sheet.Header title={headerTitle} />
+      <Sheet.Scroll testID={testID} contentContainerStyle={styles.sheetContent}>
+        <Column style={styles.content} gap={spacing.L}>
+          <Column gap={spacing.M}>
+            <Column gap={spacing.XS}>
+              <Text.M variant="secondary">{drepLabel}</Text.M>
+              <Row alignItems="center" gap={spacing.S}>
+                <Avatar
+                  size={32}
+                  shape="rounded"
+                  content={{
+                    ...(drepAvatarUri !== undefined && {
+                      img: { uri: drepAvatarUri },
+                    }),
+                  }}
+                  fallbackIcon="User"
+                  testID={`${testID}-drep-avatar`}
+                />
+                <Text.M
+                  numberOfLines={1}
+                  ellipsizeMode="middle"
+                  style={styles.drepValue}
+                  testID={`${testID}-drep-value`}>
+                  {drepName ?? drepValue}
+                </Text.M>
+              </Row>
+            </Column>
+            <Row justifyContent="space-between">
+              <Text.M variant="secondary">{sourceAccountLabel}</Text.M>
+              <Text.M testID={`${testID}-source-account`}>
+                {sourceAccountName}
               </Text.M>
             </Row>
           </Column>
-          <Row justifyContent="space-between">
-            <Text.M variant="secondary">{sourceAccountLabel}</Text.M>
-            <Text.M testID={`${testID}-source-account`}>
-              {sourceAccountName}
-            </Text.M>
-          </Row>
+
+          <Divider />
+
+          <TotalBreakdown
+            totalBreakdownLabel={totalBreakdownLabel}
+            stakeKeyDepositLabel={stakeKeyDepositLabel}
+            stakeKeyDepositAda={stakeKeyDepositAda}
+            transactionFeeLabel={transactionFeeLabel}
+            transactionFeeAda={transactionFeeAda}
+            totalLabel={totalLabel}
+            totalAda={totalAda}
+          />
+
+          {certificate && (
+            <Accordion.Root
+              title={certificate.title}
+              isInitiallyExpanded
+              testID={`${testID}-certificate`}>
+              <Column gap={spacing.S} style={styles.accordionContent}>
+                {certificate.rows.map(row => (
+                  <Row
+                    key={row.label}
+                    justifyContent="space-between"
+                    gap={spacing.M}>
+                    <Text.M variant="secondary">{row.label}</Text.M>
+                    <Text.S style={[styles.certificateValue, breakAllStyle]}>
+                      {row.value}
+                    </Text.S>
+                  </Row>
+                ))}
+              </Column>
+            </Accordion.Root>
+          )}
+
+          {rawTransaction && (
+            <Accordion.Root
+              title={rawTransaction.title}
+              testID={`${testID}-raw-tx`}>
+              <View
+                style={[
+                  styles.cborBox,
+                  { backgroundColor: theme.background.tertiary },
+                ]}>
+                <Pressable
+                  onPress={handleCopyCbor}
+                  style={styles.copyButton}
+                  testID={`${testID}-raw-tx-copy`}>
+                  <Icon name="Copy" size={18} />
+                </Pressable>
+                <Text.XS style={breakAllStyle} testID={`${testID}-raw-tx-cbor`}>
+                  {rawTransaction.cbor}
+                </Text.XS>
+              </View>
+            </Accordion.Root>
+          )}
         </Column>
-
-        <Divider />
-
-        <TotalBreakdown
-          totalBreakdownLabel={totalBreakdownLabel}
-          stakeKeyDepositLabel={stakeKeyDepositLabel}
-          stakeKeyDepositAda={stakeKeyDepositAda}
-          transactionFeeLabel={transactionFeeLabel}
-          transactionFeeAda={transactionFeeAda}
-          totalLabel={totalLabel}
-          totalAda={totalAda}
-        />
-
-        {certificate && (
-          <Accordion.Root
-            title={certificate.title}
-            isInitiallyExpanded
-            testID={`${testID}-certificate`}>
-            <Column gap={spacing.S} style={styles.accordionContent}>
-              {certificate.rows.map(row => (
-                <Row
-                  key={row.label}
-                  justifyContent="space-between"
-                  gap={spacing.M}>
-                  <Text.M variant="secondary">{row.label}</Text.M>
-                  <Text.S style={[styles.certificateValue, breakAllStyle]}>
-                    {row.value}
-                  </Text.S>
-                </Row>
-              ))}
-            </Column>
-          </Accordion.Root>
-        )}
-
-        {rawTransaction && (
-          <Accordion.Root
-            title={rawTransaction.title}
-            testID={`${testID}-raw-tx`}>
-            <View
-              style={[
-                styles.cborBox,
-                { backgroundColor: theme.background.tertiary },
-              ]}>
-              <Pressable
-                onPress={handleCopyCbor}
-                style={styles.copyButton}
-                testID={`${testID}-raw-tx-copy`}>
-                <Icon name="Copy" size={18} />
-              </Pressable>
-              <Text.XS style={breakAllStyle} testID={`${testID}-raw-tx-cbor`}>
-                {rawTransaction.cbor}
-              </Text.XS>
-            </View>
-          </Accordion.Root>
-        )}
-      </Column>
-    </Sheet.Scroll>
+      </Sheet.Scroll>
+      <Sheet.Footer
+        secondaryButton={{
+          label: cancelButtonLabel,
+          onPress: onCancelPress,
+          testID: `${testID}-cancel-button`,
+        }}
+        primaryButton={{
+          label: delegateButtonLabel,
+          onPress: onDelegatePress,
+          disabled: delegateButtonDisabled,
+          loading: delegateButtonLoading,
+          testID: `${testID}-delegate-button`,
+        }}
+      />
+    </>
   );
 };
 

@@ -53,6 +53,7 @@ describe('CardanoWalletApi', () => {
       getUnregisteredPubStakeKeys: vi
         .fn()
         .mockRejectedValue(new Error('Not implemented')),
+      signData: vi.fn().mockRejectedValue(new Error('Not implemented')),
     },
     cip142: {
       getNetworkMagic: vi.fn().mockResolvedValue(1),
@@ -228,6 +229,7 @@ describe('CardanoWalletApi', () => {
       expect(enabledApi.cip95).toHaveProperty('getPubDRepKey');
       expect(enabledApi.cip95).toHaveProperty('getRegisteredPubStakeKeys');
       expect(enabledApi.cip95).toHaveProperty('getUnregisteredPubStakeKeys');
+      expect(enabledApi.cip95).toHaveProperty('signData');
       expect(enabledApi).toHaveProperty('cip142');
       expect(enabledApi.cip142).toHaveProperty('getNetworkMagic');
       expect(enabledApi).toHaveProperty('experimental');

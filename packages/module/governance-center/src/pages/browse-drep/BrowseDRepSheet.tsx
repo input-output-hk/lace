@@ -18,10 +18,8 @@ import {
   useTheme,
 } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo } from 'react';
-// Pressable from react-native, not react-native-gesture-handler: on Android the
-// sheet content is its own native RootView, outside the app's
-// GestureHandlerRootView, so gesture-handler touchables get no events there.
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Pressable } from 'react-native-gesture-handler';
 
 import { DRepFilterDropdown } from './DRepFilterDropdown';
 import { useBrowseDRep } from './useBrowseDRep';

@@ -10,6 +10,18 @@ import type {
 import type { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 
+/**
+ * The `signWith` identifier is well-formed but this account holds no key for
+ * it: a foreign or script DRep, or an address outside the known set. Callers
+ * map this to CIP-30 DataSignError ProofGeneration (code 1).
+ */
+export class UnknownSignWithError extends Error {
+  public constructor(info: string) {
+    super(info);
+    this.name = 'UnknownSignWithError';
+  }
+}
+
 const ALGORITHM_EDDSA = -8;
 const KEY_TYPE_OKP = 1;
 const CURVE_ED25519 = 6;
@@ -43,7 +55,15 @@ const resolveSigningContext = ({
     const matchingAddress = knownAddresses.find(
       addr => addr.rewardAccount === signWith,
     );
-    if (matchingAddress?.stakeKeyDerivationPath) {
+    // An unmatched reward account must refuse, never fall back to stake key
+    // 0: a substitute-key signature cannot verify against the requested
+    // credential and misattributes consent.
+    if (!matchingAddress) {
+      throw new UnknownSignWithError(
+        `Unknown signWith reward account: ${signWith}`,
+      );
+    }
+    if (matchingAddress.stakeKeyDerivationPath) {
       return {
         derivationPath: {
           role: matchingAddress.stakeKeyDerivationPath.role,
@@ -82,7 +102,7 @@ const resolveSigningContext = ({
     };
   }
 
-  throw new Error(`Unknown signWith address: ${signWith}`);
+  throw new UnknownSignWithError(`Unknown signWith address: ${signWith}`);
 };
 
 const createProtectedHeaders = (
@@ -156,6 +176,41 @@ const createCoseKey = (
   return writer.encode();
 };
 
+export interface ResolveSignDataContextParams {
+  signWith: Cardano.PaymentAddress | Cardano.RewardAccount;
+  knownAddresses: GroupedAddress[];
+  dRepKeyHash?: Ed25519KeyHashHex;
+}
+
+/**
+ * Resolves the signer a CIP-8 request maps to, without signing. The single
+ * classification authority: pre-consent gates and the signing path both use
+ * it, so a request refused up front can never sign later (and vice versa).
+ *
+ * @throws UnknownSignWithError when this account holds no key for `signWith`.
+ */
+export const resolveSignDataContext = ({
+  signWith,
+  knownAddresses,
+  dRepKeyHash,
+}: ResolveSignDataContextParams): SigningContext & {
+  address: Cardano.Address;
+} => {
+  const address = Cardano.Address.fromString(signWith);
+  if (!address) {
+    throw new UnknownSignWithError(`Invalid address: ${signWith}`);
+  }
+  return {
+    address,
+    ...resolveSigningContext({
+      address,
+      signWith,
+      knownAddresses,
+      dRepKeyHash,
+    }),
+  };
+};
+
 export interface Cip8SignDataParams {
   /**
    * Only signBlob is required: COSE assembly happens here, so any signer able
@@ -174,13 +229,7 @@ export const cip8SignData = async ({
   knownAddresses,
   dRepKeyHash,
 }: Cip8SignDataParams): Promise<CardanoSignDataResult> => {
-  const address = Cardano.Address.fromString(request.signWith);
-  if (!address) {
-    throw new Error(`Invalid address: ${request.signWith}`);
-  }
-
-  const { derivationPath, isDRepSigning } = resolveSigningContext({
-    address,
+  const { address, derivationPath, isDRepSigning } = resolveSignDataContext({
     signWith: request.signWith,
     knownAddresses,
     dRepKeyHash,

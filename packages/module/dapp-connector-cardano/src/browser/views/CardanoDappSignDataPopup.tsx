@@ -6,6 +6,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { SignDataContent, SignTxLoadingContent } from '../../common/components';
 import { useSignDataAccountInfo } from '../../common/hooks/useSignDataAccountInfo';
+import { useSignDataDRepKeyHash } from '../../common/hooks/useSignDataDRepKeyHash';
+import { isSignDataSignerResolving } from '../../common/store/util';
 import { CARDANO_DAPP_SIGN_DATA_LOCATION } from '../const';
 import { useDappPopupFlow, useDappViewClose } from '../hooks';
 
@@ -21,6 +23,7 @@ export const CardanoDappSignDataPopup = () => {
   });
 
   const accountInfo = useSignDataAccountInfo(request?.dappOrigin);
+  const dRepKeyHash = useSignDataDRepKeyHash(request?.dappOrigin);
   const hasConfirmedRef = useRef(false);
 
   const handleConfirmWithHwIndicator = useCallback(() => {
@@ -53,10 +56,14 @@ export const CardanoDappSignDataPopup = () => {
       accountInfo,
       address,
       payload,
+      dRepKeyHash,
     };
-  }, [request, accountInfo]);
+  }, [request, accountInfo, dRepKeyHash]);
 
   const isShowingLoading = isLoading;
+  const isSignerResolving =
+    contentProps !== null &&
+    isSignDataSignerResolving(contentProps.address, contentProps.dRepKeyHash);
   const scrollContent =
     isShowingLoading || !contentProps ? (
       <SignTxLoadingContent style={styles.centeredContent} />
@@ -72,7 +79,7 @@ export const CardanoDappSignDataPopup = () => {
       primaryButton={{
         label: t('dapp-connector.cardano.sign-data.confirm'),
         action: handleConfirmWithHwIndicator,
-        disabled: isShowingLoading || !contentProps,
+        disabled: isShowingLoading || !contentProps || isSignerResolving,
       }}
       secondaryButton={{
         label: t('dapp-connector.cardano.sign-data.deny'),

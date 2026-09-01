@@ -8,7 +8,13 @@ import {
   RemoteApiPropertyType,
 } from '@lace-lib/extension-messaging';
 
-import { APIError } from '../common/api-error';
+import {
+  APIError,
+  DataSignError,
+  PaginateError,
+  TxSendError,
+  TxSignError,
+} from '../common/api-error';
 
 import { createCardanoWalletApi } from './cardano-wallet-api';
 import { CIP30_API_METHODS } from './const';
@@ -45,8 +51,16 @@ export const cardanoWalletApiProperties: RemoteApiProperties<Cip30FullWalletApi>
 /**
  * Error classes that can be thrown by the Cardano wallet API.
  * Used by extension messaging to properly serialize/deserialize errors.
+ * Serialization preserves `code`/`info` regardless; registration restores
+ * the prototype so `error instanceof DataSignError` holds on the page side.
  */
-export const cardanoWalletApiErrors: ErrorClass[] = [APIError];
+export const cardanoWalletApiErrors: ErrorClass[] = [
+  APIError,
+  DataSignError,
+  PaginateError,
+  TxSendError,
+  TxSignError,
+];
 
 /**
  * Injects the Cardano dApp connector into the page.

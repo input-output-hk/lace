@@ -63,22 +63,9 @@ declare module '@trezor/connect-mobile' {
     derivationType?: number;
   }
 
-  interface TrezorConnectCardanoGetPublicKeyBundleParams {
-    bundle: TrezorConnectCardanoGetPublicKeyParams[];
-  }
-
-  interface TrezorConnectCardanoHdNodePayload {
-    public_key?: string;
-    chain_code?: string;
-  }
-
   interface TrezorConnectCardanoGetPublicKeyPayload {
-    /** v9 shape: the extended key. v10 shape: the raw 32-byte public key. */
     publicKey: string;
     path: number[];
-    /** v10 shape only — see `extendedPublicKey` in `mobile/cardano-xpub.ts`. */
-    xpub?: string;
-    node?: TrezorConnectCardanoHdNodePayload;
   }
 
   interface TrezorConnectGetPublicKeyBundleItem {
@@ -113,11 +100,21 @@ declare module '@trezor/connect-mobile' {
     code?: string;
   }
 
-  // No `device` field: Trezor Connect responses carry only id/success/payload,
-  // and the deep-link bridge drops everything but success/payload on top of
-  // that. Declaring one here would let callers read an always-undefined device.
+  interface TrezorConnectDeviceInfo {
+    path?: string;
+    state?: string;
+    features?: {
+      [key: string]: unknown;
+      device_id?: string;
+    };
+  }
+
   type TrezorConnectResult<P> =
-    | { success: true; payload: P }
+    | {
+        success: true;
+        payload: P;
+        device?: TrezorConnectDeviceInfo;
+      }
     | { success: false; payload: TrezorConnectUnsuccessfulPayload };
 
   interface TrezorConnectBitcoinTxInput {
@@ -199,14 +196,9 @@ declare module '@trezor/connect-mobile' {
   interface TrezorConnectMobileStatic {
     init: (options: TrezorConnectMobileInitOptions) => Promise<void>;
     handleDeeplink: (url: string) => void;
-    cardanoGetPublicKey: {
-      (params: TrezorConnectCardanoGetPublicKeyParams): Promise<
-        TrezorConnectResult<TrezorConnectCardanoGetPublicKeyPayload>
-      >;
-      (params: TrezorConnectCardanoGetPublicKeyBundleParams): Promise<
-        TrezorConnectResult<TrezorConnectCardanoGetPublicKeyPayload[]>
-      >;
-    };
+    cardanoGetPublicKey: (
+      params: TrezorConnectCardanoGetPublicKeyParams,
+    ) => Promise<TrezorConnectResult<TrezorConnectCardanoGetPublicKeyPayload>>;
     cardanoSignTransaction: (
       params: TrezorConnectCardanoSignTransactionParams,
     ) => Promise<TrezorConnectResult<TrezorConnectCardanoSignedTxPayload>>;

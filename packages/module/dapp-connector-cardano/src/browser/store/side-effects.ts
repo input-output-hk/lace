@@ -152,7 +152,7 @@ const createSignTransactionWrapper = ({
 
     if (!accountId) {
       throw new APIError(
-        APIErrorCode.InternalError,
+        APIErrorCode.AccountChange,
         `No account found for origin: ${origin}. Please reconnect the dApp.`,
       );
     }
@@ -169,7 +169,7 @@ const createSignTransactionWrapper = ({
     const account = allAccounts.find(a => a.accountId === accountId);
     if (!account) {
       throw new APIError(
-        APIErrorCode.InternalError,
+        APIErrorCode.AccountChange,
         `Account not found for ID: ${accountId}`,
       );
     }
@@ -408,6 +408,7 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     chainId$: selectChainId$,
     allAccounts$: selectActiveNetworkAccounts$,
     allWallets$: selectAll$,
+    cardanoProvider,
     getAccountIdForOrigin: (origin: string) => sessionAccountByOrigin[origin],
     signTransaction: signTransactionWrapper,
     submitTransaction,

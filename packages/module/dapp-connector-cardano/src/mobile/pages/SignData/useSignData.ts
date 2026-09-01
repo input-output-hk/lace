@@ -31,6 +31,7 @@ export const useSignData = ({
     isLoading,
     result: signDataResult,
   } = useDappSignRequest({
+    signingType: 'signData',
     requestId,
     pendingRequest,
     webViewResponseQueue,

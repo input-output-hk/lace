@@ -407,6 +407,7 @@
   "dapp-connector.cardano.sign-data.confirm": "unknown",
   "dapp-connector.cardano.sign-data.deny": "unknown",
   "dapp-connector.cardano.sign-data.address-label": "unknown",
+  "dapp-connector.cardano.sign-data.drep-id-label": "verbatim",
   "dapp-connector.cardano.sign-data.payload-label": "unknown",
   "dapp-connector.cardano.sign-data.result.success.title": "unknown",
   "dapp-connector.cardano.sign-data.result.success.description": "unknown",

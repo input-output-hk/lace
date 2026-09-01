@@ -28,11 +28,7 @@ const performInit = async (): Promise<void> => {
   await TrezorConnect.init({
     manifest: TREZOR_MANIFEST,
     deeplinkOpen: (url: string) => {
-      // An unopenable link (no app claims it) would leave the caller's promise
-      // pending forever; cancelling settles it as a failed Connect call.
-      Linking.openURL(url).catch(() => {
-        TrezorConnect.cancel?.('Could not open Trezor Suite');
-      });
+      void Linking.openURL(url);
     },
     deeplinkCallbackUrl: TREZOR_DEEPLINK_CALLBACK_URL,
   });

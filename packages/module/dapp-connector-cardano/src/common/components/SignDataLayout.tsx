@@ -5,6 +5,8 @@ import { Sheet, useTheme } from '@lace-lib/ui-toolkit';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 
+import { isSignDataSignerResolving } from '../store/util';
+
 import { SignDataContent } from './sign-data/SignDataContent';
 import { SignTxLoadingContent } from './SignTxLoadingContent';
 import { SignTxView } from './SignTxView';
@@ -40,7 +42,11 @@ export const SignDataLayout = ({
 
   const title = t('dapp-connector.cardano.sign-data.title');
 
-  const isConfirmDisabled = confirmDisabled || showLoading || !contentProps;
+  const isSignerResolving =
+    contentProps !== null &&
+    isSignDataSignerResolving(contentProps.address, contentProps.dRepKeyHash);
+  const isConfirmDisabled =
+    confirmDisabled || showLoading || !contentProps || isSignerResolving;
 
   useEffect(() => {
     if (resultView != null) return;

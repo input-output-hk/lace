@@ -1,3 +1,4 @@
+import { supportedCip30Extensions } from '../../common/cip30-extensions';
 import {
   CIP30_API_VERSION,
   WALLET_NAME,
@@ -87,7 +88,7 @@ export const defaultConfig: InjectionScriptConfig = {
   walletName: WALLET_NAME,
   apiVersion: CIP30_API_VERSION,
   walletIcon: WALLET_ICON,
-  supportedExtensions: [{ cip: 95 }],
+  supportedExtensions: supportedCip30Extensions(),
   requestTimeout: 60000,
   debug: __DEV__ ?? false,
 };

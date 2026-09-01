@@ -3,17 +3,15 @@ import { BluetoothOffError, LedgerBlePermissionError } from '@lace-lib/util-hw';
 import { Subject, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { navigateMock, closeMock, closeSheetsMock } = vi.hoisted(() => ({
+const { navigateMock, closeMock } = vi.hoisted(() => ({
   navigateMock: vi.fn(),
   closeMock: vi.fn(),
-  closeSheetsMock: vi.fn(),
 }));
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
     navigate: navigateMock,
     closeSheet: closeMock,
-    closeSheets: closeSheetsMock,
   },
   SheetRoutes: {
     HardwareWalletDiscoveryResults: 'HardwareWalletDiscoveryResults',
@@ -62,7 +60,6 @@ const usbDevice: FoundDevice = {
 beforeEach(() => {
   navigateMock.mockClear();
   closeMock.mockClear();
-  closeSheetsMock.mockClear();
 });
 
 describe('makeHandleSearching', () => {
@@ -325,11 +322,6 @@ describe('handleError', () => {
 });
 
 describe('handleSheetClose', () => {
-  const discoverySheets = [
-    'HardwareWalletDiscoveryResults',
-    'HardwareWalletDiscoveryError',
-  ];
-
   it('closes the discovery sheet when cancel is dispatched', () => {
     testSideEffect(handleSheetClose, ({ cold, flush }) => ({
       actionObservables: {
@@ -342,12 +334,12 @@ describe('handleSheetClose', () => {
       assertion: sideEffect$ => {
         sideEffect$.subscribe();
         flush();
-        expect(closeSheetsMock).toHaveBeenCalledWith(discoverySheets);
+        expect(closeMock).toHaveBeenCalledTimes(1);
       },
     }));
   });
 
-  it('dismisses only its own sheets when a device is selected, keeping the requesting sheet mounted', () => {
+  it('closes the discovery sheet when a device is selected', () => {
     testSideEffect(handleSheetClose, ({ cold, flush }) => ({
       actionObservables: {
         hwConnectorMobile: {
@@ -363,8 +355,7 @@ describe('handleSheetClose', () => {
       assertion: sideEffect$ => {
         sideEffect$.subscribe();
         flush();
-        expect(closeSheetsMock).toHaveBeenCalledWith(discoverySheets);
-        expect(closeMock).not.toHaveBeenCalled();
+        expect(closeMock).toHaveBeenCalledTimes(1);
       },
     }));
   });

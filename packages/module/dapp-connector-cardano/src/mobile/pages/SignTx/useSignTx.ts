@@ -52,6 +52,7 @@ export const useSignTx = ({
     isSigning,
     result: signTxResult,
   } = useDappSignRequest({
+    signingType: 'signTx',
     requestId,
     pendingRequest,
     webViewResponseQueue,

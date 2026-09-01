@@ -5,7 +5,7 @@
     "owner": "lace_io",
     "entryPoint": "index.js",
     "newArchEnabled": true,
-    "version": "2.2.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/Lace-ios-icon.png",
     "platforms": ["ios", "android", "web"],
