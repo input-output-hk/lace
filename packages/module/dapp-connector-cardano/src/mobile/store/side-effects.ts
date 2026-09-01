@@ -8,6 +8,7 @@ import {
   countTransactionSignatures,
   isCardanoAccount,
   cardanoRewardAccountDetails$,
+  UnknownSignWithError,
 } from '@lace-contract/cardano-context';
 import { DappId } from '@lace-contract/dapp-connector';
 import {
@@ -32,7 +33,12 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import { APIErrorCode, TxSignErrorCode } from '../../common/api-error';
+import {
+  APIErrorCode,
+  DataSignError,
+  DataSignErrorCode,
+  TxSignErrorCode,
+} from '../../common/api-error';
 import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
@@ -120,7 +126,7 @@ export const processWebViewMessage: SideEffect = (
     addresses: { selectAllAddresses$ },
     wallets: { selectActiveNetworkAccounts$, selectAll$ },
   },
-  { actions, cardanoProvider },
+  { actions, cardanoProvider, logger },
 ) => {
   const addressesUpsert$ = new Subject<UpsertAddressesPayload>();
 
@@ -176,6 +182,7 @@ export const processWebViewMessage: SideEffect = (
             sessionAccountByOrigin[origin],
           isSessionAuthorized: (origin: string) =>
             (sessionOrigins ?? []).includes(origin),
+          logger,
           cardanoProvider,
           deriveNextUnusedAddress,
         };
@@ -301,6 +308,7 @@ export const processWebViewMessage: SideEffect = (
                 dapp: dappInfo,
                 address: result.address ?? '',
                 payload: result.payload ?? '',
+                accountId: result.accountId,
               };
 
               NavigationControls.navigate(SheetRoutes.SignData, {
@@ -471,13 +479,34 @@ export const handleSignDataConfirmation: SideEffect = (
       ]) => {
         const { requestId, dappOrigin, address, payload } = pendingRequest!;
         const accountId = sessionAccountByOrigin[dappOrigin];
+        // The gate classified against the account bound when the sheet
+        // opened; a rebind since then must answer AccountChange rather than
+        // sign under the new account.
+        if (
+          pendingRequest!.accountId !== undefined &&
+          accountId !== pendingRequest!.accountId
+        ) {
+          const errorResponse: WebViewResponse = {
+            id: requestId,
+            success: false,
+            error: {
+              code: APIErrorCode.AccountChange,
+              info: `Session account changed while awaiting confirmation for origin: ${dappOrigin}. Please reconnect the dApp.`,
+            },
+            timestamp: Date.now(),
+          };
+          return of(
+            actions.cardanoDappConnector.setWebViewResponse(errorResponse),
+            actions.cardanoDappConnector.clearPendingSignDataRequest(),
+          );
+        }
         const account = allAccounts.find(a => a.accountId === accountId);
         if (!account) {
           const errorResponse: WebViewResponse = {
             id: requestId,
             success: false,
             error: {
-              code: APIErrorCode.InternalError,
+              code: APIErrorCode.AccountChange,
               info: `Account not found for origin: ${dappOrigin}`,
             },
             timestamp: Date.now(),
@@ -537,6 +566,30 @@ export const handleSignDataConfirmation: SideEffect = (
           );
         }
 
+        // A sync throw inside switchMap's projection would error the whole
+        // side-effect stream, permanently breaking signData for the session.
+        let signWith;
+        try {
+          signWith = addrToSignWith(address);
+        } catch (error) {
+          const errorResponse: WebViewResponse = {
+            id: requestId,
+            success: false,
+            error:
+              error instanceof DataSignError
+                ? { code: error.code, info: error.info }
+                : {
+                    code: DataSignErrorCode.AddressNotPK,
+                    info: 'Invalid address format for signing',
+                  },
+            timestamp: Date.now(),
+          };
+          return of(
+            actions.cardanoDappConnector.setWebViewResponse(errorResponse),
+            actions.cardanoDappConnector.clearPendingSignDataRequest(),
+          );
+        }
+
         const knownAddresses = transformToGroupedAddresses(
           allAddresses,
           accountId,
@@ -560,7 +613,7 @@ export const handleSignDataConfirmation: SideEffect = (
 
         return dataSigner
           .signData({
-            signWith: addrToSignWith(address),
+            signWith,
             payload,
           })
           .pipe(
@@ -585,7 +638,7 @@ export const handleSignDataConfirmation: SideEffect = (
                   id: requestId,
                   success: false,
                   error: {
-                    code: APIErrorCode.Refused,
+                    code: DataSignErrorCode.UserDeclined,
                     info: 'User cancelled authentication',
                   },
                   timestamp: Date.now(),
@@ -597,14 +650,25 @@ export const handleSignDataConfirmation: SideEffect = (
                   actions.cardanoDappConnector.clearPendingSignDataRequest(),
                 );
               }
+              const cip30Error =
+                error instanceof DataSignError
+                  ? { code: error.code, info: error.info }
+                  : error instanceof UnknownSignWithError
+                  ? {
+                      code: DataSignErrorCode.ProofGeneration,
+                      info: error.message,
+                    }
+                  : {
+                      code: APIErrorCode.InternalError,
+                      info:
+                        error instanceof Error
+                          ? error.message
+                          : 'Signing failed',
+                    };
               const errorResponse: WebViewResponse = {
                 id: requestId,
                 success: false,
-                error: {
-                  code: APIErrorCode.InternalError,
-                  info:
-                    error instanceof Error ? error.message : 'Signing failed',
-                },
+                error: cip30Error,
                 timestamp: Date.now(),
               };
               return of(
@@ -644,7 +708,7 @@ export const handleSignDataRejection: SideEffect = (
         id: pendingRequest!.requestId,
         success: false,
         error: {
-          code: APIErrorCode.Refused,
+          code: DataSignErrorCode.UserDeclined,
           info: 'User declined to sign data',
         },
         timestamp: Date.now(),
@@ -721,7 +785,7 @@ export const handleSignTxConfirmation: SideEffect = (
             id: requestId,
             success: false,
             error: {
-              code: APIErrorCode.InternalError,
+              code: APIErrorCode.AccountChange,
               info: `Account not found for origin: ${dappOrigin}`,
             },
             timestamp: Date.now(),
@@ -913,7 +977,7 @@ export const handleSignTxConfirmation: SideEffect = (
                     id: requestId,
                     success: false,
                     error: {
-                      code: APIErrorCode.Refused,
+                      code: TxSignErrorCode.UserDeclined,
                       info: 'User cancelled authentication',
                     },
                     timestamp: Date.now(),
@@ -996,7 +1060,7 @@ export const handleSignTxRejection: SideEffect = (
         id: pendingRequest!.requestId,
         success: false,
         error: {
-          code: APIErrorCode.Refused,
+          code: TxSignErrorCode.UserDeclined,
           info: 'User declined to sign transaction',
         },
         timestamp: Date.now(),

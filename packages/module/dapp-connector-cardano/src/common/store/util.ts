@@ -2,7 +2,7 @@ import { Cardano } from '@cardano-sdk/core';
 import { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import { HexBlob } from '@cardano-sdk/util';
 
-import { APIError, APIErrorCode } from '../api-error';
+import { DataSignError, DataSignErrorCode } from '../api-error';
 
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { AnyAddress } from '@lace-contract/addresses';
@@ -71,7 +71,7 @@ const parseDRepCredential = (addr: string) => {
  * the CIP-129 pipeline would re-wrap the key hash via `DRepID.toAddress`,
  * which always emits network 0.
  *
- * @throws APIError if the address format is not recognised.
+ * @throws DataSignError (AddressNotPK) if the address format is not recognised.
  */
 export const addrToSignWith = (
   addr: Cardano.PaymentAddress | Cardano.RewardAccount | string,
@@ -84,16 +84,16 @@ export const addrToSignWith = (
 
   const credential = parseDRepCredential(addr);
   if (!credential) {
-    throw new APIError(
-      APIErrorCode.InternalError,
+    throw new DataSignError(
+      DataSignErrorCode.AddressNotPK,
       'Invalid address format for signing',
     );
   }
   const drepId = Cardano.DRepID.cip129FromCredential(credential);
   const drepAddr = Cardano.DRepID.toAddress(drepId)?.toAddress();
   if (!drepAddr) {
-    throw new APIError(
-      APIErrorCode.InternalError,
+    throw new DataSignError(
+      DataSignErrorCode.AddressNotPK,
       'Invalid address format for signing',
     );
   }
@@ -154,6 +154,32 @@ const credentialMatchesKeyHash = (
 ): boolean =>
   credential.type === Cardano.CredentialType.KeyHash &&
   String(credential.hash).toLowerCase() === String(keyHash).toLowerCase();
+
+/**
+ * True when the signData `addr` decodes to a type-6 enterprise KEY address —
+ * the one shape that is either a payment address or a CIP-95 DRep signing
+ * request, and can only be told apart with the account's DRep key hash.
+ */
+const isAmbiguousSignDataAddress = (addr: string): boolean => {
+  const decoded = decodeAddress(addr);
+  const credential = decoded?.asEnterprise()?.getPaymentCredential();
+  return (
+    credential !== undefined &&
+    credential.type === Cardano.CredentialType.KeyHash
+  );
+};
+
+/**
+ * True while the signer line of a signData request is still unresolved: the
+ * address is ambiguous and the account's DRep key hash — the only way to tell
+ * a CIP-95 DRep request from a payment address — has not arrived yet. Such a
+ * request must neither be rendered as a payment address nor be approvable
+ * against the placeholder shown in its place: either is a consent mismatch.
+ */
+export const isSignDataSignerResolving = (
+  address: string,
+  dRepKeyHash?: Ed25519KeyHashHex,
+): boolean => dRepKeyHash === undefined && isAmbiguousSignDataAddress(address);
 
 interface AddrToDisplayOptions {
   /**

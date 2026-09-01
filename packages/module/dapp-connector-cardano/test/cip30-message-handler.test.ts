@@ -381,6 +381,124 @@ describe('handleCip30Message', () => {
     });
   });
 
+  describe('signData', () => {
+    const PAYMENT_ADDRESS =
+      'addr_test1qrr7pflnkppvp49sl2hjs9v255ydycp8zxuxzfjw03vev9ns6cdlwymh7v9kr8cd8cy5vx8l7h6v9da84ml2cjd90fusnjsh8d';
+    const REWARD_ACCOUNT =
+      'stake_test1urpklgzqsh9yqz8pkyuxcw9dlszpe5flnxjtl55epla6ftqktdyfz';
+    const accountId = AccountId('acc-1');
+
+    const signDataDeps = (walletType = 'InMemory') =>
+      createMockDeps({
+        isSessionAuthorized: () => true,
+        getAccountIdForOrigin: () => accountId,
+        allAccounts$: of([
+          {
+            accountId,
+            walletId: 'wallet-1',
+            accountType: 'Bip32',
+            blockchainName: 'Cardano',
+            blockchainSpecific: {
+              extendedAccountPublicKey: '0'.repeat(128),
+            },
+          } as unknown as AnyAccount,
+        ]),
+        allWallets$: of([
+          { walletId: 'wallet-1', type: walletType } as unknown as AnyWallet,
+        ]),
+        addresses$: of([
+          {
+            address: PAYMENT_ADDRESS,
+            accountId,
+            blockchainName: 'Cardano',
+            data: {
+              type: 0,
+              index: 0,
+              networkId: 0,
+              accountIndex: 0,
+              rewardAccount: REWARD_ACCOUNT,
+              stakeKeyDerivationPath: { role: 2, index: 0 },
+            },
+          } as never,
+        ]),
+      });
+
+    it('returns signing_required for an owned payment address', async () => {
+      const message = {
+        ...createRequest('req-1', 'signData'),
+        args: [PAYMENT_ADDRESS, 'deadbeef'],
+      };
+      const result = await handleCip30Message(
+        message,
+        'https://dapp.example',
+        signDataDeps(),
+      );
+      expect(result).toEqual({
+        type: 'signing_required',
+        requestId: 'req-1',
+        dappOrigin: 'https://dapp.example',
+        dappName: 'dapp.example',
+        signingType: 'signData',
+        address: PAYMENT_ADDRESS,
+        payload: 'deadbeef',
+        accountId,
+      });
+    });
+
+    it('refuses an unparseable signer with DataSignError AddressNotPK before the signing sheet', async () => {
+      const message = {
+        ...createRequest('req-1', 'signData'),
+        args: ['not-a-valid-address', 'deadbeef'],
+      };
+      const result = await handleCip30Message(
+        message,
+        'https://dapp.example',
+        signDataDeps(),
+      );
+      expectErrorResponse(result, {
+        id: 'req-1',
+        code: 2,
+        info: 'Invalid address format for signing',
+      });
+    });
+
+    it('refuses a foreign DRep key hash with DataSignError ProofGeneration before the signing sheet', async () => {
+      const message = {
+        ...createRequest('req-1', 'signData'),
+        args: ['b'.repeat(56), 'deadbeef'],
+      };
+      const result = await handleCip30Message(
+        message,
+        'https://dapp.example',
+        signDataDeps(),
+      );
+      expect(result).toMatchObject({
+        type: 'response_ready',
+        response: { id: 'req-1', success: false, error: { code: 1 } },
+      });
+    });
+
+    it('refuses Trezor data signing with DataSignError ProofGeneration before the signing sheet', async () => {
+      const message = {
+        ...createRequest('req-1', 'signData'),
+        args: [PAYMENT_ADDRESS, 'deadbeef'],
+      };
+      const result = await handleCip30Message(
+        message,
+        'https://dapp.example',
+        signDataDeps('HardwareTrezor'),
+      );
+      expect(result).toMatchObject({
+        type: 'response_ready',
+        response: { id: 'req-1', success: false, error: { code: 1 } },
+      });
+      expect(
+        (result as { response: { error?: { info: string } } }).response.error
+          ?.info,
+      ).toContain('Trezor');
+    });
+  });
+
   describe('error handling', () => {
     it('returns InternalError for unknown method', async () => {
       const result = await handleCip30Message(

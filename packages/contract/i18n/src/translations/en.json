@@ -417,6 +417,7 @@
   "dapp-connector.cardano.sign-data.confirm": "Confirm",
   "dapp-connector.cardano.sign-data.deny": "Cancel",
   "dapp-connector.cardano.sign-data.address-label": "Address:",
+  "dapp-connector.cardano.sign-data.drep-id-label": "DRep ID:",
   "dapp-connector.cardano.sign-data.payload-label": "Data:",
   "dapp-connector.cardano.sign-data.result.success.title": "All done!",
   "dapp-connector.cardano.sign-data.result.success.description": "Data signed",

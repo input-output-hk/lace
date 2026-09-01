@@ -1,14 +1,23 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
 import { AddressType, KeyRole } from '@cardano-sdk/key-management';
+import { UnknownSignWithError } from '@lace-contract/cardano-context';
 import { BlockchainNetworkId } from '@lace-contract/network';
+import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
-import { of, Subject, throwError } from 'rxjs';
+import { Ok } from '@lace-lib/util';
+import { of, Subject, throwError, type Observable } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
-import { APIErrorCode } from '../src/common/api-error';
+import {
+  APIErrorCode,
+  DataSignErrorCode,
+  TxSendErrorCode,
+  TxSignErrorCode,
+} from '../src/common/api-error';
 import { CardanoDappConnectorApi } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 
 import type { Paginate, SenderContext } from '../src/browser/types';
+import type { CardanoDappConnectorApiDependencies } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { SigningResult } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { CardanoConfirmationCallback } from '../src/common/store/dependencies/create-confirmation-callback';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
@@ -640,7 +649,7 @@ describe('CardanoDappConnectorApi', () => {
       );
     });
 
-    it('throws Refused error when user rejects', async () => {
+    it('throws TxSignError UserDeclined when user rejects', async () => {
       const accountId = AccountId('acc-1');
       const walletId = WalletId('wallet-1');
       const mockConfirmation = vi.fn().mockResolvedValue({
@@ -684,7 +693,10 @@ describe('CardanoDappConnectorApi', () => {
         await api.signTx('abcd1234', false, mockSender);
         expect.fail('Should have thrown');
       } catch (error) {
-        expect((error as { code: number }).code).toBe(APIErrorCode.Refused);
+        expect((error as Error).name).toBe('TxSignError');
+        expect((error as { code: number }).code).toBe(
+          TxSignErrorCode.UserDeclined,
+        );
       }
     });
 
@@ -756,6 +768,97 @@ describe('CardanoDappConnectorApi', () => {
       } as Runtime.MessageSender,
     };
 
+    /** InMemory-wallet api whose data signer behaviour is pluggable. */
+    const createSignDataApi = (
+      dataSigner: {
+        signData: () => Observable<unknown>;
+      },
+      overrides: {
+        isConfirmed?: boolean;
+        walletType?: WalletType;
+      } = {},
+    ) => {
+      const accountId = AccountId('acc-1');
+      const walletId = WalletId('wallet-1');
+      const mockAccount = {
+        accountId,
+        walletId,
+        accountIndex: 0,
+        accountType: 'Bip32',
+        name: 'Test Account',
+        blockchainName: 'Cardano',
+        blockchainSpecific: {
+          accountIndex: 0,
+          chainId: {
+            networkId: 0,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          },
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+      } as unknown as AnyAccount;
+      const mockWallet = {
+        walletId,
+        name: 'Test Wallet',
+        type: overrides.walletType ?? WalletType.InMemory,
+        metadata: {},
+        blockchainSpecific: {
+          Cardano: { encryptedRootPrivateKey: 'a'.repeat(192) },
+        },
+      } as unknown as InMemoryWallet;
+      const mockAddresses = [
+        {
+          address: PAYMENT_ADDRESS_1,
+          accountId,
+          blockchainName: 'Cardano',
+          data: {
+            type: 0,
+            index: 0,
+            networkId: 0,
+            accountIndex: 0,
+            rewardAccount: REWARD_ACCOUNT,
+            stakeKeyDerivationPath: { role: 2, index: 0 },
+          },
+        } as unknown as AnyAddress,
+      ];
+      const signingResults: SigningResult[] = [];
+      const signingResult$ = new Subject<SigningResult>();
+      signingResult$.subscribe(result => signingResults.push(result));
+
+      const userConfirmationRequest = vi.fn().mockResolvedValue({
+        isConfirmed: overrides.isConfirmed ?? true,
+      });
+
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of(mockAddresses),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([mockAccount]),
+        allWallets$: of([mockWallet]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        userConfirmationRequest:
+          userConfirmationRequest as unknown as CardanoConfirmationCallback,
+        submitTransaction: vi.fn(),
+        signerFactory: {
+          createDataSigner: () => dataSigner,
+        } as unknown as CardanoSignerFactory,
+        signingResult$,
+        authenticate: vi
+          .fn()
+          .mockReturnValue(of(true)) as unknown as Authenticate,
+        accessAuthSecret: vi
+          .fn()
+          .mockImplementation((callback: (secret: Uint8Array) => unknown) =>
+            callback(new Uint8Array([1, 2, 3])),
+          ) as unknown as AccessAuthSecret,
+      });
+
+      return { api, signingResults, userConfirmationRequest };
+    };
+
     it('throws InternalError when signing not configured', async () => {
       const accountId = AccountId('acc-1');
       const api = new CardanoDappConnectorApi({
@@ -775,30 +878,151 @@ describe('CardanoDappConnectorApi', () => {
       ).rejects.toThrow('Signing not configured');
     });
 
-    it('throws Refused error when user rejects', async () => {
-      const accountId = AccountId('acc-1');
-      const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: false,
-      }) as unknown as CardanoConfirmationCallback;
+    it('throws DataSignError UserDeclined when user rejects', async () => {
+      const { api, userConfirmationRequest } = createSignDataApi(
+        { signData: () => of({ signature: 'sig', key: 'key' }) },
+        { isConfirmed: false },
+      );
 
-      const api = new CardanoDappConnectorApi({
+      try {
+        await api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.UserDeclined,
+        );
+      }
+      expect(userConfirmationRequest).toHaveBeenCalled();
+    });
+
+    it('refuses an unparseable signer with AddressNotPK before prompting', async () => {
+      const { api, userConfirmationRequest } = createSignDataApi({
+        signData: () => of({ signature: 'sig', key: 'key' }),
+      });
+
+      try {
+        await api.signData('not-a-valid-address', 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.AddressNotPK,
+        );
+      }
+      expect(userConfirmationRequest).not.toHaveBeenCalled();
+    });
+
+    it('refuses a foreign DRep key hash with ProofGeneration before prompting', async () => {
+      const { api, userConfirmationRequest } = createSignDataApi({
+        signData: () => of({ signature: 'sig', key: 'key' }),
+      });
+
+      try {
+        // A well-formed CIP-105 DRep key hash this account does not own.
+        await api.signData('b'.repeat(56), 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.ProofGeneration,
+        );
+      }
+      expect(userConfirmationRequest).not.toHaveBeenCalled();
+    });
+
+    it('answers AccountChange when the session account is rebound while the prompt is open', async () => {
+      const accountId = AccountId('acc-1');
+      const otherAccountId = AccountId('acc-2');
+      // The session rebinds at the exact moment the user is confirming.
+      let sessionAccountId = accountId;
+      const shifting = new CardanoDappConnectorApi({
         ...defaultNewDeps,
         accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
-        addresses$: of([]),
-        chainId$: of(undefined),
-        allAccounts$: of([]),
-        allWallets$: of([]),
-        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
-        userConfirmationRequest: mockConfirmation,
+        addresses$: of([
+          {
+            address: PAYMENT_ADDRESS_1,
+            accountId,
+            blockchainName: 'Cardano',
+            data: {
+              type: 0,
+              index: 0,
+              networkId: 0,
+              accountIndex: 0,
+              rewardAccount: REWARD_ACCOUNT,
+              stakeKeyDerivationPath: { role: 2, index: 0 },
+            },
+          } as unknown as AnyAddress,
+        ]),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([
+          {
+            accountId,
+            walletId: WalletId('wallet-1'),
+            accountIndex: 0,
+            accountType: 'Bip32',
+            name: 'Test Account',
+            blockchainName: 'Cardano',
+            blockchainSpecific: {
+              accountIndex: 0,
+              chainId: {
+                networkId: 0,
+                networkMagic: Cardano.NetworkMagics.Preprod,
+              },
+              extendedAccountPublicKey: '0'.repeat(128),
+            },
+          } as unknown as AnyAccount,
+        ]),
+        allWallets$: of([
+          {
+            walletId: WalletId('wallet-1'),
+            name: 'Test Wallet',
+            type: WalletType.InMemory,
+            metadata: {},
+            blockchainSpecific: {
+              Cardano: { encryptedRootPrivateKey: 'a'.repeat(192) },
+            },
+          } as unknown as InMemoryWallet,
+        ]),
+        getAccountIdForOrigin: () => sessionAccountId,
+        userConfirmationRequest: vi.fn().mockImplementation(async () => {
+          sessionAccountId = otherAccountId;
+          return { isConfirmed: true };
+        }) as unknown as CardanoConfirmationCallback,
         submitTransaction: vi.fn(),
       });
 
       try {
-        await api.signData('addr_test1...', 'deadbeef', mockSender);
+        await shifting.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
         expect.fail('Should have thrown');
       } catch (error) {
-        expect((error as { code: number }).code).toBe(APIErrorCode.Refused);
+        expect((error as Error).name).toBe('APIError');
+        expect((error as { code: number }).code).toBe(
+          APIErrorCode.AccountChange,
+        );
       }
+    });
+
+    it('refuses Trezor data signing with ProofGeneration before prompting', async () => {
+      const { api, userConfirmationRequest } = createSignDataApi(
+        { signData: () => of({ signature: 'sig', key: 'key' }) },
+        { walletType: WalletType.HardwareTrezor },
+      );
+
+      try {
+        await api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.ProofGeneration,
+        );
+        expect((error as { info: string }).info).toContain('Trezor');
+      }
+      expect(userConfirmationRequest).not.toHaveBeenCalled();
     });
 
     it('returns signature when user confirms', async () => {
@@ -1103,6 +1327,223 @@ describe('CardanoDappConnectorApi', () => {
         { type: 'error', hwErrorKeys: undefined },
       ]);
     });
+
+    it('maps an unknown signWith failure to DataSignError ProofGeneration', async () => {
+      const { api } = createSignDataApi({
+        signData: () =>
+          throwError(
+            () => new UnknownSignWithError('Unknown signWith address: x'),
+          ),
+      });
+
+      try {
+        await api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.ProofGeneration,
+        );
+        expect((error as { info: string }).info).toContain(
+          'Unknown signWith address',
+        );
+      }
+    });
+
+    it('maps cancelled authentication to DataSignError UserDeclined', async () => {
+      const { api, signingResults } = createSignDataApi({
+        signData: () => throwError(() => new AuthenticationCancelledError()),
+      });
+
+      try {
+        await api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.UserDeclined,
+        );
+      }
+      expect(signingResults).toEqual([{ type: 'cancelled' }]);
+    });
+  });
+
+  /**
+   * The field signature from the DRep report that motivated this work:
+   * voting (signTx) succeeds while comments/rationale (signData) fail on
+   * every governance dApp at once. On a Trezor wallet that conjunction is
+   * expected: transaction signing works, CIP-8 data signing is unsupported
+   * by the firmware and must refuse up front with ProofGeneration.
+   */
+  describe('Trezor governance field signature', () => {
+    it('signs a transaction but refuses data signing with ProofGeneration on the same wallet', async () => {
+      const accountId = AccountId('acc-1');
+      const walletId = WalletId('wallet-1');
+      const mockAccount = {
+        accountId,
+        walletId,
+        accountIndex: 0,
+        accountType: 'Bip32',
+        name: 'Trezor Account',
+        blockchainName: 'Cardano',
+        blockchainSpecific: {
+          accountIndex: 0,
+          chainId: {
+            networkId: 0,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          },
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+      } as unknown as AnyAccount;
+      const mockWallet = {
+        walletId,
+        name: 'Trezor Wallet',
+        type: WalletType.HardwareTrezor,
+        metadata: {},
+        blockchainSpecific: {},
+      } as unknown as InMemoryWallet;
+      const mockAddresses = [
+        {
+          address: PAYMENT_ADDRESS_1,
+          accountId,
+          blockchainName: 'Cardano',
+          data: {
+            type: 0,
+            index: 0,
+            networkId: 0,
+            accountIndex: 0,
+            rewardAccount: REWARD_ACCOUNT,
+            stakeKeyDerivationPath: { role: 2, index: 0 },
+          },
+        } as unknown as AnyAddress,
+      ];
+      const userConfirmationRequest = vi
+        .fn()
+        .mockResolvedValue({ isConfirmed: true });
+
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of(mockAddresses),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([mockAccount]),
+        allWallets$: of([mockWallet]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        userConfirmationRequest:
+          userConfirmationRequest as unknown as CardanoConfirmationCallback,
+        signTransaction: vi.fn().mockResolvedValue('witness-set-cbor'),
+        submitTransaction: vi.fn(),
+      });
+
+      // Voting: transaction signing succeeds on the Trezor wallet.
+      await expect(
+        api.signTx('abcd1234', false, createMockSenderContext()),
+      ).resolves.toBe('witness-set-cbor');
+
+      // Comments/rationale: CIP-95 signData with the account's own DRep key
+      // hash refuses before any prompt — the dApp receives ProofGeneration.
+      userConfirmationRequest.mockClear();
+      try {
+        // The mocked derivation pins the DRep key hash to '0'.repeat(56).
+        await api.signData(
+          '0'.repeat(56),
+          'deadbeef',
+          createMockSenderContext(),
+        );
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('DataSignError');
+        expect((error as { code: number }).code).toBe(
+          DataSignErrorCode.ProofGeneration,
+        );
+        expect((error as { info: string }).info).toContain('Trezor');
+      }
+      expect(userConfirmationRequest).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('paginate', () => {
+    const buildApi = (utxos: Cardano.Utxo[]) => {
+      const accountId = AccountId('acc-1');
+      return new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: utxos } as unknown as AccountUtxoMap),
+        addresses$: of([]),
+        chainId$: of(undefined),
+        allAccounts$: of([]),
+        allWallets$: of([]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        submitTransaction: vi.fn(),
+      });
+    };
+    const utxos = [
+      createMockUtxo({
+        txIdHex: '0'.repeat(64),
+        index: 0,
+        address: PAYMENT_ADDRESS_1,
+        coins: 1_000_000n,
+      }),
+      createMockUtxo({
+        txIdHex: '1'.repeat(64),
+        index: 0,
+        address: PAYMENT_ADDRESS_1,
+        coins: 2_000_000n,
+      }),
+    ];
+
+    it('getUtxos returns the requested page when in range', async () => {
+      const api = buildApi(utxos);
+      const result = await api.getUtxos(
+        undefined,
+        { page: 1, limit: 1 },
+        createMockSenderContext(),
+      );
+      expect(result).toHaveLength(1);
+    });
+
+    it('getUtxos rejects an out-of-range page with PaginateError maxSize', async () => {
+      const api = buildApi(utxos);
+      try {
+        await api.getUtxos(
+          undefined,
+          { page: 5, limit: 1 },
+          createMockSenderContext(),
+        );
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('PaginateError');
+        expect((error as { maxSize: number }).maxSize).toBe(2);
+      }
+    });
+
+    it('getUsedAddresses rejects an out-of-range page with PaginateError', async () => {
+      const accountId = AccountId('acc-1');
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of([
+          createMockAddress(PAYMENT_ADDRESS_1, accountId, REWARD_ACCOUNT),
+        ]),
+        chainId$: of(undefined),
+        allAccounts$: of([]),
+        allWallets$: of([]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        submitTransaction: vi.fn(),
+      });
+      try {
+        await api.getUsedAddresses(
+          { page: 3, limit: 5 },
+          createMockSenderContext(),
+        );
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('PaginateError');
+        expect((error as { maxSize: number }).maxSize).toBe(1);
+      }
+    });
   });
 
   describe('submitTx', () => {
@@ -1127,6 +1568,31 @@ describe('CardanoDappConnectorApi', () => {
 
       expect(result).toBe(expectedTxHash);
       expect(mockSubmitTransaction).toHaveBeenCalledWith('signed-tx-cbor');
+    });
+
+    it('maps a network rejection to TxSendError Failure', async () => {
+      const accountId = AccountId('acc-1');
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of([]),
+        chainId$: of(undefined),
+        allAccounts$: of([]),
+        allWallets$: of([]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        submitTransaction: vi
+          .fn()
+          .mockRejectedValue(new Error('BadInputsUTxO')),
+      });
+
+      try {
+        await api.submitTx('signed-tx-cbor');
+        expect.fail('Should have thrown');
+      } catch (error) {
+        expect((error as Error).name).toBe('TxSendError');
+        expect((error as { code: number }).code).toBe(TxSendErrorCode.Failure);
+        expect((error as { info: string }).info).toContain('BadInputsUTxO');
+      }
     });
   });
 
@@ -1174,7 +1640,7 @@ describe('CardanoDappConnectorApi', () => {
   });
 
   describe('getExtensions', () => {
-    it('returns supported extensions array with CIP-95', async () => {
+    it('returns every registered extension (CIP-95 and CIP-142)', async () => {
       const accountId = AccountId('acc-1');
       const api = new CardanoDappConnectorApi({
         ...defaultNewDeps,
@@ -1189,7 +1655,7 @@ describe('CardanoDappConnectorApi', () => {
 
       const result = await api.getExtensions();
 
-      expect(result).toEqual([{ cip: 95 }]);
+      expect(result).toEqual([{ cip: 95 }, { cip: 142 }]);
     });
   });
 
@@ -1241,7 +1707,7 @@ describe('CardanoDappConnectorApi', () => {
   });
 
   describe('CIP-95 Governance Methods', () => {
-    it('getPubDRepKey throws error when account not found', async () => {
+    it('getPubDRepKey throws AccountChange when the session account no longer resolves', async () => {
       const accountId = AccountId('acc-1');
       const api = new CardanoDappConnectorApi({
         ...defaultNewDeps,
@@ -1260,10 +1726,59 @@ describe('CardanoDappConnectorApi', () => {
         expect.fail('Should have thrown');
       } catch (error) {
         expect((error as { code: number }).code).toBe(
-          APIErrorCode.InternalError,
+          APIErrorCode.AccountChange,
         );
         expect((error as { info: string }).info).toContain('Account not found');
       }
+    });
+
+    it('answers registration from a direct provider query when the cache is cold', async () => {
+      const accountId = AccountId('acc-1');
+      const getRewardAccountInfo = vi
+        .fn()
+        .mockReturnValue(of(Ok({ isRegistered: true })));
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of([
+          createMockAddress(PAYMENT_ADDRESS_1, accountId, REWARD_ACCOUNT),
+        ]),
+        chainId$: of({
+          networkId: 0,
+          networkMagic: Cardano.NetworkMagics.Preprod,
+        }),
+        allAccounts$: of([
+          {
+            accountId,
+            walletId: WalletId('wallet-1'),
+            accountType: 'Bip32',
+            blockchainName: 'Cardano',
+            blockchainSpecific: {
+              extendedAccountPublicKey: '0'.repeat(128),
+            },
+          } as unknown as AnyAccount,
+        ]),
+        allWallets$: of([]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        submitTransaction: vi.fn(),
+        cardanoProvider: {
+          getRewardAccountInfo,
+        } as unknown as CardanoDappConnectorApiDependencies['cardanoProvider'],
+      });
+
+      const senderContext = createMockSenderContext();
+      // Registered on-chain: the registered bucket answers the key, the
+      // unregistered bucket answers empty — from the provider, not the cache.
+      await expect(
+        api.getRegisteredPubStakeKeys(senderContext),
+      ).resolves.toHaveLength(1);
+      await expect(
+        api.getUnregisteredPubStakeKeys(senderContext),
+      ).resolves.toEqual([]);
+      expect(getRewardAccountInfo).toHaveBeenCalledTimes(2);
+      expect(getRewardAccountInfo.mock.calls[0][0]).toEqual({
+        rewardAccount: REWARD_ACCOUNT,
+      });
     });
 
     it('getRegisteredPubStakeKeys throws error when reward account details not found', async () => {

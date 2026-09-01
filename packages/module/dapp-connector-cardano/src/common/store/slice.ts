@@ -77,6 +77,12 @@ export type PendingSignDataRequest = {
   dapp: DappInfo;
   address: string;
   payload: string;
+  /**
+   * The session account the pre-consent gate classified against. Confirmation
+   * re-checks it: a session rebound to a different account while the sheet
+   * was open answers AccountChange (-4), never signs under the new account.
+   */
+  accountId?: AccountId;
 };
 
 /**

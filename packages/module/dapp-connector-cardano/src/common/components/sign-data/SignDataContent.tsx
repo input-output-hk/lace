@@ -13,7 +13,7 @@ import {
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { addrToDisplay } from '../../store/util';
+import { addrToDisplay, isSignDataSignerResolving } from '../../store/util';
 import { formatSignDataPayload } from '../../utils/sign-data-payload';
 
 import type { SignDataDisplayDapp } from './types';
@@ -27,6 +27,40 @@ export interface SignDataContentProps {
   payload: string;
   dRepKeyHash?: Ed25519KeyHashHex;
 }
+
+/**
+ * The signer line. While the signer is still resolving the line is held at a
+ * placeholder; once resolved, a DRep request is labelled as the DRep ID it is.
+ */
+const SignDataAddress = ({
+  address,
+  dRepKeyHash,
+}: {
+  address: string;
+  dRepKeyHash?: Ed25519KeyHashHex;
+}) => {
+  const { theme } = useTheme();
+  const { t } = useTranslation();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+  const isResolving = isSignDataSignerResolving(address, dRepKeyHash);
+  const display = isResolving
+    ? undefined
+    : addrToDisplay(address, { dRepKeyHash });
+  const isDRep = display?.startsWith('drep1') ?? false;
+
+  return (
+    <>
+      <Text.XS variant="secondary">
+        {isDRep
+          ? t('dapp-connector.cardano.sign-data.drep-id-label')
+          : t('dapp-connector.cardano.sign-data.address-label')}
+      </Text.XS>
+      <Text.S style={styles.preText} selectable>
+        {display ?? '…'}
+      </Text.S>
+    </>
+  );
+};
 
 export const SignDataContent = ({
   dapp,
@@ -98,12 +132,7 @@ export const SignDataContent = ({
       )}
 
       <View style={styles.preContainer} testID="sign-data-address">
-        <Text.XS variant="secondary">
-          {t('dapp-connector.cardano.sign-data.address-label')}
-        </Text.XS>
-        <Text.S style={styles.preText} selectable>
-          {addrToDisplay(address, { dRepKeyHash })}
-        </Text.S>
+        <SignDataAddress address={address} dRepKeyHash={dRepKeyHash} />
       </View>
 
       <View style={styles.dataContainer} testID="sign-data-data">

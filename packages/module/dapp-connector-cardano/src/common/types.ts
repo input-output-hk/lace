@@ -126,6 +126,13 @@ export interface Cip95WalletApi {
   getPubDRepKey(): Promise<string>;
 
   /**
+   * CIP-95's extended signData: same contract as the CIP-30 method, with
+   * DRep IDs accepted as the signer. dApps that call the namespaced form
+   * (dreptalk.com prefers it when present) get the same implementation.
+   */
+  signData(addr: string, payload: string): Promise<DataSignature>;
+
+  /**
    * Returns public stake keys that are registered on-chain
    * @returns Array of Ed25519 public key hex strings
    */

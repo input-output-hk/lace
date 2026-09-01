@@ -59,18 +59,15 @@ export const DEFAULT_NETWORKS_CONFIG: MidnightNetworksConfig = {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc/',
     proofServerAddress: 'http://localhost:6300',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
-    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
   },
   [NetworkId.NetworkId.PreProd]: {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc/',
     proofServerAddress: 'http://localhost:6300',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
-    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
   },
   [NetworkId.NetworkId.Preview]: {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preview-rpc/',
     proofServerAddress: 'http://localhost:6300',
-    indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
   },
   [NetworkId.NetworkId.QaNet]: {

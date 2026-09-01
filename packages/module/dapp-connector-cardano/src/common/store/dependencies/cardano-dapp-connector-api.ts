@@ -6,6 +6,8 @@ import {
   type CardanoPaymentAddress,
   isCardanoAccount,
   isCardanoAddress,
+  resolveSignDataContext,
+  UnknownSignWithError,
 } from '@lace-contract/cardano-context';
 import {
   AuthenticationCancelledError,
@@ -16,6 +18,7 @@ import {
   type AnyAccount,
   type AnyWallet,
   isHardwareWallet,
+  WalletType,
 } from '@lace-contract/wallet-repo';
 import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
 import { senderOrigin } from '@lace-lib/dapp-connector';
@@ -25,9 +28,15 @@ import { firstValueFrom } from 'rxjs';
 import {
   APIError,
   APIErrorCode,
+  DataSignError,
+  DataSignErrorCode,
+  PaginateError,
+  TxSendError,
+  TxSendErrorCode,
   TxSignError,
   TxSignErrorCode,
 } from '../../api-error';
+import { supportedCip30Extensions } from '../../cip30-extensions';
 import { addrToSignWith, transformToGroupedAddresses } from '../util';
 import { requiresForeignSignaturesFromCbor } from '../utils/input-resolver';
 
@@ -56,12 +65,14 @@ import type {
 import type {
   AccountUtxoMap,
   CardanoAddressData,
+  CardanoProvider,
   CardanoSignerContext,
   RewardAccountDetails,
 } from '@lace-contract/cardano-context';
 import type { SignerFactory } from '@lace-contract/signer';
 import type { HwSigningErrorTranslationKeys } from '@lace-lib/util-hw';
 import type { Observable, Subject } from 'rxjs';
+import type { Logger } from 'ts-log';
 
 /**
  * Function type for signing a Cardano transaction.
@@ -122,7 +133,7 @@ const derivePublicKeyForAccount = async ({
 
   if (!account) {
     throw new APIError(
-      APIErrorCode.InternalError,
+      APIErrorCode.AccountChange,
       `Account not found for ID: ${accountId}`,
     );
   }
@@ -186,12 +197,35 @@ export interface CardanoDappConnectorApiDependencies {
   authenticate?: Authenticate;
   /** Subject to signal signing completion to the popup flow */
   signingResult$?: Subject<SigningResult>;
+  /** Logger for dApp-request diagnostics; silent when omitted */
+  logger?: Logger;
+  /**
+   * On-demand stake-key registration lookup for a cold cache: the tracked
+   * rewardAccountDetails$ lags the indexer and is empty on a fresh service
+   * worker, and answering CIP-95's registered/unregistered buckets wrongly
+   * makes dApps build txs with duplicate (or missing) registration certs.
+   */
+  cardanoProvider?: Pick<CardanoProvider, 'getRewardAccountInfo'>;
 }
 
 export type SigningResult =
   | { type: 'cancelled' }
   | { type: 'error'; hwErrorKeys?: HwSigningErrorTranslationKeys }
   | { type: 'success' };
+
+/**
+ * Applies CIP-30 pagination: a page starting beyond the available items is
+ * out of range and must reject with PaginateError { maxSize } rather than
+ * answer an empty page the dApp cannot distinguish from real data.
+ */
+const paginateItems = <T>(items: T[], paginate?: Paginate): T[] => {
+  if (!paginate) return items;
+  const start = paginate.page * paginate.limit;
+  if (start > 0 && start >= items.length) {
+    throw new PaginateError(items.length);
+  }
+  return items.slice(start, start + paginate.limit);
+};
 
 /**
  * Serializes a Cardano UTXO to CBOR hex string (CIP-30 format)
@@ -265,6 +299,8 @@ export class CardanoDappConnectorApi
   readonly #accessAuthSecret?: AccessAuthSecret;
   readonly #authenticate?: Authenticate;
   readonly #signingResult$?: Subject<SigningResult>;
+  readonly #logger?: Logger;
+  readonly #cardanoProvider?: Pick<CardanoProvider, 'getRewardAccountInfo'>;
 
   public constructor({
     accountUtxos$,
@@ -284,6 +320,8 @@ export class CardanoDappConnectorApi
     accessAuthSecret,
     authenticate,
     signingResult$,
+    logger,
+    cardanoProvider,
   }: CardanoDappConnectorApiDependencies) {
     this.#accountUtxos$ = accountUtxos$;
     this.#accountUnspendableUtxos$ = accountUnspendableUtxos$;
@@ -302,11 +340,14 @@ export class CardanoDappConnectorApi
     this.#accessAuthSecret = accessAuthSecret;
     this.#authenticate = authenticate;
     this.#signingResult$ = signingResult$;
+    this.#logger = logger;
+    this.#cardanoProvider = cardanoProvider;
 
     this.cip95 = {
       getPubDRepKey: this.getPubDRepKey.bind(this),
       getRegisteredPubStakeKeys: this.getRegisteredPubStakeKeys.bind(this),
       getUnregisteredPubStakeKeys: this.getUnregisteredPubStakeKeys.bind(this),
+      signData: this.signData.bind(this),
     };
 
     this.cip142 = {
@@ -408,11 +449,7 @@ export class CardanoDappConnectorApi
       }
     }
 
-    if (paginate) {
-      const start = paginate.page * paginate.limit;
-      const end = start + paginate.limit;
-      filteredUtxos = filteredUtxos.slice(start, end);
-    }
+    filteredUtxos = paginateItems(filteredUtxos, paginate);
 
     return filteredUtxos.map(serializeUtxo);
   }
@@ -446,17 +483,11 @@ export class CardanoDappConnectorApi
       (a, b) => (a.data?.accountIndex ?? 0) - (b.data?.accountIndex ?? 0),
     );
 
-    let result = usedAddresses.map(addr =>
+    const result = usedAddresses.map(addr =>
       serializeAddress(Cardano.PaymentAddress(addr.address)),
     );
 
-    if (paginate) {
-      const start = paginate.page * paginate.limit;
-      const end = start + paginate.limit;
-      result = result.slice(start, end);
-    }
-
-    return result;
+    return paginateItems(result, paginate);
   }
 
   /**
@@ -565,7 +596,7 @@ export class CardanoDappConnectorApi
    * @param partialSign - If true, only signs what the wallet can sign (for multi-sig)
    * @param context - Sender context with dApp information
    * @returns CBOR-encoded transaction witness set
-   * @throws APIError with Refused code if user rejects
+   * @throws TxSignError with UserDeclined code if user rejects
    * @throws APIError with InternalError if signing dependencies not configured
    */
   public async signTx(
@@ -591,15 +622,18 @@ export class CardanoDappConnectorApi
     );
 
     if (!isConfirmed) {
-      throw new APIError(APIErrorCode.Refused, 'User rejected transaction');
+      throw new TxSignError(
+        TxSignErrorCode.UserDeclined,
+        'User rejected transaction',
+      );
     }
 
     try {
       return await this.#signTransaction(tx, partialSign, origin);
     } catch (error) {
       if (error instanceof AuthenticationCancelledError) {
-        throw new APIError(
-          APIErrorCode.Refused,
+        throw new TxSignError(
+          TxSignErrorCode.UserDeclined,
           'User cancelled authentication',
         );
       }
@@ -617,7 +651,7 @@ export class CardanoDappConnectorApi
    * @param payload - Hex-encoded payload to sign
    * @param context - Sender context with dApp information
    * @returns Data signature with COSE_Sign1 signature and COSE_Key
-   * @throws APIError with Refused code if user rejects
+   * @throws DataSignError with UserDeclined code if user rejects
    * @throws APIError with InternalError if signing dependencies not configured
    */
   public async signData(
@@ -632,6 +666,15 @@ export class CardanoDappConnectorApi
       );
     }
 
+    const origin = this.#extractOrigin({ sender });
+    this.#logger?.debug(
+      `[cip30] signData request from ${origin}: addr=${addr}, payload ${
+        payload.length / 2
+      } bytes`,
+    );
+    const gateAccountId = this.#getAccountId(origin);
+    await this.validateCanSignData(addr, origin);
+
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
       'signData',
@@ -639,18 +682,29 @@ export class CardanoDappConnectorApi
     );
 
     if (!isConfirmed) {
-      throw new APIError(APIErrorCode.Refused, 'User rejected data signing');
+      throw new DataSignError(
+        DataSignErrorCode.UserDeclined,
+        'User rejected data signing',
+      );
     }
 
-    const origin = this.#extractOrigin({ sender });
     const accountId = this.#getAccountId(origin);
+    // The gate classified against gate-time state; a session rebind while the
+    // prompt was open must answer AccountChange, not a misleading
+    // ProofGeneration from the stale classification.
+    if (accountId !== gateAccountId) {
+      throw new APIError(
+        APIErrorCode.AccountChange,
+        `Session account changed while awaiting confirmation for origin: ${origin}. Please reconnect the dApp.`,
+      );
+    }
 
     const allAccounts = await firstValueFrom(this.#allAccounts$);
     const account = allAccounts.find(a => a.accountId === accountId);
 
     if (!account) {
       throw new APIError(
-        APIErrorCode.InternalError,
+        APIErrorCode.AccountChange,
         `Account not found for ID: ${accountId}`,
       );
     }
@@ -725,8 +779,8 @@ export class CardanoDappConnectorApi
     } catch (error) {
       if (error instanceof AuthenticationCancelledError) {
         this.#signingResult$?.next({ type: 'cancelled' });
-        throw new APIError(
-          APIErrorCode.Refused,
+        throw new DataSignError(
+          DataSignErrorCode.UserDeclined,
           'User cancelled authentication',
         );
       }
@@ -734,6 +788,108 @@ export class CardanoDappConnectorApi
         ? mapHwSigningError(error)
         : undefined;
       this.#signingResult$?.next({ type: 'error', hwErrorKeys });
+      this.#logger?.warn(
+        `[cip30] signData failed for ${origin}: ${
+          error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : String(error)
+        }`,
+      );
+      if (error instanceof UnknownSignWithError) {
+        throw new DataSignError(
+          DataSignErrorCode.ProofGeneration,
+          error.message,
+        );
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Pre-consent gate for signData, mirroring #validateCanSign: a request this
+   * account can never satisfy is refused before the signing dialog opens and
+   * before the user is asked for credentials. Local-only — no network access.
+   *
+   * @throws DataSignError AddressNotPK for an unparseable signer identifier,
+   *   ProofGeneration for a signer this account holds no key for (foreign or
+   *   script DRep, unknown address, MultiSig account, Trezor device).
+   */
+  public async validateCanSignData(
+    addr: string,
+    origin: string,
+  ): Promise<void> {
+    const accountId = this.#getAccountId(origin);
+    const allAccounts = await firstValueFrom(this.#allAccounts$);
+    const account = allAccounts.find(a => a.accountId === accountId);
+
+    if (!account) {
+      throw new APIError(
+        APIErrorCode.AccountChange,
+        `Account not found for ID: ${accountId}`,
+      );
+    }
+    if (!isCardanoAccount(account)) {
+      throw new APIError(
+        APIErrorCode.InternalError,
+        `Account is not a Cardano account: ${accountId}`,
+      );
+    }
+    if (account.accountType === 'MultiSig') {
+      throw new DataSignError(
+        DataSignErrorCode.ProofGeneration,
+        `signData is not supported for MultiSig accounts: ${accountId}`,
+      );
+    }
+
+    const allWallets = await firstValueFrom(this.#allWallets$);
+    const wallet = allWallets.find(w => w.walletId === account.walletId);
+    if (!wallet) {
+      throw new APIError(
+        APIErrorCode.InternalError,
+        `Wallet not found for ID: ${account.walletId}`,
+      );
+    }
+    if (wallet.type === WalletType.HardwareTrezor) {
+      throw new DataSignError(
+        DataSignErrorCode.ProofGeneration,
+        'CIP-8 data signing is not supported on Trezor devices',
+      );
+    }
+
+    const signWith = addrToSignWith(addr);
+    const cardanoAddresses = await this.#getCardanoAddresses(origin);
+    const knownAddresses = this.#transformToGroupedAddresses(cardanoAddresses);
+
+    const { extendedAccountPublicKey } = account.blockchainSpecific as {
+      extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
+    };
+    // Underivable key ⇒ no DRep key to match ⇒ the resolver refuses below.
+    let dRepKeyHash;
+    try {
+      dRepKeyHash = hashEd25519PublicKey(
+        await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
+      );
+    } catch {}
+
+    try {
+      const { derivationPath, isDRepSigning } = resolveSignDataContext({
+        signWith,
+        knownAddresses,
+        dRepKeyHash,
+      });
+      this.#logger?.debug(
+        `[cip30] signData signer resolved for ${origin}: role ${derivationPath.role}, index ${derivationPath.index}, isDRepSigning=${isDRepSigning}`,
+      );
+    } catch (error) {
+      if (error instanceof UnknownSignWithError) {
+        this.#logger?.warn(
+          `[cip30] signData refused for ${origin}: ${error.message}; replying DataSignError ProofGeneration (1)`,
+        );
+        throw new DataSignError(
+          DataSignErrorCode.ProofGeneration,
+          error.message,
+        );
+      }
       throw error;
     }
   }
@@ -746,10 +902,20 @@ export class CardanoDappConnectorApi
    *
    * @param tx - CBOR-encoded signed transaction
    * @returns Transaction hash
-   * @throws APIError with InternalError if submit function not configured
+   * @throws TxSendError with Failure code when the network rejects the tx
    */
   public async submitTx(tx: Cbor): Promise<string> {
-    return this.#submitTransaction(tx);
+    try {
+      return await this.#submitTransaction(tx);
+    } catch (error) {
+      if (error instanceof APIError || error instanceof TxSendError) {
+        throw error;
+      }
+      throw new TxSendError(
+        TxSendErrorCode.Failure,
+        error instanceof Error ? error.message : String(error),
+      );
+    }
   }
 
   /**
@@ -803,7 +969,7 @@ export class CardanoDappConnectorApi
    * @see https://cips.cardano.org/cip/CIP-30#extensions
    */
   public async getExtensions(): Promise<WalletApiExtension[]> {
-    return [{ cip: 95 }];
+    return supportedCip30Extensions();
   }
 
   /**
@@ -863,19 +1029,7 @@ export class CardanoDappConnectorApi
   ): Promise<string[]> {
     const origin = this.#extractOrigin(context);
     const accountId = this.#getAccountId(origin);
-    const rewardAccountDetails = await firstValueFrom(
-      this.#rewardAccountDetails$,
-    );
-    const details = rewardAccountDetails[accountId];
-
-    if (!details) {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        'Reward account details not found for account ID: ' + accountId,
-      );
-    }
-
-    if (!isStakeKeyRegistered(details)) {
+    if (!(await this.#isStakeKeyRegisteredFor(origin, accountId))) {
       return [];
     }
 
@@ -903,19 +1057,7 @@ export class CardanoDappConnectorApi
   ): Promise<string[]> {
     const origin = this.#extractOrigin(context);
     const accountId = this.#getAccountId(origin);
-    const rewardAccountDetails = await firstValueFrom(
-      this.#rewardAccountDetails$,
-    );
-    const details = rewardAccountDetails[accountId];
-
-    if (!details) {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        'Reward account details not found for account ID: ' + accountId,
-      );
-    }
-
-    if (isStakeKeyRegistered(details)) {
+    if (await this.#isStakeKeyRegisteredFor(origin, accountId)) {
       return [];
     }
 
@@ -926,6 +1068,58 @@ export class CardanoDappConnectorApi
       keyLabel: 'Stake',
     });
     return [pubStakeKey];
+  }
+
+  /**
+   * Cache-first stake-key registration status. The tracked cache answers
+   * instantly when warm; a cold cache (fresh service worker, indexer lag)
+   * falls back to one direct provider query so the CIP-95 buckets answer
+   * from chain state rather than a hard error or a wrong "unregistered".
+   */
+  async #isStakeKeyRegisteredFor(
+    origin: string,
+    accountId: AccountId,
+  ): Promise<boolean> {
+    const rewardAccountDetails = await firstValueFrom(
+      this.#rewardAccountDetails$,
+    );
+    const details = rewardAccountDetails[accountId];
+    if (details) {
+      return isStakeKeyRegistered(details) ?? false;
+    }
+
+    const notReady = (reason: string) =>
+      new APIError(
+        APIErrorCode.InternalError,
+        `Reward account details not found for account ID: ${accountId} (${reason})`,
+      );
+    if (!this.#cardanoProvider) {
+      throw notReady('no provider available for an on-demand lookup');
+    }
+    const chainId = await firstValueFrom(this.#chainId$);
+    if (!chainId) {
+      throw notReady('no active chain');
+    }
+    const addresses = await this.#getCardanoAddresses(origin);
+    const rewardAccount = addresses.find(addr => addr.data?.rewardAccount)?.data
+      ?.rewardAccount;
+    if (!rewardAccount) {
+      throw notReady('wallet addresses not ready');
+    }
+
+    this.#logger?.debug(
+      `[cip30] stake-key registration cache cold for ${accountId}; querying provider`,
+    );
+    const result = await firstValueFrom(
+      this.#cardanoProvider.getRewardAccountInfo(
+        { rewardAccount: rewardAccount },
+        { chainId },
+      ),
+    );
+    if (result.isErr()) {
+      throw notReady(`provider lookup failed: ${result.error.message}`);
+    }
+    return result.value.isRegistered;
   }
 
   /**
@@ -957,8 +1151,11 @@ export class CardanoDappConnectorApi
   #getAccountId(origin: string): AccountId {
     const accountId = this.#getAccountIdForOrigin(origin);
     if (!accountId) {
+      this.#logger?.warn(
+        `[cip30] no session account for origin ${origin}; replying AccountChange (-4)`,
+      );
       throw new APIError(
-        APIErrorCode.InternalError,
+        APIErrorCode.AccountChange,
         `No account found for origin: ${origin}. Please reconnect the dApp.`,
       );
     }
@@ -1073,8 +1270,8 @@ export class CardanoDappConnectorApi
   ): Promise<void> {
     const accountId = this.#getAccountIdForOrigin(origin);
     if (!accountId) {
-      throw new TxSignError(
-        TxSignErrorCode.ProofGeneration,
+      throw new APIError(
+        APIErrorCode.AccountChange,
         `No account found for origin: ${origin}. Please reconnect the dApp.`,
       );
     }

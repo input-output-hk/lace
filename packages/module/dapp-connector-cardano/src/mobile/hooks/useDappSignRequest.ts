@@ -1,7 +1,11 @@
 import { NavigationControls } from '@lace-lib/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { APIErrorCode } from '../../common/api-error';
+import {
+  APIErrorCode,
+  DataSignErrorCode,
+  TxSignErrorCode,
+} from '../../common/api-error';
 
 import type { WebViewResponse } from '../../common/store';
 
@@ -18,6 +22,8 @@ export interface DappSignResult {
 }
 
 export interface UseDappSignRequestConfig {
+  /** Selects which CIP-30 UserDeclined code marks a response as 'rejected'. */
+  signingType: 'signData' | 'signTx';
   requestId: string;
   pendingRequest: unknown;
   webViewResponseQueue: WebViewResponse[];
@@ -36,13 +42,24 @@ export interface UseDappSignRequestResult {
   result: DappSignResult | null;
 }
 
-const mapResponse = (response: WebViewResponse): DappSignResult => {
+const mapResponse = (
+  response: WebViewResponse,
+  signingType: 'signData' | 'signTx',
+): DappSignResult => {
   if (response.success) {
     return { state: 'success' };
   }
   const error = response.error;
+  // A user decline is DataSignError 3 / TxSignError 2; APIError -3 is kept
+  // for responses produced before the CIP-30 code alignment.
+  const declinedCode =
+    signingType === 'signData'
+      ? DataSignErrorCode.UserDeclined
+      : TxSignErrorCode.UserDeclined;
   const state: DappSignResultState =
-    error?.code === APIErrorCode.Refused ? 'rejected' : 'failure';
+    error?.code === declinedCode || error?.code === APIErrorCode.Refused
+      ? 'rejected'
+      : 'failure';
   return {
     state,
     error: error
@@ -52,6 +69,7 @@ const mapResponse = (response: WebViewResponse): DappSignResult => {
 };
 
 export const useDappSignRequest = ({
+  signingType,
   requestId,
   pendingRequest,
   webViewResponseQueue,
@@ -66,8 +84,8 @@ export const useDappSignRequest = ({
   const result = useMemo((): DappSignResult | null => {
     const response = webViewResponseQueue?.find(r => r.id === requestId);
     if (!response) return null;
-    return mapResponse(response);
-  }, [webViewResponseQueue, requestId]);
+    return mapResponse(response, signingType);
+  }, [webViewResponseQueue, requestId, signingType]);
 
   const handleConfirm = useCallback(() => {
     hasRespondedRef.current = true;

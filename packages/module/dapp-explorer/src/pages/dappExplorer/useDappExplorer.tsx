@@ -208,54 +208,13 @@ export const useDappExplorer = (): UseDappExplorerResult => {
     return map;
   }, [customDappList]);
 
-  // Dapps allowed by policy (feature flags, inactive status, excluded
-  // categories), before the user's chain/category/search filters.
-  const policyFilteredDapps = useMemo(() => {
-    let filtered = dappList;
-
-    // Filter out explicitly disallowed slugs
-    if (disallowedSlugs.length > 0) {
-      const disallowedSet = new Set(disallowedSlugs);
-      filtered = filtered.filter(
-        dapp =>
-          alwaysVisibleSlugs.includes(dapp.slug) ||
-          !disallowedSet.has(dapp.slug),
-      );
-    }
-
-    // Filter out dapps with disallowed categories
-    if (disallowedCategories.length > 0) {
-      const disallowedSet = new Set(disallowedCategories);
-      filtered = filtered.filter(
-        dapp =>
-          alwaysVisibleSlugs.includes(dapp.slug) ||
-          !dapp.categories.some((category: string) =>
-            disallowedSet.has(category),
-          ),
-      );
-    }
-
-    // Filter out explicitly inactive dapps
-    filtered = filtered.filter(
-      dapp => dapp.active_status?.toLowerCase() !== 'inactive',
-    );
-
-    // Filter out dapps belonging to excluded categories
-    const excludedSet = new Set(EXCLUDED_CATEGORY_SLUGS);
-    return filtered.filter(
-      dapp => !dapp.categories.some(cat => excludedSet.has(cat)),
-    );
-  }, [dappList, alwaysVisibleSlugs, disallowedSlugs, disallowedCategories]);
-
-  // Policy-hidden dapps must not match here: a URL the user cannot reach
-  // through the curated list behaves like any custom URL (warning + favourite).
   const curatedUrlSet = useMemo(() => {
     const set = new Set<string>();
-    for (const dapp of policyFilteredDapps) {
+    for (const dapp of dappList) {
       if (dapp.website) set.add(normalizeUrlForId(dapp.website));
     }
     return set;
-  }, [policyFilteredDapps]);
+  }, [dappList]);
 
   const requestOpenExternalUrl = useCallback(
     (url: string) => {
@@ -337,9 +296,42 @@ export const useDappExplorer = (): UseDappExplorerResult => {
     NavigationControls.navigate(SheetRoutes.DappFilterControls);
   }, [navigation]);
 
-  // Apply the user's chain/category filters on top of the policy filters
+  // Apply feature-flag filters to the dapp list from the store
   const filteredDapps = useMemo(() => {
-    let filtered = policyFilteredDapps;
+    let filtered = dappList;
+
+    // Filter out explicitly disallowed slugs
+    if (disallowedSlugs.length > 0) {
+      const disallowedSet = new Set(disallowedSlugs);
+      filtered = filtered.filter(
+        dapp =>
+          alwaysVisibleSlugs.includes(dapp.slug) ||
+          !disallowedSet.has(dapp.slug),
+      );
+    }
+
+    // Filter out dapps with disallowed categories
+    if (disallowedCategories.length > 0) {
+      const disallowedSet = new Set(disallowedCategories);
+      filtered = filtered.filter(
+        dapp =>
+          alwaysVisibleSlugs.includes(dapp.slug) ||
+          !dapp.categories.some((category: string) =>
+            disallowedSet.has(category),
+          ),
+      );
+    }
+
+    // Filter out explicitly inactive dapps
+    filtered = filtered.filter(
+      dapp => dapp.active_status?.toLowerCase() !== 'inactive',
+    );
+
+    // Filter out dapps belonging to excluded categories
+    const excludedSet = new Set(EXCLUDED_CATEGORY_SLUGS);
+    filtered = filtered.filter(
+      dapp => !dapp.categories.some(cat => excludedSet.has(cat)),
+    );
 
     // Filter by chain if specified
     if (dappSearchParams?.chain) {
@@ -361,7 +353,10 @@ export const useDappExplorer = (): UseDappExplorerResult => {
 
     return filtered;
   }, [
-    policyFilteredDapps,
+    dappList,
+    alwaysVisibleSlugs,
+    disallowedSlugs,
+    disallowedCategories,
     dappSearchParams?.chain,
     dappSearchParams?.category,
   ]);

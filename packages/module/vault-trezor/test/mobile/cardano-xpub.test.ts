@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getCardanoXpubViaDeepLink } from '../../src/mobile/cardano-xpub';
+import { TREZOR_USB_PRODUCT_ID, TREZOR_USB_VENDOR_ID } from '../../src/const';
+import {
+  TrezorMobileMissingDeviceIdError,
+  getCardanoXpubViaDeepLink,
+  walletIdFromTrezorDeviceId,
+} from '../../src/mobile/cardano-xpub';
 
 // Bip32PublicKeyHex requires exactly 128 hex characters (64 bytes).
-const IDENTITY_XPUB = 'a'.repeat(128);
-const ACCOUNT_XPUB = 'b'.repeat(128);
-// Raw 32-byte key and chain code, as the v10 response splits them.
-const RAW_KEY = 'c'.repeat(64);
-const CHAIN_CODE = 'd'.repeat(64);
+const VALID_XPUB = 'a'.repeat(128);
 
 const hoisted = vi.hoisted(() => ({
   cardanoGetPublicKey: vi.fn(),
@@ -19,110 +20,30 @@ vi.mock('../../src/mobile/trezor-connect-bridge', () => ({
   }),
 }));
 
-/** What Suite returns over the deep link: extended key in `xpub`, raw in `publicKey`. */
-const bundleResponse = (identityXpub = IDENTITY_XPUB) =>
-  hoisted.cardanoGetPublicKey.mockResolvedValue({
-    success: true,
-    payload: [
-      { publicKey: RAW_KEY, xpub: identityXpub },
-      { publicKey: RAW_KEY, xpub: ACCOUNT_XPUB },
-    ],
+describe('walletIdFromTrezorDeviceId', () => {
+  it('uses the Trezor Suite device id when available', () => {
+    expect(walletIdFromTrezorDeviceId('suite-device-id')).toBe(
+      `usb-hw-${TREZOR_USB_VENDOR_ID}-${TREZOR_USB_PRODUCT_ID}-suite-device-id`,
+    );
   });
-
-const requestedBundle = () =>
-  (
-    hoisted.cardanoGetPublicKey.mock.calls[0][0] as {
-      bundle: { path: string; derivationType?: number }[];
-    }
-  ).bundle;
-
-const requestedPaths = () => requestedBundle().map(item => item.path);
-
-const requestedDerivationTypes = () =>
-  requestedBundle().map(item => item.derivationType);
+});
 
 describe('getCardanoXpubViaDeepLink', () => {
   beforeEach(() => {
     hoisted.cardanoGetPublicKey.mockReset();
-    bundleResponse();
   });
 
-  it('reads the extended key from `xpub` when the response splits it off', async () => {
-    const { publicKey } = await getCardanoXpubViaDeepLink(3);
-
-    expect(publicKey).toBe(ACCOUNT_XPUB);
-  });
-
-  it('reads the extended key from `publicKey` when the host back-fills it there', async () => {
+  it('returns the public key and device_id on a successful deep-link round-trip', async () => {
     hoisted.cardanoGetPublicKey.mockResolvedValue({
       success: true,
-      payload: [{ publicKey: IDENTITY_XPUB }, { publicKey: ACCOUNT_XPUB }],
+      payload: { publicKey: VALID_XPUB },
+      device: { features: { device_id: 'suite-device-id' } },
     });
 
-    const { publicKey } = await getCardanoXpubViaDeepLink(3);
+    const result = await getCardanoXpubViaDeepLink(0);
 
-    expect(publicKey).toBe(ACCOUNT_XPUB);
-  });
-
-  it('rebuilds the extended key from the node when neither field carries it', async () => {
-    hoisted.cardanoGetPublicKey.mockResolvedValue({
-      success: true,
-      payload: Array.from({ length: 2 }, () => ({
-        publicKey: RAW_KEY,
-        node: { public_key: RAW_KEY, chain_code: CHAIN_CODE },
-      })),
-    });
-
-    const { publicKey } = await getCardanoXpubViaDeepLink(3);
-
-    expect(publicKey).toBe(`${RAW_KEY}${CHAIN_CODE}`);
-  });
-
-  it('throws with the observed field sizes when no field carries an extended key', async () => {
-    hoisted.cardanoGetPublicKey.mockResolvedValue({
-      success: true,
-      payload: Array.from({ length: 2 }, () => ({ publicKey: RAW_KEY })),
-    });
-
-    await expect(getCardanoXpubViaDeepLink(3)).rejects.toThrow(
-      'xpub: 0 hex chars, publicKey: 64, node: 0',
-    );
-  });
-
-  it('throws when the bundle comes back collapsed to a single key', async () => {
-    hoisted.cardanoGetPublicKey.mockResolvedValue({
-      success: true,
-      payload: [{ publicKey: RAW_KEY, xpub: ACCOUNT_XPUB }],
-    });
-
-    await expect(getCardanoXpubViaDeepLink(3)).rejects.toThrow(
-      'Trezor returned 1 keys for a 2-path bundle',
-    );
-  });
-
-  it('requests the identity path and the account path in one deep-link round-trip', async () => {
-    await getCardanoXpubViaDeepLink(3);
-
-    expect(hoisted.cardanoGetPublicKey).toHaveBeenCalledTimes(1);
-    expect(requestedPaths()).toEqual(["m/1852'/1815'/0'", "m/1852'/1815'/3'"]);
-  });
-
-  it('derives the same seed identity regardless of which account is requested', async () => {
-    const { seedIdentity: fromAccount0 } = await getCardanoXpubViaDeepLink(0);
-    const { seedIdentity: fromAccount7 } = await getCardanoXpubViaDeepLink(7);
-
-    expect(fromAccount0).toBe(fromAccount7);
-  });
-
-  it('derives a different seed identity for a different device seed', async () => {
-    const { seedIdentity } = await getCardanoXpubViaDeepLink(0);
-
-    bundleResponse('c'.repeat(128));
-    const { seedIdentity: otherSeedIdentity } = await getCardanoXpubViaDeepLink(
-      0,
-    );
-
-    expect(otherSeedIdentity).not.toBe(seedIdentity);
+    expect(result.publicKey).toBe(VALID_XPUB);
+    expect(result.deviceId).toBe('suite-device-id');
   });
 
   it('throws when Suite returns a failure response', async () => {
@@ -136,15 +57,68 @@ describe('getCardanoXpubViaDeepLink', () => {
     );
   });
 
-  it('passes the numeric derivation type to Trezor on every bundle item', async () => {
+  it('throws when Suite omits device_id (would otherwise collide across devices)', async () => {
+    hoisted.cardanoGetPublicKey.mockResolvedValue({
+      success: true,
+      payload: { publicKey: VALID_XPUB },
+      device: { features: { device_id: null } },
+    });
+
+    await expect(getCardanoXpubViaDeepLink(0)).rejects.toThrow(
+      TrezorMobileMissingDeviceIdError,
+    );
+  });
+
+  it('throws when the response carries no device object', async () => {
+    hoisted.cardanoGetPublicKey.mockResolvedValue({
+      success: true,
+      payload: { publicKey: VALID_XPUB },
+    });
+
+    await expect(getCardanoXpubViaDeepLink(0)).rejects.toThrow(
+      TrezorMobileMissingDeviceIdError,
+    );
+  });
+
+  it('builds the correct Cardano BIP-44 derivation path for the given account index', async () => {
+    hoisted.cardanoGetPublicKey.mockResolvedValue({
+      success: true,
+      payload: { publicKey: VALID_XPUB },
+      device: { features: { device_id: 'id' } },
+    });
+
+    await getCardanoXpubViaDeepLink(3);
+
+    expect(hoisted.cardanoGetPublicKey).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "m/1852'/1815'/3'" }),
+    );
+  });
+
+  it('passes the numeric derivation type to Trezor when derivationType is provided', async () => {
+    hoisted.cardanoGetPublicKey.mockResolvedValue({
+      success: true,
+      payload: { publicKey: VALID_XPUB },
+      device: { features: { device_id: 'id' } },
+    });
+
     await getCardanoXpubViaDeepLink(0, 'ICARUS_TREZOR');
 
-    expect(requestedDerivationTypes()).toEqual([2, 2]);
+    expect(hoisted.cardanoGetPublicKey).toHaveBeenCalledWith(
+      expect.objectContaining({ derivationType: 2 }),
+    );
   });
 
   it('passes undefined derivationType to Trezor when derivationType is omitted', async () => {
+    hoisted.cardanoGetPublicKey.mockResolvedValue({
+      success: true,
+      payload: { publicKey: VALID_XPUB },
+      device: { features: { device_id: 'id' } },
+    });
+
     await getCardanoXpubViaDeepLink(0);
 
-    expect(requestedDerivationTypes()).toEqual([undefined, undefined]);
+    expect(hoisted.cardanoGetPublicKey).toHaveBeenCalledWith(
+      expect.objectContaining({ derivationType: undefined }),
+    );
   });
 });

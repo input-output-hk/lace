@@ -30,6 +30,7 @@ import type {
   AccountRewardAccountDetailsMap,
   AccountUtxoMap,
   CardanoAccountAddressHistoryMap,
+  CardanoProvider,
 } from '@lace-contract/cardano-context';
 import type { AuthorizedDappsDataSlice } from '@lace-contract/dapp-connector';
 import type { SignerFactory } from '@lace-contract/signer';
@@ -74,6 +75,8 @@ type ConnectCardanoDappConnectorParameters<T> = {
   allAccounts$: Observable<AnyAccount[]>;
   /** Observable of all wallets (needed for accessing encrypted root key for signing) */
   allWallets$: Observable<AnyWallet[]>;
+  /** On-demand stake-key registration lookup for a cold cache (CIP-95) */
+  cardanoProvider?: Pick<CardanoProvider, 'getRewardAccountInfo'>;
   /**
    * Function to get account ID for a specific dApp origin.
    * Enables per-dApp account isolation.
@@ -168,6 +171,7 @@ export const initializeCardanoDappConnectorDependencies = ({
     chainId$,
     allAccounts$,
     allWallets$,
+    cardanoProvider,
     getAccountIdForOrigin,
     signTransaction,
     submitTransaction,
@@ -202,6 +206,8 @@ export const initializeCardanoDappConnectorDependencies = ({
           accessAuthSecret,
           authenticate,
           signingResult$,
+          logger,
+          cardanoProvider,
         });
 
       const api = exposeApi(

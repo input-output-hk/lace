@@ -17,7 +17,7 @@ import {
   tap,
 } from 'rxjs';
 
-import type { ActionCreators, SideEffect } from '../..';
+import type { SideEffect } from '../..';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { FoundDevice, SearchHWDevices } from '@lace-lib/util-hw';
 import type { Observable } from 'rxjs';
@@ -38,28 +38,6 @@ const classifyBleError = (error: unknown): TranslationKey => {
   return SEARCH_ERROR_TRANSLATION_KEY;
 };
 
-/**
- * Escalates to the Error state only when every vendor failed, otherwise merges
- * whatever they found. Sits outside the pipe so its own callbacks do not stack
- * on top of the side effect's nesting.
- */
-const toSearchOutcomeAction = (
-  outcomes: SearchOutcome[],
-  actions: ActionCreators,
-) => {
-  const areAllErrored =
-    outcomes.length > 0 && outcomes.every(o => o.error !== undefined);
-  if (areAllErrored) {
-    const firstError = outcomes.find(o => o.error !== undefined)?.error;
-    return actions.hwConnectorMobile.errored({
-      errorTranslationKey: classifyBleError(firstError),
-    });
-  }
-  return actions.hwConnectorMobile.devicesChanged({
-    devices: outcomes.flatMap(o => o.devices),
-  });
-};
-
 export const makeHandleSearching = (
   searchHWDevices: SearchHWDevices[],
 ): SideEffect => {
@@ -67,7 +45,8 @@ export const makeHandleSearching = (
     const searchHandles = searchHWDevices.map(search => search());
     // Wrap each handle so it never errors the combined stream: a per-vendor
     // failure surfaces as `{ devices: [], error }` and lets other vendors
-    // keep streaming devices.
+    // keep streaming devices. Only when every handle has errored do we
+    // escalate to the Error state.
     const outcomes$: Observable<SearchOutcome>[] = searchHandles.map(h =>
       h.results$.pipe(
         map((devices): SearchOutcome => ({ devices })),
@@ -100,7 +79,21 @@ export const makeHandleSearching = (
           take(1),
         );
         return outcomes$.pipe(
-          map(outcomes => toSearchOutcomeAction(outcomes, actions)),
+          map(outcomes => {
+            const areAllErrored =
+              outcomes.length > 0 && outcomes.every(o => o.error !== undefined);
+            if (areAllErrored) {
+              const firstError = outcomes.find(
+                o => o.error !== undefined,
+              )?.error;
+              return actions.hwConnectorMobile.errored({
+                errorTranslationKey: classifyBleError(firstError),
+              });
+            }
+            return actions.hwConnectorMobile.devicesChanged({
+              devices: outcomes.flatMap(o => o.devices),
+            });
+          }),
           takeUntil(leavingSearching$),
           finalize(stop),
         );
@@ -119,23 +112,12 @@ export const handleError: SideEffect = (
     toEmpty,
   );
 
-const DISCOVERY_SHEETS = [
-  SheetRoutes.HardwareWalletDiscoveryResults,
-  SheetRoutes.HardwareWalletDiscoveryError,
-] as const;
-
 export const handleSheetClose: SideEffect = ({
   hwConnectorMobile: { cancel$, deviceSelected$ },
 }) =>
   merge(cancel$, deviceSelected$).pipe(
     tap(() => {
-      // Only this flow's own sheets: closing the whole stack would also unmount
-      // the sheet that requested the connection (add-wallet), so the device
-      // match it is awaiting would resolve into a dead React tree — leaving the
-      // base screen bare with no way to continue. Onboarding is unaffected
-      // either way: its picker is a stack screen, so the discovery sheet sits
-      // directly on the base route and this still dismisses everything.
-      NavigationControls.closeSheets(DISCOVERY_SHEETS);
+      NavigationControls.closeSheet();
     }),
     toEmpty,
   );

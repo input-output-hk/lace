@@ -89,17 +89,15 @@ describe('cip8SignData', () => {
     );
   });
 
-  it('defaults to role 2 index 0 for reward accounts without matching known address', async () => {
-    await cip8SignData({
-      keyAgent: mockKeyAgent,
-      request: { ...baseRequest, signWith: rewardAccount },
-      knownAddresses: [],
-    });
-
-    expect(mockKeyAgent.signBlob).toHaveBeenCalledWith(
-      { role: 2, index: 0 },
-      expect.any(String),
-    );
+  it('throws for reward accounts without a matching known address (no silent fallback to stake key 0)', async () => {
+    await expect(
+      cip8SignData({
+        keyAgent: mockKeyAgent,
+        request: { ...baseRequest, signWith: rewardAccount },
+        knownAddresses: [],
+      }),
+    ).rejects.toThrow(/Unknown signWith reward account/);
+    expect(mockKeyAgent.signBlob).not.toHaveBeenCalled();
   });
 
   it('throws for unknown payment addresses (no silent fallback to payment key 0)', async () => {

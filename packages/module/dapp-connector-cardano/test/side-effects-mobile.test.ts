@@ -5,10 +5,16 @@ import { type DeepPartialTilObservable } from '@lace-lib/util-dev';
 import { firstValueFrom, of, take, toArray } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { APIErrorCode } from '../src/common/api-error';
+import {
+  APIErrorCode,
+  DataSignErrorCode,
+  TxSignErrorCode,
+} from '../src/common/api-error';
 import { cardanoDappConnectorActions } from '../src/common/store/slice';
 import {
   handleAuthResponse,
+  handleSignDataConfirmation,
+  handleSignDataRejection,
   handleSignTxRejection,
   processWebViewMessage,
 } from '../src/mobile/store/side-effects';
@@ -36,8 +42,9 @@ vi.mock('@lace-lib/navigation', () => ({
   },
 }));
 
-vi.mock('@lace-contract/cardano-context', async () => {
+vi.mock('@lace-contract/cardano-context', async importOriginal => {
   const { of } = await import('rxjs');
+  const actual = await importOriginal<Record<string, unknown>>();
   return {
     cardanoAccountUtxos$: of({}),
     cardanoAccountUnspendableUtxos$: of({}),
@@ -45,6 +52,8 @@ vi.mock('@lace-contract/cardano-context', async () => {
     cardanoAddresses$: of([]),
     cardanoChainId$: of(undefined),
     isCardanoAccount: () => true,
+    // Real class so the signData error mapping's instanceof checks work.
+    UnknownSignWithError: actual.UnknownSignWithError,
   };
 });
 
@@ -645,7 +654,7 @@ describe('mobile side effects', () => {
           id: 'tx-1',
           success: false,
           error: {
-            code: APIErrorCode.Refused,
+            code: TxSignErrorCode.UserDeclined,
             info: 'User declined to sign transaction',
           },
           timestamp: 789,
@@ -658,6 +667,177 @@ describe('mobile side effects', () => {
       const output$ = invokeHandleSignTxRejection(null);
       const emitted = await firstValueFrom(output$.pipe(toArray()));
       expect(emitted).toEqual([]);
+    });
+  });
+
+  describe('handleSignDataRejection', () => {
+    it('emits DataSignError UserDeclined and clears pending request', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(789);
+
+      const actionObservables = {
+        cardanoDappConnector: {
+          rejectSignData$: of({ type: 'rejectSignData' }),
+        },
+      };
+      const stateObservables = {
+        cardanoDappConnector: {
+          selectPendingSignDataRequest$: of({
+            requestId: 'data-1',
+            dappOrigin: 'https://dapp.example',
+            address: 'stake_test1abc',
+            payload: 'deadbeef',
+          }),
+        },
+      };
+      const output$ = handleSignDataRejection(
+        actionObservables as unknown as ActionObservables<ActionCreators>,
+        stateObservables as unknown as StateObservables<Selectors>,
+        createDependencies() as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: 'data-1',
+          success: false,
+          error: {
+            code: DataSignErrorCode.UserDeclined,
+            info: 'User declined to sign data',
+          },
+          timestamp: 789,
+        }),
+        cardanoDappConnectorActions.cardanoDappConnector.clearPendingSignDataRequest(),
+      ]);
+    });
+  });
+
+  describe('handleSignDataConfirmation', () => {
+    it('answers AccountChange when the session was rebound while the sheet was open', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(789);
+
+      const gateAccountId = AccountId('acc-1');
+      const currentAccountId = AccountId('acc-2');
+      const createDataSigner = vi.fn();
+
+      const actionObservables = {
+        cardanoDappConnector: {
+          confirmSignData$: of({ type: 'confirmSignData' }),
+        },
+      };
+      const stateObservables = {
+        cardanoDappConnector: {
+          selectPendingSignDataRequest$: of({
+            requestId: 'data-3',
+            dappOrigin: 'https://dapp.example',
+            address: 'stake_test1abc',
+            payload: 'deadbeef',
+            accountId: gateAccountId,
+          }),
+          selectSessionAccountByOrigin$: of({
+            'https://dapp.example': currentAccountId,
+          }),
+        },
+        wallets: {
+          selectActiveNetworkAccounts$: of([]),
+          selectAll$: of([]),
+        },
+        addresses: { selectAllAddresses$: of([]) },
+      };
+      const dependencies = {
+        ...createDependencies(),
+        accessAuthSecret: vi.fn(),
+        authenticate: vi.fn(),
+        signerFactory: { canSign: () => true, createDataSigner },
+      };
+
+      const output$ = handleSignDataConfirmation(
+        actionObservables as unknown as ActionObservables<ActionCreators>,
+        stateObservables as unknown as StateObservables<Selectors>,
+        dependencies as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: 'data-3',
+          success: false,
+          error: {
+            code: APIErrorCode.AccountChange,
+            info: 'Session account changed while awaiting confirmation for origin: https://dapp.example. Please reconnect the dApp.',
+          },
+          timestamp: 789,
+        }),
+        cardanoDappConnectorActions.cardanoDappConnector.clearPendingSignDataRequest(),
+      ]);
+      expect(createDataSigner).not.toHaveBeenCalled();
+    });
+
+    it('refuses an unparseable address with DataSignError AddressNotPK without touching the signer', async () => {
+      vi.spyOn(Date, 'now').mockReturnValue(789);
+
+      const accountId = AccountId('acc-1');
+      const walletId = 'wallet-1';
+      const account = {
+        accountId,
+        walletId,
+        accountType: 'Bip32',
+        blockchainName: 'Cardano',
+      };
+      const createDataSigner = vi.fn();
+
+      const actionObservables = {
+        cardanoDappConnector: {
+          confirmSignData$: of({ type: 'confirmSignData' }),
+        },
+      };
+      const stateObservables = {
+        cardanoDappConnector: {
+          selectPendingSignDataRequest$: of({
+            requestId: 'data-2',
+            dappOrigin: 'https://dapp.example',
+            address: 'not-a-valid-address',
+            payload: 'deadbeef',
+          }),
+          selectSessionAccountByOrigin$: of({
+            'https://dapp.example': accountId,
+          }),
+        },
+        wallets: {
+          selectActiveNetworkAccounts$: of([account]),
+          selectAll$: of([{ walletId, type: 'InMemory' }]),
+        },
+        addresses: { selectAllAddresses$: of([]) },
+      };
+      const dependencies = {
+        ...createDependencies(),
+        accessAuthSecret: vi.fn(),
+        authenticate: vi.fn(),
+        signerFactory: { canSign: () => true, createDataSigner },
+      };
+
+      const output$ = handleSignDataConfirmation(
+        actionObservables as unknown as ActionObservables<ActionCreators>,
+        stateObservables as unknown as StateObservables<Selectors>,
+        dependencies as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: 'data-2',
+          success: false,
+          error: {
+            code: DataSignErrorCode.AddressNotPK,
+            info: 'Invalid address format for signing',
+          },
+          timestamp: 789,
+        }),
+        cardanoDappConnectorActions.cardanoDappConnector.clearPendingSignDataRequest(),
+      ]);
+      expect(createDataSigner).not.toHaveBeenCalled();
     });
   });
 });

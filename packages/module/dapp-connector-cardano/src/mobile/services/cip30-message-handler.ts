@@ -1,6 +1,13 @@
 import { firstValueFrom } from 'rxjs';
 
-import { APIError, APIErrorCode } from '../../common/api-error';
+import {
+  APIError,
+  APIErrorCode,
+  DataSignError,
+  PaginateError,
+  TxSendError,
+  TxSignError,
+} from '../../common/api-error';
 import {
   CardanoDappConnectorApi,
   type CardanoDappConnectorApiDependencies,
@@ -23,6 +30,7 @@ import type {
   AnyWallet,
 } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
+import type { Logger } from 'ts-log';
 
 /**
  * Represents a CIP-30 request message from a dApp.
@@ -49,8 +57,8 @@ export interface Cip30Response {
   success: boolean;
   /** Result data on success */
   result?: unknown;
-  /** Error details on failure */
-  error?: { code: number; info: string };
+  /** Error details on failure; maxSize carries CIP-30 PaginateError */
+  error?: { code: number; info: string; maxSize?: number };
 }
 
 /**
@@ -85,6 +93,8 @@ export interface SigningRequired {
   address?: string;
   /** For signData - hex payload to sign */
   payload?: string;
+  /** For signData - the session account the pre-consent gate validated */
+  accountId?: AccountId;
   /** For signTx - transaction CBOR */
   txHex?: string;
   /** For signTx - whether partial signing is allowed */
@@ -158,6 +168,8 @@ export interface Cip30MessageHandlerDependencies {
   cardanoProvider: CardanoProvider;
   /** Derives and persists the next unused External address */
   deriveNextUnusedAddress?: DeriveNextUnusedAddressFunction;
+  /** Logger for dApp-request diagnostics; silent when omitted */
+  logger?: Logger;
 }
 
 /**
@@ -192,6 +204,8 @@ export const handleCip30Message = async (
     allAccounts$: deps.allAccounts$,
     allWallets$: deps.allWallets$,
     deriveNextUnusedAddress: deps.deriveNextUnusedAddress,
+    logger: deps.logger,
+    cardanoProvider: deps.cardanoProvider,
     submitTransaction: async cbor => {
       const chainId = await firstValueFrom(deps.chainId$);
       if (!chainId) {
@@ -350,6 +364,9 @@ export const handleCip30Message = async (
 
       signData: async () => {
         const [address, payload] = args as [string, string];
+        // Refuse unsignable requests before the signing sheet opens; the
+        // typed DataSignError reaches the dApp via the catch below.
+        await walletApi.validateCanSignData(address, dappOrigin);
         return {
           type: 'signing_required' as const,
           requestId: id,
@@ -358,6 +375,9 @@ export const handleCip30Message = async (
           signingType: 'signData' as const,
           address,
           payload,
+          // Confirmation re-checks this: a rebind while the sheet is open
+          // answers AccountChange instead of signing under the new account.
+          accountId: deps.getAccountIdForOrigin(dappOrigin),
         };
       },
 
@@ -398,8 +418,29 @@ export const handleCip30Message = async (
 
     return createResponse({ id, success: true, result });
   } catch (error) {
-    if (error instanceof APIError) {
+    // CIP-30 typed errors carry the code the dApp branches on; flattening
+    // them to InternalError makes every refusal look like a wallet crash.
+    if (
+      error instanceof APIError ||
+      error instanceof DataSignError ||
+      error instanceof TxSendError ||
+      error instanceof TxSignError
+    ) {
       return createErrorResponse(error.code, error.info);
+    }
+    // PaginateError has no numeric code in CIP-30 — its contract is the
+    // maxSize field; -1 (InvalidRequest) carries it over the numeric-code
+    // transport and the injected runtime re-attaches maxSize.
+    if (error instanceof PaginateError) {
+      return createResponse({
+        id,
+        success: false,
+        error: {
+          code: APIErrorCode.InvalidRequest,
+          info: error.message,
+          maxSize: error.maxSize,
+        },
+      });
     }
 
     const error_ = error as Error;

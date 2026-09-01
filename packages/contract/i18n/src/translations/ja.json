@@ -418,6 +418,7 @@
   "dapp-connector.cardano.sign-data.confirm": "確認",
   "dapp-connector.cardano.sign-data.deny": "キャンセル",
   "dapp-connector.cardano.sign-data.address-label": "アドレス:",
+  "dapp-connector.cardano.sign-data.drep-id-label": "DRep ID:",
   "dapp-connector.cardano.sign-data.payload-label": "データ:",
   "dapp-connector.cardano.sign-data.result.success.title": "完了しました！",
   "dapp-connector.cardano.sign-data.result.success.description": "データが署名されました",

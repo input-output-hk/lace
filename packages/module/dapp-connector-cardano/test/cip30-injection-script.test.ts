@@ -24,7 +24,10 @@ describe('cip30-injection-script', () => {
       expect(defaultConfig.walletName).toBe(WALLET_NAME);
       expect(defaultConfig.apiVersion).toBe(CIP30_API_VERSION);
       expect(defaultConfig.walletIcon).toBe(WALLET_ICON);
-      expect(defaultConfig.supportedExtensions).toEqual([{ cip: 95 }]);
+      expect(defaultConfig.supportedExtensions).toEqual([
+        { cip: 95 },
+        { cip: 142 },
+      ]);
       expect(defaultConfig.requestTimeout).toBe(60000);
       expect(typeof defaultConfig.debug).toBe('boolean');
     });
