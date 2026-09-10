@@ -9,6 +9,7 @@ import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 import { useContactForm } from '../../hooks/useContactForm';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
+import type { ButtonConfig } from '@lace-lib/ui-toolkit';
 
 const CONTACT_SHEET_TEST_ID = 'contact-sheet';
 
@@ -41,6 +42,16 @@ export const AddContactSheet = ({
   );
   const mode = contact ? 'edit' : 'add';
 
+  const primaryButton = useMemo<ButtonConfig>(
+    () => ({
+      label: t('v2.contact-sheet.button.save'),
+      onPress: form.onSave,
+      disabled: form.saveDisabled,
+      testID: `${CONTACT_SHEET_TEST_ID}-save-button`,
+    }),
+    [t, form.onSave, form.saveDisabled],
+  );
+
   useEffect(() => {
     navigation.setOptions({
       header: (
@@ -60,16 +71,11 @@ export const AddContactSheet = ({
             onPress: form.onCancel,
             testID: `${CONTACT_SHEET_TEST_ID}-cancel-button`,
           }}
-          primaryButton={{
-            label: t('v2.contact-sheet.button.save'),
-            onPress: form.onSave,
-            disabled: form.saveDisabled,
-            testID: `${CONTACT_SHEET_TEST_ID}-save-button`,
-          }}
+          primaryButton={primaryButton}
         />
       ),
     });
-  }, [navigation, t, mode, form.onCancel, form.onSave, form.saveDisabled]);
+  }, [navigation, t, mode, form.onCancel, primaryButton]);
 
   const onDeletePress = () => {
     setIsDeleteModalVisible(true);
@@ -100,12 +106,14 @@ export const AddContactSheet = ({
 
   return (
     <>
-      <ContactSheet
-        mode={mode}
-        testID={CONTACT_SHEET_TEST_ID}
-        {...form}
-        onRemoveContact={onDeletePress}
-      />
+      <Sheet.SubmitProvider action={primaryButton}>
+        <ContactSheet
+          mode={mode}
+          testID={CONTACT_SHEET_TEST_ID}
+          {...form}
+          onRemoveContact={onDeletePress}
+        />
+      </Sheet.SubmitProvider>
       <Modal
         visible={isDeleteModalVisible}
         onClose={closeDeleteModal}

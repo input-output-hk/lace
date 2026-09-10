@@ -1,0 +1,27 @@
+{
+  "name": "@lace-module/bitcoin-host-pull",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@bitcoinerlab/secp256k1": "1.2.0",
+    "@lace-contract/bitcoin-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/bitcoin-provider-core": "*",
+    "@lace-lib/extension-shell-api": "*",
+    "@lace-lib/extension-shell-client": "*",
+    "@lace-lib/util": "*",
+    "@scure/bip32": "2.0.1",
+    "bitcoinjs-lib": "^6.1.7"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

@@ -23,7 +23,7 @@ export type ActivityCardProps =
   | {
       id: string;
       status: 'failed' | 'pending';
-      info: { title: string };
+      info: FlexibleInfo;
       value: { subtitle: string };
       iconName: IconName;
       iconBackground?: ColorType;

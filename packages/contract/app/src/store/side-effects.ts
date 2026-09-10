@@ -67,19 +67,25 @@ export const trackSession: SideEffect = (
   );
 
 /**
- * Consumes `reloadApplication` and invokes the platform-injected
- * `performAppReload` (mobile: `Updates.reloadAsync`; extension: `runtime.reload`).
- * `catchError` keeps the outer subscription alive so a single failure doesn't
- * silently drop future reload requests.
+ * Consumes `reloadApplication`, flushes pending redux-persist writes (see
+ * `flushPersistedState`), then invokes the platform-injected reload (mobile:
+ * `Updates.reloadAsync`; extension: `runtime.reload`). A failed flush still
+ * reloads. `catchError` keeps the outer subscription alive so a single failure
+ * doesn't silently drop future reloads.
  */
 export const performAppReload: SideEffect = (
   { app: { reloadApplication$ } },
   __,
-  { performAppReload: doReload, logger },
+  { performAppReload: doReload, flushPersistedState, logger },
 ) =>
   reloadApplication$.pipe(
     switchMap(() =>
-      doReload().pipe(
+      flushPersistedState().pipe(
+        catchError(error => {
+          logger.error('Failed to flush persisted state before reload', error);
+          return of(undefined);
+        }),
+        switchMap(() => doReload()),
         catchError(error => {
           logger.error('Failed to reload app', error);
           return EMPTY;

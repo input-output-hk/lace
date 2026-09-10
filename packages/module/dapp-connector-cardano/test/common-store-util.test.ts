@@ -3,11 +3,7 @@ import { HexBlob } from '@cardano-sdk/util';
 import { describe, expect, it } from 'vitest';
 
 import { DataSignError, DataSignErrorCode } from '../src/common/api-error';
-import {
-  addrToDisplay,
-  addrToSignWith,
-  isSignDataSignerResolving,
-} from '../src/common/store/util';
+import { addrToDisplay, addrToSignWith } from '../src/common/store/util';
 
 import type { Ed25519KeyHashHex, Hash28ByteBase16 } from '@cardano-sdk/crypto';
 
@@ -71,7 +67,6 @@ const paymentAddressHex = String(
 const enterpriseAddressBech32 = Cardano.Address.fromBytes(
   HexBlob(enterpriseAddressTestnetHex),
 ).toBech32() as Cardano.PaymentAddress;
-const enterpriseScriptAddressHex = `70${drepKeyHashHex}`;
 
 const expectEnterpriseKeyAddressWithHash = (
   result: Cardano.PaymentAddress | Cardano.RewardAccount,
@@ -317,44 +312,6 @@ describe('addrToDisplay', () => {
       expect(credential.hash).toBe(drepKeyHashHex);
       expect(credential.type).toBe(Cardano.CredentialType.ScriptHash);
     });
-  });
-});
-
-describe('isSignDataSignerResolving', () => {
-  it.each<[label: string, input: string]>([
-    ['hex testnet enterprise key address', enterpriseAddressTestnetHex],
-    ['hex mainnet enterprise key address', enterpriseAddressMainnetHex],
-    ['bech32 enterprise key address', enterpriseAddressBech32],
-  ])('holds a %s until the DRep key hash arrives', (_label, input) => {
-    expect(isSignDataSignerResolving(input)).toBe(true);
-  });
-
-  it('resolves once the account DRep key hash matches', () => {
-    expect(
-      isSignDataSignerResolving(
-        enterpriseAddressTestnetHex,
-        accountDRepKeyHash,
-      ),
-    ).toBe(false);
-  });
-
-  it('resolves once a non-matching DRep key hash rules the DRep request out', () => {
-    expect(
-      isSignDataSignerResolving(enterpriseAddressTestnetHex, otherKeyHash),
-    ).toBe(false);
-  });
-
-  it.each<[label: string, input: string]>([
-    ['bech32 base payment address', paymentAddress],
-    ['hex base payment address', paymentAddressHex],
-    ['bech32 reward account', rewardAccount],
-    ['hex reward address', rewardAccountTestnetHex],
-    ['hex enterprise script address', enterpriseScriptAddressHex],
-    ['CIP-129 bech32 DRep ID', drepIdCip129Bech32],
-    ['CIP-105 bech32 DRep ID', drepIdCip105Bech32],
-    ['hex DRep key hash', drepKeyHashHex],
-  ])('never holds an unambiguous %s', (_label, input) => {
-    expect(isSignDataSignerResolving(input)).toBe(false);
   });
 });
 

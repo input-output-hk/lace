@@ -41,8 +41,11 @@ export const useReceiveSheet = () => {
     return index >= 0 ? index : 0;
   }, [accounts, activeAccountContext?.accountId]);
 
-  const [selectedAccountIndex, setSelectedAccountIndex] =
-    useState(activeAccountIndex);
+  // Accounts can hydrate after mount, so `activeAccountIndex` is 0 until the
+  // active account is found. Seeding state with it would freeze that stale 0;
+  // deferring to it until the user picks keeps the active account selected.
+  const [pickedAccountIndex, setPickedAccountIndex] = useState<number>();
+  const selectedAccountIndex = pickedAccountIndex ?? activeAccountIndex;
   const showToast = useDispatchLaceAction('ui.showToast');
 
   const isBuyAvailable = useLaceSelector(
@@ -258,10 +261,10 @@ export const useReceiveSheet = () => {
 
   const onSelectItem = useCallback(
     (index: number) => {
-      setSelectedAccountIndex(index);
+      setPickedAccountIndex(index);
       trackEvent('receive | account | select | press', { index });
     },
-    [setSelectedAccountIndex, trackEvent],
+    [setPickedAccountIndex, trackEvent],
   );
 
   const onCopyAddressPress = (addr: string) => {

@@ -1,3 +1,6 @@
+import { createMigrate } from 'redux-persist';
+
+import { dropIncompleteNetworkData } from './migrations/drop-incomplete-network-data';
 import { cardanoStakePoolsSideEffects } from './side-effects';
 import { cardanoStakePoolsReducers, initialState } from './slice';
 
@@ -11,8 +14,11 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
   },
   persistConfig: {
     cardanoStakePools: {
-      version: 1,
+      version: 2,
       whitelist: ['networkData', 'poolDetails', 'poolSummaries'],
+      migrate: createMigrate({
+        2: dropIncompleteNetworkData,
+      }),
     },
   },
 });

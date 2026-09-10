@@ -47,6 +47,7 @@ import { useSelector } from 'react-redux';
 
 import { Home } from './Home';
 import { useDispatchLaceAction, useLaceSelector } from './util/hooks';
+import { sentryNavigationIntegration } from './util/sentry-navigation';
 
 import type { Init } from './load-app';
 import type { State } from '@lace-contract/module';
@@ -116,6 +117,7 @@ export const Router = ({
   }, []);
 
   const onNavigationReady = useCallback(() => {
+    sentryNavigationIntegration.registerNavigationContainer(navigationRef);
     trackNavigationReady();
     syncDialogRouteFromNavigationRef();
   }, [trackNavigationReady, syncDialogRouteFromNavigationRef]);

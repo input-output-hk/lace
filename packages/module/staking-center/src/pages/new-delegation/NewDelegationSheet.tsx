@@ -105,10 +105,12 @@ export const NewDelegationSheet = (
           <Sheet.Footer
             secondaryButton={{
               label: delegationProps.cancelButtonLabel,
+              testID: 'delegation-cancel-button',
               onPress: delegationProps.onCancelPress,
             }}
             primaryButton={{
               label: delegationProps.delegateButtonLabel,
+              testID: 'delegation-confirm-button',
               onPress: delegationProps.onDelegatePress,
             }}
           />

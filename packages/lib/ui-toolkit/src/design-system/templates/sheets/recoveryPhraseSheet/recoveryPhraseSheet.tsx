@@ -6,10 +6,9 @@ import { Button, Loader, Column, Text } from '../../../atoms';
 import { RecoveryPhrase } from '../../../molecules';
 import { Sheet, footerHeight } from '../../../organisms';
 
-import type { ByteArray } from '@lace-lib/util';
-
 interface RecoveryPhraseSheetTemplateProps {
-  mnemonicWords: ByteArray[] | null;
+  /** One byte array per word (ByteArray or plain Uint8Array); null while loading. */
+  mnemonicWords: Uint8Array[] | null;
   isBlurred: boolean;
   showPassphraseLabel: string;
   hidePassphraseLabel?: string;

@@ -74,6 +74,10 @@ export type StakeCardProps = {
   onAddFunds?: () => void;
   testID?: string;
   onViewDelegation?: () => void;
+
+  // Overrides the "Stake" CTA label for the stake-available state — used to
+  // surface "Earn rewards" when onStake routes into the earn-rewards flow.
+  ctaLabelOverride?: string;
 };
 
 export const StakeCard = ({
@@ -95,6 +99,7 @@ export const StakeCard = ({
   onAddFunds,
   testID = 'stake-card',
   onViewDelegation,
+  ctaLabelOverride,
 }: StakeCardProps) => {
   const { theme } = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
@@ -346,7 +351,7 @@ export const StakeCard = ({
       case 'not-available':
         return t('v2.generic.staking.card.coming-soon');
       case 'stake-available':
-        return t('v2.generic.staking.card.stake.label');
+        return ctaLabelOverride ?? t('v2.generic.staking.card.stake.label');
       case 'high-saturation':
       case 'low-saturation':
       case 'pledge':
@@ -383,10 +388,17 @@ export const StakeCard = ({
             size="large"
             onPress={onDelegate || (() => {})}
             fullWidth
+            // Attribute-only test hook (zero logic/rendering change) — same
+            // call-site pattern NetworkSheet.tsx's
+            // `network-selection-sheet-confirm-button` already uses. This
+            // Button.Primary (unlike renderUnstakedBalance()'s
+            // `${testID}-stake-button`) previously carried no testID at
+            // all, so an e2e flow could not distinguish the 'locked'
+            // state's "Delegate Vote" action from any other card's button.
+            testID={`${testID}-action-button`}
           />
         );
       case 'loading':
-      case 'low-saturation':
       default:
         return null;
     }

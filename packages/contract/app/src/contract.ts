@@ -45,6 +45,15 @@ export const blockchainSpecificAppCustomizationsAddonContract =
     },
   });
 
+export const portfolioAnnouncementsAddonContract = inferContractContext({
+  name: ContractName('portfolio-announcements-addon'),
+  instance: 'zero-or-more',
+  contractType: 'addon',
+  provides: {
+    addons: ['loadPortfolioAnnouncements'],
+  },
+});
+
 export const blockchainSpecificAppSettingsPageCustomizationsAddonContract =
   inferContractContext({
     name: ContractName(

@@ -22,6 +22,10 @@ const txBody = {
 };
 
 const mockWitnessSet = { setVkeys: vi.fn() };
+const scriptsState = vi.hoisted(() => ({
+  scripts: undefined as unknown[] | undefined,
+}));
+
 const toCore = vi.fn().mockReturnValue(txBody);
 const mockTx = {
   body: vi.fn().mockReturnValue({
@@ -30,6 +34,7 @@ const mockTx = {
   }),
   witnessSet: vi.fn().mockReturnValue(mockWitnessSet),
   auxiliaryData: vi.fn().mockReturnValue({}),
+  toCore: vi.fn(() => ({ witness: { scripts: scriptsState.scripts } })),
 };
 
 vi.mock('@cardano-sdk/core', () => ({
@@ -52,7 +57,7 @@ const createTxInKeyPathMap = vi.hoisted(() =>
 const ownSignatureKeyPaths = vi.hoisted(() =>
   vi.fn<
     (
-      ...args: [unknown, unknown, unknown, string?]
+      ...args: [unknown, unknown, unknown, string?, unknown[]?]
     ) => { role: number; index: number }[]
   >(),
 );
@@ -63,6 +68,11 @@ vi.mock('@cardano-sdk/key-management', () => ({
 }));
 
 vi.mock('@lace-contract/cardano-context', () => ({
+  applyVkeyWitnesses: vi.fn(
+    (witnessSet: { setVkeys: (v: unknown) => void }) => {
+      witnessSet.setVkeys('vkey-set');
+    },
+  ),
   createInputResolver: vi.fn(() => ({})),
   deriveDRepKeyHash: vi.fn(async () => DREP_KEY_HASH),
 }));
@@ -116,9 +126,11 @@ describe('CardanoSeedSignerTransactionSigner', () => {
     parseResponse.mockReset();
     mockWitnessSet.setVkeys.mockClear();
     toCore.mockReturnValue(txBody);
+    scriptsState.scripts = undefined;
     createTxInKeyPathMap.mockResolvedValue({
       [`${'ab'.repeat(32)}#0`]: { role: 0, index: 5 },
     });
+    ownSignatureKeyPaths.mockClear();
     ownSignatureKeyPaths.mockReturnValue([{ role: 0, index: 5 }]);
     triggerSpy.mockReturnValue(
       of({ urType: CardanoUrType.TxSignResponse, cbor: new Uint8Array([9]) }),
@@ -279,6 +291,80 @@ describe('CardanoSeedSignerTransactionSigner', () => {
     expect(extraSigners.some(signer => signer.path.slice(3)[0] === 0)).toBe(
       false,
     );
+  });
+
+  it('forwards the tx witness scripts to own-signature detection', async () => {
+    const scripts = [{ kind: 'RequireSignature', keyHash: 'aa'.repeat(28) }];
+    scriptsState.scripts = scripts;
+
+    await firstValueFrom(buildSigner().sign({ serializedTx: HexBytes('tx') }));
+
+    expect(ownSignatureKeyPaths.mock.calls[0][4]).toBe(scripts);
+  });
+
+  it('passes no scripts when the tx witness set carries none', async () => {
+    await firstValueFrom(buildSigner().sign({ serializedTx: HexBytes('tx') }));
+
+    expect(ownSignatureKeyPaths.mock.calls[0][4]).toBeUndefined();
+  });
+
+  it('adds the stake key as an extra signer when required only via a native script', async () => {
+    scriptsState.scripts = [
+      { kind: 'RequireSignature', keyHash: 'aa'.repeat(28) },
+    ];
+    ownSignatureKeyPaths.mockImplementation((...args) =>
+      args[4] === undefined
+        ? [{ role: 0, index: 5 }]
+        : [
+            { role: 0, index: 5 },
+            { role: 2, index: 0 },
+          ],
+    );
+
+    await firstValueFrom(buildSigner().sign({ serializedTx: HexBytes('tx') }));
+
+    const { extraSigners } = buildRequest.mock.calls[0][0];
+    expect(extraSigners).toHaveLength(1);
+    expect(extraSigners[0].path.slice(3)).toEqual([2, 0]);
+  });
+
+  it('adds an own key nested in a script beside a foreign key as an extra signer', async () => {
+    scriptsState.scripts = [
+      {
+        kind: 'RequireAnyOf',
+        scripts: [
+          { kind: 'RequireSignature', keyHash: 'ff'.repeat(28) },
+          { kind: 'RequireSignature', keyHash: 'aa'.repeat(28) },
+        ],
+      },
+    ];
+    ownSignatureKeyPaths.mockImplementation((...args) =>
+      args[4] === undefined
+        ? [{ role: 0, index: 5 }]
+        : [
+            { role: 0, index: 5 },
+            { role: 1, index: 5 },
+          ],
+    );
+
+    await firstValueFrom(buildSigner().sign({ serializedTx: HexBytes('tx') }));
+
+    const { extraSigners } = buildRequest.mock.calls[0][0];
+    expect(extraSigners).toHaveLength(1);
+    expect(extraSigners[0].path.slice(3)).toEqual([1, 5]);
+  });
+
+  it('does not duplicate a script-required key already covered by a signing input', async () => {
+    scriptsState.scripts = [
+      { kind: 'RequireSignature', keyHash: 'aa'.repeat(28) },
+    ];
+    ownSignatureKeyPaths.mockReturnValue([{ role: 0, index: 5 }]);
+
+    await firstValueFrom(buildSigner().sign({ serializedTx: HexBytes('tx') }));
+
+    const params = buildRequest.mock.calls[0][0];
+    expect(params.signingInputs).toHaveLength(1);
+    expect(params.extraSigners).toHaveLength(0);
   });
 
   it('throws when the device returns an empty witness set', async () => {

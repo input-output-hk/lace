@@ -114,8 +114,12 @@ describe('useDustDesignationSheet', () => {
     fees?: unknown[];
     confirmButtonEnabled?: boolean;
   };
+  let dustAvailableByAccount: Record<string, string>;
 
-  const setupMocks = (overrideState?: Partial<typeof sendFlowState>) => {
+  const setupMocks = (
+    overrideState?: Partial<typeof sendFlowState>,
+    dustAvailable = '1000000',
+  ) => {
     sendFlowState = {
       status: 'Summary',
       form: { address: { value: mockOwnDustAddress, error: null } },
@@ -123,6 +127,7 @@ describe('useDustDesignationSheet', () => {
       confirmButtonEnabled: true,
       ...overrideState,
     };
+    dustAvailableByAccount = { [mockAccountId]: dustAvailable };
 
     mockUseLaceSelector.mockImplementation(
       (selector: string, accountId?: string) => {
@@ -143,8 +148,8 @@ describe('useDustDesignationSheet', () => {
             };
           case 'wallets.selectActiveNetworkAccounts':
             return [{ accountId: mockAccountId, blockchainName: 'Midnight' }];
-          case 'midnightContext.selectDustGenerationDetails':
-            return { [mockAccountId]: { currentValue: BigInt(1000000) } };
+          case 'midnightContext.selectDustAvailableByAccount':
+            return dustAvailableByAccount;
           default:
             return undefined;
         }
@@ -406,6 +411,68 @@ describe('useDustDesignationSheet', () => {
       expect(mockDispatchClosed).not.toHaveBeenCalled();
       expect(mockDispatchOpenRequested).not.toHaveBeenCalled();
       expect(mockDispatchConfirm).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('insufficient dust', () => {
+    const feeOf = (amount: string) => [{ amount, tokenId: 'dust' }];
+
+    it('reports no error while the fee is still unknown', () => {
+      setupMocks({ fees: [] });
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBeNull();
+    });
+
+    it('reports no error for the free first designation', () => {
+      setupMocks({ fees: feeOf('0') }, '0');
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBeNull();
+    });
+
+    it('reports no error when the spendable dust covers the fee', () => {
+      setupMocks({ fees: feeOf('500000') }, '500000');
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBeNull();
+      expect(result.current.isFormValid).toBe(true);
+    });
+
+    it('blocks the form when the spendable dust is below the fee', () => {
+      setupMocks({ fees: feeOf('500000') }, '499999');
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBe(
+        'designation-flow.error.insufficient-dust',
+      );
+      expect(result.current.isFormValid).toBe(false);
+    });
+
+    it('blocks the form when a pending build holds the whole dust coin', () => {
+      setupMocks({ fees: feeOf('500000') }, '0');
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBe(
+        'designation-flow.error.insufficient-dust',
+      );
+      expect(result.current.isFormValid).toBe(false);
+    });
+
+    it('blocks the form when the account has no dust entry yet', () => {
+      setupMocks({ fees: feeOf('500000') });
+      dustAvailableByAccount = {};
+
+      const { result } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(result.current.insufficientDustError).toBe(
+        'designation-flow.error.insufficient-dust',
+      );
     });
   });
 

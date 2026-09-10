@@ -540,6 +540,15 @@ export type DRepOption =
   | { type: 'alwaysNoConfidence' }
   | { type: 'specific'; drepId: Cardano.DRepID };
 
+/**
+ * A real DRep, excluding the abstain / no-confidence sentinels. Flows that must
+ * delegate to an actual representative — earn-rewards, whose spec forbids
+ * casting the user's vote as Always Abstain / No Confidence — take this instead
+ * of {@link DRepOption} so the prohibition is enforced by the compiler rather
+ * than by a runtime check alone.
+ */
+export type SpecificDRepOption = Extract<DRepOption, { type: 'specific' }>;
+
 export type DRepReference = { label?: string; uri: string };
 
 /** CIP-119 metadata fields Lace displays, parsed from the inline `json_metadata.body`. */
@@ -624,6 +633,50 @@ export type BuildDelegationTx = (
 export type MakeBuildDelegationTx<TDependencies = unknown> = (
   dependencies: TDependencies,
 ) => BuildDelegationTx;
+
+/**
+ * Combined stake + vote delegation in a single transaction, backing the
+ * one-tap "earn rewards" flow. The `dRep` is always a specific DRep for that
+ * flow, but the type accepts any `DRepOption` so the builder stays reusable.
+ */
+export type BuildEarnRewardsTxParams = {
+  accountId: AccountId;
+  /**
+   * DRep to delegate voting power to. **Omit** when no promoted DRep is
+   * configured — the transaction then stakes without a vote certificate. At
+   * least one of `dRep` / `poolId` must be present: with neither there is no
+   * certificate to emit, and the builder refuses rather than minting an empty
+   * transaction.
+   */
+  dRep?: SpecificDRepOption;
+  /**
+   * Stake pool to delegate to. **Omit** to delegate voting power only, leaving an
+   * existing stake delegation untouched — the `vote-only` mode for an account that
+   * already stakes but has no DRep. Vote delegation requires a registered stake
+   * credential, so omitting this is only valid for an already-registered account.
+   */
+  poolId?: Cardano.PoolId;
+};
+
+export type BuildEarnRewardsTxResult =
+  | {
+      success: false;
+      error: Error;
+    }
+  | {
+      success: true;
+      serializedTx: string;
+      fees: FeeEntry[];
+      deposit: string;
+    };
+
+export type BuildEarnRewardsTx = (
+  params: BuildEarnRewardsTxParams,
+) => Observable<BuildEarnRewardsTxResult>;
+
+export type MakeBuildEarnRewardsTx<TDependencies = unknown> = (
+  dependencies: TDependencies,
+) => BuildEarnRewardsTx;
 
 export type BuildDeregistrationTxParams = {
   accountId: AccountId;

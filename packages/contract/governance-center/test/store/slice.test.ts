@@ -166,9 +166,9 @@ describe('governance center slice', () => {
   describe('dRepsFilter', () => {
     const reducer = governanceCenterReducers.dRepsFilter;
 
-    it('should have correct initial state', () => {
+    it('should land with no explicit sort chosen', () => {
       const state = reducer(undefined, { type: 'unknown' });
-      expect(state).toEqual({ status: 'all', sortBy: 'votingPower' });
+      expect(state).toEqual({ status: 'all', sortBy: null });
     });
 
     it('updates status on setDRepStatus', () => {
@@ -215,6 +215,8 @@ describe('governance center slice', () => {
       expect(reducer(undefined, { type: 'unknown' })).toEqual({
         config: {},
         activePromoted: [],
+        blockedConfig: {},
+        activeBlocked: [],
       });
     });
 
@@ -236,23 +238,62 @@ describe('governance center slice', () => {
       expect(state.activePromoted).toEqual(promoted);
     });
 
+    it('stores the blocked config on setBlockedConfig', () => {
+      const config = { mainnet: ['drep1abc'] };
+      const state = reducer(
+        undefined,
+        governanceCenterActions.promotedDReps.setBlockedConfig(config),
+      );
+      expect(state.blockedConfig).toEqual(config);
+    });
+
+    it('stores the active blocked list on setActiveBlocked', () => {
+      const blocked = ['drep1abc'];
+      const state = reducer(
+        undefined,
+        governanceCenterActions.promotedDReps.setActiveBlocked({
+          blocked,
+        }),
+      );
+      expect(state.activeBlocked).toEqual(blocked);
+    });
+
     it('selectors fall back to shared empties for undefined state', () => {
-      const { selectPromotedConfig, selectActivePromoted } =
-        governanceCenterSelectors.promotedDReps;
+      const {
+        selectPromotedConfig,
+        selectActivePromoted,
+        selectBlockedConfig,
+        selectActiveBlocked,
+      } = governanceCenterSelectors.promotedDReps;
       expect(selectPromotedConfig(undefined)).toEqual({});
       expect(selectActivePromoted(undefined)).toEqual([]);
+      expect(selectBlockedConfig(undefined)).toEqual({});
+      expect(selectActiveBlocked(undefined)).toEqual([]);
     });
 
     it('selectors read real values from populated root state', () => {
-      const { selectPromotedConfig, selectActivePromoted } =
-        governanceCenterSelectors.promotedDReps;
+      const {
+        selectPromotedConfig,
+        selectActivePromoted,
+        selectBlockedConfig,
+        selectActiveBlocked,
+      } = governanceCenterSelectors.promotedDReps;
       const config = { mainnet: [{ id: 'drep1abc' }] };
       const activePromoted = [{ id: 'drep1abc' }];
+      const blockedConfig = { mainnet: ['drep1def'] };
+      const activeBlocked = ['drep1def'];
       const rootState = {
-        promotedDReps: { config, activePromoted },
+        promotedDReps: {
+          config,
+          activePromoted,
+          blockedConfig,
+          activeBlocked,
+        },
       } as never;
       expect(selectPromotedConfig(rootState)).toBe(config);
       expect(selectActivePromoted(rootState)).toBe(activePromoted);
+      expect(selectBlockedConfig(rootState)).toBe(blockedConfig);
+      expect(selectActiveBlocked(rootState)).toBe(activeBlocked);
     });
   });
 });

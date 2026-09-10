@@ -61,27 +61,72 @@ const logger = {
   trace: vi.fn(),
 };
 
-const makeWalletsSubject = (utxos: BitcoinUTxO[]) =>
+const makeWalletMock = ({
+  utxos,
+  submitTransaction,
+}: {
+  utxos: BitcoinUTxO[];
+  submitTransaction: ReturnType<typeof vi.fn>;
+}) => ({
+  submitTransaction,
+  utxos$: of(utxos),
+  addresses$: of([{ address: ownAddress, network: BitcoinNetwork.Testnet }]),
+});
+
+const makeWalletsSubject = (wallet: ReturnType<typeof makeWalletMock>) =>
   new BehaviorSubject({
-    [testAccountId]: {
-      utxos$: of(utxos),
-      addresses$: of([
-        { address: ownAddress, network: BitcoinNetwork.Testnet },
-      ]),
-    },
+    [testAccountId]: wallet,
   } as unknown as SideEffectDependencies['bitcoinAccountWallets$']['value']);
 
 describe('makeSubmitTx (bitcoin)', () => {
-  it('returns an error result when the provider rejects the tx', async () => {
+  it('returns an error result when the wallet rejects the tx', async () => {
+    const { hex } = buildRawTxHex();
+    const serializedTx = buildSerializedPayload(hex);
+
+    const providerSubmitTransaction = vi.fn();
+
+    const deps = {
+      bitcoinProvider: {
+        submitTransaction: providerSubmitTransaction,
+      },
+      bitcoinAccountWallets$: makeWalletsSubject(
+        makeWalletMock({
+          utxos: [makeOwnUtxo()],
+          submitTransaction: vi.fn(() =>
+            of(Err({ reason: 'invalid', name: 'ProviderError' })),
+          ),
+        }),
+      ),
+      logger,
+    } as unknown as SideEffectDependencies;
+
+    const submit = makeSubmitTx(deps);
+    const result = await firstValueFrom(
+      submit({
+        accountId: testAccountId,
+        blockchainName: 'Bitcoin',
+        blockchainSpecificSendFlowData: {},
+        serializedTx,
+      }),
+    );
+
+    expect(result.success).toBe(false);
+    expect(providerSubmitTransaction).not.toHaveBeenCalled();
+  });
+
+  it('returns an error result when the provider rejects the tx on the fallback path', async () => {
     const { hex } = buildRawTxHex();
     const serializedTx = buildSerializedPayload(hex);
 
     const deps = {
       bitcoinProvider: {
-        submitTransaction: () =>
+        submitTransaction: vi.fn(() =>
           of(Err({ reason: 'invalid', name: 'ProviderError' })),
+        ),
       },
-      bitcoinAccountWallets$: makeWalletsSubject([makeOwnUtxo()]),
+      bitcoinAccountWallets$: new BehaviorSubject(
+        {} as unknown as SideEffectDependencies['bitcoinAccountWallets$']['value'],
+      ),
       logger,
     } as unknown as SideEffectDependencies;
 
@@ -98,15 +143,23 @@ describe('makeSubmitTx (bitcoin)', () => {
     expect(result.success).toBe(false);
   });
 
-  it('returns txId plus Bitcoin in-flight metadata on success', async () => {
+  it('broadcasts through the account wallet and returns txId plus Bitcoin in-flight metadata on success', async () => {
     const { hex, txId } = buildRawTxHex();
     const serializedTx = buildSerializedPayload(hex);
 
+    const walletSubmitTransaction = vi.fn(() => of(Ok(txId)));
+    const providerSubmitTransaction = vi.fn();
+
     const deps = {
       bitcoinProvider: {
-        submitTransaction: () => of(Ok(txId)),
+        submitTransaction: providerSubmitTransaction,
       },
-      bitcoinAccountWallets$: makeWalletsSubject([makeOwnUtxo()]),
+      bitcoinAccountWallets$: makeWalletsSubject(
+        makeWalletMock({
+          utxos: [makeOwnUtxo()],
+          submitTransaction: walletSubmitTransaction,
+        }),
+      ),
       logger,
     } as unknown as SideEffectDependencies;
 
@@ -119,6 +172,10 @@ describe('makeSubmitTx (bitcoin)', () => {
         serializedTx,
       }),
     );
+
+    expect(walletSubmitTransaction).toHaveBeenCalledTimes(1);
+    expect(walletSubmitTransaction).toHaveBeenCalledWith(hex);
+    expect(providerSubmitTransaction).not.toHaveBeenCalled();
 
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -146,13 +203,15 @@ describe('makeSubmitTx (bitcoin)', () => {
     });
   });
 
-  it('returns success without metadata when the submitting account has no wallet registered', async () => {
+  it('falls back to the provider when the submitting account has no wallet registered', async () => {
     const { hex, txId } = buildRawTxHex();
     const serializedTx = buildSerializedPayload(hex);
 
+    const providerSubmitTransaction = vi.fn(() => of(Ok(txId)));
+
     const deps = {
       bitcoinProvider: {
-        submitTransaction: () => of(Ok(txId)),
+        submitTransaction: providerSubmitTransaction,
       },
       bitcoinAccountWallets$: new BehaviorSubject(
         {} as unknown as SideEffectDependencies['bitcoinAccountWallets$']['value'],
@@ -168,6 +227,12 @@ describe('makeSubmitTx (bitcoin)', () => {
         blockchainSpecificSendFlowData: {},
         serializedTx,
       }),
+    );
+
+    expect(providerSubmitTransaction).toHaveBeenCalledTimes(1);
+    expect(providerSubmitTransaction).toHaveBeenCalledWith(
+      { network: BitcoinNetwork.Testnet },
+      hex,
     );
 
     expect(result.success).toBe(true);
@@ -190,10 +255,11 @@ describe('makeSubmitTx (bitcoin)', () => {
 
     const deps = {
       bitcoinProvider: {
-        submitTransaction: () => of(Ok(txId)),
+        submitTransaction: vi.fn(),
       },
       bitcoinAccountWallets$: new BehaviorSubject({
         [testAccountId]: {
+          submitTransaction: vi.fn(() => of(Ok(txId))),
           utxos$: of([]),
           addresses$: of([]),
         },

@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     ...baseConfig.test,
     environment: 'node',
-    include: ['packages/module/dapp-connector-midnight/**/*.test.ts'],
+    coverage: {
+      ...baseConfig.test.coverage,
+      reportsDirectory: __dirname + '/coverage',
+    },
+    include: [__dirname + '/**/*.test.ts'],
   },
 });

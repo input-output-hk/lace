@@ -5,6 +5,12 @@ import {
   convertLovelacesToAda,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
+import {
+  earnRewardsPoolSelectionId,
+  earnRewardsMode,
+  needsEarnRewardsPoolChoice,
+  resolveEarnRewardsTarget,
+} from '@lace-contract/earn-rewards';
 import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { FeatureIds } from '@lace-contract/network';
@@ -25,6 +31,7 @@ import type {
   RewardAccountInfo,
 } from '@lace-contract/cardano-context';
 import type { LaceStakePool } from '@lace-contract/cardano-stake-pools';
+import type { EarnRewardsMode } from '@lace-contract/earn-rewards';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type {
   StakeCardProps,
@@ -53,6 +60,26 @@ const detectStakingProblems = (
   if (isPledgeNotMet) problems.push('pledge');
 
   return problems;
+};
+
+const deriveStakeCardState = ({
+  isStakingStatusLoading,
+  balanceCoin,
+  isStaking,
+  stakePool,
+  problems,
+}: {
+  isStakingStatusLoading: boolean;
+  balanceCoin: string;
+  isStaking: boolean;
+  stakePool: LaceStakePool | undefined;
+  problems: StakingProblem[];
+}): StakeCardProps['state'] => {
+  if (isStakingStatusLoading) return 'loading';
+  if (balanceCoin === '0') return 'empty-account';
+  if (isStaking && !stakePool) return 'loading';
+  if (isStaking) return problems[0] ?? 'low-saturation';
+  return 'stake-available';
 };
 
 const extractPoolIds = (
@@ -89,6 +116,9 @@ export const useStakingCenter = () => {
   );
   const tokensGroupedByAccount = useLaceSelector(
     'tokens.selectTokensGroupedByAccount',
+  );
+  const pendingActivitiesByAccount = useLaceSelector(
+    'activities.selectPendingActivitiesByAccount',
   );
 
   const rewardAccountDetailsMap = useLaceSelector(
@@ -157,9 +187,42 @@ export const useStakingCenter = () => {
     [featureFlags],
   );
 
+  // Earn rewards supersedes the plain "Stake" CTA for any account whose vote is
+  // not yet delegated: when the feature is enabled and a target resolves, the
+  // primary action becomes the one-tap flow — joining the promoted pool and DRep
+  // for an undelegated account, or delegating the vote alone for one that already
+  // stakes.
+  const chainId = useLaceSelector('cardanoContext.selectChainId');
+  const earnRewardsTarget = useMemo(
+    () => resolveEarnRewardsTarget({ featureFlags, chainId }),
+    [featureFlags, chainId],
+  );
+  // A resolved target already implies the feature is enabled (see the resolver).
+  const isEarnRewardsAvailable = !!earnRewardsTarget;
+
   const handleStake = useCallback((accountId: string) => {
     NavigationControls.navigate(SheetRoutes.BrowsePool, { accountId });
   }, []);
+
+  const handleEarnRewards = useCallback(
+    (accountId: string, mode: EarnRewardsMode | undefined) => {
+      // Straight to the pool list when there is a pool to choose. A vote-only
+      // account already stakes, so it is never asked.
+      if (needsEarnRewardsPoolChoice({ target: earnRewardsTarget, mode })) {
+        NavigationControls.navigate(SheetRoutes.BrowsePool, {
+          accountId,
+          poolSelectionId: earnRewardsPoolSelectionId(accountId),
+          // What THIS flow's transaction will do — the vote leg rides along
+          // only when a DRep is promoted.
+          poolSelectionNotice:
+            earnRewardsTarget?.dRep === undefined ? 'stake' : 'stake-and-vote',
+        });
+        return;
+      }
+      NavigationControls.navigate(SheetRoutes.EarnRewards, { accountId });
+    },
+    [earnRewardsTarget],
+  );
 
   const handleAddFunds = useCallback((accountId: string) => {
     NavigationControls.navigate(SheetRoutes.Buy, { accountId });
@@ -211,17 +274,26 @@ export const useStakingCenter = () => {
           )
         : [];
 
-      let state: StakeCardProps['state'] = 'stake-available';
+      const state = deriveStakeCardState({
+        isStakingStatusLoading,
+        balanceCoin,
+        isStaking,
+        stakePool,
+        problems,
+      });
 
-      if (isStakingStatusLoading) {
-        state = 'loading';
-      } else if (balanceCoin === '0') {
-        state = 'empty-account';
-      } else if (isStaking && !stakePool) {
-        state = 'loading';
-      } else if (isStaking) {
-        state = problems[0] ?? 'low-saturation';
-      }
+      // Reroute the primary CTA to earn-rewards only for the shared audience —
+      // the one rule the nudge and governance center also use.
+      const offerMode = earnRewardsMode({
+        rewardAccountInfo: rewardAccountDetails?.rewardAccountInfo,
+        hasPendingTx:
+          (pendingActivitiesByAccount[account.accountId]?.length ?? 0) > 0,
+        hasAda:
+          adaToken !== undefined && BigInt(adaToken.available.toString()) > 0n,
+        hasDRep: earnRewardsTarget?.dRep !== undefined,
+      });
+      const isEarnRewardsApplicable =
+        isEarnRewardsAvailable && offerMode !== undefined;
 
       const stakingData = {
         earnedCoin: formatAmountToLocale(
@@ -262,6 +334,13 @@ export const useStakingCenter = () => {
       };
 
       const handleDelegate = () => {
+        // Same destination as this card's "update delegation" route into the
+        // locked-rewards sheet, so one account cannot get two different flows
+        // depending on which control it taps.
+        if (isEarnRewardsApplicable) {
+          handleEarnRewards(account.accountId.toString(), offerMode);
+          return;
+        }
         // Vote delegation lives in the governance center; fall back to the
         // staking-issue explainer only when that module is disabled.
         if (isGovernanceCenterEnabled) {
@@ -285,9 +364,26 @@ export const useStakingCenter = () => {
         state,
         balanceCoin,
         coin: adaDisplayTicker,
-        onStake: () => {
-          handleStake(account.accountId.toString());
-        },
+        onStake: isEarnRewardsApplicable
+          ? () => {
+              handleEarnRewards(account.accountId.toString(), offerMode);
+            }
+          : () => {
+              handleStake(account.accountId.toString());
+            },
+        // Labelled by the OUTCOME, for every account whose next step is to
+        // start earning — not only the ones the one-tap flow can serve. An
+        // account that already has a DRep is excluded from that flow (changing
+        // a delegation is a deliberate action it never messages), and calling
+        // its button "Stake" while its neighbour said "Earn rewards" made the
+        // two read as different offers when they are the same one: the button
+        // names the mechanism in one card and the result in the other, and the
+        // only thing that varies is a governance delegation the user cannot
+        // see from here. Both now open the pool list.
+        ...(isEarnRewardsAvailable &&
+          state === 'stake-available' && {
+            ctaLabelOverride: t('v2.earn-rewards.stake-cta'),
+          }),
         onAddFunds: isBuyAvailable
           ? () => {
               handleAddFunds(account.accountId.toString());
@@ -307,9 +403,12 @@ export const useStakingCenter = () => {
     rewardAccountDetailsMap,
     handleStake,
     handleAddFunds,
+    handleEarnRewards,
     isBuyAvailable,
+    isEarnRewardsAvailable,
     isGovernanceCenterEnabled,
     isStakingStatusLoading,
+    pendingActivitiesByAccount,
     adaDisplayTicker,
   ]);
 

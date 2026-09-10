@@ -3,7 +3,7 @@ import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { BigNumber, Timestamp } from '@lace-lib/util';
 
-import type { CardanoInFlightUtxoActivityMetadata } from '../../augmentations';
+import type { CardanoActivityUtxoMetadata } from '../../augmentations';
 import type { CardanoPaymentAddress } from '../../types';
 import type { Cardano } from '@cardano-sdk/core';
 import type {
@@ -102,7 +102,7 @@ export const derivePendingActivityFromCbor = ({
     });
   }
 
-  const cardanoInFlight: CardanoInFlightUtxoActivityMetadata = {
+  const cardanoInFlight: CardanoActivityUtxoMetadata = {
     consumedInputs,
     producedOutputs,
   };

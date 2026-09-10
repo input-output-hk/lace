@@ -1,0 +1,7 @@
+[
+  "authentication-prompt.retry-countdown",
+  "v2.swap.insufficient-funds-amount",
+  "v2.swap.review.minimum-received",
+  "v2.swap.error.quote-expired",
+  "v2.sheets.receive.no-address"
+]

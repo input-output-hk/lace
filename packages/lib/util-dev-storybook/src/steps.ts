@@ -1,4 +1,4 @@
-import { waitFor, within } from '@testing-library/dom';
+import { fireEvent, waitFor, within } from '@testing-library/dom';
 import userEvent, {
   PointerEventsCheckLevel,
 } from '@testing-library/user-event';
@@ -138,6 +138,25 @@ export const inputText = async (params: {
     return;
   }
   await userEvent.type(inputElement, params.text, NO_POINTER_EVENTS_CHECK);
+};
+
+/**
+ * Presses the return key on an input.
+ * @param canvas - The testing canvas the input lives in
+ * @param testId - Test ID of the inner input element (`${testID}-value` for
+ * `CustomTextInput`)
+ *
+ * Uses `keyDown` rather than `userEvent.keyboard`: react-native-web reads the
+ * submit off its own `onKeyDown`, and `keyDown` skips the pointer-events and
+ * visibility preconditions that make `userEvent` flaky on sheet bodies.
+ */
+export const pressEnter = async (
+  canvas: Canvas,
+  testId: string,
+  timeout = 5000,
+) => {
+  const element = await canvas.findByTestId(testId, {}, { timeout });
+  fireEvent.keyDown(element, { key: 'Enter', code: 'Enter' });
 };
 
 export const goThroughAuthenticationPromptMobile = async (

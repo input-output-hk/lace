@@ -27,6 +27,7 @@ interface OnboardingRestoreWalletProps {
   onNext: (passphrase: string) => void;
   validateMnemonic: (value: string) => boolean;
   instructionText: string;
+  callout?: React.ReactNode;
   mnemonicFormOptions?: typeof defaultMnemonicFormOptions;
   nextButtonLabel: string;
   pasteButtonLabel: string;
@@ -40,6 +41,7 @@ export const OnboardingRestoreWallet = ({
   onNext,
   validateMnemonic,
   instructionText,
+  callout,
   mnemonicFormOptions = defaultMnemonicFormOptions,
   nextButtonLabel,
   pasteButtonLabel,
@@ -120,6 +122,12 @@ export const OnboardingRestoreWallet = ({
                         {instructionText}
                       </Text.XS>
 
+                      {/* In normal flow, never absolute: the callout reserves
+                          its own space so it cannot occlude the input below. */}
+                      {callout && (
+                        <View style={styles.calloutWrapper}>{callout}</View>
+                      )}
+
                       <Box style={styles.inputContainer}>
                         <field.MnemonicTextInput
                           testID="restore-passphrase-input"
@@ -172,6 +180,9 @@ const createStyles = () =>
     instructionText: {
       marginBottom: spacing.XXL,
       paddingHorizontal: spacing.M,
+    },
+    calloutWrapper: {
+      marginBottom: spacing.XXL,
     },
     inputContainer: {
       flex: 1,

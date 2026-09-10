@@ -26,7 +26,9 @@ const PANEL_WIDTH = 240;
 
 type DRepFilterDropdownProps = {
   status: DRepStatus;
-  sortBy: DRepSortBy;
+  // null while the browser is on its default landing rank: neither explicit
+  // sort is ticked until the user picks one.
+  sortBy: DRepSortBy | null;
   onStatusChange: (status: DRepStatus) => void;
   onSortByChange: (sortBy: DRepSortBy) => void;
   isActive?: boolean;

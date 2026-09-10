@@ -1,4 +1,1 @@
-export * from './ur-types';
-export * from './value-objects';
-export * from './messages';
-export * from './flows';
+export * from '@lace-lib/core/air-gapped/seed-signer';

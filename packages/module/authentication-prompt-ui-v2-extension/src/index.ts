@@ -47,9 +47,29 @@ const multiPlatformModule = inferModuleContext({
   },
 });
 
+// The extension-shell guest runs on a plain web page where the extension
+// internal-auth-secret addon cannot load (its chunk top-level-imports
+// webextension-polyfill, which throws outside a browser extension) — and
+// where it is also unnecessary: like mobile at runtime, the guest is a
+// single JS context, so the in-process auth-secret bus suffices.
+const guestModule = inferModuleContext({
+  moduleName: ModuleName('authentication-prompt-ui-v2-extension'),
+  implements: implementsContracts,
+  dependsOn: dependsOnContracts,
+  store,
+  addons: {
+    loadAuthenticationPromptInternalAuthSecretApiExtension: async () =>
+      import('./addons/authentication-prompt-api-guest'),
+    loadRenderAuthPromptUI: async () =>
+      import('./addons/load-render-authentication-prompt'),
+    loadGlobalOverlays: async () => import('./addons/load-global-overlays'),
+  },
+});
+
 const moduleMap: LaceModuleMap = {
   'lace-extension': multiPlatformModule,
   'lace-mobile': multiPlatformModule,
+  'lace-extension-guest': guestModule,
 };
 
 export default moduleMap;

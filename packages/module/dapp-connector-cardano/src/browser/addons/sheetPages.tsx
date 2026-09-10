@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   authPromptOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1,
     pointerEvents: 'box-none',
   },

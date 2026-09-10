@@ -66,7 +66,11 @@ export const fromEstimateResponse = (
   response: SteelSwapEstimateResponse,
   request: SwapQuoteRequest,
 ): SwapQuote => {
-  const pools = response.pools ?? response.splitGroup?.flat() ?? [];
+  // `splitGroup` nests one level deeper than `pools`: its leaves are splits
+  // that carry their own `pools`, so the dex names live two levels down.
+  const pools =
+    response.pools ??
+    (response.splitGroup ?? []).flat().flatMap(split => split.pools ?? []);
   const route: SwapRouteLeg[] = pools.map(pool => ({
     dexName: pool.dex,
     sellTokenId: response.tokenA,
@@ -83,6 +87,7 @@ export const fromEstimateResponse = (
   const deposit =
     response.totalDeposit > 0
       ? {
+          amount: String(response.totalDeposit),
           displayAmount: lovelaceToAda(response.totalDeposit),
           displayCurrency: 'ADA',
         }

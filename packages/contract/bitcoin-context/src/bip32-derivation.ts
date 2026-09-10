@@ -30,10 +30,17 @@ export const bitcoinAccountDerivationPath = (props: {
   return `m/${purpose}'/${coinType}'/${props.account}'`;
 };
 
+/** BIP-32 chain segment per chain name. */
+const CHAIN_TO_SEGMENT: Record<string, number> = {
+  external: 0,
+  internal: 1,
+};
+
 /**
  * Builds the full BIP-32 derivation path
- * (m/purpose'/coin_type'/account'/chain/index) for a single address. The chain
- * segment is 1 for the internal (change) chain and 0 otherwise.
+ * (m/purpose'/coin_type'/account'/chain/index) for a single address. Throws on
+ * unknown chains for the same reason as on unknown address types: defaulting to
+ * the external chain would silently derive the wrong key.
  */
 export const bitcoinFullDerivationPath = (props: {
   addressType: string;
@@ -42,6 +49,9 @@ export const bitcoinFullDerivationPath = (props: {
   chain: string;
   index: number;
 }): string => {
-  const chain = props.chain === 'internal' ? 1 : 0;
+  const chain = CHAIN_TO_SEGMENT[props.chain];
+  if (chain === undefined) {
+    throw new Error(`Unknown Bitcoin address chain: ${props.chain}`);
+  }
   return `${bitcoinAccountDerivationPath(props)}/${chain}/${props.index}`;
 };

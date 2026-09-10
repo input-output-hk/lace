@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { applyInFlightUtxoAdjustments } from '../src/apply-in-flight-utxo-adjustments';
 import { CardanoPaymentAddress } from '../src/types';
 
-import type { CardanoInFlightUtxoActivityMetadata } from '../src/augmentations';
+import type { CardanoActivityUtxoMetadata } from '../src/augmentations';
 import type { Activity } from '@lace-contract/activities';
 
 const testAccountId = AccountId('test-account');
@@ -41,7 +41,7 @@ const makeUtxo = (
 /* eslint-enable max-params */
 
 const inFlight = (
-  metadata: CardanoInFlightUtxoActivityMetadata,
+  metadata: CardanoActivityUtxoMetadata,
   id = 'pending-activity-id',
 ): Activity => ({
   accountId: testAccountId,

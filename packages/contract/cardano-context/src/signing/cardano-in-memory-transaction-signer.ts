@@ -3,6 +3,8 @@ import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { HexBytes } from '@lace-lib/util';
 import { from, switchMap, throwError } from 'rxjs';
 
+import { applyVkeyWitnesses } from './apply-vkey-witnesses';
+
 import type {
   CardanoKeyAgent,
   CardanoSignRequest,
@@ -75,14 +77,7 @@ export class CardanoInMemoryTransactionSigner
     });
 
     const witnessSet = tx.witnessSet();
-    witnessSet.setVkeys(
-      Serialization.CborSet.fromCore(
-        [...signatures.entries()] as Parameters<
-          typeof Serialization.VkeyWitness.fromCore
-        >[0][],
-        Serialization.VkeyWitness.fromCore,
-      ),
-    );
+    applyVkeyWitnesses(witnessSet, signatures);
 
     const signedTx = new Serialization.Transaction(
       tx.body(),

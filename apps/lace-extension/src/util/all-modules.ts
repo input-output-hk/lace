@@ -26,18 +26,22 @@ import cardanoCollateralFlow from '@lace-module/cardano-collateral-flow';
 import blockfrostProvider from '@lace-module/cardano-provider-blockfrost';
 import cardanoSync from '@lace-module/cardano-sync';
 import cryptoCardanoSdk from '@lace-module/crypto-cardano-sdk';
+import dappConnectorBitcoin from '@lace-module/dapp-connector-bitcoin';
 import dappConnectorCardano from '@lace-module/dapp-connector-cardano';
 import dappConnectorExtension from '@lace-module/dapp-connector-extension';
 import dappConnectorMidnight from '@lace-module/dapp-connector-midnight';
 import dappExplorer from '@lace-module/dapp-explorer';
+import earnRewards from '@lace-module/earn-rewards';
 import featureDev from '@lace-module/feature-dev';
 import featurePosthog from '@lace-module/feature-posthog';
 import governanceCenter from '@lace-module/governance-center';
 import hwConnector from '@lace-module/hw-connector';
 import i18n from '@lace-module/i18n';
 import identityCenter from '@lace-module/identity-center';
+import midnightSync from '@lace-module/midnight-sync';
 import migrateMultiDelegation from '@lace-module/migrate-multi-delegation';
 import migrateV1Data from '@lace-module/migrate-v1-data';
+import migrateWallet from '@lace-module/migrate-wallet';
 import notificationCenter from '@lace-module/notification-center';
 import onboarding from '@lace-module/onboarding';
 import posthogExtension from '@lace-module/posthog-client-extension';
@@ -56,6 +60,7 @@ import vaultInMemory from '@lace-module/vault-in-memory';
 import vaultInMemoryUI from '@lace-module/vault-in-memory-ui';
 import vaultKeystone from '@lace-module/vault-keystone';
 import vaultLedger from '@lace-module/vault-ledger';
+import vaultLocal from '@lace-module/vault-local';
 import vaultSeedSigner from '@lace-module/vault-seed-signer';
 import vaultTrezor from '@lace-module/vault-trezor';
 import views from '@lace-module/views-extension';
@@ -73,6 +78,7 @@ export const allModules: LaceModule[] = [
   appMobile,
   stakingCenter,
   governanceCenter,
+  earnRewards,
   identityCenter,
   addressBook,
   authenticationPromptUiV2Extension,
@@ -101,6 +107,7 @@ export const allModules: LaceModule[] = [
   appActivityWeb,
   vaultInMemory,
   vaultInMemoryUI,
+  vaultLocal,
   vaultLedger,
   vaultTrezor,
   vaultSeedSigner,
@@ -110,11 +117,14 @@ export const allModules: LaceModule[] = [
   blockchainBitcoinUI,
   blockchainCardanoUI,
   blockchainMidnight,
+  midnightSync,
   dappConnectorMidnight,
+  dappConnectorBitcoin,
   adaHandle,
   swapCenter,
   swapProviderSteelswap,
   migrateMultiDelegation,
+  migrateWallet,
   recoveryPhraseChannelExtension,
   hwConnector,
   // keep this last to overwrite preloadedState

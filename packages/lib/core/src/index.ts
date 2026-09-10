@@ -1,4 +1,5 @@
 export * from './address';
+export * from './decrypt-recovery-phrase';
 export * from './emip3';
 export * from './encrypt-recovery-phrase';
 export * from './secret-box';

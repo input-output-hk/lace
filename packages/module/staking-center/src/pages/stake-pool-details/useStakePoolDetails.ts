@@ -3,7 +3,11 @@ import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { useCallback, useMemo } from 'react';
 
-import { useLaceSelector, useStakePools } from '../../hooks';
+import {
+  useDispatchLaceAction,
+  useLaceSelector,
+  useStakePools,
+} from '../../hooks';
 import { getPoolDisplayData } from '../new-delegation/utils';
 import { useAdaPrice } from '../useAdaPrice';
 
@@ -17,7 +21,7 @@ import type {
 export const useStakePoolDetails = (
   params: SheetScreenProps<SheetRoutes.StakePoolDetails>['route']['params'],
 ) => {
-  const { poolId, accountId } = params;
+  const { poolId, accountId, poolSelectionId } = params;
   const { t } = useTranslation();
   const networkType = useLaceSelector('network.selectNetworkType');
   const adaDisplayTicker = useMemo(
@@ -33,12 +37,34 @@ export const useStakePoolDetails = (
     NavigationControls.navigate(SheetRoutes.BrowsePool, params);
   }, [params]);
 
+  const poolSelectionMade = useDispatchLaceAction(
+    'cardanoStakePools.poolSelectionMade',
+  );
+
   const handleStakePress = useCallback(() => {
     NavigationControls.navigate(SheetRoutes.NewDelegation, {
       poolId,
       accountId,
     });
   }, [poolId, accountId]);
+
+  // Selection mode: another flow sent the user here to PICK a pool, not to
+  // stake from the picker. Dispatch only — the sending flow watches for its
+  // own selectionId and drives its own navigation, so this screen needs no
+  // knowledge of who asked (ADR 14 keeps modules apart; the slice is the
+  // meeting point).
+  const handleSelectPress = useCallback(() => {
+    if (!poolSelectionId || !stakePool) return;
+    poolSelectionMade({
+      selectionId: poolSelectionId,
+      poolId: stakePool.poolId,
+      ticker: stakePool.ticker,
+      poolName: stakePool.poolName,
+      // The details figure (live pledge included), not the list's summary
+      // estimate — the consumer states this rate next to the user's choice.
+      ros: stakePool.ros,
+    });
+  }, [poolSelectionId, stakePool, poolSelectionMade]);
 
   // Map stake pool data to PoolDetailsSheetProps
   const stakePoolDetailsProps = useMemo<
@@ -126,15 +152,19 @@ export const useStakePoolDetails = (
       ownerIds: stakePool.owners,
       ownersLabel: t('v2.pages.pool-details.owners'),
       onCancelPress: handleCancelPress,
-      onStakePress: handleStakePress,
+      onStakePress: poolSelectionId ? handleSelectPress : handleStakePress,
       cancelButtonLabel: t('v2.generic.cancel'),
-      stakeButtonLabel: t('v2.sheets.stake-delegation.delegate-button'),
+      stakeButtonLabel: poolSelectionId
+        ? t('v2.pages.pool-details.select-button')
+        : t('v2.sheets.stake-delegation.delegate-button'),
     };
   }, [
     adaDisplayTicker,
     adaPrice,
     stakePool,
+    poolSelectionId,
     handleCancelPress,
+    handleSelectPress,
     handleStakePress,
     t,
   ]);

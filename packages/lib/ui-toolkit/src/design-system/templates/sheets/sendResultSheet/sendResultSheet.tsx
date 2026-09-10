@@ -47,6 +47,7 @@ interface SendResultSheetProps {
     recipientLabel: string;
     feeLabel: string;
   };
+  testID?: string;
 }
 
 const RecipientAddress = ({
@@ -156,11 +157,15 @@ export const SendResultTemplate = ({
   transactionDetails,
   labels,
   errorDetails,
+  testID,
 }: SendResultSheetProps) => {
   const isSuccess = transactionState.status === 'success';
 
   return (
-    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+    <Sheet.Scroll
+      showsVerticalScrollIndicator={false}
+      keyboardAware
+      testID={testID}>
       <Column>
         <Column
           gap={spacing.M}

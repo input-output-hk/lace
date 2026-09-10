@@ -91,7 +91,7 @@ describe('BitcoinSeedSignerSignerFactory', () => {
     ).toThrow('does not support account type');
   });
 
-  it('does not support BIP-322 data signing', () => {
+  it('does not support message signing', () => {
     const factory = new BitcoinSeedSignerSignerFactory();
     const signerAccount = account();
 
@@ -100,6 +100,6 @@ describe('BitcoinSeedSignerSignerFactory', () => {
         wallet: wallet([signerAccount]),
         accountId: signerAccount.accountId,
       } as never),
-    ).toThrow('BIP-322');
+    ).toThrow('Message signing is not supported');
   });
 });

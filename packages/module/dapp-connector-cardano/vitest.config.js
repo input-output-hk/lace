@@ -11,5 +11,6 @@ export default defineConfig({
       reportsDirectory: __dirname + '/coverage',
     },
     include: [__dirname + '/**/*.test.ts'],
+    setupFiles: [__dirname + '/test/locale-test-setup.js'],
   },
 });

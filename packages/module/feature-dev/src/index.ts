@@ -52,9 +52,31 @@ const extensionModule = inferModuleContext({
   },
 });
 
+// The extension-shell guest has no PostHog wiring, so feature-dev is its only
+// feature-store implementation and must load in production builds too —
+// flag-gated only, without the environment gate.
+const guestModule = inferModuleContext({
+  moduleName: ModuleName('feature-dev'),
+  implements: implementsContracts,
+  store,
+  feature: {
+    willLoad: featureFlags =>
+      featureFlags.some(flag => flag.key === FEATURES_DEV_FEATURE_FLAG),
+    metadata: {
+      name: 'FeatureDev',
+      description: 'Development mode features module',
+    },
+  },
+  addons: {
+    loadInitializeExtensionView: async () =>
+      import('./initialize-extension-view'),
+  },
+});
+
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': extensionModule,
+  'lace-extension-guest': guestModule,
 };
 
 export default moduleMap;

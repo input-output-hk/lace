@@ -9,9 +9,6 @@
   },
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
-    "@cardano-sdk/util": "0.17.2",
-    "@ngraveio/bc-ur": "1.1.13",
-    "buffer": "^6.0.3"
+    "@lace-lib/core": "*"
   }
 }

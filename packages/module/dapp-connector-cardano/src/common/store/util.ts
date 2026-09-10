@@ -159,8 +159,10 @@ const credentialMatchesKeyHash = (
  * True when the signData `addr` decodes to a type-6 enterprise KEY address —
  * the one shape that is either a payment address or a CIP-95 DRep signing
  * request, and can only be told apart with the account's DRep key hash.
+ * The dialog must not render such a request until the hash has resolved:
+ * a DRep request shown as a payment address is a consent mismatch.
  */
-const isAmbiguousSignDataAddress = (addr: string): boolean => {
+export const isAmbiguousSignDataAddress = (addr: string): boolean => {
   const decoded = decodeAddress(addr);
   const credential = decoded?.asEnterprise()?.getPaymentCredential();
   return (
@@ -168,18 +170,6 @@ const isAmbiguousSignDataAddress = (addr: string): boolean => {
     credential.type === Cardano.CredentialType.KeyHash
   );
 };
-
-/**
- * True while the signer line of a signData request is still unresolved: the
- * address is ambiguous and the account's DRep key hash — the only way to tell
- * a CIP-95 DRep request from a payment address — has not arrived yet. Such a
- * request must neither be rendered as a payment address nor be approvable
- * against the placeholder shown in its place: either is a consent mismatch.
- */
-export const isSignDataSignerResolving = (
-  address: string,
-  dRepKeyHash?: Ed25519KeyHashHex,
-): boolean => dRepKeyHash === undefined && isAmbiguousSignDataAddress(address);
 
 interface AddrToDisplayOptions {
   /**

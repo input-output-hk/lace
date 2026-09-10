@@ -9,6 +9,7 @@ import { tokensActions } from '@lace-contract/tokens';
 import { Milliseconds, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { defer, of } from 'rxjs';
+import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import { trackTip } from '../../../src/store/side-effects/trackTip';
@@ -54,6 +55,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('t', { t: true }),
             },
             assertion: sideEffect$ => {
@@ -89,6 +91,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('t', { t: true }),
             },
             assertion: sideEffect$ => {
@@ -126,6 +129,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('f', { f: false }),
             },
             assertion: sideEffect$ => {
@@ -159,6 +163,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               // Inactive at frame 0, becomes active at frame 4
               isWalletActive$: hot('f---t', { f: false, t: true }),
             },
@@ -204,6 +209,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               // Active at frame 0, locked at frame 5; long idle window after.
               isWalletActive$: hot('t----f', { t: true, f: false }),
             },
@@ -252,6 +258,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('t', { t: true }),
             },
             assertion: sideEffect$ => {
@@ -271,7 +278,7 @@ describe('cardano-context side effects', () => {
       );
     });
 
-    it('retries transient provider errors with exponential backoff and silently swallows on exhaustion', () => {
+    it('retries transient provider errors with exponential backoff and swallows on exhaustion', () => {
       const tipPollFrequency = Milliseconds(10_000);
       testSideEffect(
         trackTip(tipPollFrequency),
@@ -299,6 +306,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('t', { t: true }),
             },
             assertion: sideEffect$ => {
@@ -341,6 +349,7 @@ describe('cardano-context side effects', () => {
                 getTip,
               } as unknown as CardanoProviderDependencies['cardanoProvider'],
               actions,
+              logger: dummyLogger,
               isWalletActive$: hot('t', { t: true }),
             },
             assertion: sideEffect$ => {

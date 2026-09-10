@@ -1008,6 +1008,92 @@ describe('side-effects', () => {
         },
       }));
     });
+
+    // Regression guard: on a mainnet→testnet switch the account swap emits the
+    // new token set into this side-effect before `networkType` propagates. The
+    // network type must gate the whole pipeline (not a stale `withLatestFrom`
+    // value) so that just-started fetch is torn down when testnet arrives —
+    // otherwise it runs to completion and its rejected transport request
+    // surfaces as `setError` ("Failed to fetch token prices").
+    it('cancels the in-flight mainnet fetch when the network flips to testnet', () => {
+      const error = new TypeError('Failed to fetch');
+
+      testSideEffect(fetchPricesForNewTokens, ({ cold, hot, flush }) => {
+        // Fetch would reject at frame 7 (relative to its frame-1 start); the
+        // testnet flip at frame 4 must cancel it first.
+        const mockProvider = createMockProvider(cold('------#', {}, error));
+
+        return {
+          stateObservables: {
+            tokens: {
+              // Token-set churn arrives at frame 1, while still on mainnet.
+              selectAggregatedFungibleTokensForVisibleAccounts$: cold('-a', {
+                a: [createMockToken('ada')],
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            network: {
+              selectNetworkType$: hot<NetworkType>('a---b', {
+                a: 'mainnet',
+                b: 'testnet',
+              }),
+            },
+          },
+          dependencies: {
+            tokenPricingProvider: mockProvider,
+            actions: tokenPricingActions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+
+            // The pre-flip churn did start a fetch...
+            expect(mockProvider.fetchPrices).toHaveBeenCalledTimes(1);
+            // ...but the flip cancelled it, so no setError (or setPrices) fires.
+            expect(emissions).toEqual([]);
+          },
+        };
+      });
+    });
+
+    it('records setError on a genuine mainnet fetch failure', () => {
+      const error = new Error('Network error');
+
+      testSideEffect(fetchPricesForNewTokens, ({ cold, expectObservable }) => ({
+        stateObservables: {
+          tokens: {
+            selectAggregatedFungibleTokensForVisibleAccounts$: cold('a', {
+              a: [createMockToken('ada')],
+            }),
+          },
+          tokenPricing: {
+            selectPrices$: cold('a', { a: {} }),
+          },
+          network: {
+            selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+          },
+        },
+        dependencies: {
+          tokenPricingProvider: createMockProvider(cold('#', {}, error)),
+          actions: tokenPricingActions,
+          logger,
+        },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('a', {
+            a: tokenPricingActions.tokenPricing.setError({
+              error: {
+                message: 'Network error',
+                timestamp: expect.any(Number),
+              },
+            }),
+          });
+        },
+      }));
+    });
   });
 
   describe('fetchPricesOnDemand', () => {

@@ -18,6 +18,13 @@
         "command": "vitest watch --config=vitest.config.js --coverage",
         "cwd": "{projectRoot}"
       }
+    },
+    "test-perf": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "TEST_RUNNER_PATH=../../../node_modules/.bin/jest TEST_RUNNER_ARGS='--config jest.perf.config.js --runInBand --forceExit' ../../../node_modules/.bin/reassure",
+        "cwd": "{projectRoot}"
+      }
     }
   }
 }

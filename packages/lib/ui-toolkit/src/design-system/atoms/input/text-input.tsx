@@ -25,6 +25,7 @@ export const TextInput = forwardRef<RnTextInputType, TextInputProps>(
       label,
       onChangeText,
       containerStyle,
+      style,
       testID,
       ...restProps
     },
@@ -57,7 +58,15 @@ export const TextInput = forwardRef<RnTextInputType, TextInputProps>(
           onChangeText={onChangeText}
           ref={ref}
           {...restProps}
-          style={[inputStyles.input, isWeb ? inputStyles.inputWeb : undefined]}
+          // Caller style last, so it can be overridden rather than silently
+          // dropped: spreading restProps ahead of a hardcoded `style` swallowed
+          // every `style` passed in, which left multiline callers with no way
+          // to set a height.
+          style={[
+            inputStyles.input,
+            isWeb ? inputStyles.inputWeb : undefined,
+            style,
+          ]}
           testID={testID ? `${testID}-value` : 'input-value'}
         />
         {errorMessage && (

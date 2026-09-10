@@ -300,7 +300,7 @@ export const syncGovernanceFeatureFlagPayload: SideEffect = (
     const flag = featureFlags.find(
       f => f.key === FEATURE_FLAG_GOVERNANCE_CENTER,
     );
-    return parseGovernanceFeatureFlagPayload(flag).promotedDreps ?? {};
+    return parseGovernanceFeatureFlagPayload(flag);
   };
 
   return merge(
@@ -313,7 +313,10 @@ export const syncGovernanceFeatureFlagPayload: SideEffect = (
     ),
   ).pipe(
     distinctUntilChanged(deepEquals),
-    map(config => actions.promotedDReps.setConfig(config)),
+    mergeMap(payload => [
+      actions.promotedDReps.setConfig(payload.promotedDreps ?? {}),
+      actions.promotedDReps.setBlockedConfig(payload.blockedDreps ?? {}),
+    ]),
   );
 };
 
@@ -335,6 +338,24 @@ export const resolvePromotedDRepsSideEffect: SideEffect = (
     }),
   );
 
+export const resolveBlockedDRepsSideEffect: SideEffect = (
+  _,
+  {
+    cardanoContext: { selectChainId$ },
+    promotedDReps: { selectBlockedConfig$ },
+  },
+  { actions },
+) =>
+  combineLatest([selectBlockedConfig$, selectChainId$]).pipe(
+    map(([config, chainId]) => {
+      const networkKey = chainId
+        ? promotedNetworkKeyForChainId(chainId)
+        : undefined;
+      const blocked = (networkKey && config[networkKey]) || [];
+      return actions.promotedDReps.setActiveBlocked({ blocked });
+    }),
+  );
+
 export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
   loadModules,
 }) => {
@@ -351,6 +372,7 @@ export const initializeSideEffects: LaceInit<SideEffect[]> = async ({
           resetDRepsOnNetworkChange,
           syncGovernanceFeatureFlagPayload,
           resolvePromotedDRepsSideEffect,
+          resolveBlockedDRepsSideEffect,
           makeFeeCalculation({ buildVoteDelegationTx }),
           makeVoteDelegationAwaitingConfirmation({
             confirmTx: makeConfirmTx(actionObservables.txExecutor),

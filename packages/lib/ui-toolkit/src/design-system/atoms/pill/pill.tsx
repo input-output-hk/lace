@@ -71,7 +71,7 @@ const PillBase: React.FC<PillProps> = ({
 const SyncStatusVariant: React.FC<SyncStatusProps> = ({
   status,
   onPress,
-  syncingProgress = 0,
+  syncingProgress,
   showBeacon = true,
   showLabel = true,
 }) => {
@@ -100,8 +100,9 @@ const SyncStatusVariant: React.FC<SyncStatusProps> = ({
   }, [showBeacon, beaconColor]);
 
   const progressBar = useMemo(() => {
-    // Added this to prevent showing the progress bar until we can calculate the progress
-    if (status !== 'syncing' || syncingProgress <= 0) return null;
+    // undefined means progress cannot be calculated yet (no determinate
+    // operations); 0 is real progress and shows an empty track.
+    if (status !== 'syncing' || syncingProgress === undefined) return null;
     const style: ViewStyle = {
       ...styles.syncingBar,
       backgroundColor: theme.brand.yellowSecondary,
@@ -133,9 +134,9 @@ const SyncStatusVariant: React.FC<SyncStatusProps> = ({
         return t('v2.sync-status.synced');
       case 'syncing': {
         const syncingLabel = t('v2.sync-status.syncing');
-        return syncingProgress > 0
-          ? `${String(syncingLabel)} (${Math.round(syncingProgress)}%)`
-          : syncingLabel;
+        return syncingProgress === undefined
+          ? syncingLabel
+          : `${String(syncingLabel)} (${Math.round(syncingProgress)}%)`;
       }
       case 'error':
         return t('v2.sync-status.error');
@@ -197,7 +198,7 @@ const getStyles = ({ theme }: { theme: Theme }) =>
       backgroundColor: theme.background.primary,
       overflow: 'hidden',
     },
-    blur: { ...StyleSheet.absoluteFillObject, borderRadius: radius.L },
+    blur: { ...StyleSheet.absoluteFill, borderRadius: radius.L },
     beacon: {
       width: 12,
       height: 12,

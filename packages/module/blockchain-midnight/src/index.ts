@@ -14,16 +14,11 @@ import {
   blockchainSpecificAppSettingsPageCustomizationsAddonContract,
   sendFlowSheetUICustomisationAddonContract,
 } from '@lace-contract/app';
-import { appLockStoreContract } from '@lace-contract/app-lock';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
 import { dappConnectorStoreContract } from '@lace-contract/dapp-connector';
 import { failuresStoreContract } from '@lace-contract/failures';
 import { featureStoreContract } from '@lace-contract/feature';
-import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
-import {
-  midnightContextStoreContract,
-  midnightDependencyContract,
-} from '@lace-contract/midnight-context';
+import { midnightContextStoreContract } from '@lace-contract/midnight-context';
 import {
   combineContracts,
   inferModuleContext,
@@ -31,22 +26,17 @@ import {
 } from '@lace-contract/module';
 import {
   addressValidatorAddonContract,
+  baseTokenAddonContract,
   sendFlowAnalyticsEnhancerAddonContract,
   sendFlowStoreContract,
 } from '@lace-contract/send-flow';
-import { signerFactoryAddonContract } from '@lace-contract/signer';
-import { syncStoreContract } from '@lace-contract/sync';
 import { tokenPricingStoreContract } from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
-import {
-  txExecutorStoreContract,
-  txExecutorImplementationAddonContract,
-} from '@lace-contract/tx-executor';
+import { txExecutorStoreContract } from '@lace-contract/tx-executor';
 import {
   viewsStoreContract,
   sheetPagesAddonContract,
 } from '@lace-contract/views';
-import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_MIDNIGHT } from './const';
@@ -62,32 +52,26 @@ import type {
 
 const implementsContracts = combineContracts([
   accountSettingsUIAddonContract,
-  inMemoryIntegrationAddonContract,
   tokensStoreContract,
-  syncStoreContract,
   addressesStoreContract,
   midnightContextStoreContract,
-  midnightDependencyContract,
   blockchainSpecificAppCustomizationsAddonContract,
   blockchainSpecificAppSettingsPageCustomizationsAddonContract,
   sendFlowSheetUICustomisationAddonContract,
   activitiesDetailsSheetCustomizationsAddonContract,
   addressValidatorAddonContract,
+  baseTokenAddonContract,
   sendFlowAnalyticsEnhancerAddonContract,
-  txExecutorImplementationAddonContract,
   addressBookAddressValidatorAddonContract,
-  signerFactoryAddonContract,
   sheetPagesAddonContract,
   dialogsAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
   activitiesStoreContract,
-  appLockStoreContract,
   appStoreContract,
   dappConnectorStoreContract,
   featureStoreContract,
-  walletActiveStateDependencyContract,
   walletRepoStoreContract,
   viewsStoreContract,
   authenticationPromptStoreContract,
@@ -114,10 +98,9 @@ const reactNativeModule = inferModuleContext({
     // make the naming prefix consistent: add/remove 'load' to all properties
     loadAddressValidator: async () =>
       import('./exported-modules/address-validator'),
+    loadBaseToken: async () => import('./exported-modules/base-token-selector'),
     loadSendFlowAnalyticsEnhancers: async () =>
       import('./exported-modules/send-flow-analytics-enhancer'),
-    loadTxExecutorImplementation: async () =>
-      import('./exported-modules/tx-executor-implementation'),
     loadPortfolioBannerUICustomisations: async () =>
       import('./exported-modules/portfolio-banner-customisation'),
     loadReceiveSheetAddressDataCustomisations: async () =>
@@ -128,15 +111,10 @@ const reactNativeModule = inferModuleContext({
       ),
     loadAddressBookAddressValidators: async () =>
       import('./exported-modules/address-book-address-validator'),
-    loadSignerFactory: async () => import('./exported-modules/signer-factory'),
     loadAccountUICustomisations: async () =>
       import('./exported-modules/account-ui-customisation'),
     loadSendFlowSheetUICustomisations: async () =>
       import('./exported-modules/send-flow-sheet-ui-customization'),
-    loadInMemoryWalletIntegration: async () =>
-      import('./exported-modules/in-memory-wallet-integration').then(
-        module => ({ default: module.inMemoryWalletIntegrationReactNative }),
-      ),
     loadTokenDetailsUICustomisations: async () =>
       import(
         './exported-modules/token-details-ui-customization/react-native'
@@ -157,6 +135,12 @@ const reactNativeModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-mobile': reactNativeModule,
   'lace-extension': reactNativeModule,
+  // Engine-free since the midnight-sync split, so the same module serves the
+  // guest verbatim (ADR 47): every contract here is slice/UI-plane — the
+  // engine-coupled seams (tx executor, signer, in-memory integration,
+  // midnightDependencyContract) live in @lace-module/midnight-sync for the
+  // monolith and @lace-module/midnight-host-pull for the guest.
+  'lace-extension-guest': reactNativeModule,
 };
 
 export default moduleMap;

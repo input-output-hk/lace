@@ -46,6 +46,7 @@ const makeNetworkData = (timestamp: number): StakePoolsNetworkData => ({
   reserves: 2,
   retiringPools: [],
   slotLength: 1,
+  treasuryCut: 0.2,
   timestamp,
 });
 
@@ -89,6 +90,80 @@ describe('cardanoStakePools slice', () => {
           }),
         );
         expect(state.networkData[mainnetId]).toEqual(data);
+      });
+    });
+
+    describe('poolSelectionMade / poolSelectionCleared', () => {
+      const selection = {
+        selectionId: 'earn-rewards:acc-1',
+        poolId: 'pool1' as Cardano.PoolId,
+        ticker: 'AAA',
+        poolName: 'Pool A',
+        ros: 0.031,
+      };
+
+      it('stores the pick, last write winning', () => {
+        const first = cardanoStakePoolsReducers.cardanoStakePools(
+          initialState,
+          actions.cardanoStakePools.poolSelectionMade(selection),
+        );
+        // A second pick before consumption is the user changing their mind.
+        const second = cardanoStakePoolsReducers.cardanoStakePools(
+          first,
+          actions.cardanoStakePools.poolSelectionMade({
+            ...selection,
+            poolId: 'pool2' as Cardano.PoolId,
+          }),
+        );
+        expect(second.poolSelection?.poolId).toBe('pool2');
+      });
+
+      it("clears only its own consumer's pick", () => {
+        const withSelection = cardanoStakePoolsReducers.cardanoStakePools(
+          initialState,
+          actions.cardanoStakePools.poolSelectionMade(selection),
+        );
+        // A consumer tearing down must not discard a pick just made for a
+        // DIFFERENT flow — the id check is the whole point.
+        const afterForeignClear = cardanoStakePoolsReducers.cardanoStakePools(
+          withSelection,
+          actions.cardanoStakePools.poolSelectionCleared({
+            selectionId: 'migrate-wallet',
+          }),
+        );
+        expect(afterForeignClear.poolSelection).toEqual(selection);
+
+        const afterOwnClear = cardanoStakePoolsReducers.cardanoStakePools(
+          afterForeignClear,
+          actions.cardanoStakePools.poolSelectionCleared({
+            selectionId: selection.selectionId,
+          }),
+        );
+        expect(afterOwnClear.poolSelection).toBeUndefined();
+      });
+
+      // Consumers clear unconditionally on teardown (e.g. a cancelled wizard),
+      // so an empty slot must be a no-op, never an error.
+      it('tolerates clearing an empty slot', () => {
+        const state = cardanoStakePoolsReducers.cardanoStakePools(
+          initialState,
+          actions.cardanoStakePools.poolSelectionCleared({
+            selectionId: 'migrate-wallet',
+          }),
+        );
+        expect(state.poolSelection).toBeUndefined();
+      });
+
+      it('exposes the pick via selectPoolSelection', () => {
+        const state = cardanoStakePoolsReducers.cardanoStakePools(
+          initialState,
+          actions.cardanoStakePools.poolSelectionMade(selection),
+        );
+        expect(
+          cardanoStakePoolsSelectors.cardanoStakePools.selectPoolSelection({
+            cardanoStakePools: state,
+          }),
+        ).toEqual(selection);
       });
     });
 

@@ -20,7 +20,11 @@ import type {
 } from 'redux-persist';
 import type { Observable } from 'rxjs';
 
-export type App = 'lace-extension' | 'lace-mobile' | 'lace-sdk';
+export type App =
+  | 'lace-extension-guest'
+  | 'lace-extension'
+  | 'lace-mobile'
+  | 'lace-sdk';
 export interface AppConfig {}
 
 export type LacePlatform = 'android' | 'ios' | 'web-extension' | 'web';
@@ -56,6 +60,13 @@ export type DefaultSideEffectDependencies = KeyValueStorageDependencies &
      * This will fail if called during SideEffect initialization.
      */
     __getState: () => State;
+    /**
+     * Flushes pending redux-persist writes to storage. A hard app reload
+     * (`app.reloadApplication`) must await this first — redux-persist writes are
+     * throttled/async, so state cleared right before a reload is otherwise lost
+     * and the runtime rehydrates the stale pre-reload values.
+     */
+    flushPersistedState: () => Observable<void>;
   };
 
 export interface SideEffectDependencies extends DefaultSideEffectDependencies {}
@@ -451,6 +462,30 @@ export type ModuleSelectors<T> = T extends LaceModule<
   infer _ContractActionCreators
 >
   ? ContractSelectors & DependencySelectors & Selectors
+  : never;
+
+/**
+ * The combined selectors of a `Contracts` bundle (what `combineContracts`
+ * returns). With `ModuleStoreSelectors`, an equivalent of
+ * `ModuleSelectors<typeof module>` built from the module's parts: declaration
+ * emit must serialize a `typeof module` reference as ONE node, which can
+ * exceed the compiler's cap (TS7056) for large modules, while the contract
+ * combos and store serialize as separate, smaller nodes.
+ */
+export type ContractsSelectors<T> = T extends Contracts<
+  infer CombinedSelectors,
+  infer _CombinedActionCreators,
+  infer _CombinedProvidesAddons
+>
+  ? CombinedSelectors
+  : never;
+
+/** The selectors of a module's `LaceModuleStore`. See `ContractsSelectors`. */
+export type ModuleStoreSelectors<T> = T extends LaceModuleStore<
+  infer Selectors,
+  infer _ActionCreators
+>
+  ? Selectors
   : never;
 
 export interface CreateLoaderProps

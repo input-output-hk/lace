@@ -400,6 +400,82 @@ describe('staking-center side effects', () => {
       vi.restoreAllMocks();
     });
 
+    it('carries the submit result’s blockchain metadata onto the pending activity', () => {
+      // Without this the in-flight view cannot subtract what this tx spends,
+      // so its inputs stay offered as spendable until it confirms.
+      const activityMetadata = {
+        Cardano: { consumedInputs: [{ txId: testTxId, index: 0 }] },
+      };
+      const submitResult: TxSubmissionResult = {
+        success: true,
+        txId: testTxId,
+        blockchainSpecificActivityMetadata: activityMetadata,
+      };
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDelegationProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult(submitResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            delegationFlow: {
+              selectDelegationFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  poolId: testPoolId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  deposit: testDeposit,
+                  fees: testFees,
+                } as DelegationFlowState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: { ...stakingCenterActions, ...activitiesActions },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: testTxId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(-200000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(-2000000n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                    blockchainSpecific: activityMetadata,
+                  },
+                ],
+              }),
+              b: stakingCenterActions.delegationFlow.processingResulted({
+                result: submitResult,
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
     it('dispatches "processingResulted" on failure without pending activity', () => {
       const submitResult: TxSubmissionResult = {
         success: false,

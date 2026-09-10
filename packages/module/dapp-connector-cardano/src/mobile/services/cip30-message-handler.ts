@@ -164,7 +164,7 @@ export interface Cip30MessageHandlerDependencies {
    * @returns True if the dApp has a valid session authorization
    */
   isSessionAuthorized: (origin: string) => boolean;
-  /** Cardano provider instance for submitting transactions */
+  /** Cardano provider instance for submitting transactions and resolving inputs */
   cardanoProvider: CardanoProvider;
   /** Derives and persists the next unused External address */
   deriveNextUnusedAddress?: DeriveNextUnusedAddressFunction;
@@ -201,6 +201,11 @@ export const handleCip30Message = async (
     chainId$: deps.chainId$,
     rewardAccountDetails$: deps.rewardAccountDetails$,
     getAccountIdForOrigin: deps.getAccountIdForOrigin,
+    /**
+     * Mobile answers signTx with signing_required before the API's sign
+     * pre-check runs, so chained-input resolution is never consulted here.
+     */
+    resolveChainedInputs: () => [],
     allAccounts$: deps.allAccounts$,
     allWallets$: deps.allWallets$,
     deriveNextUnusedAddress: deps.deriveNextUnusedAddress,

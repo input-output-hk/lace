@@ -2,6 +2,7 @@ import React from 'react';
 
 import { spacing } from '../../../../../design-tokens';
 import { Column, CustomTextInput, Divider, Icon } from '../../../../atoms';
+import { useSheetSubmit } from '../../../../organisms';
 
 import type { SendSheetProps } from '../sendSheet';
 
@@ -23,6 +24,7 @@ export const NoteSection = ({
   const { noteLabel } = copies;
   const { noteValue } = values;
   const { onNoteChange, onClearNote } = actions;
+  const submitProps = useSheetSubmit();
 
   return (
     <Column gap={spacing.M}>
@@ -39,6 +41,7 @@ export const NoteSection = ({
         }}
         maxLength={length}
         testID={`${testIdPrefix}-note-input`}
+        {...submitProps}
       />
     </Column>
   );

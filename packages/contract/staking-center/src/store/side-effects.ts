@@ -1,6 +1,10 @@
 import { ActivityType } from '@lace-contract/activities';
 import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
-import { makeConfirmTx, makeSubmitTx } from '@lace-contract/tx-executor';
+import {
+  makeConfirmTx,
+  makeSubmitTx,
+  pendingActivityMetadata,
+} from '@lace-contract/tx-executor';
 import { BigNumber, Timestamp } from '@lace-lib/util';
 import {
   dropStaleResult,
@@ -240,6 +244,7 @@ export const makeDelegationProcessing =
                 timestamp: Timestamp(Date.now()),
                 tokenBalanceChanges: [...feeChanges, ...depositChange],
                 type: ActivityType.Pending,
+                ...pendingActivityMetadata(result),
               };
 
               return from([

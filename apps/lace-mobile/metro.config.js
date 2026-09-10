@@ -93,6 +93,13 @@ const withNxMetroResult = withNxMetro(
 );
 
 const patchNxConfig = nxConfig => {
+  // withNxMetro sets projectRoot to the workspace root, but Expo SDK 56's babel
+  // transformer resolves the project's babel config relative to projectRoot. With
+  // the workspace root it picks up the root babel.config.json (babelrcRoots), which
+  // babel rejects inside an `extends`ed file, and looks for a non-existent root
+  // .babelrc.js. Pointing projectRoot back at the app dir lets Expo resolve this
+  // app's own .babelrc.js. Workspace libraries stay resolvable via watchFolders.
+  nxConfig.projectRoot = projectRoot;
   const nxResolver = nxConfig.resolver.resolveRequest.bind(nxConfig.resolver);
   nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
     if (moduleName.startsWith('node:')) {
@@ -102,6 +109,19 @@ const patchNxConfig = nxConfig => {
       return context.resolveRequest(
         context,
         'react-native-quick-crypto',
+        platform,
+      );
+    }
+    // extraNodeModules cannot alias 'buffer': the installed npm package wins the
+    // hierarchical lookup, splitting imports from the global Buffer class set by
+    // react-native-quick-crypto and breaking `instanceof Buffer` CBOR encoders.
+    if (
+      (moduleName === 'buffer' || moduleName === 'buffer/') &&
+      platform !== 'web'
+    ) {
+      return context.resolveRequest(
+        context,
+        '@craftzdog/react-native-buffer',
         platform,
       );
     }

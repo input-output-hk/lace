@@ -95,7 +95,21 @@ const featureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SEND_FLOW') },
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
-  { key: FeatureFlagKey('STAKING_CENTER') },
+  {
+    key: FeatureFlagKey('STAKING_CENTER'),
+    payload: {
+      // Promoted pool the earn-rewards target reads. Committed bootstrap defaults
+      // for every network (mainnet treated no differently from preprod/preview)
+      // so dev / PR / nightly builds can exercise the flow. In production PostHog
+      // replaces the bootstrap flags wholesale and owns the real targets, so
+      // these values never reach a live-PostHog user.
+      promotedPools: {
+        mainnet: [],
+        preprod: [],
+        preview: [],
+      },
+    },
+  },
   {
     key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
     // The currency list itself is the static FIAT_CURRENCIES allowlist in
@@ -107,28 +121,26 @@ const featureFlags: FeatureFlag[] = [
   },
   {
     key: FeatureFlagKey('SWAP_CENTER'),
-    payload: {
-      steelswapApiUrl: 'https://steelswap.lw.iog.io',
-    },
+    payload: {},
   },
   { key: FeatureFlagKey('TOKEN_PRICING') },
   { key: FeatureFlagKey('V1_MIGRATION') },
   { key: FeatureFlagKey('VAULT_LEDGER') },
   { key: FeatureFlagKey('VAULT_TREZOR') },
+  // Air-gapped QR signers. Bootstrap-on so dev / PR / nightly builds offer
+  // them wherever hardware wallets appear (onboarding, add wallet, and as
+  // migration destinations); production stays PostHog-controlled like every
+  // other flag here.
+  { key: FeatureFlagKey('SEED_SIGNER') },
+  { key: FeatureFlagKey('KEYSTONE') },
   {
     key: FeatureFlagKey('GOVERNANCE_CENTER'),
     payload: {
       promotedDreps: {
-        mainnet: [
-          {
-            id: 'drep1yg4mxhwlct5crvnkqpqy06l6lrszn0f4cyc5k2hv0pk8xhsvluu37',
-            additional_information: {
-              en: 'Recommended by Lace for consistent governance participation.',
-              es: 'Recomendado por Lace por su participación constante en la gobernanza.',
-              ja: 'Lace が一貫したガバナンス参加を理由に推奨しています。',
-            },
-          },
-        ],
+        mainnet: [],
+        // Testnet DReps so the earn-rewards target resolves on preprod/preview.
+        preprod: [],
+        preview: [],
       },
     },
   },

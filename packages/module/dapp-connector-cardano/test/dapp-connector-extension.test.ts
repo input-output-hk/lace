@@ -191,6 +191,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -230,6 +231,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -276,6 +278,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -328,6 +331,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -369,6 +373,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -411,6 +416,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 
@@ -495,6 +501,7 @@ describe('dapp-connector-extension', () => {
         allAccounts$: of([]),
         allWallets$: of([]),
         getAccountIdForOrigin: () => undefined,
+        resolveChainedInputs: () => [],
         submitTransaction: vi.fn().mockResolvedValue('mock-tx-hash'),
       });
 

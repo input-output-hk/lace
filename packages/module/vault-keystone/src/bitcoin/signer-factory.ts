@@ -37,9 +37,7 @@ export class BitcoinKeystoneSignerFactory implements BitcoinSignerFactory {
   }
 
   public createDataSigner(_context: BitcoinSignerContext): BitcoinDataSigner {
-    throw new Error(
-      'BIP-322 message signing is not supported by the Bitcoin Keystone',
-    );
+    throw new Error('Message signing is not supported by the Bitcoin Keystone');
   }
 
   #extractAccountProps(

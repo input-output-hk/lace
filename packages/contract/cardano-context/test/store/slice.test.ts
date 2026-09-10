@@ -16,6 +16,7 @@ import {
   CardanoPaymentAddress,
   CardanoNetworkId,
   CardanoAccountId,
+  CardanoSyncFailureId,
   RewardAccountDetailsCacheKey,
   UtxoCacheKey,
 } from '../../src';
@@ -43,8 +44,10 @@ import type {
 } from '../../src';
 import type { EraSummary } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
+import type { Failure, FailureId } from '@lace-contract/failures';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { NetworkSliceState, NetworkType } from '@lace-contract/network';
-import type { WalletEntity } from '@lace-contract/wallet-repo';
+import type { AnyAccount, WalletEntity } from '@lace-contract/wallet-repo';
 
 describe('cardanoContext slice', () => {
   let initialState: CardanoContextSliceState;
@@ -2619,6 +2622,163 @@ describe('cardanoContext slice', () => {
       });
     });
 
+    describe('selectAccountUtxosWithInFlight', () => {
+      const sourceAccountId = AccountId('source-acc');
+      const destinationAccountId = AccountId('dest-acc');
+      const sourceAddress =
+        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp';
+      const destinationAddress =
+        'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95';
+      const settledTxId = Cardano.TransactionId(
+        '39a7a284c2a0948189dc45dec670211cd4d72f7b66c5726c08d9b3df11e44d58',
+      );
+      const sweepTxId = Cardano.TransactionId(
+        '4c4e67bafa15e742c13c592b65c8f74c769cd7d9af04c848099672d1ba391b49',
+      );
+
+      const makeUtxo = (address: string, coins: bigint): Cardano.Utxo => [
+        {
+          address: Cardano.PaymentAddress(address),
+          txId: settledTxId,
+          index: 0,
+        },
+        { address: Cardano.PaymentAddress(address), value: { coins } },
+      ];
+
+      const pendingActivity = (
+        accountId: AccountId,
+        metadata: {
+          consumedInputs: { txId: Cardano.TransactionId; index: number }[];
+          producedOutputs: Cardano.Utxo[];
+        },
+      ): Activity => ({
+        accountId,
+        activityId: String(sweepTxId),
+        timestamp: Timestamp(0),
+        tokenBalanceChanges: [],
+        type: ActivityType.Pending,
+        blockchainSpecific: Serializable.to({ Cardano: metadata }) as unknown,
+      });
+
+      const addressEntry = (accountId: AccountId, address: string) => ({
+        name: 'test',
+        address,
+        blockchainName: 'Cardano',
+        accountId,
+      });
+
+      const buildState = (activitiesByAccount: Record<string, Activity[]>) => {
+        const cardanoContext = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId: sourceAccountId,
+            utxos: [makeUtxo(sourceAddress, 10_000_000n)],
+          }),
+        );
+        return {
+          cardanoContext,
+          activities: {
+            activities: activitiesByAccount,
+            desiredLoadedActivitiesCountPerAccount: {},
+            hasLoadedOldestEntry: {},
+          },
+          addresses: {
+            addresses: [
+              addressEntry(sourceAccountId, sourceAddress),
+              addressEntry(destinationAccountId, destinationAddress),
+            ],
+          },
+        } as unknown as Parameters<
+          typeof selectors.cardanoContext.selectAccountUtxosWithInFlight
+        >[0];
+      };
+
+      it('subtracts a pending spend from the source and credits the destination it pays, before either settles', () => {
+        const state = buildState({
+          [sourceAccountId]: [
+            pendingActivity(sourceAccountId, {
+              consumedInputs: [{ txId: settledTxId, index: 0 }],
+              producedOutputs: [],
+            }),
+          ],
+          // The destination has no settled UTxO entry yet — the credit must
+          // appear anyway (union of raw and pending key sets).
+          [destinationAccountId]: [
+            pendingActivity(destinationAccountId, {
+              consumedInputs: [],
+              producedOutputs: [
+                [
+                  {
+                    txId: sweepTxId,
+                    index: 0,
+                    address: Cardano.PaymentAddress(destinationAddress),
+                  },
+                  {
+                    address: Cardano.PaymentAddress(destinationAddress),
+                    value: { coins: 9_800_000n },
+                  },
+                ],
+              ],
+            }),
+          ],
+        });
+
+        const result =
+          selectors.cardanoContext.selectAccountUtxosWithInFlight(state);
+
+        expect(result[sourceAccountId]).toEqual([]);
+        expect(result[destinationAccountId]).toHaveLength(1);
+        expect(result[destinationAccountId]?.[0]?.[1].value.coins).toBe(
+          9_800_000n,
+        );
+      });
+
+      it('returns the settled sets untouched when nothing is in flight', () => {
+        const state = buildState({});
+        const result =
+          selectors.cardanoContext.selectAccountUtxosWithInFlight(state);
+
+        expect(result[sourceAccountId]).toHaveLength(1);
+        expect(result[destinationAccountId]).toBeUndefined();
+      });
+
+      it('keeps collateral (unspendable) UTxOs in the balance view', () => {
+        const state = buildState({});
+        // Mark the source's only UTxO unspendable (collateral). The balance
+        // view answers "what does the account hold", so it must stay counted —
+        // only selectAvailableAccountUtxos ("what can a transaction spend")
+        // filters it.
+        const withCollateral = {
+          ...state,
+          cardanoContext: reducers.cardanoContext(
+            (state as { cardanoContext: CardanoContextSliceState })
+              .cardanoContext,
+            actions.cardanoContext.setAccountUnspendableUtxos({
+              accountId: sourceAccountId,
+              utxos: [makeUtxo(sourceAddress, 10_000_000n)],
+            }),
+          ),
+        } as typeof state;
+
+        const result =
+          selectors.cardanoContext.selectAccountUtxosWithInFlight(
+            withCollateral,
+          );
+
+        expect(result[sourceAccountId]).toHaveLength(1);
+      });
+
+      it('returns the same reference for the same state (input stability)', () => {
+        const state = buildState({});
+        const first =
+          selectors.cardanoContext.selectAccountUtxosWithInFlight(state);
+        const second =
+          selectors.cardanoContext.selectAccountUtxosWithInFlight(state);
+
+        expect(second).toBe(first);
+      });
+    });
+
     describe('selectStakingStatus', () => {
       const testWalletId = WalletId('test-wallet');
       const preprodNetworkMagic = Cardano.NetworkMagics.Preprod;
@@ -3731,6 +3891,62 @@ describe('cardanoContext slice', () => {
           selectors.cardanoContext.selectAccountIdInManualHdSync(state),
         ).toBeUndefined();
       });
+    });
+  });
+
+  describe('selectActiveNetworkHasSyncFailure', () => {
+    const accountId1 = AccountId('cardano-active-1');
+    const accountId2 = AccountId('cardano-active-2');
+
+    const account = (accountId: AccountId): AnyAccount =>
+      ({ accountId } as AnyAccount);
+
+    const syncFailure = (accountId: AccountId): Failure => ({
+      failureId: CardanoSyncFailureId(accountId),
+      message: 'sync.error.cardano-sync-round-failed' as TranslationKey,
+    });
+
+    it('returns true when an active-network account has a Cardano sync failure', () => {
+      const accounts = [account(accountId1), account(accountId2)];
+      const failures: Record<FailureId, Failure> = {
+        [CardanoSyncFailureId(accountId2)]: syncFailure(accountId2),
+      };
+
+      expect(
+        selectors.cardanoContext.selectActiveNetworkHasSyncFailure.resultFunc(
+          accounts,
+          failures,
+        ),
+      ).toBe(true);
+    });
+
+    it('returns false when no active-network account has a Cardano sync failure', () => {
+      const accounts = [account(accountId1)];
+      const failures: Record<FailureId, Failure> = {};
+
+      expect(
+        selectors.cardanoContext.selectActiveNetworkHasSyncFailure.resultFunc(
+          accounts,
+          failures,
+        ),
+      ).toBe(false);
+    });
+
+    it('returns false when only a non-active-network account has a failure', () => {
+      // The selector receives only active-network accounts, so a failure for
+      // an account on another network (accountId2, absent from `accounts`)
+      // must not count.
+      const accounts = [account(accountId1)];
+      const failures: Record<FailureId, Failure> = {
+        [CardanoSyncFailureId(accountId2)]: syncFailure(accountId2),
+      };
+
+      expect(
+        selectors.cardanoContext.selectActiveNetworkHasSyncFailure.resultFunc(
+          accounts,
+          failures,
+        ),
+      ).toBe(false);
     });
   });
 });

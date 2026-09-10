@@ -1,10 +1,11 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StyleSheet } from 'react-native';
 
 import { spacing, useTheme, type Theme } from '../../../../design-tokens';
 import {
   Avatar,
   Beacon,
+  Button,
   Column,
   Divider,
   Icon,
@@ -12,7 +13,7 @@ import {
   Row,
   Text,
 } from '../../../atoms';
-import { GenericFlashList, Sheet } from '../../../organisms';
+import { footerHeight, Sheet } from '../../../organisms';
 
 import type { AvatarContent } from '../../../../utils/avatarUtils';
 import type { IconName } from '../../../atoms';
@@ -24,10 +25,14 @@ interface ActionButtonsProps {
   onDeletePress: () => void;
   onEditPress: () => void;
   onCopyPress: (address: string) => void;
+  /** Optional quick action rendered under the name (e.g. send to contact). */
+  onSendPress?: () => void;
 }
 
 interface LabelsProps {
   name: string;
+  /** Label for the optional send quick action. */
+  sendLabel?: string;
 }
 
 type ContactAddress = {
@@ -99,40 +104,53 @@ export const ContactDetailsSheetTemplate = ({
   avatar,
   contact,
 }: ContactDetailsSheetTemplateProps) => {
-  const { name } = labels;
-  const { onCopyPress } = actions;
+  const { name, sendLabel } = labels;
+  const { onCopyPress, onSendPress } = actions;
   const { theme } = useTheme();
   const isDarkMode = theme.name === 'dark';
 
-  const renderItem = useCallback(
-    ({ item }: { item: ContactAddress }) =>
-      renderAddressItem({ item, onCopy: onCopyPress, theme, isDarkMode }),
-    [onCopyPress, theme, isDarkMode],
-  );
-
-  const keyExtractor = (item: ContactAddress, index: number) =>
-    `${item.address}-${index}`;
-
   return (
-    <Sheet.Scroll testID="contact-details-sheet-body">
+    <Sheet.Scroll
+      testID="contact-details-sheet-body"
+      contentContainerStyle={styles.scrollContent}>
       <Column alignItems="center" gap={spacing.M} style={styles.content}>
         <Avatar content={avatar} size={CONTACT_AVATAR_SIZE} shape="rounded" />
         <Text.L testID="contact-details-sheet-name">{name}</Text.L>
+        {onSendPress && sendLabel ? (
+          <Button.Secondary
+            label={sendLabel}
+            preIconName="ArrowUp"
+            size="small"
+            onPress={onSendPress}
+            testID="contact-details-sheet-send-button"
+          />
+        ) : undefined}
       </Column>
-      <GenericFlashList<ContactAddress>
-        data={contact.addresses}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={true}
-        nestedScrollEnabled={true}
-        contentContainerStyle={styles.contentContainer}
-      />
+      {/* Plain rows (a contact holds a handful of addresses): keeps intrinsic
+          height so auto-sized sheets can measure the content — a virtualized
+          list needs a bounded parent and collapses under 'auto' detents. */}
+      <Column gap={spacing.S}>
+        {contact.addresses.map((item, index) => (
+          <React.Fragment key={`${item.address}-${index}`}>
+            {renderAddressItem({
+              isDarkMode,
+              item,
+              onCopy: onCopyPress,
+              theme,
+            })}
+          </React.Fragment>
+        ))}
+      </Column>
     </Sheet.Scroll>
   );
 };
 
 const styles = StyleSheet.create({
+  // Keeps the last address row above the sheet footer (same fix as
+  // fiatCurrencySheet).
+  scrollContent: {
+    paddingBottom: footerHeight.horizontal,
+  },
   content: {
     marginBottom: spacing.M,
   },
@@ -141,8 +159,5 @@ const styles = StyleSheet.create({
   },
   dividerWrapper: {
     marginTop: spacing.M,
-  },
-  contentContainer: {
-    gap: spacing.S,
   },
 });

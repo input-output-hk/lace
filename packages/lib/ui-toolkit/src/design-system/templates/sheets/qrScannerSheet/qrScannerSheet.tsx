@@ -14,6 +14,15 @@ export interface QrScannerSheetProps {
   onClose: () => void;
   validateScan?: (data: string) => boolean;
   theme: Theme;
+  /**
+   * Navigator that hosts the sheet footer. Defaults to the nearest navigator;
+   * pass a parent (e.g. navigation.getParent()) when this sheet is nested in a
+   * headerless stack so the permission / Done buttons land on the real sheet
+   * chrome instead of a navigator that never renders a footer.
+   */
+  footerNavigation?: {
+    setOptions: (options: { footer?: React.ReactNode }) => void;
+  };
 }
 
 export const QrScannerSheet = ({
@@ -21,9 +30,12 @@ export const QrScannerSheet = ({
   onClose,
   validateScan,
   theme,
+  footerNavigation,
 }: QrScannerSheetProps) => {
   const { t } = useTranslation();
   const navigation = useNavigation();
+  // Footer chrome host: the passed parent when nested, else the nearest navigator.
+  const footerNav = footerNavigation ?? navigation;
   const [permission, requestPermission, getPermission] = useCameraPermissions();
   const [isScanned, setIsScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,7 +81,7 @@ export const QrScannerSheet = ({
 
   useEffect(() => {
     if (!permission?.granted) {
-      navigation.setOptions({
+      footerNav.setOptions({
         footer: (
           <Sheet.Footer
             primaryButton={{
@@ -108,7 +120,7 @@ export const QrScannerSheet = ({
       ),
     });
   }, [
-    navigation,
+    footerNav,
     permission,
     t,
     handleRequestPermission,
@@ -193,7 +205,7 @@ const getStyles = (theme: Theme) =>
       flex: 1,
     },
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       justifyContent: 'center',
       alignItems: 'center',
     },

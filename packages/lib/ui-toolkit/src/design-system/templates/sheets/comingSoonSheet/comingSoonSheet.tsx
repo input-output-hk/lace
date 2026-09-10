@@ -23,6 +23,6 @@ const styles = StyleSheet.create({
     minHeight: 500,
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
 });

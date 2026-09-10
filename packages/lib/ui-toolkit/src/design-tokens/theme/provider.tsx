@@ -36,8 +36,17 @@ export const ThemeProvider: React.FC<{
   children: React.ReactNode;
   defaultTheme: ColorSchemeName;
   featureFlags?: FeatureFlag[];
-}> = ({ children, defaultTheme, featureFlags = [] }) => {
-  const [themeChoice, setThemeChoice] = useState<ColorSchemeName>(defaultTheme);
+  /** When false, OS color-scheme changes do not override an explicitly chosen theme. Defaults to true. */
+  tracksSystemColorScheme?: boolean;
+}> = ({
+  children,
+  defaultTheme,
+  featureFlags = [],
+  tracksSystemColorScheme = true,
+}) => {
+  const [themeChoice, setThemeChoice] = useState<ColorSchemeName>(
+    () => defaultTheme ?? Appearance.getColorScheme() ?? 'dark',
+  );
   const [temporaryTheme, setTemporaryTheme] = useState<ColorSchemeName | null>(
     null,
   );
@@ -72,10 +81,11 @@ export const ThemeProvider: React.FC<{
   }, [width, height]);
 
   useEffect(() => {
-    setThemeChoice(defaultTheme);
+    setThemeChoice(defaultTheme ?? Appearance.getColorScheme() ?? 'dark');
   }, [defaultTheme]);
 
   useEffect(() => {
+    if (!tracksSystemColorScheme) return;
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       if (!temporaryTheme) {
         setThemeChoice(colorScheme || 'dark');
@@ -87,7 +97,7 @@ export const ThemeProvider: React.FC<{
         subscription.remove();
       }
     };
-  }, [temporaryTheme]);
+  }, [temporaryTheme, tracksSystemColorScheme]);
 
   const toggleTheme = useCallback(async () => {
     setThemeChoice(previous => (previous === 'light' ? 'dark' : 'light'));

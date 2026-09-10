@@ -1,8 +1,12 @@
 import { CommonActions, StackActions } from '@react-navigation/native';
+import { Platform } from 'react-native';
 
 import { SheetRoutes, StackRoutes } from '../types/routes';
 
-import { trackNavigationAction } from './navigation-observability';
+import {
+  trackNavigationAction,
+  trackSheetDismissalWatchdogFired,
+} from './navigation-observability';
 
 import { navigationRef } from '.';
 
@@ -56,6 +60,10 @@ const isInsideSheet = (currentRoute: AppRoutes | undefined): boolean =>
 // eslint-disable-next-line functional/no-let
 let activeDismissal: { cancel: () => void } | null = null;
 
+// Long enough for any sheet dismissal animation to complete naturally; short
+// enough that a user stuck behind an undismissable sheet recovers quickly.
+const SHEET_DISMISSAL_WATCHDOG_MS = 2000;
+
 const dismissSheetsAndThen = (
   navigation: NavigationContainerRef<SheetParameterList>,
   action: () => void,
@@ -79,6 +87,7 @@ const dismissSheetsAndThen = (
     if (settled) return;
     settled = true;
     unsubscribe();
+    clearTimeout(watchdog);
     if (activeDismissal === handle) activeDismissal = null;
     if (fireAction) action();
   };
@@ -90,7 +99,8 @@ const dismissSheetsAndThen = (
   };
 
   // Resolve only on natural dismissal (routes.length <= 1). No timeout
-  // fallback: a late action() would crash by hitting a stale React tree.
+  // fallback for the action itself beyond the forced REMOVE below: a late
+  // action() would crash by hitting a stale React tree.
   const unsubscribe = navigation.addListener('state', event => {
     const newState = event.data.state as NavigationState | undefined;
     if (!newState || newState.routes.length <= 1) {
@@ -99,6 +109,59 @@ const dismissSheetsAndThen = (
   });
 
   activeDismissal = handle;
+
+  // The dismissal cascade can silently stall on web: TrueSheetScreen invokes
+  // dismiss() exactly once per route (guarded by its isDismissedRef), and the
+  // REMOVE that shrinks the routes is only dispatched from onDidDismiss. When
+  // a stacked sheet's presentation animation is still in flight (e.g. Done is
+  // clicked right after a success sheet is pushed), that callback can be
+  // dropped, leaving the route marked closing forever — no repeat popToTop
+  // can recover, because the once-guard never re-fires dismiss(). Force the
+  // router-level REMOVE after a grace period: it drops the closing route and
+  // everything above it from state, unmounting the stuck sheet views.
+  //
+  // Web-only: the dropped-onDidDismiss race is not observed on iOS/Android,
+  // where dismissSheetsAndThen is on the hot path for every closeSheet(). On
+  // native the forced REMOVE could only misfire — JS-thread contention, a
+  // backgrounded device, or a legitimately long dismissal — and tear down
+  // sheets that were animating correctly, so the watchdog is not armed there.
+  const watchdog =
+    Platform.OS === 'web'
+      ? setTimeout(() => {
+          const staleState = navigation.getRootState() as
+            | NavigationState
+            | undefined;
+          if (!staleState || staleState.routes.length <= 1) return;
+          // Collapse to the base route deterministically. A source-less REMOVE
+          // targets the first route still flagged `closing`, which is fragile:
+          // if that flag was already cleared by a partial dismissal the REMOVE
+          // is a no-op, and since the watchdog fires only once the pending
+          // action would be dropped and the stack left stuck. Instead target
+          // the lowest dismissible sheet route by key — the TrueSheet router's
+          // REMOVE drops that route AND every route above it in a single
+          // dispatch, independent of any `closing` flags, unmounting all the
+          // stuck sheet views at once so routes shrinks to <= 1 and the state
+          // listener fires the action.
+          const lowestSheet = staleState.routes.find(
+            route =>
+              isSheetRoute(route.name) && route.name !== SheetRoutes.RootStack,
+          );
+          if (!lowestSheet) {
+            // routes.length > 1 but nothing dismissible to target (shouldn't
+            // happen). Fire the action rather than drop it, matching the
+            // finalize contract.
+            finalize(true);
+            return;
+          }
+          trackSheetDismissalWatchdogFired({
+            routes: staleState.routes.map(route => route.name),
+            removedFrom: lowestSheet.name,
+          });
+          // { type: 'REMOVE', source } — inlined so the untranspiled
+          // @lodev09/react-native-true-sheet sources aren't imported here.
+          navigation.dispatch({ type: 'REMOVE', source: lowestSheet.key });
+        }, SHEET_DISMISSAL_WATCHDOG_MS)
+      : undefined;
 
   // popToTop marks the bottom-most sheet route with closing: true.
   // TrueSheetScreen reacts to that flag by invoking the native dismiss(),
@@ -136,6 +199,13 @@ export const findLastRouteIndexByName = (
   }
   return -1;
 };
+
+/** First index in the root stack `routes` matching any of `routeNames`. */
+const findFirstRouteIndexByName = (
+  state: NavigationState | undefined,
+  routeNames: readonly string[],
+): number =>
+  state?.routes?.findIndex(route => routeNames.includes(route.name)) ?? -1;
 
 const countDismissibleSheetRoutes = (
   state: NavigationState | undefined,
@@ -353,6 +423,38 @@ export const NavigationControls = {
     // firing a stale action.
     dismissSheetsAndThen(navigation, () => undefined);
   },
+  /**
+   * Dismisses only the sheets a self-contained sub-flow presented, revealing
+   * the sheet it was launched from. Unlike {@link NavigationControls.closeSheet},
+   * the launching sheet stays presented and mounted — a caller awaiting the
+   * sub-flow's outcome still has its React state when that outcome arrives.
+   *
+   * Falls back to a full `closeSheet` when the sub-flow's sheets sit directly
+   * on the base route: there is nothing to reveal, and that path waits for the
+   * native dismissal cascade to settle.
+   */
+  closeSheets: (routes: readonly SheetRoutes[]): void => {
+    const navigation = getMainNavigation();
+    if (!navigation) return;
+
+    const rootState = navigation.getRootState() as NavigationState | undefined;
+    const lowestIndex = findFirstRouteIndexByName(rootState, routes);
+
+    // -1: none presented. 0: the base route can never be one of them.
+    if (lowestIndex <= 0 || !rootState) return;
+
+    if (lowestIndex === 1) {
+      NavigationControls.closeSheet();
+      return;
+    }
+
+    const popCount =
+      (rootState.index ?? rootState.routes.length - 1) + 1 - lowestIndex;
+    if (popCount <= 0) return;
+
+    notifySheetCloseListeners();
+    navigation.dispatch(StackActions.pop(popCount));
+  },
 };
 
 type SheetStateRoute = NavigationState['routes'][number] & {
@@ -390,9 +492,9 @@ export const handleInteractiveSheetDismiss = (
   const rootState = navigation.getRootState() as NavigationState | undefined;
   if (!rootState?.routes?.length) return;
 
-  const dismissingRoute = rootState.routes.find(
+  const dismissingRoute: SheetStateRoute | undefined = rootState.routes.find(
     route => route.key === routeKey,
-  ) as SheetStateRoute | undefined;
+  );
   if (!dismissingRoute) return;
 
   // Programmatic dismiss (button → goBack/pop): route pre-marked `closing`.

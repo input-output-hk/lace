@@ -73,41 +73,78 @@ const dependsOnContracts = combineContracts([
   sendFlowStoreContract,
 ] as const);
 
+const feature = {
+  metadata: { name: 'Bitcoin', description: '' },
+  willLoad: (featureFlags: readonly { key: string }[]) =>
+    featureFlags.map(({ key }) => key).includes(BITCOIN_FEATURE_FLAG),
+};
+
+const addons = {
+  loadInMemoryWalletIntegration: async () =>
+    import('./in-memory-wallet-integration'),
+  loadAddressValidator: async () => import('./address-validator'),
+  loadBaseToken: async () => import('./exposed-modules/base-token-selector'),
+  loadChainMinimumAmountTokenValidator: async () =>
+    import('./exposed-modules/chain-minimum-amount-token-validator'),
+  loadTxExecutorImplementation: async () =>
+    import('./tx-executor-implementation'),
+  loadActivitiesItemUICustomisations: async () =>
+    import('./exposed-modules/activities-item-ui-customisation'),
+  loadAddressBookAddressValidators: async () =>
+    import('./exposed-modules/address-book-address-validator'),
+  loadTokenIdMapper: async () => import('./exposed-modules/token-id-mapper'),
+  loadAccountUICustomisations: async () =>
+    import('./exposed-modules/account-ui-customisation'),
+  loadSendFlowSheetUICustomisations: async () =>
+    import('./exposed-modules/send-flow-sheet-ui-customization'),
+  loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
+};
+
 const bitcoinModule = inferModuleContext({
   moduleName: ModuleName('blockchain-bitcoin'),
   implements: implementsContracts,
   dependsOn: dependsOnContracts,
-  feature: {
-    metadata: { name: 'Bitcoin', description: '' },
-    willLoad: featureFlags =>
-      featureFlags.map(({ key }) => key).includes(BITCOIN_FEATURE_FLAG),
-  },
-  addons: {
-    loadInMemoryWalletIntegration: async () =>
-      import('./in-memory-wallet-integration'),
-    loadAddressValidator: async () => import('./address-validator'),
-    loadBaseToken: async () => import('./exposed-modules/base-token-selector'),
-    loadChainMinimumAmountTokenValidator: async () =>
-      import('./exposed-modules/chain-minimum-amount-token-validator'),
-    loadTxExecutorImplementation: async () =>
-      import('./tx-executor-implementation'),
-    loadActivitiesItemUICustomisations: async () =>
-      import('./exposed-modules/activities-item-ui-customisation'),
-    loadAddressBookAddressValidators: async () =>
-      import('./exposed-modules/address-book-address-validator'),
-    loadTokenIdMapper: async () => import('./exposed-modules/token-id-mapper'),
-    loadAccountUICustomisations: async () =>
-      import('./exposed-modules/account-ui-customisation'),
-    loadSendFlowSheetUICustomisations: async () =>
-      import('./exposed-modules/send-flow-sheet-ui-customization'),
-    loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
-  },
+  feature,
+  addons,
+  store,
+});
+
+// The guest sources Bitcoin signing from the host (@lace-module/bitcoin-host-pull's
+// HostBitcoinSignerFactory), so its entry OMITS the in-process signer-factory
+// addon — no InMemory seed ever runs guest-side for Bitcoin (ADR 36/46).
+// Mirrors the blockchain-cardano guest variant.
+const guestImplementsContracts = combineContracts([
+  inMemoryIntegrationAddonContract,
+  accountUICustomisationAddonContract,
+  sendFlowSheetUICustomisationAddonContract,
+  tokensStoreContract,
+  addressesStoreContract,
+  syncStoreContract,
+  activitiesItemCustomizationsAddonContract,
+  txExecutorImplementationAddonContract,
+  addressValidatorAddonContract,
+  baseTokenAddonContract,
+  chainMinimumAmountTokenValidatorAddonContract,
+  addressBookAddressValidatorAddonContract,
+  tokenIdMapperAddonContract,
+] as const);
+
+const { loadSignerFactory: _hostOwnedInGuest, ...guestAddons } = addons;
+void _hostOwnedInGuest;
+
+const guestModule = inferModuleContext({
+  moduleName: ModuleName('blockchain-bitcoin'),
+  implements: guestImplementsContracts,
+  dependsOn: dependsOnContracts,
+  feature,
+  addons: guestAddons,
   store,
 });
 
 const moduleMap: LaceModuleMap = {
   'lace-extension': bitcoinModule,
   'lace-mobile': bitcoinModule,
+  'lace-extension-guest': guestModule,
 };
 
 export default moduleMap;

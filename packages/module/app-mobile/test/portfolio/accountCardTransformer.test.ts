@@ -77,7 +77,7 @@ describe('accountCardTransformer', () => {
     prices: {},
     timeRange: '24H' as const,
     rewardsByAccount: {},
-    compromisedSuffixByAccount: {},
+    nameSuffixByAccount: {},
     getNativeTokenInfo: () => undefined,
   };
 

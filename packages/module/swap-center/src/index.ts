@@ -24,8 +24,6 @@ import type {
   ModuleAddons,
 } from '@lace-contract/module';
 
-export * from './const';
-
 const implementsContracts = combineContracts([
   tabPagesAddonContract,
   sheetPagesAddonContract,
@@ -66,6 +64,7 @@ const multiPlatformModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': multiPlatformModule,
   'lace-mobile': multiPlatformModule,
+  'lace-extension-guest': multiPlatformModule,
 };
 
 export default moduleMap;

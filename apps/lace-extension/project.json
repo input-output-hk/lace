@@ -29,25 +29,28 @@
           "env": "SENTRY_ENVIRONMENT"
         },
         {
-          "env": "BLOCKFROST_PROJECT_ID_MAINNET"
-        },
-        {
-          "env": "BLOCKFROST_PROJECT_ID_PREPROD"
-        },
-        {
-          "env": "BLOCKFROST_PROJECT_ID_PREVIEW"
-        },
-        {
-          "env": "BLOCKFROST_URL_MAINNET"
-        },
-        {
-          "env": "BLOCKFROST_URL_PREPROD"
-        },
-        {
-          "env": "BLOCKFROST_URL_PREVIEW"
+          "env": "BLOCKFROST_PROXY_URL"
         },
         {
           "env": "BLOCKFROST_IPFS_URL"
+        },
+        {
+          "env": "MEMPOOLSPACE_URL_MAINNET"
+        },
+        {
+          "env": "MEMPOOLSPACE_URL_TESTNET"
+        },
+        {
+          "env": "COINGECKO_API_BASE_URL"
+        },
+        {
+          "env": "NFT_CDN_URL"
+        },
+        {
+          "env": "STEELSWAP_API_BASE_URL"
+        },
+        {
+          "env": "CARDANO_CUBE_BASE_URL"
         },
         {
           "env": "MAESTRO_PROJECT_ID_TESTNET"

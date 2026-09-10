@@ -12,11 +12,16 @@ import {
   WALLET_NAME,
 } from '../src/common/const';
 import {
-  CIP30_INJECTION_SCRIPT,
   createInjectionScript,
   defaultConfig,
   generateCip30InjectionScript,
+  type InjectionScriptConfig,
 } from '../src/mobile/injection';
+
+const testConfig: InjectionScriptConfig = {
+  ...defaultConfig,
+  bridgeToken: 'test-bridge-token',
+};
 
 describe('cip30-injection-script', () => {
   describe('defaultConfig', () => {
@@ -31,20 +36,30 @@ describe('cip30-injection-script', () => {
       expect(defaultConfig.requestTimeout).toBe(60000);
       expect(typeof defaultConfig.debug).toBe('boolean');
     });
+
+    it('does not carry a bridge token (it must be per-instance)', () => {
+      expect('bridgeToken' in defaultConfig).toBe(false);
+    });
   });
 
   describe('generateCip30InjectionScript', () => {
-    it('generates script with default config when no config provided', () => {
-      const script = generateCip30InjectionScript();
+    it('generates script with the provided config', () => {
+      const script = generateCip30InjectionScript(testConfig);
 
       expect(script).toContain('window.__LACE_CIP30_CONFIG__');
       expect(script).toContain(WALLET_NAME);
       expect(script).toContain(CIP30_API_VERSION);
     });
 
+    it('embeds the bridge token in the injected config', () => {
+      const script = generateCip30InjectionScript(testConfig);
+
+      expect(script).toContain('"bridgeToken":"test-bridge-token"');
+    });
+
     it('generates script with custom config', () => {
-      const customConfig = {
-        ...defaultConfig,
+      const customConfig: InjectionScriptConfig = {
+        ...testConfig,
         walletName: 'custom-wallet',
         apiVersion: '1.0.0',
         requestTimeout: 30000,
@@ -61,8 +76,8 @@ describe('cip30-injection-script', () => {
     });
 
     it('serializes supportedExtensions correctly', () => {
-      const config = {
-        ...defaultConfig,
+      const config: InjectionScriptConfig = {
+        ...testConfig,
         supportedExtensions: [{ cip: 30 }, { cip: 95 }],
       };
 
@@ -72,7 +87,7 @@ describe('cip30-injection-script', () => {
     });
 
     it('includes the WebView runtime source', () => {
-      const script = generateCip30InjectionScript();
+      const script = generateCip30InjectionScript(testConfig);
 
       // The script should have content beyond just the config line
       const configLineEnd = script.indexOf('\n');
@@ -82,16 +97,21 @@ describe('cip30-injection-script', () => {
     });
   });
 
-  describe('CIP30_INJECTION_SCRIPT', () => {
-    it('is pre-generated with default config', () => {
-      expect(CIP30_INJECTION_SCRIPT).toBeDefined();
-      expect(typeof CIP30_INJECTION_SCRIPT).toBe('string');
-      expect(CIP30_INJECTION_SCRIPT).toContain('window.__LACE_CIP30_CONFIG__');
-    });
+  describe('runtime source hardening', () => {
+    it('reads the token from config and never exposes it on window', () => {
+      const script = generateCip30InjectionScript(testConfig);
+      const runtime = script.slice(script.indexOf('\n') + 1);
 
-    it('matches script generated with default config', () => {
-      const generated = generateCip30InjectionScript(defaultConfig);
-      expect(CIP30_INJECTION_SCRIPT).toBe(generated);
+      // The runtime reads the token from the injected config...
+      expect(runtime).toContain('CONFIG.bridgeToken');
+      // ...and stamps token + document nonce on every outgoing envelope.
+      expect(runtime).toContain('token: BRIDGE_TOKEN');
+      expect(runtime).toContain('nonce: DOCUMENT_NONCE');
+      // ...and rejects a response addressed to a different document.
+      expect(runtime).toContain('nonce !== DOCUMENT_NONCE');
+      // The token must stay in the closure — never assigned to a window prop.
+      expect(runtime).not.toContain('window.bridgeToken');
+      expect(runtime).not.toContain('window.BRIDGE_TOKEN');
     });
   });
 
@@ -102,7 +122,7 @@ describe('cip30-injection-script', () => {
 
     it('works with partial config override', () => {
       const script = createInjectionScript({
-        ...defaultConfig,
+        ...testConfig,
         debug: true,
       });
 

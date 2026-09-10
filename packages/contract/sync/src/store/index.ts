@@ -6,6 +6,7 @@ import {
   selectAverageSyncProgress,
   selectAllFailedOperations,
   selectHasEverSynced,
+  selectActiveNetworkHasEverSynced,
 } from './selectors';
 import { syncActions, syncSelectors as sliceSelectors } from './slice';
 
@@ -30,6 +31,7 @@ export const syncSelectors = {
     selectAverageSyncProgress,
     selectAllFailedOperations,
     selectHasEverSynced,
+    selectActiveNetworkHasEverSynced,
   },
 };
 

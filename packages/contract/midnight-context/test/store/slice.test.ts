@@ -1,5 +1,5 @@
 import { BigNumber, HexBytes } from '@lace-lib/util';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -254,30 +254,36 @@ describe('midnight slice', () => {
     });
 
     describe('setDustBalance', () => {
-      it('should set dust balance for a given account', () => {
+      it('should set dust balance and its spendable subset for a given account', () => {
         const dustBalance = BigNumber(100n);
+        const dustAvailable = BigNumber(40n);
         const action = actions.midnightContext.setDustBalance({
           accountId,
           dustBalance,
+          dustAvailable,
         });
         const state = reducers.midnightContext(initialState, action);
 
         expect(state.dustBalanceByAccount[accountId]).toEqual(dustBalance);
+        expect(state.dustAvailableByAccount[accountId]).toEqual(dustAvailable);
       });
 
       it('should update existing dust balance for a given account', () => {
         const stateWithBalance: MidnightContextSliceState = {
           ...initialState,
           dustBalanceByAccount: { [accountId]: BigNumber(100n) },
+          dustAvailableByAccount: { [accountId]: BigNumber(100n) },
         };
         const updatedBalance = BigNumber(200n);
         const action = actions.midnightContext.setDustBalance({
           accountId,
           dustBalance: updatedBalance,
+          dustAvailable: BigNumber(0n),
         });
         const state = reducers.midnightContext(stateWithBalance, action);
 
         expect(state.dustBalanceByAccount[accountId]).toEqual(updatedBalance);
+        expect(state.dustAvailableByAccount[accountId]).toEqual(BigNumber(0n));
       });
 
       it('should not affect dust balance of other accounts', () => {
@@ -286,14 +292,19 @@ describe('midnight slice', () => {
         const stateWithOtherAccount: MidnightContextSliceState = {
           ...initialState,
           dustBalanceByAccount: { [anotherAccountId]: existingBalance },
+          dustAvailableByAccount: { [anotherAccountId]: existingBalance },
         };
         const action = actions.midnightContext.setDustBalance({
           accountId,
           dustBalance: BigNumber(100n),
+          dustAvailable: BigNumber(100n),
         });
         const state = reducers.midnightContext(stateWithOtherAccount, action);
 
         expect(state.dustBalanceByAccount[anotherAccountId]).toEqual(
+          existingBalance,
+        );
+        expect(state.dustAvailableByAccount[anotherAccountId]).toEqual(
           existingBalance,
         );
       });
@@ -393,6 +404,82 @@ describe('midnight slice', () => {
         );
 
         expect(result[anotherAccountId]).toEqual(dustGenerationDetails);
+      });
+    });
+
+    describe('resetAccountDust', () => {
+      const dustGenerationDetails: DustGenerationDetails = {
+        currentValue: 100n,
+        maxCap: 1000n,
+        decayTime: undefined,
+        maxCapReachedAt: undefined,
+        rate: 10n,
+      };
+
+      it('clears both dust balance and generation details for the account', () => {
+        const stateWithDust = reducers.midnightContext(
+          {
+            ...initialState,
+            dustBalanceByAccount: { [accountId]: BigNumber(100n) },
+            dustAvailableByAccount: { [accountId]: BigNumber(40n) },
+          },
+          actions.midnightContext.setDustGenerationDetails({
+            accountId,
+            dustGenerationDetails,
+          }),
+        );
+
+        const next = reducers.midnightContext(
+          stateWithDust,
+          actions.midnightContext.resetAccountDust({ accountId }),
+        );
+
+        expect(next.dustBalanceByAccount[accountId]).toBeUndefined();
+        expect(next.dustAvailableByAccount[accountId]).toBeUndefined();
+        expect(next.dustGenerationDetailsByAccount[accountId]).toBeUndefined();
+      });
+
+      it('does not affect other accounts', () => {
+        const otherAccountId = MidnightAccountId(walletId, 1, networkId);
+        const seeded = reducers.midnightContext(
+          {
+            ...initialState,
+            dustBalanceByAccount: {
+              [accountId]: BigNumber(100n),
+              [otherAccountId]: BigNumber(50n),
+            },
+          },
+          actions.midnightContext.setDustGenerationDetails({
+            accountId: otherAccountId,
+            dustGenerationDetails,
+          }),
+        );
+
+        const next = reducers.midnightContext(
+          seeded,
+          actions.midnightContext.resetAccountDust({ accountId }),
+        );
+
+        expect(next.dustBalanceByAccount[accountId]).toBeUndefined();
+        expect(next.dustBalanceByAccount[otherAccountId]).toEqual(
+          BigNumber(50n),
+        );
+        const otherDetails =
+          selectors.midnightContext.selectDustGenerationDetails(
+            { midnightContext: next },
+            [otherAccountId],
+          );
+        expect(otherDetails[otherAccountId]).toEqual(dustGenerationDetails);
+      });
+
+      it('is a no-op when the account has no dust', () => {
+        const next = reducers.midnightContext(
+          initialState,
+          actions.midnightContext.resetAccountDust({ accountId }),
+        );
+
+        expect(next.dustBalanceByAccount[accountId]).toBeUndefined();
+        expect(next.dustGenerationDetailsByAccount[accountId]).toBeUndefined();
       });
     });
 
@@ -876,136 +963,23 @@ describe('midnight slice', () => {
       });
     });
 
-    describe('selectDustToken', () => {
-      it('should create dust token from derived network ID and dust balance', () => {
-        const dustBalanceByAccount = {
-          [accountId]: BigNumber(456n),
+    describe('selectDustAvailableByAccount', () => {
+      it('should select the spendable dust, not the total balance', () => {
+        const dustAvailableByAccount = {
+          [accountId]: BigNumber(56n),
         };
-        const state: WithNetworkTestState = {
+        const state: TestState = {
           midnightContext: {
             ...initialState,
-            dustBalanceByAccount,
+            dustBalanceByAccount: { [accountId]: BigNumber(456n) },
+            dustAvailableByAccount,
           },
-          network: networkState,
-          features: emptyFeaturesState,
         };
 
-        const dustToken = selectors.midnightContext.selectDustToken(
-          state,
-          accountId,
-        );
+        const result =
+          selectors.midnightContext.selectDustAvailableByAccount(state);
 
-        expect(dustToken).toBeDefined();
-        expect(dustToken.displayShortName).toBe('tDUST'); // Preview network uses tDUST ticker
-        expect(dustToken.blockchainName).toBe('Midnight');
-        expect(dustToken.available).toEqual(dustBalanceByAccount[accountId]);
-        expect(dustToken.tokenId).toBe('dust');
-      });
-
-      it('should memoize the result when inputs do not change', () => {
-        const dustBalanceByAccount = {
-          [accountId]: BigNumber(789n),
-        };
-        const state: WithNetworkTestState = {
-          midnightContext: {
-            ...initialState,
-            dustBalanceByAccount,
-          },
-          network: networkState,
-          features: emptyFeaturesState,
-        };
-
-        const dustToken1 = selectors.midnightContext.selectDustToken(
-          state,
-          accountId,
-        );
-        const dustToken2 = selectors.midnightContext.selectDustToken(
-          state,
-          accountId,
-        );
-
-        // Same reference should be returned due to memoization
-        expect(dustToken1).toBe(dustToken2);
-      });
-
-      it('should create new dust token when network type changes', () => {
-        const dustBalanceByAccount = {
-          [accountId]: BigNumber(100n),
-        };
-        const state1: WithNetworkTestState = {
-          midnightContext: {
-            ...initialState,
-            dustBalanceByAccount,
-          },
-          network: networkState, // testnet → preview
-          features: emptyFeaturesState,
-        };
-
-        const dustToken1 = selectors.midnightContext.selectDustToken(
-          state1,
-          accountId,
-        );
-
-        const state2: WithNetworkTestState = {
-          midnightContext: {
-            ...initialState,
-            dustBalanceByAccount,
-          },
-          network: {
-            ...networkState,
-            networkType: 'mainnet',
-          },
-          features: emptyFeaturesState,
-        };
-
-        const dustToken2 = selectors.midnightContext.selectDustToken(
-          state2,
-          accountId,
-        );
-
-        // Different reference and different ticker (based on network)
-        expect(dustToken1).not.toBe(dustToken2);
-        expect(dustToken1.displayShortName).toBe('tDUST'); // Preview network
-        expect(dustToken2.displayShortName).toBe('DUST'); // MainNet network
-      });
-
-      it('should create new dust token when dust balance changes', () => {
-        const state1: WithNetworkTestState = {
-          midnightContext: {
-            ...initialState,
-            dustBalanceByAccount: {
-              [accountId]: BigNumber(100n),
-            },
-          },
-          network: networkState,
-          features: emptyFeaturesState,
-        };
-
-        const dustToken1 = selectors.midnightContext.selectDustToken(
-          state1,
-          accountId,
-        );
-
-        const state2: WithNetworkTestState = {
-          midnightContext: {
-            ...initialState,
-            dustBalanceByAccount: {
-              [accountId]: BigNumber(200n),
-            },
-          },
-          network: networkState,
-          features: emptyFeaturesState,
-        };
-
-        const dustToken2 = selectors.midnightContext.selectDustToken(
-          state2,
-          accountId,
-        );
-
-        // Different reference and different balance
-        expect(dustToken1).not.toBe(dustToken2);
-        expect(dustToken1.available).toEqual(BigNumber(100n));
-        expect(dustToken2.available).toEqual(BigNumber(200n));
+        expect(result).toEqual(dustAvailableByAccount);
       });
     });
   });

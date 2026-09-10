@@ -64,6 +64,8 @@ describe('getTopOnChainActivity', () => {
     expect(result).toEqual({
       activityId: 'tx-send',
       slot: Cardano.Slot(12_345),
+      consumedInputs: [],
+      producedOwnOutpoints: [],
     });
   });
 
@@ -80,7 +82,47 @@ describe('getTopOnChainActivity', () => {
       { [accountId]: [sendActivity('tx-send')] },
       accountId,
     );
-    expect(result).toEqual({ activityId: 'tx-send', slot: undefined });
+    expect(result).toEqual({
+      activityId: 'tx-send',
+      slot: undefined,
+      consumedInputs: [],
+      producedOwnOutpoints: [],
+    });
+  });
+
+  describe('producedOwnOutpoints', () => {
+    const outpointA: Cardano.TxIn = {
+      txId: Cardano.TransactionId(
+        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      ),
+      index: 0,
+    };
+
+    it('projects the top activity’s own outpoints verbatim', () => {
+      const receive: Activity = {
+        accountId,
+        activityId: 'rx',
+        timestamp: Timestamp(2),
+        tokenBalanceChanges: [],
+        type: ActivityType.Receive,
+        blockchainSpecific: {
+          Cardano: { consumedInputs: [], producedOwnOutpoints: [outpointA] },
+        },
+      };
+      expect(
+        getTopOnChainActivity({ [accountId]: [receive] }, accountId)
+          ?.producedOwnOutpoints,
+      ).toEqual([outpointA]);
+    });
+
+    it('is empty when the activity predates the field', () => {
+      expect(
+        getTopOnChainActivity(
+          { [accountId]: [sendActivity('s', 1)] },
+          accountId,
+        )?.producedOwnOutpoints,
+      ).toEqual([]);
+    });
   });
 
   describe('without includeRewardActivities (default)', () => {
@@ -106,6 +148,8 @@ describe('getTopOnChainActivity', () => {
       expect(result).toEqual({
         activityId: 'tx-send',
         slot: Cardano.Slot(12_345),
+        consumedInputs: [],
+        producedOwnOutpoints: [],
       });
     });
   });
@@ -117,7 +161,12 @@ describe('getTopOnChainActivity', () => {
         accountId,
         true,
       );
-      expect(result).toEqual({ activityId: 'reward-1', slot: undefined });
+      expect(result).toEqual({
+        activityId: 'reward-1',
+        slot: undefined,
+        consumedInputs: [],
+        producedOwnOutpoints: [],
+      });
     });
 
     it('skips a Pending entry on top and returns the Rewards entry below it', () => {
@@ -131,7 +180,12 @@ describe('getTopOnChainActivity', () => {
         accountId,
         true,
       );
-      expect(result).toEqual({ activityId: 'reward-1', slot: undefined });
+      expect(result).toEqual({
+        activityId: 'reward-1',
+        slot: undefined,
+        consumedInputs: [],
+        producedOwnOutpoints: [],
+      });
     });
 
     it('returns the on-chain Send entry when it is above a Rewards entry', () => {
@@ -148,6 +202,8 @@ describe('getTopOnChainActivity', () => {
       expect(result).toEqual({
         activityId: 'tx-send',
         slot: Cardano.Slot(12_345),
+        consumedInputs: [],
+        producedOwnOutpoints: [],
       });
     });
   });

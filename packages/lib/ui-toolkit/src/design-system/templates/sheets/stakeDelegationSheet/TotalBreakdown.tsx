@@ -13,6 +13,7 @@ interface TotalBreakdownProps {
   transactionFeeAda: string;
   totalLabel: string;
   totalAda: string;
+  testID?: string;
 }
 
 export const TotalBreakdown = ({
@@ -25,6 +26,7 @@ export const TotalBreakdown = ({
   transactionFeeAda,
   totalLabel,
   totalAda,
+  testID = 'total-breakdown',
 }: TotalBreakdownProps) => {
   return (
     <Column gap={spacing.M}>
@@ -32,7 +34,7 @@ export const TotalBreakdown = ({
 
       {/* Stake key Deposit (only for first-time delegation) */}
       {stakeKeyDepositAda && (
-        <Row justifyContent="space-between">
+        <Row justifyContent="space-between" testID={`${testID}-deposit-row`}>
           <Text.M variant="secondary">{stakeKeyDepositLabel}</Text.M>
           <Text.M>{stakeKeyDepositAda}</Text.M>
         </Row>
@@ -47,7 +49,7 @@ export const TotalBreakdown = ({
       )}
 
       {/* Transaction Fee */}
-      <Row justifyContent="space-between">
+      <Row justifyContent="space-between" testID={`${testID}-fee-row`}>
         <Text.M variant="secondary">{transactionFeeLabel}</Text.M>
         <Text.M>{transactionFeeAda}</Text.M>
       </Row>
@@ -55,7 +57,7 @@ export const TotalBreakdown = ({
       <Divider />
 
       {/* Total */}
-      <Row justifyContent="space-between">
+      <Row justifyContent="space-between" testID={`${testID}-total-row`}>
         <Text.M variant="secondary">{totalLabel}</Text.M>
         <Text.M>{totalAda}</Text.M>
       </Row>

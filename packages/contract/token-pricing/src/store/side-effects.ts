@@ -383,34 +383,44 @@ export const makeFetchPricesForNewTokens =
     const currencyPreference$ =
       tokenPricing.selectCurrencyPreference$ ?? of(DEFAULT_CURRENCY_PREFERENCE);
 
-    return selectAggregatedFungibleTokensForVisibleAccounts$.pipe(
-      withLatestFrom(
-        tokenPricing.selectPrices$,
-        currencyPreference$,
-        selectNetworkType$,
-      ),
-      filter(
-        ([, , , networkType]) => networkType === TOKEN_PRICING_NETWORK_TYPE,
-      ),
-      switchMap(([tokens, prices, currencyPreference]) => {
-        // Map tokens to requests and filter those that need fetching based on TTL
-        const requests = prepareTokenRequests(
-          tokens,
-          currencyPreference.name,
-          selectMapper,
-        ).filter(request => shouldFetchPrice(prices[request.priceId]));
+    // Network type drives the outer switchMap so a flip to testnet tears down
+    // the token-churn pipeline, cancelling any in-flight or just-scheduled
+    // fetch. The synchronous account swap on a network switch emits the new
+    // account's token set into this side-effect *before* `networkType`
+    // propagates; a plain `withLatestFrom(selectNetworkType$)` would still read
+    // the stale `mainnet` and let that emission start one last fetch that then
+    // fails against the cleared/testnet state ("Failed to fetch token prices").
+    // Gating the whole pipeline on the current network type instead unsubscribes
+    // that fetch the moment testnet arrives, so no error surfaces.
+    return selectNetworkType$.pipe(
+      map(networkType => networkType === TOKEN_PRICING_NETWORK_TYPE),
+      distinctUntilChanged(),
+      switchMap(isPricingNetwork =>
+        isPricingNetwork
+          ? selectAggregatedFungibleTokensForVisibleAccounts$.pipe(
+              withLatestFrom(tokenPricing.selectPrices$, currencyPreference$),
+              switchMap(([tokens, prices, currencyPreference]) => {
+                // Map tokens to requests and filter those that need fetching based on TTL
+                const requests = prepareTokenRequests(
+                  tokens,
+                  currencyPreference.name,
+                  selectMapper,
+                ).filter(request => shouldFetchPrice(prices[request.priceId]));
 
-        if (requests.length === 0) {
-          return EMPTY;
-        }
+                if (requests.length === 0) {
+                  return EMPTY;
+                }
 
-        return fetchAndSetPrices({
-          tokenPricingProvider,
-          requests,
-          actions,
-          logger,
-        });
-      }),
+                return fetchAndSetPrices({
+                  tokenPricingProvider,
+                  requests,
+                  actions,
+                  logger,
+                });
+              }),
+            )
+          : EMPTY,
+      ),
     );
   };
 

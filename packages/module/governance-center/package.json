@@ -8,6 +8,7 @@
   "dependencies": {
     "@lace-contract/app": "*",
     "@lace-contract/cardano-context": "*",
+    "@lace-contract/earn-rewards": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/governance-center": "*",
     "@lace-contract/i18n": "*",

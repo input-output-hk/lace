@@ -282,7 +282,7 @@ describe('txExecutor side-effects', () => {
         );
       });
 
-      it('throws an error when accountId is not found in the provided wallet (confirmTx path)', () => {
+      it('contains a thrown error (accountId not in wallet) as a generic completion instead of erroring the stream', () => {
         const invalidWallet = {
           accounts: [{ blockchainName, accountId: 'different-account' }],
         } as AnyWallet;
@@ -320,11 +320,83 @@ describe('txExecutor side-effects', () => {
               },
             },
             assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe(
-                '-#',
-                undefined,
-                new Error(`Account ${accountId} not found in provided wallet`),
-              );
+              // The confirmTx flow throws when the account is missing; the
+              // stream must not error (`#`) — it maps to a generic completion.
+              expectObservable(sideEffect$).toBe('-a', {
+                a: expect.objectContaining({
+                  type: txExecutorActions.txExecutor.txPhaseCompleted.type,
+                  payload: expect.objectContaining({
+                    executionId,
+                    result: expect.objectContaining({
+                      success: false,
+                      errorTranslationKeys: {
+                        subtitle:
+                          'tx-executor.confirmation-error.generic.subtitle',
+                        title: 'tx-executor.confirmation-error.generic.title',
+                      },
+                    }) as unknown,
+                  }) as unknown,
+                }) as unknown,
+              });
+            },
+          }),
+        );
+      });
+
+      it('keeps serving later requests after an executor phase throws', () => {
+        const throwingImplementation: MakeTxExecutorImplementation = vi
+          .fn()
+          .mockImplementation(() => ({
+            blockchainName: 'Midnight',
+            confirmTx: vi
+              .fn()
+              .mockReturnValue(of({ success: true, serializedTx: '' })),
+            buildTx: vi.fn().mockImplementation(() => {
+              throw new Error('executor blew up');
+            }),
+            previewTx: vi
+              .fn()
+              .mockReturnValue(
+                of({ success: true as const, minimumAmount: BigNumber(1n) }),
+              ),
+            discardTx: vi.fn().mockReturnValue(of({ success: true })),
+            submitTx: vi
+              .fn()
+              .mockReturnValue(of({ success: true, txId: 'ok' })),
+          }));
+
+        testSideEffect(
+          makeExecuteTxPhase({
+            implementationFactories: [throwingImplementation],
+          }),
+          ({ cold, expectObservable }) => ({
+            actionObservables: {
+              txExecutor: {
+                // First request's executor throws synchronously; the second
+                // must still be served (the shared stream is not torn down).
+                txPhaseRequested$: cold('a-b', {
+                  a: makeTxPhaseRequested({ type: 'buildTx' }),
+                  b: makeTxPhaseRequested({ type: 'submitTx' }),
+                }),
+              },
+            },
+            dependencies: { actions: txExecutorActions },
+            stateObservables: {
+              wallets: {
+                selectAll$: cold('a', { a: [wallet] }),
+              },
+            },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe('a-b', {
+                a: txExecutorActions.txExecutor.txPhaseCompleted({
+                  executionId,
+                  result: genericErrorResults.buildTx(),
+                }),
+                b: txExecutorActions.txExecutor.txPhaseCompleted({
+                  executionId,
+                  result: { success: true, txId: 'ok' },
+                }),
+              });
             },
           }),
         );

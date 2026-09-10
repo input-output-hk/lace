@@ -15,7 +15,9 @@ const separatorCache = new Map<string, LocaleSeparators>();
  * Results are cached for performance.
  *
  * @param locale Optional locale string (e.g., 'en-US', 'de-DE'). Defaults to system locale.
- * @returns Object with groupSeparator and decimalSeparator
+ * @returns Object with groupSeparator and decimalSeparator. A locale that does
+ * not group returns an empty groupSeparator. If the runtime reports no
+ * separators at all, falls back to `,` and `.`.
  */
 export const getLocaleSeparators = (locale?: string): LocaleSeparators => {
   const key = locale ?? 'default';
@@ -25,18 +27,31 @@ export const getLocaleSeparators = (locale?: string): LocaleSeparators => {
     return cached;
   }
 
-  // Format a test number that will have both group and decimal separators
-  // e.g., "1,234.5" (en-US) or "1.234,5" (de-DE)
-  const formatted = new Intl.NumberFormat(locale).format(1234.5);
+  // Seven digits, because a locale with CLDR minimumGroupingDigits=2 leaves a
+  // four-digit probe ungrouped, and its lone decimal separator would then be
+  // read as the group separator.
+  const formatted = new Intl.NumberFormat(locale).format(1234567.5);
 
-  // Remove all digits to extract just the separators in order
-  // "1,234.5" -> ",." or "1.234,5" -> ".,"
-  const separators = formatted.replace(/\d/g, '');
+  // \p{Nd} rather than \d, so a non-Latin numbering system does not leave a
+  // numeral behind to be mistaken for a separator.
+  const separators = formatted.replace(/\p{Nd}/gu, '');
 
-  const result: LocaleSeparators = {
-    groupSeparator: separators[0] || ',',
-    decimalSeparator: separators[1] || '.',
-  };
+  // The decimal is the LAST separator, never a fixed index, because Indian
+  // grouping splits as 12,34,567 rather than 1,234,567.
+  //
+  // No ICU locale returns fewer than two separators for this probe. Both short
+  // branches are deliberate guards for a reduced or polyfilled Intl, where
+  // guessing wrong would swap the separators, which is the defect this derives
+  // around. A lone character is the decimal, since the probe carries a fraction.
+  const result: LocaleSeparators =
+    separators.length >= 2
+      ? {
+          groupSeparator: separators[0],
+          decimalSeparator: separators[separators.length - 1],
+        }
+      : separators.length === 1
+      ? { groupSeparator: '', decimalSeparator: separators[0] }
+      : { groupSeparator: ',', decimalSeparator: '.' };
 
   separatorCache.set(key, result);
   return result;

@@ -360,7 +360,14 @@ describe('side effects', () => {
             {
               address: derivedAddress.address,
               accountId: bitcoinAccount.accountId,
-              data: { network: derivedAddress.network },
+              data: {
+                network: derivedAddress.network,
+                addressType: derivedAddress.addressType,
+                account: derivedAddress.account,
+                chain: derivedAddress.chain,
+                index: derivedAddress.index,
+                publicKeyHex: derivedAddress.publicKeyHex,
+              },
             } as never,
           ],
           blockchainName: 'Bitcoin',

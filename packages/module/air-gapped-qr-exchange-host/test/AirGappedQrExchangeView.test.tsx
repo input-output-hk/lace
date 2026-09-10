@@ -56,7 +56,7 @@ vi.mock('@lace-lib/ui-toolkit', () => ({
 vi.mock('react-native', () => ({
   StyleSheet: {
     create: (styles: unknown) => styles,
-    absoluteFillObject: {},
+    absoluteFill: {},
   },
   View: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
 }));

@@ -27,8 +27,14 @@ help:
 	@echo "  [Midnight]"
 	@echo "  midnight-start : Start previously created Midnight containers"
 	@echo "  midnight-stop : Stop Midnight containers"
-	@echo "  midnight-up : Create (if needed) and start Midnight network"
+	@echo "  midnight-up : Create (if needed) and start Midnight network, including the wallet dapp, and wait until healthy"
 	@echo "  midnight-down : Stop and remove Midnight containers and network"
+	@echo "  "
+	@echo "  [Test dapps]"
+	@echo "  dapps-up : Create and start the Cardano/Bitcoin connector test dapps and wait until healthy"
+	@echo "  dapps-down : Stop and remove the connector test dapp containers"
+	@echo "  test-env-up : Bring up the full test environment (Midnight stack + connector test dapps)"
+	@echo "  test-env-down : Tear down the full test environment"
 	@echo "  "
 	@echo "  [Misc]"
 	@echo "  init : Initialize workspace (install dependencies, reset NX cache, run expo prebuild)"
@@ -98,22 +104,29 @@ cleanup-mobile-app-state-ios:
 		echo  "│   └── Mobile iOS app simulator state cleaned up. Restart app or use 'cmd + d' to open the developer menu in the simulator and click 'Reload'."; \
 	fi
 
-MIDNGIHT_COMPOSE = docker compose -p midnight -f compose/midnight.yml
+MIDNIGHT_COMPOSE = docker compose -p midnight -f compose/midnight.yml
 midnight-start:
-	$(MIDNGIHT_COMPOSE) start
+	$(MIDNIGHT_COMPOSE) start
 
 midnight-stop:
-	$(MIDNGIHT_COMPOSE) stop
+	$(MIDNIGHT_COMPOSE) stop
 
 midnight-up:
-	$(MIDNGIHT_COMPOSE) up --detach
+	$(MIDNIGHT_COMPOSE) up --detach --build --wait
 
 midnight-down:
-	$(MIDNGIHT_COMPOSE) down --volumes --remove-orphans
+	$(MIDNIGHT_COMPOSE) down --volumes --remove-orphans
 
-midnight-restart:
-	$(MIDNGIHT_COMPOSE) down
-	$(MIDNGIHT_COMPOSE) up -d
+DAPPS_COMPOSE = docker compose -p test-dapps -f compose/dapps.yml
+dapps-up:
+	$(DAPPS_COMPOSE) up --detach --wait
+
+dapps-down:
+	$(DAPPS_COMPOSE) down --remove-orphans
+
+test-env-up: midnight-up dapps-up
+
+test-env-down: dapps-down midnight-down
 
 
 update-cardano-sdk:

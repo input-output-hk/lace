@@ -339,7 +339,14 @@ export const createBitcoinWallet = ({
         derivedAddresses.map(derivedAddr => ({
           address: derivedAddr.address as BitcoinAddress,
           accountId: account.accountId,
-          data: { network: derivedAddr.network },
+          data: {
+            network: derivedAddr.network,
+            addressType: derivedAddr.addressType,
+            account: derivedAddr.account,
+            chain: derivedAddr.chain,
+            index: derivedAddr.index,
+            publicKeyHex: derivedAddr.publicKeyHex,
+          },
         })),
       ),
     ),

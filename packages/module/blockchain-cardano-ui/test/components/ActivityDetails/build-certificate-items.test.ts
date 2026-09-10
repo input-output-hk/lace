@@ -45,8 +45,19 @@ const dRepCredential: Cardano.Credential = {
   hash: DREP_CREDENTIAL_HASH,
   type: Cardano.CredentialType.KeyHash,
 };
-/** Pre-computed bech32 form so tests don't depend on the bech32 encoder. */
-const DREP_ID_BECH32 = Cardano.DRepID.cip105FromCredential(dRepCredential);
+/** Hardcoded CIP-129 form of dRepCredential so tests don't depend on the encoder under test. */
+const DREP_ID_BECH32 =
+  'drep1y24yd92lw8zf5mycwyzpgh26rq253ql4rjzxcy4x5qku6cqfdrchn';
+
+const scriptDRepCredential: Cardano.Credential = {
+  hash: Hash28ByteBase16(
+    'b96897b866ec26f4b93d93b2792e496ba9369cef6bfd175d5ffb0d6a',
+  ),
+  type: Cardano.CredentialType.ScriptHash,
+};
+/** Hardcoded CIP-129 form of scriptDRepCredential (script header byte 0x23). */
+const SCRIPT_DREP_ID_BECH32 =
+  'drep1ywuk39acvmkzda9e8kfmy7fwf946jd5uaa4l696atlas66s68f0fl';
 
 const COLD_CREDENTIAL_HASH = Hash28ByteBase16(
   'cccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
@@ -146,10 +157,17 @@ describe('buildCertificateItems', () => {
       });
     });
 
-    it('returns the bech32-encoded credential for a credential DRep', () => {
+    it('returns the CIP-129 DRep ID for a key-hash credential DRep', () => {
       expect(buildDRepItem(dRepCredential, t)).toEqual({
         label: 'v2.activity-details.sheet.drepId',
         value: DREP_ID_BECH32,
+      });
+    });
+
+    it('returns the CIP-129 DRep ID for a script-hash credential DRep', () => {
+      expect(buildDRepItem(scriptDRepCredential, t)).toEqual({
+        label: 'v2.activity-details.sheet.drepId',
+        value: SCRIPT_DREP_ID_BECH32,
       });
     });
   });
@@ -438,6 +456,19 @@ describe('buildCertificateItems', () => {
           depositItem,
           ...anchorRows,
         ]);
+      });
+
+      it('renders the CIP-129 script DRep ID for a script-hash credential', () => {
+        const result = expectItems(
+          buildCertificateItems(
+            { ...baseCertificate, dRepCredential: scriptDRepCredential },
+            baseContext,
+          ),
+        );
+        expect(result.items[1]).toEqual({
+          label: 'v2.activity-details.sheet.drepId',
+          value: SCRIPT_DREP_ID_BECH32,
+        });
       });
     });
 

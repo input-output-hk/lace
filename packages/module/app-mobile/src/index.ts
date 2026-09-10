@@ -97,6 +97,7 @@ const multiPlatformModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-mobile': multiPlatformModule,
   'lace-extension': multiPlatformModule,
+  'lace-extension-guest': multiPlatformModule,
 };
 
 export default moduleMap;

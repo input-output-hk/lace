@@ -27,7 +27,8 @@ export const ActivityDetailsInputOutput = ({
   ownAddresses = [],
 }: {
   inputOutput?: TxOutputInput[];
-  label?: 'Inputs' | 'Outputs';
+  // Display title (passed translated copy via t()), not a discriminator.
+  label?: string;
   coinSymbol?: string;
   ownAddresses?: string[];
 }) => {

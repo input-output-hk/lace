@@ -209,6 +209,221 @@ describe('mapTransactionToActivity', () => {
       });
     });
 
+    // `consumedInputs` is load-bearing rather than cosmetic: cardano-sync reads a
+    // still-present outpoint as proof a provider has not applied the tx yet, and
+    // withholds its UTxO cache key on that basis. Recorded straight off the tx
+    // body, unresolved — ownership filtering happens where it is consumed.
+    it('records every outpoint the transaction spent, whatever the net direction', async () => {
+      const spentA = {
+        txId: Cardano.TransactionId(
+          '1111111111111111111111111111111111111111111111111111111111111111',
+        ),
+        index: 0,
+      };
+      const spentB = {
+        txId: Cardano.TransactionId(
+          '2222222222222222222222222222222222222222222222222222222222222222',
+        ),
+        index: 3,
+      };
+      // Net-positive, so the mapper types it `Receive` — the case a
+      // type-based test would have wrongly read as "spent nothing".
+      mockTxSummaryInspector.mockReturnValue(
+        of({ summary: { coins: 1000000n, assets: new Map() } }),
+      );
+
+      const result = await firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails: {
+            ...mockTxDetails,
+            body: { ...mockTxDetails.body, inputs: [spentA, spentB] },
+          } as ExtendedTxDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: true,
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(
+          (
+            result.value.blockchainSpecific as {
+              Cardano: { consumedInputs: unknown };
+            }
+          ).Cardano.consumedInputs,
+        ).toEqual([spentA, spentB]);
+        expect(result.value.type).toBe(ActivityType.Receive);
+      }
+    });
+
+    // `producedOwnOutpoints` is the incoming mirror of `consumedInputs`:
+    // cardano-sync reads an own output MISSING from a fetch as proof a trailing
+    // provider has not applied the receive yet. Own addresses only — a foreign
+    // output's absence proves nothing.
+    it('records only the outpoints paying own addresses', async () => {
+      const ownOutput = {
+        address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+        value: { coins: 5000000n },
+      };
+      const foreignOutput = {
+        address: Cardano.PaymentAddress(
+          'addr_test1qzuk9c0qaq8ustvatan8xelmp3wjn9n99c78004dsfjwvs4h5kpytryyph0d9vyzj9g9e5rwsnxc2djcandyywdvu8kq54t0f8',
+        ),
+        value: { coins: 1000000n },
+      };
+      mockTxSummaryInspector.mockReturnValue(
+        of({ summary: { coins: 5000000n, assets: new Map() } }),
+      );
+
+      const result = await firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails: {
+            ...mockTxDetails,
+            body: {
+              ...mockTxDetails.body,
+              outputs: [foreignOutput, ownOutput],
+            },
+          } as ExtendedTxDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: true,
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(
+          (
+            result.value.blockchainSpecific as {
+              Cardano: { producedOwnOutpoints: unknown };
+            }
+          ).Cardano.producedOwnOutpoints,
+        ).toEqual([{ txId: mockTxDetails.id, index: 1 }]);
+      }
+    });
+
+    // A phase-2 failure created nothing but its collateral return, and
+    // hydration does not preserve that output's ledger index — so even an
+    // own-address collateral return records nothing. A wrong outpoint would
+    // withhold the cache key until the account's next transaction; recording
+    // body.outputs would wait forever on outputs the chain never produced.
+    it('records no produced outpoints when the chain consumed collateral, even for an own collateral return', async () => {
+      const ownOutput = {
+        address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+        value: { coins: 5000000n },
+      };
+      mockTxSummaryInspector.mockReturnValue(
+        of({ summary: { coins: -1000n, assets: new Map() } }),
+      );
+
+      const result = await firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails: {
+            ...mockTxDetails,
+            inputSource: Cardano.InputSource.collaterals,
+            body: {
+              ...mockTxDetails.body,
+              outputs: [ownOutput],
+              collaterals: [],
+              collateralReturn: {
+                address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+                value: { coins: 3000000n },
+              },
+            },
+          } as ExtendedTxDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: true,
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(
+          (
+            result.value.blockchainSpecific as {
+              Cardano: { producedOwnOutpoints: unknown };
+            }
+          ).Cardano.producedOwnOutpoints,
+        ).toEqual([]);
+      }
+    });
+
+    // A phase-2 failure consumes the COLLATERALS; its `body.inputs` were never
+    // spent and stay in the account's UTxO set. Recording them would leave
+    // cardano-sync withholding its cache key forever against a provider that is
+    // reporting those inputs correctly as unspent.
+    it('records the collaterals, not the inputs, when the chain consumed collateral', async () => {
+      const input = {
+        txId: Cardano.TransactionId(
+          '3333333333333333333333333333333333333333333333333333333333333333',
+        ),
+        index: 1,
+      };
+      const collateral = {
+        txId: Cardano.TransactionId(
+          '4444444444444444444444444444444444444444444444444444444444444444',
+        ),
+        index: 2,
+      };
+      mockTxSummaryInspector.mockReturnValue(
+        of({ summary: { coins: -1000n, assets: new Map() } }),
+      );
+
+      const result = await firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails: {
+            ...mockTxDetails,
+            inputSource: Cardano.InputSource.collaterals,
+            body: {
+              ...mockTxDetails.body,
+              inputs: [input],
+              collaterals: [collateral],
+            },
+          } as ExtendedTxDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: true,
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(
+          (
+            result.value.blockchainSpecific as {
+              Cardano: { consumedInputs: unknown };
+            }
+          ).Cardano.consumedInputs,
+        ).toEqual([collateral]);
+      }
+    });
+
     it('should return Ok with correct activity for receive transaction', async () => {
       const mockSummary = {
         coins: 1000000n,
@@ -252,6 +467,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
+              producedOwnOutpoints: [],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },
@@ -344,6 +560,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
+              producedOwnOutpoints: [],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },
@@ -394,6 +611,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
+              producedOwnOutpoints: [],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },

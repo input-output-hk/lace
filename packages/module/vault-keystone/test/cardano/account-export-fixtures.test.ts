@@ -44,7 +44,7 @@ const evidence = JSON.parse(
   readFileSync(
     join(
       __dirname,
-      '../../../../lib/cardano-keystone-protocol/test/fixtures/keystone-evidence.json',
+      '../../../../lib/core/test/air-gapped/keystone/fixtures/keystone-evidence.json',
     ),
     'utf8',
   ),

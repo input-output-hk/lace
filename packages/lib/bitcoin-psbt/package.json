@@ -1,0 +1,14 @@
+{
+  "name": "@lace-lib/bitcoin-psbt",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "bitcoinjs-lib": "^6.1.7"
+  }
+}

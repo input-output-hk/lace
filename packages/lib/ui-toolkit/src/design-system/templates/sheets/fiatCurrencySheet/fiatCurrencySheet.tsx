@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { RadioGroup } from '../../../molecules';
-import { Sheet, footerHeight } from '../../../organisms';
+import { footerHeight, Sheet } from '../../../organisms';
 
 interface FiatCurrencySheetProps {
   radioOptions: Array<{ label: string; value: string; description?: string }>;

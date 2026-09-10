@@ -3,7 +3,12 @@ import type {
   StakePoolsNetworkData,
 } from '@lace-contract/cardano-stake-pools';
 
-export type BlockfrostStakePoolFixture = BlockfrostStakePool;
+/**
+ * Non-nullable: the provider type allows a missing pool, but every fixture here
+ * is real recorded data, and the saturation cross-check reads its fields
+ * directly.
+ */
+export type BlockfrostStakePoolFixture = NonNullable<BlockfrostStakePool>;
 
 export const laceRosStakePoolsNetworkData: StakePoolsNetworkData = {
   activeSlotsCoefficient: 0.05,
@@ -17,6 +22,7 @@ export const laceRosStakePoolsNetworkData: StakePoolsNetworkData = {
   retiringPools: [],
   slotLength: 1,
   timestamp: 0,
+  treasuryCut: 0.2,
 };
 
 export type LaceRosPoolFixture = {
@@ -28,7 +34,7 @@ export type LaceRosPoolFixture = {
 export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   {
     poolId: 'pool19yzqr3meksnvzdxh5xf6aknfhldyqdj7eaquxgcjva4mzt5kg3v',
-    expectedRos: 0.02020610536317613,
+    expectedRos: 0.01608977865669936,
     blockfrost: {
       pool_id: 'pool19yzqr3meksnvzdxh5xf6aknfhldyqdj7eaquxgcjva4mzt5kg3v',
       hex: '290401c779b426c134d7a193aeda69bfda40365ecf41c32312676bb1',
@@ -46,7 +52,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1f2wfjqkf2wx6jq93pdck6hgmy9zgw32lmvrq9zejl7scqxjqfze',
-    expectedRos: 0.02628055689164288,
+    expectedRos: 0.02091429835102976,
     blockfrost: {
       pool_id: 'pool1f2wfjqkf2wx6jq93pdck6hgmy9zgw32lmvrq9zejl7scqxjqfze',
       hex: '4a9c9902c9538da900b10b716d5d1b214487455fdb06028b32ffa180',
@@ -82,7 +88,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1ekcsyzwexl7p2kwxxh34hy28l6772vrmff7jwmuxsa6u6fzty9z',
-    expectedRos: 0.031588033384080116,
+    expectedRos: 0.025085215505125547,
     blockfrost: {
       pool_id: 'pool1ekcsyzwexl7p2kwxxh34hy28l6772vrmff7jwmuxsa6u6fzty9z',
       hex: 'cdb10209d937fc1559c635e35b9147febde5307b4a7d276f868775cd',
@@ -103,7 +109,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool14cq4fchmmqjygwjw4zexmqqd6a7caxptjnvseyu6wanjuppv4vk',
-    expectedRos: 0.032514330508591316,
+    expectedRos: 0.025525492403738248,
     blockfrost: {
       pool_id: 'pool14cq4fchmmqjygwjw4zexmqqd6a7caxptjnvseyu6wanjuppv4vk',
       hex: 'ae0154e2fbd824443a4ea8b26d800dd77d8e982b94d90c939a77672e',
@@ -126,7 +132,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool16ajaae2n5lsyr4f9k9uz5y8tpf0996tw640dzu7chwp2wdrnz6a',
-    expectedRos: 0.031592478767300536,
+    expectedRos: 0.025079584564809076,
     blockfrost: {
       pool_id: 'pool16ajaae2n5lsyr4f9k9uz5y8tpf0996tw640dzu7chwp2wdrnz6a',
       hex: 'd765dee553a7e041d525b1782a10eb0a5e52e96ed55ed173d8bb82a7',
@@ -144,7 +150,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool10rdglgh4pzvkf936p2m669qzarr9dusrhmmz9nultm3uvq4eh5k',
-    expectedRos: 0.02978712922886717,
+    expectedRos: 0.023599105112954044,
     blockfrost: {
       pool_id: 'pool10rdglgh4pzvkf936p2m669qzarr9dusrhmmz9nultm3uvq4eh5k',
       hex: '78da8fa2f5089964963a0ab7ad1402e8c656f203bef622cf9f5ee3c6',
@@ -162,7 +168,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool18ufrgfgmslekdxnk9v9345qvhrr7vfgzkvneqtwm7unnwaht6ww',
-    expectedRos: 0.03166657317346244,
+    expectedRos: 0.025075389561766137,
     blockfrost: {
       pool_id: 'pool18ufrgfgmslekdxnk9v9345qvhrr7vfgzkvneqtwm7unnwaht6ww',
       hex: '3f1234251b87f3669a762b0b1ad00cb8c7e62502b327902ddbf72737',
@@ -183,7 +189,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool16agnvfan65ypnswgg6rml52lqtcqe5guxltexkn82sqgj2crqtx',
-    expectedRos: 0.0314450450093231,
+    expectedRos: 0.02475349915915115,
     blockfrost: {
       pool_id: 'pool16agnvfan65ypnswgg6rml52lqtcqe5guxltexkn82sqgj2crqtx',
       hex: 'd7513627b3d50819c1c84687bfd15f02f00cd11c37d7935a67540089',
@@ -201,7 +207,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1lhz4gsk5ezdl5s4mv2kxgrkhzzhad6me2v0xmwuyt845vensdlc',
-    expectedRos: 0.03173994842418715,
+    expectedRos: 0.02504292441966749,
     blockfrost: {
       pool_id: 'pool1lhz4gsk5ezdl5s4mv2kxgrkhzzhad6me2v0xmwuyt845vensdlc',
       hex: 'fdc55442d4c89bfa42bb62ac640ed710afd6eb79531e6dbb8459eb46',
@@ -258,7 +264,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1xt0gxs63r5vgjsrzhm7jfuhuqzga9pf8kqvp38qmdzn3wjxudvr',
-    expectedRos: 0.000834040552604387,
+    expectedRos: 2.396881884991764e-5,
     blockfrost: {
       pool_id: 'pool1xt0gxs63r5vgjsrzhm7jfuhuqzga9pf8kqvp38qmdzn3wjxudvr',
       hex: '32de8343511d18894062befd24f2fc0091d28527b018189c1b68a717',
@@ -351,7 +357,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1rj6apcqxcvavaxp22f75zs9upphena7ntsnut2efvq98g4404up',
-    expectedRos: 0.02374630386267329,
+    expectedRos: 0.0007260701746703013,
     blockfrost: {
       pool_id: 'pool1rj6apcqxcvavaxp22f75zs9upphena7ntsnut2efvq98g4404up',
       hex: '1cb5d0e006c33ace982a527d4140bc086f99f7d35c27c5ab29600a74',
@@ -369,7 +375,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1hezakp5r240dy4fcsm7mfd3qqahcvyrhj8hl770yxmxxzdwvcre',
-    expectedRos: 0.004769854990042122,
+    expectedRos: 0.0018493839081006325,
     blockfrost: {
       pool_id: 'pool1hezakp5r240dy4fcsm7mfd3qqahcvyrhj8hl770yxmxxzdwvcre',
       hex: 'be45db0683555ed2553886fdb4b620076f86107791efff79e436cc61',
@@ -387,7 +393,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1a6ysvnx24xsjh2f6ehgmx7yu9q45fd7lsk88v2swxkek7pkxtgp',
-    expectedRos: 0.026084633210397,
+    expectedRos: 0.011261633321627773,
     blockfrost: {
       pool_id: 'pool1a6ysvnx24xsjh2f6ehgmx7yu9q45fd7lsk88v2swxkek7pkxtgp',
       hex: 'ee89064ccaa9a12ba93acdd1b3789c282b44b7df858e762a0e35b36f',
@@ -405,7 +411,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1522rtve5zlgnlh3zm5a4mcy3u7gpndg3kkac3xyzxmp6x6weca3',
-    expectedRos: 0.03991865377709036,
+    expectedRos: 0.017466704256550614,
     blockfrost: {
       pool_id: 'pool1522rtve5zlgnlh3zm5a4mcy3u7gpndg3kkac3xyzxmp6x6weca3',
       hex: 'a29435b33417d13fde22dd3b5de091e79019b511b5bb88988236c3a3',
@@ -423,7 +429,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1gaztx97t53k47fr7282d70tje8323vvzx8pshgts30t9krw62tm',
-    expectedRos: 0.03731683356009663,
+    expectedRos: 0.022247807405342712,
     blockfrost: {
       pool_id: 'pool1gaztx97t53k47fr7282d70tje8323vvzx8pshgts30t9krw62tm',
       hex: '4744b317cba46d5f247e51d4df3d72c9e2a8b18231c30ba1708bd65b',
@@ -441,7 +447,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu',
-    expectedRos: 0.021118720873503083,
+    expectedRos: 0.0003692094093115106,
     blockfrost: {
       pool_id: 'pool1gsfu7c2ac6rh45dn836myms9flp99y0erppqez80nwehk9c70eu',
       hex: '4413cf615dc6877ad1b33c75b26e054fc25291f918420c88ef9bb37b',
@@ -459,7 +465,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8',
-    expectedRos: 0.024619120927203753,
+    expectedRos: 0.0003778508079461673,
     blockfrost: {
       pool_id: 'pool1pg2k7lp6w68vlvdycug2ycu3mkrt0z4ftxay4g8zchj87mw6ug8',
       hex: '0a156f7c3a768ecfb1a4c710a26391dd86b78aa959ba4aa0e2c5e47f',
@@ -477,7 +483,7 @@ export const laceRosPoolFixtures: readonly LaceRosPoolFixture[] = [
   },
   {
     poolId: 'pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5',
-    expectedRos: 0.02424067428547616,
+    expectedRos: 2.2306287499773703e-5,
     blockfrost: {
       pool_id: 'pool18gxqszcsk9yt0jsnzc293556x5t0cd0xdepr69wta9rh23349j5',
       hex: '3a0c080b10b148b7ca13161458d29a3516fc35e66e423d15cbe94775',

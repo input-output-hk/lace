@@ -8,6 +8,31 @@ export const truncateText = (text?: string | null, maxLength = 20): string => {
   return text.slice(0, half) + '...' + text.slice(-half);
 };
 
+/**
+ * Long enough that `truncateText` keeps the whole `pool1` prefix, which marks
+ * the string as an id rather than an odd ticker, plus a five-character tail.
+ * The tail is what distinguishes one unnamed pool from another and what an
+ * explorer or the search box can be given.
+ */
+const POOL_ID_LABEL_LENGTH = 14;
+
+/**
+ * A pool's short identity: its ticker, or a fragment of its id when it
+ * published none. `??` said nothing and made every such pool look identical.
+ *
+ * A blank ticker counts as none — a published-but-empty ticker is as
+ * unidentifiable as an absent one, and `??` was reached only for `null`.
+ */
+export const poolShortLabel = (
+  ticker: string | null | undefined,
+  poolId: string,
+): string => {
+  const trimmed = (ticker ?? '').trim();
+  return trimmed.length > 0
+    ? trimmed
+    : truncateText(poolId, POOL_ID_LABEL_LENGTH);
+};
+
 export const shouldTruncateText = (
   text: ReactNode | string,
 ): ReactNode | string => {

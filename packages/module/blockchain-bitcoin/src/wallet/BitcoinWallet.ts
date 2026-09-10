@@ -274,6 +274,11 @@ export class BitcoinWallet {
   /**
    * Submits a raw transaction to the blockchain for inclusion in a block.
    *
+   * On success the transaction is eagerly appended to pendingTransactions$.
+   * A failure to derive that pending entry (e.g. an output with no address
+   * form) is logged but never fails the submission: the transaction is
+   * already on the network, so the txId must still be returned.
+   *
    * @param rawTransaction - The raw transaction data to be broadcast to the network.
    */
   public submitTransaction(
@@ -311,6 +316,13 @@ export class BitcoinWallet {
               }
             }),
             map(() => submitResult),
+            catchError((error: unknown) => {
+              this.logger.error(
+                'Failed to derive pending entry for submitted transaction:',
+                error,
+              );
+              return of(submitResult);
+            }),
           );
         }),
         catchError((error: ProviderError) => {

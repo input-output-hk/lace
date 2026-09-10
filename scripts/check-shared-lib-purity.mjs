@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // ADR-37 first-party purity guard for the host's SOURCE-shared libraries.
 //
-// @lace-lib/core is admitted into the privileged host's dependency closure as
-// SOURCE (docs/adr/37-host-supply-chain-isolation.md).
+// @lace-lib/core and @lace-lib/extension-shell-api are admitted into the privileged
+// host's dependency closure as SOURCE (docs/adr/37-host-supply-chain-isolation.md).
 // For the ONLY external code in the privileged bundle to be the audited
-// @lace-lib/vendor artifact, this lib must stay 100% first-party: every module
-// it imports (or exports-from) must be relative or another @lace-lib/* package, and
-// every SHIPPED dependency it declares must be @lace-lib/*. Externals — including
+// @lace-lib/vendor artifact, these two libs must stay 100% first-party: every module
+// they import (or export-from) must be relative or another @lace-lib/* package, and
+// every SHIPPED dependency they declare must be @lace-lib/*. Externals — including
 // transitive ones — enter the host ONLY through the @lace-lib/vendor seam, which
 // re-exports the audited surface (the @cardano-sdk crypto/derivation, plus `buffer`
 // and type-fest's `Tagged`).
@@ -23,7 +23,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const LIBS = ['packages/lib/core'];
+const LIBS = ['packages/lib/core', 'packages/lib/extension-shell-api'];
 const FIRST_PARTY = /^@lace-lib\//;
 const RELATIVE = /^\./;
 const SHIPPED_DEP_FIELDS = [
@@ -93,10 +93,13 @@ if (problems.length > 0) {
   console.error('\n❌ shared-lib first-party purity check FAILED (ADR 37)\n');
   for (const problem of problems) console.error(`  - ${problem}`);
   console.error(
-    '\n  @lace-lib/core must contain ONLY first-party code; every external ' +
-      '(incl transitive) enters the closure through the @lace-lib/vendor seam.\n',
+    '\n  @lace-lib/core + @lace-lib/extension-shell-api must contain ONLY ' +
+      'first-party code; every external (incl transitive) enters the host ' +
+      'through the @lace-lib/vendor seam.\n',
   );
   process.exit(1);
 }
 
-console.log('[check-shared-lib-purity] core is 100% first-party (ADR 37) ✓');
+console.log(
+  '[check-shared-lib-purity] core + extension-shell-api are 100% first-party (ADR 37) ✓',
+);

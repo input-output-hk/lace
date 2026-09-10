@@ -46,6 +46,19 @@ export interface AttemptCreateHardwareWalletPayload {
   accountIndex: number;
   derivationType?: DerivationType;
   blockchainName: BlockchainName;
+  /**
+   * Overrides the connector's default wallet name on a NEWLY created wallet
+   * (a merge into an existing wallet keeps its name). The migration wizard
+   * uses it to mark an imported hardware source, mirroring the name-suffixed
+   * phrase import.
+   */
+  walletName?: string;
+  /**
+   * Skips the success sheet. For callers that own their own journey (the
+   * migration wizard): the sheet is add-wallet's ending, and popping it over
+   * a flow that is mid-way reads as the flow finishing when it hasn't.
+   */
+  shouldSuppressSuccessSheet?: boolean;
 }
 
 /**

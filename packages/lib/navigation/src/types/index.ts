@@ -44,16 +44,11 @@ export type NavigationState = {
   }>;
 };
 
-type PortfolioTokenSortParams = {
-  tokenSortOption?: 'quantity' | 'ticker' | 'value';
-  tokenSortOrder?: 'asc' | 'desc';
-};
-
-type PortfolioTokenSortSheetParams = PortfolioTokenSortParams & {
+type PortfolioTokenSortSheetParams = {
   isTokenPricingEnabled?: boolean;
 };
 
-type PortfolioTabParams = PortfolioTokenSortParams & {
+type PortfolioTabParams = {
   /** One-shot: open the accounts carousel focused on this account. */
   focusAccountId?: string;
 };
@@ -128,6 +123,33 @@ export type StackParameterList = {
     notificationId: string;
   };
 };
+
+/**
+ * Selection mode on the pool picker, as one indivisible pair.
+ *
+ * `poolSelectionId` is present when another flow sent the user here to PICK a
+ * pool rather than stake from the picker: the details screen then offers
+ * "Select this pool" and dispatches `cardanoStakePools.poolSelectionMade` with
+ * this id, and the sending flow — watching for its own id — carries on. Both
+ * fields must survive every in-picker navigation (details, filters) or
+ * selection mode is silently lost mid-browse.
+ *
+ * `poolSelectionNotice` says what the sending flow's transaction will do, so
+ * the picker can state it before the choice is made. Declared by the CONSUMER:
+ * the picker is deliberately blind to who asked, and reading one consumer's
+ * target here would put its transaction semantics into a shared screen's copy.
+ *
+ * UNION, NOT TWO OPTIONALS. As independent optionals, three callers opened the
+ * picker in selection mode without a notice and the shared screen quietly told
+ * those users their vote would not move when the transaction did move it.
+ * Pairing them makes that a compile error rather than a copy bug nobody sees.
+ */
+export type PoolSelectionRequest =
+  | {
+      poolSelectionId: string;
+      poolSelectionNotice: 'stake-and-vote' | 'stake';
+    }
+  | { poolSelectionId?: undefined; poolSelectionNotice?: undefined };
 
 export type SheetParameterList = {
   [SheetRoutes.RootStack]: NavigatorScreenParams<StackParameterList>;
@@ -275,19 +297,19 @@ export type SheetParameterList = {
     accountId: string;
     walletId: string;
   };
-  [SheetRoutes.BrowsePool]: {
+  [SheetRoutes.BrowsePool]: PoolSelectionRequest & {
     searchQuery?: string;
     accountId: string;
     browsePoolSortOption?: string;
     browsePoolSortOrder?: string;
   };
-  [SheetRoutes.BrowsePoolFilterControls]: {
+  [SheetRoutes.BrowsePoolFilterControls]: PoolSelectionRequest & {
     accountId: string;
     searchQuery?: string;
     browsePoolSortOption?: string;
     browsePoolSortOrder?: string;
   };
-  [SheetRoutes.StakePoolDetails]: {
+  [SheetRoutes.StakePoolDetails]: PoolSelectionRequest & {
     poolId: string;
     searchQuery?: string;
     accountId: string;
@@ -359,6 +381,42 @@ export type SheetParameterList = {
     txHex: string;
     partialSign: boolean;
   };
+  [SheetRoutes.BitcoinDappConnect]: {
+    dapp: {
+      icon: AvatarContent;
+      name: string;
+      category: string;
+    };
+    dappOrigin: string;
+  };
+  [SheetRoutes.BitcoinDappSignMessage]: {
+    requestId: string;
+    dapp: {
+      icon: AvatarContent;
+      name: string;
+      origin: string;
+    };
+    address: string;
+    message: string;
+    signatureType: 'bip322-simple' | 'ecdsa';
+  };
+  [SheetRoutes.BitcoinDappSignTx]: {
+    requestId: string;
+    dapp: {
+      icon: AvatarContent;
+      name: string;
+      origin: string;
+    };
+    psbtsBase64: string[];
+    options?: {
+      toSignInputs?: {
+        index: number;
+        address?: string;
+        publicKey?: string;
+        sighashTypes?: number[];
+      }[];
+    };
+  };
   [SheetRoutes.MidnightSettings]: undefined;
   [SheetRoutes.EditTokenName]: {
     token: Token;
@@ -398,6 +456,10 @@ export type SheetParameterList = {
       | { type: 'specific'; drepId: string };
   };
   [SheetRoutes.DRepDelegationSuccess]: undefined;
+  // Earn rewards
+  [SheetRoutes.EarnRewards]: {
+    accountId: string;
+  };
 };
 
 export type StackScreenProps<T extends keyof StackParameterList> =

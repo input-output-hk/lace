@@ -16,7 +16,7 @@ import {
   DropdownMenu,
   DropdownMenuViewport,
 } from '../../../molecules';
-import { footerHeight } from '../../../organisms';
+import { footerHeight, useSheetSubmit } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 import type { Theme } from '../../../../design-tokens';
@@ -39,7 +39,8 @@ interface AddAccountSheetProps {
   onAccountNameChange: (text: string) => void;
   selectedBlockchain: string;
   onBlockchainChange: (value: string) => void;
-  blockchainOptions: BlockchainName[];
+  /** Read-only: the template only maps over it, and callers derive it. */
+  blockchainOptions: readonly BlockchainName[];
   testID?: string;
   accountNameInputTestID?: string;
   accountIndexInputLabel?: string;
@@ -75,6 +76,7 @@ export const AddAccountSheet = ({
 }: AddAccountSheetProps) => {
   const { theme } = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
+  const submitProps = useSheetSubmit();
 
   const handleAccountIndexSelect = useCallback(
     (index: number) => {
@@ -124,6 +126,7 @@ export const AddAccountSheet = ({
           inputError={accountNameError}
           editable={hasAvailableIndices}
           maxLength={NAME_MAX_LENGTH}
+          {...submitProps}
         />
         <RadioGroup
           options={blockchainOptions.map(blockchain => ({

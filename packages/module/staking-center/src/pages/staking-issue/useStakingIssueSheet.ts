@@ -2,7 +2,14 @@ import {
   ADA_DECIMALS,
   DEFAULT_DECIMALS,
   getAdaTokenTickerByNetwork,
+  LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
+import {
+  earnRewardsMode,
+  earnRewardsPoolSelectionId,
+  needsEarnRewardsPoolChoice,
+  resolveEarnRewardsTarget,
+} from '@lace-contract/earn-rewards';
 import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
@@ -45,6 +52,13 @@ export const useStakingIssueSheet = (
   const rewardAccountDetails = rewardAccountDetailsMap[accountId];
 
   const addresses = useLaceSelector('addresses.selectByAccountId', accountId);
+  const pendingActivitiesByAccount = useLaceSelector(
+    'activities.selectPendingActivitiesByAccount',
+  );
+  const fungibleTokens = useLaceSelector(
+    'tokens.selectAggregatedFungibleTokensByAccountId',
+    accountIdString,
+  );
 
   const [stakePool] = useStakePools(
     rewardAccountDetails?.rewardAccountInfo.poolId,
@@ -101,11 +115,55 @@ export const useStakingIssueSheet = (
     [featureFlags],
   );
 
+  // Locked rewards mean no DRep is delegated — the earn-rewards audience. Route
+  // into the one-tap flow when it applies; the sheet derives the offer itself.
+  const chainId = useLaceSelector('cardanoContext.selectChainId');
+  const earnRewardsTarget = useMemo(
+    () => resolveEarnRewardsTarget({ featureFlags, chainId }),
+    [featureFlags, chainId],
+  );
+  const adaAvailable = fungibleTokens.find(
+    token => token.tokenId === LOVELACE_TOKEN_ID,
+  )?.available;
+  const offerMode = earnRewardsTarget
+    ? earnRewardsMode({
+        rewardAccountInfo: rewardAccountDetails?.rewardAccountInfo,
+        hasPendingTx: (pendingActivitiesByAccount[accountId]?.length ?? 0) > 0,
+        hasAda:
+          adaAvailable !== undefined && BigInt(adaAvailable.toString()) > 0n,
+        hasDRep: earnRewardsTarget?.dRep !== undefined,
+      })
+    : undefined;
+  const isEarnRewardsApplicable = offerMode !== undefined;
+
   const handleDelegateVote = useCallback(() => {
-    NavigationControls.navigate(SheetRoutes.BrowseDRep, {
-      accountId: accountIdString,
-    });
-  }, [accountIdString]);
+    // Straight to the pool list when there is a pool to choose. This sheet's
+    // cohort already stakes (its rewards are locked for want of a vote), so
+    // the offer is vote-only and no pool is asked for — the guard is here for
+    // the day another state routes through it.
+    if (
+      needsEarnRewardsPoolChoice({
+        target: earnRewardsTarget,
+        mode: offerMode,
+      })
+    ) {
+      NavigationControls.navigate(SheetRoutes.BrowsePool, {
+        accountId: accountIdString,
+        poolSelectionId: earnRewardsPoolSelectionId(accountIdString),
+        // What THIS flow's transaction will do — the vote leg rides along only
+        // when a DRep is promoted.
+        poolSelectionNotice:
+          earnRewardsTarget?.dRep === undefined ? 'stake' : 'stake-and-vote',
+      });
+      return;
+    }
+    NavigationControls.navigate(
+      isEarnRewardsApplicable
+        ? SheetRoutes.EarnRewards
+        : SheetRoutes.BrowseDRep,
+      { accountId: accountIdString },
+    );
+  }, [accountIdString, earnRewardsTarget, offerMode, isEarnRewardsApplicable]);
 
   const poolStatusState = issueTypeToPoolStatusState[issueType];
 
@@ -161,7 +219,20 @@ export const useStakingIssueSheet = (
       ...baseProps,
       state: 'locked-rewards' as const,
       // No handler when the governance center is disabled — the sheet hides the button.
-      ...(isGovernanceCenterEnabled && { onDelegateVote: handleDelegateVote }),
+      ...(isGovernanceCenterEnabled && {
+        onDelegateVote: handleDelegateVote,
+        // Named by the outcome the press delivers, not the certificate it
+        // signs. This cohort already stakes, so the flow it opens is the
+        // "Unlock rewards" one — same words as that sheet's header and its
+        // confirm button. Only a first-time offer would read "Earn rewards".
+        ...(isEarnRewardsApplicable && {
+          delegateVoteLabel: t(
+            offerMode === 'vote-only'
+              ? 'v2.earn-rewards.unlock.nudge.cta'
+              : 'v2.earn-rewards.stake-cta',
+          ),
+        }),
+      }),
     };
   }
 

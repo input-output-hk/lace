@@ -21,12 +21,12 @@ import type { Render } from '@lace-contract/views';
 
 const authPromptStyles = StyleSheet.create({
   root: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1,
     pointerEvents: 'box-none',
   },
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1,
     pointerEvents: 'box-none',
   },

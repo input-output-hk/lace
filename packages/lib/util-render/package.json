@@ -9,5 +9,8 @@
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
     "@react-rxjs/core": "^0.10.8"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
   }
 }

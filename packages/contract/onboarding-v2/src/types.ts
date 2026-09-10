@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react';
 
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { State } from '@lace-contract/module';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 import type {
@@ -171,6 +172,31 @@ export type OnboardingOption =
 export type OnboardingStartWalletDropdownUICustomisation = UICustomisation<{
   WalletDropdown: ComponentType;
 }>;
+
+/** A single card contributed to the OnboardingStart option list by a module. */
+/** Which option list the entry was pressed from. The contributing module gets
+ * the same press either way — this only tells it which door the user used, so
+ * a contributed flow can report its own funnel accurately. */
+export type OnboardingEntrySurface = 'add-wallet' | 'onboarding';
+
+export type OnboardingEntryOption = {
+  id: string;
+  /** IconName from ui-toolkit's IconMap. */
+  icon: string;
+  titleKey: TranslationKey;
+  descriptionKey: TranslationKey;
+  onPress: (surface: OnboardingEntrySurface) => void;
+};
+
+export type OnboardingEntryUICustomisation = UICustomisation<
+  Partial<{
+    /** Cards appended to the OnboardingStart and add-wallet option lists, after
+     * Restore/Import and before Hardware. */
+    EntryOptions: OnboardingEntryOption[];
+    /** In-flow callout rendered on the Restore screen, under the instruction text. */
+    RestoreCallout: ComponentType;
+  }>
+>;
 
 export type OnboardingConfig = {
   redirectToOnboardingWhenLastWalletRemoved: boolean;

@@ -10,6 +10,7 @@ import type {
   ProfileDropdownWalletsUICustomisation,
   DropdownMenuItemUICustomisation,
   PortfolioBannerUICustomisation,
+  PortfolioAnnouncement,
   AboutPageUICustomisation,
   Dialogs,
 } from './types';
@@ -34,6 +35,7 @@ declare module '@lace-contract/module' {
     readonly loadAppMenuItems: DynamicallyLoadedInit<AppMenuItems>;
     readonly loadTabMenuItems: DynamicallyLoadedInit<TabMenuItems>;
     readonly loadPortfolioBannerUICustomisations: DynamicallyLoadedInit<PortfolioBannerUICustomisation>;
+    readonly loadPortfolioAnnouncements: DynamicallyLoadedInit<PortfolioAnnouncement>;
     readonly loadDialogs?: DynamicallyLoadedInit<Dialogs>;
   }
 }

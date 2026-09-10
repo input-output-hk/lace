@@ -8,15 +8,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { derivePendingActivityFromCbor } from '../../../src/store/helpers/derive-pending-activity-from-cbor';
 import { CardanoPaymentAddress } from '../../../src/types';
 
-import type { CardanoInFlightUtxoActivityMetadata } from '../../../src/augmentations';
+import type { CardanoActivityUtxoMetadata } from '../../../src/augmentations';
 import type { Activity } from '@lace-contract/activities';
 
 const getCardanoInFlight = (
   activity: Activity | undefined,
-): CardanoInFlightUtxoActivityMetadata | undefined =>
+): CardanoActivityUtxoMetadata | undefined =>
   (
     activity?.blockchainSpecific as
-      | { Cardano?: CardanoInFlightUtxoActivityMetadata }
+      | { Cardano?: CardanoActivityUtxoMetadata }
       | undefined
   )?.Cardano;
 

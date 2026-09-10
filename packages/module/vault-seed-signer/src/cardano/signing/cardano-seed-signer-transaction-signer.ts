@@ -4,6 +4,7 @@ import { Serialization } from '@cardano-sdk/core';
 import { TxInId, util } from '@cardano-sdk/key-management';
 import { airGappedQrExchangeHook } from '@lace-contract/air-gapped-qr-exchange';
 import {
+  applyVkeyWitnesses,
   createInputResolver,
   deriveDRepKeyHash,
 } from '@lace-contract/cardano-context';
@@ -122,6 +123,7 @@ export class CardanoSeedSignerTransactionSigner
       txInKeyPathMap,
       xfp,
       dRepKeyHash,
+      scripts: tx.toCore().witness.scripts,
     });
     const collateralReturnPath = this.#buildCollateralReturnPath(txBody, xfp);
 
@@ -142,26 +144,30 @@ export class CardanoSeedSignerTransactionSigner
   /**
    * Non-input key paths the tx still requires the device to sign with -- the
    * stake key for stake certificates/withdrawals, the DRep key for DRep/voting
-   * certificates, plus required extra signers. Uses the same ownSignatureKeyPaths
-   * the in-memory and Ledger/Trezor signers rely on, then drops the paths
-   * already covered by signingInputs so each witness is requested once.
+   * certificates, own keys required by the tx's native scripts, plus required
+   * extra signers. Uses the same ownSignatureKeyPaths the in-memory and
+   * desktop Trezor signers rely on, then drops the paths already covered by
+   * signingInputs so each witness is requested once.
    */
   #buildExtraSigners({
     txBody,
     txInKeyPathMap,
     xfp,
     dRepKeyHash,
+    scripts,
   }: {
     txBody: CardanoTypes.TxBody;
     txInKeyPathMap: TxInKeyPathMap;
     xfp: ReturnType<typeof xfpFromMasterFingerprint>;
     dRepKeyHash: Ed25519KeyHashHex;
+    scripts: CardanoTypes.Script[] | undefined;
   }): ExtraSigner[] {
     const keyPaths = util.ownSignatureKeyPaths(
       txBody,
       this.#props.knownAddresses,
       txInKeyPathMap,
       dRepKeyHash,
+      scripts,
     );
     const seen = new Set(
       Object.values(txInKeyPathMap)
@@ -271,11 +277,9 @@ export class CardanoSeedSignerTransactionSigner
     }
 
     const witnessSet = tx.witnessSet();
-    witnessSet.setVkeys(
-      Serialization.CborSet.fromCore(
-        witnesses.map(witness => [witness.vkey, witness.signature]),
-        Serialization.VkeyWitness.fromCore,
-      ),
+    applyVkeyWitnesses(
+      witnessSet,
+      witnesses.map(witness => [witness.vkey, witness.signature]),
     );
 
     const signedTx = new Serialization.Transaction(

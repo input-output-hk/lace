@@ -13,7 +13,7 @@ import {
   Text,
 } from '../../../atoms';
 import { DropdownMenu } from '../../../molecules';
-import { Sheet, footerHeight } from '../../../organisms';
+import { Sheet, footerHeight, useSheetSubmit } from '../../../organisms';
 
 import type {
   ContactSheetProps,
@@ -125,10 +125,12 @@ export const ContactSheet = ({
   onUploadAvatar,
   onRemoveContact,
   nameError,
+  hasVerticalFooter = false,
   testID,
 }: ContactSheetProps) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const submitProps = useSheetSubmit();
 
   // Auto-detect is always the first option provided by the template
   const autoDetectOption = {
@@ -147,8 +149,14 @@ export const ContactSheet = ({
   };
 
   return (
-    <Sheet.Scroll>
-      <Column alignItems="center" gap={spacing.M} style={styles.container}>
+    <Sheet.Scroll keyboardAware>
+      <Column
+        alignItems="center"
+        gap={spacing.M}
+        style={[
+          styles.container,
+          hasVerticalFooter && styles.containerVerticalFooter,
+        ]}>
         <View style={styles.avatarContainer}>
           <Avatar
             size={100}
@@ -191,6 +199,7 @@ export const ContactSheet = ({
             onChangeText={onNameChange}
             inputError={nameError}
             testID={testID ? `${testID}-name-input` : undefined}
+            {...submitProps}
           />
         </View>
 
@@ -239,6 +248,14 @@ export const ContactSheet = ({
 const styles = StyleSheet.create({
   container: {
     paddingBottom: footerHeight.horizontal,
+  },
+  // Opt-in (hasVerticalFooter), additive to `container`, so the two hosts
+  // differ by exactly this amount.
+  // TEMPORARY SPLIT: only lace-next needs the taller inset today. Once
+  // lace-next replaces lace-mobile, drop the prop and fold this value into
+  // `container` — next's behaviour becomes the only behaviour.
+  containerVerticalFooter: {
+    paddingBottom: footerHeight.vertical + footerHeight.horizontal,
   },
   avatarContainer: {
     marginVertical: spacing.S,

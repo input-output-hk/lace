@@ -3,10 +3,13 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useUICustomisation } from '@lace-contract/app';
 import { resolveAccountNameSuffix } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
-import { isHardwareWallet, WalletType } from '@lace-contract/wallet-repo';
+import {
+  isHardwareWallet,
+  WalletType,
+  withMigratedTag,
+} from '@lace-contract/wallet-repo';
 import {
   NavigationControls,
-  SheetRoutes,
   StackRoutes,
   TabRoutes,
 } from '@lace-lib/navigation';
@@ -26,7 +29,12 @@ import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import { isVaultCapabilityEnabled } from '../capability-gating';
+import {
+  useDispatchLaceAction,
+  useLaceSelector,
+  useLoadModules,
+} from '../hooks';
 
 import type { TranslationKey } from '@lace-contract/i18n';
 import type {
@@ -82,6 +90,20 @@ export const AccountCenter = ({
   const clearAccountStatus = useDispatchLaceAction(
     'accountManagement.clearAccountStatus',
   );
+  const requestAddAccountCeremony = useDispatchLaceAction(
+    'vault.addAccountCeremonyRequested',
+  );
+  // `undefined` until the capabilities promise resolves (ADR 52), so the entry
+  // appears when it lands rather than flashing an entry the arm cannot serve.
+  const vaultCapabilities = useLoadModules('addons.loadVaultCapabilities')?.[0];
+  const canAddAccount = isVaultCapabilityEnabled(
+    vaultCapabilities,
+    'addAccount',
+  );
+  // On the shell host the add-account surface only appears once the host mounts
+  // it. Any pending launch locks every wallet's add button (the host mounts one
+  // surface at a time); only the wallet that was pressed spins.
+  const pendingCeremony = useLaceSelector('vault.selectPendingCeremony');
 
   const accountCenterWalletsUICustomisations = useUICustomisation(
     'addons.loadAccountCenterWalletsUICustomisations',
@@ -128,12 +150,9 @@ export const AccountCenter = ({
           : undefined,
       );
       clearAccountStatus();
-      NavigationControls.navigate(SheetRoutes.AddAccount, {
-        walletId,
-        hasNestedScrolling: true,
-      });
+      requestAddAccountCeremony({ walletId });
     },
-    [clearAccountStatus, trackEvent, wallets],
+    [clearAccountStatus, requestAddAccountCeremony, trackEvent, wallets],
   );
 
   const handleAccountPress = useCallback(
@@ -213,7 +232,10 @@ export const AccountCenter = ({
             : undefined;
           return {
             id: account.accountId,
-            title: account.metadata.name,
+            title: withMigratedTag(
+              account.metadata,
+              t('wallet.migrated-marker'),
+            ),
             suffix,
             subtitle: account.blockchainName,
             icon: getBlockchainIcon(account.blockchainName),
@@ -243,9 +265,15 @@ export const AccountCenter = ({
         <WalletHierarchy
           showAlert={isPassphraseUnconfirmed}
           headerIcon={getWalletIcon(wallet.type)}
-          title={wallet.metadata.name}
+          title={withMigratedTag(wallet.metadata, t('wallet.migrated-marker'))}
           actionButtonLabel={t('v2.generic.btn.settings')}
           addButtonLabel={t('v2.account-management.addAccount')}
+          showAddButton={canAddAccount}
+          addButtonDisabled={pendingCeremony !== null}
+          addButtonLoading={
+            pendingCeremony?.ceremony === 'add-account' &&
+            pendingCeremony.walletId === wallet.walletId
+          }
           items={convertWalletToHierarchyItems(wallet)}
           onActionButtonPress={() => {
             handleWalletSettings(wallet.walletId);
@@ -265,6 +293,8 @@ export const AccountCenter = ({
     [
       getWalletIcon,
       t,
+      canAddAccount,
+      pendingCeremony,
       convertWalletToHierarchyItems,
       handleWalletSettings,
       handleAddAccount,

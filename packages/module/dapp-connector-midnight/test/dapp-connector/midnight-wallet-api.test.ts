@@ -3,7 +3,7 @@ import {
   AuthenticatorErrorCode,
 } from '@lace-contract/dapp-connector';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

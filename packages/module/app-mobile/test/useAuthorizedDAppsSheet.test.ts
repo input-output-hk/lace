@@ -165,10 +165,22 @@ describe('useAuthorizedDAppsSheet', () => {
     expect(on.current.isBrowseButtonVisible).toBe(true);
   });
 
+  it('dispatches authorizedDappsViewed on mount', () => {
+    mockSelectors(authorizedCardanoOnly, true);
+
+    renderHook(() => useAuthorizedDAppsSheet());
+
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      dappConnectorActions.authorizedDapps.authorizedDappsViewed(),
+    );
+  });
+
   it('dispatches removeAuthorizedDapp with blockchainName and dapp id', () => {
     mockSelectors(authorizedCardanoOnly, true);
 
     const { result } = renderHook(() => useAuthorizedDAppsSheet());
+    mockDispatch.mockClear();
 
     act(() => {
       result.current.dApps[0]?.onDAppRemove();

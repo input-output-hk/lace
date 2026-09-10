@@ -128,6 +128,8 @@ const slice = createSlice({
 
         if (didAllSucceeded) {
           accountStatus.lastSuccessfulSync = Timestamp(Date.now());
+        } else {
+          accountStatus.lastFailedSync = Timestamp(Date.now());
         }
 
         // Clear pendingSync
@@ -164,6 +166,7 @@ const slice = createSlice({
 
       if (isAllTerminal) {
         // Don't update lastSuccessfulSync on failure
+        accountStatus.lastFailedSync = Timestamp(Date.now());
         // Clear pendingSync
         accountStatus.pendingSync = undefined;
       }
@@ -184,7 +187,10 @@ const slice = createSlice({
 
     /**
      * Drops `pendingSync` for the specified accounts, preserving
-     * `lastSuccessfulSync`. Used by per-blockchain coordinators to clear
+     * `lastSuccessfulSync` and `lastFailedSync` — the round is abandoned,
+     * not resolved, so consumers that classify a round's outcome (e.g.
+     * `trackSyncRoundFailures`) must read it as neither success nor failure.
+     * Used by per-blockchain coordinators to clear
      * their own stale operations on unlock — only blockchains whose
      * operation IDs aren't stable across sync rounds (e.g. Cardano's
      * `tipHash`-based IDs) need this. Blockchains with stable per-account
@@ -205,6 +211,19 @@ const slice = createSlice({
           state.syncStatusByAccount[accountId].pendingSync = undefined;
         }
       }
+    },
+
+    /**
+     * Drops the account's entire sync record — including `lastSuccessfulSync`,
+     * unlike `clearPendingSyncsForAccounts` which preserves it. Used when a
+     * user resets an account's blockchain sync state from scratch, so the
+     * account reads as never-synced until the fresh sync completes.
+     */
+    resetAccountSyncStatus: (
+      state,
+      { payload }: PayloadAction<{ accountId: AccountId }>,
+    ) => {
+      delete state.syncStatusByAccount[payload.accountId];
     },
 
     updateSyncProgress: (

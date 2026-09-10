@@ -10,6 +10,16 @@ interface CardanoNetworkIdConstructor {
 
   getChainId(networkId: CardanoNetworkId): Cardano.ChainId;
   getChainId(networkId: BlockchainNetworkId): Cardano.ChainId | undefined;
+
+  /**
+   * The network's name — `Mainnet`, `Preprod`, `Preview` — for anything a person
+   * reads. The id itself is a storage key: `cardano-1` names nothing to a user
+   * checking which chain their transactions are on.
+   *
+   * Undefined for a network magic the SDK has no name for, so the caller decides
+   * whether to fall back to the magic or say nothing.
+   */
+  getName(networkId: BlockchainNetworkId): string | undefined;
 }
 
 const CARDANO_NETWORK_PREFIX = 'cardano-';
@@ -30,5 +40,11 @@ export const CardanoNetworkId: CardanoNetworkIdConstructor = Object.assign(
       );
       return chainId;
     }) as CardanoNetworkIdConstructor['getChainId'],
+    getName: (networkId: BlockchainNetworkId): string | undefined => {
+      const networkMagic = Number(networkId.split(CARDANO_NETWORK_PREFIX)[1]);
+      // Reverse mapping on the SDK's numeric enum, so the names track the SDK
+      // rather than a second list here that could drift from it.
+      return Cardano.NetworkMagics[networkMagic] as string | undefined;
+    },
   },
 );

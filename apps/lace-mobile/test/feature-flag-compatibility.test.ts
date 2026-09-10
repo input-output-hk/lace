@@ -8,6 +8,7 @@ import { FeatureFlagKey } from '@lace-contract/feature';
 import { testFeatureFlagCompatibility } from '@lace-lib/util-dev-app';
 import { ADA_HANDLE_FEATURE_FLAG } from '@lace-module/ada-handle';
 import { MD_MIGRATION_FEATURE_FLAG } from '@lace-module/migrate-multi-delegation';
+import { MIGRATE_WALLET_FEATURE_FLAG } from '@lace-module/migrate-wallet';
 import { describe, expect, it } from 'vitest';
 
 import defaultFeatureFlags from '../src/app/feature-flags';
@@ -40,12 +41,14 @@ const experimentalFeatureFlags = [
   { key: FeatureFlagKey('CNIGHT_DESIGNATION') },
   { key: FeatureFlagKey('GOVERNANCE_CENTER') },
   { key: MD_MIGRATION_FEATURE_FLAG },
+  { key: MIGRATE_WALLET_FEATURE_FLAG },
   { key: ADA_HANDLE_FEATURE_FLAG },
   { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: PAUSE_NETWORK_POLLING_FEATURE_FLAG },
   { key: FEATURE_FLAG_WALLET_SECURITY_ALERTS },
   { key: FEATURE_FLAG_SEED_SIGNER },
   { key: FEATURE_FLAG_KEYSTONE },
+  { key: FeatureFlagKey('EARN_REWARDS') },
 ];
 
 testFeatureFlagCompatibility(

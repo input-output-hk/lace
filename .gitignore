@@ -40,6 +40,10 @@ feature-flags.override.ts
 
 # dist files
 dist
+dist-web/
+dist-extension/
+dist-approval/
+dist-native/
 
 # cache
 .nx
@@ -80,3 +84,16 @@ cache/
 apps/lace-mobile-e2e/artifacts
 .junie/
 /android/
+# expo prebuild output (scoped to apps so ci/android + ci/ios stay tracked)
+apps/*/android/
+apps/*/ios/
+# local expo modules are source (kotlin/swift), but their gradle output is not
+apps/*/modules/*/android/build/
+# …nor Gradle's own project cache/locks, which a local build creates beside it
+# (this omission is why `git add -A` swept apollo-crypto's .gradle/ into a
+# commit during LW-15041 T209)
+apps/*/modules/*/android/.gradle/
+
+# reassure perf-test output (baseline/current measurements + compare reports)
+.reassure/
+**/.gradle/

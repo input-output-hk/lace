@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -154,9 +155,9 @@ export const DropdownMenuViewport = ({
   boundaryInsets?: DropdownMenuViewportContextValue['boundaryInsets'];
 }) => {
   const boundaryRef = useRef<View | null>(null);
-  const hostName = useRef(
-    `dropdown-menu-viewport-${Math.random().toString(36).slice(2, 11)}`,
-  ).current;
+
+  const generatedId = useId();
+  const hostName = `dropdown-menu-viewport-${generatedId}`;
 
   return (
     <DropdownMenuViewportProvider
@@ -852,9 +853,7 @@ export const DropdownMenu = React.memo(
             statusBarTranslucent
             navigationBarTranslucent
             onRequestClose={closeMenu}>
-            <View
-              style={StyleSheet.absoluteFillObject}
-              pointerEvents="box-none">
+            <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
               <Pressable
                 style={[
                   defaultStyles.modalBackdropSegment,
@@ -1015,7 +1014,7 @@ const styles = (theme: Theme) =>
 
 const stylesPortal = StyleSheet.create({
   hostContainer: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     pointerEvents: 'box-none',
     zIndex: 11,
   },

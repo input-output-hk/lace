@@ -98,12 +98,15 @@ export type DRepSortBy = 'status' | 'votingPower';
 
 type DRepsFilterState = {
   status: DRepStatus;
-  sortBy: DRepSortBy;
+  // null = the user has not chosen a sort, so the browser applies its default
+  // landing rank. Once an explicit sort is picked there is no way back: the
+  // choice holds for the rest of the session (the state is not persisted).
+  sortBy: DRepSortBy | null;
 };
 
 const dRepsFilterSlice = createSlice({
   name: 'dRepsFilter',
-  initialState: { status: 'all', sortBy: 'votingPower' } as DRepsFilterState,
+  initialState: { status: 'all', sortBy: null } as DRepsFilterState,
   reducers: {
     setDRepStatus: (state, action: PayloadAction<{ status: DRepStatus }>) => {
       state.status = action.payload.status;
@@ -121,16 +124,25 @@ const dRepsFilterSlice = createSlice({
 type PromotedDRepsState = {
   config: Partial<Record<CardanoPromotedNetworkKey, PromotedDRep[]>>;
   activePromoted: PromotedDRep[];
+  // The editorial inverse of the promoted list: DRep ids the browser hides
+  // from the directory, reachable only by pasting the exact DRep id.
+  // Config-owned, per network, like the promoted entries.
+  blockedConfig: Partial<Record<CardanoPromotedNetworkKey, string[]>>;
+  activeBlocked: string[];
 };
 
 // Shared empty fallbacks keep the selectors referentially stable before this
 // contract's reducers are injected (async store load).
 const EMPTY_PROMOTED_CONFIG: PromotedDRepsState['config'] = {};
 const EMPTY_PROMOTED_LIST: PromotedDRep[] = [];
+const EMPTY_BLOCKED_CONFIG: PromotedDRepsState['blockedConfig'] = {};
+const EMPTY_BLOCKED_LIST: string[] = [];
 
 const INITIAL_PROMOTED_DREPS_STATE: PromotedDRepsState = {
   config: EMPTY_PROMOTED_CONFIG,
   activePromoted: EMPTY_PROMOTED_LIST,
+  blockedConfig: EMPTY_BLOCKED_CONFIG,
+  activeBlocked: EMPTY_BLOCKED_LIST,
 };
 
 const promotedDRepsSlice = createSlice({
@@ -151,12 +163,27 @@ const promotedDRepsSlice = createSlice({
     ) => {
       state.activePromoted = action.payload.promoted;
     },
+    setBlockedConfig: (
+      state,
+      action: PayloadAction<
+        Partial<Record<CardanoPromotedNetworkKey, string[]>>
+      >,
+    ) => {
+      state.blockedConfig = action.payload;
+    },
+    setActiveBlocked: (state, action: PayloadAction<{ blocked: string[] }>) => {
+      state.activeBlocked = action.payload.blocked;
+    },
   },
   selectors: {
     selectPromotedConfig: (state: PromotedDRepsState | undefined) =>
       state?.config ?? EMPTY_PROMOTED_CONFIG,
     selectActivePromoted: (state: PromotedDRepsState | undefined) =>
       state?.activePromoted ?? EMPTY_PROMOTED_LIST,
+    selectBlockedConfig: (state: PromotedDRepsState | undefined) =>
+      state?.blockedConfig ?? EMPTY_BLOCKED_CONFIG,
+    selectActiveBlocked: (state: PromotedDRepsState | undefined) =>
+      state?.activeBlocked ?? EMPTY_BLOCKED_LIST,
   },
 });
 

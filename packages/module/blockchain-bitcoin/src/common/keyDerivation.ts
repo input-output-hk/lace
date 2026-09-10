@@ -2,6 +2,7 @@ import * as ecc from '@bitcoinerlab/secp256k1';
 import {
   BitcoinNetwork,
   bitcoinAccountDerivationPath,
+  hdKeyFromExtendedKey,
 } from '@lace-contract/bitcoin-context';
 import { HDKey } from '@scure/bip32';
 import * as bitcoin from 'bitcoinjs-lib';
@@ -12,26 +13,6 @@ import { AddressType } from './address';
 import type { ExtendedAccountPublicKeys } from './info';
 
 bitcoin.initEccLib(ecc);
-
-const TESTNET_BIP32_VERSIONS = {
-  private: bitcoin.networks.testnet.bip32.private,
-  public: bitcoin.networks.testnet.bip32.public,
-};
-
-/**
- * Imports a BIP-32 extended key, tolerating either a mainnet (xpub/xprv) or a
- * testnet (tpub/tprv) version prefix. @scure/bip32 validates the version against
- * a single {private, public} pair, so try mainnet first and fall back to
- * testnet. The version bytes do not affect child derivation; the wallet network
- * is tracked separately via the account networkType.
- */
-const hdKeyFromExtendedKey = (extendedKey: string): HDKey => {
-  try {
-    return HDKey.fromExtendedKey(extendedKey);
-  } catch {
-    return HDKey.fromExtendedKey(extendedKey, TESTNET_BIP32_VERSIONS);
-  }
-};
 
 /**
  * Mapping from AddressType enum values to keys used in ExtendedAccountPublicKeys.

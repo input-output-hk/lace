@@ -40,6 +40,7 @@ import { Router } from './Router';
 import { logger } from './util';
 import { appConfig, configValidationError, ENV } from './util';
 import { BLOCKFROST_IPFS_URL, WEB_IPFS_GATEWAY_URL } from './util/constants';
+import { sentryNavigationIntegration } from './util/sentry-navigation';
 
 import type { ThemePreference } from './util';
 
@@ -73,6 +74,7 @@ if (Platform.OS === 'web') {
         sendDefaultPii: false,
         tracesSampleRate: isProduction ? 0.1 : 1.0,
         profilesSampleRate: isProduction ? 0.1 : 1.0,
+        integrations: [sentryNavigationIntegration],
       });
     } else {
       initializeObservability(new NoOpProvider());
@@ -95,7 +97,9 @@ const ThemeProviderWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 
   const defaultTheme =
-    themePreference === 'system' ? userAgentColorScheme : themePreference;
+    themePreference === 'system'
+      ? userAgentColorScheme ?? 'light'
+      : themePreference;
 
   return (
     <ThemeProvider

@@ -1,10 +1,9 @@
 import { featuresSelectors } from '@lace-contract/feature';
 import { markParameterizedSelector } from '@lace-contract/module';
 import { networkSelectors } from '@lace-contract/network';
-import { BigNumber } from '@lace-lib/util';
 import { Serializable } from '@lace-lib/util-store';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
-import { createSelector, createSlice } from '@reduxjs/toolkit';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
+import { createAction, createSelector, createSlice } from '@reduxjs/toolkit';
 import merge from 'lodash/merge';
 
 import {
@@ -15,7 +14,6 @@ import {
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
 } from '../const';
 import { MidnightSDKNetworkId } from '../const';
-import { createDustToken } from '../dust-token';
 import { getValidNetworkStringPayload } from '../utils';
 import { MidnightNetworkId } from '../value-objects';
 
@@ -32,6 +30,8 @@ import type {
 } from '../types';
 import type { MidnightAccountId } from '../value-objects';
 import type { FeatureFlagKey } from '@lace-contract/feature';
+import type { AccountId } from '@lace-contract/wallet-repo';
+import type { BigNumber } from '@lace-lib/util';
 import type {
   PayloadAction,
   StateFromReducersMapObject,
@@ -47,6 +47,7 @@ export const initialState: MidnightContextSliceState = {
   isPortfolioBannerDismissed: false,
   supportedNetworksIds: [...MidnightSDKNetworkId],
   dustBalanceByAccount: {},
+  dustAvailableByAccount: {},
   dustGenerationDetailsByAccount: {},
   shouldAcknowledgeMidnightDisclaimer: 'not-shown',
   publicKeysByAccount: {},
@@ -121,13 +122,17 @@ const slice = createSlice({
     setDustBalance: (
       state,
       {
-        payload: { accountId, dustBalance },
+        payload: { accountId, dustAvailable, dustBalance },
       }: PayloadAction<{
         accountId: MidnightAccountId;
+        /** The spendable subset of `dustBalance` — what a transfer can pay
+         * with once a pending build has taken its dust coin. */
+        dustAvailable: BigNumber;
         dustBalance: BigNumber;
       }>,
     ) => {
       state.dustBalanceByAccount[accountId] = dustBalance;
+      state.dustAvailableByAccount[accountId] = dustAvailable;
     },
     setDustGenerationDetails: {
       reducer: (
@@ -187,6 +192,22 @@ const slice = createSlice({
     ) => {
       state.networkTermsAndConditions = payload;
     },
+
+    /**
+     * Clears the sync-derived dust caches (balance and generation details) for
+     * one account. Used by the per-account "reset sync state" flow so a stale
+     * dust balance can't survive the reset/restart and mislead the user.
+     */
+    resetAccountDust: (
+      state,
+      {
+        payload: { accountId },
+      }: PayloadAction<{ accountId: MidnightAccountId }>,
+    ) => {
+      delete state.dustBalanceByAccount[accountId];
+      delete state.dustAvailableByAccount[accountId];
+      delete state.dustGenerationDetailsByAccount[accountId];
+    },
   },
   selectors: {
     selectNetworksDefaultConfig: state => state.defaultNetworksConfig,
@@ -206,6 +227,8 @@ const slice = createSlice({
     selectDefaultTestNetNetworkId: state => state.defaultTestNetNetworkId,
 
     selectDustBalanceByAccount: state => state.dustBalanceByAccount,
+
+    selectDustAvailableByAccount: state => state.dustAvailableByAccount,
 
     selectSerializedDustGenerationDetailsByAccount: state =>
       state.dustGenerationDetailsByAccount,
@@ -282,17 +305,6 @@ const selectInitialNetworkId = createSelector(
     initialNetworkType === 'mainnet'
       ? NetworkId.NetworkId.MainNet
       : defaultTestNetNetworkId,
-);
-
-const selectDustToken = createSelector(
-  selectNetworkId,
-  slice.selectors.selectDustBalanceByAccount,
-  (_: unknown, accountId?: MidnightAccountId) => accountId,
-  (networkId, dustBalanceByAccount, accountId) =>
-    createDustToken(
-      networkId,
-      (accountId && dustBalanceByAccount[accountId]) ?? BigNumber(0n),
-    ),
 );
 
 /**
@@ -375,9 +387,20 @@ export const midnightContextReducers = {
   [slice.name]: slice.reducer,
 };
 
+/**
+ * Per-account "reset sync state" intent. Lives on the contract (not a module
+ * slice) because two different modules implement it — @lace-module/midnight-sync
+ * for the monolith engine and @lace-module/midnight-host-pull for the shell
+ * guest — and modules cannot subscribe to another module's actions (ADR 14).
+ */
+const resetSyncState = createAction<{ accountId: AccountId }>(
+  'midnight/resetSyncState',
+);
+
 export const midnightContextActions = {
   midnightContext: {
     ...slice.actions,
+    resetSyncState,
   },
 };
 
@@ -387,7 +410,6 @@ export const midnightContextSelectors = {
     selectMidnightBlockchainNetworkId,
     selectNetworkId,
     selectInitialNetworkId,
-    selectDustToken,
     selectNetworksConfig,
     selectNetworksConfigFeatureFlagsOverrides,
     selectCurrentNetwork,

@@ -150,6 +150,7 @@ describe('BlockfrostStakePoolProvider', () => {
         maxLovelaceSupply: Number(mockedNetworkResponse.supply.max),
         monetaryExpansion: mockedEpochParams.rho,
         poolInfluence: mockedEpochParams.a0,
+        treasuryCut: mockedEpochParams.tau,
         reserves: Number(mockedNetworkResponse.supply.reserves),
         retiringPools: [
           'pool1wn6a6f23ctq06udwhw27ravdpd6zcr7jlut3yez0wzdackz3222',

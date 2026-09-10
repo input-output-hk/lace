@@ -115,7 +115,7 @@ export const GlobalToast = ({ toast, onHide }: GlobalToastProps) => {
   }
 
   return (
-    <FloatingOverlay>
+    <FloatingOverlay onTouchThrough={onHide}>
       <Animated.View style={triggerToast.animatedStyle} pointerEvents="none">
         <Toast
           text={translatedText ?? toast.text}

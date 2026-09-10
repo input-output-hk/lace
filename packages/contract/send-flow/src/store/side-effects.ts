@@ -6,6 +6,7 @@ import {
   makeDiscardTx,
   makePreviewTx,
   makeSubmitTx,
+  pendingActivityMetadata,
 } from '@lace-contract/tx-executor';
 import { isAccountVisibleOnNetwork } from '@lace-contract/wallet-repo';
 import { BigNumber, Timestamp } from '@lace-lib/util';
@@ -61,12 +62,12 @@ import type { NetworkType } from '@lace-contract/network';
 import type { TokenIdMapper } from '@lace-contract/token-pricing';
 import type {
   BuildTx,
+  BuildTxParams,
   ConfirmTx,
   DiscardTx,
   PreviewTx,
   SubmitTx,
   TokenTransfer,
-  TxParams,
 } from '@lace-contract/tx-executor';
 import type { ByBlockchainNameSelector, JsonType } from '@lace-lib/util-store';
 
@@ -194,13 +195,22 @@ export const makeSendFlowPreparing =
                 const accountTokens = accountData
                   ? [...accountData.fungible, ...accountData.nfts]
                   : [];
-                const hasAnyTokens = Object.keys(groupedTokens).length > 0;
-                return { accountTokens, hasAnyTokens };
+                // Per-account readiness: an entry for THIS account (present even
+                // when its token lists are empty) means the account's tokens
+                // have been loaded. A global "any account has tokens" gate reads
+                // "loaded" off another account's residue — after a network flip
+                // the previous network's tokens are still in the map (ADR 11
+                // swaps the visible accounts but does not clear tokens), so the
+                // gate would pass immediately and the not-yet-synced account
+                // would be treated as genuinely empty.
+                const hasLoadedAccountTokens = accountData !== undefined;
+                return { accountTokens, hasLoadedAccountTokens };
               }),
-              // Wait until we have tokens loaded OR account has tokens
+              // Wait until this account's tokens have loaded (whether it ends up
+              // holding any or not).
               filter(
-                ({ accountTokens, hasAnyTokens }) =>
-                  accountTokens.length > 0 || hasAnyTokens,
+                ({ accountTokens, hasLoadedAccountTokens }) =>
+                  accountTokens.length > 0 || hasLoadedAccountTokens,
               ),
               take(1),
               map(({ accountTokens }) => {
@@ -348,22 +358,41 @@ export const makeSendFlowTxBuilding =
           blockchainName,
           blockchainSpecificData,
         }) => {
+          const [firstTransfer, ...restTransfers] = form.tokenTransfers;
+          // Nothing to build or preview without a transfer. The state machine
+          // gates FormTxBuilding on isFormCorrect (which rejects empty
+          // transfers), but the preview path fires from the Form state where
+          // the form may still be empty — skip rather than construct a
+          // non-empty tuple by casting an empty array (which every executor
+          // then destructures blindly).
+          if (!firstTransfer) {
+            return EMPTY;
+          }
+
           const { error, resolvedAddress, value } = form.address;
           const address = error ? '' : resolvedAddress || value;
-          const txBuilderParams = {
+
+          const toTransfer = (
+            transfer: (typeof form.tokenTransfers)[number],
+          ): TokenTransfer => ({
+            normalizedAmount: transfer.amount.value,
+            token: transfer.token.value,
+          });
+
+          const txBuilderParams: BuildTxParams = {
             accountId,
             blockchainName,
             serializedTx,
             txParams: [
               {
                 address,
-                tokenTransfers: form.tokenTransfers.map(tt => ({
-                  normalizedAmount: tt.amount.value,
-                  token: tt.token.value,
-                })) as [TokenTransfer, ...TokenTransfer[]],
+                tokenTransfers: [
+                  toTransfer(firstTransfer),
+                  ...restTransfers.map(toTransfer),
+                ],
                 blockchainSpecific: form.blockchainSpecific?.value,
               },
-            ] as [TxParams, ...TxParams[]],
+            ],
             blockchainSpecificSendFlowData: blockchainSpecificData,
           };
 
@@ -533,12 +562,7 @@ export const makeSendFlowProcessing =
                     amount: BigNumber(-BigNumber.valueOf(tt.amount.value)),
                   })),
                   type: ActivityType.Pending,
-                  ...(value.blockchainSpecificActivityMetadata !== undefined
-                    ? {
-                        blockchainSpecific:
-                          value.blockchainSpecificActivityMetadata,
-                      }
-                    : {}),
+                  ...pendingActivityMetadata(value),
                 };
 
                 return from([

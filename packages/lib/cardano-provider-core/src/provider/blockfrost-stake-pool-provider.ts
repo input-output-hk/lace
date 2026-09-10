@@ -67,6 +67,7 @@ export class BlockfrostStakePoolProvider extends BlockfrostProvider {
         retiringPools: retiring.map(pool => pool.pool_id as Cardano.PoolId),
         slotLength: genesis.slot_length,
         timestamp: 0,
+        treasuryCut: params.tau,
       };
     } catch (error) {
       throw toProviderError(error);

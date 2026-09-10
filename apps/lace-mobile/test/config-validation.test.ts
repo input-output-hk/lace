@@ -28,7 +28,7 @@ describe('config validation', () => {
 
   const createValidEnvironment = (overrides = {}) => ({
     NODE_ENV: 'test',
-    EXPO_PUBLIC_POSTHOG_API_URL: 'https://e.lw.iog.io',
+    EXPO_PUBLIC_POSTHOG_API_URL: 'https://posthog.example.com',
     EXPO_PUBLIC_FEATURE_FLAG_CHECK_FREQUENCY_SECONDS: '1800',
     EXPO_PUBLIC_POSTHOG_API_TOKEN: 'test-token',
     EXPO_PUBLIC_DEFAULT_MIDNIGHT_TESTNET_NETWORK_ID: 'undeployed',
@@ -44,13 +44,16 @@ describe('config validation', () => {
     EXPO_PUBLIC_ZENDESK_NEW_REQUEST_URL: 'https://example.com/zendesk',
     EXPO_PUBLIC_BANXA_URL: 'https://example.com/banxa',
     EXPO_PUBLIC_GOV_TOOLS_URL: 'https://example.com/gov',
-    EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREPROD: 'preprod-key',
-    EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREVIEW: 'preview-key',
-    EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_MAINNET: 'mainnet-key',
     EXPO_PUBLIC_LEARN_MORE_URL: 'https://example.com/learn-more',
     EXPO_PUBLIC_URL_LACE_PAGE: 'https://example.com/lace-link',
     EXPO_PUBLIC_NFT_CDN_URL: 'https://example.com/nft-cdn',
     EXPO_PUBLIC_CARDANO_CUBE_BASE_URL: 'https://example.com/cardano-cube',
+    EXPO_PUBLIC_MAESTRO_URL_MAINNET: 'https://example.com/maestro-mainnet',
+    EXPO_PUBLIC_MAESTRO_URL_TESTNET: 'https://example.com/maestro-testnet',
+    EXPO_PUBLIC_MEMPOOLSPACE_URL_MAINNET: 'https://example.com/mempool-mainnet',
+    EXPO_PUBLIC_MEMPOOLSPACE_URL_TESTNET: 'https://example.com/mempool-testnet',
+    EXPO_PUBLIC_COINGECKO_API_BASE_URL: 'https://example.com/coingecko',
+    EXPO_PUBLIC_BLOCKFROST_PROXY_URL: 'https://example.com/blockfrost',
     ...overrides,
   });
 
@@ -81,7 +84,7 @@ describe('config validation', () => {
       // Assert
       expect(appConfig).not.toBeNull();
       expect(configValidationError).toBeNull();
-      expect(appConfig?.postHogUrl).toBe('https://e.lw.iog.io');
+      expect(appConfig?.postHogUrl).toBe('https://posthog.example.com');
       expect(appConfig?.postHogApiToken).toBe('test-token');
       expect(appConfig?.defaultMidnightTestnetNetworkId).toBe('undeployed');
       expect(appConfig?.defaultTestnetChainId).toBe(Cardano.ChainIds.Preprod);
@@ -92,7 +95,7 @@ describe('config validation', () => {
         // Arrange
         Object.assign(process.env, {
           NODE_ENV: 'test',
-          EXPO_PUBLIC_POSTHOG_API_URL: 'https://e.lw.iog.io',
+          EXPO_PUBLIC_POSTHOG_API_URL: 'https://posthog.example.com',
           // Missing other required variables
         });
 
@@ -262,7 +265,7 @@ describe('config validation', () => {
         // Arrange
         Object.assign(process.env, {
           NODE_ENV: 'development',
-          EXPO_PUBLIC_POSTHOG_API_URL: 'https://e.lw.iog.io',
+          EXPO_PUBLIC_POSTHOG_API_URL: 'https://posthog.example.com',
           EXPO_PUBLIC_POSTHOG_API_TOKEN: 'test-token',
           // Missing most other required vars
         });
@@ -306,7 +309,7 @@ describe('config validation', () => {
         // Arrange
         Object.assign(process.env, {
           NODE_ENV: 'test',
-          EXPO_PUBLIC_POSTHOG_API_URL: 'https://e.lw.iog.io',
+          EXPO_PUBLIC_POSTHOG_API_URL: 'https://posthog.example.com',
           // Missing all others
         });
 

@@ -133,6 +133,25 @@ export type ModuleActionCreators<T> = T extends LaceModule<
   ? ActionCreators & ContractActionCreators & DependencyActionCreators
   : never;
 
+/** The combined action creators of a `Contracts` bundle. The action-creators
+ * counterpart of `ContractsSelectors` — see it for when to prefer these
+ * part-wise extractors over `ModuleActionCreators<typeof module>`. */
+export type ContractsActionCreators<T> = T extends Contracts<
+  infer _CombinedSelectors,
+  infer CombinedActionCreators,
+  infer _CombinedProvidesAddons
+>
+  ? CombinedActionCreators
+  : never;
+
+/** The action creators of a module's `LaceModuleStore`. See `ContractsSelectors`. */
+export type ModuleStoreActionCreators<T> = T extends LaceModuleStore<
+  infer _Selectors,
+  infer ActionCreators
+>
+  ? ActionCreators
+  : never;
+
 /**
  * Infer generic parameters in a way that preserves type safety
  */

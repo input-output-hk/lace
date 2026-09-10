@@ -328,7 +328,7 @@ const getStyles = (theme: Theme) =>
       flex: 1,
     },
     chartLayer: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     tooltip: {
       position: 'absolute',

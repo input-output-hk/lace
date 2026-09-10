@@ -10,7 +10,7 @@ import type { Activity } from '@lace-contract/activities';
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type * as ledger from '@midnight-ntwrk/ledger-v8';
-import type { UtxoWithMeta } from '@midnight-ntwrk/wallet-sdk/facade';
+import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 
 type DeserializedTx = ledger.Transaction<
   ledger.SignatureEnabled,

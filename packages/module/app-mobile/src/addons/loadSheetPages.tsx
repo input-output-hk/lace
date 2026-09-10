@@ -73,7 +73,6 @@ const loadSheetPages: ContextualLaceInit<
       <SheetStack.Screen
         name={SheetRoutes.PortfolioTokenSortControls}
         component={PortfolioTokenSortSheet}
-        options={{ stackBehavior: 'push' }}
       />
       <SheetStack.Screen
         name={SheetRoutes.ActivityDetail}

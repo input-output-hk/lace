@@ -100,6 +100,9 @@ const fixBufferPolyfill: Plugin = {
         'buffer/index.js',
       )}';
 import { Buffer as _B } from '${nm('buffer/index.js')}';
+// nodePolyfills' inline shims (assert, to-arraybuffer) import a top-level
+// isBuffer from 'buffer', which the npm package doesn't export.
+export const isBuffer = (b) => _B.isBuffer(b);
 export default { Buffer: _B };`;
     }
     return null;

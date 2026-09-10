@@ -1,7 +1,4 @@
 import { Cardano } from '@cardano-sdk/core';
-import { HexBlob } from '@cardano-sdk/util';
-
-import type { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 
 /**
  * Display information for a DRep.
@@ -28,13 +25,13 @@ export const formatStakeKeyHash = (
 ): string => String(stakeCredential.hash);
 
 /**
- * Converts a DRep credential hash to a bech32-encoded DRep ID.
+ * Converts a DRep credential to a CIP-129 bech32-encoded DRep ID.
  *
- * @param hash - The 28-byte hash of the DRep credential
- * @returns The bech32-encoded DRep ID
+ * @param credential - The DRep credential (key hash or script hash)
+ * @returns The CIP-129 bech32-encoded DRep ID
  */
-export const formatDRepId = (hash: Hash28ByteBase16): Cardano.DRepID =>
-  Cardano.DRepID(HexBlob.toTypedBech32('drep', HexBlob(hash)));
+export const formatDRepId = (credential: Cardano.Credential): Cardano.DRepID =>
+  Cardano.DRepID.cip129FromCredential(credential);
 
 /**
  * Formats a deposit amount in lovelace to a display string with coin symbol.
@@ -65,6 +62,6 @@ export const getDRepDisplayInfo = (
   alwaysAbstain: Cardano.isDRepAlwaysAbstain(dRep),
   alwaysNoConfidence: Cardano.isDRepAlwaysNoConfidence(dRep),
   ...(Cardano.isDRepCredential(dRep) && {
-    drepId: formatDRepId(dRep.hash),
+    drepId: formatDRepId(dRep),
   }),
 });

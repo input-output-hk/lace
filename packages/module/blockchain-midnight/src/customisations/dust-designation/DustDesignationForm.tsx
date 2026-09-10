@@ -6,6 +6,7 @@ import {
   spacing,
   Text,
   TokenItem,
+  useSheetSubmit,
   useTheme,
 } from '@lace-lib/ui-toolkit';
 import React from 'react';
@@ -52,6 +53,7 @@ export const DustDesignationForm = ({
   onDesignate,
 }: DustDesignationFormProps) => {
   const styles = useStyles();
+  const submitProps = useSheetSubmit();
 
   const feeDisplay =
     estimatedFee.length > 0
@@ -71,6 +73,7 @@ export const DustDesignationForm = ({
         testID="dust-address-input"
         autoCapitalize="none"
         autoCorrect={false}
+        {...submitProps}
       />
 
       <TokenItem

@@ -5,7 +5,7 @@ import { Sheet, useTheme } from '@lace-lib/ui-toolkit';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 
-import { isSignDataSignerResolving } from '../store/util';
+import { isAmbiguousSignDataAddress } from '../store/util';
 
 import { SignDataContent } from './sign-data/SignDataContent';
 import { SignTxLoadingContent } from './SignTxLoadingContent';
@@ -42,9 +42,14 @@ export const SignDataLayout = ({
 
   const title = t('dapp-connector.cardano.sign-data.title');
 
+  // An ambiguous (type-6 enterprise key) signer must not be approvable
+  // while its DRep-vs-payment identity is still resolving: the line shows a
+  // placeholder, and consenting to a placeholder is the consent mismatch
+  // the held rendering exists to prevent.
   const isSignerResolving =
     contentProps !== null &&
-    isSignDataSignerResolving(contentProps.address, contentProps.dRepKeyHash);
+    contentProps.dRepKeyHash === undefined &&
+    isAmbiguousSignDataAddress(contentProps.address);
   const isConfirmDisabled =
     confirmDisabled || showLoading || !contentProps || isSignerResolving;
 

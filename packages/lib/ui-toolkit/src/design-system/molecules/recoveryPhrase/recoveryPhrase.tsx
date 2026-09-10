@@ -5,10 +5,9 @@ import { spacing } from '../../../design-tokens';
 import { Row } from '../../atoms';
 import { MnemonicWord } from '../mnemonicWord/mnemonicWord';
 
-import type { ByteArray } from '@lace-lib/util';
-
 export type RecoveryPhraseProps = {
-  words: ByteArray[];
+  /** One byte array per word (ByteArray or plain Uint8Array — only the bytes are read). */
+  words: Uint8Array[];
   isBlurred?: boolean;
   testID?: string;
 };

@@ -6,7 +6,7 @@ import {
   StackRoutes,
   TabRoutes,
 } from '@lace-lib/navigation';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useLaceSelector } from '../../hooks';
@@ -28,6 +28,14 @@ const flattenAuthorizedDapps = (
 export const useAuthorizedDAppsSheet = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+
+  // Opening the sheet re-pulls the authoritative source (the host grant table,
+  // via the guest's host-pull bridge): grants added since boot — a host-side
+  // dapp connect the guest never observed — surface here rather than a stale
+  // snapshot. A no-op in the monolith, where the slice already has a writer.
+  useEffect(() => {
+    dispatch(dappConnectorActions.authorizedDapps.authorizedDappsViewed());
+  }, [dispatch]);
 
   const authorizedByChain = useLaceSelector(
     'dappConnector.selectAuthorizedDapps',

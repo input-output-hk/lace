@@ -32,7 +32,7 @@ const authPromptRoutesPattern = new RegExp(
 
 const authPromptContainerStyles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1,
     pointerEvents: 'box-none',
   },
@@ -45,7 +45,7 @@ const authPromptContainerStyles = StyleSheet.create({
  */
 const authPromptRootStyles = StyleSheet.create({
   root: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     zIndex: 1,
     // RN Web: ensure hit-testing passes through; prop alone is not enough on all views.
     pointerEvents: 'box-none',

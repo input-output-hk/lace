@@ -1,0 +1,8 @@
+[
+  "authentication-prompt.retry-countdown",
+  "dapp-connector.cardano.sign-data.drep-id-label",
+  "v2.sheets.receive.no-address",
+  "v2.swap.error.quote-expired",
+  "v2.swap.insufficient-funds-amount",
+  "v2.swap.review.minimum-received"
+]

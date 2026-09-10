@@ -21,10 +21,22 @@ const computeAccountTokens =
   (accountId: AccountId): SideEffect =>
   (
     _,
-    { cardanoContext: { selectAccountUtxos$, selectRewardAccountDetails$ } },
+    {
+      cardanoContext: {
+        selectAccountUtxosWithInFlight$,
+        selectRewardAccountDetails$,
+      },
+    },
     { actions },
   ) =>
-    combineLatest([selectAccountUtxos$, selectRewardAccountDetails$]).pipe(
+    // The in-flight view, not the raw set: a submitted-but-unsettled spend
+    // (e.g. a migration sweep) must leave the source's balance the moment it
+    // is submitted and credit the destination once — the raw sets double-count
+    // it until both providers catch up (LW-15318).
+    combineLatest([
+      selectAccountUtxosWithInFlight$,
+      selectRewardAccountDetails$,
+    ]).pipe(
       map(([accountUtxoMap, rewardAccountDetailsMap]) => ({
         accountUtxos: accountUtxoMap[accountId],
         rewardBalance:

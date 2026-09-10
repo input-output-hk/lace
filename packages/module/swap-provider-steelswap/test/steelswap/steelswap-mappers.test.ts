@@ -88,14 +88,32 @@ describe('steelswap-mappers', () => {
       expect(result.deposit).toBeUndefined();
     });
 
-    it('handles hop routes via splitGroup', () => {
-      const hopResponse = {
+    it('reads dex names from the pools nested inside splitGroup', () => {
+      // Shape taken from a live ADA→NIGHT response: each splitGroup leaf is an
+      // estimate-shaped split carrying its own `pools`.
+      const splitResponse = {
         ...mockEstimateResponse,
         pools: undefined,
-        splitGroup: [mockEstimateResponse.pools!],
+        splitGroup: [
+          [
+            {
+              bonusOut: 0,
+              pools: mockEstimateResponse.pools!,
+              price: mockEstimateResponse.price,
+              quantityA: mockEstimateResponse.quantityA,
+              quantityB: mockEstimateResponse.quantityB,
+              steelswapFee: mockEstimateResponse.steelswapFee,
+              tokenA: mockEstimateResponse.tokenA,
+              tokenB: mockEstimateResponse.tokenB,
+              totalDeposit: mockEstimateResponse.totalDeposit,
+              totalFee: mockEstimateResponse.totalFee,
+            },
+          ],
+        ],
       };
-      const result = fromEstimateResponse(hopResponse, mockQuoteRequest);
+      const result = fromEstimateResponse(splitResponse, mockQuoteRequest);
       expect(result.route).toHaveLength(1);
+      expect(result.route[0].dexName).toBe('Minswap');
     });
   });
 
@@ -134,7 +152,7 @@ describe('steelswap-mappers', () => {
   });
 
   describe('fromTokenSummary', () => {
-    const nftCdnUrl = 'https://nftcdn.lw.iog.io';
+    const nftCdnUrl = 'https://nftcdn.example.com';
 
     it('maps SteelSwap token to SwapToken', () => {
       const result = fromTokenSummary(

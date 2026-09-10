@@ -23,6 +23,7 @@ import {
   CARDANO_WALLET_API_CHANNEL,
 } from './messaging';
 
+import type { Cip30ApiMethod } from './const';
 import type { Cip30FullWalletApi, Cip30WalletApi } from './types';
 import type { ErrorClass, Shutdown } from '@cardano-sdk/util';
 import type {
@@ -32,6 +33,30 @@ import type {
 } from '@lace-contract/dapp-connector';
 import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
+
+/**
+ * CIP-30 methods that are safe to replay when the service worker dies before
+ * responding: pure reads whose re-execution on a fresh worker has no side
+ * effects, plus submitTx, whose handler treats resubmission of an already
+ * landed tx as success. Signing methods must not be replayed since they would
+ * re-prompt the user.
+ */
+const REPLAYABLE_CIP30_METHODS: ReadonlySet<Cip30ApiMethod> = new Set([
+  'getNetworkId',
+  'getUtxos',
+  'getCollateral',
+  'getBalance',
+  'getUsedAddresses',
+  'getUnusedAddresses',
+  'getChangeAddress',
+  'getRewardAddresses',
+  'getExtensions',
+  'submitTx',
+  'getPubDRepKey',
+  'getRegisteredPubStakeKeys',
+  'getUnregisteredPubStakeKeys',
+  'getNetworkMagic',
+] satisfies Cip30ApiMethod[]);
 
 /**
  * Remote API properties configuration for CIP-30 wallet methods.
@@ -44,7 +69,12 @@ export const cardanoWalletApiProperties: RemoteApiProperties<Cip30FullWalletApi>
   Object.fromEntries(
     CIP30_API_METHODS.map(name => [
       name,
-      RemoteApiPropertyType.MethodReturningPromise,
+      REPLAYABLE_CIP30_METHODS.has(name)
+        ? {
+            propType: RemoteApiPropertyType.MethodReturningPromise,
+            requestOptions: { onDisconnect: 'replay' },
+          }
+        : RemoteApiPropertyType.MethodReturningPromise,
     ]),
   ) as RemoteApiProperties<Cip30FullWalletApi>;
 

@@ -1,14 +1,17 @@
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, Serialization } from '@cardano-sdk/core';
 import { Ok, Err } from '@lace-lib/util';
 import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
   createCombinedInputResolver,
+  requiresForeignSignatures,
   requiresForeignSignaturesFromCbor,
   txInEquals,
 } from '../src/common/store/utils/input-resolver';
 
+import type { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
+import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type {
   CardanoProvider,
   CardanoProviderContext,
@@ -55,6 +58,13 @@ const createMockUtxo = (
   createMockHydratedTxIn(txId, index),
   createMockTxOut(lovelace),
 ];
+
+const createLocalInputResolver = (
+  localUtxos: Cardano.Utxo[],
+): Cardano.InputResolver => ({
+  resolveInput: async (txIn: Cardano.TxIn): Promise<Cardano.TxOut | null> =>
+    localUtxos.find(([input]) => txInEquals(input, txIn))?.[1] ?? null,
+});
 
 const mockContext: CardanoProviderContext = {
   chainId: {
@@ -261,71 +271,451 @@ describe('input-resolver', () => {
     // Empty knownAddresses to test only foreign inputs detection
     const emptyKnownAddresses: [] = [];
 
-    it('returns false when all transaction inputs are in local UTXOs', () => {
+    it('returns false when all transaction inputs are in local UTXOs', async () => {
       const localUtxos = [
         createMockUtxo(TX_INPUT_TXID, TX_INPUT_INDEX, 5_000_000n),
       ];
 
-      const hasForeignSignatures = requiresForeignSignaturesFromCbor(
+      const hasForeignSignatures = await requiresForeignSignaturesFromCbor(
         VALID_TX_CBOR,
         localUtxos,
         emptyKnownAddresses,
+        createLocalInputResolver(localUtxos),
+        true,
       );
 
       expect(hasForeignSignatures).toBe(false);
     });
 
-    it('returns true when transaction has inputs not in local UTXOs', () => {
+    it('returns true when transaction has inputs not in local UTXOs', async () => {
       const localUtxos = [
         createMockUtxo(mockTxId1, 0, 1_000_000n),
         createMockUtxo(mockTxId2, 0, 2_000_000n),
       ];
 
-      const hasForeignSignatures = requiresForeignSignaturesFromCbor(
+      const hasForeignSignatures = await requiresForeignSignaturesFromCbor(
         VALID_TX_CBOR,
         localUtxos,
         emptyKnownAddresses,
+        createLocalInputResolver(localUtxos),
+        true,
       );
 
       expect(hasForeignSignatures).toBe(true);
     });
 
-    it('returns true when local UTXOs is empty', () => {
+    it('returns true when local UTXOs is empty', async () => {
       const localUtxos: Cardano.Utxo[] = [];
 
-      const hasForeignSignatures = requiresForeignSignaturesFromCbor(
+      const hasForeignSignatures = await requiresForeignSignaturesFromCbor(
         VALID_TX_CBOR,
         localUtxos,
         emptyKnownAddresses,
+        createLocalInputResolver(localUtxos),
+        true,
       );
 
       expect(hasForeignSignatures).toBe(true);
     });
 
-    it('returns true when some inputs are local and some are foreign', () => {
+    it('returns true when some inputs are local and some are foreign', async () => {
       const localUtxos = [createMockUtxo(TX_INPUT_TXID, 0, 1_000_000n)];
 
-      const hasForeignSignatures = requiresForeignSignaturesFromCbor(
+      const hasForeignSignatures = await requiresForeignSignaturesFromCbor(
         VALID_TX_CBOR,
         localUtxos,
         emptyKnownAddresses,
+        createLocalInputResolver(localUtxos),
+        true,
       );
 
       expect(hasForeignSignatures).toBe(true);
     });
 
-    it('returns false when UTXO has same txId and index (different value is ok)', () => {
+    it('returns false when UTXO has same txId and index (different value is ok)', async () => {
       const localUtxos = [
         createMockUtxo(TX_INPUT_TXID, TX_INPUT_INDEX, 999_999n),
       ];
 
-      const hasForeignSignatures = requiresForeignSignaturesFromCbor(
+      const hasForeignSignatures = await requiresForeignSignaturesFromCbor(
         VALID_TX_CBOR,
         localUtxos,
         emptyKnownAddresses,
+        createLocalInputResolver(localUtxos),
+        true,
       );
 
       expect(hasForeignSignatures).toBe(false);
+    });
+  });
+
+  describe('requiresForeignSignatures (native scripts)', () => {
+    const OWN_ADDRESS = Cardano.PaymentAddress(
+      'addr_test1qpw0djgj0x59ngrjvqthn7enhvruxnsavsw5th63la3mjel3tkc974sr23jmlzgq5zda4gtv8k9cy38756r9y3qgmkqqjz6aa7',
+    );
+    const OWN_REWARD_ACCOUNT = Cardano.RewardAccount(
+      'stake_test1urc4mvzl2cp4gedl3yq2px7659krmzuzgnl2dpjjgsydmqqxgamj7',
+    );
+    const ownPaymentKeyHash = Cardano.Address.fromBech32(OWN_ADDRESS)
+      .asBase()!
+      .getPaymentCredential().hash as unknown as Ed25519KeyHashHex;
+    const ownStakeKeyHash = Cardano.RewardAccount.toHash(
+      OWN_REWARD_ACCOUNT,
+    ) as unknown as Ed25519KeyHashHex;
+    const foreignKeyHash = 'f'.repeat(56) as unknown as Ed25519KeyHashHex;
+
+    const knownAddresses = [
+      { address: OWN_ADDRESS, rewardAccount: OWN_REWARD_ACCOUNT },
+    ] as GroupedAddress[];
+
+    const requireSig = (keyHash: Ed25519KeyHashHex): Cardano.NativeScript => ({
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireSignature,
+      keyHash,
+    });
+    const allOf = (
+      ...scripts: Cardano.NativeScript[]
+    ): Cardano.NativeScript => ({
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireAllOf,
+      scripts,
+    });
+    const anyOf = (
+      ...scripts: Cardano.NativeScript[]
+    ): Cardano.NativeScript => ({
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireAnyOf,
+      scripts,
+    });
+    const nOf = (
+      required: number,
+      ...scripts: Cardano.NativeScript[]
+    ): Cardano.NativeScript => ({
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireNOf,
+      required,
+      scripts,
+    });
+    const guard = (credential: Cardano.Credential): Cardano.NativeScript => ({
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireGuard,
+      credential,
+    });
+    const timelock: Cardano.NativeScript = {
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireTimeAfter,
+      slot: Cardano.Slot(0),
+    };
+
+    const localUtxo = createMockUtxo(mockTxId1, 0, 5_000_000n);
+
+    const makeTx = (scripts?: Cardano.Script[]): Cardano.Tx => ({
+      id: Cardano.TransactionId(`${'0'.repeat(63)}9`),
+      body: {
+        inputs: [createMockTxIn(mockTxId1, 0)],
+        outputs: [],
+        fee: 0n,
+      },
+      witness: { signatures: new Map(), scripts },
+    });
+
+    const gate = async (
+      scripts?: Cardano.Script[],
+      signerWitnessesScriptKeys = true,
+    ): Promise<boolean> =>
+      requiresForeignSignatures(
+        makeTx(scripts),
+        [localUtxo],
+        knownAddresses,
+        createLocalInputResolver([localUtxo]),
+        signerWitnessesScriptKeys,
+      );
+
+    it('returns false for a RequireSignature script over an own payment key', async () => {
+      expect(await gate([requireSig(ownPaymentKeyHash)])).toBe(false);
+    });
+
+    it('returns false for a RequireSignature script over an own stake key', async () => {
+      expect(await gate([requireSig(ownStakeKeyHash)])).toBe(false);
+    });
+
+    it('returns true for a RequireSignature script over a foreign key', async () => {
+      expect(await gate([requireSig(foreignKeyHash)])).toBe(true);
+    });
+
+    it('returns false for a RequireAllOf script with only own keys', async () => {
+      expect(
+        await gate([
+          allOf(requireSig(ownPaymentKeyHash), requireSig(ownStakeKeyHash)),
+        ]),
+      ).toBe(false);
+    });
+
+    it('returns true for a RequireAllOf script with a foreign child', async () => {
+      expect(
+        await gate([
+          allOf(requireSig(ownPaymentKeyHash), requireSig(foreignKeyHash)),
+        ]),
+      ).toBe(true);
+    });
+
+    it('returns false for a RequireAnyOf script with one own branch', async () => {
+      expect(
+        await gate([
+          anyOf(requireSig(foreignKeyHash), requireSig(ownPaymentKeyHash)),
+        ]),
+      ).toBe(false);
+    });
+
+    it('returns true for a RequireAnyOf script with only foreign branches', async () => {
+      expect(await gate([anyOf(requireSig(foreignKeyHash))])).toBe(true);
+    });
+
+    it('returns false for a RequireNOf script with exactly n satisfiable children', async () => {
+      expect(
+        await gate([
+          nOf(
+            2,
+            requireSig(ownPaymentKeyHash),
+            requireSig(ownStakeKeyHash),
+            requireSig(foreignKeyHash),
+          ),
+        ]),
+      ).toBe(false);
+    });
+
+    it('returns true for a RequireNOf script with fewer than n satisfiable children', async () => {
+      expect(
+        await gate([
+          nOf(
+            3,
+            requireSig(ownPaymentKeyHash),
+            requireSig(ownStakeKeyHash),
+            requireSig(foreignKeyHash),
+          ),
+        ]),
+      ).toBe(true);
+    });
+
+    it('returns false for a RequireGuard script over an own key hash', async () => {
+      expect(
+        await gate([
+          guard({
+            type: Cardano.CredentialType.KeyHash,
+            hash: ownPaymentKeyHash as unknown as Cardano.Credential['hash'],
+          }),
+        ]),
+      ).toBe(false);
+    });
+
+    it('returns true for a RequireGuard script over a foreign key hash', async () => {
+      expect(
+        await gate([
+          guard({
+            type: Cardano.CredentialType.KeyHash,
+            hash: foreignKeyHash as unknown as Cardano.Credential['hash'],
+          }),
+        ]),
+      ).toBe(true);
+    });
+
+    it('returns true for a RequireGuard script over a non-key credential', async () => {
+      expect(
+        await gate([
+          guard({
+            type: Cardano.CredentialType.ScriptHash,
+            hash: foreignKeyHash as unknown as Cardano.Credential['hash'],
+          }),
+        ]),
+      ).toBe(true);
+    });
+
+    it('returns false for a pure timelock script', async () => {
+      expect(await gate([timelock])).toBe(false);
+    });
+
+    it('returns false for an empty scripts array', async () => {
+      expect(await gate([])).toBe(false);
+    });
+
+    it('returns false when the witness set has no scripts', async () => {
+      expect(await gate()).toBe(false);
+    });
+
+    describe('signer cannot witness script keys', () => {
+      it('returns true for a signature-bearing script even over an own key', async () => {
+        expect(await gate([requireSig(ownPaymentKeyHash)], false)).toBe(true);
+      });
+
+      it('returns false for a pure timelock script', async () => {
+        expect(await gate([timelock], false)).toBe(false);
+      });
+
+      it('returns false for a RequireAnyOf script with a timelock branch', async () => {
+        expect(
+          await gate([anyOf(timelock, requireSig(ownPaymentKeyHash))], false),
+        ).toBe(false);
+      });
+    });
+
+    describe('foreign input script exemption', () => {
+      const ownScript = requireSig(ownPaymentKeyHash);
+      const ownScriptAddress = Cardano.EnterpriseAddress.fromCredentials(
+        Cardano.NetworkId.Testnet,
+        {
+          type: Cardano.CredentialType.ScriptHash,
+          hash: Serialization.NativeScript.fromCore(ownScript).hash(),
+        },
+      )
+        .toAddress()
+        .toBech32() as Cardano.PaymentAddress;
+
+      const resolverReturning = (
+        txOut: Cardano.TxOut | null,
+      ): Cardano.InputResolver => ({
+        resolveInput: vi.fn().mockResolvedValue(txOut),
+      });
+
+      const gateWithResolver = async (
+        scripts: Cardano.Script[],
+        inputResolver: Cardano.InputResolver | undefined,
+        signerWitnessesScriptKeys = true,
+      ): Promise<boolean> =>
+        requiresForeignSignatures(
+          makeTx(scripts),
+          [],
+          knownAddresses,
+          inputResolver,
+          signerWitnessesScriptKeys,
+        );
+
+      it('returns false when an unknown input resolves to the address of an own-satisfiable script', async () => {
+        const resolver = resolverReturning({
+          address: ownScriptAddress,
+          value: { coins: 5_000_000n },
+        });
+
+        expect(await gateWithResolver([ownScript], resolver)).toBe(false);
+      });
+
+      it('returns true when an unknown input cannot be resolved', async () => {
+        expect(
+          await gateWithResolver([ownScript], resolverReturning(null)),
+        ).toBe(true);
+      });
+
+      it('returns true when an unknown input resolves to a key hash address', async () => {
+        const resolver = resolverReturning({
+          address: OWN_ADDRESS,
+          value: { coins: 5_000_000n },
+        });
+
+        expect(await gateWithResolver([ownScript], resolver)).toBe(true);
+      });
+
+      it('returns true when the signer cannot witness script keys', async () => {
+        const timelockAddress = Cardano.EnterpriseAddress.fromCredentials(
+          Cardano.NetworkId.Testnet,
+          {
+            type: Cardano.CredentialType.ScriptHash,
+            hash: Serialization.NativeScript.fromCore(timelock).hash(),
+          },
+        )
+          .toAddress()
+          .toBech32() as Cardano.PaymentAddress;
+        const resolver = resolverReturning({
+          address: timelockAddress,
+          value: { coins: 5_000_000n },
+        });
+
+        expect(await gateWithResolver([timelock], resolver, false)).toBe(true);
+      });
+
+      it('returns true without resolving when a script needs a foreign key', async () => {
+        const resolver = resolverReturning({
+          address: ownScriptAddress,
+          value: { coins: 5_000_000n },
+        });
+
+        expect(
+          await gateWithResolver([requireSig(foreignKeyHash)], resolver),
+        ).toBe(true);
+        expect(resolver.resolveInput).not.toHaveBeenCalled();
+      });
+
+      it('resolves a repeated unknown input only once', async () => {
+        const resolver = resolverReturning({
+          address: ownScriptAddress,
+          value: { coins: 5_000_000n },
+        });
+        const txIn = createMockTxIn(mockTxId2, 0);
+        const tx: Cardano.Tx = {
+          ...makeTx([ownScript]),
+          body: {
+            inputs: [txIn, { ...txIn }],
+            collaterals: [{ ...txIn }],
+            outputs: [],
+            fee: 0n,
+          },
+        };
+
+        expect(
+          await requiresForeignSignatures(
+            tx,
+            [],
+            knownAddresses,
+            resolver,
+            true,
+          ),
+        ).toBe(false);
+        expect(resolver.resolveInput).toHaveBeenCalledTimes(1);
+      });
+
+      it('returns true without resolving when unknown inputs exceed the resolution cap', async () => {
+        const resolver = resolverReturning({
+          address: ownScriptAddress,
+          value: { coins: 5_000_000n },
+        });
+        const tx: Cardano.Tx = {
+          ...makeTx([ownScript]),
+          body: {
+            inputs: Array.from({ length: 31 }, (_, index) =>
+              createMockTxIn(mockTxId2, index),
+            ),
+            outputs: [],
+            fee: 0n,
+          },
+        };
+
+        expect(
+          await requiresForeignSignatures(
+            tx,
+            [],
+            knownAddresses,
+            resolver,
+            true,
+          ),
+        ).toBe(true);
+        expect(resolver.resolveInput).not.toHaveBeenCalled();
+      });
+
+      describe('without an input resolver (pre-consent local-only mode)', () => {
+        it('optimistically exempts unknown inputs when an own-satisfiable script exists', async () => {
+          expect(await gateWithResolver([ownScript], undefined)).toBe(false);
+        });
+
+        it('still rejects unknown inputs when no own-satisfiable script exists', async () => {
+          expect(
+            await requiresForeignSignatures(
+              makeTx(),
+              [],
+              knownAddresses,
+              undefined,
+              true,
+            ),
+          ).toBe(true);
+        });
+      });
     });
   });
 });

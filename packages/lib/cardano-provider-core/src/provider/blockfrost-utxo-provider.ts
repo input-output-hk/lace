@@ -6,8 +6,7 @@ import { BlockfrostProvider } from '../blockfrost-provider';
 import { BlockfrostToCardanoSDK } from '../blockfrost-to-cardano-sdk';
 
 import type { Responses } from '@blockfrost/blockfrost-js';
-import type { ProviderError } from '@cardano-sdk/core';
-import type { Cardano } from '@cardano-sdk/core';
+import type { Cardano, ProviderError } from '@cardano-sdk/core';
 import type {
   CardanoPaymentAddress,
   CardanoRewardAccount,
@@ -28,6 +27,9 @@ export class BlockfrostUtxoProvider extends BlockfrostProvider {
   /**
    * Fetch UTxOs controlled by a reward account.
    *
+   * Blockfrost returns 404 for a stake key that has never appeared on-chain,
+   * that is a valid empty result here, not an error.
+   *
    * @param rewardAccount stake address (e.g. `stake1...`)
    * @param pageSize pagination size (default 100)
    */
@@ -45,7 +47,13 @@ export class BlockfrostUtxoProvider extends BlockfrostProvider {
       }),
     ).pipe(
       map(items => Ok(BlockfrostToCardanoSDK.accountUtxos(items))),
-      catchError(error => of(Err(error as ProviderError))),
+      catchError(error =>
+        // Blockfrost responds 404 for a stake address with no UTxO history, a
+        // valid empty result, not an error.
+        isNotFoundError(error)
+          ? of(Ok<Cardano.Utxo[]>([]))
+          : of(Err(error as ProviderError)),
+      ),
     );
   }
 

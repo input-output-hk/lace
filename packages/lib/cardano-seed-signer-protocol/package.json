@@ -9,11 +9,6 @@
   },
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
-    "@cardano-sdk/crypto": "0.4.7",
-    "@cardano-sdk/util": "0.17.2",
-    "@lace-lib/ur-transport": "*",
-    "buffer": "^6.0.3",
-    "type-fest": "^4.41.0"
+    "@lace-lib/core": "*"
   }
 }

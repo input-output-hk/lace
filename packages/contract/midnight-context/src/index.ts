@@ -6,6 +6,7 @@ export type * from './types';
 
 export { midnightWallets$ } from './midnight-wallet';
 export type { MidnightWalletsByAccountId } from './midnight-wallet';
+export { midnightAccounts$ } from './midnight-accounts';
 export * from './const';
 export * from './utils';
 export * from './value-objects';

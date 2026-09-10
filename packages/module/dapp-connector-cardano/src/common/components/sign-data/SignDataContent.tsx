@@ -13,7 +13,7 @@ import {
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 
-import { addrToDisplay, isSignDataSignerResolving } from '../../store/util';
+import { addrToDisplay, isAmbiguousSignDataAddress } from '../../store/util';
 import { formatSignDataPayload } from '../../utils/sign-data-payload';
 
 import type { SignDataDisplayDapp } from './types';
@@ -29,8 +29,11 @@ export interface SignDataContentProps {
 }
 
 /**
- * The signer line. While the signer is still resolving the line is held at a
- * placeholder; once resolved, a DRep request is labelled as the DRep ID it is.
+ * The signer line. A type-6 enterprise key address is ambiguous — payment
+ * address or CIP-95 DRep request — and only the account's DRep key hash
+ * (derived async) disambiguates. Until it resolves, hold the line rather
+ * than render a DRep request as a payment address; once resolved, a DRep
+ * request is labelled as the DRep ID it is.
  */
 const SignDataAddress = ({
   address,
@@ -42,7 +45,8 @@ const SignDataAddress = ({
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => getStyles(theme), [theme]);
-  const isResolving = isSignDataSignerResolving(address, dRepKeyHash);
+  const isResolving =
+    dRepKeyHash === undefined && isAmbiguousSignDataAddress(address);
   const display = isResolving
     ? undefined
     : addrToDisplay(address, { dRepKeyHash });

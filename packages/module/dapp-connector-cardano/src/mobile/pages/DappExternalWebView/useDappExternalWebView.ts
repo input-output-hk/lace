@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useMemo } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../../common/hooks';
+import { safeParseUrl } from '../../../common/utils/url-utils';
 import {
   useDappConnectorBridge,
   type DappConnectorBridgeResult,
@@ -15,6 +16,9 @@ import type {
   WebViewTemplateProps,
 } from '@lace-lib/ui-toolkit';
 
+// Stable identity so the bridge never rebuilds the injected runtime on render.
+const INJECTION_CONFIG = { debug: __DEV__ } as const;
+
 /**
  * Props returned by the useDappExternalWebView hook.
  */
@@ -22,6 +26,8 @@ export interface DappExternalWebViewProps extends WebViewTemplateProps {
   isAuthorizationPending: boolean;
   setInjectJavaScript: DappConnectorBridgeResult['setInjectJavaScript'];
   dappOrigin: string;
+  /** Hostname of the current top-level document, for the nav bar. */
+  currentHostname: string;
   favorite?: WebViewNavBarFavorite;
 }
 
@@ -44,20 +50,17 @@ export const useDappExternalWebView = (
   const dappUrl = params.buttonUrl;
   const canFavorite = params.canFavorite !== false;
 
-  let dappOrigin = '';
-  try {
-    dappOrigin = new URL(dappUrl).origin;
-  } catch {
-    dappOrigin = dappUrl;
-  }
+  const dappOrigin = safeParseUrl(dappUrl).origin;
 
-  const { webViewProps, setInjectJavaScript, isAuthorizationPending } =
-    useDappConnectorBridge({
-      dappOrigin,
-      injectionConfig: {
-        debug: __DEV__,
-      },
-    });
+  const {
+    webViewProps,
+    setInjectJavaScript,
+    isAuthorizationPending,
+    currentHostname,
+  } = useDappConnectorBridge({
+    dappOrigin,
+    injectionConfig: INJECTION_CONFIG,
+  });
 
   const isSaved = useLaceSelector('customDapps.selectIsUrlSaved', dappUrl);
   const addCustomDapp = useDispatchLaceAction('customDapps.addCustomDapp');
@@ -112,6 +115,7 @@ export const useDappExternalWebView = (
     isAuthorizationPending,
     setInjectJavaScript,
     dappOrigin,
+    currentHostname,
     favorite,
   };
 };

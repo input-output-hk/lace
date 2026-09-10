@@ -1,3 +1,4 @@
+import { feeRateFromSatsPerVByte } from '@lace-contract/bitcoin-context';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   isSendFlowClosed,
@@ -5,7 +6,6 @@ import {
   isSendFlowSuccess,
   useSendFlow,
 } from '@lace-contract/send-flow';
-import BigNumberJs from 'bignumber.js';
 import debounce from 'lodash/fp/debounce';
 import { useMemo, useEffect, useCallback, useRef } from 'react';
 
@@ -13,8 +13,13 @@ import { useLaceSelector, useDispatchLaceAction } from '../hooks';
 
 import type { FeeOption, FeeOptionTabItem } from '@lace-lib/ui-toolkit';
 
-const SATS_IN_BTC = new BigNumberJs(100_000_000);
-const BTC_SATS_PER_VBYTE_FACTOR = new BigNumberJs(1000);
+/**
+ * The custom-fee field holds what the user typed, in sat/vB. An entry the
+ * conversion refuses (empty, zero, negative, unparseable, absurdly large)
+ * yields no rate, never the 0 that used to build a fee-less transaction.
+ */
+const toCustomFeeRate = (typedSatsPerVByte: string | undefined) =>
+  feeRateFromSatsPerVByte(Number(typedSatsPerVByte));
 
 export const useFeeSection = () => {
   const { t } = useTranslation();
@@ -67,12 +72,7 @@ export const useFeeSection = () => {
                 ...(latest as object),
                 feeRate: {
                   feeOption: value.feeOption,
-                  customFeeRate: value.customFeeRate
-                    ? new BigNumberJs(value.customFeeRate)
-                        .div(SATS_IN_BTC)
-                        .times(BTC_SATS_PER_VBYTE_FACTOR)
-                        .toNumber()
-                    : 0,
+                  customFeeRate: toCustomFeeRate(value.customFeeRate),
                 },
               },
             },
@@ -100,12 +100,7 @@ export const useFeeSection = () => {
           value: {
             feeRate: {
               feeOption: feeRateOption,
-              customFeeRate: customFeeRate
-                ? new BigNumberJs(customFeeRate)
-                    .div(SATS_IN_BTC)
-                    .times(BTC_SATS_PER_VBYTE_FACTOR)
-                    .toNumber()
-                : 0,
+              customFeeRate: toCustomFeeRate(customFeeRate),
             },
           },
         },

@@ -43,13 +43,25 @@ export type BitcoinTransactionSigner = TransactionSigner<
   BitcoinSignResult
 >;
 
-/** BIP-322 data signing request. */
+/**
+ * Message signing scheme. 'ecdsa' is the BIP-137 compact recoverable
+ * signature that Bitcoin dApps expect by default; 'bip322-simple' is the
+ * BIP-322 Simple proof witness stack.
+ */
+export type BitcoinSignatureType = 'bip322-simple' | 'ecdsa';
+
+/** Data signing request. When signatureType is absent, 'ecdsa' applies. */
 export interface BitcoinSignDataRequest {
   address: string;
   message: string;
+  signatureType?: BitcoinSignatureType;
 }
 
-/** BIP-322 data signing result. */
+/**
+ * Data signing result. For 'ecdsa' the signature is the hex encoding of the
+ * 65-byte compact recoverable signature; for 'bip322-simple' it is the hex
+ * encoding of the serialized witness stack.
+ */
 export interface BitcoinSignDataResult {
   signature: HexBytes;
 }

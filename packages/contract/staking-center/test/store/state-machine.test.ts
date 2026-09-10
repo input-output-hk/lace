@@ -243,6 +243,30 @@ describe('delegationFlow stateMachine', () => {
       const state = execute(stateSuccess, delegationFlowMachine.events.reset());
       expect(state).toEqual({ status: 'Idle' });
     });
+
+    it('ignores stale "feeCalculationFailed" event', () => {
+      const state = execute(
+        stateSuccess,
+        delegationFlowMachine.events.feeCalculationFailed({
+          errorMessage: 'Test error',
+          errorTranslationKeys: txErrorTranslationKeys,
+        }),
+      );
+      expect(state).toEqual(stateSuccess);
+    });
+
+    it('ignores stale "feeCalculationCompleted" event', () => {
+      const state = execute(
+        stateSuccess,
+        delegationFlowMachine.events.feeCalculationCompleted({
+          deposit: testDeposit,
+          fees: testFees,
+          serializedTx: testSerializedTx,
+          wallet: testWallet,
+        }),
+      );
+      expect(state).toEqual(stateSuccess);
+    });
   });
 
   describe('Error', () => {

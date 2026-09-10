@@ -105,6 +105,41 @@ export const mapTransactionToActivity = ({
     txDetails.body.mint,
   );
 
+  // What the chain actually consumed, unresolved: consumers that care about
+  // ownership intersect this with the account's own UTxO set, which does that
+  // filtering for free. Load-bearing for `canTrustFetchAsSettled` in
+  // cardano-sync, which reads a still-present outpoint as proof the provider has
+  // not applied this transaction — so it must be what was really spent, and
+  // complete for the tx rather than narrowed to what looks relevant here.
+  //
+  // `inputSource` decides which list that is. A transaction that failed phase-2
+  // validation consumed its COLLATERALS; its `body.inputs` were never spent and
+  // legitimately stay in the account's UTxO set, so recording them would leave
+  // a consumer withholding forever against a provider that is reporting them
+  // correctly.
+  const spentOutpoints = (
+    txDetails.inputSource === Cardano.InputSource.collaterals
+      ? txDetails.body.collaterals ?? []
+      : txDetails.body.inputs
+  ).map(({ txId, index }) => ({ txId, index }));
+
+  // Semantics on `CardanoActivityUtxoMetadata.producedOwnOutpoints`.
+  // Indexed per on-chain position BEFORE filtering. A phase-2 failure's only
+  // materialised output is its collateral return, whose ledger index
+  // (|outputs|) hydration does not preserve — so record no evidence rather
+  // than a wrong outpoint; empty falls through per the field's contract.
+  const producedOwnOutpoints: Cardano.TxIn[] =
+    txDetails.inputSource === Cardano.InputSource.collaterals
+      ? []
+      : (() => {
+          const ownAddresses = new Set<string>(accountAddresses);
+          return txDetails.body.outputs.flatMap((output, index) =>
+            ownAddresses.has(output.address)
+              ? [{ txId: txDetails.id, index }]
+              : [],
+          );
+        })();
+
   return from(txSummaryInspector(txDetails)).pipe(
     mergeMap(async ({ summary }) => {
       const tokenBalanceChanges = [
@@ -153,8 +188,9 @@ export const mapTransactionToActivity = ({
           type: ActivityType.NightDesignation,
           blockchainSpecific: {
             Cardano: {
-              consumedInputs: [],
+              consumedInputs: spentOutpoints,
               producedOutputs: [],
+              producedOwnOutpoints,
               slot: txDetails.blockHeader.slot,
               nightDesignation: {
                 action: nightDesignationClassification.action,
@@ -173,8 +209,9 @@ export const mapTransactionToActivity = ({
         type: summary.coins > 0 ? ActivityType.Receive : ActivityType.Send,
         blockchainSpecific: {
           Cardano: {
-            consumedInputs: [],
+            consumedInputs: spentOutpoints,
             producedOutputs: [],
+            producedOwnOutpoints,
             slot: txDetails.blockHeader.slot,
             security,
           },

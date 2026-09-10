@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { radius, type Theme } from '../../../../../design-tokens';
 import { CustomTextInput, Icon } from '../../../../atoms';
+import { useSheetSubmit } from '../../../../organisms';
 import { isWeb } from '../../../../util';
 
 import type { SendSheetProps } from '../sendSheet';
@@ -32,6 +33,7 @@ export const RecipientInput = ({
   const { addressSelected } = values;
   const { recipientErrorMessage, theme } = utils;
   const { onQrCodePress, onContactsPress, onRecipientAddressChange } = actions;
+  const submitProps = useSheetSubmit();
 
   const styles = getStyles(theme);
 
@@ -47,14 +49,18 @@ export const RecipientInput = ({
           },
         ]
       : []),
-    // Contacts button - on all platforms
-    {
-      icon: <Icon name="User" />,
-      onPress: onContactsPress,
-      style: styles.ctaButton,
-      isDisabled: !values.selectedAccountId,
-      testID: `${testIdPrefix}-address-book-button`,
-    },
+    // Contacts button - on all platforms, only for chains with contact support
+    ...(onContactsPress
+      ? [
+          {
+            icon: <Icon name="User" />,
+            onPress: onContactsPress,
+            style: styles.ctaButton,
+            isDisabled: !values.selectedAccountId,
+            testID: `${testIdPrefix}-address-book-button`,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -66,6 +72,7 @@ export const RecipientInput = ({
       testID={`${testIdPrefix}-recipient-address`}
       ctaButtons={ctaButtons}
       inputError={recipientErrorMessage}
+      {...submitProps}
     />
   );
 };

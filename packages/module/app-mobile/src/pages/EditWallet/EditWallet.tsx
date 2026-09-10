@@ -24,5 +24,9 @@ export const EditWalletSheet = (
     });
   }, [props.navigation, labels.title, secondaryButton, primaryButton]);
 
-  return <EditWalletSheetTemplate {...templateProps} />;
+  return (
+    <Sheet.SubmitProvider action={primaryButton}>
+      <EditWalletSheetTemplate {...templateProps} />
+    </Sheet.SubmitProvider>
+  );
 };

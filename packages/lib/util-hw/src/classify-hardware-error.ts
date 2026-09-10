@@ -1,5 +1,7 @@
 import { WRONG_DEVICE_CODE } from './seed-signer-errors';
 
+import type { HardwareErrorCategory } from './hardware-error-categories';
+
 /**
  * Mirrors of the bitcoin-air-gapped-protocol error codes, kept as literals:
  * util-hw ships in the SDK bundle, and importing the protocol lib would drag
@@ -22,21 +24,7 @@ const LOCKED_DEVICE_STATUS = '0x5515';
 const WRONG_APP_STATUS_CODES = ['0x6e00', '0x6e01', '0x6d00'];
 const SILENT_EXPORT_REFUSED_STATUS = '0x6a82';
 
-export type HardwareErrorCategory =
-  | 'already-added'
-  | 'app-not-open'
-  | 'cancelled'
-  | 'device-disconnected'
-  | 'device-locked'
-  | 'device-picker-rejected'
-  | 'generic'
-  | 'multisig-not-supported'
-  | 'not-supported'
-  | 'unauthorized'
-  | 'version-unsupported'
-  | 'wrong-device'
-  | 'wrong-network-app'
-  | 'wrong-script-type';
+export type { HardwareErrorCategory } from './hardware-error-categories';
 
 /**
  * Collect error messages and error names from the full error chain.
@@ -93,6 +81,21 @@ export const classifyHardwareError = (
   }
   if (names.has(WRONG_DEVICE_CODE) || message.includes('wrong_device')) {
     return 'wrong-device';
+  }
+
+  // THP errors (ThpTransportBusy, ThpDeviceLocked, ...) only come from
+  // Trezor Safe 7+ devices, which Trezor blocks from the Connect popup —
+  // the sole supported path is the Trezor Suite desktop app, so any THP
+  // failure means the call did not go through Suite.
+  if (message.includes('thp')) {
+    return 'trezor-suite-required';
+  }
+
+  // Chrome's Local Network Access permission denied: Trezor Suite may be
+  // running, but the browser refuses the localhost WebSocket to it
+  // (@trezor/connect maps this to Browser_LocalNetworkPermissionMissing).
+  if (message.includes('localnetworkpermission')) {
+    return 'local-network-blocked';
   }
 
   // Mobile BLE discovery sheet dismissed by the user

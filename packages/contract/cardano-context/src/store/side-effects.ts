@@ -46,6 +46,7 @@ import {
   mapTransactionToActivity,
 } from './helpers';
 import { fetchAddressTransactionHistories } from './helpers/fetch-address-transaction-histories';
+import { clearStaleCardanoSyncsOnNetworkChange } from './side-effects/clear-stale-cardano-syncs-on-network-change';
 import { clearStaleCardanoSyncsOnResume } from './side-effects/clear-stale-cardano-syncs-on-resume';
 import { findMissingTokensMetadataForActivities } from './side-effects/find-missing-tokens-metadata-for-activities';
 import { loadTokensMetadata } from './side-effects/load-tokens-metadata';
@@ -425,6 +426,7 @@ export const createRegisterCardanoBlockchainNetworks =
 export const createCardanoProviderSideEffects = (config: AppConfig) => [
   createRegisterCardanoBlockchainNetworks(config.defaultTestnetChainId),
   clearStaleCardanoSyncsOnResume,
+  clearStaleCardanoSyncsOnNetworkChange,
   securityRescan,
   securityRescanToast,
   trackAccountTokens,

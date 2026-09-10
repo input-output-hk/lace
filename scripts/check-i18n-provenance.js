@@ -53,9 +53,18 @@
 //      is a deliberate `verbatim`. `pre-production` bypasses both floors.
 //      `stub` is the honest "untranslated" marker, governed by parity /
 //      `--strict-new`, so the gate applies only to translated techniques.
-//   6. With `--strict-new`: keys that didn't exist at HEAD cannot be `stub`
+//   6. New-key strictness: a key absent from the BASELINE cannot be `stub`
 //      or `unknown` — a brand-new key can't be marked pre-policy. Forces the
 //      developer to invoke the `i18n-translate` skill or mark it explicitly.
+//      The baseline is selected by flag:
+//        - `--strict-new`     → baseline = HEAD. Fast pre-commit feedback; in
+//          CI it is a silent no-op (working tree == HEAD, so the new set is
+//          empty), which is exactly why the server-side net below exists.
+//        - `--base-ref <ref>` → baseline = merge-base(<ref>, HEAD), the fork
+//          point against the PR's base branch. Enforced in CI and cannot be
+//          bypassed with `git commit --no-verify`; implies new-key strictness
+//          on its own (no need to also pass `--strict-new`). See
+//          `resolveBaseline` for why the merge-base, not the base tip.
 //
 // Adoption & conversion:
 //   At governance rollout, seed every existing source key as `unknown` in each
@@ -66,8 +75,9 @@
 //   as it is reviewed, per locale, until none remain.
 //
 // Invocation:
-//   node scripts/check-i18n-provenance.js                # post-commit / CI
-//   node scripts/check-i18n-provenance.js --strict-new   # pre-commit
+//   node scripts/check-i18n-provenance.js                        # post-commit / CI (whole set)
+//   node scripts/check-i18n-provenance.js --strict-new           # pre-commit (baseline: HEAD)
+//   node scripts/check-i18n-provenance.js --base-ref origin/main # CI PR gate (baseline: merge-base)
 //   node scripts/check-i18n-provenance.js --seed-unknown <translations-root>
 // =====================================================================
 
@@ -133,7 +143,13 @@ const TOLERANCE_TECHNIQUES = {
 
 // Resolve the workspace root from this script's location, not the caller's
 // cwd — the check must behave the same run from a package subdir or via npm.
-const ROOT = path.resolve(__dirname, '..');
+// `I18N_PROVENANCE_ROOT` overrides it so tests can point the checker at a
+// throwaway git repo; it is never set in production, so behaviour is unchanged.
+// Every git invocation runs with `cwd: ROOT`, keeping file lookups and revision
+// resolution anchored to this root rather than the ambient working directory.
+const ROOT = path.resolve(
+  process.env.I18N_PROVENANCE_ROOT || path.join(__dirname, '..'),
+);
 
 const loadJson = filepath => JSON.parse(fs.readFileSync(filepath, 'utf-8'));
 
@@ -172,29 +188,55 @@ const compileGlob = glob =>
     )}$`,
   );
 
-// Keys present in `filepath` at HEAD, or `null` if the file did not exist at
-// HEAD (a brand-new locale file). `null` ≠ empty set: a new file means every
-// key is "new", which would make --strict-new reject the legitimate all-stub
-// onboarding state — callers treat `null` as "skip strict-new for this file".
-// Path is POSIX-normalized and passed argv-style (no shell) so it is safe on
-// paths with spaces and on Windows.
-const keysAtHead = filepath => {
+// Keys present in `filepath` at `ref`, or `null` if the file did not exist at
+// `ref` (a brand-new locale file). `null` ≠ empty set: a new file means every
+// key is "new", which would make new-key strictness reject the legitimate
+// all-stub onboarding state — callers treat `null` as "skip strict-new for this
+// file". Path is POSIX-normalized and passed argv-style (no shell) so it is safe
+// on paths with spaces and on Windows.
+const keysAtRef = (filepath, ref) => {
   const relative = path.relative(ROOT, filepath).split(path.sep).join('/');
   try {
-    const content = execFileSync('git', ['show', `HEAD:${relative}`], {
+    const content = execFileSync('git', ['show', `${ref}:${relative}`], {
+      cwd: ROOT,
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return new Set(Object.keys(JSON.parse(content)));
   } catch (error) {
-    // Only "the file didn't exist at HEAD" is a legitimate null (→ skip
-    // strict-new for a brand-new file). Any other failure — no repo, git
-    // missing, bad ref — must surface, not silently disable strict-new.
+    // Only "the file didn't exist at `ref`" is a legitimate null (→ skip
+    // strict-new for a brand-new file). The stderr regex matches for an
+    // arbitrary ref, not just HEAD. Any other failure — no repo, git missing,
+    // bad ref — must surface, not silently disable strict-new.
     const stderr = String(error.stderr ?? error.message ?? '');
     if (/does not exist in|exists on disk, but not in/.test(stderr)) {
       return null;
     }
-    throw new Error(`git show HEAD:${relative} failed: ${stderr.trim()}`);
+    throw new Error(`git show ${ref}:${relative} failed: ${stderr.trim()}`);
+  }
+};
+
+// Resolve the new-key baseline for `--base-ref` to the fork point: the
+// merge-base of `baseRef` and HEAD. The merge-base (not the base tip) is
+// deliberate — for a rebased branch it ≈ the base tip, and for a stale branch it
+// is the older fork point; either way the "new" set is exactly the branch's own
+// additions (main's newer keys aren't in HEAD, so they can't be flagged). Throw
+// on failure (unrelated histories, or a shallow clone / unfetched base ref)
+// rather than falling back to a permissive default: a silent fallback would
+// reopen the exact loophole this check exists to close.
+const resolveBaseline = baseRef => {
+  try {
+    return execFileSync('git', ['merge-base', baseRef, 'HEAD'], {
+      cwd: ROOT,
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+  } catch (error) {
+    const stderr = String(error.stderr ?? error.message ?? '');
+    throw new Error(
+      `git merge-base ${baseRef} HEAD failed: ${stderr.trim()}\n` +
+        `Fetch the base branch first (e.g. \`git fetch --no-tags origin <base>\`) so "${baseRef}" resolves.`,
+    );
   }
 };
 
@@ -208,6 +250,7 @@ const checkRoot = ({
   shippedLanguages,
   rootRel,
   strictNew,
+  baseline,
 }) => {
   const errors = [];
   const rootAbs = path.join(ROOT, rootRel);
@@ -247,12 +290,12 @@ const checkRoot = ({
       : [];
   const isCriticalKey = key => criticalRegexes.some(re => re.test(key));
 
-  // Brand-new source file (absent at HEAD) → no "new key" set, so the all-stub
-  // onboarding state is allowed under --strict-new.
-  const headKeys = strictNew ? keysAtHead(sourcePath) : null;
+  // Brand-new source file (absent at the baseline) → no "new key" set, so the
+  // all-stub onboarding state is allowed under new-key strictness.
+  const baselineKeys = strictNew ? keysAtRef(sourcePath, baseline) : null;
   const newKeys =
-    strictNew && headKeys !== null
-      ? new Set(Object.keys(source).filter(k => !headKeys.has(k)))
+    strictNew && baselineKeys !== null
+      ? new Set(Object.keys(source).filter(k => !baselineKeys.has(k)))
       : new Set();
 
   // Validate every target locale that EXISTS in the root, not just the shipped
@@ -429,7 +472,7 @@ const findApps = () => {
     .filter(app => fs.existsSync(app.policyPath));
 };
 
-const checkApp = (app, strictNew) => {
+const checkApp = (app, strictNew, baseline) => {
   const policy = loadJson(app.policyPath);
 
   const tolerance = policy.tolerance;
@@ -459,6 +502,7 @@ const checkApp = (app, strictNew) => {
         shippedLanguages: policy.shippedLanguages,
         rootRel,
         strictNew,
+        baseline,
       }),
     );
   }
@@ -543,7 +587,30 @@ const main = () => {
     return;
   }
 
-  const strictNew = args.includes('--strict-new');
+  // `--base-ref <ref>` sets the new-key baseline to merge-base(<ref>, HEAD) and
+  // implies new-key strictness. Computed once here so every (app × root) is
+  // diffed against the same fork point. Both `--base-ref <ref>` and the GNU
+  // equals-form `--base-ref=<ref>` are accepted: the equals-form must NOT fall
+  // through to whole-set mode, which would silently skip the gate — the exact
+  // no-op loophole this check exists to close. A given-but-empty value fails
+  // loudly rather than degrading to permissive.
+  const baseRefEq = args.find(arg => arg.startsWith('--base-ref='));
+  const baseRefIndex = args.indexOf('--base-ref');
+  const baseRefGiven = baseRefEq !== undefined || baseRefIndex !== -1;
+  const baseRef = baseRefEq
+    ? baseRefEq.slice('--base-ref='.length)
+    : baseRefIndex !== -1
+    ? args[baseRefIndex + 1]
+    : null;
+  if (baseRefGiven && !baseRef) {
+    console.error(
+      'Usage: node scripts/check-i18n-provenance.js --base-ref <ref>',
+    );
+    process.exit(1);
+  }
+  const baseline = baseRef ? resolveBaseline(baseRef) : 'HEAD';
+  const strictNew = args.includes('--strict-new') || baseRefGiven;
+
   const apps = findApps();
   if (apps.length === 0) {
     console.log('No apps with docs/i18n/policy.json found — skipping.');
@@ -552,7 +619,7 @@ const main = () => {
 
   let allErrors = [];
   for (const app of apps) {
-    const errors = checkApp(app, strictNew);
+    const errors = checkApp(app, strictNew, baseline);
     if (errors.length > 0) allErrors = allErrors.concat(errors);
   }
 
@@ -567,7 +634,11 @@ const main = () => {
   }
 
   const plural = apps.length === 1 ? '' : 's';
-  const mode = strictNew ? ' (strict-new mode)' : '';
+  const mode = baseRef
+    ? ` (new-key mode vs ${baseRef})`
+    : strictNew
+    ? ' (strict-new mode)'
+    : '';
   console.log(
     `i18n provenance check passed for ${apps.length} app${plural}${mode}.`,
   );

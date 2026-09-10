@@ -55,9 +55,23 @@ export type AccountRef = {
 export interface WalletMetadata {
   name: string;
   order: number;
+  /**
+   * Epoch-ms timestamp of the migration sweep that emptied every account this
+   * wallet held on the migrated network tier. Presentation-layer marker: UI
+   * surfaces render a localized "[Migrated]" tag from it, so the warning
+   * re-translates on locale switch instead of freezing into the stored name.
+   * Absent means never migrated out (or migrated before this field existed).
+   */
+  migratedOutAt?: Timestamp;
 }
 export interface AccountMetadata {
   name: string;
+  /**
+   * Epoch-ms timestamp of the migration sweep that moved this account's funds
+   * to another wallet. Same presentation-layer contract as
+   * {@link WalletMetadata.migratedOutAt}.
+   */
+  migratedOutAt?: Timestamp;
   /** Optional avatar image URL for account display (e.g. in account selector). */
   avatarUri?: string;
   /**

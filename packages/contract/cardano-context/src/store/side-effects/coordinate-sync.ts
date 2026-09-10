@@ -9,6 +9,7 @@ import {
   map,
   race,
   take,
+  tap,
   timer,
   type Observable,
 } from 'rxjs';
@@ -65,7 +66,7 @@ export const createCoordinateCardanoSync =
     const {
       sync: { selectIsSyncOperationPending$ },
     } = stateObservables;
-    const { actions } = dependencies;
+    const { actions, logger } = dependencies;
 
     return config
       .trigger$(actionObservables, stateObservables, dependencies)
@@ -131,7 +132,17 @@ export const createCoordinateCardanoSync =
               toEmpty,
             );
 
-          const timeout$ = timer(SYNC_ROUND_TIMEOUT_MS);
+          // A timed-out round leaves its operations Pending forever with no
+          // failure recorded — this log is the only trace it happened.
+          const timeout$ = timer(SYNC_ROUND_TIMEOUT_MS).pipe(
+            tap(() => {
+              logger.error(
+                `Sync round timed out after ${SYNC_ROUND_TIMEOUT_MS}ms; round operations: ${operationIds.join(
+                  ', ',
+                )}`,
+              );
+            }),
+          );
 
           return concat(
             from(allActions),

@@ -6,6 +6,7 @@ import { TransportStatusError } from '@ledgerhq/errors';
 import { describe, expect, it } from 'vitest';
 
 import { classifyHardwareError } from '../src/classify-hardware-error';
+import { isHardwareErrorCategory } from '../src/hardware-error-categories';
 import { WrongDeviceError } from '../src/seed-signer-errors';
 
 describe('classifyHardwareError -- air-gapped QR exchange cancel', () => {
@@ -149,4 +150,92 @@ describe('classifyHardwareError -- Seed Signer Bitcoin export errors', () => {
   it('still returns generic for an unrecognised error', () => {
     expect(classifyHardwareError(new Error('boom'))).toBe('generic');
   });
+});
+
+describe('classifyHardwareError -- Trezor THP (Safe 7+) errors', () => {
+  it('classifies a THP transport-busy failure as trezor-suite-required', () => {
+    expect(
+      classifyHardwareError(new Error('Initialize failed: ThpTransportBusy')),
+    ).toBe('trezor-suite-required');
+  });
+
+  it('classifies a Trezor Connect payload carrying a THP code', () => {
+    const wrapped = new Error('Trezor transport failed');
+    (wrapped as { innerError?: unknown }).innerError = {
+      error: 'Initialize failed',
+      code: 'ThpTransportBusy',
+    };
+    expect(classifyHardwareError(wrapped)).toBe('trezor-suite-required');
+  });
+
+  it('classifies a THP device-locked failure as trezor-suite-required', () => {
+    expect(classifyHardwareError(new Error('ThpDeviceLocked'))).toBe(
+      'trezor-suite-required',
+    );
+  });
+
+  it('does not divert non-THP transport failures', () => {
+    expect(classifyHardwareError(new Error('Transport failed'))).toBe(
+      'device-disconnected',
+    );
+  });
+});
+
+describe('classifyHardwareError -- Chrome Local Network Access denial', () => {
+  it('classifies the denied localhost permission as local-network-blocked', () => {
+    expect(
+      classifyHardwareError(new Error('Browser_LocalNetworkPermissionMissing')),
+    ).toBe('local-network-blocked');
+  });
+
+  it('classifies a Trezor Connect payload carrying the permission code', () => {
+    const wrapped = new Error('Trezor call failed');
+    (wrapped as { innerError?: unknown }).innerError = {
+      error: 'Local network permission missing',
+      code: 'Browser_LocalNetworkPermissionMissing',
+    };
+    expect(classifyHardwareError(wrapped)).toBe('local-network-blocked');
+  });
+});
+
+describe('isHardwareErrorCategory', () => {
+  // Re-listing the members pins the public contract: renaming or removing a
+  // category must break this test, not silently narrow the guard.
+  it.each([
+    'already-added',
+    'app-not-open',
+    'cancelled',
+    'device-disconnected',
+    'device-locked',
+    'device-picker-rejected',
+    'generic',
+    'local-network-blocked',
+    'multisig-not-supported',
+    'not-supported',
+    'trezor-suite-required',
+    'unauthorized',
+    'version-unsupported',
+    'wrong-device',
+    'wrong-network-app',
+    'wrong-script-type',
+  ] as const)('accepts the category %s', category => {
+    expect(isHardwareErrorCategory(category)).toBe(true);
+  });
+
+  it('accepts what classifyHardwareError classifies a live error into', () => {
+    expect(
+      isHardwareErrorCategory(
+        classifyHardwareError(
+          new Error('Cannot communicate with Ledger Cardano App'),
+        ),
+      ),
+    ).toBe(true);
+  });
+
+  it.each(['creation-failed', 'biometric-auth-failed', '', undefined])(
+    'rejects the non-device reason %s',
+    reason => {
+      expect(isHardwareErrorCategory(reason)).toBe(false);
+    },
+  );
 });

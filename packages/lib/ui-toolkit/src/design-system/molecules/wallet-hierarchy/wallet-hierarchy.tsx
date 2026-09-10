@@ -45,6 +45,8 @@ export interface WalletHierarchyProps {
   showHeader?: boolean;
   actionButtonLabel: string;
   addButtonLabel: string;
+  addButtonDisabled?: boolean;
+  addButtonLoading?: boolean;
   items: WalletHierarchyItem[];
   onActionButtonPress?: () => void;
   onAddButtonPress?: () => void;
@@ -73,6 +75,8 @@ interface WalletItemProps {
 
 interface WalletAddButtonProps {
   addButtonLabel: string;
+  disabled?: boolean;
+  loading?: boolean;
   onAddButtonPress: () => void;
   styles: ReturnType<typeof getStyles>;
 }
@@ -216,6 +220,8 @@ const WalletItem: React.FC<WalletItemProps> = ({
 
 const WalletAddButton: React.FC<WalletAddButtonProps> = ({
   addButtonLabel,
+  disabled,
+  loading,
   onAddButtonPress,
   styles,
 }) => {
@@ -224,6 +230,8 @@ const WalletAddButton: React.FC<WalletAddButtonProps> = ({
       <Button.Tertiary
         preNode={<Icon name="Plus" size={18} />}
         label={addButtonLabel}
+        disabled={disabled}
+        loading={loading}
         onPress={onAddButtonPress}
         testID="wallet-hierarchy-add-account-button"
         fullWidth
@@ -242,6 +250,8 @@ export const WalletHierarchy: React.FC<WalletHierarchyProps> = ({
   showHeader = true,
   actionButtonLabel,
   addButtonLabel,
+  addButtonDisabled,
+  addButtonLoading,
   items,
   onActionButtonPress,
   onAddButtonPress,
@@ -292,6 +302,8 @@ export const WalletHierarchy: React.FC<WalletHierarchyProps> = ({
       {showAddButton && onAddButtonPress && (
         <WalletAddButton
           addButtonLabel={addButtonLabel}
+          disabled={addButtonDisabled}
+          loading={addButtonLoading}
           onAddButtonPress={onAddButtonPress}
           styles={styles}
         />

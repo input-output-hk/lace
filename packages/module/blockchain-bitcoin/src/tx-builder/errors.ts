@@ -23,6 +23,8 @@ export enum BitcoinTxBuildErrorCode {
   UnresolvedUtxoAddress = 'UnresolvedUtxoAddress',
   /** The OP_RETURN message exceeds the 80-byte limit. */
   MessageTooLong = 'MessageTooLong',
+  /** The resolved fee rate is not a positive number, so the tx would pay no fee. */
+  InvalidFeeRate = 'InvalidFeeRate',
 }
 
 /**
@@ -58,6 +60,8 @@ const TRANSLATION_KEY_BY_CODE: Record<BitcoinTxBuildErrorCode, TranslationKey> =
       'tx-executor.building-error.unresolved-utxo-address',
     [BitcoinTxBuildErrorCode.MessageTooLong]:
       'tx-executor.building-error.message-too-long',
+    [BitcoinTxBuildErrorCode.InvalidFeeRate]:
+      'tx-executor.building-error.invalid-fee-rate',
   };
 
 /**

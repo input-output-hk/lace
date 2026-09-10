@@ -7,21 +7,17 @@ import { FeatureFlagKey } from '@lace-contract/feature';
 import {
   EMPTY_PARTIAL_NETWORKS_CONFIG,
   midnightContextActions,
-  MidnightAccountId,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { ModuleName } from '@lace-contract/module';
 import { networkActions } from '@lace-contract/network';
-import { syncActions } from '@lace-contract/sync';
 import { tokensActions } from '@lace-contract/tokens';
 import { viewsActions } from '@lace-contract/views';
 import { walletsActions, WalletId } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, it, vi } from 'vitest';
 
 import {
   FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_MAINNET_SUPPORT,
@@ -29,29 +25,18 @@ import {
 } from '../../../src/const';
 import {
   autoDismissMidnightWalletFailure,
-  createClearWalletStateOnResync,
-  createDeleteWalletSideEffect,
   handleMidnightSettingsChange,
   registerMidnightBlockchainNetworks,
-  requestResyncWallet,
-  resyncWalletOnConfigChangeFromFeatureFlags,
   syncSupportedNetworksWithFeatureFlags,
 } from '../../../src/store/side-effects';
 import { midnightActions } from '../../../src/store/slice';
 import { MidnightWalletFailureId } from '../../../src/value-objects/midnight-wallet-failure-id.vo';
 
 import type { Features } from '@lace-contract/feature';
-import type {
-  MidnightNetworkConfig,
-  SerializedMidnightWallet,
-} from '@lace-contract/midnight-context';
-import type { CollectionStorage } from '@lace-contract/storage';
+import type { MidnightNetworkConfig } from '@lace-contract/midnight-context';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
-import type { Action } from '@reduxjs/toolkit';
-import type { Observable } from 'rxjs';
 
-const { accountId, midnightAccount, midnightWallet, walletId, networkId } =
-  stubData;
+const { midnightAccount, midnightWallet, networkId } = stubData;
 
 const actions = {
   ...midnightActions,
@@ -63,7 +48,6 @@ const actions = {
   ...viewsActions,
   ...midnightContextActions,
   ...activitiesActions,
-  ...syncActions,
   ...failuresActions,
   ...networkActions,
 };
@@ -209,601 +193,8 @@ describe('midnight-wallet/store/side-effects', () => {
     });
   });
 
-  describe('deleteWallet', () => {
-    it("removing a wallet dispatches 'reset' actions", () => {
-      const otherWalletId = WalletId('other-wallet-id');
-      const walletStates: SerializedMidnightWallet[] = [
-        {
-          walletId,
-          accountId,
-          networkId: MidnightSDKNetworkIds.TestNet,
-          serializedState: {
-            dust: HexBytes(''),
-            shielded: HexBytes(''),
-            unshielded: HexBytes(''),
-            unshieldedTxHistory: HexBytes(''),
-          },
-        },
-        {
-          walletId: otherWalletId,
-          accountId: MidnightAccountId(otherWalletId, 0, networkId),
-          networkId: MidnightSDKNetworkIds.TestNet,
-          serializedState: {
-            dust: HexBytes(''),
-            shielded: HexBytes(''),
-            unshielded: HexBytes(''),
-            unshieldedTxHistory: HexBytes(''),
-          },
-        },
-      ];
-
-      const storage = {
-        getAll: vi.fn(() => of(walletStates)),
-        setAll: vi.fn(() => of(void 0)),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-      testSideEffect(
-        createDeleteWalletSideEffect(storage),
-        ({ expectObservable, flush, hot, cold }) => {
-          const dependencies = {
-            stopMidnightWallet: vi.fn().mockReturnValue(of(void 0)),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              wallets: {
-                removeWallet$: hot('-a', {
-                  a: walletsActions.wallets.removeWallet(walletId, []),
-                }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectAll$: cold('a', { a: [midnightWallet] }),
-              },
-            },
-            dependencies,
-            assertion: (sideEffect$: Readonly<Observable<Action>>) => {
-              expectObservable(sideEffect$).toBe('-(abc)', {
-                a: actions.addresses.resetAddresses({ accountId }),
-                b: actions.tokens.resetAccountTokens({ accountId }),
-                c: actions.activities.resetActivities({ accountId }),
-              });
-              flush();
-              expect(storage.getAll).toHaveBeenCalled();
-              expect(storage.setAll).toHaveBeenCalledWith([
-                walletStates.find(w => w.walletId === otherWalletId),
-              ]);
-            },
-          };
-        },
-      );
-    });
-  });
-
-  describe('createClearWalletStateOnResync', () => {
-    it('stops currently running midnight wallet', () => {
-      const storage = {
-        setAll: vi.fn(() => of(void 0)),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-
-      testSideEffect(
-        createClearWalletStateOnResync(storage),
-        ({ flush, cold }) => {
-          const dependencies = {
-            stopAllMidnightWallets: vi
-              .fn()
-              .mockReturnValue(cold('a', { a: null })),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              midnight: {
-                resync$: cold('--b', { b: actions.midnight.resync() }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-              midnightContext: {
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-            },
-            dependencies,
-            assertion: sideEffect$ => {
-              sideEffect$.subscribe();
-              flush();
-              expect(dependencies.stopAllMidnightWallets).toHaveBeenCalled();
-            },
-          };
-        },
-      );
-    });
-
-    it('clears stored state', () => {
-      const storage = {
-        setAll: vi.fn(() => of(void 0)),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-
-      testSideEffect(
-        createClearWalletStateOnResync(storage),
-        ({ flush, cold }) => {
-          const dependencies = {
-            stopAllMidnightWallets: vi
-              .fn()
-              .mockReturnValue(cold('a', { a: null })),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              midnight: {
-                resync$: cold('--b', { b: actions.midnight.resync() }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-              midnightContext: {
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-            },
-            dependencies,
-            assertion: sideEffect$ => {
-              sideEffect$.subscribe();
-              flush();
-              expect(storage.setAll).toHaveBeenCalledWith([]);
-            },
-          };
-        },
-      );
-    });
-
-    it('resets tokens for the active account', () => {
-      const storage = {
-        setAll: vi.fn(() => of(void 0)),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-
-      testSideEffect(
-        createClearWalletStateOnResync(storage),
-        ({ expectObservable, cold }) => {
-          const dependencies = {
-            stopAllMidnightWallets: vi
-              .fn()
-              .mockReturnValue(cold('a', { a: null })),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              midnight: {
-                resync$: cold('--b', { b: actions.midnight.resync() }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-              midnightContext: {
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-            },
-            dependencies,
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('--(ab)', {
-                a: actions.tokens.resetAccountTokens({ accountId }),
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                b: expect.any(Object),
-              });
-            },
-          };
-        },
-      );
-    });
-
-    it('requests wallet watch restart', () => {
-      const storage = {
-        setAll: vi.fn(() => of(void 0)),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-
-      testSideEffect(
-        createClearWalletStateOnResync(storage),
-        ({ expectObservable, cold }) => {
-          const dependencies = {
-            stopAllMidnightWallets: vi
-              .fn()
-              .mockReturnValue(cold('a', { a: null })),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              midnight: {
-                resync$: cold('--b', { b: actions.midnight.resync() }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-              midnightContext: {
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-            },
-            dependencies,
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('--(ab)', {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                a: expect.any(Object),
-                b: actions.midnight.restartWalletWatch(),
-              });
-            },
-          };
-        },
-      );
-    });
-
-    it('runs operations in correct order: stop, clear, then emit actions', () => {
-      const executionEvents: string[] = [];
-      const storage = {
-        setAll: vi.fn(() => {
-          executionEvents.push('reset storage');
-          return of(void 0);
-        }),
-      } as unknown as CollectionStorage<SerializedMidnightWallet>;
-
-      testSideEffect(
-        createClearWalletStateOnResync(storage),
-        ({ flush, cold }) => {
-          const dependencies = {
-            stopAllMidnightWallets: vi.fn(() => {
-              executionEvents.push('stop');
-              return cold('a', { a: void 0 });
-            }),
-            actions,
-          };
-
-          return {
-            actionObservables: {
-              midnight: {
-                resync$: cold('--b', { b: actions.midnight.resync() }),
-              },
-            },
-            stateObservables: {
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-              midnightContext: {
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-            },
-            dependencies,
-            assertion: sideEffect$ => {
-              sideEffect$.subscribe(() => {
-                executionEvents.push('emit actions');
-              });
-              flush();
-              expect(executionEvents).toEqual([
-                'stop',
-                'reset storage',
-                'emit actions',
-                'emit actions',
-              ]);
-            },
-          };
-        },
-      );
-    });
-  });
-
-  describe('resyncWalletOnConfigChangeFromFeatureFlags', () => {
-    it('does nothing when wallet is locked', () => {
-      const authenticateenticationPrompt = vi.fn();
-
-      testSideEffect(
-        resyncWalletOnConfigChangeFromFeatureFlags,
-        ({ expectObservable, cold, flush }) => {
-          return {
-            actionObservables: {},
-            stateObservables: {
-              appLock: {
-                isUnlocked$: cold('a', { a: false }),
-              },
-              midnightContext: {
-                selectCurrentNetwork$: cold('aa', {
-                  a: {
-                    networkId,
-                    config: {
-                      nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
-                      indexerAddress: 'http://indexerAddress',
-                    },
-                  },
-                }),
-                selectNetworksConfigFeatureFlagsOverrides$: cold('a', {
-                  a: EMPTY_PARTIAL_NETWORKS_CONFIG,
-                }),
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: (sideEffect$: Readonly<Observable<Action>>) => {
-              expectObservable(sideEffect$).toBe('');
-              flush();
-
-              expect(authenticateenticationPrompt).not.toHaveBeenCalled();
-            },
-          };
-        },
-      );
-    });
-
-    it('sends resync action when password prompt flow completed with success', () => {
-      testSideEffect(
-        resyncWalletOnConfigChangeFromFeatureFlags,
-        ({ expectObservable, cold }) => {
-          return {
-            actionObservables: {},
-            stateObservables: {
-              appLock: {
-                isUnlocked$: cold('a', { a: true }),
-              },
-              midnightContext: {
-                selectCurrentNetwork$: cold('aa', {
-                  a: {
-                    networkId,
-                    config: {
-                      nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
-                      indexerAddress: 'http://indexerAddress',
-                    },
-                  },
-                }),
-                selectNetworksConfigFeatureFlagsOverrides$: cold('a', {
-                  a: EMPTY_PARTIAL_NETWORKS_CONFIG,
-                }),
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: (sideEffect$: Readonly<Observable<Action>>) => {
-              expectObservable(sideEffect$).toBe('(ab)', {
-                a: actions.sync.addSyncOperation({
-                  accountId,
-                  operation: expect.objectContaining({
-                    operationId: `${accountId}-midnight-sync`,
-                    status: 'Pending',
-                    description: 'sync.operation.midnight-resync',
-                  }) as never,
-                }),
-                b: actions.midnight.resync(),
-              });
-            },
-          };
-        },
-      );
-    });
-
-    it('does not send resync action again when joint config did not change', () => {
-      testSideEffect(
-        resyncWalletOnConfigChangeFromFeatureFlags,
-        ({ expectObservable, cold }) => {
-          return {
-            actionObservables: {},
-            stateObservables: {
-              appLock: {
-                isUnlocked$: cold('a', { a: true }),
-              },
-              midnightContext: {
-                selectCurrentNetwork$: cold('aa', {
-                  a: {
-                    networkId,
-                    config: {
-                      nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
-                      indexerAddress: 'http://indexerAddress',
-                    },
-                  },
-                }),
-                selectNetworksConfigFeatureFlagsOverrides$: cold('a', {
-                  a: EMPTY_PARTIAL_NETWORKS_CONFIG,
-                }),
-                selectMidnightBlockchainNetworkId$: cold('a', {
-                  a: MidnightNetworkId(networkId),
-                }),
-              },
-              wallets: {
-                selectIsWalletRepoMigrating$: cold('a', { a: false }),
-                selectActiveNetworkAccounts$: cold('a', {
-                  a: [midnightAccount],
-                }),
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: (sideEffect$: Readonly<Observable<Action>>) => {
-              expectObservable(sideEffect$).toBe('(ab)-', {
-                a: actions.sync.addSyncOperation({
-                  accountId,
-                  operation: expect.objectContaining({
-                    operationId: `${accountId}-midnight-sync`,
-                    status: 'Pending',
-                    description: 'sync.operation.midnight-resync',
-                  }) as never,
-                }),
-                b: actions.midnight.resync(),
-              });
-            },
-          };
-        },
-      );
-    });
-  });
-
   // NOTE: triggerUnlockFromAuthenticationPrompt tests removed - functionality
   // is now internal to watchMidnightAccount and tested in account-key-manager.test.ts
-
-  describe('requestResyncWallet', () => {
-    it('sends resync action when successfully obtained password', () => {
-      testSideEffect(requestResyncWallet, ({ cold, expectObservable }) => {
-        return {
-          actionObservables: {
-            midnight: {
-              requestResync$: cold('a'),
-            },
-          },
-          stateObservables: {
-            wallets: {
-              selectIsWalletRepoMigrating$: cold('a', { a: false }),
-              selectActiveNetworkAccounts$: cold('a', { a: [midnightAccount] }),
-            },
-            midnightContext: {
-              selectMidnightBlockchainNetworkId$: cold('a', {
-                a: MidnightNetworkId(networkId),
-              }),
-            },
-          },
-          dependencies: {
-            actions,
-          },
-          assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('(ab)', {
-              a: actions.sync.addSyncOperation({
-                accountId,
-                operation: expect.objectContaining({
-                  operationId: `${accountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                }) as never,
-              }),
-              b: actions.midnight.resync(),
-            });
-          },
-        };
-      });
-    });
-
-    it('resyncs accounts for the currently active network after network switch', () => {
-      const previewNetworkId = MidnightSDKNetworkIds.Preview;
-      const previewAccountId = MidnightAccountId(walletId, 0, previewNetworkId);
-      const previewAccount = {
-        ...midnightAccount,
-        accountId: previewAccountId,
-        blockchainNetworkId: MidnightNetworkId(previewNetworkId),
-        blockchainSpecific: {
-          ...midnightAccount.blockchainSpecific,
-          networkId: previewNetworkId,
-        },
-      };
-
-      testSideEffect(requestResyncWallet, ({ hot, expectObservable }) => {
-        // Accounts include both networks, but only the active network's accounts should be used
-        const allAccounts = [midnightAccount, previewAccount];
-
-        return {
-          actionObservables: {
-            midnight: {
-              // Frame 2: first request, Frame 7: second request
-              requestResync$: hot('--a----b', {
-                a: actions.midnight.requestResync(),
-                b: actions.midnight.requestResync(),
-              }),
-            },
-          },
-          stateObservables: {
-            wallets: {
-              selectIsWalletRepoMigrating$: hot('a', { a: false }),
-              // Accounts don't change throughout the test
-              selectActiveNetworkAccounts$: hot('a', { a: allAccounts }),
-            },
-            midnightContext: {
-              // Frame 0: undeployed, Frame 5: switches to preview
-              selectMidnightBlockchainNetworkId$: hot('a----b', {
-                a: MidnightNetworkId(networkId), // Undeployed
-                b: MidnightNetworkId(previewNetworkId), // Preview
-              }),
-            },
-          },
-          dependencies: {
-            actions,
-          },
-          assertion: sideEffect$ => {
-            // Frame 2: resync uses undeployed account (network was undeployed at frame 0)
-            // Frame 7: resync uses preview account (network switched to preview at frame 5)
-            expectObservable(sideEffect$).toBe('--(ab)-(cd)', {
-              a: actions.sync.addSyncOperation({
-                accountId, // Undeployed account
-                operation: expect.objectContaining({
-                  operationId: `${accountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                }) as never,
-              }),
-              b: actions.midnight.resync(),
-              c: actions.sync.addSyncOperation({
-                accountId: previewAccountId, // Preview account
-                operation: expect.objectContaining({
-                  operationId: `${previewAccountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                }) as never,
-              }),
-              d: actions.midnight.resync(),
-            });
-          },
-        };
-      });
-    });
-  });
 
   describe('handleMidnightSettingsChange', () => {
     it('confirms change, updates the config and current network id', () => {
@@ -1477,16 +868,13 @@ describe('midnight-wallet/store/side-effects', () => {
     const failureId = MidnightWalletFailureId(testWalletId);
     const secondFailureId = MidnightWalletFailureId(secondWalletId);
 
-    it('dismisses failures for all wallets when app unlocks', () => {
+    it('dismisses failures for all wallets when the wallet resumes', () => {
       testSideEffect(
         {
           build: () => autoDismissMidnightWalletFailure,
         },
         ({ expectObservable, cold, hot }) => ({
           stateObservables: {
-            appLock: {
-              isUnlocked$: cold('-a', { a: true }),
-            },
             wallets: {
               selectAll$: hot('a', {
                 a: [testMidnightWallet, secondMidnightWallet],
@@ -1513,6 +901,7 @@ describe('midnight-wallet/store/side-effects', () => {
           },
           dependencies: {
             actions,
+            walletResumed$: cold('-a', { a: undefined }),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('-(ab)', {
@@ -1524,16 +913,13 @@ describe('midnight-wallet/store/side-effects', () => {
       );
     });
 
-    it('does not emit when app is locked', () => {
+    it('does not emit when the wallet has not resumed', () => {
       testSideEffect(
         {
           build: () => autoDismissMidnightWalletFailure,
         },
         ({ expectObservable, cold, hot }) => ({
           stateObservables: {
-            appLock: {
-              isUnlocked$: cold('a', { a: false }),
-            },
             wallets: {
               selectAll$: hot('a', {
                 a: [testMidnightWallet, secondMidnightWallet],
@@ -1552,6 +938,7 @@ describe('midnight-wallet/store/side-effects', () => {
           },
           dependencies: {
             actions,
+            walletResumed$: cold(''),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
@@ -1567,9 +954,6 @@ describe('midnight-wallet/store/side-effects', () => {
         },
         ({ expectObservable, cold, hot }) => ({
           stateObservables: {
-            appLock: {
-              isUnlocked$: cold('-a', { a: true }),
-            },
             wallets: {
               selectAll$: hot('a', {
                 a: [testMidnightWallet, secondMidnightWallet],
@@ -1585,6 +969,7 @@ describe('midnight-wallet/store/side-effects', () => {
           },
           dependencies: {
             actions,
+            walletResumed$: cold('-a', { a: undefined }),
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');

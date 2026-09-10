@@ -62,9 +62,7 @@ export class BitcoinTrezorSignerFactory implements BitcoinSignerFactory {
   }
 
   public createDataSigner(_context: BitcoinSignerContext): BitcoinDataSigner {
-    throw new Error(
-      'BIP-322 message signing is not supported by the Bitcoin Trezor',
-    );
+    throw new Error('Message signing is not supported by the Bitcoin Trezor');
   }
 
   #extractAccountProps(

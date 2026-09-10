@@ -1,3 +1,5 @@
+import type { RefreshControlProps } from 'react-native';
+
 import { useTranslation } from '@lace-contract/i18n';
 import React, { useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -29,6 +31,8 @@ interface StakeCenterMainProps {
   networkInfoCard?: NetworkInfoCardProps;
   stakingStatusCard: StakingStatusCardProps;
   stakeCards: StakeCardProps[];
+  /** Pull-to-refresh control, forwarded to the card list. */
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 export const StakeCenterMain = ({
@@ -40,6 +44,7 @@ export const StakeCenterMain = ({
   networkInfoCard,
   stakingStatusCard,
   stakeCards,
+  refreshControl,
 }: StakeCenterMainProps) => {
   const { t } = useTranslation();
   const shouldShowSearch = showSearchBar ?? stakeCards.length > 1;
@@ -129,6 +134,7 @@ export const StakeCenterMain = ({
             contentContainerStyle={styles.listContent}
             onScroll={onScroll}
             scrollEventThrottle={16}
+            refreshControl={refreshControl}
           />
         </View>
       </View>

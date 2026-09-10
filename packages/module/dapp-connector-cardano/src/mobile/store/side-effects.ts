@@ -15,6 +15,7 @@ import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
+import { WalletType } from '@lace-contract/wallet-repo';
 import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import { HexBytes } from '@lace-lib/util';
@@ -39,6 +40,7 @@ import {
   DataSignErrorCode,
   TxSignErrorCode,
 } from '../../common/api-error';
+import { createChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
@@ -46,7 +48,10 @@ import {
   addrToSignWith,
   transformToGroupedAddresses,
 } from '../../common/store/util';
-import { requiresForeignSignaturesFromCbor } from '../../common/store/utils/input-resolver';
+import {
+  createCombinedInputResolver,
+  requiresForeignSignaturesFromCbor,
+} from '../../common/store/utils/input-resolver';
 import { handleCip30Message } from '../services/cip30-message-handler';
 
 import type { DappInfo, WebViewResponse } from '../../common/store/slice';
@@ -57,6 +62,7 @@ import type {
   CardanoSignerContext,
   CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
+import type { AnyWallet } from '@lace-contract/wallet-repo';
 import type { AvatarContent } from '@lace-lib/ui-toolkit';
 
 /**
@@ -71,6 +77,16 @@ const getDappStatusFromOrigin = (origin: string): 'trusted' | 'unsecured' => {
   }
   return 'trusted';
 };
+
+/**
+ * Whether the account's signer threads witness native scripts into signature
+ * detection. On mobile the Ledger and Trezor signers cannot witness
+ * script-required own keys, so full signing must be rejected up front for any
+ * native script that needs a signature.
+ */
+const signerWitnessesScriptKeys = (wallet: AnyWallet): boolean =>
+  wallet.type !== WalletType.HardwareLedger &&
+  wallet.type !== WalletType.HardwareTrezor;
 
 /**
  * Converts DappInfo to navigation-compatible dapp params for AuthorizeDapp sheet.
@@ -110,6 +126,15 @@ const toSigningNavParams = (dappInfo: DappInfo) => ({
  * @param dependencies - Side effect dependencies including actions and cardanoProvider
  * @returns Observable stream of actions to dispatch
  */
+/**
+ * Shared by processWebViewMessage (records submitted txs) and
+ * handleSignTxConfirmation (records signed txs, resolves chained inputs).
+ * Module scope because those are separate side effects with no common
+ * dependency seam; a stale entry can only reproduce the resolution miss it
+ * exists to prevent, never a wrong signature.
+ */
+const chainedTxOutputCache = createChainedTxOutputCache();
+
 export const processWebViewMessage: SideEffect = (
   { cardanoDappConnector: { receiveWebViewMessage$ } },
   {
@@ -204,6 +229,7 @@ export const processWebViewMessage: SideEffect = (
 
               if (isSuccessfulSubmitTx) {
                 const serializedTx = message.args![0] as string;
+                chainedTxOutputCache.recordOwnTransaction(serializedTx);
                 const accountIdHint = sessionAccountByOrigin[dappOrigin];
                 return from(
                   Promise.all([
@@ -748,7 +774,7 @@ export const handleSignTxConfirmation: SideEffect = (
     addresses: { selectAllAddresses$ },
     cardanoContext: { selectChainId$, selectAvailableAccountUtxos$ },
   },
-  { actions, accessAuthSecret, authenticate, signerFactory },
+  { actions, accessAuthSecret, authenticate, signerFactory, cardanoProvider },
 ) => {
   return confirmSignTx$.pipe(
     withLatestFrom(
@@ -871,6 +897,13 @@ export const handleSignTxConfirmation: SideEffect = (
         };
 
         const localUtxos = availableAccountUtxos[accountId] ?? [];
+        const resolutionUtxos = [
+          ...localUtxos,
+          ...chainedTxOutputCache.resolveChainedInputs(
+            txHex,
+            new Set<string>(knownAddresses.map(({ address }) => address)),
+          ),
+        ];
 
         return from(
           (async () => {
@@ -881,42 +914,43 @@ export const handleSignTxConfirmation: SideEffect = (
                 0,
               ),
             );
-            return { dRepKeyHash };
+            const hasForeignSignatures =
+              !isPartialSign &&
+              (await requiresForeignSignaturesFromCbor(
+                txHex,
+                resolutionUtxos,
+                knownAddresses,
+                createCombinedInputResolver(resolutionUtxos, cardanoProvider, {
+                  chainId,
+                }),
+                signerWitnessesScriptKeys(wallet),
+                dRepKeyHash,
+              ));
+            return { hasForeignSignatures };
           })(),
         ).pipe(
-          switchMap(({ dRepKeyHash }) => {
-            if (!isPartialSign) {
-              if (
-                requiresForeignSignaturesFromCbor(
-                  txHex,
-                  localUtxos,
-                  knownAddresses,
-                  dRepKeyHash,
-                )
-              ) {
-                const errorResponse: WebViewResponse = {
-                  id: requestId,
-                  success: false,
-                  error: {
-                    code: TxSignErrorCode.ProofGeneration,
-                    info: 'The wallet does not have the secret key associated with some of the inputs or certificates.',
-                  },
-                  timestamp: Date.now(),
-                };
-                return of(
-                  actions.cardanoDappConnector.setWebViewResponse(
-                    errorResponse,
-                  ),
-                  actions.cardanoDappConnector.clearPendingSignTxRequest(),
-                );
-              }
+          switchMap(({ hasForeignSignatures }) => {
+            if (hasForeignSignatures) {
+              const errorResponse: WebViewResponse = {
+                id: requestId,
+                success: false,
+                error: {
+                  code: TxSignErrorCode.ProofGeneration,
+                  info: 'The wallet does not have the secret key associated with some of the inputs or certificates.',
+                },
+                timestamp: Date.now(),
+              };
+              return of(
+                actions.cardanoDappConnector.setWebViewResponse(errorResponse),
+                actions.cardanoDappConnector.clearPendingSignTxRequest(),
+              );
             }
 
             const signerContext: CardanoTransactionSignerContext = {
               wallet,
               accountId,
               knownAddresses,
-              utxo: localUtxos,
+              utxo: resolutionUtxos,
               auth: signerAuthFromPrompt(
                 { accessAuthSecret, authenticate },
                 {
@@ -954,6 +988,7 @@ export const handleSignTxConfirmation: SideEffect = (
                     actions.cardanoDappConnector.clearPendingSignTxRequest(),
                   );
                 }
+                chainedTxOutputCache.recordOwnTransaction(txHex);
                 const witnessSetCbor = buildCip30SignTxWitnessSet(
                   Serialization.TxCBOR(txHex),
                   Serialization.TxCBOR(result.serializedTx),

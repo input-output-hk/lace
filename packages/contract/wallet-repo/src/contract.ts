@@ -19,12 +19,6 @@ export const walletRepoStoreContract = inferContractContext({
   })),
 });
 
-export const vaultContract = inferContractContext({
-  contractType: 'sideEffectDependency',
-  name: ContractName('vault'),
-  instance: 'at-least-one',
-});
-
 export const requestHWConnectionAddonContract = inferContractContext({
   name: ContractName('request-hw-connection-addon'),
   instance: 'exactly-one',

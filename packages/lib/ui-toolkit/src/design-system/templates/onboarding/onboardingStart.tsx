@@ -91,15 +91,20 @@ const createStyles = (theme: Theme, isWideLayout: boolean) => {
     brandLogo: {
       marginTop: isWideLayout ? 0 : spacing.XL + spacing.L,
     },
+    // Tighter than the sections around it: the cards are one set of choices, so
+    // they need to read as a group rather than as unrelated blocks separated by
+    // as much space as the sections themselves. Composed rather than a literal
+    // 12 because the scale has no token between S and M.
     buttonSection: {
-      gap: spacing.XL,
+      gap: spacing.S + spacing.XS,
     },
     actionButton: {
       justifyContent: 'flex-start',
       borderWidth: 1,
       borderColor: theme.border.top,
       paddingHorizontal: spacing.M,
-      paddingVertical: spacing.XL,
+      gap: spacing.M,
+      paddingVertical: spacing.L,
       width: '100%',
       borderRadius: radius.M,
     },
@@ -113,8 +118,10 @@ const createStyles = (theme: Theme, isWideLayout: boolean) => {
 
   return {
     ...styles,
+    // Sized to sit with the card's title rather than dominate it: at 35 the
+    // glyph was taller than both lines of text it labels.
     iconStyle: {
-      size: 35,
+      size: 24,
     },
   };
 };

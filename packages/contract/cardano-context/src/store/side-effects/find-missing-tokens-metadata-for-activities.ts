@@ -1,7 +1,9 @@
 import { Milliseconds } from '@cardano-sdk/core';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import uniq from 'lodash/uniq';
-import { debounceTime, from, mergeMap } from 'rxjs';
+import { combineLatest, debounceTime, from, mergeMap } from 'rxjs';
+
+import { isCardanoAccount } from '../../util';
 
 import type { SideEffect } from '../../contract';
 import type { Activity } from '@lace-contract/activities';
@@ -37,19 +39,35 @@ export const findMissingTokensMetadataForActivities =
   (
     { debounce }: { debounce: Milliseconds } = { debounce: Milliseconds(1000) },
   ): SideEffect =>
-  (_, { tokens, activities }, { actions }) =>
+  (_, { tokens, activities, wallets }, { actions }) =>
     activities.selectAllFlat$.pipe(
       // This would be re-run every time an activity is added to the store otherwise
       debounceTime(debounce),
-      blockingWithLatestFrom(tokens.selectTokensMetadata$),
-      mergeMap(([activities, tokensMetadataById]) =>
-        from(
-          getTokenIdsWithoutMetadata(activities, tokensMetadataById).map(
-            tokenId =>
-              actions.cardanoContext.loadTokenMetadata({
-                tokenId,
-              }),
-          ),
-        ),
+      blockingWithLatestFrom(
+        combineLatest([
+          tokens.selectTokensMetadata$,
+          wallets.selectActiveNetworkAccounts$,
+        ]),
       ),
+      mergeMap(([activities, [tokensMetadataById, accounts]]) => {
+        // Only Cardano-account activities may feed the Cardano metadata
+        // provider: other blockchains (e.g. Midnight) mint non-hex token ids
+        // that throw in `Cardano.AssetId` and would tear the metadata stream
+        // down, stalling sync for the whole wallet.
+        const cardanoAccountIds = new Set(
+          accounts.filter(isCardanoAccount).map(account => account.accountId),
+        );
+        return from(
+          getTokenIdsWithoutMetadata(
+            activities.filter(activity =>
+              cardanoAccountIds.has(activity.accountId),
+            ),
+            tokensMetadataById,
+          ).map(tokenId =>
+            actions.cardanoContext.loadTokenMetadata({
+              tokenId,
+            }),
+          ),
+        );
+      }),
     );

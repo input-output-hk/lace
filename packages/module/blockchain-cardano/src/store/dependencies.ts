@@ -1,4 +1,3 @@
-import { Serialization } from '@cardano-sdk/core';
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
 import {
   InMemoryKeyAgent,
@@ -6,6 +5,7 @@ import {
   util,
 } from '@cardano-sdk/key-management';
 import {
+  applyVkeyWitnesses,
   createInputResolver,
   type CardanoInMemorySigningDependencies,
   type SignInMemoryTransactionProps,
@@ -65,12 +65,7 @@ export const initializeDependencies: LaceInit<
           ).pipe(
             map(signatures => {
               const witnessSet = props.tx.witnessSet();
-              witnessSet.setVkeys(
-                Serialization.CborSet.fromCore(
-                  [...signatures.entries()],
-                  Serialization.VkeyWitness.fromCore,
-                ),
-              );
+              applyVkeyWitnesses(witnessSet, signatures);
               props.tx.setWitnessSet(witnessSet);
               return Ok(props.tx);
             }),

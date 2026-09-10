@@ -7,10 +7,16 @@ import {
   NavigationControls,
   sheetStackScreenListeners,
 } from '../src/core/navigation-controls';
-import { SheetRoutes, TabRoutes } from '../src/types/routes';
+import { SheetRoutes, StackRoutes, TabRoutes } from '../src/types/routes';
 
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { NavigationState } from '@react-navigation/native';
+
+const { mockPlatform } = vi.hoisted(() => ({
+  mockPlatform: { OS: 'web' as 'android' | 'ios' | 'web' },
+}));
+
+vi.mock('react-native', () => ({ Platform: mockPlatform }));
 
 const { mockSetParams, mockPop, mockPopToTop } = vi.hoisted(() => {
   const setParams = vi.fn((params: Record<string, unknown>) => ({
@@ -35,6 +41,18 @@ vi.mock('@react-navigation/native', () => ({
     pop: mockPop,
     popToTop: mockPopToTop,
   },
+}));
+
+const { mockCaptureMessage } = vi.hoisted(() => ({
+  mockCaptureMessage: vi.fn(),
+}));
+
+vi.mock('@lace-lib/observability', () => ({
+  LogLevel: { INFO: 'info', WARNING: 'warning' },
+  getObservability: () => ({
+    captureMessage: mockCaptureMessage,
+    addBreadcrumb: vi.fn(),
+  }),
 }));
 
 vi.mock('../src/core', () => ({
@@ -77,6 +95,7 @@ describe('findLastRouteIndexByName', () => {
 describe('NavigationControls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockPlatform.OS = 'web';
     vi.mocked(navigationRef.getRootState).mockReturnValue(undefined as never);
   });
 
@@ -343,6 +362,286 @@ describe('NavigationControls', () => {
 
       expect(mockPopToTop).not.toHaveBeenCalled();
       expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('force-removes the whole sheet stack by key when the cascade stalls', () => {
+      vi.useFakeTimers();
+      try {
+        const mockDispatch = vi.mocked(navigationRef.dispatch);
+        const mockIsReady = vi.mocked(navigationRef.isReady);
+        const mockGetRootState = vi.mocked(navigationRef.getRootState);
+
+        mockIsReady.mockReturnValue(true);
+        // The stack never shrinks (the state listener is never fired), so the
+        // watchdog is the only path back to the base route.
+        mockGetRootState.mockReturnValue({
+          index: 3,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'send', name: SheetRoutes.Send },
+            { key: 'add-assets', name: SheetRoutes.AddAssets },
+            { key: 'remove-account', name: SheetRoutes.RemoveAccount },
+          ],
+        } as never);
+
+        NavigationControls.closeSheet();
+        mockDispatch.mockClear();
+
+        vi.advanceTimersByTime(3000);
+
+        // REMOVE targets the LOWEST dismissible sheet by key ('send'), which
+        // drops it and every route above it — collapsing to base in one
+        // dispatch, regardless of which routes are still flagged `closing`.
+        // A source-less REMOVE would be a no-op if no route were flagged.
+        expect(mockDispatch).toHaveBeenCalledWith({
+          type: 'REMOVE',
+          source: 'send',
+        });
+
+        // A recovery that fires silently teaches nothing about how often the
+        // "impossible" stall happens in the field.
+        expect(mockCaptureMessage).toHaveBeenCalledWith(
+          expect.stringContaining('watchdog'),
+          'warning',
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('disarms the watchdog when the cascade settles naturally, sparing a later stack', () => {
+      vi.useFakeTimers();
+      try {
+        const mockDispatch = vi.mocked(navigationRef.dispatch);
+        const mockIsReady = vi.mocked(navigationRef.isReady);
+        const mockGetRootState = vi.mocked(navigationRef.getRootState);
+        const mockAddListener = vi.mocked(navigationRef.addListener);
+
+        mockIsReady.mockReturnValue(true);
+        mockGetRootState.mockReturnValue({
+          index: 1,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'send', name: SheetRoutes.Send },
+          ],
+        } as never);
+
+        NavigationControls.closeSheet();
+
+        // The cascade settles naturally well inside the grace period.
+        const settledState = {
+          index: 0,
+          routes: [{ key: 'root', name: SheetRoutes.RootStack }],
+        } as unknown as NavigationState;
+        const stateListener = mockAddListener.mock.calls
+          .filter(([event]) => event === 'state')
+          .at(-1)?.[1] as (event: { data: { state: NavigationState } }) => void;
+        stateListener({ data: { state: settledState } });
+
+        // The user presents a FRESH sheet before the original deadline. A
+        // stale, un-cancelled watchdog re-reads state at fire time, finds this
+        // stack, and force-removes a sheet that was never stuck.
+        mockGetRootState.mockReturnValue({
+          index: 1,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'fresh-send', name: SheetRoutes.Send },
+          ],
+        } as never);
+        mockDispatch.mockClear();
+
+        vi.advanceTimersByTime(3000);
+
+        expect(mockDispatch).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'REMOVE' }),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('still fires the deferred action once the forced REMOVE settles the stack', () => {
+      vi.useFakeTimers();
+      try {
+        const mockNavigate = vi.mocked(navigationRef.navigate);
+        const mockIsReady = vi.mocked(navigationRef.isReady);
+        const mockGetRootState = vi.mocked(navigationRef.getRootState);
+        const mockGetCurrentRoute = vi.mocked(navigationRef.getCurrentRoute);
+        const mockAddListener = vi.mocked(navigationRef.addListener);
+
+        mockIsReady.mockReturnValue(true);
+        const openState = {
+          index: 1,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'send', name: SheetRoutes.Send, params: {} },
+          ],
+        } as unknown as NavigationState;
+        mockGetRootState.mockReturnValue(openState);
+        mockGetCurrentRoute.mockReturnValue({
+          key: 'send',
+          name: SheetRoutes.Send,
+        } as never);
+
+        // Navigating to a stack route from inside a sheet defers the navigate
+        // behind the dismissal — and the cascade then stalls, so the watchdog
+        // is the only path to settling. The user's navigation must survive
+        // that recovery, not be dropped with the stuck routes.
+        NavigationControls.navigate(StackRoutes.Home);
+        expect(mockNavigate).not.toHaveBeenCalled();
+
+        vi.advanceTimersByTime(3000);
+
+        // The router responds to the forced REMOVE by shrinking the stack;
+        // the settle listener sees it and releases the deferred action.
+        const settledState = {
+          index: 0,
+          routes: [{ key: 'root', name: SheetRoutes.RootStack }],
+        } as unknown as NavigationState;
+        mockGetRootState.mockReturnValue(settledState);
+        mockGetCurrentRoute.mockReturnValue({
+          key: 'root',
+          name: SheetRoutes.RootStack,
+        } as never);
+        const stateListener = mockAddListener.mock.calls
+          .filter(([event]) => event === 'state')
+          .at(-1)?.[1] as (event: { data: { state: NavigationState } }) => void;
+        stateListener({ data: { state: settledState } });
+
+        expect(mockNavigate).toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does not arm the watchdog on native platforms', () => {
+      vi.useFakeTimers();
+      try {
+        mockPlatform.OS = 'ios';
+        const mockDispatch = vi.mocked(navigationRef.dispatch);
+        const mockIsReady = vi.mocked(navigationRef.isReady);
+        const mockGetRootState = vi.mocked(navigationRef.getRootState);
+
+        mockIsReady.mockReturnValue(true);
+        // The stack never shrinks, so on web the watchdog would force-REMOVE.
+        // On native it must never arm — a legitimately long dismissal must not
+        // be torn down.
+        mockGetRootState.mockReturnValue({
+          index: 3,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'send', name: SheetRoutes.Send },
+            { key: 'add-assets', name: SheetRoutes.AddAssets },
+            { key: 'remove-account', name: SheetRoutes.RemoveAccount },
+          ],
+        } as never);
+
+        NavigationControls.closeSheet();
+        mockDispatch.mockClear();
+
+        vi.advanceTimersByTime(3000);
+
+        expect(mockDispatch).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'REMOVE' }),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('does not fire the watchdog once the stack has settled to base', () => {
+      vi.useFakeTimers();
+      try {
+        const mockDispatch = vi.mocked(navigationRef.dispatch);
+        const mockIsReady = vi.mocked(navigationRef.isReady);
+        const mockGetRootState = vi.mocked(navigationRef.getRootState);
+
+        mockIsReady.mockReturnValue(true);
+        mockGetRootState.mockReturnValue({
+          index: 1,
+          routes: [
+            { key: 'root', name: SheetRoutes.RootStack },
+            { key: 'send', name: SheetRoutes.Send },
+          ],
+        } as never);
+
+        NavigationControls.closeSheet();
+        mockDispatch.mockClear();
+        // Simulate the natural cascade completing before the watchdog fires.
+        mockGetRootState.mockReturnValue({
+          index: 0,
+          routes: [{ key: 'root', name: SheetRoutes.RootStack }],
+        } as never);
+
+        vi.advanceTimersByTime(3000);
+
+        expect(mockDispatch).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'REMOVE' }),
+        );
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  describe('closeSheets', () => {
+    const stateWith = (...names: SheetRoutes[]): NavigationState =>
+      ({
+        index: names.length,
+        routes: [
+          { key: 'root', name: SheetRoutes.RootStack },
+          ...names.map(name => ({ key: name, name })),
+        ],
+      } as unknown as NavigationState);
+
+    beforeEach(() => {
+      vi.mocked(navigationRef.isReady).mockReturnValue(true);
+    });
+
+    it('pops the listed sheets and leaves the sheet underneath presented', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(
+          SheetRoutes.AddWalletHardware,
+          SheetRoutes.HardwareWalletDiscoveryResults,
+          SheetRoutes.HardwareWalletDiscoveryError,
+        ) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+        SheetRoutes.HardwareWalletDiscoveryError,
+      ]);
+
+      expect(mockPop).toHaveBeenCalledWith(2);
+      expect(mockPopToTop).not.toHaveBeenCalled();
+    });
+
+    it('falls back to a full dismissal when the listed sheets sit on the base route', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(SheetRoutes.HardwareWalletDiscoveryResults) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+        SheetRoutes.HardwareWalletDiscoveryError,
+      ]);
+
+      expect(mockPopToTop).toHaveBeenCalledOnce();
+      expect(mockPop).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when none of the listed sheets are presented', () => {
+      vi.mocked(navigationRef.getRootState).mockReturnValue(
+        stateWith(SheetRoutes.AddWalletHardware) as never,
+      );
+
+      NavigationControls.closeSheets([
+        SheetRoutes.HardwareWalletDiscoveryResults,
+      ]);
+
+      expect(mockPop).not.toHaveBeenCalled();
+      expect(mockPopToTop).not.toHaveBeenCalled();
+      expect(vi.mocked(navigationRef.dispatch)).not.toHaveBeenCalled();
     });
   });
 });

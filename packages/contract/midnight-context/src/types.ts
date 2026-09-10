@@ -33,10 +33,10 @@ import type {
   SignatureVerifyingKey,
   ZswapSecretKeys,
 } from '@midnight-ntwrk/ledger-v8';
-import type { WalletEntry } from '@midnight-ntwrk/wallet-sdk';
-import type { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
-import type { Roles } from '@midnight-ntwrk/wallet-sdk/hd';
-import type { UnshieldedKeystore } from '@midnight-ntwrk/wallet-sdk/unshielded';
+import type { WalletEntry } from '@midnightntwrk/wallet-sdk';
+import type { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
+import type { Roles } from '@midnightntwrk/wallet-sdk/hd';
+import type { UnshieldedKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import type { Observable } from 'rxjs';
 
 export type LockStatus = 'locked' | 'unlocked' | 'unlocking';
@@ -73,7 +73,11 @@ export type MidnightContextSliceState = {
   isActivityPageHeaderBannerDismissed?: boolean;
   isPortfolioBannerDismissed?: boolean;
   supportedNetworksIds: MidnightSDKNetworkId[];
+  /** Total generated dust per account — what the dust tank displays. */
   dustBalanceByAccount: Partial<Record<MidnightAccountId, BigNumber>>;
+  /** The SPENDABLE subset of `dustBalanceByAccount`: a build moves the whole
+   * dust coin it pays with into pending, so only this can fund a transfer. */
+  dustAvailableByAccount: Partial<Record<MidnightAccountId, BigNumber>>;
   dustGenerationDetailsByAccount: Partial<
     Record<MidnightAccountId, Serializable<DustGenerationDetails>>
   >;
@@ -128,7 +132,12 @@ export type MidnightWalletSerialisedState = {
   dust: HexBytes;
   shielded: HexBytes;
   unshielded: HexBytes;
-  unshieldedTxHistory: HexBytes;
+  /**
+   * Serialized unified transaction history — the shielded, unshielded and dust
+   * sections are merged into it by hash. Profiles created before the key was
+   * renamed persist it under the legacy key `unshieldedTxHistory`.
+   */
+  txHistory: HexBytes;
 };
 
 export type MidnightWalletAddress = {

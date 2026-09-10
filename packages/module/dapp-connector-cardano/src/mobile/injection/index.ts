@@ -1,5 +1,4 @@
 export {
-  CIP30_INJECTION_SCRIPT,
   generateCip30InjectionScript,
   createInjectionScript,
   defaultConfig,

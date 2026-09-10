@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { radius, spacing, useTheme, type Theme } from '../../../design-tokens';
@@ -28,7 +28,7 @@ export type DAppCardProps = {
   rating?: DappRating | null;
 };
 
-export const DAppCard = ({
+const DAppCardComponent = ({
   name,
   description,
   avatarImage,
@@ -37,7 +37,7 @@ export const DAppCard = ({
   onDelete,
 }: DAppCardProps) => {
   const { theme } = useTheme();
-  const styles = getStyles(theme);
+  const styles = useMemo(() => getStyles(theme), [theme]);
 
   const renderActions = () => {
     const hasBlockchain = Boolean(blockchain);
@@ -116,6 +116,11 @@ export const DAppCard = ({
     </BlurView>
   );
 };
+
+// Recycled per row by the dApp explorer's FlashList: without memo every reuse
+// re-renders the blur, avatar and text subtree even when the props are equal.
+export const DAppCard = React.memo(DAppCardComponent);
+DAppCard.displayName = 'DAppCard';
 
 const getStyles = (theme: Theme) =>
   StyleSheet.create({

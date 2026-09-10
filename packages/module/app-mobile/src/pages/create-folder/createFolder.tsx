@@ -3,11 +3,12 @@ import {
   CreateFolderSheet as CreateFolderSheetTemplate,
   Sheet,
 } from '@lace-lib/ui-toolkit';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { useCreateFolder } from './useCreateFolder';
 
 import type { SheetRoutes } from '@lace-lib/navigation';
+import type { ButtonConfig } from '@lace-lib/ui-toolkit';
 
 export const CreateFolder = (
   props: SheetScreenProps<SheetRoutes.CreateFolder>,
@@ -17,6 +18,18 @@ export const CreateFolder = (
   const isSelectingTokens = createFolderState.status === 'SelectingTokens';
   const isNamingFolder = createFolderState.status === 'NamingFolder';
   const hasFooter = isSelectingTokens || isNamingFolder;
+
+  const primaryButton = useMemo<ButtonConfig>(
+    () => ({
+      label: buttons.buttonPrimaryLabel,
+      onPress: isSelectingTokens ? nfts.onDone : buttons.buttonPrimaryPress,
+      disabled: isNamingFolder ? buttons.disabled : false,
+      testID: isSelectingTokens
+        ? 'nft-folder-select-done-btn'
+        : buttons.buttonPrimaryTestID,
+    }),
+    [buttons, isSelectingTokens, isNamingFolder, nfts.onDone],
+  );
 
   useEffect(() => {
     props.navigation.setOptions({
@@ -33,16 +46,7 @@ export const CreateFolder = (
               : buttons.buttonSecondaryPress,
             testID: buttons.buttonSecondaryTestID,
           }}
-          primaryButton={{
-            label: buttons.buttonPrimaryLabel,
-            onPress: isSelectingTokens
-              ? nfts.onDone
-              : buttons.buttonPrimaryPress,
-            disabled: isNamingFolder ? buttons.disabled : false,
-            testID: isSelectingTokens
-              ? 'nft-folder-select-done-btn'
-              : buttons.buttonPrimaryTestID,
-          }}
+          primaryButton={primaryButton}
         />
       ) : undefined,
     });
@@ -51,10 +55,14 @@ export const CreateFolder = (
     title,
     hasFooter,
     isSelectingTokens,
-    isNamingFolder,
     buttons,
     nfts,
+    primaryButton,
   ]);
 
-  return <CreateFolderSheetTemplate {...templateProps} />;
+  return (
+    <Sheet.SubmitProvider action={primaryButton}>
+      <CreateFolderSheetTemplate {...templateProps} />
+    </Sheet.SubmitProvider>
+  );
 };

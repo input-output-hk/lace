@@ -5,6 +5,7 @@ import { TxInId, util } from '@cardano-sdk/key-management';
 import { HexBlob } from '@cardano-sdk/util';
 import { airGappedQrExchangeHook } from '@lace-contract/air-gapped-qr-exchange';
 import {
+  applyVkeyWitnesses,
   createInputResolver,
   deriveDRepKeyHash,
 } from '@lace-contract/cardano-context';
@@ -140,6 +141,7 @@ export class CardanoKeystoneTransactionSigner
       txInKeyPathMap,
       xfp,
       dRepKeyHash,
+      scripts: tx.toCore().witness.scripts,
     });
 
     const requestId = RequestId(v4());
@@ -265,28 +267,31 @@ export class CardanoKeystoneTransactionSigner
   /**
    * Non-spend-input key paths the tx still requires the device to sign with:
    * owned collateral inputs, the stake key for stake certificates/withdrawals,
-   * the DRep key for DRep/voting certificates, plus required extra signers.
-   * Uses the same ownSignatureKeyPaths the in-memory and Ledger/Trezor signers
-   * rely on, then drops the paths already covered by the spend inputs so each
-   * witness is requested once. Keystone identifies each extra signer by its
-   * key hash.
+   * the DRep key for DRep/voting certificates, own keys required by the tx's
+   * native scripts, plus required extra signers. Uses the same
+   * ownSignatureKeyPaths the in-memory and desktop Trezor signers rely on, then
+   * drops the paths already covered by the spend inputs so each witness is
+   * requested once. Keystone identifies each extra signer by its key hash.
    */
   #buildExtraSigners({
     txBody,
     txInKeyPathMap,
     xfp,
     dRepKeyHash,
+    scripts,
   }: {
     txBody: CardanoTypes.TxBody;
     txInKeyPathMap: TxInKeyPathMap;
     xfp: Xfp;
     dRepKeyHash: Ed25519KeyHashHex;
+    scripts: CardanoTypes.Script[] | undefined;
   }): TxExtraSigner[] {
     const keyPaths = util.ownSignatureKeyPaths(
       txBody,
       this.#props.knownAddresses,
       txInKeyPathMap,
       dRepKeyHash,
+      scripts,
     );
     const seen = new Set(
       txBody.inputs
@@ -382,12 +387,7 @@ export class CardanoKeystoneTransactionSigner
     for (const witness of deviceWitnesses) {
       merged.set(witness.vkey(), witness.toCore());
     }
-    witnessSet.setVkeys(
-      Serialization.CborSet.fromCore(
-        [...merged.values()],
-        Serialization.VkeyWitness.fromCore,
-      ),
-    );
+    applyVkeyWitnesses(witnessSet, merged.values());
 
     const signedTx = new Serialization.Transaction(
       tx.body(),

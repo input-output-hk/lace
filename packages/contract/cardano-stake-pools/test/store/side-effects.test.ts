@@ -3,6 +3,7 @@ import { CardanoNetworkId } from '@lace-contract/cardano-context';
 import { Err, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { of } from 'rxjs';
+import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import { cardanoStakePoolsActions as actions } from '../../src';
@@ -42,6 +43,7 @@ const providerNetworkPayload: StakePoolsNetworkData = {
   retiringPools: [],
   slotLength: 1,
   timestamp: 0,
+  treasuryCut: 0.2,
 };
 
 const blockfrostPool = {
@@ -171,6 +173,7 @@ export const createProvider = (overrides?: Overrides) =>
 describe('cardano-stake-pools side effects', () => {
   const deps = {
     actions: { cardanoStakePools: actions.cardanoStakePools },
+    logger: dummyLogger,
   };
 
   describe('createStakePoolsNetworkData', () => {

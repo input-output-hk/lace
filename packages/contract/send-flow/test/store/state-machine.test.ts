@@ -1000,6 +1000,30 @@ describe('send-flow stateMachine', () => {
         expect(stateFormWithAmountError.status).toEqual('Form');
       });
 
+      it('stays in "Form" (never builds) when the form has no token transfers', () => {
+        const stateEmptyTransfers = execute(
+          stateIdle,
+          sendFlowMachine.events.openRequested({
+            accountId: 'mn-acc' as AccountId,
+          }),
+          sendFlowMachine.events.preparingCompleted({
+            wallet: {} as AnyWallet,
+            // No token selected (e.g. a not-yet-synced account) → tokenTransfers: []
+            form: createFormInitialState({}),
+            blockchainName: testToken.blockchainName,
+            accountId: 'mn-acc' as AccountId,
+          }),
+          sendFlowMachine.events.formDataChanged({
+            data: { fieldName: 'address', value: 'address' },
+          }),
+          sendFlowMachine.events.formValidationCompleted({
+            result: [{ fieldName: 'address', error: null }],
+          }),
+        );
+
+        expect(stateEmptyTransfers.status).toEqual('Form');
+      });
+
       it('updates form data with errors when validation fails', () => {
         const extractErrors = (state: StateWithStatusOf<'Form'>) => {
           const result: Record<string, AmountError | string | null> = {};

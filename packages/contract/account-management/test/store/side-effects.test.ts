@@ -3256,6 +3256,121 @@ describe('createHardwareWalletCreationSideEffect', () => {
     );
   });
 
+  // The migration wizard names an imported hardware SOURCE the way the phrase
+  // import does; the override applies to a newly created wallet only (a merge
+  // into an existing wallet keeps the name the user knows).
+  it('applies the requested wallet name to a newly created wallet', () => {
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: walletEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet({
+                  ...payload,
+                  walletName: 'Old wallet (migrated)',
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(abcd)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.wallets.addWallet({
+                ...walletEntity,
+                metadata: {
+                  ...walletEntity.metadata,
+                  name: 'Old wallet (migrated)',
+                  order: 1,
+                },
+              }),
+              c: actions.accountManagement.setLoading(false),
+              d: actions.views.setActiveSheetPage({
+                route: SheetRoutes.SuccessCreateNewWallet,
+                params: { walletId: walletEntity.walletId },
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  // The sheet is add-wallet's ending; a caller that owns its own journey (the
+  // migration wizard) opts out so the sheet cannot pop mid-flow.
+  it('suppresses the success sheet when the caller asks', () => {
+    const createWalletMock = vi.fn();
+    const hwConnectors = [
+      {
+        id: ledgerOptionId,
+        walletType: WalletType.HardwareLedger,
+        connectAccount: vi.fn(),
+        createWallet: createWalletMock,
+      },
+    ];
+
+    testSideEffect(
+      createHardwareWalletCreationSideEffect(hwConnectors, {}),
+      ({ cold, expectObservable }) => {
+        createWalletMock.mockImplementation(() =>
+          cold('(a|)', { a: walletEntity }),
+        );
+        const wallets$ = cold('a', { a: [existingWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptCreateHardwareWallet$: cold('-a', {
+                a: actions.accountManagement.attemptCreateHardwareWallet({
+                  ...payload,
+                  shouldSuppressSuccessSheet: true,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            __getState: vi.fn(),
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-(abc)', {
+              a: actions.accountManagement.setLoading(true),
+              b: actions.wallets.addWallet({
+                ...walletEntity,
+                metadata: { ...walletEntity.metadata, order: 1 },
+              }),
+              c: actions.accountManagement.setLoading(false),
+            });
+          },
+        };
+      },
+    );
+  });
+
   it('calls the connector createWallet with no device for an air-gapped (seed signer) option and adds the wallet', () => {
     const seedSignerOptionId = HardwareIntegrationId('seed-signer');
     const createWalletMock = vi.fn();

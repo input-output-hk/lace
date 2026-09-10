@@ -12,9 +12,9 @@ import {
   onboardingOptionsAddonContract,
 } from '@lace-contract/onboarding-v2';
 import { signerFactoryAddonContract } from '@lace-contract/signer';
+import { vaultContract } from '@lace-contract/vault';
 import {
   searchHWDevicesAddonContract,
-  vaultContract,
   walletRepoStoreContract,
 } from '@lace-contract/wallet-repo';
 
@@ -106,6 +106,7 @@ const mobileModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': mobileModule,
+  'lace-extension-guest': mobileModule,
 };
 
 export default moduleMap;

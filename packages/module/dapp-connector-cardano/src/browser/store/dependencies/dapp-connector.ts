@@ -12,6 +12,7 @@ import { createCardanoConfirmationCallback } from '../../../common/store/depende
 import { CIP30_API_METHODS, CIP30_SENDER_CONTEXT_INDEX } from '../../const';
 import { CARDANO_WALLET_API_CHANNEL } from '../../messaging';
 
+import type { ChainedTxOutputCache } from '../../../common/store/chained-tx-output-cache';
 import type {
   DeriveNextUnusedAddressFunction,
   SignTransactionFunction,
@@ -82,6 +83,8 @@ type ConnectCardanoDappConnectorParameters<T> = {
    * Enables per-dApp account isolation.
    */
   getAccountIdForOrigin: (origin: string) => AccountId | undefined;
+  /** Resolves tx inputs spending outputs of recently signed/submitted txs */
+  resolveChainedInputs: ChainedTxOutputCache['resolveChainedInputs'];
   /** Function to sign transactions */
   signTransaction?: SignTransactionFunction;
   /** Function to submit transactions */
@@ -173,6 +176,7 @@ export const initializeCardanoDappConnectorDependencies = ({
     allWallets$,
     cardanoProvider,
     getAccountIdForOrigin,
+    resolveChainedInputs,
     signTransaction,
     submitTransaction,
     deriveNextUnusedAddress,
@@ -198,6 +202,7 @@ export const initializeCardanoDappConnectorDependencies = ({
           allAccounts$,
           allWallets$,
           getAccountIdForOrigin,
+          resolveChainedInputs,
           userConfirmationRequest: confirmationCallback.callback,
           signTransaction,
           submitTransaction,

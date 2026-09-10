@@ -43,6 +43,24 @@ const baseConfig = {
       // DOM-free variant everywhere — including the SW — without forking
       // @cardano-sdk/hardware-trezor which hard-codes @trezor/connect-web.
       '@trezor/connect-web$': '@trezor/connect-webextension',
+      // hugeicons-pro ships per-icon modules only under dist/esm, but its
+      // exports map also offers them under a `require` target (dist/cjs/*.js)
+      // that does not exist in the artifact. Because `require` is in
+      // conditionNames below and precedes `import` in the map, the exports
+      // lookup resolves per-icon imports to the missing CJS path — alias the
+      // esm directories so plain file resolution bypasses the exports map.
+      '@hugeicons-pro/core-solid-rounded/dist/esm': path.join(
+        path.dirname(
+          require.resolve('@hugeicons-pro/core-solid-rounded/package.json'),
+        ),
+        'dist/esm',
+      ),
+      '@hugeicons-pro/core-stroke-rounded/dist/esm': path.join(
+        path.dirname(
+          require.resolve('@hugeicons-pro/core-stroke-rounded/package.json'),
+        ),
+        'dist/esm',
+      ),
     },
     // posthog-node v5+ uses Node.js-only modules (fs, readline) in its "node" export condition.
     // Prefer "edge" condition which is browser-compatible.
@@ -203,6 +221,15 @@ const baseConfig = {
     ),
     new NormalModuleReplacementPlugin(
       /node_modules\/@lodev09\/react-native-true-sheet/,
+      require.resolve('../empty.js'),
+    ),
+    // `@sentry/react-native` requires react-native internals
+    // (`Libraries/Core/Devtools/*`, `NativeComponentRegistry`) that don't
+    // exist in `react-native-web`; Metro picks its `.web.js` variants but
+    // webpack doesn't. Reached via app-mobile's TimeToFullDisplay, which
+    // renders null on web. The Expo UI build still uses the real package.
+    new NormalModuleReplacementPlugin(
+      /node_modules\/@sentry\/react-native/,
       require.resolve('../empty.js'),
     ),
     new NormalModuleReplacementPlugin(/node-fetch/, resource => {

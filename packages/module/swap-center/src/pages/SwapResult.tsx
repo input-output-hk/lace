@@ -19,17 +19,43 @@ import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
+// `errorMessage` arrives in one of three shapes: one of our i18n keys, a short
+// human-readable provider detail ("Insufficient funds."), or a raw node/client
+// dump (JSON bodies, Haskell constructors) that can run to kilobytes. Only the
+// first two belong on screen — the dump already reached the logs and analytics
+// at the point of failure.
+const isTranslationKeyLike = (value: string): boolean =>
+  /^[\w-]+(\.[\w-]+)+$/.test(value);
+const MAX_HUMAN_ERROR_LENGTH = 140;
+const isHumanReadable = (value: string): boolean =>
+  value.length <= MAX_HUMAN_ERROR_LENGTH && !/[{}[\]\\"]/.test(value);
+
+const isTerminalStatus = (status: string): boolean =>
+  status === 'Success' || status === 'Error';
+
 export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => getStyles(), []);
 
-  const swapFlowState = useLaceSelector('swapFlow.selectSwapFlowState');
+  const liveFlowState = useLaceSelector('swapFlow.selectSwapFlowState');
   const swapSessionId = useLaceSelector('swapAnalytics.selectSwapSessionId');
   const showToast = useDispatchLaceAction('ui.showToast');
   const dispatchReset = useDispatchLaceAction('swapFlow.reset', true);
   const dispatchRetry = useDispatchLaceAction('swapFlow.retryRequested', true);
   const { trackEvent } = useAnalytics();
+
+  // Render from a FROZEN terminal snapshot, never the live state: Done resets
+  // the flow to Idle while the sheet is still closing, and a live-derived
+  // render flips the Success content into the failure branch mid-animation
+  // (visible in the extension, where the reset round-trips through the SW
+  // store). Once a result is on screen, nothing may change it.
+  const isLiveTerminal = isTerminalStatus(liveFlowState.status);
+  const frozenTerminalRef = useRef(isLiveTerminal ? liveFlowState : undefined);
+  if (isLiveTerminal) {
+    frozenTerminalRef.current = liveFlowState;
+  }
+  const swapFlowState = frozenTerminalRef.current ?? liveFlowState;
 
   const isSuccess = swapFlowState.status === 'Success';
   const isError = swapFlowState.status === 'Error';
@@ -37,9 +63,10 @@ export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
   // Ensure the flow always resets on dismissal for terminal states (Success
   // or Error), whether the user taps the button, swipes down, or taps the
   // backdrop. Without this, pan/backdrop dismissals would leave stale
-  // terminal state behind.
-  const isTerminalRef = useRef(isSuccess || isError);
-  isTerminalRef.current = isSuccess || isError;
+  // terminal state behind. Tracks the LIVE status, not the frozen snapshot:
+  // after Done already reset the flow, unmount must not reset again.
+  const isTerminalRef = useRef(isLiveTerminal);
+  isTerminalRef.current = isLiveTerminal;
   useEffect(
     () => () => {
       if (isTerminalRef.current) {
@@ -119,6 +146,16 @@ export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
     ? t('v2.swap.result.success-title')
     : t('v2.swap.result.fail-title');
 
+  const failureText = (() => {
+    if (errorMessage && isTranslationKeyLike(errorMessage)) {
+      return t(errorMessage, { defaultValue: errorMessage });
+    }
+    if (errorMessage && isHumanReadable(errorMessage)) {
+      return errorMessage;
+    }
+    return t('v2.swap.result.fail-subtitle');
+  })();
+
   useEffect(() => {
     props.navigation.setOptions({
       header: <Sheet.Header title={title} testID="swap-result-header" />,
@@ -163,11 +200,7 @@ export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
           variant="secondary"
           align="center"
           testID="swap-result-subtitle">
-          {isSuccess
-            ? t('v2.swap.result.success-subtitle')
-            : errorMessage
-            ? t(errorMessage, { defaultValue: errorMessage })
-            : t('v2.swap.result.fail-subtitle')}
+          {isSuccess ? t('v2.swap.result.success-subtitle') : failureText}
         </Text.XS>
         {txId ? (
           <Row alignItems="center" gap={spacing.XS} style={styles.txIdRow}>

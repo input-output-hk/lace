@@ -3,6 +3,7 @@ import type { ImageSourcePropType } from 'react-native';
 import { createSlice } from '@reduxjs/toolkit';
 
 import type { GenericSheet } from './types';
+import type { TokenSortPreference } from '../pages/portfolio/utils/portfolioSort';
 import type { FolderId, Token } from '@lace-contract/tokens';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
@@ -56,6 +57,10 @@ export type MobileState = {
       selectedToken: Token | null;
       selectedFolderId: FolderId | null;
       isPortfolioView: boolean;
+      // Optional: blobs persisted before this field existed rehydrate without
+      // it, because autoMergeLevel1 replaces the whole `ui` tree. Read it via
+      // `getTokenSort`, which substitutes the default.
+      tokenSort?: TokenSortPreference;
     };
     more: {
       selectedDapp: number | null;
@@ -65,6 +70,10 @@ export type MobileState = {
     };
   };
 };
+
+// Shared instance so `getTokenSort` stays referentially stable across calls
+// when the preference is absent (see docs/reselect-input-stability.md).
+const DEFAULT_TOKEN_SORT: TokenSortPreference = { order: 'asc' };
 
 const initialState: MobileState = {
   ui: {
@@ -79,6 +88,7 @@ const initialState: MobileState = {
       selectedToken: null,
       selectedFolderId: null,
       isPortfolioView: true, // Portfolio page starts in portfolio view (index 0)
+      tokenSort: DEFAULT_TOKEN_SORT,
     },
     more: {
       selectedDapp: null,
@@ -112,6 +122,9 @@ const slice = createSlice({
     setIsPortfolioView: (state, { payload }: PayloadAction<boolean>) => {
       state.ui.portfolio.isPortfolioView = payload;
     },
+    setTokenSort: (state, { payload }: PayloadAction<TokenSortPreference>) => {
+      state.ui.portfolio.tokenSort = payload;
+    },
     setCustomAPI: (state, { payload }: PayloadAction<string>) => {
       state.ui.general.customAPI = payload;
     },
@@ -136,6 +149,8 @@ const slice = createSlice({
       state.ui.general.themePreference,
     getIsPortfolioView: (state: Readonly<MobileState>) =>
       state.ui.portfolio.isPortfolioView,
+    getTokenSort: (state: Readonly<MobileState>) =>
+      state.ui.portfolio.tokenSort ?? DEFAULT_TOKEN_SORT,
     getCustomAPI: (state: Readonly<MobileState>) => state.ui.general.customAPI,
     getToast: (state: Readonly<MobileState>) => state.ui.general.toast,
     getIsForeground: (state: Readonly<MobileState>) =>

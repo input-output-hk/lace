@@ -18,6 +18,7 @@ import {
   makeVoteDelegationProcessing,
   resetDRepsOnNetworkChange,
   resolvePromotedDRepsSideEffect,
+  resolveBlockedDRepsSideEffect,
   syncGovernanceFeatureFlagPayload,
   trackGovernanceDelegationConfirmed,
 } from '../../src/store/side-effects';
@@ -937,8 +938,9 @@ describe('governance-center side effects', () => {
   });
 
   describe('syncGovernanceFeatureFlagPayload', () => {
-    it('dispatches setConfig with the promotedDreps payload', () => {
+    it('dispatches both configs from the payload', () => {
       const promotedDreps = { mainnet: [{ id: 'drep1abc' }] };
+      const blockedDreps = { mainnet: ['drep1def'] };
       testSideEffect(
         { build: () => syncGovernanceFeatureFlagPayload },
         ({ cold, expectObservable }) => ({
@@ -949,7 +951,7 @@ describe('governance-center side effects', () => {
                   featureFlags: [
                     {
                       key: FEATURE_FLAG_GOVERNANCE_CENTER,
-                      payload: { promotedDreps },
+                      payload: { promotedDreps, blockedDreps },
                     },
                   ],
                   modules: [],
@@ -960,15 +962,18 @@ describe('governance-center side effects', () => {
           },
           dependencies: { actions: governanceCenterActions },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('a', {
+            expectObservable(sideEffect$).toBe('(ab)', {
               a: governanceCenterActions.promotedDReps.setConfig(promotedDreps),
+              b: governanceCenterActions.promotedDReps.setBlockedConfig(
+                blockedDreps,
+              ),
             });
           },
         }),
       );
     });
 
-    it('dispatches setConfig with {} when the flag has no payload', () => {
+    it('dispatches empty configs when the flag has no payload', () => {
       testSideEffect(
         { build: () => syncGovernanceFeatureFlagPayload },
         ({ cold, expectObservable }) => ({
@@ -985,8 +990,9 @@ describe('governance-center side effects', () => {
           },
           dependencies: { actions: governanceCenterActions },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('a', {
+            expectObservable(sideEffect$).toBe('(ab)', {
               a: governanceCenterActions.promotedDReps.setConfig({}),
+              b: governanceCenterActions.promotedDReps.setBlockedConfig({}),
             });
           },
         }),
@@ -1107,6 +1113,127 @@ describe('governance-center side effects', () => {
               }),
               b: governanceCenterActions.promotedDReps.setActivePromoted({
                 promoted: [{ id: 'drep1def' }],
+              }),
+            });
+          },
+        }),
+      );
+    });
+  });
+
+  describe('resolveBlockedDRepsSideEffect', () => {
+    const testChainId: Cardano.ChainId = {
+      networkId: 1,
+      networkMagic: 764_824_073,
+    };
+
+    it('sets the active blocked list from the config entry for the active network', () => {
+      testSideEffect(
+        { build: () => resolveBlockedDRepsSideEffect },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            cardanoContext: {
+              selectChainId$: cold('a', { a: testChainId }),
+            },
+            promotedDReps: {
+              selectBlockedConfig$: cold('a', {
+                a: { mainnet: ['drep1abc'] },
+              }),
+            },
+          },
+          dependencies: {
+            actions: governanceCenterActions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: governanceCenterActions.promotedDReps.setActiveBlocked({
+                blocked: ['drep1abc'],
+              }),
+            });
+          },
+        }),
+      );
+    });
+
+    it('sets an empty blocked list when the network has no entry', () => {
+      testSideEffect(
+        { build: () => resolveBlockedDRepsSideEffect },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            cardanoContext: {
+              selectChainId$: cold('a', { a: testChainId }),
+            },
+            promotedDReps: {
+              selectBlockedConfig$: cold('a', { a: {} }),
+            },
+          },
+          dependencies: {
+            actions: governanceCenterActions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: governanceCenterActions.promotedDReps.setActiveBlocked({
+                blocked: [],
+              }),
+            });
+          },
+        }),
+      );
+    });
+
+    it('sets an empty blocked list when no chainId is available', () => {
+      testSideEffect(
+        { build: () => resolveBlockedDRepsSideEffect },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            cardanoContext: {
+              selectChainId$: cold('a', { a: undefined }),
+            },
+            promotedDReps: {
+              selectBlockedConfig$: cold('a', {
+                a: { mainnet: ['drep1abc'] },
+              }),
+            },
+          },
+          dependencies: {
+            actions: governanceCenterActions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: governanceCenterActions.promotedDReps.setActiveBlocked({
+                blocked: [],
+              }),
+            });
+          },
+        }),
+      );
+    });
+
+    it('re-emits setActiveBlocked when the config changes', () => {
+      testSideEffect(
+        { build: () => resolveBlockedDRepsSideEffect },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            cardanoContext: {
+              selectChainId$: cold('a', { a: testChainId }),
+            },
+            promotedDReps: {
+              selectBlockedConfig$: cold('ab', {
+                a: { mainnet: ['drep1abc'] },
+                b: { mainnet: ['drep1def'] },
+              }),
+            },
+          },
+          dependencies: {
+            actions: governanceCenterActions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('ab', {
+              a: governanceCenterActions.promotedDReps.setActiveBlocked({
+                blocked: ['drep1abc'],
+              }),
+              b: governanceCenterActions.promotedDReps.setActiveBlocked({
+                blocked: ['drep1def'],
               }),
             });
           },

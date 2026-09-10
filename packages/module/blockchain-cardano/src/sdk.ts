@@ -6,6 +6,7 @@ import {
   delegationTxBuilderAddonContract,
   deregistrationTxBuilderAddonContract,
   voteDelegationTxBuilderAddonContract,
+  earnRewardsTxBuilderAddonContract,
   FEATURE_FLAG_CARDANO,
 } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
@@ -46,6 +47,7 @@ const implementsContracts = combineContracts([
   deregistrationTxBuilderAddonContract,
   // governanceCenterStoreContract,
   voteDelegationTxBuilderAddonContract,
+  earnRewardsTxBuilderAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
@@ -79,6 +81,8 @@ export default inferModuleContext({
       import('./exposed-modules/deregistration-tx-builder'),
     loadVoteDelegationTxBuilder: async () =>
       import('./exposed-modules/vote-delegation-tx-builder'),
+    loadEarnRewardsTxBuilder: async () =>
+      import('./exposed-modules/earn-rewards-tx-builder'),
     loadSignerFactory: async () => import('./exposed-modules/signer-factory'),
   },
 });

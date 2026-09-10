@@ -1,0 +1,31 @@
+{
+  "name": "@lace-module/midnight-host-pull",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/util": "*",
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/midnight-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/sync": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-active-state": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/extension-shell-api": "*",
+    "@lace-lib/extension-shell-client": "*",
+    "@lace-lib/util": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

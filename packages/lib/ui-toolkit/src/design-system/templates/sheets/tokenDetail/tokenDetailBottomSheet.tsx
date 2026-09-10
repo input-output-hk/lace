@@ -1,3 +1,5 @@
+import type { ScrollView } from 'react-native';
+
 import React, {
   useCallback,
   useEffect,
@@ -37,7 +39,6 @@ import type {
   ActivityCardType,
   ActivitySection,
 } from '../../../organisms/activityList/activityList';
-import type { BottomSheetScrollViewMethods } from '@gorhom/bottom-sheet';
 import type { FlashListRef } from '@shopify/flash-list';
 
 const COPY_BUTTON_SIZE = 28;
@@ -388,7 +389,7 @@ const useCopiedFieldFeedback = (onCopyValue?: (value: string) => void) => {
 };
 
 const useTokenDetailScrollPosition = (scrollStateKey?: string) => {
-  const sheetScrollRef = useRef<BottomSheetScrollViewMethods | null>(null);
+  const sheetScrollRef = useRef<ScrollView | null>(null);
   const flashListRef = useRef<FlashListRef<ActivityCardType> | null>(null);
   const restoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const restoreRafRef = useRef<number | null>(null);

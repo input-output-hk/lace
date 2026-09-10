@@ -313,9 +313,12 @@ describe('sync slice', () => {
         expect(
           state.syncStatusByAccount[accountId].lastSuccessfulSync!,
         ).toBeLessThanOrEqual(afterLastComplete);
+        expect(
+          state.syncStatusByAccount[accountId]?.lastFailedSync,
+        ).toBeUndefined();
       });
 
-      it('should clear pendingSync but not set lastSuccessfulSync when completing after a failure', () => {
+      it('should clear pendingSync and record lastFailedSync when completing after a failure', () => {
         const operation1: SyncOperation = {
           operationId: 'op1',
           status: 'Pending',
@@ -351,10 +354,12 @@ describe('sync slice', () => {
         );
 
         // Complete second operation
+        const beforeLastComplete = Date.now();
         state = syncReducers.sync(
           state,
           actions.sync.completeSyncOperation({ accountId, operationId: 'op2' }),
         );
+        const afterLastComplete = Date.now();
 
         expect(
           state.syncStatusByAccount[accountId]?.pendingSync,
@@ -362,6 +367,12 @@ describe('sync slice', () => {
         expect(
           state.syncStatusByAccount[accountId]?.lastSuccessfulSync,
         ).toBeUndefined();
+        expect(
+          state.syncStatusByAccount[accountId].lastFailedSync!,
+        ).toBeGreaterThanOrEqual(beforeLastComplete);
+        expect(
+          state.syncStatusByAccount[accountId].lastFailedSync!,
+        ).toBeLessThanOrEqual(afterLastComplete);
       });
     });
 
@@ -454,7 +465,7 @@ describe('sync slice', () => {
         expect(state.syncStatusByAccount[accountId]?.pendingSync).toBeDefined();
       });
 
-      it('should clear pendingSync but not set lastSuccessfulSync when all operations are terminal', () => {
+      it('should clear pendingSync and record lastFailedSync when all operations are terminal', () => {
         const operation1: SyncOperation = {
           operationId: 'op1',
           status: 'Pending',
@@ -484,6 +495,7 @@ describe('sync slice', () => {
           actions.sync.completeSyncOperation({ accountId, operationId: 'op1' }),
         );
 
+        const beforeLastFail = Date.now();
         state = syncReducers.sync(
           state,
           actions.sync.failSyncOperation({
@@ -492,12 +504,58 @@ describe('sync slice', () => {
             error: 'sync.error.tokens-fetch-failed',
           }),
         );
+        const afterLastFail = Date.now();
 
         expect(
           state.syncStatusByAccount[accountId]?.pendingSync,
         ).toBeUndefined();
         expect(
           state.syncStatusByAccount[accountId]?.lastSuccessfulSync,
+        ).toBeUndefined();
+        expect(
+          state.syncStatusByAccount[accountId].lastFailedSync!,
+        ).toBeGreaterThanOrEqual(beforeLastFail);
+        expect(
+          state.syncStatusByAccount[accountId].lastFailedSync!,
+        ).toBeLessThanOrEqual(afterLastFail);
+      });
+
+      it('should not record lastFailedSync while the round is still in flight', () => {
+        const operation1: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+
+        const operation2: SyncOperation = {
+          operationId: 'op2',
+          status: 'Pending',
+          description: 'sync.operation.tokens',
+          startedAt: Timestamp(Date.now()),
+        };
+
+        let state = syncReducers.sync(
+          initialState,
+          actions.sync.addSyncOperation({ accountId, operation: operation1 }),
+        );
+
+        state = syncReducers.sync(
+          state,
+          actions.sync.addSyncOperation({ accountId, operation: operation2 }),
+        );
+
+        state = syncReducers.sync(
+          state,
+          actions.sync.failSyncOperation({
+            accountId,
+            operationId: 'op1',
+            error: 'sync.error.address-discovery-failed',
+          }),
+        );
+
+        expect(
+          state.syncStatusByAccount[accountId]?.lastFailedSync,
         ).toBeUndefined();
       });
     });
@@ -617,6 +675,63 @@ describe('sync slice', () => {
         ).toBeUndefined();
       });
 
+      it('moves neither outcome timestamp, so the dropped round reads as unresolved', () => {
+        const lastSuccessfulSync = Timestamp(Date.now() - 20000);
+        const lastFailedSync = Timestamp(Date.now() - 10000);
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+        let state = syncReducers.sync(
+          {
+            syncStatusByAccount: {
+              [accountId]: { lastSuccessfulSync, lastFailedSync },
+            },
+          },
+          actions.sync.addSyncOperation({ accountId, operation }),
+        );
+
+        state = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [accountId],
+          }),
+        );
+
+        expect(
+          state.syncStatusByAccount[accountId]?.lastSuccessfulSync,
+        ).toEqual(lastSuccessfulSync);
+        expect(state.syncStatusByAccount[accountId]?.lastFailedSync).toEqual(
+          lastFailedSync,
+        );
+      });
+
+      it('leaves a never-synced account with no outcome timestamp at all', () => {
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+        let state = syncReducers.sync(
+          initialState,
+          actions.sync.addSyncOperation({ accountId, operation }),
+        );
+
+        state = syncReducers.sync(
+          state,
+          actions.sync.clearPendingSyncsForAccounts({
+            accountIds: [accountId],
+          }),
+        );
+
+        expect(state.syncStatusByAccount[accountId]).toEqual({
+          pendingSync: undefined,
+        });
+      });
+
       it('is a no-op when no accounts have pendingSync', () => {
         const lastSuccessfulSync = Timestamp(Date.now());
         const state: SyncSliceState = {
@@ -665,6 +780,48 @@ describe('sync slice', () => {
           initialState,
           actions.sync.clearPendingSyncsForAccounts({
             accountIds: [AccountId('unknown')],
+          }),
+        );
+        expect(next.syncStatusByAccount).toEqual({});
+      });
+    });
+
+    describe('resetAccountSyncStatus', () => {
+      it('removes the account entire sync record, including lastSuccessfulSync', () => {
+        const otherAccountId = AccountId('account2');
+        const operation: SyncOperation = {
+          operationId: 'op1',
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
+        const state: SyncSliceState = {
+          syncStatusByAccount: {
+            [accountId]: {
+              lastSuccessfulSync: Timestamp(Date.now()),
+              pendingSync: {
+                startedAt: Timestamp(Date.now()),
+                operations: { op1: operation },
+              },
+            },
+            [otherAccountId]: { lastSuccessfulSync: Timestamp(Date.now()) },
+          },
+        };
+
+        const next = syncReducers.sync(
+          state,
+          actions.sync.resetAccountSyncStatus({ accountId }),
+        );
+
+        expect(next.syncStatusByAccount[accountId]).toBeUndefined();
+        expect(next.syncStatusByAccount[otherAccountId]).toBeDefined();
+      });
+
+      it('is a no-op for an account with no sync record', () => {
+        const next = syncReducers.sync(
+          initialState,
+          actions.sync.resetAccountSyncStatus({
+            accountId: AccountId('unknown'),
           }),
         );
         expect(next.syncStatusByAccount).toEqual({});

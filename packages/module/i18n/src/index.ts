@@ -1,3 +1,5 @@
+import './augmentations';
+
 import {
   appContextInitializationAddonContract,
   appStoreContract,
@@ -21,6 +23,7 @@ import type {
   ModuleSelectors,
   LaceModuleMap,
   ModuleAddons,
+  LaceSideEffect,
 } from '@lace-contract/module';
 
 const dependsOnContracts = combineContracts([
@@ -63,12 +66,14 @@ const mobileModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': mobileModule,
+  'lace-extension-guest': mobileModule,
 };
 
 export default moduleMap;
 
 export type Selectors = ModuleSelectors<typeof extensionModule>;
 export type ActionCreators = ModuleActionCreators<typeof extensionModule>;
+export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 export type AvailableAddons = ModuleAddons<
   typeof implementsContracts,
   typeof dependsOnContracts

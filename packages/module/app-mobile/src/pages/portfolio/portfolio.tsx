@@ -36,17 +36,18 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
 
+import { TimeToFullDisplay } from '../../components/observability/TimeToFullDisplay';
 import { SecurityAlertsBanner } from '../../components/security-alerts/SecurityAlertsBanner';
+import { useLaceSelector } from '../../hooks';
 
 import { ActivitiesFlatlist } from './activities';
 import { NftsList } from './nfts';
 import { TokensList } from './tokens-list';
 import { AccountViewType, SelectedAssetView } from './types';
 import { usePortfolio } from './usePortfolio';
-import { getTokenSortOption, getTokenSortOrder } from './utils/portfolioSort';
+import { resolveTokenSortOption } from './utils/portfolioSort';
 
 import type { AccountView, AssetView } from './types';
-import type { TokenSortOption, TokenSortOrder } from './utils/portfolioSort';
 import type { Theme } from '@lace-lib/ui-toolkit';
 
 type WheelLikeEvent = {
@@ -63,18 +64,13 @@ export const Portfolio = ({
 }: TabScreenProps<TabRoutes.Portfolio>) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const initialSortOption = getTokenSortOption(route.params?.tokenSortOption);
   const [{ headerHeight, headerTopInset }, setHeaderLayout] = useState({
     headerHeight: 0,
     headerTopInset: 0,
   });
   const [carouselHeight, setCarouselHeight] = useState(0);
-  const [tokenSortOption, setTokenSortOption] = useState<
-    TokenSortOption | undefined
-  >(initialSortOption);
-  const [tokenSortOrder, setTokenSortOrder] = useState<TokenSortOrder>(() =>
-    getTokenSortOrder(route.params?.tokenSortOrder, initialSortOption),
-  );
+  const { option: persistedSortOption, order: tokenSortOrder } =
+    useLaceSelector('ui.getTokenSort');
   const [isTokensListEmpty, setIsTokensListEmpty] = useState(false);
   const tokensListRef = useRef<FlatList<unknown> | null>(null);
   const nftsListRef = useRef<FlatList<unknown> | null>(null);
@@ -181,21 +177,16 @@ export const Portfolio = ({
     [],
   );
 
-  useEffect(() => {
-    const nextOption = getTokenSortOption(route.params?.tokenSortOption);
-    setTokenSortOption(nextOption);
-    setTokenSortOrder(
-      getTokenSortOrder(route.params?.tokenSortOrder, nextOption),
-    );
-  }, [route.params?.tokenSortOption, route.params?.tokenSortOrder]);
+  const tokenSortOption = resolveTokenSortOption(
+    persistedSortOption,
+    isTokenPricingEnabled,
+  );
 
   const handleTokenSortPress = useCallback(() => {
     NavigationControls.navigate(SheetRoutes.PortfolioTokenSortControls, {
-      tokenSortOption,
-      tokenSortOrder,
       isTokenPricingEnabled,
     });
-  }, [isTokenPricingEnabled, tokenSortOption, tokenSortOrder]);
+  }, [isTokenPricingEnabled]);
 
   const activeBannerAccount = activeIndex > 0 ? currentAccount : null;
 
@@ -205,12 +196,23 @@ export const Portfolio = ({
     activeBannerAccount?.blockchainName,
   );
 
+  // Portfolio announcements — blockchain-agnostic inline nudges (e.g. earn
+  // rewards). Each decides its own visibility; several may render stacked.
+  const portfolioAnnouncements = useUICustomisation(
+    'addons.loadPortfolioAnnouncements',
+  );
+
   const AssetListHeader = useCallback(
     () => (
       <>
         {currentAccount ? (
           <SecurityAlertsBanner accountId={currentAccount.accountId} />
         ) : null}
+        {currentAccount
+          ? portfolioAnnouncements.map(({ key, Announcement }) => (
+              <Announcement key={key} accountId={currentAccount.accountId} />
+            ))
+          : null}
         {activeBannerAccount &&
         portfolioBannerCustomisation?.PortfolioBanner ? (
           <portfolioBannerCustomisation.PortfolioBanner
@@ -223,6 +225,7 @@ export const Portfolio = ({
       currentAccount,
       activeBannerAccount,
       portfolioBannerCustomisation?.PortfolioBanner,
+      portfolioAnnouncements,
     ],
   );
 
@@ -530,6 +533,9 @@ export const Portfolio = ({
 
   return (
     <PageContainerTemplate fullWidth>
+      {/* Reached only once usePortfolio finished the initial asset load, so
+          rendering with record marks the TTFD end for the Portfolio screen. */}
+      <TimeToFullDisplay record />
       <View style={styles.fillSpace}>
         {WalletDropdownComponent && (
           <View style={styles.topBarContainer}>

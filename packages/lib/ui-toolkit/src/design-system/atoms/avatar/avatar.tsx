@@ -57,12 +57,10 @@ export const Avatar = ({
 }: AvatarProps) => {
   const { theme } = useTheme();
 
-  const avatarStyles = getAvatarStyles({
-    size,
-    shape,
-    isShielded,
-    theme,
-  });
+  const avatarStyles = useMemo(
+    () => getAvatarStyles({ size, shape, isShielded, theme }),
+    [size, shape, isShielded, theme],
+  );
 
   const shieldIconSize = 12;
   const beaconSize = spacing.M;
@@ -83,7 +81,10 @@ export const Avatar = ({
   const effectiveImageUri = hasImageError ? undefined : imageUri;
   const shouldShowIcon = !effectiveImageUri && !content.fallback;
 
-  const styles = getStyles(size, theme, shieldIconSize);
+  const styles = useMemo(
+    () => getStyles(size, theme, shieldIconSize),
+    [size, theme, shieldIconSize],
+  );
 
   const imgNotFoundDefaultIconSize = useMemo(() => {
     return size * 0.3 + 10;
@@ -128,6 +129,12 @@ export const Avatar = ({
             <Image
               style={avatarStyles.image}
               source={{ uri: effectiveImageUri }}
+              // Keep decoded bitmaps in RAM: the default 'disk' policy re-reads
+              // and re-decodes on every cell recycle in a FlashList.
+              cachePolicy="memory-disk"
+              // Blank the view when a recycled cell swaps source, so it never
+              // shows the previous row's image while the new one loads.
+              recyclingKey={effectiveImageUri}
               onError={() => {
                 setHasImageError(true);
               }}

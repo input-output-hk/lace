@@ -10,6 +10,9 @@ import {
 import noop from 'lodash/noop';
 import React, { useCallback, useMemo } from 'react';
 
+import { isAccountSettingAvailable } from '../capability-gating';
+import { useDispatchLaceAction, useLoadModules } from '../hooks';
+
 import type { AccountSettingsOption } from '@lace-contract/account-management';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 
@@ -30,12 +33,19 @@ export const AccountSettings = ({ account }: { account: AnyAccount }) => {
     { blockchainName: account?.blockchainName },
   );
 
+  const requestRenameAccountCeremony = useDispatchLaceAction(
+    'vault.renameAccountCeremonyRequested',
+  );
+
+  // A vault ceremony, not a route (ADR 52): in process it resolves to this
+  // sheet, on the shell host to the host-origin manager view that owns account
+  // names — the screen must not know which.
   const handleOpenSheet = useCallback(() => {
-    NavigationControls.navigate(SheetRoutes.CustomizeAccount, {
+    requestRenameAccountCeremony({
       walletId: account.walletId,
       accountId: account.accountId,
     });
-  }, [account.walletId, account.accountId]);
+  }, [requestRenameAccountCeremony, account.walletId, account.accountId]);
 
   const handleNavigateToYourKeys = useCallback(() => {
     NavigationControls.navigate(SheetRoutes.AccountKey, {
@@ -89,6 +99,8 @@ export const AccountSettings = ({ account }: { account: AnyAccount }) => {
     [buildCustomizeAccountSetting, buildYourKeysSetting, t],
   );
 
+  const vaultCapabilities = useLoadModules('addons.loadVaultCapabilities')?.[0];
+
   const relevantSettings = useMemo(() => {
     const customizationSettings = accountSettingsUICustomisations.flatMap(
       customization =>
@@ -98,15 +110,20 @@ export const AccountSettings = ({ account }: { account: AnyAccount }) => {
         }),
     );
 
-    return customizationSettings.map(setting => ({
-      ...setting,
-      ...buildExtendedSetting(setting.id),
-    }));
+    return customizationSettings
+      .filter(setting =>
+        isAccountSettingAvailable(setting.id, vaultCapabilities),
+      )
+      .map(setting => ({
+        ...setting,
+        ...buildExtendedSetting(setting.id),
+      }));
   }, [
     accountSettingsUICustomisations,
     account?.accountId,
     account?.walletId,
     buildExtendedSetting,
+    vaultCapabilities,
   ]);
 
   const getSettingComponent = useCallback(

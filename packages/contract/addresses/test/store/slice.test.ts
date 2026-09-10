@@ -95,6 +95,89 @@ describe('addresses slice', () => {
         ]);
       });
 
+      it('refreshes the data of an existing address when re-upserted with different data', () => {
+        const persistedState: AddressesSliceState = {
+          addresses: [
+            {
+              ...cardanoAddress1,
+              accountId,
+              blockchainName: 'Bitcoin',
+              data: { network: 'mainnet' },
+            },
+          ],
+          aliases: {},
+        };
+        const backfilledData = {
+          network: 'mainnet',
+          addressType: 'NativeSegWit',
+          account: 0,
+          chain: 'external',
+          index: 0,
+          publicKeyHex: '02abc',
+        };
+        const action = actions.addresses.upsertAddresses({
+          blockchainName: 'Bitcoin',
+          accountId,
+          addresses: [{ ...cardanoAddress1, data: backfilledData }],
+        });
+
+        const state = addressesReducers.addresses(persistedState, action);
+
+        expect(state.addresses).toEqual([
+          {
+            ...cardanoAddress1,
+            accountId,
+            blockchainName: 'Bitcoin',
+            data: backfilledData,
+          },
+        ]);
+      });
+
+      it('keeps the same state reference when re-upserted with identical data', () => {
+        const data = { network: 'mainnet', index: 0 };
+        const persistedState: AddressesSliceState = {
+          addresses: [
+            {
+              ...cardanoAddress1,
+              accountId,
+              blockchainName: 'Bitcoin',
+              data: { ...data },
+            },
+          ],
+          aliases: {},
+        };
+        const action = actions.addresses.upsertAddresses({
+          blockchainName: 'Bitcoin',
+          accountId,
+          addresses: [{ ...cardanoAddress1, data: { ...data } }],
+        });
+
+        const state = addressesReducers.addresses(persistedState, action);
+
+        expect(state).toBe(persistedState);
+      });
+
+      it('keeps existing data when re-upserted without data', () => {
+        const data = { network: 'mainnet' };
+        const persistedState: AddressesSliceState = {
+          addresses: [
+            { ...cardanoAddress1, accountId, blockchainName: 'Bitcoin', data },
+          ],
+          aliases: {},
+        };
+        const action = actions.addresses.upsertAddresses({
+          blockchainName: 'Bitcoin',
+          accountId,
+          addresses: [cardanoAddress1],
+        });
+
+        const state = addressesReducers.addresses(persistedState, action);
+
+        expect(state.addresses).toEqual([
+          { ...cardanoAddress1, accountId, blockchainName: 'Bitcoin', data },
+        ]);
+      });
+
       it('allows the same address for different accounts', () => {
         const action = actions.addresses.upsertAddresses({
           blockchainName: 'Cardano',

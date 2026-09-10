@@ -1,6 +1,6 @@
 import { ActivityType } from '@lace-contract/activities';
 
-import type { CardanoInFlightUtxoActivityMetadata } from '../../augmentations';
+import type { CardanoActivityUtxoMetadata } from '../../augmentations';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -13,6 +13,19 @@ export type TopOnChainActivity = {
    * an epoch, not a slot).
    */
   slot?: Cardano.Slot;
+  /**
+   * Every outpoint this transaction spent, unresolved — see
+   * `CardanoActivityUtxoMetadata.consumedInputs`. Empty means UNKNOWN
+   * (an activity persisted before confirmed transactions carried this), never
+   * "spent nothing".
+   */
+  consumedInputs: readonly Cardano.TxIn[];
+  /**
+   * Outpoints of this transaction's outputs paying addresses the account
+   * owned at map time — see `CardanoActivityUtxoMetadata.producedOwnOutpoints`.
+   * Empty carries no evidence (legacy activity, or nothing paid to us).
+   */
+  producedOwnOutpoints: readonly Cardano.TxIn[];
 };
 
 /**
@@ -50,8 +63,13 @@ export const getTopOnChainActivity = (
   if (!top) return undefined;
   const cardano = (
     top.blockchainSpecific as
-      | { Cardano?: CardanoInFlightUtxoActivityMetadata }
+      | { Cardano?: CardanoActivityUtxoMetadata }
       | undefined
   )?.Cardano;
-  return { activityId: top.activityId, slot: cardano?.slot };
+  return {
+    activityId: top.activityId,
+    slot: cardano?.slot,
+    consumedInputs: cardano?.consumedInputs ?? [],
+    producedOwnOutpoints: cardano?.producedOwnOutpoints ?? [],
+  };
 };

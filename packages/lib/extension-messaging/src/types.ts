@@ -123,6 +123,14 @@ export enum RemoteApiPropertyType {
 }
 
 export interface MethodRequestOptions {
+  /**
+   * Consumer-side policy for a clean port disconnect while the call is in
+   * flight (the host died before responding and its handler state is gone).
+   * 'replay' re-posts the same request once after reconnect; only safe for
+   * idempotent methods, since the host may have already executed the call.
+   * 'fail' (default) rejects with RemoteApiShutdownError.
+   */
+  onDisconnect?: 'fail' | 'replay';
   transform?: TransformRequest;
   validate?: ValidateRequest;
 }

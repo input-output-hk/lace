@@ -184,16 +184,131 @@ const mockAddressOwningFrankenUtxo: AnyAddress = {
 const nonRetriableError = new ProviderError(ProviderFailure.BadRequest);
 const retriableError = new ProviderError(ProviderFailure.Unhealthy);
 
-const txActivity = (id: string, slot?: number): Activity => ({
+/**
+ * `spends` are the outpoints the transaction consumed, as the mapper now records
+ * them. Off by default so the existing cases keep exercising the unknown case —
+ * an activity persisted before confirmed transactions carried this.
+ */
+const txActivity = (
+  id: string,
+  slot?: number,
+  {
+    spends = [],
+    produced = [],
+  }: {
+    spends?: Cardano.TxIn[];
+    produced?: Cardano.TxIn[];
+  } = {},
+): Activity => ({
   accountId,
   activityId: id,
   timestamp: Timestamp(id.length),
   tokenBalanceChanges: [],
   type: ActivityType.Send,
-  ...(slot !== undefined && {
-    blockchainSpecific: { Cardano: { slot: Cardano.Slot(slot) } },
+  ...((slot !== undefined || spends.length > 0 || produced.length > 0) && {
+    blockchainSpecific: {
+      Cardano: {
+        ...(slot !== undefined && { slot: Cardano.Slot(slot) }),
+        consumedInputs: spends,
+        ...(produced.length > 0 && { producedOwnOutpoints: produced }),
+      },
+    },
   }),
 });
+
+/** The outpoint of `legitimateUtxoForAddr1`, for a spend that consumed it. */
+const spentAddr1Outpoint: Cardano.TxIn = {
+  txId: legitimateUtxoForAddr1[0].txId,
+  index: legitimateUtxoForAddr1[0].index,
+};
+
+/** An output tx-2 paid to addr1 — the receive the trailing provider misses. */
+const receivedAddr1Utxo: Cardano.Utxo = [
+  {
+    address: legitimateUtxoForAddr1[0].address,
+    txId: Cardano.TransactionId(
+      'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    ),
+    index: 0,
+  },
+  legitimateUtxoForAddr1[1],
+];
+const receivedAddr1Outpoint: Cardano.TxIn = {
+  txId: receivedAddr1Utxo[0].txId,
+  index: receivedAddr1Utxo[0].index,
+};
+
+/**
+ * One anchor-proof scenario: the account's loaded activities, what the
+ * provider serves, and whether the fetch may be trusted as settled (the key
+ * advances). Everything else — a settled tip past the confirmation depth,
+ * the persisted key one anchor behind, addr1's stored UTxO — is the shared
+ * stage every proof case plays on.
+ */
+const anchorProofScenario = ({
+  activities,
+  fetched,
+  expectKeyAdvance,
+}: {
+  activities: Activity[];
+  fetched: Cardano.Utxo[];
+  expectKeyAdvance: boolean;
+}) => {
+  testSideEffect(trackAccountUtxos, ({ cold, flush }) => ({
+    actionObservables: {
+      cardanoContext: { retrySyncRound$: cold('-') },
+    },
+    stateObservables: {
+      wallets: {
+        selectActiveNetworkAccounts$: cold<AnyAccount[]>('a', {
+          a: [account],
+        }),
+      },
+      addresses: {
+        selectAllAddresses$: cold<AnyAddress[]>('a', { a: [mockAddress1] }),
+      },
+      activities: {
+        selectAllMap$: cold<Record<string, Activity[]>>('a', {
+          a: { [accountId]: activities },
+        }),
+      },
+      cardanoContext: {
+        selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+          a: { [accountId]: cacheKeyFor1 },
+        }),
+        selectAccountUtxos$: cold('a', {
+          a: { [accountId]: [legitimateUtxoForAddr1] },
+        }),
+        selectTip$: cold('a', {
+          a: {
+            slot: Cardano.Slot(100 + UTXO_SYNC_CONFIRMATION_DEPTH + 1),
+          } as Cardano.Tip,
+        }),
+      },
+      failures: {
+        selectFailureById$: cold('a', { a: noFailureSelector }),
+        selectAllFailures$: cold('a', { a: emptyFailures }),
+      },
+    },
+    dependencies: {
+      cardanoProvider: {
+        getAccountUtxos: vi
+          .fn()
+          .mockImplementation(() => cold('(a|)', { a: Ok(fetched) })),
+      } as unknown as CardanoProviderDependencies['cardanoProvider'],
+      actions,
+      logger: dummyLogger,
+    },
+    assertion: sideEffect$ => {
+      const emitted: { type: string }[] = [];
+      sideEffect$.subscribe(action => emitted.push(action));
+      flush();
+      expect(
+        emitted.filter(actions.cardanoContext.setLastFetchedUtxoCacheKey.match),
+      ).toHaveLength(expectKeyAdvance ? 1 : 0);
+    },
+  }));
+};
 
 const pendingActivity = (id: string): Activity => ({
   accountId,
@@ -610,6 +725,318 @@ describe('trackAccountUtxos', () => {
           });
           flush();
           expect(getAccountUtxos).toHaveBeenCalledTimes(1);
+        },
+      };
+    });
+  });
+
+  // The provider handing back an outpoint the anchor spent is a read from before
+  // that transaction, not a settled set. Advancing on the confirmation-depth
+  // rule there froze the pre-spend set as authoritative for good: the key then
+  // equals the computed one, so the gate never reopened on any later tip or
+  // across a reload, and `retrySyncRound` could not help because the fetch had
+  // succeeded. Seen in the wild as an emptied account reporting its pre-spend
+  // balance indefinitely.
+  it('withholds the cache key while the fetched set still holds an outpoint the anchor spent', () => {
+    testSideEffect(trackAccountUtxos, ({ cold, flush }) => {
+      const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
+      const addresses$ = cold<AnyAddress[]>('a', { a: [mockAddress1] });
+      // The spend is the new top activity; the stored set was fetched at tx-1.
+      const activities$ = cold<Record<string, Activity[]>>('a', {
+        a: {
+          [accountId]: [
+            txActivity('tx-2', 100, { spends: [spentAddr1Outpoint] }),
+          ],
+        },
+      });
+      // Well past the depth window, so the depth rule alone would advance.
+      const settledTip = {
+        slot: Cardano.Slot(100 + UTXO_SYNC_CONFIRMATION_DEPTH + 1),
+      } as Cardano.Tip;
+
+      const getAccountUtxos = vi
+        .fn()
+        .mockImplementation(() =>
+          cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+        );
+
+      return {
+        actionObservables: {
+          cardanoContext: { retrySyncRound$: cold('-') },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+          addresses: { selectAllAddresses$: addresses$ },
+          activities: { selectAllMap$: activities$ },
+          cardanoContext: {
+            selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+              a: { [accountId]: cacheKeyFor1 },
+            }),
+            selectAccountUtxos$: cold('a', {
+              a: { [accountId]: [legitimateUtxoForAddr1] },
+            }),
+            selectTip$: cold('a', { a: settledTip }),
+          },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+            selectAllFailures$: cold('a', { a: emptyFailures }),
+          },
+        },
+        dependencies: {
+          cardanoProvider: {
+            getAccountUtxos,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          const emitted: { type: string }[] = [];
+          sideEffect$.subscribe(action => emitted.push(action));
+          flush();
+          expect(
+            emitted.filter(
+              actions.cardanoContext.setLastFetchedUtxoCacheKey.match,
+            ),
+          ).toHaveLength(0);
+        },
+      };
+    });
+  });
+
+  // LW-15319, the incoming mirror of the case above: a receive anchors the
+  // key, the spent-outpoint proof cannot fire (the anchor consumed only the
+  // sender's outpoints), and the depth rule would freeze a set missing the
+  // received output.
+  it("withholds the cache key while the receive anchor's own output is missing from the set", () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+      ],
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: false,
+    });
+  });
+
+  it("advances the cache key once the receive anchor's own output appears in the set", () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+      ],
+      fetched: [legitimateUtxoForAddr1, receivedAddr1Utxo],
+      expectKeyAdvance: true,
+    });
+  });
+
+  // NONE-present is the predicate, not some-missing: one own output present
+  // proves the provider applied the transaction; a partially-served
+  // multi-stake-key fetch must not read as staleness.
+  it('advances when at least one of the receive anchor’s own outputs is present', () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, {
+          produced: [
+            receivedAddr1Outpoint,
+            { txId: receivedAddr1Outpoint.txId, index: 1 },
+          ],
+        }),
+      ],
+      fetched: [legitimateUtxoForAddr1, receivedAddr1Utxo],
+      expectKeyAdvance: true,
+    });
+  });
+
+  // An own outpoint a LOADED activity spent is legitimately absent from a
+  // settled fetch and must not arm the proof — otherwise a same-block sibling
+  // spend (which can sort above the receive forever on the timestamp tie)
+  // would withhold the key until the account's next transaction.
+  it('advances when a loaded sibling activity spent the receive anchor’s only output', () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+        txActivity('tx-2b', 100, { spends: [receivedAddr1Outpoint] }),
+      ],
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: true,
+    });
+  });
+
+  // Same for the routine case: the user's NEXT spend of the received output
+  // is still Pending (Pending never anchors) while the provider has applied
+  // it — a fresh set lacking the output is settled, not stale.
+  it('advances when a pending activity spent the receive anchor’s only output', () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+        {
+          ...pendingActivity('tx-3'),
+          blockchainSpecific: {
+            Cardano: {
+              consumedInputs: [receivedAddr1Outpoint],
+              producedOutputs: [],
+            },
+          },
+        },
+      ],
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: true,
+    });
+  });
+
+  // The subtraction has to survive the PIPELINE, not just the predicate: a
+  // spend that loads in a later emission than the anchor is dropped by
+  // distinctUntilChanged (cacheKey and tip.slot both hold), so it reaches
+  // canTrustFetchAsSettled on the next tip rather than immediately. This
+  // pins that it does arrive, and that the key then advances.
+  it('advances on the next tip when the spend loads after the anchor', () => {
+    testSideEffect(trackAccountUtxos, ({ cold, flush }) => ({
+      actionObservables: {
+        cardanoContext: { retrySyncRound$: cold('-') },
+      },
+      stateObservables: {
+        wallets: {
+          selectActiveNetworkAccounts$: cold<AnyAccount[]>('a', {
+            a: [account],
+          }),
+        },
+        addresses: {
+          selectAllAddresses$: cold<AnyAddress[]>('a', { a: [mockAddress1] }),
+        },
+        activities: {
+          // The sibling spend arrives one frame after the receive anchor.
+          selectAllMap$: cold<Record<string, Activity[]>>('a-b', {
+            a: {
+              [accountId]: [
+                txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+              ],
+            },
+            b: {
+              [accountId]: [
+                txActivity('tx-2', 100, { produced: [receivedAddr1Outpoint] }),
+                txActivity('tx-2b', 100, { spends: [receivedAddr1Outpoint] }),
+              ],
+            },
+          }),
+        },
+        cardanoContext: {
+          selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+            a: { [accountId]: cacheKeyFor1 },
+          }),
+          selectAccountUtxos$: cold('a', {
+            a: { [accountId]: [legitimateUtxoForAddr1] },
+          }),
+          // A later tip is what re-opens the gate the dedupe closed.
+          selectTip$: cold('a--c', {
+            a: {
+              slot: Cardano.Slot(100 + UTXO_SYNC_CONFIRMATION_DEPTH + 1),
+            } as Cardano.Tip,
+            c: {
+              slot: Cardano.Slot(100 + UTXO_SYNC_CONFIRMATION_DEPTH + 2),
+            } as Cardano.Tip,
+          }),
+        },
+        failures: {
+          selectFailureById$: cold('a', { a: noFailureSelector }),
+          selectAllFailures$: cold('a', { a: emptyFailures }),
+        },
+      },
+      dependencies: {
+        cardanoProvider: {
+          getAccountUtxos: vi
+            .fn()
+            .mockImplementation(() =>
+              cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+            ),
+        } as unknown as CardanoProviderDependencies['cardanoProvider'],
+        actions,
+        logger: dummyLogger,
+      },
+      assertion: sideEffect$ => {
+        const emitted: { type: string }[] = [];
+        sideEffect$.subscribe(action => emitted.push(action));
+        flush();
+        // The first fetch withholds (spend not loaded yet); once the spend is
+        // known and a tip re-triggers, the anchor's outpoint is subtracted and
+        // the key advances.
+        expect(
+          emitted.filter(
+            actions.cardanoContext.setLastFetchedUtxoCacheKey.match,
+          ),
+        ).toHaveLength(1);
+      },
+    }));
+  });
+
+  // A receive anchor persisted before confirmed activities carried own
+  // outpoints leaves the field empty — no evidence — and must fall through
+  // to the depth rule exactly as before this proof.
+  it('advances on the depth rule when the receive anchor carries no produced outputs', () => {
+    anchorProofScenario({
+      activities: [txActivity('tx-2', 100)],
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: true,
+    });
+  });
+
+  // The other half: once the provider applies the spend, the outpoint is gone,
+  // the set differs, and the key must advance — otherwise this refetches forever.
+  it("advances the cache key once the anchor's spent outpoint is gone from the set", () => {
+    testSideEffect(trackAccountUtxos, ({ cold, flush }) => {
+      const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
+      const addresses$ = cold<AnyAddress[]>('a', { a: [mockAddress1] });
+      const activities$ = cold<Record<string, Activity[]>>('a', {
+        a: {
+          [accountId]: [
+            txActivity('tx-2', 100, { spends: [spentAddr1Outpoint] }),
+          ],
+        },
+      });
+      const settledTip = {
+        slot: Cardano.Slot(100 + UTXO_SYNC_CONFIRMATION_DEPTH + 1),
+      } as Cardano.Tip;
+
+      // Emptied by the spend — what the provider returns once caught up.
+      const getAccountUtxos = vi
+        .fn()
+        .mockImplementation(() => cold('(a|)', { a: Ok([]) }));
+
+      return {
+        actionObservables: {
+          cardanoContext: { retrySyncRound$: cold('-') },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+          addresses: { selectAllAddresses$: addresses$ },
+          activities: { selectAllMap$: activities$ },
+          cardanoContext: {
+            selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+              a: { [accountId]: cacheKeyFor1 },
+            }),
+            selectAccountUtxos$: cold('a', {
+              a: { [accountId]: [legitimateUtxoForAddr1] },
+            }),
+            selectTip$: cold('a', { a: settledTip }),
+          },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+            selectAllFailures$: cold('a', { a: emptyFailures }),
+          },
+        },
+        dependencies: {
+          cardanoProvider: {
+            getAccountUtxos,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          const emitted: { type: string }[] = [];
+          sideEffect$.subscribe(action => emitted.push(action));
+          flush();
+          expect(
+            emitted.filter(
+              actions.cardanoContext.setLastFetchedUtxoCacheKey.match,
+            ),
+          ).toHaveLength(1);
         },
       };
     });
@@ -1429,6 +1856,95 @@ describe('trackAccountUtxos', () => {
       });
     });
 
+    // Discovery adds an address that holds nothing: the refetch returns the
+    // same set and the tip may sit within confirmation depth for a long time
+    // (or never tick again). Withholding the key here strands every consumer
+    // that waits for it to cover the live address count — the set was just
+    // re-verified under the wider ownership, so the key must advance.
+    it('advances cacheKey when only the address count changed and the refetched set is unchanged', () => {
+      testSideEffect(trackAccountUtxos, ({ cold, expectObservable, flush }) => {
+        const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
+        // Two addresses, one stake key: ownership widened, activity unchanged.
+        const addresses$ = cold<AnyAddress[]>('a', {
+          a: [mockAddress1, mockAddressOwningFrankenUtxo],
+        });
+        const activitySlot = 100;
+        const activities$ = cold<Record<string, Activity[]>>('a', {
+          a: { [accountId]: [txActivity('tx-1', activitySlot)] },
+        });
+
+        const getAccountUtxos = vi
+          .fn()
+          .mockImplementation(() =>
+            cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+          );
+
+        const storedUtxos$ = cold<AccountUtxoMap>('a', {
+          a: { [accountId]: [legitimateUtxoForAddr1] },
+        });
+        // Within the confirmation window, so depth alone would not advance.
+        const tip$ = cold<Cardano.Tip>('a', {
+          a: {
+            slot: Cardano.Slot(activitySlot + 1),
+            blockNo: Cardano.BlockNo(1),
+            hash: Cardano.BlockId(
+              '0000000000000000000000000000000000000000000000000000000000000000',
+            ),
+          },
+        });
+
+        const cacheKeyTwoAddresses = UtxoCacheKey({
+          topOnChainActivityId: 'tx-1',
+          stakeKeys: [rewardAccount1],
+          accountAddressCount: 2,
+        });
+
+        return {
+          actionObservables: {
+            cardanoContext: { retrySyncRound$: cold('-') },
+          },
+          stateObservables: {
+            wallets: { selectActiveNetworkAccounts$: accounts$ },
+            addresses: { selectAllAddresses$: addresses$ },
+            activities: { selectAllMap$: activities$ },
+            cardanoContext: {
+              // Last fetch was made at the same activity with one address.
+              selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+                a: { [accountId]: cacheKeyFor1 } as PersistedCacheKeys,
+              }),
+              selectAccountUtxos$: storedUtxos$,
+              selectTip$: tip$,
+            },
+            failures: {
+              selectFailureById$: cold('a', { a: noFailureSelector }),
+              selectAllFailures$: cold('a', { a: emptyFailures }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              getAccountUtxos,
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: actions.cardanoContext.setAccountUtxos({
+                accountId,
+                utxos: [legitimateUtxoForAddr1],
+              }),
+              b: actions.cardanoContext.setLastFetchedUtxoCacheKey({
+                accountId,
+                cacheKey: cacheKeyTwoAddresses,
+              }),
+            });
+            flush();
+            expect(getAccountUtxos).toHaveBeenCalledTimes(1);
+          },
+        };
+      });
+    });
+
     it('re-fetches and finally emits fresh utxos when tip advances after a stale fetch', () => {
       testSideEffect(trackAccountUtxos, ({ cold, expectObservable, flush }) => {
         const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
@@ -1532,13 +2048,24 @@ describe('trackAccountUtxos', () => {
       });
     });
 
-    it('advances cacheKey on a tip tick past confirmation depth even when utxos are unchanged', () => {
+    // Was: "advances cacheKey on a tip tick past confirmation depth even when
+    // utxos are unchanged". That give-up still applies when the anchor's inputs
+    // are unknown (see the case below), but not when the set demonstrably still
+    // holds an outpoint the anchor spent: that read is stale by proof, and
+    // advancing makes it authoritative forever.
+    it('keeps withholding past confirmation depth while a spent outpoint is still returned', () => {
       testSideEffect(trackAccountUtxos, ({ cold, expectObservable, flush }) => {
         const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
         const addresses$ = cold<AnyAddress[]>('a', { a: [mockAddress1] });
         const activitySlot = 100;
         const activities$ = cold<Record<string, Activity[]>>('a', {
-          a: { [accountId]: [txActivity('tx-1', activitySlot)] },
+          a: {
+            [accountId]: [
+              txActivity('tx-1', activitySlot, {
+                spends: [spentAddr1Outpoint],
+              }),
+            ],
+          },
         });
 
         // Indexer always returns the same set, equal to stored utxos.
@@ -1597,11 +2124,10 @@ describe('trackAccountUtxos', () => {
             logger: dummyLogger,
           },
           assertion: sideEffect$ => {
-            // Frame 0: utxos equal stored, tip not past depth → only
-            // setAccountUtxos fires (no cacheKey advance).
-            // Frame 3: utxos still equal stored, but tip is past depth →
-            // setAccountUtxos + setLastFetchedUtxoCacheKey fire.
-            expectObservable(sideEffect$).toBe('a--(bc)', {
+            // Both frames refetch and write the set, and NEITHER advances the
+            // key — so the account keeps re-verifying until the provider
+            // applies the spend, instead of freezing on the pre-spend set.
+            expectObservable(sideEffect$).toBe('a--b', {
               a: actions.cardanoContext.setAccountUtxos({
                 accountId,
                 utxos: [legitimateUtxoForAddr1],
@@ -1610,13 +2136,83 @@ describe('trackAccountUtxos', () => {
                 accountId,
                 utxos: [legitimateUtxoForAddr1],
               }),
-              c: actions.cardanoContext.setLastFetchedUtxoCacheKey({
+            });
+            flush();
+            expect(getAccountUtxos).toHaveBeenCalledTimes(2);
+          },
+        };
+      });
+    });
+
+    // The give-up still applies where staleness cannot be proved — an activity
+    // persisted before consumed inputs were recorded. Without it such an account
+    // would re-verify forever waiting on a catch-up that is not coming.
+    it("advances cacheKey past confirmation depth when the anchor's consumed inputs are unknown", () => {
+      testSideEffect(trackAccountUtxos, ({ cold, expectObservable, flush }) => {
+        const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
+        const addresses$ = cold<AnyAddress[]>('a', { a: [mockAddress1] });
+        const activitySlot = 100;
+        const activities$ = cold<Record<string, Activity[]>>('a', {
+          a: { [accountId]: [txActivity('tx-1', activitySlot)] },
+        });
+
+        const getAccountUtxos = vi
+          .fn()
+          .mockImplementation(() =>
+            cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+          );
+
+        return {
+          actionObservables: {
+            cardanoContext: { retrySyncRound$: cold('-') },
+          },
+          stateObservables: {
+            wallets: { selectActiveNetworkAccounts$: accounts$ },
+            addresses: { selectAllAddresses$: addresses$ },
+            activities: { selectAllMap$: activities$ },
+            cardanoContext: {
+              selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+                a: emptyPersisted,
+              }),
+              selectAccountUtxos$: cold<AccountUtxoMap>('a', {
+                a: { [accountId]: [legitimateUtxoForAddr1] },
+              }),
+              selectTip$: cold<Cardano.Tip>('a', {
+                a: {
+                  slot: Cardano.Slot(
+                    activitySlot + UTXO_SYNC_CONFIRMATION_DEPTH + 1,
+                  ),
+                  blockNo: Cardano.BlockNo(2),
+                  hash: Cardano.BlockId(
+                    '0000000000000000000000000000000000000000000000000000000000000002',
+                  ),
+                },
+              }),
+            },
+            failures: {
+              selectFailureById$: cold('a', { a: noFailureSelector }),
+              selectAllFailures$: cold('a', { a: emptyFailures }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              getAccountUtxos,
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: actions.cardanoContext.setAccountUtxos({
+                accountId,
+                utxos: [legitimateUtxoForAddr1],
+              }),
+              b: actions.cardanoContext.setLastFetchedUtxoCacheKey({
                 accountId,
                 cacheKey: cacheKeyFor1,
               }),
             });
             flush();
-            expect(getAccountUtxos).toHaveBeenCalledTimes(2);
           },
         };
       });
@@ -1701,6 +2297,191 @@ describe('trackAccountUtxos', () => {
   });
 
   describe('manual retry via retrySyncRound', () => {
+    // The receive mirror of the spend case below: proof outranks retry for
+    // missing own outputs exactly as for still-present spent outpoints.
+    it('withholds the cache key even on a manual retry while a receive anchor’s output is missing', () => {
+      testSideEffect(trackAccountUtxos, ({ cold, hot, flush }) => {
+        const failureId = CardanoUtxoFetchFailureId(accountId);
+        const existingFailure = {
+          failureId,
+          message: 'sync.error.cardano-utxo-fetch-failed' as TranslationKey,
+        } as unknown as Failure;
+
+        return {
+          actionObservables: {
+            cardanoContext: {
+              retrySyncRound$: hot('-a', {
+                a: actions.cardanoContext.retrySyncRound(),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectActiveNetworkAccounts$: cold<AnyAccount[]>('a', {
+                a: [account],
+              }),
+            },
+            addresses: {
+              selectAllAddresses$: cold<AnyAddress[]>('a', {
+                a: [mockAddress1],
+              }),
+            },
+            activities: {
+              selectAllMap$: cold<Record<string, Activity[]>>('a', {
+                a: {
+                  [accountId]: [
+                    txActivity('tx-2', 100, {
+                      produced: [receivedAddr1Outpoint],
+                    }),
+                  ],
+                },
+              }),
+            },
+            cardanoContext: {
+              selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+                a: { [accountId]: cacheKeyFor1 },
+              }),
+              selectAccountUtxos$: cold<AccountUtxoMap>('a', {
+                a: { [accountId]: [legitimateUtxoForAddr1] },
+              }),
+              selectTip$: cold('a', { a: undefinedTip }),
+            },
+            failures: {
+              selectFailureById$: cold('a', {
+                a: (id: FailureId) =>
+                  id === failureId ? existingFailure : undefined,
+              }),
+              selectAllFailures$: cold('a', {
+                a: { [failureId]: existingFailure } as Record<
+                  FailureId,
+                  Failure
+                >,
+              }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              // Recovered, but still serving the pre-receive set.
+              getAccountUtxos: vi
+                .fn()
+                .mockImplementation(() =>
+                  cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+                ),
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            const emitted: { type: string }[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(
+              emitted.filter(
+                actions.cardanoContext.setLastFetchedUtxoCacheKey.match,
+              ),
+            ).toHaveLength(0);
+          },
+        };
+      });
+    });
+
+    // Proof outranks intent: the retry exists to get past a fetch failure, not
+    // to accept a demonstrably pre-spend set. A provider that has just recovered
+    // may still be serving one, and this was the last door left into the latch
+    // this whole rule prevents — the key would advance on data the anchor's own
+    // outpoints contradict.
+    it('withholds the cache key even on a manual retry when a spent outpoint comes back', () => {
+      testSideEffect(trackAccountUtxos, ({ cold, hot, flush }) => {
+        const failureId = CardanoUtxoFetchFailureId(accountId);
+        const existingFailure = {
+          failureId,
+          message: 'sync.error.cardano-utxo-fetch-failed' as TranslationKey,
+        } as unknown as Failure;
+
+        return {
+          actionObservables: {
+            cardanoContext: {
+              retrySyncRound$: hot('-a', {
+                a: actions.cardanoContext.retrySyncRound(),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectActiveNetworkAccounts$: cold<AnyAccount[]>('a', {
+                a: [account],
+              }),
+            },
+            addresses: {
+              selectAllAddresses$: cold<AnyAddress[]>('a', {
+                a: [mockAddress1],
+              }),
+            },
+            activities: {
+              selectAllMap$: cold<Record<string, Activity[]>>('a', {
+                a: {
+                  [accountId]: [
+                    txActivity('tx-2', 100, { spends: [spentAddr1Outpoint] }),
+                  ],
+                },
+              }),
+            },
+            cardanoContext: {
+              selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+                a: { [accountId]: cacheKeyFor1 },
+              }),
+              selectAccountUtxos$: cold<AccountUtxoMap>('a', {
+                a: { [accountId]: [legitimateUtxoForAddr1] },
+              }),
+              selectTip$: cold('a', { a: undefinedTip }),
+            },
+            failures: {
+              selectFailureById$: cold('a', {
+                a: (id: FailureId) =>
+                  id === failureId ? existingFailure : undefined,
+              }),
+              selectAllFailures$: cold('a', {
+                a: { [failureId]: existingFailure } as Record<
+                  FailureId,
+                  Failure
+                >,
+              }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              // Recovered, but still serving the pre-spend set.
+              getAccountUtxos: vi
+                .fn()
+                .mockImplementation(() =>
+                  cold('(a|)', { a: Ok([legitimateUtxoForAddr1]) }),
+                ),
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            const emitted: { type: string }[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(
+              emitted.filter(
+                actions.cardanoContext.setLastFetchedUtxoCacheKey.match,
+              ),
+            ).toHaveLength(0);
+            // The UTxOs are still written — only the "settled" claim is
+            // withheld. Both triggers fetch here (the cache key is behind AND a
+            // retry fired), so the count is not pinned; that it wrote at all is
+            // the point.
+            expect(
+              emitted.filter(actions.cardanoContext.setAccountUtxos.match)
+                .length,
+            ).toBeGreaterThan(0);
+          },
+        };
+      });
+    });
+
     it('refetches only accounts currently holding a CardanoUtxoFetchFailureId', () => {
       testSideEffect(
         trackAccountUtxos,

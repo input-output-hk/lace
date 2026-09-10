@@ -5,7 +5,6 @@ import {
   normalizeUrlForId,
   tryParseExternalUrl,
 } from '@lace-contract/custom-dapps';
-import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   NavigationControls,
@@ -16,13 +15,16 @@ import { useNavigation } from '@react-navigation/native';
 import Fuse from 'fuse.js';
 import debounce from 'lodash/debounce';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Platform } from 'react-native';
 
 import { EXCLUDED_CATEGORY_SLUGS } from '../../const';
 import {
   useDispatchLaceAction,
   useLaceSelector,
 } from '../../hooks/lace-context';
+import {
+  getCurrentPlatform,
+  useDappExplorerConfig,
+} from '../../hooks/useDappExplorerConfig';
 import { getDappCategoryLabel } from '../../util/text-utils';
 
 import type {
@@ -33,46 +35,7 @@ import type {
 // Sentinel id for the synthetic "open external URL" list item.
 const EXTERNAL_URL_ITEM_ID = -1;
 
-type PlatformKey = 'android' | 'ios' | 'web';
-
-type PlatformFilters = {
-  disallowedDapps?: Record<string, string[]>;
-  disallowedCategories?: Record<string, string[]>;
-  alwaysVisibleSlugs?: string[];
-};
-
-type DappExplorerPayload = {
-  availableChains?: string[];
-  disallowedDapps?: Record<string, string[]>;
-  disallowedCategories?: Record<string, string[]>;
-  alwaysVisibleSlugs?: string[];
-  ios?: PlatformFilters;
-  android?: PlatformFilters;
-  web?: PlatformFilters;
-  showStatistics?: boolean;
-};
-
 const DEBOUNCE_DELAY_MS = 300;
-
-const getCurrentPlatform = (): PlatformKey => {
-  const os = Platform.OS;
-  if (os === 'ios') return 'ios';
-  if (os === 'android') return 'android';
-  return 'web';
-};
-
-const mergeRecordArrays = <T,>(
-  global: Record<string, T[]> | undefined,
-  platform: Record<string, T[]> | undefined,
-): Record<string, T[]> => {
-  const result: Record<string, T[]> = { ...(global ?? {}) };
-  if (platform) {
-    for (const [key, values] of Object.entries(platform)) {
-      result[key] = [...(result[key] ?? []), ...values];
-    }
-  }
-  return result;
-};
 
 export type CustomUrlDisclaimer = {
   visible: boolean;
@@ -134,51 +97,10 @@ export const useDappExplorer = (): UseDappExplorerResult => {
     setLocalSearchValue(dappSearchParams?.searchValue ?? '');
   }, [dappSearchParams?.searchValue]);
 
-  const loadedFeatures = useLaceSelector('features.selectLoadedFeatures');
+  const { disallowedSlugs, disallowedCategories, alwaysVisibleSlugs } =
+    useDappExplorerConfig();
 
-  const currentPlatform = getCurrentPlatform();
-  const isWebPlatform = currentPlatform === 'web';
-
-  const disallowedCategories = useMemo<string[]>(() => {
-    const featureFlags = loadedFeatures?.featureFlags || [];
-    const dappExplorerFlag = featureFlags.find(
-      (flag: FeatureFlag) => flag.key === FeatureFlagKey('DAPP_EXPLORER'),
-    ) as FeatureFlag<DappExplorerPayload> | undefined;
-
-    const globalGroups = dappExplorerFlag?.payload?.disallowedCategories;
-    const platformGroups =
-      dappExplorerFlag?.payload?.[currentPlatform]?.disallowedCategories;
-    const mergedGroups = mergeRecordArrays(globalGroups, platformGroups);
-
-    const result = Object.values(mergedGroups).flat();
-    return result;
-  }, [loadedFeatures, currentPlatform]);
-
-  const disallowedSlugs = useMemo<string[]>(() => {
-    const featureFlags = loadedFeatures?.featureFlags || [];
-    const dappExplorerFlag = featureFlags.find(
-      (flag: FeatureFlag) => flag.key === FeatureFlagKey('DAPP_EXPLORER'),
-    ) as FeatureFlag<DappExplorerPayload> | undefined;
-
-    const globalGroups = dappExplorerFlag?.payload?.disallowedDapps;
-    const platformGroups =
-      dappExplorerFlag?.payload?.[currentPlatform]?.disallowedDapps;
-    const mergedGroups = mergeRecordArrays(globalGroups, platformGroups);
-
-    return Object.values(mergedGroups).flat();
-  }, [loadedFeatures, currentPlatform]);
-
-  const alwaysVisibleSlugs = useMemo<string[]>(() => {
-    const featureFlags = loadedFeatures?.featureFlags || [];
-    const dappExplorerFlag = featureFlags.find(
-      (flag: FeatureFlag) => flag.key === FeatureFlagKey('DAPP_EXPLORER'),
-    ) as FeatureFlag<DappExplorerPayload> | undefined;
-
-    const globalSlugs = dappExplorerFlag?.payload?.alwaysVisibleSlugs ?? [];
-    const platformSlugs =
-      dappExplorerFlag?.payload?.[currentPlatform]?.alwaysVisibleSlugs ?? [];
-    return [...globalSlugs, ...platformSlugs];
-  }, [loadedFeatures, currentPlatform]);
+  const isWebPlatform = getCurrentPlatform() === 'web';
 
   const shouldShowHttpHint = useMemo(
     () => !isWebPlatform && isExplicitHttpUrl(localSearchValue),
@@ -208,13 +130,54 @@ export const useDappExplorer = (): UseDappExplorerResult => {
     return map;
   }, [customDappList]);
 
+  // Dapps allowed by policy (feature flags, inactive status, excluded
+  // categories), before the user's chain/category/search filters.
+  const policyFilteredDapps = useMemo(() => {
+    let filtered = dappList;
+
+    // Filter out explicitly disallowed slugs
+    if (disallowedSlugs.length > 0) {
+      const disallowedSet = new Set(disallowedSlugs);
+      filtered = filtered.filter(
+        dapp =>
+          alwaysVisibleSlugs.includes(dapp.slug) ||
+          !disallowedSet.has(dapp.slug),
+      );
+    }
+
+    // Filter out dapps with disallowed categories
+    if (disallowedCategories.length > 0) {
+      const disallowedSet = new Set(disallowedCategories);
+      filtered = filtered.filter(
+        dapp =>
+          alwaysVisibleSlugs.includes(dapp.slug) ||
+          !dapp.categories.some((category: string) =>
+            disallowedSet.has(category),
+          ),
+      );
+    }
+
+    // Filter out explicitly inactive dapps
+    filtered = filtered.filter(
+      dapp => dapp.active_status?.toLowerCase() !== 'inactive',
+    );
+
+    // Filter out dapps belonging to excluded categories
+    const excludedSet = new Set(EXCLUDED_CATEGORY_SLUGS);
+    return filtered.filter(
+      dapp => !dapp.categories.some(cat => excludedSet.has(cat)),
+    );
+  }, [dappList, alwaysVisibleSlugs, disallowedSlugs, disallowedCategories]);
+
+  // Policy-hidden dapps must not match here: a URL the user cannot reach
+  // through the curated list behaves like any custom URL (warning + favourite).
   const curatedUrlSet = useMemo(() => {
     const set = new Set<string>();
-    for (const dapp of dappList) {
+    for (const dapp of policyFilteredDapps) {
       if (dapp.website) set.add(normalizeUrlForId(dapp.website));
     }
     return set;
-  }, [dappList]);
+  }, [policyFilteredDapps]);
 
   const requestOpenExternalUrl = useCallback(
     (url: string) => {
@@ -296,42 +259,9 @@ export const useDappExplorer = (): UseDappExplorerResult => {
     NavigationControls.navigate(SheetRoutes.DappFilterControls);
   }, [navigation]);
 
-  // Apply feature-flag filters to the dapp list from the store
+  // Apply the user's chain/category filters on top of the policy filters
   const filteredDapps = useMemo(() => {
-    let filtered = dappList;
-
-    // Filter out explicitly disallowed slugs
-    if (disallowedSlugs.length > 0) {
-      const disallowedSet = new Set(disallowedSlugs);
-      filtered = filtered.filter(
-        dapp =>
-          alwaysVisibleSlugs.includes(dapp.slug) ||
-          !disallowedSet.has(dapp.slug),
-      );
-    }
-
-    // Filter out dapps with disallowed categories
-    if (disallowedCategories.length > 0) {
-      const disallowedSet = new Set(disallowedCategories);
-      filtered = filtered.filter(
-        dapp =>
-          alwaysVisibleSlugs.includes(dapp.slug) ||
-          !dapp.categories.some((category: string) =>
-            disallowedSet.has(category),
-          ),
-      );
-    }
-
-    // Filter out explicitly inactive dapps
-    filtered = filtered.filter(
-      dapp => dapp.active_status?.toLowerCase() !== 'inactive',
-    );
-
-    // Filter out dapps belonging to excluded categories
-    const excludedSet = new Set(EXCLUDED_CATEGORY_SLUGS);
-    filtered = filtered.filter(
-      dapp => !dapp.categories.some(cat => excludedSet.has(cat)),
-    );
+    let filtered = policyFilteredDapps;
 
     // Filter by chain if specified
     if (dappSearchParams?.chain) {
@@ -353,10 +283,7 @@ export const useDappExplorer = (): UseDappExplorerResult => {
 
     return filtered;
   }, [
-    dappList,
-    alwaysVisibleSlugs,
-    disallowedSlugs,
-    disallowedCategories,
+    policyFilteredDapps,
     dappSearchParams?.chain,
     dappSearchParams?.category,
   ]);

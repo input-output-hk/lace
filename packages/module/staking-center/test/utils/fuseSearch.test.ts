@@ -39,6 +39,7 @@ const mockNetworkData: StakePoolsNetworkData = {
   reserves: 10_000_000_000_000_000,
   retiringPools: [],
   slotLength: 1,
+  treasuryCut: 0.2,
   timestamp: 1_700_000_000_000,
 };
 
@@ -87,6 +88,27 @@ describe('FuseSearch.connect', () => {
     expect(fuse.fuse$.value.isLoading).toBe(false);
     expect(fuse.fuse$.value.pools).toHaveLength(1);
     expect(fuse.fuse$.value.totalPoolsCount).toBe(1);
+  });
+
+  // The one place holding both the summaries and the network data annotates
+  // each listed pool with its estimated rate, so the list can show and sort by
+  // it without a per-frame recomputation across ~3k pools.
+  it('annotates every indexed pool with an estimated rate', () => {
+    const summaries$ = new BehaviorSubject<LacePartialStakePool[] | undefined>([
+      mockPool,
+    ]);
+    const networkData$ = new BehaviorSubject<StakePoolsNetworkData | undefined>(
+      mockNetworkData,
+    );
+    const fuse = new FuseSearch();
+
+    fuse.connect(createSlice(summaries$, networkData$));
+
+    const { pools } = fuse.fuse$.value;
+    expect(pools.length).toBeGreaterThan(0);
+    for (const pool of pools) {
+      expect(typeof (pool as { ros?: number }).ros).toBe('number');
+    }
   });
 
   it('emits empty state when poolSummaries is undefined', () => {

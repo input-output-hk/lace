@@ -33,6 +33,17 @@ export interface OnboardingHardwareWalletProps {
    * device id (wired devices run the scan, air-gapped devices skip it).
    */
   onSelectDevice?: (deviceId: string) => void;
+  /**
+   * The currently chosen device id, drawn as selected. Only meaningful alongside
+   * `onSelectDevice`: without feedback a tap that merely records a choice looks
+   * like a tap that did nothing.
+   */
+  selectedDeviceId?: string;
+  /**
+   * Disables the Connect button while the choice it needs is missing — distinct
+   * from `isLoading`, which means a scan is already running.
+   */
+  isConnectDisabled?: boolean;
   connectButtonLabel: string;
   isLoading?: boolean;
   isError?: boolean;
@@ -49,7 +60,9 @@ export const OnboardingHardwareWallet = ({
   onBackPress,
   onConnect,
   onSelectDevice,
+  selectedDeviceId,
   connectButtonLabel,
+  isConnectDisabled = false,
   isLoading = false,
   isError = false,
   embedded = false,
@@ -64,6 +77,7 @@ export const OnboardingHardwareWallet = ({
         instructionText={instructionText}
         isError={isError}
         onSelectDevice={onSelectDevice}
+        selectedDeviceId={selectedDeviceId}
       />
     );
   }
@@ -92,6 +106,7 @@ export const OnboardingHardwareWallet = ({
             <DeviceList
               supportedDevices={supportedDevices}
               onSelectDevice={onSelectDevice}
+              selectedDeviceId={selectedDeviceId}
             />
           </View>
 
@@ -107,7 +122,7 @@ export const OnboardingHardwareWallet = ({
           <Button.Primary
             label={connectButtonLabel}
             onPress={onConnect}
-            disabled={isLoading}
+            disabled={isLoading || isConnectDisabled}
             testID="onboarding-hw-connect-button"
           />
         </View>
@@ -188,9 +203,11 @@ const EmbeddedHardwareWallet = ({
 const DeviceList = ({
   supportedDevices,
   onSelectDevice,
+  selectedDeviceId,
 }: {
   supportedDevices: HardwareWalletDevice[];
   onSelectDevice?: (deviceId: string) => void;
+  selectedDeviceId?: string;
 }) => (
   <>
     {supportedDevices.map(device => {
@@ -218,7 +235,14 @@ const DeviceList = ({
       if (onSelectDevice) {
         return (
           <Pressable
-            style={deviceStyles.deviceOption}
+            style={[
+              deviceStyles.deviceOption,
+              // Nothing is dimmed until a choice exists, so a single-vendor list
+              // looks exactly as it did before selection was possible.
+              selectedDeviceId === undefined || device.id === selectedDeviceId
+                ? deviceStyles.deviceSelected
+                : deviceStyles.deviceUnselected,
+            ]}
             key={device.id}
             onPress={() => {
               onSelectDevice(device.id);
@@ -291,6 +315,15 @@ const deviceStyles = StyleSheet.create({
   deviceOption: {
     marginBottom: spacing.M,
     alignItems: 'center',
+  },
+  // Selection is drawn by dimming the ones NOT chosen rather than adding a
+  // border: the rows are logo tiles of differing widths, so an outline would
+  // shift the layout on every tap.
+  deviceSelected: {
+    opacity: 1,
+  },
+  deviceUnselected: {
+    opacity: 0.4,
   },
   deviceInfo: {
     flexDirection: 'row',

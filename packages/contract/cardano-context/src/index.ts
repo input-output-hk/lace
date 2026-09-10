@@ -23,10 +23,20 @@ export {
   parseTipHashFromOperationId,
 } from './store/side-effects/sync-operation-utils';
 export { applyInFlightUtxoAdjustments } from './apply-in-flight-utxo-adjustments';
+export {
+  extractOwnedPaymentCredentials,
+  extractPaymentCredential,
+  filterFrankenUtxos,
+} from './filter-franken-utxos';
 export * from './cardano-observables';
 export * from './contract';
+export * from './promoted-targets';
+export * from './reward-timing';
 export * from './value-objects';
 export * from './const';
+export * from './drep';
+export * from './estimate-signed-tx-size';
+export * from './input-selection/InputSelectionError';
 export {
   EXPLOIT_DESCRIPTORS,
   resolveAccountNameSuffix,
@@ -46,7 +56,7 @@ export * from './store/night-designation-flow';
 
 export type * from './store';
 export * from './types';
-export type { CardanoInFlightUtxoActivityMetadata } from './augmentations';
+export type { CardanoActivityUtxoMetadata } from './augmentations';
 
 export * from './tx-builder';
 export * from './signing';

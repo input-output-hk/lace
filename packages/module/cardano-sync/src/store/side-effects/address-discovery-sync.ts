@@ -18,6 +18,7 @@ import {
   mergeMap,
   of,
   take,
+  takeUntil,
   toArray,
 } from 'rxjs';
 
@@ -146,7 +147,7 @@ const handleMultiSigAccount = (params: {
 export const addressDiscoverySync: SideEffect = (
   { sync: { addSyncOperation$ } },
   { wallets: { selectActiveNetworkAccounts$ } },
-  { actions, cardanoProvider: { discoverAddresses } },
+  { actions, cardanoProvider: { discoverAddresses }, logger },
 ) =>
   addSyncOperation$.pipe(
     filter(
@@ -157,6 +158,17 @@ export const addressDiscoverySync: SideEffect = (
     mergeMap(action => {
       const { accountId, operation } = action.payload;
       const operationId = operation.operationId;
+
+      // Cancel the in-flight discovery once the account leaves the active
+      // network (network switch / account removal). Address discovery is the
+      // sustained-CPU op (bip32-ed25519 derivation, worst in `thorough` scans),
+      // so without this teardown a switch mid-scan keeps deriving the previous
+      // network's addresses to completion. `clearStaleCardanoSyncsOnNetworkChange`
+      // only frees the redux round lock — it does not stop the running executor.
+      const accountLeftActiveNetwork$ = selectActiveNetworkAccounts$.pipe(
+        filter(accounts => !accounts.some(a => a.accountId === accountId)),
+        take(1),
+      );
 
       return selectActiveNetworkAccounts$.pipe(
         take(1), // Take current value only, prevent re-subscription on state changes
@@ -216,7 +228,11 @@ export const addressDiscoverySync: SideEffect = (
                 const anyFailure = discoverAddressesResults.find(
                   r => r.isErr() && r.error,
                 );
-                if (anyFailure) {
+                if (anyFailure?.isErr()) {
+                  logger.error(
+                    `Address discovery failed for account ${accountId}`,
+                    anyFailure.error,
+                  );
                   return [
                     actions.sync.failSyncOperation({
                       accountId,
@@ -249,6 +265,7 @@ export const addressDiscoverySync: SideEffect = (
             ),
           );
         }),
+        takeUntil(accountLeftActiveNetwork$),
       );
     }),
   );

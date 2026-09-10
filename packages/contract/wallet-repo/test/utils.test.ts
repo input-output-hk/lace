@@ -8,6 +8,7 @@ import {
   isHardwareWallet,
   stampAccountsOnboardedAt,
   stampWalletOnboardedAt,
+  withMigratedTag,
 } from '../src/utils';
 import { AccountIdentityKey, WalletId } from '../src/value-objects';
 
@@ -173,5 +174,21 @@ describe('stampWalletOnboardedAt', () => {
     const result = stampWalletOnboardedAt(wallet, Timestamp(123));
     expect(result.accounts[0].metadata.onboardedAt).toBe(123);
     expect(result.accounts[1].metadata.onboardedAt).toBe(999);
+  });
+});
+
+describe('withMigratedTag', () => {
+  const migratedOutAt = Timestamp(1_700_000_000_000);
+
+  it('returns the stored name untouched when there is no stamp', () => {
+    expect(withMigratedTag({ name: 'My wallet' }, '[Migrated]')).toBe(
+      'My wallet',
+    );
+  });
+
+  it('appends the caller-translated tag when the stamp is set', () => {
+    expect(
+      withMigratedTag({ name: 'My wallet', migratedOutAt }, '[移行済み]'),
+    ).toBe('My wallet [移行済み]');
   });
 });
