@@ -188,7 +188,7 @@ export const CertificateView = ({
         const anchorDataHash = certificate.anchor?.dataHash;
         return (
           <DRepRegistrationCertificate
-            drepId={formatDRepId(certificate.dRepCredential.hash)}
+            drepId={formatDRepId(certificate.dRepCredential)}
             depositLovelace={certificate.deposit}
             coinSymbol={coinSymbol}
             anchorUrl={certificate.anchor?.url}
@@ -207,7 +207,7 @@ export const CertificateView = ({
       case Cardano.CertificateType.UnregisterDelegateRepresentative:
         return (
           <DRepRetirementCertificate
-            drepId={formatDRepId(certificate.dRepCredential.hash)}
+            drepId={formatDRepId(certificate.dRepCredential)}
             depositLovelace={certificate.deposit}
             coinSymbol={coinSymbol}
             tokenPrices={tokenPrices}
@@ -220,7 +220,7 @@ export const CertificateView = ({
         const anchorDataHash = certificate.anchor?.dataHash;
         return (
           <DRepUpdateCertificate
-            drepId={formatDRepId(certificate.dRepCredential.hash)}
+            drepId={formatDRepId(certificate.dRepCredential)}
             anchorUrl={certificate.anchor?.url}
             anchorHash={
               anchorDataHash !== undefined && anchorDataHash !== null

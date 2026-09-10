@@ -4,7 +4,7 @@ import { StyleSheet, ActivityIndicator } from 'react-native';
 import { NftItemsList } from '../..';
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTextInput } from '../../../atoms';
-import { Sheet, footerHeight } from '../../../organisms';
+import { Sheet, footerHeight, useSheetSubmit } from '../../../organisms';
 
 import type { NftItem } from '../..';
 import type { Theme } from '../../../../design-tokens';
@@ -54,6 +54,7 @@ export const CreateFolderSheet = ({
 }: CreateFolderSheetProps) => {
   const isSelectingTokens = createFolderState.status === 'SelectingTokens';
   const isNamingFolder = createFolderState.status === 'NamingFolder';
+  const submitProps = useSheetSubmit();
 
   return (
     <Sheet.Scroll>
@@ -79,6 +80,7 @@ export const CreateFolderSheet = ({
               folderName.onFolderNameChange(event.nativeEvent.text);
             }}
             animatedLabel
+            {...submitProps}
           />
         </Column>
       ) : (

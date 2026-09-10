@@ -281,7 +281,7 @@ const VerticalTabs = <Value extends number | string>({
   return (
     <View style={styles.container}>
       <View style={styles.tabsContainer}>
-        <BlurView style={StyleSheet.absoluteFillObject} pointerEvents="none" />
+        <BlurView style={StyleSheet.absoluteFill} pointerEvents="none" />
         {normalizedTabs.map((tab, index) => {
           const isSelected = selectedIndex === index;
           const isLoading = loadingTabIndex === index;
@@ -305,7 +305,7 @@ const VerticalTabs = <Value extends number | string>({
               disabled={isLoading}>
               {isSelected && !isLoading && (
                 <BlurView
-                  style={StyleSheet.absoluteFillObject}
+                  style={StyleSheet.absoluteFill}
                   pointerEvents="none"
                 />
               )}
@@ -379,7 +379,7 @@ const commonStyles = (theme: Theme) => {
 const getHorizontalTabsStyles = (theme: Theme, isCompact = false) => {
   return StyleSheet.create({
     blurView: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       borderRadius: radius.rounded,
     },
     tabsContainer: {

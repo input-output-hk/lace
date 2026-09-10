@@ -1,8 +1,18 @@
 import { useTranslation } from '@lace-contract/i18n';
-import { Column, Icon, Row, Text, Divider, Badge } from '@lace-lib/ui-toolkit';
-import { spacing, useTheme } from '@lace-lib/ui-toolkit';
+import {
+  Badge,
+  Column,
+  Divider,
+  Icon,
+  Row,
+  Text,
+  spacing,
+  useTheme,
+} from '@lace-lib/ui-toolkit';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
+
+import { effectiveSellPerBuy, formatSellPerBuy } from '../quote-math';
 
 import type { SwapQuote } from '@lace-contract/swap-provider';
 import type { Theme } from '@lace-lib/ui-toolkit';
@@ -11,7 +21,9 @@ interface QuoteInfoProps {
   quote: SwapQuote;
   slippage: number;
   sellTokenName: string;
+  sellTokenDecimals: number | undefined;
   buyTokenName: string;
+  buyTokenDecimals: number | undefined;
   onSlippagePress: () => void;
 }
 
@@ -39,7 +51,9 @@ export const QuoteInfo = ({
   quote,
   slippage,
   sellTokenName,
+  sellTokenDecimals,
   buyTokenName,
+  buyTokenDecimals,
   onSlippagePress,
 }: QuoteInfoProps) => {
   const { t } = useTranslation();
@@ -47,7 +61,16 @@ export const QuoteInfo = ({
   const styles = useMemo(() => getStyles(theme), [theme]);
   const countdown = useCountdown(quote.quoteExpiresAt);
 
-  const bestOfferText = `${quote.priceDisplay} ${sellTokenName} per ${buyTokenName}`;
+  const rate = formatSellPerBuy(
+    effectiveSellPerBuy({
+      buyDecimals: buyTokenDecimals,
+      quote,
+      sellDecimals: sellTokenDecimals,
+    }),
+  );
+  const bestOfferText = rate
+    ? `${rate} ${sellTokenName} per ${buyTokenName}`
+    : '-';
 
   return (
     <Column gap={spacing.L} style={styles.container}>
@@ -85,11 +108,24 @@ export const QuoteInfo = ({
         <Text.XS variant="secondary" weight="medium">
           {t('v2.swap.quote.estimated-fee')}
         </Text.XS>
-        <Column alignItems="flex-end">
-          <Text.XS weight="medium">{quote.totalFeeDisplay}</Text.XS>
-          {/* TODO: add fiat equivalent for estimated fee using user's selected currency */}
-        </Column>
+        <Text.XS weight="medium">{quote.totalFeeDisplay}</Text.XS>
       </Row>
+      {/* Refundable, so NOT folded into the fee above — but the account has to
+          hold it, and it can exceed the fees (WingRiders asks 3.15 ADA against
+          1.85 in fees), so hiding it made the funds error look wrong. */}
+      {quote.deposit ? (
+        <>
+          <Divider />
+          <Row justifyContent="space-between" alignItems="center">
+            <Text.XS variant="secondary" weight="medium">
+              {t('v2.swap.review.deposit')}
+            </Text.XS>
+            <Text.XS weight="medium" testID="swap-quote-deposit">
+              {`${quote.deposit.displayAmount} ${quote.deposit.displayCurrency}`}
+            </Text.XS>
+          </Row>
+        </>
+      ) : null}
     </Column>
   );
 };

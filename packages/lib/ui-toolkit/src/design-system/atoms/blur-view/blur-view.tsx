@@ -15,23 +15,11 @@ export const BlurView = (props: BlurViewProps) => {
   const BlurViewBase = isWeb || isAndroid ? View : RNBlurView;
 
   if (isWeb) {
-    // Web implementation with proper backdrop-filter blur
-    const webStyle = {
-      backgroundColor: 'rgba(255,255,255,0.1)',
-      backdropFilter: `blur(${UNIFIED_BLUR_INTENSITY}px)`,
-      WebkitBackdropFilter: `blur(${UNIFIED_BLUR_INTENSITY}px)`,
-      // Ensure proper stacking context for backdrop-filter
-      isolation: 'isolate',
-    } as const;
-
-    return (
-      <BlurViewBase
-        {...props}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        style={[webStyle as any, props.style]}>
-        {props.children}
-      </BlurViewBase>
-    );
+    // backdrop-filter + isolation create GPU compositing layers that cause visual
+    // artifacts (flickering / empty-rectangle flash) inside position:fixed detached
+    // modal containers (side panel). The blur is invisible anyway when the parent
+    // has a solid background, so we render a plain View.
+    return <View {...props}>{props.children}</View>;
   }
 
   if (isAndroid) {

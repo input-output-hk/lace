@@ -6,7 +6,10 @@ import {
   KeyPurpose,
   util,
 } from '@cardano-sdk/key-management';
-import { createInputResolver } from '@lace-contract/cardano-context';
+import {
+  applyVkeyWitnesses,
+  createInputResolver,
+} from '@lace-contract/cardano-context';
 import { HexBytes } from '@lace-lib/util';
 import TrezorConnect from '@trezor/connect-web';
 import { from } from 'rxjs';
@@ -91,14 +94,7 @@ export class CardanoTrezorTransactionSigner
       });
 
       const witnessSet = tx.witnessSet();
-      witnessSet.setVkeys(
-        Serialization.CborSet.fromCore(
-          [...signatures.entries()] as Parameters<
-            typeof Serialization.VkeyWitness.fromCore
-          >[0][],
-          Serialization.VkeyWitness.fromCore,
-        ),
-      );
+      applyVkeyWitnesses(witnessSet, signatures);
 
       const signedTx = new Serialization.Transaction(
         tx.body(),

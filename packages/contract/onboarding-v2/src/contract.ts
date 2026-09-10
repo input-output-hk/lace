@@ -41,6 +41,15 @@ export const onboardingStartWalletDropdownAddonContract = inferContractContext({
   },
 });
 
+export const onboardingEntryAddonContract = inferContractContext({
+  name: ContractName('onboarding-entry-addon'),
+  instance: 'zero-or-more',
+  contractType: 'addon',
+  provides: {
+    addons: ['loadOnboardingEntryUICustomisations'],
+  },
+});
+
 export const hwWalletConnectorAddonContract = inferContractContext({
   name: ContractName('hw-wallet-connector-addon'),
   instance: 'zero-or-more',

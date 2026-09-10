@@ -12,13 +12,18 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { BrowsePoolSortOption } from '@lace-contract/staking-center';
-import type { SheetScreenProps } from '@lace-lib/navigation';
+import type {
+  PoolSelectionRequest,
+  SheetScreenProps,
+} from '@lace-lib/navigation';
 import type { BrowsePoolSortOrder } from '@lace-lib/ui-toolkit';
 
 const isSortOrder = (value: unknown): value is BrowsePoolSortOrder =>
   value === ORDERS.ASC || value === ORDERS.DESC;
 
 const OPTION_LABEL_KEYS = {
+  ranking: 'v2.pages.browse-pool.more-options.ranking',
+  ros: 'v2.pages.browse-pool.more-options.ros',
   ticker: 'v2.pages.browse-pool.more-options.ticker',
   saturation: 'v2.pages.browse-pool.more-options.saturation',
   cost: 'v2.pages.browse-pool.more-options.cost',
@@ -53,6 +58,17 @@ export const useBrowsePoolFiltersSheet = (
   const { t } = useTranslation();
   const { trackEvent } = useAnalytics();
   const testID = 'browse-pool-filters-sheet';
+
+  // Carried as ONE value, never as two locals: the id and its notice are a
+  // pair (see PoolSelectionRequest), and splitting them is what let a caller
+  // send the id alone.
+  const poolSelection: PoolSelectionRequest =
+    params.poolSelectionId === undefined
+      ? {}
+      : {
+          poolSelectionId: params.poolSelectionId,
+          poolSelectionNotice: params.poolSelectionNotice,
+        };
 
   const resolvedOption = getOption(params.browsePoolSortOption) ?? undefined;
   const resolvedOrder: BrowsePoolSortOrder | undefined = isSortOrder(
@@ -97,11 +113,13 @@ export const useBrowsePoolFiltersSheet = (
           searchQuery: params.searchQuery,
           browsePoolSortOption: option,
           browsePoolSortOrder: option ? localOrder : undefined,
+          // Dropped here = selection mode silently lost after filtering.
+          ...poolSelection,
         },
         { reset: true },
       );
     },
-    [params.accountId, params.searchQuery, localOrder],
+    [params.accountId, params.searchQuery, poolSelection, localOrder],
   );
 
   const onSelectOption = useCallback((index: number) => {

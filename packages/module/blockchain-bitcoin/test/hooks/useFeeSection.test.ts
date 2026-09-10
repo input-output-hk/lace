@@ -143,7 +143,7 @@ describe('useFeeSection', () => {
           value: {
             feeRate: {
               feeOption: 'Low',
-              customFeeRate: 0,
+              customFeeRate: undefined,
             },
           },
         },
@@ -176,7 +176,7 @@ describe('useFeeSection', () => {
       mockDispatchFormDataChanged.mockClear();
 
       act(() => {
-        result.current.handleCustomFeeChange('50000');
+        result.current.handleCustomFeeChange('50');
       });
       act(() => {
         vi.advanceTimersByTime(500);
@@ -188,12 +188,48 @@ describe('useFeeSection', () => {
           value: {
             feeRate: {
               feeOption: 'Custom',
-              customFeeRate: 0.5,
+              customFeeRate: 0.0005,
             },
           },
         },
       });
     });
+
+    it.each(['', '0', '0.0', '-1', 'abc', '50000'])(
+      'dispatches no custom fee rate for the unusable entry %j',
+      typed => {
+        mockUseLaceSelector.mockImplementation((selector: string) => {
+          if (selector === 'sendFlow.selectSendFlowState') {
+            return {
+              status: 'Form',
+              form: { blockchainSpecific: { value: {} } },
+            };
+          }
+          return undefined;
+        });
+        const { result } = renderHook(() => useFeeSection());
+        mockDispatchFormDataChanged.mockClear();
+
+        act(() => {
+          result.current.handleCustomFeeChange(typed);
+        });
+        act(() => {
+          vi.advanceTimersByTime(500);
+        });
+
+        expect(mockDispatchFormDataChanged).toHaveBeenLastCalledWith({
+          data: {
+            fieldName: 'blockchainSpecific',
+            value: {
+              feeRate: {
+                feeOption: 'Custom',
+                customFeeRate: undefined,
+              },
+            },
+          },
+        });
+      },
+    );
   });
 
   describe('initialization when flow opens', () => {
@@ -215,7 +251,7 @@ describe('useFeeSection', () => {
           value: {
             feeRate: {
               feeOption: 'Average',
-              customFeeRate: 0,
+              customFeeRate: undefined,
             },
           },
         },

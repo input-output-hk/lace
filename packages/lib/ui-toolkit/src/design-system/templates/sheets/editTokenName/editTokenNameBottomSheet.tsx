@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTextInput } from '../../../atoms';
-import { Sheet } from '../../../organisms';
+import { Sheet, useSheetSubmit } from '../../../organisms';
 
 interface EditTokenNameBottomSheetProps {
   labels: {
@@ -27,6 +27,8 @@ export const EditTokenNameBottomSheet = ({
   values,
   actions,
 }: EditTokenNameBottomSheetProps) => {
+  const submitProps = useSheetSubmit();
+
   return (
     <Sheet.Scroll contentContainerStyle={styles.sheetContent}>
       <Column gap={spacing.L} style={styles.content}>
@@ -35,12 +37,16 @@ export const EditTokenNameBottomSheet = ({
           value={values.tokenFullName}
           onChangeText={actions.onTokenFullNameChange}
           inputError={values.tokenFullNameError}
+          testID="edit-token-name-sheet-name-input"
+          {...submitProps}
         />
         <CustomTextInput
           label={labels.tickerLabel}
           value={values.tokenShortName}
           onChangeText={actions.onTokenShortNameChange}
           inputError={values.tokenShortNameError}
+          testID="edit-token-name-sheet-ticker-input"
+          {...submitProps}
         />
       </Column>
     </Sheet.Scroll>

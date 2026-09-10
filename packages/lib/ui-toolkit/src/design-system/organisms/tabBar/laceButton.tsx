@@ -205,7 +205,7 @@ const laceButtonStyles = ({ theme }: { theme: Theme }) =>
       borderColor: theme.border.top,
     },
     laceButtonBlur: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       borderRadius: radius.squareRounded,
       overflow: 'hidden',
     },

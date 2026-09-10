@@ -105,6 +105,9 @@ export enum SheetRoutes {
   AuthorizeDapp = 'AuthorizeDapp',
   SignData = 'SignData',
   SignTx = 'SignTx',
+  BitcoinDappConnect = 'BitcoinDappConnect',
+  BitcoinDappSignMessage = 'BitcoinDappSignMessage',
+  BitcoinDappSignTx = 'BitcoinDappSignTx',
   MidnightSettings = 'MidnightSettings',
   EditTokenName = 'EditTokenName',
   DustDesignation = 'DustDesignation',
@@ -127,4 +130,6 @@ export enum SheetRoutes {
   DRepDetails = 'DRepDetails',
   NewDRepDelegation = 'NewDRepDelegation',
   DRepDelegationSuccess = 'DRepDelegationSuccess',
+  // Earn rewards
+  EarnRewards = 'EarnRewards',
 }

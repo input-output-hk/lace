@@ -6,30 +6,30 @@ import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
 import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
 import { featureStoreContract } from '@lace-contract/feature';
-import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
   combineContracts,
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
 import {
-  hwBlockchainSupportAddonContract,
+  onboardingEntryAddonContract,
   onboardingOptionsAddonContract,
 } from '@lace-contract/onboarding-v2';
 import { recoveryPhraseStoreContract } from '@lace-contract/recovery-phrase';
 import { secureStoreContract } from '@lace-contract/secure-store';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import {
+  vaultCapabilitiesAddonContract,
+  vaultCeremonyStoreContract,
+  vaultContract,
+} from '@lace-contract/vault';
+import {
   viewsStoreContract,
   stackPagesAddonContract,
   tabPagesAddonContract,
   sheetPagesAddonContract,
 } from '@lace-contract/views';
-import {
-  requestHWConnectionAddonContract,
-  vaultContract,
-  walletRepoStoreContract,
-} from '@lace-contract/wallet-repo';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import { FEATURE_FLAG_ACCOUNT_MANAGEMENT } from './constants';
 import store from './store';
@@ -54,15 +54,18 @@ const dependsOnContracts = combineContracts([
   viewsStoreContract,
   featureStoreContract,
   vaultContract,
+  vaultCeremonyStoreContract,
+  vaultCapabilitiesAddonContract,
   walletRepoStoreContract,
   tokensStoreContract,
   addressesStoreContract,
   recoveryPhraseStoreContract,
   secureStoreContract,
-  inMemoryIntegrationAddonContract,
-  hwBlockchainSupportAddonContract,
   onboardingOptionsAddonContract,
-  requestHWConnectionAddonContract,
+  // Module-contributed entries (today: migrate a wallet) belong on the
+  // add-wallet page as well as onboarding — the same alternatives to creating
+  // or restoring, offered to a user who already has a wallet.
+  onboardingEntryAddonContract,
   analyticsStoreContract,
 ] as const);
 
@@ -89,6 +92,7 @@ const extensionModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-mobile': extensionModule,
   'lace-extension': extensionModule,
+  'lace-extension-guest': extensionModule,
 };
 
 export default moduleMap;

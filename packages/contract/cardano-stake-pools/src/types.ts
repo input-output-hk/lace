@@ -19,6 +19,19 @@ export interface LaceBrowsePool {
   blocks: number;
   declaredPledge: number;
   liveStake: number;
+  /**
+   * Estimated annual return as a fraction (0.031 = 3.1%/yr), annotated by the
+   * list's producer via `estimateSummaryROS`. Optional because the raw summary
+   * has no rate until network data arrives to estimate against.
+   */
+  ros?: number;
+  /**
+   * The list's default ORDER (see `recommendPools`): yield, operator
+   * concentration and saturation headroom combined. A score for comparing
+   * pools, never rendered — it cannot see whether a pool makes its blocks.
+   * Absent for a pool the recommendation's hard filters reject.
+   */
+  recommendation?: number;
 }
 
 /**
@@ -104,6 +117,12 @@ export interface StakePoolsNetworkData {
   retiringPools: Cardano.PoolId[];
   slotLength: number;
   timestamp: number;
+  /**
+   * `tau`: the share of each epoch's reward pot taken by the treasury before
+   * pools are paid. Required, not optional — a missing value silently
+   * overstates every reward estimate by ~25% on mainnet.
+   */
+  treasuryCut: number;
 }
 
 export interface CardanoStakePoolsProvider {

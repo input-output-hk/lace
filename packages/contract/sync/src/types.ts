@@ -63,6 +63,14 @@ export type SyncOperation =
 
 export type AccountSyncStatus = {
   lastSuccessfulSync?: Timestamp;
+  /**
+   * When the account's last sync round ended with at least one failed
+   * operation. Together with `lastSuccessfulSync` it records how a round
+   * resolved, so a round that was dropped rather than resolved (see
+   * `clearPendingSyncsForAccounts`) is distinguishable from one that failed:
+   * a drop moves neither timestamp.
+   */
+  lastFailedSync?: Timestamp;
   pendingSync?: PendingSync;
 };
 

@@ -32,6 +32,16 @@ export type BottomSheet =
 export type Page = {
   route: string;
   params?: Record<string, unknown>;
+  /**
+   * Makes a repeat request for the page already recorded here observable. On
+   * the extension the UI holds a jsondiffpatch replica of the service worker's
+   * state: re-dispatching a byte-identical page yields no delta, so the router
+   * never re-renders and the navigation is silently dropped. Dispatchers that
+   * can legitimately ask for the same page twice in a row (a user re-pressing
+   * an entry-point button after backing out) stamp a value that changes per
+   * request. Bookkeeping only — routers never forward it to the route.
+   */
+  requestId?: number;
 };
 
 export type SheetPageNavigation = Page & {
@@ -119,12 +129,7 @@ const slice = createSlice({
     setActiveSheet: (state, { payload }: PayloadAction<BottomSheet | null>) => {
       state.activeSheet = payload;
     },
-    setActivePage: (
-      state,
-      {
-        payload,
-      }: PayloadAction<{ route: string; params?: Record<string, unknown> }>,
-    ) => {
+    setActivePage: (state, { payload }: PayloadAction<Page>) => {
       state.activePage = payload;
     },
     setActiveSheetPage: (

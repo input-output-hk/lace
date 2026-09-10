@@ -15,7 +15,7 @@ import {
   ShieldedCoinPublicKey,
   ShieldedEncryptionPublicKey,
   UnshieldedAddress,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
+} from '@midnightntwrk/wallet-sdk-address-format';
 import { firstValueFrom, map } from 'rxjs';
 
 import { APIError } from '../../api-error';
@@ -51,7 +51,7 @@ import type {
   CombinedTokenTransfer,
   TokenTransfer,
   UtxoWithMeta,
-} from '@midnight-ntwrk/wallet-sdk/facade';
+} from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 import type { Runtime } from 'webextension-polyfill';

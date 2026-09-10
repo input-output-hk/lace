@@ -73,6 +73,53 @@ describe('parseGovernanceFeatureFlagPayload', () => {
       parseGovernanceFeatureFlagPayload({ payload: { promotedDreps: 1 } }),
     ).toEqual({});
   });
+
+  it('returns the blockedDreps map from a valid payload', () => {
+    const blockedDreps = { mainnet: ['drep1abc'] };
+    expect(
+      parseGovernanceFeatureFlagPayload({ payload: { blockedDreps } }),
+    ).toEqual({ blockedDreps });
+  });
+
+  it('drops blockedDreps when it is not a per-network record', () => {
+    expect(
+      parseGovernanceFeatureFlagPayload({ payload: { blockedDreps: 1 } }),
+    ).toEqual({});
+    expect(
+      parseGovernanceFeatureFlagPayload({
+        payload: { blockedDreps: ['drep1abc'] },
+      }),
+    ).toEqual({});
+  });
+
+  it('drops malformed network entries and non-string ids from blockedDreps', () => {
+    expect(
+      parseGovernanceFeatureFlagPayload({
+        payload: {
+          blockedDreps: { mainnet: 'drep1abc', preprod: ['drep1def', 5] },
+        },
+      }),
+    ).toEqual({ blockedDreps: { preprod: ['drep1def'] } });
+  });
+
+  it('drops a promoted entry whose id is blocked on the same network', () => {
+    const payload = {
+      promotedDreps: {
+        mainnet: [{ id: 'drep1abc' }, { id: 'drep1def' }],
+        preprod: [{ id: 'drep1abc' }],
+      },
+      blockedDreps: { mainnet: ['drep1abc'] },
+    };
+    expect(parseGovernanceFeatureFlagPayload({ payload })).toEqual({
+      // Blocked beats promoted per network: the mainnet entry goes, the
+      // preprod one (not blocked there) stays.
+      promotedDreps: {
+        mainnet: [{ id: 'drep1def' }],
+        preprod: [{ id: 'drep1abc' }],
+      },
+      blockedDreps: { mainnet: ['drep1abc'] },
+    });
+  });
 });
 
 describe('promotedNetworkKeyForChainId', () => {

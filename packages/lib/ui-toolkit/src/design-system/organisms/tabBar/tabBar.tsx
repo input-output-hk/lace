@@ -105,7 +105,9 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
         account =>
           account.status === 'syncing' && account.syncingProgress !== undefined,
       );
-      if (syncingAccounts.length === 0) return -1;
+      // undefined = progress cannot be calculated yet; the pill then renders
+      // "Syncing" without a percentage or progress bar.
+      if (syncingAccounts.length === 0) return undefined;
       const total = syncingAccounts.reduce(
         (sum, account) => sum + (account.syncingProgress ?? 0),
         0,
@@ -153,9 +155,19 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
       setIsAccountsStatusOpen(false);
     }, [isAccountsStatusOpen, isAccountsStatusOpenSV]);
 
+    const paddedMainRoutes = useMemo<(TabButtonProps | null)[]>(() => {
+      if (mainRoutes.length % 2 === 0) return mainRoutes;
+      const insertAt = Math.ceil(mainRoutes.length / 2);
+      return [
+        ...mainRoutes.slice(0, insertAt),
+        null,
+        ...mainRoutes.slice(insertAt),
+      ];
+    }, [mainRoutes]);
+
     const middleIndex = useMemo(
-      () => Math.floor(mainRoutes.length / 2),
-      [mainRoutes],
+      () => Math.floor(paddedMainRoutes.length / 2),
+      [paddedMainRoutes],
     );
 
     const menuWidth = Math.min(width, 420);
@@ -198,7 +210,26 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
     );
 
     const renderMainItem = useCallback(
-      (route: TabButtonProps, index: number) => {
+      (route: TabButtonProps | null, index: number) => {
+        const laceButton = index === middleIndex && (
+          <LaceButton
+            isMenuOpen={isMenuOpen}
+            onPress={onLacePress}
+            {...laceButtonBadge}
+          />
+        );
+
+        if (route === null) {
+          return (
+            <React.Fragment key={`spacer-${index}`}>
+              {laceButton}
+              <View style={styles.tabButton}>
+                <View style={styles.tabButtonSpacer} />
+              </View>
+            </React.Fragment>
+          );
+        }
+
         const onPress = () => {
           route.onPress();
           closeMenu();
@@ -206,13 +237,7 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
 
         return (
           <React.Fragment key={`${route.label}-${index}`}>
-            {index === middleIndex && (
-              <LaceButton
-                isMenuOpen={isMenuOpen}
-                onPress={onLacePress}
-                {...laceButtonBadge}
-              />
-            )}
+            {laceButton}
             <TabButton
               containerStyle={styles.tabButton}
               hoveredStyle={styles.hoveredBorder}
@@ -228,7 +253,15 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
           </React.Fragment>
         );
       },
-      [closeMenu, onLacePress, layoutSize, isMenuOpen, laceButtonBadge],
+      [
+        closeMenu,
+        onLacePress,
+        layoutSize,
+        isMenuOpen,
+        laceButtonBadge,
+        middleIndex,
+        styles,
+      ],
     );
 
     const renderAccountRow: ListRenderItem<AccountRowProps> = useCallback(
@@ -390,7 +423,15 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
               <BlurView style={styles.blur} />
             </View>
           )}
-          {mainRoutes.map(renderMainItem)}
+          {paddedMainRoutes.length === 0 ? (
+            <LaceButton
+              isMenuOpen={isMenuOpen}
+              onPress={onLacePress}
+              {...laceButtonBadge}
+            />
+          ) : (
+            paddedMainRoutes.map(renderMainItem)
+          )}
           {isSideMenu && <View style={lStyles.sideBorder} />}
         </View>
       </>
@@ -474,6 +515,7 @@ const sharedStyles = ({
           borderRadius: radius.S,
           gap: spacing.XS,
         },
+    tabButtonSpacer: { height: 20, width: 20 },
     expandableContainer: {
       position: 'absolute',
       overflow: 'hidden',
@@ -504,7 +546,7 @@ const sharedStyles = ({
       height: ExpandableSectionMetrics.headerHeight,
     },
     blur: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     expandableContent: {
       paddingVertical: spacing.XS,
@@ -525,7 +567,7 @@ const sharedStyles = ({
 
 const smallStyles = StyleSheet.create({
   blurWrapper: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 20,
     overflow: 'hidden',
   },

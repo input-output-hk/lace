@@ -2,15 +2,65 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import { getQuoteAnalyticsContext } from '@lace-contract/swap-context';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
-import { Column, Divider, Row, Sheet, Text } from '@lace-lib/ui-toolkit';
-import { spacing } from '@lace-lib/ui-toolkit';
+import {
+  Column,
+  Divider,
+  Row,
+  Sheet,
+  Text,
+  spacing,
+} from '@lace-lib/ui-toolkit';
 import { formatAmountToLocale } from '@lace-lib/util-render';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import { effectiveSellPerBuy, formatSellPerBuy } from '../quote-math';
 
+import type { SwapQuote } from '@lace-contract/swap-provider';
 import type { SheetScreenProps } from '@lace-lib/navigation';
+
+type TokenDisplayData = { decimals: number } | undefined;
+
+const formatSellRow = (
+  sellAmount: string | undefined,
+  sellTokenData: TokenDisplayData,
+  displayName: string,
+): string =>
+  sellAmount && sellTokenData
+    ? `${formatAmountToLocale(
+        String(Math.round(Number(sellAmount) * 10 ** sellTokenData.decimals)),
+        sellTokenData.decimals,
+      )} ${displayName}`
+    : '';
+
+const formatBuyRow = (
+  quote: SwapQuote | undefined,
+  buyTokenData: TokenDisplayData,
+  displayName: string,
+): string =>
+  quote && buyTokenData
+    ? `${formatAmountToLocale(
+        quote.expectedBuyAmount,
+        buyTokenData.decimals,
+      )} ${displayName}`
+    : '';
+
+const formatRoute = (quote: SwapQuote | undefined): string =>
+  quote ? quote.route.map(leg => leg.dexName).join(' via ') : '';
+
+// Sold token per unit bought, fees included — the provider's `price` counts
+// only the batcher fee and ignores the two sides' decimals.
+const computeQuoteRatio = (
+  quote: SwapQuote | undefined,
+  sellDecimals: number | undefined,
+  buyDecimals: number | undefined,
+): string | undefined =>
+  quote
+    ? formatSellPerBuy(
+        effectiveSellPerBuy({ buyDecimals, quote, sellDecimals }),
+      )
+    : undefined;
 
 const ReviewRow = ({
   label,
@@ -122,24 +172,22 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
   const sellDisplayName = sellTokenData?.displayShortName ?? sellTokenId ?? '';
   const buyDisplayName = buyTokenData?.displayShortName ?? buyTokenId ?? '';
 
-  const formattedSellAmount =
-    sellAmount && sellTokenData
-      ? `${formatAmountToLocale(
-          String(Math.round(Number(sellAmount) * 10 ** sellTokenData.decimals)),
-          sellTokenData.decimals,
-        )} ${sellDisplayName}`
-      : '';
-  const formattedBuyAmount =
-    selectedQuote && buyTokenData
-      ? `${formatAmountToLocale(
-          selectedQuote.expectedBuyAmount,
-          buyTokenData.decimals,
-        )} ${buyDisplayName}`
-      : '';
-
-  const routeDisplay = selectedQuote
-    ? selectedQuote.route.map(leg => leg.dexName).join(' via ')
-    : '';
+  const formattedSellAmount = formatSellRow(
+    sellAmount,
+    sellTokenData,
+    sellDisplayName,
+  );
+  const formattedBuyAmount = formatBuyRow(
+    selectedQuote,
+    buyTokenData,
+    buyDisplayName,
+  );
+  const routeDisplay = formatRoute(selectedQuote);
+  const quoteRatio = computeQuoteRatio(
+    selectedQuote,
+    sellTokenData?.decimals,
+    buyTokenData?.decimals,
+  );
 
   const handleNext = useCallback(() => {
     trackEvent('swaps | review tx', {
@@ -241,8 +289,8 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
             <ReviewRow
               label={t('v2.swap.review.quote-ratio')}
               value={
-                selectedQuote.priceDisplay
-                  ? `1 ${sellDisplayName} = ${selectedQuote.priceDisplay} ${buyDisplayName}`
+                quoteRatio
+                  ? `1 ${buyDisplayName} = ${quoteRatio} ${sellDisplayName}`
                   : '-'
               }
               testID="swap-review-quote-ratio-row"
@@ -257,10 +305,10 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
               {t('v2.swap.review.transaction-cost')}
             </Text.XS>
 
-            {selectedQuote.fees.map((fee, index) => (
+            {selectedQuote.fees.map(fee => (
               <ReviewRow
-                key={index}
-                label={fee.label}
+                key={fee.label}
+                label={t(fee.label)}
                 value={`-${fee.displayAmount} ${fee.displayCurrency}`}
               />
             ))}
@@ -270,6 +318,14 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
               value={`-${selectedQuote.totalFeeDisplay}`}
               testID="swap-review-total-fees-row"
             />
+
+            {selectedQuote.deposit ? (
+              <ReviewRow
+                label={t('v2.swap.review.deposit')}
+                value={`${selectedQuote.deposit.displayAmount} ${selectedQuote.deposit.displayCurrency}`}
+                testID="swap-review-deposit-row"
+              />
+            ) : null}
           </>
         )}
       </Column>

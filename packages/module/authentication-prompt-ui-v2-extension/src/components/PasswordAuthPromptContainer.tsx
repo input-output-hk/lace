@@ -41,6 +41,7 @@ export const PasswordAuthPromptContainer = ({
   return (
     <SheetSafeOverlay
       visible
+      remountOnActivate
       onRequestClose={() => {
         onCancel();
       }}>

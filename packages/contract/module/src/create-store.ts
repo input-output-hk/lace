@@ -28,6 +28,7 @@ import {
   delay,
   distinctUntilChanged,
   filter,
+  from,
   map,
   NEVER,
   type Observable,
@@ -57,7 +58,7 @@ import type {
   WithLaceContext,
 } from './types';
 import type { StateObservable } from 'redux-observable';
-import type { Storage } from 'redux-persist';
+import type { Persistor, Storage } from 'redux-persist';
 
 const SERIALIZABLE_CHECK_WARN_AFTER_MS = 128;
 const IMMUTABLE_CHECK_WARN_AFTER_MS = 256;
@@ -122,11 +123,12 @@ export const createStateObservables = (
   );
 };
 
-const rehydrateStore = async (store: Store): Promise<void> => {
-  return new Promise(resolve => {
-    persistStore(store, null, resolve);
+const rehydrateStore = async (store: Store): Promise<Persistor> =>
+  new Promise(resolve => {
+    const persistor = persistStore(store, null, () => {
+      resolve(persistor);
+    });
   });
-};
 
 const mergeStoreExports = <T extends object>(
   storeExports: LaceModuleStoreInit[],
@@ -264,6 +266,9 @@ export const createStore = async <
     },
   );
 
+  // Assigned once rehydration runs (below); the flushPersistedState closure
+  // reads it lazily, so it is set by the time any reload triggers a flush.
+  let persistor: Persistor | undefined;
   const defaultDependencies: DefaultSideEffectDependencies & WithLaceContext = {
     actions,
     selectors,
@@ -279,6 +284,7 @@ export const createStore = async <
       }
       return state$.value;
     },
+    flushPersistedState: () => from(persistor?.flush() ?? Promise.resolve()),
     runtime,
     logger,
     loadModules,
@@ -343,7 +349,7 @@ export const createStore = async <
   });
 
   if (Object.keys(persistConfigs)) {
-    await rehydrateStore(store);
+    persistor = await rehydrateStore(store);
   }
 
   const epicTeardown$ = new Subject<void>();

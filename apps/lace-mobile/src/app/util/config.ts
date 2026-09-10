@@ -1,7 +1,8 @@
 import { Cardano } from '@cardano-sdk/core';
 import { Environment } from '@lace-contract/module';
+import { blockfrostProxyConfigs } from '@lace-lib/cardano-provider-core';
 import { Milliseconds, Seconds } from '@lace-lib/util';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { cleanEnv, str, makeValidator } from 'envalid';
 
 import defaultFeatureFlags from '../feature-flags';
@@ -75,18 +76,8 @@ const validateEnvironment = (): AppConfig | null => {
           .EXPO_PUBLIC_ZENDESK_NEW_REQUEST_URL as string,
         BANXA_URL: process.env.EXPO_PUBLIC_BANXA_URL as string,
         GOV_TOOLS_URL: process.env.EXPO_PUBLIC_GOV_TOOLS_URL as string,
-        BLOCKFROST_URL_PREPROD: process.env
-          .EXPO_PUBLIC_BLOCKFROST_URL_PREPROD as string,
-        BLOCKFROST_URL_PREVIEW: process.env
-          .EXPO_PUBLIC_BLOCKFROST_URL_PREVIEW as string,
-        BLOCKFROST_URL_MAINNET: process.env
-          .EXPO_PUBLIC_BLOCKFROST_URL_MAINNET as string,
-        BLOCKFROST_PROJECT_ID_PREPROD: process.env
-          .EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREPROD as string,
-        BLOCKFROST_PROJECT_ID_PREVIEW: process.env
-          .EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREVIEW as string,
-        BLOCKFROST_PROJECT_ID_MAINNET: process.env
-          .EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_MAINNET as string,
+        BLOCKFROST_PROXY_URL: process.env
+          .EXPO_PUBLIC_BLOCKFROST_PROXY_URL as string,
         MAESTRO_URL_TESTNET: process.env
           .EXPO_PUBLIC_MAESTRO_URL_TESTNET as string,
         MAESTRO_URL_MAINNET: process.env
@@ -154,28 +145,14 @@ const validateEnvironment = (): AppConfig | null => {
         }),
         BANXA_URL: str({ desc: 'URL to Banxa partner' }),
         GOV_TOOLS_URL: str({ desc: 'URL to gov.tools' }),
-        BLOCKFROST_URL_PREPROD: str({
-          desc: 'Blockfrost base URL',
-          default: 'https://cardano-preprod.blockfrost.io',
+        BLOCKFROST_PROXY_URL: str({
+          desc: 'Lace Blockfrost proxy base URL; per-network paths derived in code',
         }),
-        BLOCKFROST_URL_PREVIEW: str({
-          desc: 'Blockfrost base URL',
-          default: 'https://cardano-preview.blockfrost.io',
-        }),
-        BLOCKFROST_URL_MAINNET: str({
-          desc: 'Blockfrost base URL',
-          default: 'https://cardano-mainnet.blockfrost.io',
-        }),
-        BLOCKFROST_PROJECT_ID_PREPROD: str({ desc: 'Blockfrost API key' }),
-        BLOCKFROST_PROJECT_ID_PREVIEW: str({ desc: 'Blockfrost API key' }),
-        BLOCKFROST_PROJECT_ID_MAINNET: str({ desc: 'Blockfrost API key' }),
         MAESTRO_URL_TESTNET: str({
           desc: 'Maestro base URL',
-          default: 'https://dev-maestro.lw.iog.io',
         }),
         MAESTRO_URL_MAINNET: str({
           desc: 'Maestro base URL',
-          default: 'https://maestro.lw.iog.io',
         }),
         MAESTRO_PROJECT_ID_TESTNET: str({
           desc: 'Maestro API key',
@@ -187,11 +164,9 @@ const validateEnvironment = (): AppConfig | null => {
         }),
         MEMPOOLSPACE_URL_MAINNET: str({
           desc: 'Mempool.space API base URL (used by the Bitcoin fee market provider)',
-          default: 'https://mempool.lw.iog.io',
         }),
         MEMPOOLSPACE_URL_TESTNET: str({
           desc: 'Mempool.space API base URL (used by the Bitcoin fee market provider)',
-          default: 'https://mempool.lw.iog.io/testnet4',
         }),
         BITCOIN_BLOCKCHAIN_EXPLORER_URL_MAINNET: str({
           desc: 'Bitcoin blockchain explorer base URL (public website, used for transaction/address links)',
@@ -236,7 +211,6 @@ const validateEnvironment = (): AppConfig | null => {
         }),
         COINGECKO_API_BASE_URL: str({
           desc: 'CoinGecko API base URL',
-          default: 'https://coingecko.live-mainnet.eks.lw.iog.io/api/v3',
         }),
         STEELSWAP_API_BASE_URL: str({
           desc: 'Steelswap API base URL',
@@ -326,44 +300,15 @@ const validateEnvironment = (): AppConfig | null => {
       },
       cardanoProvider: {
         tipPollFrequency: Milliseconds(30_000),
-        blockfrostConfigs: {
-          [1]: {
-            clientConfig: {
-              baseUrl: validatedEnvironment.BLOCKFROST_URL_PREPROD,
-              apiVersion: 'v0',
-              projectId: validatedEnvironment.BLOCKFROST_PROJECT_ID_PREPROD,
-            },
-            rateLimiterConfig: {
-              size: 500,
-              increaseAmount: 10,
-              increaseInterval: Milliseconds(1000),
-            },
+        blockfrostConfigs: blockfrostProxyConfigs({
+          proxyBaseUrl: validatedEnvironment.BLOCKFROST_PROXY_URL,
+          surface: 'mobile',
+          rateLimiterConfig: {
+            size: 500,
+            increaseAmount: 10,
+            increaseInterval: Milliseconds(1000),
           },
-          [2]: {
-            clientConfig: {
-              baseUrl: validatedEnvironment.BLOCKFROST_URL_PREVIEW,
-              apiVersion: 'v0',
-              projectId: validatedEnvironment.BLOCKFROST_PROJECT_ID_PREVIEW,
-            },
-            rateLimiterConfig: {
-              size: 500,
-              increaseAmount: 10,
-              increaseInterval: Milliseconds(1000),
-            },
-          },
-          [764_824_073]: {
-            clientConfig: {
-              baseUrl: validatedEnvironment.BLOCKFROST_URL_MAINNET,
-              apiVersion: 'v0',
-              projectId: validatedEnvironment.BLOCKFROST_PROJECT_ID_MAINNET,
-            },
-            rateLimiterConfig: {
-              size: 500,
-              increaseAmount: 10,
-              increaseInterval: Milliseconds(1000),
-            },
-          },
-        },
+        }),
       },
       nftCdnUrl: validatedEnvironment.NFT_CDN_URL,
       coinGeckoApiBaseUrl: validatedEnvironment.COINGECKO_API_BASE_URL,
@@ -394,13 +339,16 @@ const validateEnvironment = (): AppConfig | null => {
       'EXPO_PUBLIC_ZENDESK_NEW_REQUEST_URL',
       'EXPO_PUBLIC_BANXA_URL',
       'EXPO_PUBLIC_GOV_TOOLS_URL',
-      'EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREPROD',
-      'EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_PREVIEW',
-      'EXPO_PUBLIC_BLOCKFROST_PROJECT_ID_MAINNET',
       'EXPO_PUBLIC_LEARN_MORE_URL',
       'EXPO_PUBLIC_URL_LACE_PAGE',
       'EXPO_PUBLIC_NFT_CDN_URL',
       'EXPO_PUBLIC_CARDANO_CUBE_BASE_URL',
+      'EXPO_PUBLIC_BLOCKFROST_PROXY_URL',
+      'EXPO_PUBLIC_MAESTRO_URL_MAINNET',
+      'EXPO_PUBLIC_MAESTRO_URL_TESTNET',
+      'EXPO_PUBLIC_MEMPOOLSPACE_URL_MAINNET',
+      'EXPO_PUBLIC_MEMPOOLSPACE_URL_TESTNET',
+      'EXPO_PUBLIC_COINGECKO_API_BASE_URL',
       // Conditionally required: SENTRY_DSN required in production, optional in development
       ...(ENV === 'production' ? ['EXPO_PUBLIC_SENTRY_DSN'] : []),
     ];

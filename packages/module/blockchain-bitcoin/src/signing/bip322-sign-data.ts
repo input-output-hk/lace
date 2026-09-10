@@ -2,6 +2,8 @@ import * as ecc from '@bitcoinerlab/secp256k1';
 import { HexBytes } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 
+import { varint } from './varint';
+
 import type {
   BitcoinSignDataRequest,
   BitcoinSignDataResult,
@@ -51,14 +53,14 @@ const buildToSpend = (
 /**
  * Serializes a witness stack into the BIP-322 Simple proof format.
  *
- * Format: <item_count> (<item_length> <item_bytes>)*
- * For P2WPKH: 2 items — ECDSA signature with SIGHASH_ALL and compressed public key.
+ * Format: varint(item_count) (varint(item_length) item_bytes)*
+ * For P2WPKH: 2 items, an ECDSA signature with SIGHASH_ALL and the compressed
+ * public key.
  */
 const serializeWitness = (witness: Buffer[]): Buffer => {
-  const parts: Buffer[] = [Buffer.from([witness.length])];
+  const parts: Buffer[] = [varint(witness.length)];
   for (const item of witness) {
-    parts.push(Buffer.from([item.length]));
-    parts.push(item);
+    parts.push(varint(item.length), item);
   }
   return Buffer.concat(parts);
 };

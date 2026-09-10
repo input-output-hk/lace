@@ -53,7 +53,7 @@ interface TransformAccountToCardParams {
   prices: Record<TokenPriceId, TokenPrice> | undefined;
   timeRange: TimeRange;
   rewardsByAccount: Record<string, string>;
-  compromisedSuffixByAccount: Record<string, string>;
+  nameSuffixByAccount: Record<string, string>;
   getNativeTokenInfo: (blockchainName: string) => NativeTokenInfo | undefined;
 }
 
@@ -161,11 +161,11 @@ export const transformAccountToCard = ({
   prices,
   timeRange,
   rewardsByAccount,
-  compromisedSuffixByAccount,
+  nameSuffixByAccount,
   getNativeTokenInfo,
 }: TransformAccountToCardParams): AccountCardProps => {
   const accountName = `${account.metadata?.name ?? getAccountName(index)}${
-    compromisedSuffixByAccount[account.accountId] ?? ''
+    nameSuffixByAccount[account.accountId] ?? ''
   }`;
   const blockchainName = account.blockchainName ?? 'Cardano';
 
@@ -225,7 +225,7 @@ interface TransformAccountsToCardsParams {
   prices: Record<TokenPriceId, TokenPrice> | undefined;
   timeRange: TimeRange;
   rewardsByAccount: Record<string, string>;
-  compromisedSuffixByAccount: Record<string, string>;
+  nameSuffixByAccount: Record<string, string>;
   getNativeTokenInfo: (blockchainName: string) => NativeTokenInfo | undefined;
 }
 
@@ -243,7 +243,7 @@ export const transformAccountsToCards = ({
   prices,
   timeRange,
   rewardsByAccount,
-  compromisedSuffixByAccount,
+  nameSuffixByAccount,
   getNativeTokenInfo,
 }: TransformAccountsToCardsParams): AccountCardProps[] =>
   accounts.map((account, index) =>
@@ -262,7 +262,7 @@ export const transformAccountsToCards = ({
       prices,
       timeRange,
       rewardsByAccount,
-      compromisedSuffixByAccount,
+      nameSuffixByAccount,
       getNativeTokenInfo,
     }),
   );

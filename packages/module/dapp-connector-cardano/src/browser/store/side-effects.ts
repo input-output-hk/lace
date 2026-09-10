@@ -9,7 +9,7 @@ import {
   AuthenticationCancelledError,
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
-import { isHardwareWallet } from '@lace-contract/wallet-repo';
+import { isHardwareWallet, WalletType } from '@lace-contract/wallet-repo';
 import { deriveBip32PublicKey, hashEd25519PublicKey } from '@lace-lib/core';
 import { HexBytes } from '@lace-lib/util';
 import { mapHwSigningError } from '@lace-lib/util-hw';
@@ -39,11 +39,15 @@ import {
   TxSignError,
   TxSignErrorCode,
 } from '../../common/api-error';
+import { createChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
 import { transformToGroupedAddresses } from '../../common/store/util';
-import { requiresForeignSignaturesFromCbor } from '../../common/store/utils/input-resolver';
+import {
+  createCombinedInputResolver,
+  requiresForeignSignaturesFromCbor,
+} from '../../common/store/utils/input-resolver';
 import { CARDANO_DAPP_CONNECT_LOCATION } from '../const';
 
 import {
@@ -54,6 +58,7 @@ import {
   type SigningResult,
 } from './util';
 
+import type { ChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import type {
   DeriveNextUnusedAddressFunction,
   SignTransactionFunction,
@@ -76,6 +81,7 @@ import type {
 } from '@lace-contract/authentication-prompt';
 import type {
   AccountUtxoMap,
+  CardanoProvider,
   CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import type { Dapp } from '@lace-contract/dapp-connector';
@@ -103,6 +109,14 @@ const isRequestOfType = (
 ): boolean => 'type' in request && request.type === requestType;
 
 /**
+ * Whether the account's signer threads witness native scripts into signature
+ * detection. On desktop every signer except Ledger does (in-memory, Trezor,
+ * Keystone, seed-signer), so script-required own keys are witnessable.
+ */
+const signerWitnessesScriptKeys = (wallet: AnyWallet): boolean =>
+  wallet.type !== WalletType.HardwareLedger;
+
+/**
  * Parameters for creating a signTransaction wrapper function.
  */
 type CreateSignTransactionWrapperParams = {
@@ -115,6 +129,8 @@ type CreateSignTransactionWrapperParams = {
   /** Observable of the current chain ID */
   selectChainId$: Observable<Cardano.ChainId | undefined>;
   selectAvailableAccountUtxos$: Observable<AccountUtxoMap>;
+  /** Provider for resolving inputs absent from the local UTXO set */
+  cardanoProvider: CardanoProvider;
   /** Function to get account ID for a specific origin */
   getAccountIdForOrigin: () => Record<string, AccountId>;
   /** Signer factory for signing */
@@ -125,6 +141,8 @@ type CreateSignTransactionWrapperParams = {
   authenticate: Authenticate;
   /** Subject to signal signing completion to the popup flow */
   signingResult$: Subject<SigningResult>;
+  /** Outputs of recently signed/submitted txs, for chained-input resolution */
+  chainedTxOutputCache: ChainedTxOutputCache;
 };
 
 /**
@@ -136,11 +154,13 @@ const createSignTransactionWrapper = ({
   selectAll$,
   selectChainId$,
   selectAvailableAccountUtxos$,
+  cardanoProvider,
   getAccountIdForOrigin,
   signerFactory,
   accessAuthSecret,
   authenticate,
   signingResult$,
+  chainedTxOutputCache,
 }: CreateSignTransactionWrapperParams): SignTransactionFunction => {
   return async (
     txCbor: Cbor,
@@ -197,6 +217,13 @@ const createSignTransactionWrapper = ({
       selectAvailableAccountUtxos$,
     );
     const localUtxos = availableAccountUtxos[accountId] ?? [];
+    const resolutionUtxos = [
+      ...localUtxos,
+      ...chainedTxOutputCache.resolveChainedInputs(
+        txCbor,
+        new Set<string>(knownAddresses.map(({ address }) => address)),
+      ),
+    ];
 
     const { extendedAccountPublicKey } = account.blockchainSpecific as {
       extendedAccountPublicKey: Bip32PublicKeyHex;
@@ -208,12 +235,16 @@ const createSignTransactionWrapper = ({
 
     if (
       !partialSign &&
-      requiresForeignSignaturesFromCbor(
+      (await requiresForeignSignaturesFromCbor(
         txCbor,
-        localUtxos,
+        resolutionUtxos,
         knownAddresses,
+        createCombinedInputResolver(resolutionUtxos, cardanoProvider, {
+          chainId,
+        }),
+        signerWitnessesScriptKeys(wallet),
         dRepKeyHash,
-      )
+      ))
     ) {
       throw new TxSignError(
         TxSignErrorCode.ProofGeneration,
@@ -234,7 +265,7 @@ const createSignTransactionWrapper = ({
       wallet,
       accountId,
       knownAddresses,
-      utxo: localUtxos,
+      utxo: resolutionUtxos,
       auth,
     };
     try {
@@ -253,6 +284,7 @@ const createSignTransactionWrapper = ({
           'The wallet does not have the secret key associated with any of the inputs and certificates.',
         );
       }
+      chainedTxOutputCache.recordOwnTransaction(txCbor);
       signingResult$.next({ type: 'success' });
       return buildCip30SignTxWitnessSet(
         Serialization.TxCBOR(txCbor),
@@ -324,6 +356,32 @@ export const connectCardanoDappConnectorApi: SideEffect = (
 
   let sessionAccountByOrigin: Record<string, AccountId> = {};
 
+  const chainedTxOutputCache = createChainedTxOutputCache();
+
+  /**
+   * Returns the tx id when the transaction is already on-chain, undefined
+   * otherwise. Presence of the exact id proves an earlier submission of the
+   * same signed tx succeeded, so a resubmission failure (e.g. after a replayed
+   * call whose first execution landed) can be mapped to success without
+   * classifying provider error shapes.
+   */
+  const landedTransactionId = async (
+    cbor: string,
+    chainId: Cardano.ChainId,
+  ): Promise<string | undefined> => {
+    try {
+      const txId = Serialization.Transaction.fromCbor(
+        Serialization.TxCBOR(cbor),
+      ).getId();
+      const details = await firstValueFrom(
+        cardanoProvider.getTransactionDetails(txId, { chainId }),
+      );
+      return details.isOk() ? txId : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
   const submitTransaction = async (cbor: string): Promise<string> => {
     const chainId = await firstValueFrom(selectChainId$);
     if (!chainId) {
@@ -335,7 +393,15 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     const result = await firstValueFrom(
       cardanoProvider.submitTx({ signedTransaction: cbor }, { chainId }),
     );
-    if (result.isErr()) throw result.error;
+    let transactionId: string;
+    if (result.isOk()) {
+      transactionId = result.value;
+    } else {
+      const landedId = await landedTransactionId(cbor, chainId);
+      if (!landedId) throw result.error;
+      transactionId = landedId;
+    }
+    chainedTxOutputCache.recordOwnTransaction(cbor);
 
     try {
       const [allAddresses, accountUtxos] = await Promise.all([
@@ -362,7 +428,7 @@ export const connectCardanoDappConnectorApi: SideEffect = (
       );
     }
 
-    return result.value;
+    return transactionId;
   };
 
   const signTransactionWrapper = createSignTransactionWrapper({
@@ -371,11 +437,13 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     selectAll$,
     selectChainId$,
     selectAvailableAccountUtxos$,
+    cardanoProvider,
     getAccountIdForOrigin: () => sessionAccountByOrigin,
     signerFactory,
     accessAuthSecret,
     authenticate,
     signingResult$,
+    chainedTxOutputCache,
   });
 
   const deriveNextUnusedAddress: DeriveNextUnusedAddressFunction =
@@ -410,6 +478,7 @@ export const connectCardanoDappConnectorApi: SideEffect = (
     allWallets$: selectAll$,
     cardanoProvider,
     getAccountIdForOrigin: (origin: string) => sessionAccountByOrigin[origin],
+    resolveChainedInputs: chainedTxOutputCache.resolveChainedInputs,
     signTransaction: signTransactionWrapper,
     submitTransaction,
     deriveNextUnusedAddress,

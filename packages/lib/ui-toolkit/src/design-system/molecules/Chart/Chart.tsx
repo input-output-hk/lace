@@ -238,6 +238,6 @@ const getStyles = (theme: Theme) =>
       height: 315,
     },
     pricePillContainer: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
   });

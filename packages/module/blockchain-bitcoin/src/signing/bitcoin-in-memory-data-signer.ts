@@ -12,6 +12,7 @@ import {
   deriveChildKeyPair,
 } from '../common';
 
+import { bip137SignMessage } from './bip137-sign-message';
 import { bip322SignData } from './bip322-sign-data';
 
 import type {
@@ -31,12 +32,14 @@ interface BitcoinDataSignerProps {
 }
 
 /**
- * Signs arbitrary messages using BIP-322 Generic Signed Message Format.
+ * Signs arbitrary messages using BIP-137 compact recoverable ECDSA (the
+ * default) or BIP-322 Generic Signed Message Format, selected by the
+ * request's signatureType.
  *
  * Follows the same authentication and key derivation pattern as
  * BitcoinInMemoryTransactionSigner: triggers user authentication,
  * decrypts the root private key, derives the P2WPKH signing key,
- * and produces a BIP-322 Simple proof.
+ * and produces the requested proof.
  */
 export class BitcoinInMemoryDataSigner implements BitcoinDataSigner {
   readonly #encryptedRootPrivateKey: HexBytes;
@@ -108,14 +111,17 @@ export class BitcoinInMemoryDataSigner implements BitcoinDataSigner {
 
       const childPrivateKey = Buffer.from(childKeyPair.pair.privateKey, 'hex');
       try {
-        return bip322SignData(
-          {
-            privateKey: childPrivateKey,
-            publicKey: Buffer.from(childKeyPair.pair.publicKey, 'hex'),
-            network: bitcoinJsNetwork,
-          },
-          request,
-        );
+        if (request.signatureType === 'bip322-simple') {
+          return bip322SignData(
+            {
+              privateKey: childPrivateKey,
+              publicKey: Buffer.from(childKeyPair.pair.publicKey, 'hex'),
+              network: bitcoinJsNetwork,
+            },
+            request,
+          );
+        }
+        return bip137SignMessage({ privateKey: childPrivateKey }, request);
       } finally {
         childPrivateKey.fill(0);
       }

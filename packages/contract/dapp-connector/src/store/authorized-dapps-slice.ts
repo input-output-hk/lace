@@ -32,6 +32,25 @@ export const authorizedDappsSlice = createSlice({
         ({ dapp }) => dapp.id !== id,
       );
     },
+    /**
+     * Hydration: replace the whole slice with an externally-sourced snapshot
+     * (e.g. the host grant table a host-pull module pulls). Wholesale on
+     * purpose — the source is authoritative, so entries absent from the
+     * snapshot are dropped. Hydrated entries carry `isPersisted: true` (they
+     * exist in the source's persisted table).
+     */
+    setAuthorizedDapps: (
+      _state,
+      { payload }: PayloadAction<AuthorizedDappsDataSlice>,
+    ) => payload,
+    /**
+     * Signal that the Authorized DApps view was opened. Holds no state of its
+     * own — a hydration source (a host-pull bridge) re-pulls its authoritative
+     * table on this trigger, so the view reflects grants added since boot
+     * rather than a stale snapshot. See ADR 41: the host emits no grant-change
+     * event, so the view-open is the pull cadence.
+     */
+    authorizedDappsViewed: state => state,
   },
   selectors: {
     selectAuthorizedDapps: state => state,

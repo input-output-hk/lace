@@ -49,6 +49,7 @@ const tokenPricingCoinGeckoModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': tokenPricingCoinGeckoModule,
   'lace-mobile': tokenPricingCoinGeckoModule,
+  'lace-extension-guest': tokenPricingCoinGeckoModule,
 };
 
 export default moduleMap;

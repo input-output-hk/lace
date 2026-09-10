@@ -1,8 +1,10 @@
 import type { ViewStyle, TextStyle } from 'react-native';
-import type { PressableProps } from 'react-native';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+// gesture-handler Pressable wins touch arbitration when nested in another
+// Pressable or a native sheet; RN's Pressable does not (broke Send sheet CTAs).
+import { Pressable } from 'react-native-gesture-handler';
 import ReAnimated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +16,7 @@ import { Text } from '../';
 import { useTheme, radius, spacing } from '../../../design-tokens';
 
 import type { Theme } from '../../../design-tokens';
+import type { PressableProps } from 'react-native-gesture-handler';
 
 export type IconButtonProps = Omit<PressableProps, 'style'> & {
   icon?: React.ReactElement;

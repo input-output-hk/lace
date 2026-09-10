@@ -135,6 +135,37 @@ describe('BlockfrostUtxoProvider', () => {
     expect(result.isErr()).toBe(true);
   });
 
+  it('treats a 404 (stake key never seen on-chain) as an empty UTxO set', async () => {
+    mockResponses(request, [
+      [
+        `accounts/${rewardAccount}/utxos?order=desc&page=1&count=100`,
+        new HttpClientError(404, 'Not Found'),
+      ],
+    ]);
+
+    const result = await firstValueFrom(
+      provider.getAccountUtxos({ rewardAccount }),
+    );
+
+    expect(result.isOk()).toBe(true);
+    if (result.isOk()) expect(result.value).toEqual([]);
+  });
+
+  it('surfaces non-404 errors as Err', async () => {
+    mockResponses(request, [
+      [
+        `accounts/${rewardAccount}/utxos?order=desc&page=1&count=100`,
+        new HttpClientError(500, 'Server Error'),
+      ],
+    ]);
+
+    const result = await firstValueFrom(
+      provider.getAccountUtxos({ rewardAccount }),
+    );
+
+    expect(result.isErr()).toBe(true);
+  });
+
   describe('getUtxosAtAddress', () => {
     // cNIGHT dust-generator testnet script address (enterprise, addr_test1w…).
     const scriptAddress = Cardano.PaymentAddress(

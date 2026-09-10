@@ -1,0 +1,35 @@
+{
+  "name": "@lace-module/midnight-sync",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/midnight-context": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/storage": "*",
+    "@lace-contract/sync": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-active-state": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/core": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-redacted": "*",
+    "@lace-lib/util-store": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

@@ -1,5 +1,11 @@
-import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
+import {
+  Linking,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { spacing } from '../../../design-tokens';
 import { Button, Text } from '../../atoms';
@@ -44,6 +50,19 @@ export interface OnboardingHardwareWalletSetupProps {
    * firmware caps derivation (e.g. Keystone Cardano: 24); defaults to 49.
    */
   maxAccountIndex?: number;
+  /**
+   * Chains the connected device can hold this wallet's FIRST account on. Pass
+   * with `blockchain`/`onBlockchainChange`/`blockchainLabel` to show the picker;
+   * omit all four and the section is not rendered, so a consumer that never
+   * passes them sees ZERO change (same contract as the derivation group below).
+   *
+   * SINGLE select, unlike the software create screen's multi-select toggles: a
+   * device runs one app at a time, so one flow can only found one chain.
+   */
+  blockchainOptions?: string[];
+  blockchain?: string;
+  onBlockchainChange?: (blockchain: string) => void;
+  blockchainLabel?: string;
   derivationTypeOptions?: DerivationTypeOption[];
   derivationType?: string;
   onDerivationTypeChange?: (type: string) => void;
@@ -52,6 +71,15 @@ export interface OnboardingHardwareWalletSetupProps {
   createButtonLabel: string;
   isLoading?: boolean;
   error?: string | null;
+  /**
+   * Optional guidance shown WHILE the device round-trip is in flight (T125,
+   * F002/F3 — e.g. "unlock your device / open the Cardano app"), distinct
+   * from `error` (shown only after a settled failure) — the two never
+   * overlap in practice (callers clear their error state before setting
+   * `isLoading`), but are independent props so a consumer that never passes
+   * this sees ZERO behavior change.
+   */
+  loadingHint?: string;
   // Use the sheet layout (SheetHeader + scroll + anchored SheetFooter) instead
   // of the full-screen OnboardingLayout. Set when hosting inside a sheet.
   embedded?: boolean;
@@ -59,6 +87,14 @@ export interface OnboardingHardwareWalletSetupProps {
   // account index from the device export, so it shows instructions instead.
   showAccountSetup?: boolean;
   instructionText?: string;
+  /**
+   * Informational note shown above the fields (e.g. Trezor Safe 7 and newer
+   * require the Trezor Suite desktop app). Not an error: setup can proceed.
+   */
+  notice?: string;
+  noticeLinkLabel?: string;
+  /** Opened via the platform URL handler when the notice link is pressed. */
+  noticeLinkUrl?: string;
 }
 
 export const OnboardingHardwareWalletSetup = (
@@ -75,6 +111,10 @@ const FullScreenHardwareWalletSetup = ({
   onAccountIndexChange,
   accountLabel,
   maxAccountIndex,
+  blockchainOptions,
+  blockchain,
+  onBlockchainChange,
+  blockchainLabel,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
@@ -83,8 +123,12 @@ const FullScreenHardwareWalletSetup = ({
   createButtonLabel,
   isLoading = false,
   error,
+  loadingHint,
   showAccountSetup = true,
   instructionText,
+  notice,
+  noticeLinkLabel,
+  noticeLinkUrl,
 }: OnboardingHardwareWalletSetupProps) => {
   const selectedDerivationOption = derivationTypeOptions?.find(
     o => o.value === derivationType,
@@ -103,14 +147,22 @@ const FullScreenHardwareWalletSetup = ({
             onAccountIndexChange={onAccountIndexChange}
             accountLabel={accountLabel}
             maxAccountIndex={maxAccountIndex}
+            blockchainOptions={blockchainOptions}
+            blockchain={blockchain}
+            onBlockchainChange={onBlockchainChange}
+            blockchainLabel={blockchainLabel}
             derivationTypeOptions={derivationTypeOptions}
             derivationType={derivationType}
             onDerivationTypeChange={onDerivationTypeChange}
             derivationTypeLabel={derivationTypeLabel}
             selectedDerivationOption={selectedDerivationOption}
             error={error}
+            loadingHint={loadingHint}
             showAccountSetup={showAccountSetup}
             instructionText={instructionText}
+            notice={notice}
+            noticeLinkLabel={noticeLinkLabel}
+            noticeLinkUrl={noticeLinkUrl}
           />
         </ScrollView>
 
@@ -133,13 +185,21 @@ const EmbeddedHardwareWalletSetup = ({
   onAccountIndexChange,
   accountLabel,
   maxAccountIndex,
+  blockchainOptions,
+  blockchain,
+  onBlockchainChange,
+  blockchainLabel,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
   derivationTypeLabel,
   error,
+  loadingHint,
   showAccountSetup = true,
   instructionText,
+  notice,
+  noticeLinkLabel,
+  noticeLinkUrl,
 }: OnboardingHardwareWalletSetupProps) => {
   const contentContainerStyle = useMemo(
     () => [
@@ -161,14 +221,22 @@ const EmbeddedHardwareWalletSetup = ({
         onAccountIndexChange={onAccountIndexChange}
         accountLabel={accountLabel}
         maxAccountIndex={maxAccountIndex}
+        blockchainOptions={blockchainOptions}
+        blockchain={blockchain}
+        onBlockchainChange={onBlockchainChange}
+        blockchainLabel={blockchainLabel}
         derivationTypeOptions={derivationTypeOptions}
         derivationType={derivationType}
         onDerivationTypeChange={onDerivationTypeChange}
         derivationTypeLabel={derivationTypeLabel}
         selectedDerivationOption={selectedDerivationOption}
         error={error}
+        loadingHint={loadingHint}
         showAccountSetup={showAccountSetup}
         instructionText={instructionText}
+        notice={notice}
+        noticeLinkLabel={noticeLinkLabel}
+        noticeLinkUrl={noticeLinkUrl}
       />
     </Sheet.Scroll>
   );
@@ -179,14 +247,22 @@ interface FieldGroupsProps {
   onAccountIndexChange: (index: number) => void;
   accountLabel: string;
   maxAccountIndex?: number;
+  blockchainOptions?: string[];
+  blockchain?: string;
+  onBlockchainChange?: (blockchain: string) => void;
+  blockchainLabel?: string;
   derivationTypeOptions?: DerivationTypeOption[];
   derivationType?: string;
   onDerivationTypeChange?: (type: string) => void;
   derivationTypeLabel?: string;
   selectedDerivationOption?: DerivationTypeOption;
   error?: string | null;
+  loadingHint?: string;
   showAccountSetup?: boolean;
   instructionText?: string;
+  notice?: string;
+  noticeLinkLabel?: string;
+  noticeLinkUrl?: string;
 }
 
 const FieldGroups = ({
@@ -194,27 +270,79 @@ const FieldGroups = ({
   onAccountIndexChange,
   accountLabel,
   maxAccountIndex = DEFAULT_MAX_ACCOUNT_INDEX,
+  blockchainOptions,
+  blockchain,
+  onBlockchainChange,
+  blockchainLabel,
   derivationTypeOptions,
   derivationType,
   onDerivationTypeChange,
   derivationTypeLabel,
   selectedDerivationOption,
   error,
+  loadingHint,
   showAccountSetup = true,
   instructionText,
+  notice,
+  noticeLinkLabel,
+  noticeLinkUrl,
 }: FieldGroupsProps) => {
   const accountIndexOptions = useMemo(
     () => buildAccountIndexOptions(maxAccountIndex),
     [maxAccountIndex],
   );
 
+  const handleNoticeLinkPress = useCallback(() => {
+    if (noticeLinkUrl) void Linking.openURL(noticeLinkUrl);
+  }, [noticeLinkUrl]);
+
   return (
     <>
+      {notice && (
+        <View style={fieldStyles.fieldGroup} testID="hardware-setup-notice">
+          <Text.S variant="secondary">{notice}</Text.S>
+          {noticeLinkLabel && noticeLinkUrl && (
+            <TouchableOpacity
+              onPress={handleNoticeLinkPress}
+              testID="hardware-setup-notice-link">
+              <Text.S variant="primary" style={fieldStyles.noticeLink}>
+                {noticeLinkLabel}
+              </Text.S>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
+
       {!showAccountSetup && instructionText && (
         <View style={fieldStyles.fieldGroup}>
           <Text.S variant="primary" testID="hardware-setup-instructions">
             {instructionText}
           </Text.S>
+        </View>
+      )}
+
+      {showAccountSetup && blockchainOptions && blockchain && (
+        <View style={fieldStyles.fieldGroup}>
+          <Text.S variant="primary" style={fieldStyles.label}>
+            {blockchainLabel}
+          </Text.S>
+          <DropdownMenu
+            items={blockchainOptions.map(option => ({
+              id: option,
+              text: option,
+            }))}
+            title={blockchain}
+            selectedItemId={blockchain}
+            onSelectItem={position => {
+              // `onSelectItem` reports the POSITION in `items`, so it is mapped
+              // back through the same array (unlike the account-index dropdown
+              // below, where position and value coincide).
+              const selected = blockchainOptions[position];
+              if (selected) onBlockchainChange?.(selected);
+            }}
+            maxVisibleItems={5}
+            testID="hardware-setup-blockchain"
+          />
         </View>
       )}
 
@@ -272,6 +400,14 @@ const FieldGroups = ({
           </View>
         )}
 
+      {loadingHint && (
+        <View
+          style={fieldStyles.errorContainer}
+          testID="hardware-setup-loading-hint">
+          <Text.S variant="secondary">{loadingHint}</Text.S>
+        </View>
+      )}
+
       {error && (
         <View style={fieldStyles.errorContainer}>
           <Text.S variant="secondary">{error}</Text.S>
@@ -322,5 +458,9 @@ const fieldStyles = StyleSheet.create({
   },
   errorContainer: {
     marginBottom: spacing.M,
+  },
+  noticeLink: {
+    marginTop: spacing.XS,
+    textDecorationLine: 'underline',
   },
 });

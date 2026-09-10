@@ -63,6 +63,6 @@ const getStyles = () =>
       paddingVertical: spacing.XS,
     },
     blurOverlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
   });

@@ -298,6 +298,23 @@ const makeBuildParams = (normalizedAmount: bigint): BuildTxParamsShape =>
     ],
   } as unknown as BuildTxParamsShape);
 
+const makeCustomFeeBuildParams = (
+  customFeeRate: number | undefined,
+): BuildTxParamsShape =>
+  ({
+    ...makeBuildParams(1_000_000n),
+    txParams: [
+      {
+        address: recipientAddress,
+        tokenTransfers: [makeTokenTransfer(1_000_000n)],
+        blockchainSpecific: {
+          memo: '',
+          feeRate: { feeOption: 'Custom' as const, customFeeRate },
+        },
+      },
+    ],
+  } as unknown as BuildTxParamsShape);
+
 const logger = {
   debug: vi.fn(),
   error: vi.fn(),
@@ -318,7 +335,7 @@ const makeMockWallet = (
       addressType: 'NativeSegWit',
       network: BitcoinNetwork.Testnet,
       account: 0,
-      chain: 0,
+      chain: 'external',
       index: 0,
       publicKeyHex:
         '03797dd653040d344fd048c1ad05d4cbcb2178b30c6a0c4276994795f3e833da41',
@@ -329,7 +346,7 @@ const makeMockWallet = (
     addressType: 'NativeSegWit',
     network: BitcoinNetwork.Testnet,
     account: 0,
-    chain: 0,
+    chain: 'external',
     index: 0,
     publicKeyHex:
       '03797dd653040d344fd048c1ad05d4cbcb2178b30c6a0c4276994795f3e833da41',
@@ -370,6 +387,40 @@ describe('makeBuildTx in-flight wiring (bitcoin)', () => {
     const buildTx = makeBuildTx(deps, toPendingActivities$());
     const result = await firstValueFrom(buildTx(buildParams));
     expect(result.success).toBe(true);
+  });
+
+  it.each([
+    ['no custom rate at all', undefined],
+    ['a zero rate', 0],
+    ['a negative rate', -0.0001],
+    ['a non-finite rate', Number.NaN],
+  ])('refuses to build against %s', async (_label, customFeeRate) => {
+    const deps = makeDeps([
+      makeUtxo({ txId: previousTxIdA, index: 0, satoshis: 10_000_000 }),
+    ]);
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(
+      buildTx(makeCustomFeeBuildParams(customFeeRate)),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      errorTranslationKey: 'tx-executor.building-error.invalid-fee-rate',
+    });
+  });
+
+  it('logs the resolved fee rate in the BTC/kB unit the tx builder consumes', async () => {
+    const deps = makeDeps([
+      makeUtxo({ txId: previousTxIdA, index: 0, satoshis: 10_000_000 }),
+    ]);
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    await firstValueFrom(buildTx(buildParams));
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Bitcoin buildTx: Using fee rate of 0.0001 BTC/kB',
+    );
   });
 
   it('excludes in-flight-consumed inputs from UTXO selection', async () => {

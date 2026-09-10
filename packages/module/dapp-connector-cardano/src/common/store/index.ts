@@ -17,11 +17,9 @@ export {
 } from './slice';
 export {
   txInEquals,
-  createLocalInputResolver,
   createCombinedInputResolver,
   requiresForeignSignatures,
   requiresForeignSignaturesFromCbor,
-  canSignAnyInput,
 } from './utils/input-resolver';
 export {
   createResolveForeignInputsFlow,

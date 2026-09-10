@@ -1,17 +1,24 @@
-import { EMPTY, Subject, map, of } from 'rxjs';
+import { Subject, map, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  KEEP_ALIVE_MESSAGE,
+  KEEP_ALIVE_PING_INTERVAL_MS,
+  REPLAYED_RESPONSE_TIMEOUT_MS,
   RemoteApiPropertyType,
+  RemoteApiShutdownError,
   bindFactoryMethods,
+  consumeMessengerRemoteApi,
   exposeMessengerApi,
 } from '../../src';
 import { ChannelName } from '../../src';
 
 import type {
+  DisconnectEvent,
   FactoryCallMessage,
   Messenger,
+  MethodRequestOptions,
   MinimalPort,
   PortMessage,
   RemoteApiProperties,
@@ -40,6 +47,7 @@ type TestMessenger = Messenger & { connect(): void };
 type MockMessengerResult = {
   messenger: TestMessenger;
   messageSubject: Subject<PortMessage<unknown>>;
+  disconnectSubject: Subject<DisconnectEvent>;
   derivedMessengers: Array<DerivedMessenger>;
 };
 
@@ -51,6 +59,7 @@ type DerivedMessenger = {
 const createMockMessenger = (channel: ChannelName): MockMessengerResult => {
   const derivedMessengers = [] as Array<DerivedMessenger>;
   const messageSubject = new Subject<PortMessage<unknown>>();
+  const disconnectSubject = new Subject<DisconnectEvent>();
   const connect$ = new Subject<MinimalPort>();
   let isShutdown = false;
 
@@ -72,7 +81,7 @@ const createMockMessenger = (channel: ChannelName): MockMessengerResult => {
           return result.messenger;
         },
       ),
-    disconnect$: EMPTY,
+    disconnect$: disconnectSubject.asObservable(),
     get isShutdown() {
       return isShutdown;
     },
@@ -81,6 +90,7 @@ const createMockMessenger = (channel: ChannelName): MockMessengerResult => {
     shutdown: vi.fn().mockImplementation(() => {
       isShutdown = true;
       messageSubject.complete();
+      disconnectSubject.complete();
       connect$.complete();
       for (const { messengerResult, detached } of derivedMessengers) {
         if (!detached) {
@@ -92,6 +102,7 @@ const createMockMessenger = (channel: ChannelName): MockMessengerResult => {
 
   return {
     derivedMessengers,
+    disconnectSubject,
     messageSubject,
     messenger,
   };
@@ -461,6 +472,141 @@ describe('remoteApi', () => {
   );
 
   describe('consumer', () => {
-    it.todo('it handles messages correctly');
+    const setUpConsumer = (requestOptions?: MethodRequestOptions) => {
+      const { messenger, messageSubject, disconnectSubject } =
+        createMockMessenger(ChannelName('consumer-keepalive'));
+      const api = consumeMessengerRemoteApi<{
+        somePromiseMethod: () => Promise<number>;
+      }>(
+        {
+          properties: {
+            somePromiseMethod: requestOptions
+              ? {
+                  propType: RemoteApiPropertyType.MethodReturningPromise,
+                  requestOptions,
+                }
+              : RemoteApiPropertyType.MethodReturningPromise,
+          },
+        },
+        {
+          destructor: { onGarbageCollected: vi.fn() },
+          logger,
+          messenger,
+        },
+      );
+      const postMessage = messenger.postMessage as Mock;
+      const pingCount = () =>
+        postMessage.mock.calls.filter(
+          ([message]) => message === KEEP_ALIVE_MESSAGE,
+        ).length;
+      const postedRequests = () =>
+        postMessage.mock.calls
+          .map(([message]) => message as RequestMessage)
+          .filter(message => !!message?.request);
+      const respondToPendingRequest = (response: unknown) => {
+        messageSubject.next({
+          data: { messageId: postedRequests()[0].messageId, response },
+          port: { postMessage: vi.fn() },
+        });
+      };
+      const emitCleanDisconnect = () => {
+        disconnectSubject.next({
+          disconnected: { postMessage: vi.fn() },
+          remaining: [],
+        });
+      };
+      return {
+        api,
+        emitCleanDisconnect,
+        pingCount,
+        postedRequests,
+        respondToPendingRequest,
+      };
+    };
+
+    describe('consumeMethod in-flight keepalive', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('pings the port at KEEP_ALIVE_PING_INTERVAL_MS while a call is pending', async () => {
+        const { api, pingCount } = setUpConsumer();
+        void api.somePromiseMethod();
+        expect(pingCount()).toBe(0);
+        await vi.advanceTimersByTimeAsync(KEEP_ALIVE_PING_INTERVAL_MS * 2);
+        expect(pingCount()).toBe(2);
+      });
+
+      it('stops pinging once the response settles the call', async () => {
+        const { api, pingCount, respondToPendingRequest } = setUpConsumer();
+        const promise = api.somePromiseMethod();
+        await vi.advanceTimersByTimeAsync(KEEP_ALIVE_PING_INTERVAL_MS);
+        respondToPendingRequest(5);
+        await expect(promise).resolves.toBe(5);
+        const pingsAtSettle = pingCount();
+        await vi.advanceTimersByTimeAsync(KEEP_ALIVE_PING_INTERVAL_MS * 3);
+        expect(pingCount()).toBe(pingsAtSettle);
+      });
+    });
+
+    describe('consumeMethod onDisconnect policy', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('rejects with RemoteApiShutdownError on clean disconnect by default', async () => {
+        const { api, emitCleanDisconnect } = setUpConsumer();
+        const promise = api.somePromiseMethod();
+        emitCleanDisconnect();
+        await expect(promise).rejects.toBeInstanceOf(RemoteApiShutdownError);
+      });
+
+      it('re-posts the same request once and resolves with the late response when replay is enabled', async () => {
+        const {
+          api,
+          emitCleanDisconnect,
+          postedRequests,
+          respondToPendingRequest,
+        } = setUpConsumer({ onDisconnect: 'replay' });
+        const promise = api.somePromiseMethod();
+        await vi.advanceTimersByTimeAsync(0);
+        emitCleanDisconnect();
+        await vi.advanceTimersByTimeAsync(0);
+        const requests = postedRequests();
+        expect(requests).toHaveLength(2);
+        expect(requests[1].messageId).toBe(requests[0].messageId);
+        respondToPendingRequest(7);
+        await expect(promise).resolves.toBe(7);
+      });
+
+      it('rejects when a second disconnect interrupts the replayed call', async () => {
+        const { api, emitCleanDisconnect } = setUpConsumer({
+          onDisconnect: 'replay',
+        });
+        const promise = api.somePromiseMethod();
+        emitCleanDisconnect();
+        emitCleanDisconnect();
+        await expect(promise).rejects.toBeInstanceOf(RemoteApiShutdownError);
+      });
+
+      it('rejects when the replayed request gets no response within the timeout', async () => {
+        const { api, emitCleanDisconnect } = setUpConsumer({
+          onDisconnect: 'replay',
+        });
+        const promise = api.somePromiseMethod();
+        const outcome = promise.catch((error: unknown) => error);
+        emitCleanDisconnect();
+        await vi.advanceTimersByTimeAsync(REPLAYED_RESPONSE_TIMEOUT_MS);
+        await expect(outcome).resolves.toBeInstanceOf(RemoteApiShutdownError);
+      });
+    });
   });
 });

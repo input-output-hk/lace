@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Postinstall script to fix @midnight-ntwrk packages package.json
+ * Postinstall script to fix Midnight SDK packages package.json
  *
  * These packages only have `module` and `exports` fields but no `main` field,
  * which causes CI build failures in webpack-based builds that expect a `main` field.
@@ -20,19 +20,18 @@ const path = require('path');
 // List of problematic packages to fix (from babel-plugin-fix-midnight-packages.js)
 // TODO: remove as part of DoD for LW-13253 and V2 mobile
 const PACKAGES_TO_FIX = [
-  'dapp-connector-api',
-  'wallet-sdk-abstractions',
-  'wallet-sdk-address-format',
-  'wallet-sdk-hd',
+  '@midnight-ntwrk/dapp-connector-api',
+  '@midnightntwrk/wallet-sdk-abstractions',
+  '@midnightntwrk/wallet-sdk-address-format',
+  '@midnightntwrk/wallet-sdk-hd',
 ];
 
 /**
  * Fix a single package's package.json
- * @param {string} packageName - The package name without @midnight-ntwrk/ prefix
+ * @param {string} fullPackageName - The scoped package name
  * @returns {boolean} - Returns true if package was fixed, false otherwise
  */
-const fixPackage = packageName => {
-  const fullPackageName = `@midnight-ntwrk/${packageName}`;
+const fixPackage = fullPackageName => {
   const packageJsonPath = path.join(
     __dirname,
     '..',

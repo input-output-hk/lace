@@ -18,11 +18,31 @@ const POD_BUILD_SETTINGS_BLOCK_PATH = path.resolve(
 const POD_BUILD_SETTINGS_MARKER =
   'append_build_setting = lambda do |value, flags, fallback = "$(inherited)"|';
 
+// Returns an array of flag tokens (never a pre-quoted string): xcode's own
+// pbxproj writer expects multi-value build settings as arrays so it can
+// serialize them as a proper parenthesized list, e.g. `( "a", "b" )`. Handing
+// it an already-quoted string instead (as this used to) bypasses that
+// serialization and corrupts the written project.pbxproj (mirrors the
+// array-based approach in ios-pod-post-install.rb's Ruby twin).
 const appendBuildFlag = (currentValue, flag, fallbackBase = '$(inherited)') => {
-  const normalized = String(currentValue || '').replace(/^"(.*)"$/, '$1');
-  const base = normalized || fallbackBase;
-  const nextValue = base.includes(flag) ? base : `${base} ${flag}`;
-  return `"${nextValue}"`;
+  const values = Array.isArray(currentValue)
+    ? currentValue.map(value => String(value).replace(/^"(.*)"$/, '$1'))
+    : [String(currentValue || '').replace(/^"(.*)"$/, '$1') || fallbackBase];
+
+  const requestedFlags = String(flag).split(' ');
+  const currentSequence = values.join(' ');
+  const requestedSequence = requestedFlags.join(' ');
+
+  const result = currentSequence.includes(requestedSequence)
+    ? values
+    : [...values, ...requestedFlags];
+
+  // Every element quoted explicitly (matching how xcode's writer emits
+  // sibling array settings like OTHER_LDFLAGS) rather than relying on its
+  // auto-quoting, which doesn't kick in for tokens like $(inherited) that
+  // don't otherwise need escaping — CocoaPods' own xcodeproj gem rejects
+  // an unquoted array element when re-parsing the written project.pbxproj.
+  return result.map(value => `"${value}"`);
 };
 
 const readJsonFile = filePath => {

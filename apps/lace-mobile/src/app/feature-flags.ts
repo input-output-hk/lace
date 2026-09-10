@@ -80,7 +80,21 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('MD_MIGRATION') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SEND_FLOW') },
-  { key: FeatureFlagKey('STAKING_CENTER') },
+  {
+    key: FeatureFlagKey('STAKING_CENTER'),
+    payload: {
+      // Promoted pool the earn-rewards target reads. Committed bootstrap defaults
+      // for every network (mainnet treated no differently from preprod/preview)
+      // so dev / PR / nightly builds can exercise the flow. In production PostHog
+      // replaces the bootstrap flags wholesale and owns the real targets, so
+      // these values never reach a live-PostHog user.
+      promotedPools: {
+        mainnet: [],
+        preprod: [],
+        preview: [],
+      },
+    },
+  },
   {
     key: FeatureFlagKey('SUPPORTED_CURRENCIES'),
     // The currency list itself is the static FIAT_CURRENCIES allowlist in
@@ -92,13 +106,27 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   },
   {
     key: FeatureFlagKey('SWAP_CENTER'),
-    payload: {
-      steelswapApiUrl: 'https://steelswap.lw.iog.io',
-    },
+    payload: {},
   },
   { key: FeatureFlagKey('TOKEN_PRICING') },
   { key: FeatureFlagKey('VAULT_LEDGER') },
   { key: FeatureFlagKey('VAULT_TREZOR') },
+  // Air-gapped QR signers. Bootstrap-on so dev / PR / nightly builds offer
+  // them wherever hardware wallets appear (onboarding, add wallet, and as
+  // migration destinations); production stays PostHog-controlled like every
+  // other flag here.
+  { key: FeatureFlagKey('SEED_SIGNER') },
+  { key: FeatureFlagKey('KEYSTONE') },
+  {
+    key: FeatureFlagKey('GOVERNANCE_CENTER'),
+    payload: {
+      promotedDreps: {
+        mainnet: [],
+        preprod: [],
+        preview: [],
+      },
+    },
+  },
 ];
 
 export default defaultFeatureFlags;

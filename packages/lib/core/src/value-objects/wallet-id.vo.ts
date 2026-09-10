@@ -25,7 +25,7 @@ const doubleBlake2b128 = (inputHex: HexBlob): WalletId => {
   );
 };
 
-/** For BIP-32 wallets: hash of extended account public key. For script wallets: script hash */
+/** For BIP-32 wallets: hash of the extended account public key or of the mnemonic. For script wallets: script hash */
 export type WalletId = Tagged<string, 'WalletId'>;
 export const WalletId = (walletId: string): WalletId => walletId as WalletId;
 
@@ -33,6 +33,28 @@ export const WalletId = (walletId: string): WalletId => walletId as WalletId;
 WalletId.deriveFromBip32PublicKey = (
   xpubHex: Crypto.Bip32PublicKeyHex,
 ): WalletId => doubleBlake2b128(xpubHex);
+
+/**
+ * Derive a walletId from a hardware device's BIP-32 master key fingerprint
+ * (`xfpHex` — 8 hex chars / 4 bytes), domain-separated by `vendorTag` (the device
+ * family: `'ledger'`, `'trezor'`).
+ *
+ * The xfp identifies the master key itself, so it is invariant across derivation
+ * paths and across mainnet/testnet (whose account xpubs differ): one physical
+ * device is one wallet whichever network its open app served. The vendor tag is
+ * what keeps one seed restored onto two device families two wallets — the xfp
+ * alone is identical for both. Same double blake2b-128 as the xpub mints, so every
+ * id shares one 32-hex format and one collision domain.
+ */
+WalletId.deriveFromHardwareFingerprint = (
+  vendorTag: string,
+  xfpHex: string,
+): WalletId =>
+  doubleBlake2b128(
+    Buffer.from(`${vendorTag}:${xfpHex.toLowerCase()}`, 'utf8').toString(
+      'hex',
+    ) as HexBlob,
+  );
 
 /** Derive a walletId from a mnemonic — the utf8 bytes of the space-joined words. */
 WalletId.deriveFromMnemonic = (words: string[]): WalletId =>

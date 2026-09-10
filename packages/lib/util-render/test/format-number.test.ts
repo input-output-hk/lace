@@ -1,6 +1,8 @@
-import { describe, expect, it, test } from 'vitest';
+import { afterEach, describe, expect, it, test, vi } from 'vitest';
 
 import * as formatNumber from '../src/format-number';
+
+import type { MockInstance } from 'vitest';
 
 describe('format-number', () => {
   describe('formatAmountRawToDenominated', () => {
@@ -516,6 +518,92 @@ describe('format-number', () => {
         const result = formatNumber.getLocaleSeparators('en-GB');
         expect(result.groupSeparator).toEqual(',');
         expect(result.decimalSeparator).toEqual('.');
+      });
+
+      // Assert against the runtime's own ICU rather than literal characters,
+      // because that data varies by platform: it-CH derives U+0027 under Node
+      // and U+2019 under Apple Foundation.
+      const icuSeparators = (locale: string) => {
+        const parts = new Intl.NumberFormat(locale).formatToParts(1234567.5);
+        return {
+          groupSeparator: parts.find(part => part.type === 'group')?.value,
+          decimalSeparator: parts.find(part => part.type === 'decimal')?.value,
+        };
+      };
+
+      // Grouped only from five digits, so a four-digit probe came back
+      // ungrouped and its lone decimal separator read as the group one.
+      it.each(['es-ES', 'it-IT'])(
+        'derives runtime separators for %s',
+        locale => {
+          expect(formatNumber.getLocaleSeparators(locale)).toEqual(
+            icuSeparators(locale),
+          );
+        },
+      );
+
+      // Indian grouping splits as 12,34,567, so the decimal is not at a fixed
+      // index.
+      it.each(['hi-IN', 'bn-BD'])(
+        'derives runtime separators for %s',
+        locale => {
+          expect(formatNumber.getLocaleSeparators(locale)).toEqual(
+            icuSeparators(locale),
+          );
+        },
+      );
+
+      // Arabic-Indic numerals survive an ASCII-only digit strip, so a numeral
+      // was being returned as the group separator.
+      it('never returns a numeral as a separator for ar-EG', () => {
+        const result = formatNumber.getLocaleSeparators('ar-EG');
+        expect(result).toEqual(icuSeparators('ar-EG'));
+        expect(result.groupSeparator).not.toMatch(/\p{Nd}/u);
+        expect(result.decimalSeparator).not.toMatch(/\p{Nd}/u);
+      });
+    });
+
+    describe('unusable Intl output', () => {
+      // Restore only this block's own spy, in an afterEach so a failing
+      // assertion cannot skip it. restoreAllMocks would also tear down the
+      // default-locale pin installed from setupFiles, leaving every later test
+      // in the file running unpinned.
+      let numberFormat: MockInstance | undefined;
+
+      afterEach(() => {
+        numberFormat?.mockRestore();
+        numberFormat = undefined;
+      });
+
+      const stubFormattedOutput = (formatted: string) => {
+        numberFormat = vi
+          .spyOn(Intl, 'NumberFormat')
+          .mockImplementation(
+            () => ({ format: () => formatted } as unknown as Intl.NumberFormat),
+          );
+      };
+
+      // Each case uses a locale tag never used elsewhere, so the module-level
+      // cache cannot serve a real entry in its place.
+      it('falls back to en-US separators when none are recovered', () => {
+        stubFormattedOutput('12345675');
+
+        const result = formatNumber.getLocaleSeparators('zz-NoSeparators');
+
+        expect(result.groupSeparator).toEqual(',');
+        expect(result.decimalSeparator).toEqual('.');
+      });
+
+      // The probe carries a fraction, so a lone character is provably the
+      // decimal. Reading it as the group separator would swap the two and make
+      // parseLocaleNumber misread every comma the user types.
+      it('treats a lone separator as the decimal, with no grouping', () => {
+        stubFormattedOutput('1234567,5');
+
+        const result = formatNumber.getLocaleSeparators('zz-NoGrouping');
+
+        expect(result.groupSeparator).toEqual('');
+        expect(result.decimalSeparator).toEqual(',');
       });
     });
 

@@ -3,8 +3,6 @@ import type { ReactNode } from 'react';
 import { Cardano } from '@cardano-sdk/core';
 import { convertLovelacesToAda } from '@lace-contract/cardano-context';
 
-import { drepIDasBech32FromHash } from '../../utils/drepId-from-bech32-hash';
-
 import type { TFunction, TranslationKey } from '@lace-contract/i18n';
 
 export type CertificateItem = { label: string; value: ReactNode };
@@ -99,10 +97,10 @@ const buildDepositItem = (
 
 const buildDRepIdItem = (
   t: TFunction,
-  credentialHash: Cardano.Credential['hash'],
+  credential: Cardano.Credential,
 ): CertificateItem => ({
   label: t('v2.activity-details.sheet.drepId'),
-  value: drepIDasBech32FromHash(credentialHash),
+  value: Cardano.DRepID.cip129FromCredential(credential),
 });
 
 const buildColdCredentialItem = (
@@ -137,7 +135,7 @@ export const buildDRepItem = (
   if (Cardano.isDRepAlwaysNoConfidence(dRep))
     return { label, value: t('v2.activity-details.sheet.alwaysNoConfidence') };
   if (Cardano.isDRepCredential(dRep))
-    return { label, value: drepIDasBech32FromHash(dRep.hash) };
+    return { label, value: Cardano.DRepID.cip129FromCredential(dRep) };
   return { label, value: undefined };
 };
 
@@ -255,7 +253,7 @@ export const buildCertificateItems = (
         kind: 'items',
         items: [
           buildTypeItem(t, certificate.__typename),
-          buildDRepIdItem(t, certificate.dRepCredential.hash),
+          buildDRepIdItem(t, certificate.dRepCredential),
           buildDepositItem(t, certificate.deposit, coinSymbol),
           ...buildAnchorItems(t, certificate.anchor),
         ],
@@ -266,7 +264,7 @@ export const buildCertificateItems = (
         kind: 'items',
         items: [
           buildTypeItem(t, certificate.__typename),
-          buildDRepIdItem(t, certificate.dRepCredential.hash),
+          buildDRepIdItem(t, certificate.dRepCredential),
           buildDepositItem(t, certificate.deposit, coinSymbol),
         ],
       };
@@ -276,7 +274,7 @@ export const buildCertificateItems = (
         kind: 'items',
         items: [
           buildTypeItem(t, certificate.__typename),
-          buildDRepIdItem(t, certificate.dRepCredential.hash),
+          buildDRepIdItem(t, certificate.dRepCredential),
           ...buildAnchorItems(t, certificate.anchor),
         ],
       };

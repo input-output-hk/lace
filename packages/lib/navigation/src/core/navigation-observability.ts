@@ -76,6 +76,33 @@ const trackViewLifecycle = (
   });
 };
 
+/**
+ * The sheet-dismissal watchdog exists to recover from a state its own comment
+ * calls impossible to reach legitimately (a dropped TrueSheet onDidDismiss).
+ * A recovery that fires silently teaches nothing about how often that state
+ * occurs in the field, so each firing is an active warning, not a breadcrumb
+ * that only surfaces if a later error happens to be captured.
+ */
+export const trackSheetDismissalWatchdogFired = (
+  data: Record<string, unknown>,
+): void => {
+  try {
+    const observability = getObservability();
+    observability.captureMessage(
+      'sheet dismissal cascade stalled; watchdog force-removed the sheet stack',
+      LogLevel.WARNING,
+    );
+    observability.addBreadcrumb({
+      message: 'navigation.sheetDismissalWatchdogFired',
+      category: 'navigation.action',
+      level: LogLevel.WARNING,
+      data,
+    });
+  } catch {
+    // Observability can be disabled/uninitialized in some environments.
+  }
+};
+
 export const trackNavigationAction = (
   action: string,
   data?: Record<string, unknown>,

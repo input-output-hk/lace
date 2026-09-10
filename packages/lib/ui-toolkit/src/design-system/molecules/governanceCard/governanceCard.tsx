@@ -47,6 +47,11 @@ export type GovernanceCardProps = {
   onDelegate?: () => void;
   onAddFunds?: () => void;
   onUpdateDelegation?: () => void;
+  /**
+   * Renders the delegate/update CTAs disabled — for accounts that can view
+   * their delegation but cannot change it (e.g. no signing journey yet).
+   */
+  isDelegationDisabled?: boolean;
   testID?: string;
 };
 
@@ -66,6 +71,7 @@ export const GovernanceCard = ({
   onDelegate,
   onAddFunds,
   onUpdateDelegation,
+  isDelegationDisabled = false,
   testID = 'governance-card',
 }: GovernanceCardProps) => {
   const { theme, layoutSize } = useTheme();
@@ -151,8 +157,13 @@ export const GovernanceCard = ({
           <Button.Primary
             flex={1}
             testID={`${testID}-delegate-button`}
-            label={t('v2.governance.card.button.delegate')}
+            label={
+              isDelegationDisabled
+                ? t('v2.generic.staking.card.coming-soon')
+                : t('v2.governance.card.button.delegate')
+            }
             size="large"
+            disabled={isDelegationDisabled}
             onPress={onDelegate ?? (() => {})}
           />
         )}
@@ -235,6 +246,7 @@ export const GovernanceCard = ({
         <Button.Primary
           label={t('v2.governance.card.button.update')}
           size="large"
+          disabled={isDelegationDisabled}
           onPress={onUpdateDelegation ?? (() => {})}
           fullWidth
           testID={`${testID}-update-button`}
@@ -246,6 +258,7 @@ export const GovernanceCard = ({
         <Button.Primary
           label={t('v2.governance.card.button.change-delegation')}
           size="large"
+          disabled={isDelegationDisabled}
           onPress={onUpdateDelegation ?? (() => {})}
           fullWidth
           testID={`${testID}-change-delegation-button`}

@@ -6,6 +6,7 @@ import { spacing, useTheme } from '../../../../design-tokens';
 import { Avatar, Button, Divider, Row, Shimmer, Text } from '../../../atoms';
 import { ProgressBar } from '../../../molecules';
 import { Sheet } from '../../../organisms';
+import { getSaturationColor } from '../../../util/color-utils';
 
 import type {
   PoolStatusSheetProps,
@@ -21,6 +22,7 @@ export const poolStatusSheetTestIds = {
   saturationWarning: 'pool-status-sheet-saturation-warning',
   rewardsLockedSection: 'pool-status-sheet-rewards-locked-section',
   delegateVoteButton: 'pool-status-sheet-delegate-vote-button',
+  externalDelegateVoteButton: 'pool-status-sheet-external-delegate-vote-button',
   primaryButton: 'pool-status-sheet-primary-button',
   secondaryButton: 'pool-status-sheet-secondary-button',
 } as const;
@@ -31,12 +33,6 @@ const getWarningColorForState = (
   theme: Theme,
 ): string => {
   return state === 'pledge-not-met' ? theme.brand.yellow : theme.data.negative;
-};
-
-const getProgressBarColorForState = (
-  state: PoolStatusState,
-): 'negative' | 'positive' => {
-  return state === 'pledge-not-met' ? 'positive' : 'negative';
 };
 
 export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
@@ -56,7 +52,10 @@ export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
   const { theme } = useTheme();
 
   const warningColor = getWarningColorForState(state, theme);
-  const progressBarColor = getProgressBarColorForState(state);
+  // The bar reports the pool's saturation, not the sheet's problem: painting
+  // it by the alert palette misattributed a locked-rewards (account) problem
+  // to the pool, so it keeps its own value scale.
+  const progressBarColor = getSaturationColor(saturationPercentage);
 
   const styles = useMemo(
     () => getStyles(theme, warningColor),
@@ -157,10 +156,24 @@ export const PoolStatusSheet = (props: PoolStatusSheetProps) => {
               </Row>
               {props.onDelegateVote && (
                 <Button.Critical
-                  label={t('v2.pool-status.delegate-vote')}
+                  // Named by the consumer: this CTA reroutes into the
+                  // earn-rewards flow where that offer applies, and a button
+                  // naming the mechanism ("Delegate Vote") beside a flow that
+                  // sells the outcome reads as two different things.
+                  label={
+                    props.delegateVoteLabel ?? t('v2.pool-status.delegate-vote')
+                  }
                   size="large"
                   onPress={props.onDelegateVote}
                   testID={poolStatusSheetTestIds.delegateVoteButton}
+                />
+              )}
+              {props.externalDelegateVote && (
+                <Button.Secondary
+                  label={props.externalDelegateVote.label}
+                  size="large"
+                  onPress={props.externalDelegateVote.onPress}
+                  testID={poolStatusSheetTestIds.externalDelegateVoteButton}
                 />
               )}
             </View>

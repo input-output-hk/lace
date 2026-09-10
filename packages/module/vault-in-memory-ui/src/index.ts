@@ -49,9 +49,30 @@ const extensionModule = inferModuleContext({
   },
 });
 
+// The guest keeps ONLY the recovery-phrase store (exactly-one, and the shared
+// account-management screens depend on it). It registers NO sheet pages: every
+// screen in `./addons/sheetPages` displays or re-enters a mnemonic, and ADR 52
+// requires the sandboxed remote guest to exclude those surfaces STRUCTURALLY —
+// a registered route into one is the capture vector ADR 36 exists to close.
+// Both guest entry points are host ceremonies instead: the wallet-settings
+// "Show recovery phrase" row is vault-extension-host's customisation, and a
+// host-projected shell never carries `encryptedRecoveryPhrase`, so the
+// passphrase-verification card never renders.
+const guestImplementsContracts = combineContracts([
+  recoveryPhraseStoreContract,
+] as const);
+
+const guestModule = inferModuleContext({
+  moduleName: ModuleName('vault-in-memory-ui'),
+  implements: guestImplementsContracts,
+  dependsOn: dependsOnContracts,
+  addons: {},
+});
+
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': extensionModule,
+  'lace-extension-guest': guestModule,
 };
 
 export default moduleMap;

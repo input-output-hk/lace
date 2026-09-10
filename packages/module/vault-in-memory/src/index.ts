@@ -11,10 +11,8 @@ import {
   secureStoreAddonContract,
   secureStoreContract,
 } from '@lace-contract/secure-store';
-import {
-  vaultContract,
-  walletRepoStoreContract,
-} from '@lace-contract/wallet-repo';
+import { vaultContract } from '@lace-contract/vault';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import type {
   ModuleActionCreators,
@@ -45,6 +43,7 @@ const laceMultiPlatformModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': laceMultiPlatformModule,
   'lace-mobile': laceMultiPlatformModule,
+  'lace-extension-guest': laceMultiPlatformModule,
 };
 
 export default moduleMap;

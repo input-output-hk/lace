@@ -22,6 +22,24 @@ export type SteelSwapPoolOutput = {
   volumeFee: number;
 };
 
+/**
+ * A `splitGroup` leaf is an estimate-shaped split that CONTAINS pools — it is
+ * not a pool itself. Typing it as `SteelSwapPoolOutput[][]` is what made
+ * `splitGroup.flat()` yield objects with no `dex`, rendering the route as "-".
+ */
+export type SteelSwapSplitEntry = {
+  tokenA: string;
+  quantityA: number;
+  tokenB: string;
+  quantityB: number;
+  totalFee: number;
+  totalDeposit: number;
+  steelswapFee: number;
+  bonusOut: number;
+  price: number;
+  pools?: SteelSwapPoolOutput[];
+};
+
 export type SteelSwapEstimateResponse = {
   tokenA: string;
   quantityA: number;
@@ -33,7 +51,7 @@ export type SteelSwapEstimateResponse = {
   bonusOut: number;
   price: number;
   pools?: SteelSwapPoolOutput[];
-  splitGroup?: SteelSwapPoolOutput[][];
+  splitGroup?: SteelSwapSplitEntry[][];
 };
 
 // POST /swap/build/

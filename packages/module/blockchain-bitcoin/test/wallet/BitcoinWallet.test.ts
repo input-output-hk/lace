@@ -193,6 +193,33 @@ describe('BitcoinWallet', () => {
     wallet.shutdown();
   });
 
+  it('still returns the txId when deriving the pending entry fails', async () => {
+    (utils.historyEntryFromRawTx as Mock).mockRejectedValue(
+      new Error('has no matching Address'),
+    );
+
+    const wallet = new BitcoinWallet(
+      provider,
+      feeMarketProvider,
+      20,
+      walletInfo,
+      poll$,
+      resync$,
+      logger,
+    );
+
+    const txId = await firstValueFrom(wallet.submitTransaction('rawTxHex'));
+
+    expect(txId.unwrap()).toBe('mockTxId');
+    expect(wallet.pendingTransactions$.getValue()).toEqual([]);
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to derive pending entry for submitted transaction:',
+      expect.any(Error),
+    );
+
+    wallet.shutdown();
+  });
+
   it('syncs remote pending transactions and removes/replaces local ones correctly', async () => {
     const wallet = new BitcoinWallet(
       provider,

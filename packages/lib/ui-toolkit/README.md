@@ -24,7 +24,7 @@ See [docs/atomic-design.md](../../../docs/atomic-design.md).
 1. Search for the icon name in the [Figma icons directory](https://www.figma.com/design/1JgLNRj71509LNX4St4Yzm/Lace-UI-Toolkit--v2-?node-id=29-78&p=f&m=dev) or in [Hugeicons library](https://hugeicons.com/icons).
 
 2. Add the new icon in the `IconMap.ts` file:
-   - Import the new icon stroke variant from `@hugeicons-pro/core-stroke-rounded` and from `@hugeicons-pro/core-solid-rounded` if applicable. Create the new icon variant within `iconMap` giving it an accurate name.
+   - Import the new icon stroke variant from `@hugeicons-pro/core-stroke-rounded/dist/esm/<IconName>Icon` and, if applicable, the solid variant from `@hugeicons-pro/core-solid-rounded/dist/esm/<IconName>Icon` — a **default** import per icon. Do NOT use a named import from the pack barrel (`from '@hugeicons-pro/core-stroke-rounded'`): Metro does not tree-shake, so a single barrel import bundles all ~4700 icon modules of that pack (~18 MiB in the guest web build). Create the new icon variant within `iconMap` giving it an accurate name.
 
 You can now use it importing `Icon` from `@lace-lib/ui-toolkit`. E.g.:
 

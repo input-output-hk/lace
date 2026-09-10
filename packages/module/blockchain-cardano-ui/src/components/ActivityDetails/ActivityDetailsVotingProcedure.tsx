@@ -1,12 +1,9 @@
 import { Cardano } from '@cardano-sdk/core';
-import { HexBlob } from '@cardano-sdk/util';
 import { useTranslation } from '@lace-contract/i18n';
 import { Accordion } from '@lace-lib/ui-toolkit';
 import React from 'react';
 
 import { ActivityDetailItem } from './ActivityDetailItem';
-
-import type { Hash28ByteBase16 } from '@cardano-sdk/crypto';
 
 export enum VoterTypeEnum {
   CONSTITUTIONAL_COMMITTEE = 'constitutionalCommittee',
@@ -14,14 +11,9 @@ export enum VoterTypeEnum {
   DREP = 'drep',
 }
 
-export const drepIDasBech32FromHash = (
-  value: Hash28ByteBase16,
-): Cardano.DRepID =>
-  Cardano.DRepID(HexBlob.toTypedBech32('drep', HexBlob(value)));
-
 export const getDRepId = (voter: Cardano.Voter): Cardano.DRepID | string =>
   getVoterType(voter.__typename) === VoterTypeEnum.DREP
-    ? drepIDasBech32FromHash(voter.credential.hash)
+    ? Cardano.DRepID.cip129FromCredential(voter.credential)
     : voter.credential.hash.toString();
 
 export const getVoterType = (voterType: Cardano.VoterType): VoterTypeEnum => {

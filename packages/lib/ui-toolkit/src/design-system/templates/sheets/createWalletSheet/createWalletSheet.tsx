@@ -10,7 +10,7 @@ import {
   Text,
   Toggle,
 } from '../../../atoms';
-import { footerHeight } from '../../../organisms';
+import { footerHeight, useSheetSubmit } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 export type WalletBlockchainOption = {
@@ -50,6 +50,8 @@ export const CreateWalletSheetTemplate = ({
   options,
   nameTestID = 'create-wallet-name-input',
 }: CreateWalletSheetTemplateProps) => {
+  const submitProps = useSheetSubmit();
+
   return (
     <Column
       gap={spacing.M}
@@ -63,6 +65,7 @@ export const CreateWalletSheetTemplate = ({
         inputError={nameError}
         testID={nameTestID}
         maxLength={NAME_MAX_LENGTH}
+        {...submitProps}
       />
       <Text.S variant="secondary">{description}</Text.S>
       <Column gap={spacing.M}>

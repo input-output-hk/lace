@@ -14,15 +14,25 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 export const BrowsePoolSheet = (
   props: SheetScreenProps<SheetRoutes.BrowsePool>,
 ) => {
-  const browsePoolProps = useBrowsePool(props.route.params);
+  const { isSelecting, ...browsePoolProps } = useBrowsePool(props.route.params);
   const { navigation } = props;
   const { t } = useTranslation();
 
   useEffect(() => {
     navigation.setOptions({
-      header: <Sheet.Header title={t('v2.pages.browse-pool.title')} />,
+      header: (
+        <Sheet.Header
+          // Titled as the decision it is when a flow sent the user here to
+          // pick, rather than as a place they chose to browse.
+          title={t(
+            isSelecting
+              ? 'v2.pages.browse-pool.select-title'
+              : 'v2.pages.browse-pool.title',
+          )}
+        />
+      ),
     });
-  }, [navigation, t]);
+  }, [navigation, t, isSelecting]);
 
   if (isWeb) {
     return <BrowsePoolTemplate {...browsePoolProps} />;

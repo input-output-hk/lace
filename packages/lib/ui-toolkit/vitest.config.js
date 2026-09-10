@@ -10,6 +10,6 @@ export default defineConfig({
       ...baseConfig.test.coverage,
       reportsDirectory: __dirname + '/coverage',
     },
-    include: [__dirname + '/**/*.test.ts'],
+    include: [__dirname + '/**/*.test.ts', __dirname + '/**/*.test.tsx'],
   },
 });

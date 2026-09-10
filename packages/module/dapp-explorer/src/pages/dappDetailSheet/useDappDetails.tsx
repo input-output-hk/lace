@@ -1,10 +1,10 @@
-import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import { isWeb, openUrl } from '@lace-lib/ui-toolkit';
 import { useCallback, useMemo } from 'react';
 
 import { useLaceSelector } from '../../hooks/lace-context';
+import { useDappExplorerConfig } from '../../hooks/useDappExplorerConfig';
 
 import type { DappRating } from '@lace-lib/ui-toolkit';
 
@@ -57,17 +57,7 @@ export const useDappDetails = (
 ): DappDetailsTemplateProps | null => {
   const { t } = useTranslation();
   const selectedDapp = useLaceSelector('dappExplorer.getDappById', activeDapp);
-  const loadedFeatures = useLaceSelector('features.selectLoadedFeatures');
-
-  // todo: best practice write the feature payload to store? or use a sideeffect?
-  const shouldShowStatistics = useMemo<boolean>(() => {
-    const featureFlags = loadedFeatures?.featureFlags || [];
-    const dappExplorerFlag = featureFlags.find(
-      (flag: FeatureFlag) => flag.key === FeatureFlagKey('DAPP_EXPLORER'),
-    ) as FeatureFlag<{ showStatistics: boolean }> | undefined;
-
-    return dappExplorerFlag?.payload?.showStatistics ?? false;
-  }, [loadedFeatures]);
+  const { showStatistics: shouldShowStatistics } = useDappExplorerConfig();
 
   const handleLaunchDapp = useCallback(() => {
     if (!selectedDapp) return;

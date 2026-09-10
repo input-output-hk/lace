@@ -15,6 +15,7 @@ import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { Timestamp } from '@lace-lib/util';
 import { Err, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import * as getScriptAddressModule from '../../../src/store/get-script-address';
@@ -77,6 +78,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           expectObservable(sideEffect$).toBe('a-(bcd)', {
@@ -107,6 +109,73 @@ describe('addressDiscoverySync', () => {
               operationId,
             }),
           });
+        },
+      };
+    });
+  });
+
+  it('cancels in-flight discovery when the account leaves the active network', () => {
+    testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
+      const accountId = threeAccountCardanoWalletAccounts[0].accountId;
+      const tipHash = 'tip-hash';
+      const operationId = `${accountId}-${tipHash}-address-discovery`;
+      const operation: SyncOperation = {
+        operationId,
+        status: 'Pending',
+        description: 'sync.operation.address-discovery',
+        startedAt: Timestamp(Date.now()),
+      };
+
+      const addSyncOperation$ = hot('a', {
+        a: actions.sync.addSyncOperation({ accountId, operation }),
+      });
+
+      // Account is on the active network at subscribe (so discovery starts),
+      // then a network switch drops it from the active set at frame 3 — before
+      // discovery resolves at frame 6. `takeUntil` must cancel the in-flight
+      // discovery so it never reaches upsertAddresses / chained polling /
+      // completeSyncOperation.
+      const accounts$ = hot<AnyAccount[]>('a--b', {
+        a: [threeAccountCardanoWalletAccounts[0]],
+        b: [],
+      });
+
+      const discoverAddresses = vi
+        .fn()
+        .mockImplementation((_props: DiscoverAddressesProps) =>
+          cold('------a|', { a: Ok(cardanoAccount0Addr) }),
+        );
+
+      return {
+        actionObservables: {
+          sync: { addSyncOperation$: addSyncOperation$ },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+        },
+        dependencies: {
+          cardanoProvider: {
+            discoverAddresses,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          const emissions: CardanoSyncAction[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+
+          // Only InProgress — discovery is cancelled by takeUntil.
+          expect(emissions).toEqual([
+            actions.sync.updateSyncOperation({
+              accountId,
+              operationId,
+              update: {
+                status: 'InProgress',
+                type: 'Indeterminate',
+              },
+            }),
+          ]);
         },
       };
     });
@@ -153,6 +222,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // Same behavior as success test - transparent retry doesn't change happy path
@@ -227,6 +297,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // Collect emissions to verify failure occurs after retries
@@ -292,6 +363,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // retryBackoff with 3 retries: 300ms + 600ms + 1200ms = 2100ms
@@ -348,6 +420,7 @@ describe('addressDiscoverySync', () => {
           cardanoProvider:
             {} as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // Should emit nothing because operation is not pending
@@ -387,6 +460,7 @@ describe('addressDiscoverySync', () => {
           cardanoProvider:
             {} as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // Should emit nothing because operation ID doesn't end with -address-discovery
@@ -459,6 +533,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           // Each completion now emits 3 actions (upsert + addSyncOperation(polling)
@@ -558,6 +633,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           sideEffect$.subscribe();
@@ -605,6 +681,7 @@ describe('addressDiscoverySync', () => {
             discoverAddresses,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoSyncAction[] = [];
@@ -727,6 +804,7 @@ describe('addressDiscoverySync', () => {
           cardanoProvider:
             {} as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           expectObservable(sideEffect$).toBe('(abcd)', {

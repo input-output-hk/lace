@@ -9,6 +9,7 @@ import {
   Text,
   Sheet,
   footerHeight,
+  useSheetSubmit,
 } from '@lace-lib/ui-toolkit';
 import { spacing, useTheme } from '@lace-lib/ui-toolkit';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -17,6 +18,7 @@ import { StyleSheet } from 'react-native';
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
 import type { SheetScreenProps, SheetRoutes } from '@lace-lib/navigation';
+import type { ButtonConfig, CustomTextInputProps } from '@lace-lib/ui-toolkit';
 import type { Theme } from '@lace-lib/ui-toolkit';
 
 const SLIPPAGE_PRESETS = [0.1, 0.5, 1, 2.5];
@@ -24,6 +26,12 @@ const MIN_SLIPPAGE = 0.1;
 const MAX_SLIPPAGE = 50;
 const MAX_INPUT_LENGTH = 10;
 const NUMERIC_INPUT_REGEX = /^\d*\.?\d*$/;
+
+// Separate component so it sits under the screen's own SubmitProvider.
+const SlippageInput = (props: CustomTextInputProps) => {
+  const submitProps = useSheetSubmit();
+  return <CustomTextInput {...props} {...submitProps} />;
+};
 
 export const SwapSlippage = (
   props: SheetScreenProps<SheetRoutes.SwapSlippage>,
@@ -75,37 +83,40 @@ export const SwapSlippage = (
     swapSessionId,
   ]);
 
+  const primaryButton = useMemo<ButtonConfig>(
+    () => ({
+      label: t('v2.swap.slippage.confirm'),
+      onPress: handleConfirm,
+      disabled: !isSlippageValid,
+      testID: 'swap-slippage-confirm',
+    }),
+    [t, handleConfirm, isSlippageValid],
+  );
+
   useEffect(() => {
     props.navigation.setOptions({
       header: <Sheet.Header title={t('v2.swap.slippage.title')} />,
-      footer: (
-        <Sheet.Footer
-          primaryButton={{
-            label: t('v2.swap.slippage.confirm'),
-            onPress: handleConfirm,
-            disabled: !isSlippageValid,
-            testID: 'swap-slippage-confirm',
-          }}
-        />
-      ),
+      footer: <Sheet.Footer primaryButton={primaryButton} />,
     });
-  }, [props.navigation, t, handleConfirm, isSlippageValid]);
+  }, [props.navigation, t, primaryButton]);
 
   return (
     <Column style={styles.container}>
       <Text.XS variant="secondary" testID="swap-slippage-description">
         {t('v2.swap.slippage.description')}
       </Text.XS>
-      <CustomTextInput
-        value={inputValue}
-        onChangeText={handleInputChange}
-        keyboardType="decimal-pad"
-        inputMode="decimal"
-        maxLength={MAX_INPUT_LENGTH}
-        placeholder={t('v2.swap.slippage.percentage')}
-        inputError={slippageError}
-        testID="swap-slippage-input"
-      />
+      <Sheet.SubmitProvider action={primaryButton}>
+        <SlippageInput
+          value={inputValue}
+          onChangeText={handleInputChange}
+          keyboardType="decimal-pad"
+          inputMode="decimal"
+          maxLength={MAX_INPUT_LENGTH}
+          placeholder={t('v2.swap.slippage.percentage')}
+          inputError={slippageError}
+          testID="swap-slippage-input"
+        />
+      </Sheet.SubmitProvider>
       <Row gap={spacing.S} justifyContent="space-between">
         {SLIPPAGE_PRESETS.map(preset => {
           const ButtonComponent =

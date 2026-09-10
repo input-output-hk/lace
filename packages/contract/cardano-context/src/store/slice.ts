@@ -1,5 +1,6 @@
 import { activitiesSelectors } from '@lace-contract/activities';
 import { addressesSelectors } from '@lace-contract/addresses';
+import { failuresSelectors } from '@lace-contract/failures';
 import { markParameterizedSelector } from '@lace-contract/module';
 import { networkSelectors } from '@lace-contract/network';
 import { selectHasEverSynced, syncSelectors } from '@lace-contract/sync';
@@ -19,7 +20,7 @@ import uniqBy from 'lodash/uniqBy';
 import { applyInFlightUtxoAdjustments } from '../apply-in-flight-utxo-adjustments';
 import { EXPLOIT_DESCRIPTORS } from '../security/exploit-descriptors';
 import { filterSpendableUtxos, getEligibleCollateralUtxo } from '../util';
-import { CardanoNetworkId } from '../value-objects';
+import { CardanoNetworkId, CardanoSyncFailureId } from '../value-objects';
 
 import {
   collateralFlowReducers,
@@ -929,6 +930,7 @@ const selectRewardAccountDetails = createSelector(
 const { selectPendingActivitiesByAccount } = activitiesSelectors.activities;
 
 const EMPTY_CARDANO_ADDRESSES: CardanoPaymentAddress[] = [];
+const EMPTY_UTXOS: Cardano.Utxo[] = [];
 
 const selectCardanoAddressesByAccount = createSelector(
   addressesSelectors.addresses.selectAllAddresses,
@@ -973,6 +975,46 @@ const selectAvailableAccountUtxos = createSelector(
   },
 );
 /* eslint-enable max-params */
+
+/**
+ * The BALANCE view of each account's UTxOs: the settled set with in-flight
+ * adjustments applied — a submitted transaction's consumed inputs leave the
+ * spending account and its outputs credit the receiving account immediately,
+ * so value in flight between own accounts (a migration sweep) is counted
+ * exactly once instead of twice while providers catch up.
+ *
+ * Differs from {@link selectAvailableAccountUtxos} by NOT filtering the
+ * unspendable (collateral) set: that answers "what can a transaction spend",
+ * this answers "what does the account hold" — collateral is still held.
+ */
+const selectAccountUtxosWithInFlight = createSelector(
+  selectAccountUtxos,
+  selectPendingActivitiesByAccount,
+  selectCardanoAddressesByAccount,
+  (
+    accountUtxos,
+    pendingActivitiesByAccount,
+    addressesByAccount,
+  ): AccountUtxoMap => {
+    const result: AccountUtxoMap = {};
+
+    // Union of both key sets: a freshly created receiving account can hold an
+    // in-flight credit before its first settled UTxO fetch lands.
+    const accountIds = new Set([
+      ...Object.keys(accountUtxos),
+      ...Object.keys(pendingActivitiesByAccount),
+    ]);
+    for (const accountId of accountIds) {
+      result[AccountId(accountId)] = applyInFlightUtxoAdjustments(
+        accountUtxos[AccountId(accountId)] ?? EMPTY_UTXOS,
+        addressesByAccount[AccountId(accountId)] ?? EMPTY_CARDANO_ADDRESSES,
+        pendingActivitiesByAccount[AccountId(accountId)] ?? [],
+      );
+    }
+
+    return result;
+  },
+);
 
 /**
  * Selector that gets the eligible collateral UTXO for a specific account
@@ -1224,6 +1266,26 @@ const selectActiveCardanoAccounts = createSelector(
     ),
 );
 
+/**
+ * Whether any active-network account has a terminal Cardano sync failure
+ * (a `CardanoSyncFailureId` present in the failures store).
+ *
+ * A failed first sync round clears `pendingSync` without a
+ * `lastSuccessfulSync`, so a "has ever synced" gate alone would keep the
+ * portfolio initial-load skeleton forever. This lets that gate exit on
+ * terminal failure so the portfolio and its sync-error surface render.
+ */
+const selectActiveNetworkHasSyncFailure = createSelector(
+  [
+    walletsSelectors.wallets.selectActiveNetworkAccounts,
+    failuresSelectors.failures.selectAllFailures,
+  ],
+  (accounts, failures): boolean =>
+    accounts.some(
+      account => !!failures[CardanoSyncFailureId(account.accountId)],
+    ),
+);
+
 const getAccountFlaggedExploits = (
   activitiesByAccount: Record<AccountId, Activity[]>,
   accountId: AccountId,
@@ -1430,6 +1492,7 @@ export const cardanoContextSelectors = {
     selectProtocolParameters,
     selectEraSummaries,
     selectAccountUtxos,
+    selectAccountUtxosWithInFlight,
     selectAccountUnspendableUtxos,
     selectLastFetchedUtxoCacheKeyByAccount,
     selectRewardAccountDetails,
@@ -1450,6 +1513,7 @@ export const cardanoContextSelectors = {
     selectFlaggedExploitsByAccount,
     selectSecurityScanState,
     selectNeedsSecurityRescan,
+    selectActiveNetworkHasSyncFailure,
   },
   ...collateralFlowSelectors,
   ...nightDesignationFlowSelectors,

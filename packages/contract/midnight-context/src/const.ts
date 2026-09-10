@@ -1,5 +1,5 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 
 import { MidnightNetworkId } from './value-objects';
 

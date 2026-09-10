@@ -752,10 +752,14 @@ export const createHardwareWalletCreationSideEffect =
                       } as Partial<HardwareWallet>,
                     }),
                     actions.accountManagement.setLoading(false),
-                    actions.views.setActiveSheetPage({
-                      route: SuccessCreateNewWalletRoute,
-                      params: { walletId: existingWallet.walletId },
-                    }),
+                    ...(payload.shouldSuppressSuccessSheet
+                      ? []
+                      : [
+                          actions.views.setActiveSheetPage({
+                            route: SuccessCreateNewWalletRoute,
+                            params: { walletId: existingWallet.walletId },
+                          }),
+                        ]),
                   ]);
                 }
                 if (
@@ -776,14 +780,24 @@ export const createHardwareWalletCreationSideEffect =
                   actions.wallets.addWallet(
                     stampWalletOnboardedAt({
                       ...entity,
-                      metadata: { ...entity.metadata, order: wallets.length },
+                      metadata: {
+                        ...entity.metadata,
+                        ...(payload.walletName
+                          ? { name: payload.walletName }
+                          : {}),
+                        order: wallets.length,
+                      },
                     }),
                   ),
                   actions.accountManagement.setLoading(false),
-                  actions.views.setActiveSheetPage({
-                    route: SuccessCreateNewWalletRoute,
-                    params: { walletId: entity.walletId },
-                  }),
+                  ...(payload.shouldSuppressSuccessSheet
+                    ? []
+                    : [
+                        actions.views.setActiveSheetPage({
+                          route: SuccessCreateNewWalletRoute,
+                          params: { walletId: entity.walletId },
+                        }),
+                      ]),
                 ]);
               }),
               catchError(error => {
@@ -815,7 +829,12 @@ export const createWalletCreationSideEffect =
     return attemptCreateWallet$.pipe(
       withLatestFrom(selectAll$),
       switchMap(([action, wallets]) => {
-        const { walletName, blockchains, recoveryPhrase } = action.payload;
+        const {
+          walletName,
+          blockchains,
+          recoveryPhrase,
+          shouldSuppressSuccessSheet,
+        } = action.payload;
 
         const trimmedName = walletName.trim();
         if (!trimmedName || blockchains.length === 0) {
@@ -871,10 +890,14 @@ export const createWalletCreationSideEffect =
                       stampWalletOnboardedAt(newWallet),
                     ),
                     actions.accountManagement.setLoading(false),
-                    actions.views.setActiveSheetPage({
-                      route: successRoute,
-                      params: { walletId: newWallet.walletId },
-                    }),
+                    ...(shouldSuppressSuccessSheet
+                      ? []
+                      : [
+                          actions.views.setActiveSheetPage({
+                            route: successRoute,
+                            params: { walletId: newWallet.walletId },
+                          }),
+                        ]),
                   ]);
                 }),
                 catchError(error => {

@@ -1,8 +1,15 @@
 import {
   ADA_DECIMALS,
   DEFAULT_DECIMALS,
+  LOVELACE_TOKEN_ID,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
+import {
+  earnRewardsPoolSelectionId,
+  earnRewardsMode,
+  needsEarnRewardsPoolChoice,
+  resolveEarnRewardsTarget,
+} from '@lace-contract/earn-rewards';
 import {
   getDelegationHealth,
   getDelegationStatus,
@@ -17,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
 
+import type { EarnRewardsMode } from '@lace-contract/earn-rewards';
 import type { TFunction } from '@lace-contract/i18n';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type {
@@ -64,6 +72,12 @@ export const useGovernanceCenter = () => {
 
   const rewardAccountDetailsMap = useLaceSelector(
     'cardanoContext.selectRewardAccountDetails',
+  );
+  const pendingActivitiesByAccount = useLaceSelector(
+    'activities.selectPendingActivitiesByAccount',
+  );
+  const tokensGroupedByAccount = useLaceSelector(
+    'tokens.selectTokensGroupedByAccount',
   );
   const wallets = useLaceSelector('wallets.selectActiveNetworkWallets');
   const dReps = useLaceSelector('dRepsList.selectDReps');
@@ -128,6 +142,44 @@ export const useGovernanceCenter = () => {
     NavigationControls.navigate(SheetRoutes.BrowseDRep, { accountId });
   }, []);
 
+  // Earn rewards supersedes the plain "Delegate" CTA for any account whose vote is
+  // not yet delegated — with no stake pool either, or already staking without a
+  // DRep.
+  const { featureFlags } = useLaceSelector('features.selectLoadedFeatures');
+  const chainId = useLaceSelector('cardanoContext.selectChainId');
+  const earnRewardsTarget = useMemo(
+    () => resolveEarnRewardsTarget({ featureFlags, chainId }),
+    [featureFlags, chainId],
+  );
+
+  const navigateToEarnRewards = useCallback(
+    (accountId: string, mode: EarnRewardsMode | undefined) => {
+      // Straight to the pool list when there is a pool to choose. A vote-only
+      // account already stakes, so it is never asked.
+      if (needsEarnRewardsPoolChoice({ target: earnRewardsTarget, mode })) {
+        NavigationControls.navigate(SheetRoutes.BrowsePool, {
+          accountId,
+          poolSelectionId: earnRewardsPoolSelectionId(accountId),
+          // Declared, not left for the picker to infer. Read from the target
+          // rather than hardcoded: this CTA requires the vote leg (see
+          // isEarnRewardsAvailable below), so dropping it here would be the
+          // one change that silently makes the notice a lie.
+          poolSelectionNotice:
+            earnRewardsTarget?.dRep === undefined ? 'stake' : 'stake-and-vote',
+        });
+        return;
+      }
+      NavigationControls.navigate(SheetRoutes.EarnRewards, { accountId });
+    },
+    [earnRewardsTarget],
+  );
+  // A resolved target already implies the feature is enabled (see the resolver).
+  // This center's reroute exists to capture VOTING power, so it requires the
+  // vote leg specifically: a pool-only target (no promoted DRep) still shows
+  // earn-rewards elsewhere, but rerouting a governance CTA into a flow that
+  // delegates no vote would dress staking up as governance participation.
+  const isEarnRewardsAvailable = earnRewardsTarget?.dRep !== undefined;
+
   const navigateToBuy = useCallback((accountId: string) => {
     NavigationControls.navigate(SheetRoutes.Buy, { accountId });
   }, []);
@@ -150,13 +202,41 @@ export const useGovernanceCenter = () => {
           listReady: isListReady,
         });
 
+        // `controlledAmount` is the STAKE KEY's controlled stake, which Blockfrost
+        // reports as 0 for a never-registered key — so it says nothing about the
+        // wallet's balance. Read the account's ADA the way StakeCard does.
+        const adaBalance = (
+          tokensGroupedByAccount?.[account.accountId]?.fungible ?? []
+        ).find(token => token.tokenId === LOVELACE_TOKEN_ID)?.available;
+        const hasAda =
+          adaBalance !== undefined && BigInt(adaBalance.toString()) > 0n;
+
         const hasFunds =
           rewardAccountInfo !== undefined &&
           rewardAccountInfo.controlledAmount.toString() !== '0';
 
+        // Reroute the CTA to earn-rewards only for the shared audience — the one
+        // rule the nudge and staking center also use (isEarnRewardsAudience).
+        const offerMode = earnRewardsMode({
+          rewardAccountInfo,
+          hasPendingTx:
+            (pendingActivitiesByAccount[account.accountId]?.length ?? 0) > 0,
+          hasAda,
+          hasDRep: earnRewardsTarget?.dRep !== undefined,
+        });
+        const isEarnRewardsApplicable =
+          isEarnRewardsAvailable && offerMode !== undefined;
+
         let state: GovernanceCardProps['state'];
         if (rewardAccountInfo === undefined) {
           state = 'loading';
+        } else if (isEarnRewardsApplicable) {
+          // Earn-rewards precedes `empty-account`: an audience account may have an
+          // unregistered stake key, so `hasFunds` (controlledAmount) is 0 even for
+          // a funded wallet. The flow registers the key in the same tx, so the
+          // offer is valid — and `hasAda` inside the rule keeps a genuinely empty
+          // wallet on "Add funds".
+          state = 'not-delegated';
         } else if (!hasFunds) {
           // No funds → nothing to delegate; mirror StakeCard's empty-account
           // CTA precedence (checked before delegation states).
@@ -204,7 +284,11 @@ export const useGovernanceCenter = () => {
                 DEFAULT_DECIMALS,
               )}`
             : undefined,
-          onDelegate: openBrowseDRep,
+          onDelegate: isEarnRewardsApplicable
+            ? () => {
+                navigateToEarnRewards(account.accountId, offerMode);
+              }
+            : openBrowseDRep,
           onAddFunds: isBuyAvailable
             ? () => {
                 navigateToBuy(account.accountId);
@@ -219,10 +303,14 @@ export const useGovernanceCenter = () => {
       rewardAccountDetailsMap,
       dReps,
       isListReady,
+      isEarnRewardsAvailable,
       walletNameById,
       adaTicker,
       navigateToBrowseDRep,
       navigateToBuy,
+      navigateToEarnRewards,
+      pendingActivitiesByAccount,
+      tokensGroupedByAccount,
       isBuyAvailable,
       t,
     ],

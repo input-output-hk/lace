@@ -136,6 +136,83 @@ describe('authorizedDappsSlice', () => {
     });
   });
 
+  describe('setAuthorizedDapps', () => {
+    it('replaces the state wholesale — entries absent from the snapshot are dropped', () => {
+      const initial: AuthorizedDappsDataSlice = {
+        Cardano: [
+          {
+            blockchain: 'Cardano',
+            dapp: dappA,
+            isPersisted: true,
+          },
+        ],
+      };
+
+      const state = reducer(
+        initial,
+        dappConnectorActions.authorizedDapps.setAuthorizedDapps({
+          Midnight: [
+            {
+              blockchain: 'Midnight',
+              dapp: dappB,
+              isPersisted: true,
+            },
+          ],
+        }),
+      );
+
+      expect(state).toEqual({
+        Midnight: [
+          {
+            blockchain: 'Midnight',
+            dapp: dappB,
+            isPersisted: true,
+          },
+        ],
+      });
+    });
+
+    it('an empty snapshot clears the slice', () => {
+      const initial: AuthorizedDappsDataSlice = {
+        Cardano: [
+          {
+            blockchain: 'Cardano',
+            dapp: dappA,
+            isPersisted: true,
+          },
+        ],
+      };
+
+      expect(
+        reducer(
+          initial,
+          dappConnectorActions.authorizedDapps.setAuthorizedDapps({}),
+        ),
+      ).toEqual({});
+    });
+  });
+
+  describe('authorizedDappsViewed', () => {
+    it('is a signal — it leaves the slice unchanged', () => {
+      const initial: AuthorizedDappsDataSlice = {
+        Cardano: [
+          {
+            blockchain: 'Cardano',
+            dapp: dappA,
+            isPersisted: true,
+          },
+        ],
+      };
+
+      expect(
+        reducer(
+          initial,
+          dappConnectorActions.authorizedDapps.authorizedDappsViewed(),
+        ),
+      ).toBe(initial);
+    });
+  });
+
   describe('removeAuthorizedDapp', () => {
     it('removes the dapp from the blockchain list', () => {
       let state = reducer(

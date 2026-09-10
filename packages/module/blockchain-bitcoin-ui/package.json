@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@lace-contract/addresses": "*",
+    "@lace-contract/bitcoin-context": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/module": "*"
   },

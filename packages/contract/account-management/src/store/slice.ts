@@ -165,6 +165,12 @@ export type CreateWalletProps = {
   walletName: string;
   blockchains: BlockchainName[];
   recoveryPhrase?: string[];
+  /**
+   * Skips the success sheet. For callers that own their own journey (the
+   * migration wizard): the sheet is add-wallet's ending, and popping it over
+   * a flow that is mid-way reads as the flow finishing when it hasn't.
+   */
+  shouldSuppressSuccessSheet?: boolean;
 };
 
 export type RemoveWalletProps = {

@@ -15,6 +15,8 @@ export const OPTIONS = {
 } as const;
 
 export const BROWSE_POOL_OPTIONS: readonly BrowsePoolSortOption[] = [
+  'ranking',
+  'ros',
   'ticker',
   'saturation',
   'cost',

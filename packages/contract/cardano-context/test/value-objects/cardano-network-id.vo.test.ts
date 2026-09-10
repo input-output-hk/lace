@@ -54,4 +54,29 @@ describe('value-objects/cardano-network-id', () => {
       expect(chainId).toBeUndefined();
     });
   });
+
+  describe('CardanoNetworkId.getName', () => {
+    it.each([
+      [Cardano.NetworkMagics.Mainnet, 'Mainnet'],
+      [Cardano.NetworkMagics.Preprod, 'Preprod'],
+      [Cardano.NetworkMagics.Preview, 'Preview'],
+      [Cardano.NetworkMagics.Sanchonet, 'Sanchonet'],
+    ])('should name the network for magic %i', (networkMagic, name) => {
+      expect(CardanoNetworkId.getName(CardanoNetworkId(networkMagic))).toBe(
+        name,
+      );
+    });
+
+    it('should return undefined for a magic number it has no name for', () => {
+      expect(
+        CardanoNetworkId.getName(BlockchainNetworkId('cardano-999999')),
+      ).toBeUndefined();
+    });
+
+    it('should return undefined for a non-Cardano network ID', () => {
+      expect(
+        CardanoNetworkId.getName(BlockchainNetworkId('bitcoin-mainnet')),
+      ).toBeUndefined();
+    });
+  });
 });

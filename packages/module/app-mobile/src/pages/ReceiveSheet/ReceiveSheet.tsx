@@ -88,7 +88,7 @@ export const ReceiveSheet = ({
     currentAddress,
   ]);
 
-  if (!addressData) {
+  if (dropdownItems.length === 0) {
     return null;
   }
 

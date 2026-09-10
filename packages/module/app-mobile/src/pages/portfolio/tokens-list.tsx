@@ -35,9 +35,8 @@ import {
   compareNumbersDesc,
   compareTokensByQuantity,
   compareTokensByTicker,
-  DEFAULT_TOKEN_SORT_OPTION,
-  getDefaultTokenSortOrder,
   getTokenSortValue,
+  resolveEffectiveTokenSort,
   type TokenSortOption,
   type TokenSortOrder,
 } from './utils/portfolioSort';
@@ -129,10 +128,8 @@ export const TokensList = ({
       ? aggregatedAssetsForVisibleAccounts
       : accountAssets;
     const prices = isTokenPricingEnabled ? allPrices : undefined;
-    const effectiveSortOption = sortOption ?? DEFAULT_TOKEN_SORT_OPTION;
-    const effectiveSortOrder = sortOption
-      ? sortOrder
-      : getDefaultTokenSortOrder(DEFAULT_TOKEN_SORT_OPTION);
+    const { option: effectiveSortOption, order: effectiveSortOrder } =
+      resolveEffectiveTokenSort(sortOption, sortOrder);
     const valueByTokenId =
       effectiveSortOption === 'value'
         ? new Map(

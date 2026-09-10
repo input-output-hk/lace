@@ -21,6 +21,14 @@ import { Pressable, StyleSheet, ScrollView, View } from 'react-native';
 
 import { QuoteInfo } from '../components/QuoteInfo';
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import {
+  LOVELACE_TOKEN_ID,
+  formatLovelaceAsAda,
+  isSwapUnderfunded,
+  maxSellableBaseAmount,
+  requiredAdaForSwap,
+  swapAdaOverhead,
+} from '../quote-math';
 
 import type {
   LayoutSize,
@@ -238,9 +246,42 @@ export const SwapsCenterPage = () => {
       ? formatAmountToLocale(selectedQuote.expectedBuyAmount, buyTokenDecimals)
       : selectedQuote?.expectedBuyAmount;
 
+  const adaTokenData = useMemo(
+    () =>
+      accountFungibleTokens
+        ? (
+            accountFungibleTokens as Array<{
+              tokenId: string;
+              available: unknown;
+            }>
+          ).find(token => token.tokenId === LOVELACE_TOKEN_ID)
+        : undefined,
+    [accountFungibleTokens],
+  );
+  const adaAvailable = useMemo(() => {
+    if (!adaTokenData) return undefined;
+    try {
+      return BigInt(String(adaTokenData.available));
+    } catch {
+      return undefined;
+    }
+  }, [adaTokenData]);
+
+  // The ADA the quote needs on top of the sold amount. Undefined until a quote
+  // lands, which is also when the CTA can first commit anything.
+  const adaOverhead = useMemo(
+    () => (selectedQuote ? swapAdaOverhead(selectedQuote) : undefined),
+    [selectedQuote],
+  );
+
+  // Selling never costs only the sold amount: fees and the deposit come out of
+  // the ADA side too. Checking the sold token alone let a 1 ADA sell through on
+  // a 1.99 ADA account, and a 7 ADA sell on a 12 ADA one — both rejected by the
+  // build endpoint, the second with an opaque 500.
   const isInsufficientFunds = useMemo(() => {
     if (
       !sellTokenData ||
+      !sellTokenId ||
       !sellAmount ||
       sellAmount === '' ||
       sellAmount === '0'
@@ -252,13 +293,72 @@ export const SwapsCenterPage = () => {
         Number(sellAmount) * 10 ** sellTokenData.decimals,
       );
       if (Number.isNaN(inputInSmallestUnit)) return false;
-      return (
-        BigInt(inputInSmallestUnit) > BigInt(String(sellTokenData.available))
-      );
+      return isSwapUnderfunded({
+        adaAvailable,
+        quote: selectedQuote,
+        sellAmountBase: BigInt(inputInSmallestUnit),
+        sellTokenAvailable: BigInt(String(sellTokenData.available)),
+        sellTokenId,
+      });
     } catch {
       return false;
     }
-  }, [sellTokenData, sellAmount]);
+  }, [sellTokenData, sellTokenId, sellAmount, adaAvailable, selectedQuote]);
+
+  // Naming the figure is the point: "Insufficient funds" alone contradicts the
+  // fee row, which shows only 1.85 of a 6.00 requirement. Derived from the same
+  // helper the gate uses, so the number quoted is the number enforced.
+  const insufficientFundsMessage = useMemo(() => {
+    if (!isInsufficientFunds) return undefined;
+    if (!selectedQuote || !sellTokenId) return t('v2.swap.insufficient-funds');
+    try {
+      const sellAmountBase = BigInt(
+        Math.round(Number(sellAmount) * 10 ** (sellTokenData?.decimals ?? 0)),
+      );
+      return t('v2.swap.insufficient-funds-amount', {
+        amount: formatLovelaceAsAda(
+          requiredAdaForSwap({
+            quote: selectedQuote,
+            sellAmountBase,
+            sellTokenId,
+          }),
+        ),
+      });
+    } catch {
+      return t('v2.swap.insufficient-funds');
+    }
+  }, [
+    isInsufficientFunds,
+    selectedQuote,
+    sellTokenId,
+    sellAmount,
+    sellTokenData,
+    t,
+  ]);
+
+  // Half and Max must leave the overhead behind, or they set an amount that is
+  // guaranteed to fail the build — Max on an ADA balance always did.
+  const setSellFraction = useCallback(
+    (divisor: bigint) => {
+      if (!sellTokenData || !sellTokenId) return;
+      try {
+        const available = BigInt(String(sellTokenData.available));
+        const sellable = maxSellableBaseAmount({
+          available,
+          overhead: adaOverhead,
+          sellTokenId,
+        });
+        const target =
+          available / divisor < sellable ? available / divisor : sellable;
+        dispatchSellAmountChanged({
+          sellAmount: String(Number(target) / 10 ** sellTokenData.decimals),
+        });
+      } catch {
+        /* leave the amount untouched when the balance is unreadable */
+      }
+    },
+    [sellTokenData, sellTokenId, adaOverhead, dispatchSellAmountChanged],
+  );
 
   const handleSellTokenPress = useCallback(() => {
     NavigationControls.navigate(SheetRoutes.SwapSelectSellToken);
@@ -297,13 +397,13 @@ export const SwapsCenterPage = () => {
     }
   }, [isQuoted, isSwapInProgress, sellTokenId, buyTokenId]);
 
-  const ctaLabel = isQuoting
-    ? t('v2.swap.fetching-quote')
-    : isQuoted || isSwapInProgress
-    ? t('v2.swap.swap')
-    : areBothTokensSelected
-    ? t('v2.swap.choose-amount')
-    : t('v2.swap.select-token');
+  const ctaLabelKey = (() => {
+    if (isQuoting) return 'v2.swap.fetching-quote' as const;
+    if (isQuoted || isSwapInProgress) return 'v2.swap.swap' as const;
+    if (areBothTokensSelected) return 'v2.swap.choose-amount' as const;
+    return 'v2.swap.select-token' as const;
+  })();
+  const ctaLabel = t(ctaLabelKey);
 
   return (
     <PageContainerTemplate fullWidth>
@@ -354,9 +454,7 @@ export const SwapsCenterPage = () => {
             placeholder={t('v2.swap.select-sell-option')}
             token={sellToken}
             amount={sellAmount ?? ''}
-            error={
-              isInsufficientFunds ? t('v2.swap.insufficient-funds') : undefined
-            }
+            error={insufficientFundsMessage}
             onTokenPress={handleSellTokenPress}
             onAmountChange={handleSellAmountChange}
             quickActions={[
@@ -366,15 +464,10 @@ export const SwapsCenterPage = () => {
                 label={t('v2.swap.half')}
                 testID="swap-sell-input-half"
                 onPress={() => {
-                  if (!sellTokenData) return;
                   trackEvent('swaps | quick amount | half | press', {
                     ...(swapSessionId && { swapSessionId }),
                   });
-                  const half =
-                    Number(sellTokenData.available) /
-                    10 ** sellTokenData.decimals /
-                    2;
-                  dispatchSellAmountChanged({ sellAmount: String(half) });
+                  setSellFraction(2n);
                 }}
               />,
               <Button.Secondary
@@ -383,14 +476,10 @@ export const SwapsCenterPage = () => {
                 label={t('v2.swap.max')}
                 testID="swap-sell-input-max"
                 onPress={() => {
-                  if (!sellTokenData) return;
                   trackEvent('swaps | quick amount | max | press', {
                     ...(swapSessionId && { swapSessionId }),
                   });
-                  const max =
-                    Number(sellTokenData.available) /
-                    10 ** sellTokenData.decimals;
-                  dispatchSellAmountChanged({ sellAmount: String(max) });
+                  setSellFraction(1n);
                 }}
               />,
             ]}
@@ -418,7 +507,9 @@ export const SwapsCenterPage = () => {
               quote={selectedQuote}
               slippage={currentSlippage}
               sellTokenName={sellToken!.name}
+              sellTokenDecimals={sellTokenData?.decimals}
               buyTokenName={buyToken!.name}
+              buyTokenDecimals={buyTokenDecimals}
               onSlippagePress={handleSettingsPress}
             />
           )}

@@ -7,6 +7,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@cardano-sdk/core": "0.47.0",
+    "@lace-contract/activities": "*",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app": "*",

@@ -3,6 +3,7 @@ import { syncActions } from '@lace-contract/sync';
 import { Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { combineLatest, filter, map } from 'rxjs';
+import { dummyLogger } from 'ts-log';
 import { describe, it } from 'vitest';
 
 import {
@@ -95,7 +96,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             // Only Preprod accounts (account0, account1); Preview filtered out
             expectObservable(sideEffect$).toBe('(ac)', {
@@ -141,7 +142,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             // Only the first round's operation is dispatched.
             expectObservable(sideEffect$).toBe('a', {
@@ -186,7 +187,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             // Round 1 dispatches at frame 0 (releases at frame 2); round 2
             // then dispatches account1's operation at frame 3.
@@ -231,7 +232,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
           },
@@ -262,7 +263,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('');
           },
@@ -301,7 +302,7 @@ describe('createCoordinateCardanoSync (engine)', () => {
             cardanoContext: { selectChainId$: chainId$ },
             sync: { selectIsSyncOperationPending$ },
           },
-          dependencies: { actions },
+          dependencies: { actions, logger: dummyLogger },
           assertion: sideEffect$ => {
             // Round 1 dispatches at frame 0; the 60s timeout releases the lock,
             // so the second trigger's round dispatches account1 afterwards.

@@ -55,6 +55,12 @@ export type SwapRouteLeg = {
 };
 
 export type SwapDeposit = {
+  /**
+   * Lovelace, smallest-unit integer string. Refunded when the order settles,
+   * but the account must hold it up front — the funds pre-check needs the raw
+   * value, not just the formatted one.
+   */
+  amount: string;
   displayAmount: string;
   displayCurrency: string;
 };

@@ -10,6 +10,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 import { Linking, Platform } from 'react-native';
 
+import { SettingUpOverlay } from './SettingUpOverlay';
 import { useOnboardingStart } from './useOnboardingStart';
 
 import type { StackRoutes, StackScreenProps } from '@lace-lib/navigation';
@@ -25,6 +26,7 @@ export const OnboardingStart = (
     handleOpenPrivacyPolicy,
     handleCookiePolicy,
     isBiometricRequiredModalVisible,
+    isSettingUp,
   } = useOnboardingStart(props);
   const [resetSignal, setResetSignal] = useState(0);
 
@@ -117,6 +119,8 @@ export const OnboardingStart = (
         )}
         onConfirm={handleGoToSettings}
       />
+
+      {isSettingUp && <SettingUpOverlay />}
     </>
   );
 };

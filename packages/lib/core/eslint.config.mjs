@@ -1,6 +1,6 @@
 import { defineConfig } from 'eslint/config';
 
-import rootConfig from '../../../eslint.config.mjs';
+import rootConfig, { hugeiconsBarrelBans } from '../../../eslint.config.mjs';
 
 export default defineConfig(
   rootConfig,
@@ -22,6 +22,8 @@ export default defineConfig(
       'no-restricted-imports': [
         'error',
         {
+          // Re-included: this entry replaces the workspace-wide one.
+          paths: hugeiconsBarrelBans,
           patterns: [
             {
               group: [

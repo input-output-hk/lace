@@ -98,6 +98,16 @@ export const voteDelegationTxBuilderAddonContract = inferContractContext({
   },
 });
 
+export const earnRewardsTxBuilderAddonContract = inferContractContext({
+  name: ContractName('earn-rewards-tx-builder-addon'),
+  instance: 'at-least-one',
+  contractType: 'addon',
+  preloadInServiceWorker: true,
+  provides: {
+    addons: ['loadEarnRewardsTxBuilder'],
+  },
+});
+
 export type Selectors = ContractSelectors<typeof cardanoProviderStoreContract>;
 export type ActionCreators = ContractActionCreators<
   typeof cardanoProviderStoreContract

@@ -1,5 +1,6 @@
 import '../../src/augmentations';
 
+import { activitiesActions } from '@lace-contract/activities';
 import { analyticsActions } from '@lace-contract/analytics';
 import { uiActions } from '@lace-contract/app';
 import { AccountId } from '@lace-contract/wallet-repo';
@@ -23,6 +24,7 @@ import {
 import { swapContextActions } from '../../src/store/slice';
 
 import type { SwapFlowState } from '../../src/store/types';
+import type { Cardano } from '@cardano-sdk/core';
 import type {
   SwapDex,
   SwapProviderError,
@@ -39,6 +41,7 @@ const actions = {
   ...swapContextActions,
   ...uiActions,
   ...analyticsActions,
+  ...activitiesActions,
 };
 
 const mockQuote: SwapQuote = {
@@ -422,7 +425,7 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
-            selectAccountUtxos$: of({}),
+            selectAvailableAccountUtxos$: of({}),
             selectAccountUnspendableUtxos$: of({}),
           },
         },
@@ -461,7 +464,7 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
-            selectAccountUtxos$: of({}),
+            selectAvailableAccountUtxos$: of({}),
             selectAccountUnspendableUtxos$: of({}),
           },
         },
@@ -503,7 +506,7 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
-            selectAccountUtxos$: of({}),
+            selectAvailableAccountUtxos$: of({}),
             selectAccountUnspendableUtxos$: of({}),
           },
         },
@@ -516,6 +519,85 @@ describe('swap-context side effects', () => {
             actions.swapFlow.buildFailed({
               errorMessage: 'v2.swap.error.no-provider-available',
             }),
+          );
+        },
+      }));
+    });
+  });
+
+  describe('makeBuildSwapTx UTxO sourcing', () => {
+    // The build must draw from selectAvailableAccountUtxos — the selector that
+    // excludes collateral and applies the pending-tx overlay — not the raw
+    // tracked set. A signable UTxO from that map must reach the provider
+    // serialized; one at a foreign address must not.
+    it('sends the provider the signable available UTxOs', () => {
+      const signerAddress =
+        'addr1q96l79jg5ahsrkfyrprs9eaaek0g0tfg3m4tln0vkmq29m8gnpz7wtsycpytk4tn3fe85fqhw7enll66ud9ex6yeu4wqgwfsph';
+      const foreignAddress =
+        'addr1qyf9jlvjr6en2wjkyrcdge0c8xrhgflkg4m5kwhl4yfw7g4yw2z95kepz8urcn8gl425e2jqm2pv94rm959yvqvcg32q286tna';
+      const utxoAt = (address: string, index: number): Cardano.Utxo =>
+        [
+          { txId: 'ab'.repeat(32), index },
+          { address, value: { coins: 5_000_000n } },
+        ] as unknown as Cardano.Utxo;
+      const captured: Array<{ utxos: string[]; collateralUtxos: string[] }> =
+        [];
+      const capturingProvider = {
+        ...mockProvider,
+        buildSwapTx: (request: {
+          utxos: string[];
+          collateralUtxos: string[];
+        }) => {
+          captured.push(request);
+          return mockProvider.buildSwapTx();
+        },
+      };
+
+      testSideEffect(makeBuildSwapTx, ({ hot, flush }) => ({
+        stateObservables: {
+          swapFlow: {
+            selectSwapFlowState$: hot<SwapFlowState>('-a', {
+              a: buildingState,
+            }),
+          },
+          swapConfig: {
+            selectSlippage$: of(0.5),
+            selectExcludedDexes$: of([] as string[]),
+          },
+          swapAnalytics: {
+            selectSwapSessionId$: of(undefined),
+          },
+          addresses: {
+            selectByAccountId$: of(
+              ((): Array<{ address: string }> => [
+                { address: signerAddress },
+              ]) as (id: AccountId) => Array<{ address: string }>,
+            ) as never,
+          },
+          cardanoContext: {
+            selectAvailableAccountUtxos$: of({
+              [testAccountId]: [
+                utxoAt(signerAddress, 0),
+                utxoAt(foreignAddress, 1),
+              ],
+            }),
+            selectAccountUnspendableUtxos$: of({}),
+          },
+        },
+        dependencies: {
+          actions,
+          logger,
+          swapProviders: [capturingProvider],
+        },
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          expect(captured).toHaveLength(1);
+          expect(captured[0].utxos).toHaveLength(1);
+          expect(captured[0].collateralUtxos).toHaveLength(0);
+          expect(emissions).toContainEqual(
+            actions.swapFlow.buildCompleted({ unsignedTxCbor: 'deadbeef' }),
           );
         },
       }));
@@ -776,6 +858,69 @@ describe('swap-context side effects', () => {
             expect(emissions).toContainEqual(
               actions.swapFlow.submissionSucceeded({ txId: 'tx-hash-123' }),
             );
+          },
+        }),
+      );
+    });
+
+    it('records a pending activity carrying the submit metadata, so in-flight inputs leave the available UTxO set', () => {
+      const inFlightMetadata = {
+        Cardano: {
+          consumedInputs: [{ txId: 'consumed-tx', index: 0 }],
+          producedOutputs: [],
+        },
+      };
+      testSideEffect(
+        {
+          build: () =>
+            makeProcessing({
+              submitTx: (_params, mapResult) =>
+                of(
+                  mapResult({
+                    success: true,
+                    txId: 'tx-hash-123',
+                    blockchainSpecificActivityMetadata: inFlightMetadata,
+                  }),
+                ),
+            }),
+        },
+        ({ hot, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: processingState,
+              }),
+            },
+            swapConfig: { selectSlippage$: of(0.5) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            const upsert = emissions.find(
+              (
+                emission,
+              ): emission is ReturnType<
+                typeof actions.activities.upsertActivities
+              > =>
+                (emission as { type?: string }).type ===
+                actions.activities.upsertActivities.type,
+            );
+            expect(upsert).toBeDefined();
+            expect(upsert?.payload.accountId).toBe(testAccountId);
+            const [activity] = upsert?.payload.activities ?? [];
+            expect(activity).toMatchObject({
+              accountId: testAccountId,
+              activityId: 'tx-hash-123',
+              blockchainSpecific: inFlightMetadata,
+              type: 'Pending',
+            });
+            // The sell side in base units, negative: this tx sends the sold
+            // amount to the order contract.
+            expect(activity?.tokenBalanceChanges).toHaveLength(1);
+            expect(activity?.tokenBalanceChanges[0]?.tokenId).toBe('lovelace');
           },
         }),
       );

@@ -13,6 +13,8 @@ import {
   filter,
   firstValueFrom,
   from,
+  ignoreElements,
+  interval,
   isObservable,
   map,
   merge,
@@ -23,6 +25,7 @@ import {
   takeUntil,
   tap,
   throwError,
+  timer,
 } from 'rxjs';
 import { CustomError } from 'ts-custom-error';
 import { v4 as uuidv4 } from 'uuid';
@@ -30,6 +33,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { WrongTargetError } from './errors';
 import { RemoteApiPropertyType } from './types';
 import {
+  KEEP_ALIVE_MESSAGE,
+  KEEP_ALIVE_PING_INTERVAL_MS,
   disabledApiMsg as disabledApiMessage,
   isCompletionMessage,
   isEmitMessage,
@@ -70,11 +75,19 @@ export class RemoteApiShutdownError extends CustomError {
   }
 }
 
+/**
+ * Bound on the wait for a response after a replayed request. Generous enough
+ * for a host cold start plus method execution; without it a host that never
+ * comes back would leave the replayed call pending forever.
+ */
+export const REPLAYED_RESPONSE_TIMEOUT_MS = 30_000;
+
 const consumeMethod =
   (
     {
       propName,
       errorTypes,
+      options,
     }: {
       errorTypes?: ErrorClass[];
       options?: MethodRequestOptions;
@@ -96,6 +109,11 @@ const consumeMethod =
     const result = await firstValueFrom(
       merge(
         postMessage(requestMessage).pipe(mergeMap(() => EMPTY)),
+        interval(KEEP_ALIVE_PING_INTERVAL_MS).pipe(
+          takeUntil(concat(message$.pipe(ignoreElements()), of(true))),
+          mergeMap(() => postMessage(KEEP_ALIVE_MESSAGE)),
+          mergeMap(() => EMPTY),
+        ),
         message$.pipe(
           map(({ data }) =>
             fromSerializableObject(data, {
@@ -109,7 +127,16 @@ const consumeMethod =
         ),
         disconnect$.pipe(
           filter(dc => dc.remaining.length === 0),
-          mergeMap(() => throwError(() => new EmptyError())),
+          mergeMap((_, disconnectIndex) =>
+            options?.onDisconnect === 'replay' && disconnectIndex === 0
+              ? merge(
+                  postMessage(requestMessage).pipe(mergeMap(() => EMPTY)),
+                  timer(REPLAYED_RESPONSE_TIMEOUT_MS).pipe(
+                    mergeMap(() => throwError(() => new EmptyError())),
+                  ),
+                )
+              : throwError(() => new EmptyError()),
+          ),
         ),
       ),
     ).catch(error => {

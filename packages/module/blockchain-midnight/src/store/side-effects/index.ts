@@ -1,32 +1,23 @@
 import { deepEquals } from '@cardano-sdk/util';
 import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import {
-  convertHttpUrlToWebsocket,
   hasMidnightAccount,
   isInMemoryMidnightAccount,
+  midnightAccounts$,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
 } from '@lace-contract/midnight-context';
-import { Milliseconds, Timestamp } from '@lace-lib/util';
+import { Milliseconds } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
-import { WalletFacade } from '@midnight-ntwrk/wallet-sdk/facade';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
-  catchError,
-  combineLatest,
-  defaultIfEmpty,
   distinctUntilChanged,
-  EMPTY,
   filter,
-  forkJoin,
   from,
   map,
   merge,
-  mergeMap,
-  of,
   pairwise,
   switchMap,
-  take,
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
@@ -38,72 +29,37 @@ import {
 } from '../../const';
 import { MidnightWalletFailureId } from '../../value-objects/midnight-wallet-failure-id.vo';
 
-import { loadActivityDetails, updateActivities } from './activities';
 import {
   sendFlowAddressValidation,
   sendFlowAnalyticsEnhancer,
 } from './send-flow';
-import { watchMidnightAccount, watchMidnightAccounts } from './watch';
 
 import type { SideEffect } from '../..';
 import type { FeatureFlag } from '@lace-contract/feature/src';
 import type {
   MidnightAccountProps,
-  SerializedMidnightWallet,
   MidnightSDKNetworkId,
 } from '@lace-contract/midnight-context';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { TestnetOption } from '@lace-contract/network';
-import type { CollectionStorage } from '@lace-contract/storage';
 import type {
   AnyAccount,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
-const sameAccounts = (
-  accounts1: InMemoryWalletAccount<MidnightAccountProps>[],
-  accounts2: InMemoryWalletAccount<MidnightAccountProps>[],
-) => {
-  if (accounts1.length !== accounts2.length) return false;
-  for (let index = 0; index < accounts1.length; index++) {
-    if (accounts1[index].accountId !== accounts2[index].accountId) return false;
-  }
-  return true;
-};
-
 const withMidnightAccounts =
   (
     makeSideEffect: (
-      midnightAccounts$: Observable<
-        InMemoryWalletAccount<MidnightAccountProps>[]
-      >,
+      accounts$: Observable<InMemoryWalletAccount<MidnightAccountProps>[]>,
     ) => SideEffect,
   ): SideEffect =>
-  (actionObservables, stateObservables, dependencies) => {
-    const midnightAccounts$ = combineLatest([
-      stateObservables.wallets.selectActiveNetworkAccounts$,
-      stateObservables.midnightContext.selectMidnightBlockchainNetworkId$.pipe(
-        filter(Boolean),
-      ),
-      stateObservables.wallets.selectIsWalletRepoMigrating$,
-    ]).pipe(
-      map(([accounts, activeNetwork, isWalletRepoMigrating]) =>
-        isWalletRepoMigrating
-          ? []
-          : accounts
-              .filter(isInMemoryMidnightAccount)
-              .filter(account => account.blockchainNetworkId === activeNetwork),
-      ),
-      distinctUntilChanged(sameAccounts),
-    );
-
-    return makeSideEffect(midnightAccounts$)(
+  (actionObservables, stateObservables, dependencies) =>
+    makeSideEffect(midnightAccounts$(stateObservables))(
       actionObservables,
       stateObservables,
       dependencies,
     );
-  };
 
 /**
  * Registers Midnight blockchain networks with the global network store.
@@ -150,187 +106,25 @@ export const registerMidnightBlockchainNetworks: SideEffect = (
   );
 
 /**
- * Auto-dismiss Midnight wallet failure when unlock succeeds.
+ * Auto-dismiss Midnight wallet failure when the wallet resumes.
  *
- * This side effect listens for successful unlock actions and dismisses
- * any existing failure for that wallet. This provides automatic error
- * recovery without user intervention.
+ * `walletResumed$` fires on the rising edge after a genuine pause (the
+ * unlock transition), so any failure accumulated while the wallet was
+ * paused is dismissed on resume — automatic error recovery without user
+ * intervention.
  */
 export const autoDismissMidnightWalletFailure: SideEffect = (
   _,
-  {
-    appLock: { isUnlocked$ },
-    wallets: { selectAll$ },
-    failures: { selectFailureById$ },
-  },
+  { wallets: { selectAll$ }, failures: { selectFailureById$ } },
+  { walletResumed$ },
 ) =>
-  isUnlocked$.pipe(
-    distinctUntilChanged(),
-    filter(Boolean),
+  walletResumed$.pipe(
     withLatestFrom(selectAll$),
-    switchMap(([_, wallets]) =>
+    switchMap(([, wallets]) =>
       wallets.map(w => MidnightWalletFailureId(w.walletId)),
     ),
     autoDismissFailureOnSuccess(selectFailureById$),
   );
-
-export const requestResyncWallet = withMidnightAccounts(
-  midnightAccount$ =>
-    ({ midnight: { requestResync$ } }, _, { actions }) =>
-      merge(
-        requestResync$.pipe(
-          withLatestFrom(midnightAccount$),
-          switchMap(([_, accounts]) => {
-            const syncActions = accounts.map(({ accountId }) =>
-              actions.sync.addSyncOperation({
-                accountId,
-                operation: {
-                  operationId: `${accountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                  startedAt: Timestamp(Date.now()),
-                },
-              }),
-            );
-
-            return from([...syncActions, actions.midnight.resync()]);
-          }),
-        ),
-      ),
-);
-
-export const createClearWalletStateOnResync = (
-  store: CollectionStorage<SerializedMidnightWallet>,
-): SideEffect =>
-  withMidnightAccounts(
-    midnightAccounts$ =>
-      ({ midnight: { resync$ } }, _, { actions, stopAllMidnightWallets }) =>
-        resync$.pipe(
-          withLatestFrom(midnightAccounts$),
-          switchMap(([_, midnightAccounts]) =>
-            stopAllMidnightWallets().pipe(
-              switchMap(() => store.setAll([])),
-              switchMap(() => [
-                ...midnightAccounts.map(({ accountId }) =>
-                  actions.tokens.resetAccountTokens({
-                    accountId,
-                  }),
-                ),
-                actions.midnight.restartWalletWatch(),
-              ]),
-            ),
-          ),
-        ),
-  );
-
-/**
- * Side-effect that triggers a Midnight wallet resync whenever the config change
- * is made with a feature flag override and the wallet is unlocked.
- */
-export const resyncWalletOnConfigChangeFromFeatureFlags = withMidnightAccounts(
-  midnightAccounts$ =>
-    (
-      _,
-      {
-        appLock: { isUnlocked$ },
-        midnightContext: {
-          selectCurrentNetwork$,
-          selectNetworksConfigFeatureFlagsOverrides$,
-        },
-      },
-      { actions },
-    ) => {
-      const configChangesCausedByFFUpdate$ =
-        selectNetworksConfigFeatureFlagsOverrides$.pipe(
-          withLatestFrom(isUnlocked$),
-          filter(([_, isUnlocked]) => isUnlocked),
-          switchMap(() => selectCurrentNetwork$.pipe(take(1))),
-          map(({ config }) => config),
-          distinctUntilChanged(deepEquals),
-        );
-
-      return configChangesCausedByFFUpdate$.pipe(
-        withLatestFrom(midnightAccounts$),
-        switchMap(([_, midnightAccounts]) =>
-          from([
-            ...midnightAccounts.map(({ accountId }) =>
-              actions.sync.addSyncOperation({
-                accountId,
-                operation: {
-                  operationId: `${accountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                  startedAt: Timestamp(Date.now()),
-                },
-              }),
-            ),
-            actions.midnight.resync(),
-          ]),
-        ),
-      );
-    },
-);
-
-export const createDeleteWalletSideEffect =
-  (storage: CollectionStorage<SerializedMidnightWallet>): SideEffect =>
-  (
-    { wallets: { removeWallet$ } },
-    { wallets: { selectAll$ } },
-    { stopMidnightWallet, actions },
-  ) =>
-    removeWallet$.pipe(
-      withLatestFrom(
-        selectAll$.pipe(map(wallets => wallets.filter(hasMidnightAccount))),
-      ),
-      switchMap(([{ payload }, midnightWallets]) => {
-        const walletId =
-          typeof payload === 'string' ? payload : payload.walletId;
-
-        const targetWallet = midnightWallets.find(w => w.walletId === walletId);
-        if (!targetWallet) return EMPTY;
-
-        const allMidnightAccounts = targetWallet.accounts.filter(
-          isInMemoryMidnightAccount,
-        );
-
-        const stopWallets$ =
-          allMidnightAccounts.length > 0
-            ? forkJoin(
-                allMidnightAccounts.map(({ accountId }) =>
-                  stopMidnightWallet(accountId),
-                ),
-              )
-            : of([]);
-
-        return stopWallets$.pipe(
-          switchMap(() =>
-            storage.getAll().pipe(
-              defaultIfEmpty([]),
-              take(1),
-              switchMap(wallets => {
-                const remainingWallets = wallets.filter(
-                  wallet => wallet.walletId !== walletId,
-                );
-                return storage.setAll(remainingWallets);
-              }),
-            ),
-          ),
-          mergeMap(() =>
-            allMidnightAccounts.flatMap(({ accountId }) => [
-              actions.addresses.resetAddresses({
-                accountId,
-              }),
-              actions.tokens.resetAccountTokens({
-                accountId,
-              }),
-              actions.activities.resetActivities({
-                accountId,
-              }),
-            ]),
-          ),
-        );
-      }),
-    );
 
 const getFeatureFlagByName = (
   featureFlags: FeatureFlag[],
@@ -578,83 +372,18 @@ export const updateActiveAccountContextOnNetworkSwitch: SideEffect =
         ),
   );
 
-/**
- * Fetches network Terms & Conditions from the indexer on each network change.
- * Stores the result in Redux; consumers fall back to the hardcoded config URL on failure.
- */
-export const fetchNetworkTermsAndConditions: SideEffect = (
-  _,
-  { midnightContext: { selectCurrentNetwork$ } },
-  { actions, logger },
-) =>
-  selectCurrentNetwork$.pipe(
-    distinctUntilChanged(deepEquals),
-    switchMap(({ config }) =>
-      from(
-        WalletFacade.fetchTermsAndConditions({
-          indexerClientConnection: {
-            indexerHttpUrl: config.indexerAddress,
-            indexerWsUrl: convertHttpUrlToWebsocket(config.indexerAddress),
-          },
-        }),
-      ).pipe(
-        map(termsAndConditions =>
-          actions.midnightContext.setNetworkTermsAndConditions(
-            termsAndConditions,
-          ),
-        ),
-        catchError(error => {
-          logger.error('Failed to fetch network Terms & Conditions:', error);
-          return of(
-            actions.midnightContext.setNetworkTermsAndConditions(undefined),
-          );
-        }),
-      ),
-    ),
-  );
-
 export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
   return [
     (actionObservables, stateObservables, dependencies) => {
-      const midnightStateStorage =
-        dependencies.createCollectionStorage<SerializedMidnightWallet>({
-          collectionId: 'midnightWalletState',
-          computeDocId: wallet => `${wallet.walletId}-${wallet.networkId}`,
-        });
-
-      const deleteWallet = createDeleteWalletSideEffect(midnightStateStorage);
-      const clearWalletStateOnResync =
-        createClearWalletStateOnResync(midnightStateStorage);
-
-      // New account-based wallet management replaces:
-      // - createUnlockWalletSideEffect (wallet lifecycle)
-      // - triggerUnlockFromAuthenticationPrompt (auth trigger)
-      // - createUpsertAddresses (now in subscribeToWallet)
-      // - createUpdateSyncProgress (now in subscribeToWallet)
-      // - updateDustBalance (now in subscribeToWallet)
-      // - createUpdateTokens (now in subscribeToWallet)
-      const accountWalletWatcher = watchMidnightAccounts(
-        midnightStateStorage,
-        watchMidnightAccount,
-      );
-
       return merge(
         ...[
           registerMidnightBlockchainNetworks,
           syncSupportedNetworksWithFeatureFlags,
           autoDismissMidnightWalletFailure,
-          updateActivities,
-          loadActivityDetails,
-          deleteWallet,
-          clearWalletStateOnResync,
-          resyncWalletOnConfigChangeFromFeatureFlags,
           handleMidnightSettingsChange,
-          requestResyncWallet,
-          accountWalletWatcher,
           sendFlowAddressValidation,
           sendFlowAnalyticsEnhancer,
           triggerMidnightDisclaimerOnWalletCreation,
-          fetchNetworkTermsAndConditions,
           updateActiveAccountContextOnNetworkSwitch,
         ].map(sideEffect =>
           sideEffect(actionObservables, stateObservables, dependencies),

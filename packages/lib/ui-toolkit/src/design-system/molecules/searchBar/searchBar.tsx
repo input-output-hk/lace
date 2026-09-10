@@ -123,6 +123,12 @@ export const SearchBar = ({
           style={styles.input}
           editable={!disabled}
           testID={`${testID}-input`}
+          // A query must reach the consumer verbatim: iOS applies the pending
+          // autocorrection when the field blurs, silently rewriting searches
+          // (tickers especially). Overridable via textInputProps.
+          autoCapitalize="none"
+          autoCorrect={false}
+          spellCheck={false}
           {...textInputProps}
         />
       </Row>

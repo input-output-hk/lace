@@ -1,0 +1,56 @@
+import { OnboardingHardwareWalletSetup } from '@lace-lib/ui-toolkit';
+import React from 'react';
+
+import { useOnboardingHardwareSetup } from './useOnboardingHardwareSetup';
+
+import type { StackScreenProps, StackRoutes } from '@lace-lib/navigation';
+
+export const OnboardingHardwareSetup = (
+  props: StackScreenProps<StackRoutes.OnboardingHardwareSetup>,
+) => {
+  const {
+    title,
+    onBackPress,
+    hasAccountSetup,
+    accountIndex,
+    setAccountIndex,
+    maxAccountIndex,
+    accountLabel,
+    instructionText,
+    derivationTypeOptions,
+    derivationType,
+    handleDerivationTypeChange,
+    derivationTypeLabel,
+    onCreateWallet,
+    createButtonLabel,
+    isCreating,
+    error,
+    notice,
+    noticeLinkLabel,
+    noticeLinkUrl,
+  } = useOnboardingHardwareSetup(props);
+
+  return (
+    <OnboardingHardwareWalletSetup
+      title={title}
+      onBackPress={onBackPress}
+      showAccountSetup={hasAccountSetup}
+      accountIndex={accountIndex}
+      onAccountIndexChange={setAccountIndex}
+      maxAccountIndex={maxAccountIndex}
+      accountLabel={accountLabel}
+      instructionText={instructionText}
+      derivationTypeOptions={derivationTypeOptions}
+      derivationType={derivationType}
+      onDerivationTypeChange={handleDerivationTypeChange}
+      derivationTypeLabel={derivationTypeLabel}
+      onCreateWallet={onCreateWallet}
+      createButtonLabel={createButtonLabel}
+      isLoading={isCreating}
+      error={error}
+      notice={notice}
+      noticeLinkLabel={noticeLinkLabel}
+      noticeLinkUrl={noticeLinkUrl}
+    />
+  );
+};

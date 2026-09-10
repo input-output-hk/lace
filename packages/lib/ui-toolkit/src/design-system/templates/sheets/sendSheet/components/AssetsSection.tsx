@@ -9,9 +9,11 @@ import {
   Column,
   CustomTextInput,
   Icon,
+  Loader,
   Row,
   Text,
 } from '../../../../atoms';
+import { useSheetSubmit } from '../../../../organisms';
 import { getAssetImageUrl } from '../../../../util';
 
 import type { Theme } from '../../../../../design-tokens';
@@ -33,12 +35,14 @@ interface AssetsSectionProps {
   utils: Pick<
     SendSheetProps['utils'],
     | 'isAddAssetButtonEnabled'
+    | 'isMaxLoading'
     | 'shouldShowMaxButton'
     | 'shouldShowRemoveAsset'
     | 'theme'
   >;
   actions: Pick<
     SendSheetProps['actions'],
+    | 'handleInputBlur'
     | 'handleInputChange'
     | 'onAddAssetPress'
     | 'onMaxAmountPress'
@@ -62,6 +66,7 @@ export const AssetsSection = ({
   const { assetsToSend, assetInputValues, selectedAccountId } = values;
   const {
     isAddAssetButtonEnabled,
+    isMaxLoading,
     shouldShowMaxButton,
     shouldShowRemoveAsset,
     theme,
@@ -71,7 +76,9 @@ export const AssetsSection = ({
     onRemoveAsset,
     onMaxAmountPress,
     handleInputChange,
+    handleInputBlur,
   } = actions;
+  const submitProps = useSheetSubmit();
 
   const styles = getStyles(theme);
 
@@ -101,6 +108,7 @@ export const AssetsSection = ({
 
         const rawValue = assetInputValues?.[index]?.value ?? '0';
         const isShielded = isShieldedFromMetadata(asset.token.metadata);
+        const isLoadingMax = isMaxLoading?.(asset.token.tokenId) === true;
 
         return (
           <CustomTextInput
@@ -125,16 +133,21 @@ export const AssetsSection = ({
                 })}
             value={rawValue}
             keyboardType="decimal-pad"
+            inputMode="decimal"
             editable={!isNft}
             readOnly={isNft}
             onChange={event => {
               handleInputChange(index, event.nativeEvent.text);
             }}
+            onBlur={() => handleInputBlur?.(index)}
             ctaButtons={[
               ...(shouldShowMaxButton?.(asset.token.tokenId) && !isNft
                 ? [
                     {
-                      label: maxButtonLabel,
+                      // While Max is computing: spinner instead of label, disabled.
+                      ...(isLoadingMax
+                        ? { icon: <Loader size={16} />, isDisabled: true }
+                        : { label: maxButtonLabel }),
                       onPress: () => {
                         onMaxAmountPress(index);
                       },
@@ -157,6 +170,7 @@ export const AssetsSection = ({
                 : []),
             ]}
             inputError={assetErrors?.[index]}
+            {...submitProps}
           />
         );
       })}

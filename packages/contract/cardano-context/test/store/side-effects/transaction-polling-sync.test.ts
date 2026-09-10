@@ -5,6 +5,7 @@ import { AccountId } from '@lace-contract/wallet-repo';
 import { Err, Ok, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { defer, of } from 'rxjs';
+import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CardanoPaymentAddress } from '../../../src';
@@ -91,6 +92,7 @@ describe('transactionPollingSync', () => {
             getAddressTransactionHistory,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoContextAction[] = [];
@@ -114,6 +116,62 @@ describe('transactionPollingSync', () => {
               ],
             }),
             actions.sync.completeSyncOperation({ accountId, operationId }),
+          ]);
+        },
+      };
+    });
+  });
+
+  it('cancels the in-flight fetch when the account leaves the active network', () => {
+    testSideEffect(transactionPollingSync, ({ cold, hot, flush }) => {
+      const addSyncOperation$ = hot('-a', {
+        a: actions.sync.addSyncOperation({
+          accountId,
+          operation: pendingOperation,
+        }),
+      });
+      // Account active at subscribe, then a network switch drops it from the
+      // active set at frame 3 — before the fetch resolves at frame 6.
+      const accounts$ = hot<AnyAccount[]>('a--b', { a: [account], b: [] });
+      const addresses$ = hot<AnyAddress[]>('a', { a: [address1] });
+      const transactionHistory$ = hot<
+        Record<string, CardanoAddressTransactionHistoryMap>
+      >('a', { a: {} });
+      const getAddressTransactionHistory = vi
+        .fn()
+        .mockImplementation(() => cold('-----a|', { a: Ok([tx1]) }));
+
+      return {
+        actionObservables: {
+          sync: { addSyncOperation$ },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+          addresses: { selectAllAddresses$: addresses$ },
+          cardanoContext: {
+            selectAccountTransactionHistory$: transactionHistory$,
+          },
+        },
+        dependencies: {
+          cardanoProvider: {
+            getAddressTransactionHistory,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          const emissions: CardanoContextAction[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+
+          // Only InProgress — the fetch is cancelled by takeUntil, so neither
+          // setAccountTransactionHistory nor completeSyncOperation is emitted.
+          expect(emissions).toEqual([
+            actions.sync.updateSyncOperation({
+              accountId,
+              operationId,
+              update: { status: 'InProgress', type: 'Indeterminate' },
+            }),
           ]);
         },
       };
@@ -151,6 +209,7 @@ describe('transactionPollingSync', () => {
             getAddressTransactionHistory,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoContextAction[] = [];
@@ -199,6 +258,7 @@ describe('transactionPollingSync', () => {
             getAddressTransactionHistory,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoContextAction[] = [];
@@ -259,6 +319,7 @@ describe('transactionPollingSync', () => {
             getAddressTransactionHistory,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoContextAction[] = [];
@@ -325,6 +386,7 @@ describe('transactionPollingSync', () => {
             getAddressTransactionHistory,
           } as unknown as CardanoProviderDependencies['cardanoProvider'],
           actions,
+          logger: dummyLogger,
         },
         assertion: sideEffect$ => {
           const emissions: CardanoContextAction[] = [];

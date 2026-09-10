@@ -9,12 +9,13 @@ import {
   type SheetScreenProps,
 } from '@lace-lib/navigation';
 import { EditTokenNameBottomSheet, Sheet } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { useDispatchLaceAction } from '../../hooks';
 
 import type { UseEditTokenNameProps } from '@lace-contract/midnight-context';
 import type { SheetRoutes } from '@lace-lib/navigation';
+import type { ButtonConfig } from '@lace-lib/ui-toolkit';
 
 export const EditTokenNameSheet = ({
   navigation,
@@ -69,6 +70,16 @@ export const EditTokenNameSheet = ({
     getErrorMessage,
   });
 
+  const primaryButton = useMemo<ButtonConfig>(
+    () => ({
+      label: t('tokens.detail-drawer.save'),
+      onPress: handleSave,
+      disabled: isSaveDisabled,
+      testID: 'edit-token-name-sheet-save-button',
+    }),
+    [t, handleSave, isSaveDisabled],
+  );
+
   useEffect(() => {
     navigation.setOptions({
       header: <Sheet.Header title={t('tokens.detail-drawer.header')} />,
@@ -78,32 +89,30 @@ export const EditTokenNameSheet = ({
             label: t('tokens.detail-drawer.cancel'),
             onPress: handleClose,
           }}
-          primaryButton={{
-            label: t('tokens.detail-drawer.save'),
-            onPress: handleSave,
-            disabled: isSaveDisabled,
-          }}
+          primaryButton={primaryButton}
         />
       ),
     });
-  }, [navigation, t, handleClose, handleSave, isSaveDisabled]);
+  }, [navigation, t, handleClose, primaryButton]);
 
   return (
-    <EditTokenNameBottomSheet
-      labels={{
-        nameLabel: t('tokens.detail-drawer.custom-name.input.full-name'),
-        tickerLabel: t('tokens.detail-drawer.custom-name.input.short-name'),
-      }}
-      values={{
-        tokenFullName,
-        tokenShortName,
-        tokenFullNameError,
-        tokenShortNameError,
-      }}
-      actions={{
-        onTokenFullNameChange: setTokenFullName,
-        onTokenShortNameChange: setTokenShortName,
-      }}
-    />
+    <Sheet.SubmitProvider action={primaryButton}>
+      <EditTokenNameBottomSheet
+        labels={{
+          nameLabel: t('tokens.detail-drawer.custom-name.input.full-name'),
+          tickerLabel: t('tokens.detail-drawer.custom-name.input.short-name'),
+        }}
+        values={{
+          tokenFullName,
+          tokenShortName,
+          tokenFullNameError,
+          tokenShortNameError,
+        }}
+        actions={{
+          onTokenFullNameChange: setTokenFullName,
+          onTokenShortNameChange: setTokenShortName,
+        }}
+      />
+    </Sheet.SubmitProvider>
   );
 };

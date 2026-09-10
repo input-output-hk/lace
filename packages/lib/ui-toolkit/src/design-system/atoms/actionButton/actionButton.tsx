@@ -8,6 +8,7 @@ import { radius, spacing, useTheme } from '../../../design-tokens';
 import { BlurView } from '../blur-view/blur-view';
 import { Column } from '../column/column';
 import { Icon } from '../icons/Icon';
+import { Loader } from '../loader/loader';
 import { Text } from '../text/text';
 
 import type { Theme } from '../../../design-tokens';
@@ -19,6 +20,8 @@ export type ActionButtonProps = Omit<PressableProps, 'style'> & {
   showTitle?: boolean;
   description?: string;
   vertical?: boolean;
+  /** Appends a spinner and blocks presses, like `Button`'s own `loading`. */
+  loading?: boolean;
   textAlign?: 'center' | 'left';
   containerStyle?: ViewStyle | ViewStyle[];
   titleStyle?: TextStyle;
@@ -35,6 +38,8 @@ export const ActionButton = ({
   description,
   icon,
   vertical = false,
+  disabled = false,
+  loading = false,
   textAlign,
   containerStyle,
   titleStyle,
@@ -43,6 +48,7 @@ export const ActionButton = ({
   ...restProps
 }: ActionButtonProps) => {
   const { theme } = useTheme();
+  const isPressBlocked = disabled || loading;
 
   const defaultStyles = styles({
     theme,
@@ -69,9 +75,11 @@ export const ActionButton = ({
   return (
     <BlurView style={defaultStyles.blurContainer} testID={testID}>
       <Pressable
+        disabled={isPressBlocked}
         style={({ pressed }) => [
           defaultStyles.default,
           pressed && defaultStyles.pressed,
+          isPressBlocked && defaultStyles.disabled,
           containerStyle,
         ]}
         {...restProps}>
@@ -96,6 +104,13 @@ export const ActionButton = ({
               </Text.XS>
             )}
           </Column>
+        )}
+        {loading && (
+          <Loader
+            size={20}
+            color={theme.text.primary}
+            testID={`${testID}-loader`}
+          />
         )}
       </Pressable>
     </BlurView>
@@ -133,14 +148,20 @@ const styles = ({ theme, vertical, textAlign }: ActionButtonStyleProps) => {
     pressed: {
       opacity: 0.5,
     },
+    disabled: {
+      opacity: 0.5,
+    },
     title: {
       textAlign: finalTextAlignment,
     },
     description: {
       textAlign: finalTextAlignment,
     },
+    // Small gap, not none: the title and description are flush otherwise, which
+    // reads as one wrapped sentence rather than a label and its explanation.
     textWrapper: {
       flexShrink: 1,
+      gap: spacing.XS,
     },
   });
 };

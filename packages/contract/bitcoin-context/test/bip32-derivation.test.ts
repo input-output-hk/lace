@@ -82,8 +82,8 @@ describe('bitcoinFullDerivationPath', () => {
     ).toBe("m/86'/1'/3'/1/7");
   });
 
-  it('treats an unknown chain value as external', () => {
-    expect(
+  it('throws for an unknown chain instead of deriving the external one', () => {
+    expect(() =>
       bitcoinFullDerivationPath({
         addressType: 'Legacy',
         network: BitcoinNetwork.Mainnet,
@@ -91,6 +91,6 @@ describe('bitcoinFullDerivationPath', () => {
         chain: 'receive',
         index: 0,
       }),
-    ).toBe("m/44'/0'/1'/0/0");
+    ).toThrow(/Unknown Bitcoin address chain: receive/);
   });
 });

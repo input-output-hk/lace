@@ -1,5 +1,5 @@
 import { Sheet } from '@lace-lib/ui-toolkit';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { DustDesignationForm } from './DustDesignationForm';
 import { DustDesignationReview } from './DustDesignationReview';
@@ -37,6 +37,12 @@ export const DustDesignationSheet = (
 
   const shouldShowFormStep = currentStep === 'form';
 
+  // The form step has no footer; its primary action is the in-body Designate button.
+  const designateAction = useMemo(
+    () => ({ onPress: handleDesignate, disabled: !isFormValid }),
+    [handleDesignate, isFormValid],
+  );
+
   useEffect(() => {
     props.navigation.setOptions({
       header: (
@@ -71,23 +77,25 @@ export const DustDesignationSheet = (
   return (
     <>
       {shouldShowFormStep ? (
-        <Sheet.Scroll showsVerticalScrollIndicator={false}>
-          <DustDesignationForm
-            dustAddress={dustAddress}
-            addressLabel={addressLabel}
-            addressError={addressError}
-            insufficientDustError={insufficientDustError}
-            nightToken={nightToken}
-            nightTokenTicker={nightTokenTicker}
-            dustTokenTicker={dustTokenTicker}
-            formattedNightBalance={formattedNightBalance}
-            estimatedFee={estimatedFee}
-            isFormValid={isFormValid}
-            copies={copies}
-            onAddressChange={handleAddressChange}
-            onDesignate={handleDesignate}
-          />
-        </Sheet.Scroll>
+        <Sheet.SubmitProvider action={designateAction}>
+          <Sheet.Scroll showsVerticalScrollIndicator={false}>
+            <DustDesignationForm
+              dustAddress={dustAddress}
+              addressLabel={addressLabel}
+              addressError={addressError}
+              insufficientDustError={insufficientDustError}
+              nightToken={nightToken}
+              nightTokenTicker={nightTokenTicker}
+              dustTokenTicker={dustTokenTicker}
+              formattedNightBalance={formattedNightBalance}
+              estimatedFee={estimatedFee}
+              isFormValid={isFormValid}
+              copies={copies}
+              onAddressChange={handleAddressChange}
+              onDesignate={designateAction.onPress}
+            />
+          </Sheet.Scroll>
+        </Sheet.SubmitProvider>
       ) : (
         <DustDesignationReview
           nightTokenTicker={nightTokenTicker}

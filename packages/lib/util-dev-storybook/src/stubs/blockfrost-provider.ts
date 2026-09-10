@@ -268,6 +268,7 @@ export const stubStakePoolsNetworkData: StakePoolsNetworkData = {
   retiringPools: [RETIRING_POOL_ID],
   slotLength: 1,
   timestamp: 0,
+  treasuryCut: 0.2,
 };
 
 const stubCardanoStakePoolsProvider: CardanoStakePoolsProvider = {
@@ -456,6 +457,20 @@ const rawStubDReps: DRepStub[] = [
     amount: '450000000',
     hasScript: false,
     name: 'Educational DRep',
+  },
+  // Active bare-ID row (no CIP-119 metadata) with the set's highest voting
+  // power: a raw voting-power sort puts it first, the browser's default
+  // landing rank must not.
+  {
+    drepId: Cardano.DRepID(
+      'drep1y2k9neenzflsue9syfm3z007u09lxg3v8843yxae2ywk0yqc670ny',
+    ),
+    hex: 'ac59e733127f0e64b02277113dfee3cbf3222c39eb121bb9511d6790',
+    isActive: true,
+    retired: false,
+    expired: false,
+    amount: '99000000000',
+    hasScript: false,
   },
 ];
 

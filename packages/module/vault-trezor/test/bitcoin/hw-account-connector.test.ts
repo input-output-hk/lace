@@ -28,9 +28,8 @@ const XPUB_VERSION_TESTNET = 0x04_35_87_cf;
 const walletId = WalletId('usb-hw-4617-21441-abc123');
 
 const CHAIN_CODE = '07'.repeat(32);
-// The secp256k1 generator point G — a public constant, not a secret.
-// prettier-ignore
-const PUBLIC_KEY = '0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798'; // gitleaks:allow
+const PUBLIC_KEY =
+  '0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798';
 
 const MASTER_FINGERPRINT = 0xde_ad_be_ef;
 const ACCOUNT_PARENT_FINGERPRINT = 0x01_02_03_04;
@@ -274,28 +273,5 @@ describe('bitcoin trezor hw-account-connector', () => {
         targetNetworks: allNetworks(),
       }),
     ).rejects.toThrow('Trezor getPublicKey failed: User cancelled');
-  });
-
-  it('exposes the Suite device id from the response envelope', async () => {
-    getPublicKey.mockImplementationOnce(async ({ bundle }) => ({
-      ...successResponse(bundle),
-      device: { features: { device_id: 'suite-device-id' } },
-    }));
-
-    const { deviceId } = await exportBitcoinAccountKeys(connect, {
-      accountIndex: 0,
-      targetNetworks: allNetworks(),
-    });
-
-    expect(deviceId).toBe('suite-device-id');
-  });
-
-  it('leaves the device id undefined when the envelope omits it', async () => {
-    const { deviceId } = await exportBitcoinAccountKeys(connect, {
-      accountIndex: 0,
-      targetNetworks: allNetworks(),
-    });
-
-    expect(deviceId).toBeUndefined();
   });
 });

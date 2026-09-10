@@ -81,7 +81,7 @@ const getStyles = (theme: Theme) =>
       position: 'relative',
     },
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       justifyContent: 'center',
       alignItems: 'center',
     },

@@ -47,6 +47,12 @@ describe('approximateVotingPower', () => {
     expect(approximateVotingPower(lovelace(-5))).toBe(0);
   });
 
+  it('returns 0 for non-finite input', () => {
+    // BigInt -> Number conversion overflows to Infinity past ~1.8e308; without
+    // the isFinite guard this would report Infinity instead of falling back to 0.
+    expect(approximateVotingPower(BigNumber(10n ** 400n))).toBe(0);
+  });
+
   it('honours a non-default figures argument', () => {
     expect(approximateVotingPower(lovelace(4321.55), 2)).toBe(4300);
   });

@@ -70,6 +70,11 @@ export interface WalletResponse {
  * @property supportedExtensions - Array of supported CIP extensions (e.g., [{ cip: 95 }])
  * @property requestTimeout - Timeout for API requests in milliseconds
  * @property debug - Enable debug logging in the injected script's console
+ * @property bridgeToken - Per-instance capability token the runtime stamps on
+ *   every message. The native bridge issues it, injects it main-frame-only, and
+ *   rejects any message without an exact match — so a cross-origin subframe
+ *   (which cannot read the main frame's closure) cannot forge an accepted
+ *   request. Must be unguessable and unique per WebView instance.
  */
 export interface InjectionScriptConfig {
   walletName: string;
@@ -78,13 +83,15 @@ export interface InjectionScriptConfig {
   supportedExtensions: { cip: number }[];
   requestTimeout: number;
   debug: boolean;
+  bridgeToken: string;
 }
 
 /**
- * Default configuration using wallet constants.
- * This configuration is suitable for production use.
+ * Default wallet-facing configuration. Does NOT include `bridgeToken`: the token
+ * must be generated per WebView instance at runtime (see `useDappConnectorBridge`)
+ * — a static shared token would defeat the frame-identity guarantee.
  */
-export const defaultConfig: InjectionScriptConfig = {
+export const defaultConfig: Omit<InjectionScriptConfig, 'bridgeToken'> = {
   walletName: WALLET_NAME,
   apiVersion: CIP30_API_VERSION,
   walletIcon: WALLET_ICON,
@@ -100,24 +107,18 @@ export const defaultConfig: InjectionScriptConfig = {
  * The script is a thin proxy that forwards all requests to the wallet
  * via postMessage. The actual wallet logic is handled on the wallet side.
  *
- * @param config - Configuration options for the wallet API
+ * @param config - Configuration options for the wallet API, including the
+ *   per-instance `bridgeToken`. There is intentionally no default: a token must
+ *   always be supplied so no code path can ship a tokenless runtime.
  * @returns JavaScript code string to inject
  */
 export const generateCip30InjectionScript = (
-  config: InjectionScriptConfig = defaultConfig,
+  config: InjectionScriptConfig,
 ): string => {
   const configJson = JSON.stringify(config);
 
   return `window.__LACE_CIP30_CONFIG__ = ${configJson};\n${CIP30_WEBVIEW_RUNTIME_SOURCE}`;
 };
-
-/**
- * Pre-generated injection script using default configuration.
- * Use this for the injectedJavaScriptBeforeContentLoaded prop in WebView
- * or for extension content script injection.
- */
-export const CIP30_INJECTION_SCRIPT =
-  generateCip30InjectionScript(defaultConfig);
 
 /**
  * Alias for generateCip30InjectionScript.

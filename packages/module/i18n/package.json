@@ -13,8 +13,13 @@
     "@lace-contract/module": "*",
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/extension-shell-api": "*",
+    "@lace-lib/extension-shell-client": "*",
     "i18next": "^23.11.5",
     "intl-pluralrules": "2.0.1",
     "react-i18next": "^14.1.2"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
   }
 }

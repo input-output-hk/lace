@@ -1,6 +1,6 @@
 import { ActivityType } from '@lace-contract/activities';
 
-import type { CardanoInFlightUtxoActivityMetadata } from './augmentations';
+import type { CardanoActivityUtxoMetadata } from './augmentations';
 import type { CardanoPaymentAddress } from './types';
 import type { Cardano } from '@cardano-sdk/core';
 import type {
@@ -13,7 +13,7 @@ const outpointKey = (ref: { txId: Cardano.TransactionId; index: number }) =>
 
 const getCardanoInFlight = (
   activity: Activity,
-): CardanoInFlightUtxoActivityMetadata | undefined => {
+): CardanoActivityUtxoMetadata | undefined => {
   if (activity.type !== ActivityType.Pending) return undefined;
   const blockchainSpecific = activity.blockchainSpecific as
     | BlockchainSpecificActivityMetadata

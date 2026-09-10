@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTextInput } from '../../../atoms';
-import { footerHeight } from '../../../organisms';
+import { footerHeight, useSheetSubmit } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 interface actionProps {
@@ -42,6 +42,8 @@ export const CustomizeAccountSheet = ({
 
   const { inputLabel } = copies;
 
+  const submitProps = useSheetSubmit();
+
   return (
     <Column
       gap={spacing.L}
@@ -56,6 +58,7 @@ export const CustomizeAccountSheet = ({
         size="small"
         animatedLabel
         maxLength={NAME_MAX_LENGTH}
+        {...submitProps}
       />
     </Column>
   );

@@ -28,25 +28,34 @@ describe('certificate-utils', () => {
   });
 
   describe('formatDRepId', () => {
-    it('converts a hash to a bech32-encoded DRep ID', () => {
-      const hash =
-        '00000000000000000000000000000000000000000000000000000000' as Crypto.Hash28ByteBase16;
+    it('converts a key-hash credential to a CIP-129 bech32-encoded DRep ID', () => {
+      const credential: Cardano.Credential = {
+        type: Cardano.CredentialType.KeyHash,
+        hash: Crypto.Hash28ByteBase16(
+          '00000000000000000000000000000000000000000000000000000000',
+        ),
+      };
 
-      const result = formatDRepId(hash);
+      const result = formatDRepId(credential);
 
       expect(result).toBe(
-        'drep1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqua9udh',
+        'drep1ygqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq7vlc9n',
       );
     });
 
-    it('converts a different hash to a bech32-encoded DRep ID', () => {
-      const hash =
-        'abcdef1234567890abcdef1234567890abcdef1234567890abcdef12' as Crypto.Hash28ByteBase16;
+    it('converts a script-hash credential to a CIP-129 bech32-encoded DRep ID', () => {
+      const credential: Cardano.Credential = {
+        type: Cardano.CredentialType.ScriptHash,
+        hash: Crypto.Hash28ByteBase16(
+          'b96897b866ec26f4b93d93b2792e496ba9369cef6bfd175d5ffb0d6a',
+        ),
+      };
 
-      const result = formatDRepId(hash);
+      const result = formatDRepId(credential);
 
-      expect(result.startsWith('drep1')).toBe(true);
-      expect(result.length).toBeGreaterThan(10);
+      expect(result).toBe(
+        'drep1ywuk39acvmkzda9e8kfmy7fwf946jd5uaa4l696atlas66s68f0fl',
+      );
     });
   });
 
@@ -108,8 +117,9 @@ describe('certificate-utils', () => {
 
       const result = getDRepDisplayInfo(dRep);
 
-      expect(result.drepId).toBeDefined();
-      expect(result.drepId?.startsWith('drep1')).toBe(true);
+      expect(result.drepId).toBe(
+        'drep1ygqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq7vlc9n',
+      );
       expect(result.alwaysAbstain).toBe(false);
       expect(result.alwaysNoConfidence).toBe(false);
     });

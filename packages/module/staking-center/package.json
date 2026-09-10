@@ -10,6 +10,7 @@
     "@lace-contract/app": "*",
     "@lace-contract/cardano-context": "*",
     "@lace-contract/cardano-stake-pools": "*",
+    "@lace-contract/earn-rewards": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",

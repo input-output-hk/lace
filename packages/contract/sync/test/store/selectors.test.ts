@@ -8,10 +8,15 @@ import {
   selectAverageSyncProgress,
   selectAllFailedOperations,
   selectActiveAccountSyncProgress,
+  selectActiveNetworkHasEverSynced,
   computeAccountSyncingProgress,
 } from '../../src/store/selectors';
 
 import type { SyncSliceState, SyncOperation } from '../../src/types';
+import type { AnyAccount } from '@lace-contract/wallet-repo';
+
+const account = (accountId: AccountId): AnyAccount =>
+  ({ accountId } as AnyAccount);
 
 const accountId1 = AccountId('account1');
 const accountId2 = AccountId('account2');
@@ -840,6 +845,53 @@ describe('sync selectors', () => {
           },
         }),
       ).toBe(99);
+    });
+  });
+
+  describe('selectActiveNetworkHasEverSynced', () => {
+    it('returns true when an active-network account has lastSuccessfulSync', () => {
+      const accounts = [account(accountId1), account(accountId2)];
+      const syncStatusByAccount: SyncSliceState['syncStatusByAccount'] = {
+        [accountId1]: {},
+        [accountId2]: { lastSuccessfulSync: Timestamp(Date.now()) },
+      };
+
+      expect(
+        selectActiveNetworkHasEverSynced.resultFunc(
+          accounts,
+          syncStatusByAccount,
+        ),
+      ).toBe(true);
+    });
+
+    it('returns false when no active-network account has ever synced', () => {
+      const accounts = [account(accountId1), account(accountId2)];
+      const syncStatusByAccount: SyncSliceState['syncStatusByAccount'] = {};
+
+      expect(
+        selectActiveNetworkHasEverSynced.resultFunc(
+          accounts,
+          syncStatusByAccount,
+        ),
+      ).toBe(false);
+    });
+
+    it('returns false when only a non-active-network account has synced', () => {
+      // The selector receives only active-network accounts, so a synced
+      // account on another network (accountId2) is absent from `accounts`
+      // even though it has a lastSuccessfulSync in the map.
+      const accounts = [account(accountId1)];
+      const syncStatusByAccount: SyncSliceState['syncStatusByAccount'] = {
+        [accountId1]: {},
+        [accountId2]: { lastSuccessfulSync: Timestamp(Date.now()) },
+      };
+
+      expect(
+        selectActiveNetworkHasEverSynced.resultFunc(
+          accounts,
+          syncStatusByAccount,
+        ),
+      ).toBe(false);
     });
   });
 });

@@ -3,26 +3,25 @@ import {
   authenticationPromptStoreContract,
   internalAuthSecretApiAddonContract,
 } from '@lace-contract/authentication-prompt/src/contract';
-import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
   combineContracts,
   inferModuleContext,
   ModuleName,
 } from '@lace-contract/module';
 import {
-  hwBlockchainSupportAddonContract,
   onboardingOptionsAddonContract,
   onboardingV2StoreContract,
 } from '@lace-contract/onboarding-v2';
 import {
+  vaultCapabilitiesAddonContract,
+  vaultCeremonyStoreContract,
+  vaultContract,
+} from '@lace-contract/vault';
+import {
   viewsStoreContract,
   stackPagesAddonContract,
 } from '@lace-contract/views';
-import {
-  requestHWConnectionAddonContract,
-  vaultContract,
-  walletRepoStoreContract,
-} from '@lace-contract/wallet-repo';
+import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
 import store from './store';
 
@@ -40,15 +39,14 @@ const implementsContracts = combineContracts([
 ] as const);
 const dependsOnContracts = combineContracts([
   vaultContract,
+  vaultCeremonyStoreContract,
+  vaultCapabilitiesAddonContract,
   viewsStoreContract,
   analyticsStoreContract,
   walletRepoStoreContract,
-  inMemoryIntegrationAddonContract,
   authenticationPromptStoreContract,
   internalAuthSecretApiAddonContract,
   onboardingOptionsAddonContract,
-  hwBlockchainSupportAddonContract,
-  requestHWConnectionAddonContract,
 ] as const);
 
 const multiPlatformModule = inferModuleContext({
@@ -64,6 +62,7 @@ const multiPlatformModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': multiPlatformModule,
   'lace-mobile': multiPlatformModule,
+  'lace-extension-guest': multiPlatformModule,
 };
 
 export default moduleMap;

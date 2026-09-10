@@ -175,12 +175,6 @@ export const getAndroidRipple = ({
   };
 };
 
-export const getEarnedRewards = (earnedCoin: string) => {
-  const normalized = earnedCoin.replace(/[^\d.,-]/g, '').replace(',', '.');
-  const value = Number(normalized);
-  return Number.isFinite(value) && value > 0;
-};
-
 export const getAmountParts = (amount?: string | null): AmountParts => {
   if (!amount) return { ticker: '', value: '' };
 

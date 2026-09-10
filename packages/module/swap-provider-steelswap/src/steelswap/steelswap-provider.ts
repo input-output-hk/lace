@@ -41,7 +41,8 @@ const jsonPost = async <T>(url: string, body: unknown): Promise<T> => {
       }`,
     );
   }
-  return response.json() as Promise<T>;
+  const json = (await response.json()) as T;
+  return json;
 };
 
 const jsonGet = async <T>(url: string): Promise<T> => {
@@ -51,7 +52,8 @@ const jsonGet = async <T>(url: string): Promise<T> => {
       `SteelSwap API error (${response.status}): ${response.statusText}`,
     );
   }
-  return response.json() as Promise<T>;
+  const json = (await response.json()) as T;
+  return json;
 };
 
 export const createSteelSwapProvider = (
@@ -69,7 +71,9 @@ export const createSteelSwapProvider = (
           toEstimateRequest(request, partner),
         )
           .then(response => Ok(fromEstimateResponse(response, request)))
-          .catch(error => Err(toSwapProviderError(error))),
+          .catch(error => {
+            return Err(toSwapProviderError(error));
+          }),
       ),
 
     buildSwapTx: request =>
@@ -79,7 +83,9 @@ export const createSteelSwapProvider = (
           toBuildRequest(request, partner),
         )
           .then(response => Ok(fromBuildResponse(response)))
-          .catch(error => Err(toSwapProviderError(error))),
+          .catch(error => {
+            return Err(toSwapProviderError(error));
+          }),
       ),
 
     listTokens: () =>

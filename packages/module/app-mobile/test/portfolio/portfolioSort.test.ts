@@ -11,7 +11,11 @@ vi.mock('@lace-lib/ui-toolkit', () => ({
 import {
   applyAscendingSortOrder,
   compareTokensByTicker,
-  getTokenSortOrder,
+  DEFAULT_TOKEN_SORT_OPTION,
+  getAvailableTokenSortOptions,
+  getDefaultTokenSortOrder,
+  resolveEffectiveTokenSort,
+  resolveTokenSortOption,
 } from '../../src/pages/portfolio/utils/portfolioSort';
 
 import type { Token } from '@lace-contract/tokens';
@@ -65,8 +69,50 @@ describe('portfolioSort', () => {
     ]);
   });
 
-  it('uses ascending order when no sort option is active', () => {
-    expect(getTokenSortOrder(undefined, undefined)).toBe(ORDERS.ASC);
-    expect(getTokenSortOrder(ORDERS.DESC, undefined)).toBe(ORDERS.ASC);
+  it('defaults to sorting by value in descending order', () => {
+    expect(DEFAULT_TOKEN_SORT_OPTION).toBe('value');
+    expect(getDefaultTokenSortOrder(DEFAULT_TOKEN_SORT_OPTION)).toBe(
+      ORDERS.DESC,
+    );
+  });
+
+  describe('resolveEffectiveTokenSort', () => {
+    it('keeps the order that belongs to an explicit option', () => {
+      expect(resolveEffectiveTokenSort('ticker', ORDERS.DESC)).toEqual({
+        option: 'ticker',
+        order: ORDERS.DESC,
+      });
+    });
+
+    it.each([ORDERS.ASC, ORDERS.DESC])(
+      'discards a leftover %s order when no option is active',
+      order => {
+        expect(resolveEffectiveTokenSort(undefined, order)).toEqual({
+          option: 'value',
+          order: ORDERS.DESC,
+        });
+      },
+    );
+  });
+
+  describe('resolveTokenSortOption', () => {
+    it('keeps an option the current network offers', () => {
+      expect(resolveTokenSortOption('value', true)).toBe('value');
+      expect(resolveTokenSortOption('ticker', false)).toBe('ticker');
+    });
+
+    it('drops value when token pricing is unavailable', () => {
+      expect(getAvailableTokenSortOptions(false)).not.toContain('value');
+      expect(resolveTokenSortOption('value', false)).toBeUndefined();
+    });
+
+    it('drops an unrecognised option', () => {
+      expect(
+        resolveTokenSortOption(
+          'marketCap' as unknown as typeof DEFAULT_TOKEN_SORT_OPTION,
+          true,
+        ),
+      ).toBeUndefined();
+    });
   });
 });

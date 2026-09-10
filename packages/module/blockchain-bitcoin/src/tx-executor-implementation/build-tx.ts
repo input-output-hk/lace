@@ -7,7 +7,12 @@ import { defer, firstValueFrom, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { DUST_THRESHOLD, encodeUnsignedTxToString } from '../common';
-import { buildErrorTranslationKey, TransactionBuilder } from '../tx-builder';
+import {
+  BitcoinTxBuildError,
+  BitcoinTxBuildErrorCode,
+  buildErrorTranslationKey,
+  TransactionBuilder,
+} from '../tx-builder';
 
 import type { ProviderError } from '@cardano-sdk/core';
 import type {
@@ -213,7 +218,14 @@ export const makeBuildTx =
         rateToUse = currentFeeRate.slow.feeRate;
       }
 
-      logger.debug(`Bitcoin buildTx: Using fee rate of ${rateToUse} sat/vB`);
+      if (!Number.isFinite(rateToUse) || rateToUse <= 0) {
+        throw new BitcoinTxBuildError(
+          BitcoinTxBuildErrorCode.InvalidFeeRate,
+          `Invalid fee rate: ${rateToUse}`,
+        );
+      }
+
+      logger.debug(`Bitcoin buildTx: Using fee rate of ${rateToUse} BTC/kB`);
       const txBuilder = new TransactionBuilder(network, rateToUse, addresses);
 
       const ownAddresses = new Set(addresses.map(a => a.address));

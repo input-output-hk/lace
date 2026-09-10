@@ -1,0 +1,48 @@
+{
+  "name": "@lace-module/dapp-connector-bitcoin",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/util": "0.17.2",
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/app-lock": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/bitcoin-context": "*",
+    "@lace-contract/dapp-connector": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/signer": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/bitcoin-psbt": "*",
+    "@lace-lib/dapp-connector": "*",
+    "@lace-lib/extension-messaging": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-extension": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-render": "*",
+    "@reduxjs/toolkit": "*",
+    "bitcoinjs-lib": "^6.1.7",
+    "rxjs": "*",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@cardano-sdk/core": "0.47.0",
+    "@lace-lib/util-dev": "*",
+    "@testing-library/react": "^16.3.0",
+    "@types/webextension-polyfill": "^0.10.7",
+    "jsdom": "^26.1.0"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}

@@ -604,6 +604,78 @@ describe('send-flow sideEffects', () => {
         }),
       );
     });
+
+    it('waits for the requested account to load instead of reading "loaded" off another account after a network flip', () => {
+      const w: AnyWallet = {
+        accounts: [midnightAccount],
+      } as unknown as AnyWallet;
+
+      testSideEffect(
+        makeSendFlowPreparing({ selectBaseToken: () => null }),
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Preparing',
+                  accountId: midnightAccount.accountId,
+                } as SendFlowSliceState,
+              }),
+            },
+            tokens: {
+              selectTokensGroupedByAccount$: cold('ab', {
+                // Residue from the previously-active network's account only:
+                // the requested account has not synced on the new network yet.
+                // A global "any tokens loaded" gate would fire here and pick an
+                // empty form; the per-account gate must keep waiting.
+                a: {
+                  [cardanoAccount.accountId]: {
+                    fungible: [cardanoToken],
+                    nfts: [],
+                  },
+                },
+                // The requested account's tokens have now loaded.
+                b: {
+                  [cardanoAccount.accountId]: {
+                    fungible: [cardanoToken],
+                    nfts: [],
+                  },
+                  [midnightAccount.accountId]: {
+                    fungible: [midnightToken],
+                    nfts: [],
+                  },
+                },
+              }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [w] }),
+            },
+            network: {
+              selectNetworkType$: cold('a', { a: 'mainnet' as NetworkType }),
+              selectBlockchainNetworks$: cold('a', { a: {} }),
+            },
+          },
+          dependencies: {
+            actions: sendFlowActions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            // Emits only at frame b (once the requested account loaded) with its
+            // own token — never the empty-form emission at frame a.
+            expectObservable(sideEffect$).toBe('-a', {
+              a: sendFlowActions.sendFlow.preparingCompleted({
+                form: createFormInitialState({
+                  token: midnightToken,
+                }),
+                blockchainName: midnightAccount.blockchainName,
+                accountId: midnightToken.accountId,
+                wallet: w,
+              }),
+            });
+          },
+        }),
+      );
+    });
   });
 
   describe('makeSendFlowDiscard', () => {

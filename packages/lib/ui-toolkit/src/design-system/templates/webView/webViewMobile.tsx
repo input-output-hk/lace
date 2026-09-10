@@ -38,7 +38,7 @@ const InternalWebView = forwardRef<WebViewRef, RNWebViewProps>(
   ({ style, ...rest }, ref) => {
     return (
       <RNWebView
-        ref={ref as React.LegacyRef<React.ComponentRef<typeof RNWebView>>}
+        ref={ref as React.Ref<React.ComponentRef<typeof RNWebView>>}
         style={style}
         {...rest}
       />
@@ -76,12 +76,22 @@ const webViewProps = {
   allowsBackForwardNavigationGestures: true,
   sharedCookiesEnabled: true,
   thirdPartyCookiesEnabled: true,
-  // Only allow http/https — blocks javascript:, file:, and other schemes
-  originWhitelist: ['https://*', 'http://*'],
+  // Only allow http/https — blocks javascript:, file:, and other schemes.
+  // Production is https-only; http is kept for dev/test (localhost dApps and the
+  // LW-15303 repro fixture are served over http). The scheme is also validated by
+  // isValidUrlScheme / onShouldStartLoadWithRequest.
+  // NOSONAR: http is dev-only here; production restricts the whitelist to https.
+  originWhitelist: __DEV__ ? ['https://*', 'http://*'] : ['https://*'],
   mixedContentMode: 'never' as const,
   androidLayerType: 'hardware' as const,
   setSupportMultipleWindows: false,
   incognito: false,
+  // Inject only into the main frame (these already default to true; set
+  // explicitly because the CIP-30 bridge's frame-identity guarantee depends on
+  // it — the runtime, and the capability token it carries, must never reach a
+  // cross-origin subframe).
+  injectedJavaScriptForMainFrameOnly: true,
+  injectedJavaScriptBeforeContentLoadedForMainFrameOnly: true,
 };
 
 const useWebViewEventHandlers = ({
@@ -474,7 +484,7 @@ const getStyles = (theme: Theme) =>
       backgroundColor: 'transparent',
     },
     navBarUrlContainer: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: spacing.XL * 3,

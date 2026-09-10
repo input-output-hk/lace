@@ -426,10 +426,10 @@ const getStyles = (theme: Theme) =>
       width: '100%',
     },
     headerBackground: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       paddingTop: spacing.L,
       paddingBottom: spacing.L,
       justifyContent: 'center',

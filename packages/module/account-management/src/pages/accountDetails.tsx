@@ -1,5 +1,5 @@
+import { getAccountIndex } from '@lace-contract/account-management';
 import { useTranslation } from '@lace-contract/i18n';
-import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import {
   useTheme,
   Button,
@@ -80,9 +80,14 @@ export const AccountDetails = ({
     );
   }, [account, wallet, t, testNetworkDisplayName]);
 
-  const attemptRemoveAccount = useDispatchLaceAction(
-    'accountManagement.attemptRemoveAccount',
+  const requestRemoveAccountCeremony = useDispatchLaceAction(
+    'vault.removeAccountCeremonyRequested',
   );
+
+  // On the shell host the confirm closes this modal and the removal only becomes
+  // visible once the host mounts its manager surface — seconds on a cold service
+  // worker, with nothing on screen in between.
+  const pendingCeremony = useLaceSelector('vault.selectPendingCeremony');
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -103,17 +108,13 @@ export const AccountDetails = ({
 
   const handleConfirmRemoveAccount = useCallback(() => {
     setIsRemoveAccountModalVisible(false);
-    attemptRemoveAccount({
-      walletId: WalletId(walletId),
-      accountId: AccountId(accountId),
-      authenticationPromptConfig: {
-        cancellable: true,
-        confirmButtonLabel:
-          'authentication-prompt.confirm-button-label.remove-account',
-        message: 'authentication-prompt.message.remove-account',
-      },
+    if (!account) return;
+    requestRemoveAccountCeremony({
+      walletId,
+      accountId,
+      accountIndex: getAccountIndex(account),
     });
-  }, [attemptRemoveAccount, walletId, accountId]);
+  }, [requestRemoveAccountCeremony, walletId, accountId, account]);
 
   // Pop the screen if the account it points to no longer exists in state —
   // e.g. after the user confirms removal. Without this, the screen stays
@@ -161,6 +162,11 @@ export const AccountDetails = ({
               iconColor={theme.brand.white}
               label={t('v2.account-details.remove-account.button.remove')}
               onPress={handlePressRemoveAccount}
+              disabled={pendingCeremony !== null}
+              loading={
+                pendingCeremony?.ceremony === 'remove-account' &&
+                pendingCeremony.walletId === walletId
+              }
               testID="account-details-remove-button"
             />
           </View>

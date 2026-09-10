@@ -4,7 +4,7 @@ import { ViewId } from '@lace-contract/module';
 import { viewsActions } from '@lace-contract/views';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { BehaviorSubject, EMPTY, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 

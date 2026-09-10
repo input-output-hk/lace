@@ -12,7 +12,11 @@ import {
   type TrezorTxTransformerContext,
 } from '@cardano-sdk/hardware-trezor';
 import { util } from '@cardano-sdk/key-management';
-import { createInputResolver } from '@lace-contract/cardano-context';
+import {
+  applyVkeyWitnesses,
+  createInputResolver,
+  getScriptOnlyKeyPaths,
+} from '@lace-contract/cardano-context';
 import { HexBytes } from '@lace-lib/util';
 import { from } from 'rxjs';
 
@@ -141,6 +145,20 @@ export class CardanoTrezorMobileTransactionSigner
       createInputResolver(this.#props.utxo),
     );
 
+    const scriptOnlyKeyPaths = getScriptOnlyKeyPaths({
+      txBody: coreBody,
+      knownAddresses: this.#props.knownAddresses,
+      txInKeyPathMap,
+      scripts: tx.toCore().witness.scripts,
+    });
+    if (scriptOnlyKeyPaths.length > 0) {
+      throw new Error(
+        `Trezor mobile cannot witness keys required only by the transaction's native scripts: ${scriptOnlyKeyPaths
+          .map(({ role, index }) => `role ${role} index ${index}`)
+          .join(', ')}`,
+      );
+    }
+
     const outputsFormat = body
       .outputs()
       .map(out => (out.isBabbageOutput() ? MAP_BABBAGE : ARRAY_LEGACY));
@@ -198,14 +216,7 @@ export class CardanoTrezorMobileTransactionSigner
     );
 
     const witnessSet = tx.witnessSet();
-    witnessSet.setVkeys(
-      Serialization.CborSet.fromCore(
-        [...signatures.entries()] as Parameters<
-          typeof Serialization.VkeyWitness.fromCore
-        >[0][],
-        Serialization.VkeyWitness.fromCore,
-      ),
-    );
+    applyVkeyWitnesses(witnessSet, signatures);
 
     const signedTx = new Serialization.Transaction(
       body,

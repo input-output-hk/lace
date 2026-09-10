@@ -24,7 +24,7 @@ describe('trackSyncRoundFailures', () => {
   const now = Timestamp(Date.now());
 
   describe('failure detection', () => {
-    it('should add failure when sync round fails (pendingSync cleared, lastSuccessfulSync not updated)', () => {
+    it('should add failure when sync round fails (pendingSync cleared, lastFailedSync updated)', () => {
       testSideEffect(trackSyncRoundFailures, ({ hot, expectObservable }) => {
         // Initial state: account has pending sync
         const initialState: SyncStatusByAccount = {
@@ -37,11 +37,12 @@ describe('trackSyncRoundFailures', () => {
           },
         };
 
-        // Next state: pending sync cleared BUT lastSuccessfulSync not updated (failure!)
+        // Next state: pending sync cleared and the round recorded as failed
         const failedState: SyncStatusByAccount = {
           [accountId1]: {
             pendingSync: undefined, // ← Cleared
             lastSuccessfulSync: now, // ← Same timestamp (not updated)
+            lastFailedSync: Timestamp(now + 1000), // ← Round resolved as failed
           },
         };
 
@@ -119,6 +120,67 @@ describe('trackSyncRoundFailures', () => {
         };
       });
     });
+  });
+
+  describe('deliberate clear', () => {
+    const pendingRound = {
+      pendingSync: {
+        startedAt: now,
+        operations: {},
+      },
+    };
+
+    // `clearPendingSyncsForAccounts` on unlock / network switch drops the round
+    // without resolving it. Reading that as a failure makes the portfolio's
+    // initial-load gate treat the network as settled and render the empty
+    // state instead of the skeleton.
+    const droppedRoundCases: Array<
+      [string, AccountSyncStatus, AccountSyncStatus]
+    > = [
+      [
+        'a never-synced account (lock mid-sync, then unlock)',
+        pendingRound,
+        { pendingSync: undefined },
+      ],
+      [
+        'an account that synced on this network before (switch network and back)',
+        { ...pendingRound, lastSuccessfulSync: now },
+        { pendingSync: undefined, lastSuccessfulSync: now },
+      ],
+      [
+        'an account whose previous round had already failed',
+        { ...pendingRound, lastFailedSync: now },
+        { pendingSync: undefined, lastFailedSync: now },
+      ],
+    ];
+
+    it.each(droppedRoundCases)(
+      'should not record a failure when the round is dropped for %s',
+      (_label, previousStatus, currentStatus) => {
+        testSideEffect(trackSyncRoundFailures, ({ hot, expectObservable }) => {
+          const selectSyncStatusByAccount$ = hot<SyncStatusByAccount>('ab', {
+            a: { [accountId1]: previousStatus },
+            b: { [accountId1]: currentStatus },
+          });
+
+          const selectFailureById$ = hot('a', {
+            a: () => undefined,
+          });
+
+          return {
+            actionObservables: {},
+            stateObservables: {
+              sync: { selectSyncStatusByAccount$ },
+              failures: { selectFailureById$ },
+            },
+            dependencies: { actions },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe('--');
+            },
+          };
+        });
+      },
+    );
   });
 
   describe('failure dismissal', () => {

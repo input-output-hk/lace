@@ -84,6 +84,14 @@ const BLOCKCHAIN_ICONS = {
   Midnight: <Blockchains.Midnight width={16} height={16} />,
 } as const;
 
+/**
+ * Longest the initial-load skeleton may cover an active network that has not
+ * enqueued a single sync operation. Such a round records no failure when it
+ * never starts (e.g. no usable provider for the active chain), so nothing else
+ * would ever exit the skeleton.
+ */
+const INITIAL_LOAD_IDLE_TIMEOUT_MS = 30_000;
+
 interface UsePortfolioOptions {
   headerHeight: number;
   headerTopInset: number;
@@ -125,7 +133,12 @@ export const usePortfolio = ({
   const networkKey = useLaceSelector('network.selectNetworkKey');
   const currency = useLaceSelector('tokenPricing.selectCurrencyPreference');
   const syncStatus = useLaceSelector('sync.selectGlobalSyncStatus');
-  const hasEverSynced = useLaceSelector('sync.selectHasEverSynced');
+  const hasActiveNetworkEverSynced = useLaceSelector(
+    'sync.selectActiveNetworkHasEverSynced',
+  );
+  const hasActiveNetworkSyncFailure = useLaceSelector(
+    'cardanoContext.selectActiveNetworkHasSyncFailure',
+  );
   const { trackEvent } = useAnalytics();
   const setActiveAccount = useDispatchLaceAction(
     'wallets.setActiveAccountContext',
@@ -308,17 +321,26 @@ export const usePortfolio = ({
     'cardanoContext.selectFlaggedExploitsByAccount',
   );
 
-  const compromisedSuffixByAccount = useMemo(() => {
+  const nameSuffixByAccount = useMemo(() => {
     const result: Record<string, string> = {};
     for (const account of accounts) {
+      const parts: string[] = [];
       const suffixInfo = resolveAccountNameSuffix(
         flaggedExploitsByAccount[account.accountId] ?? [],
         featureFlags,
       );
       if (suffixInfo) {
-        result[account.accountId] = ` ${
-          suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey)
-        }`;
+        parts.push(
+          suffixInfo.override ?? t(suffixInfo.copyKey as TranslationKey),
+        );
+      }
+      // Read-time migrated tag (LW-15317): re-translates on locale switch and
+      // never touches the stored name.
+      if (account.metadata?.migratedOutAt !== undefined) {
+        parts.push(t('wallet.migrated-marker'));
+      }
+      if (parts.length > 0) {
+        result[account.accountId] = ` ${parts.join(' ')}`;
       }
     }
     return result;
@@ -340,7 +362,7 @@ export const usePortfolio = ({
         prices: allPrices,
         timeRange,
         rewardsByAccount,
-        compromisedSuffixByAccount,
+        nameSuffixByAccount,
         getNativeTokenInfo,
       }),
     [
@@ -357,7 +379,7 @@ export const usePortfolio = ({
       allPrices,
       timeRange,
       rewardsByAccount,
-      compromisedSuffixByAccount,
+      nameSuffixByAccount,
       getNativeTokenInfo,
     ],
   );
@@ -502,9 +524,39 @@ export const usePortfolio = ({
     return baseTabs;
   }, [t, isAccountView, shouldShowNftTab]);
 
+  // Bounds the skeleton for a network that never enqueues a sync operation; the
+  // active network changing restarts the window because its first round is
+  // enqueued anew.
+  const [hasInitialLoadTimedOut, setHasInitialLoadTimedOut] = useState(false);
+  useEffect(() => {
+    setHasInitialLoadTimedOut(false);
+    const timeout = setTimeout(() => {
+      setHasInitialLoadTimedOut(true);
+    }, INITIAL_LOAD_IDLE_TIMEOUT_MS);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [networkKey]);
+
   const isLoading = useMemo(() => {
-    return syncStatus === 'syncing' && !hasEverSynced;
-  }, [syncStatus, hasEverSynced]);
+    // Skeleton only while the ACTIVE network is still loading its first data:
+    // accounts exist (ADR 11 — network-specific) and none has ever synced. Each
+    // exit covers a stall the others miss — the terminal failure
+    // (CardanoSyncFailureId) is recorded only once a round clears pendingSync,
+    // 'error' catches an operation that failed inside a round still in flight,
+    // and the timeout bounds a first round that never starts.
+    if (accounts.length === 0) return false;
+    if (hasActiveNetworkEverSynced || hasActiveNetworkSyncFailure) return false;
+    if (syncStatus === 'error') return false;
+
+    return syncStatus === 'syncing' || !hasInitialLoadTimedOut;
+  }, [
+    accounts.length,
+    hasActiveNetworkEverSynced,
+    hasActiveNetworkSyncFailure,
+    hasInitialLoadTimedOut,
+    syncStatus,
+  ]);
 
   // Sync activeAssetView shared value with selectedAssetView state
   useEffect(() => {

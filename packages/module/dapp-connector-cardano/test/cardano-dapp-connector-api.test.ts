@@ -6,7 +6,7 @@ import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { Ok } from '@lace-lib/util';
 import { of, Subject, throwError, type Observable } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   APIErrorCode,
@@ -15,12 +15,13 @@ import {
   TxSignErrorCode,
 } from '../src/common/api-error';
 import { CardanoDappConnectorApi } from '../src/common/store/dependencies/cardano-dapp-connector-api';
+import { requiresForeignSignaturesFromCbor } from '../src/common/store/utils/input-resolver';
 
 import type { Paginate, SenderContext } from '../src/browser/types';
 import type { CardanoDappConnectorApiDependencies } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { SigningResult } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { CardanoConfirmationCallback } from '../src/common/store/dependencies/create-confirmation-callback';
-import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
+import type { Bip32PublicKeyHex, Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
   AccessAuthSecret,
@@ -180,6 +181,7 @@ const defaultNewDeps = {
   accountUnspendableUtxos$: of({} as AccountUtxoMap),
   rewardAccountDetails$: of({} as AccountRewardAccountDetailsMap),
   accountTransactionHistory$: of({} as CardanoAccountAddressHistoryMap),
+  resolveChainedInputs: (): Cardano.Utxo[] => [],
 };
 
 describe('CardanoDappConnectorApi', () => {
@@ -757,6 +759,282 @@ describe('CardanoDappConnectorApi', () => {
         true,
         'https://test-dapp.com',
       );
+    });
+
+    describe('chained tx spending own mempool outputs', () => {
+      const accountId = AccountId('acc-1');
+      const walletId = WalletId('wallet-1');
+      const chainedSourceTxId = Cardano.TransactionId('9'.repeat(64));
+      const chainedUtxo = createMockUtxo({
+        txIdHex: '9'.repeat(64),
+        index: 0,
+        address: PAYMENT_ADDRESS_1,
+        coins: 10_000_000n,
+      });
+
+      const mockAccount: AnyAccount = {
+        accountId,
+        walletId,
+        accountIndex: 0,
+        accountType: 'Bip32',
+        blockchainName: 'Cardano',
+        blockchainNetworkId: 'cardano-preprod',
+        blockchainSpecific: {
+          accountIndex: 0,
+          extendedAccountPublicKey: '0'.repeat(128),
+        },
+        metadata: { name: 'Test Account' },
+        networkType: 'testnet',
+      } as unknown as AnyAccount;
+
+      const mockAddresses = [
+        {
+          address: PAYMENT_ADDRESS_1,
+          accountId,
+          blockchainName: 'Cardano',
+          data: {
+            type: 0,
+            index: 0,
+            networkId: 0,
+            accountIndex: 0,
+            rewardAccount: REWARD_ACCOUNT,
+            stakeKeyDerivationPath: { role: 2, index: 0 },
+          },
+        } as unknown as AnyAddress,
+      ];
+
+      const createApi = ({
+        resolveChainedInputs,
+        userConfirmationRequest,
+        signTransaction,
+      }: {
+        resolveChainedInputs: (
+          txCbor: string,
+          ownAddresses: ReadonlySet<string>,
+        ) => Cardano.Utxo[];
+        userConfirmationRequest: CardanoConfirmationCallback;
+        signTransaction: ReturnType<typeof vi.fn>;
+      }) =>
+        new CardanoDappConnectorApi({
+          ...defaultNewDeps,
+          accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+          addresses$: of(mockAddresses),
+          chainId$: of({
+            networkId: Cardano.NetworkId.Testnet,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          } as Cardano.ChainId),
+          allAccounts$: of([mockAccount]),
+          allWallets$: of([]),
+          getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+          resolveChainedInputs,
+          userConfirmationRequest,
+          signTransaction,
+          submitTransaction: vi.fn(),
+        });
+
+      // Mirrors the real guard just enough to discriminate the cache: foreign
+      // signatures are required unless the chained source utxo is present.
+      beforeEach(() => {
+        vi.mocked(requiresForeignSignaturesFromCbor).mockImplementation(
+          async (_txCbor, utxos) =>
+            !utxos.some(([txIn]) => txIn.txId === chainedSourceTxId),
+        );
+      });
+
+      afterEach(() => {
+        vi.mocked(requiresForeignSignaturesFromCbor).mockResolvedValue(false);
+      });
+
+      it('full-sign passes the pre-check when the chained input resolves to a cached own output', async () => {
+        const resolveChainedInputs = vi.fn().mockReturnValue([chainedUtxo]);
+        const mockConfirmation = vi.fn().mockResolvedValue({
+          isConfirmed: true,
+        }) as unknown as CardanoConfirmationCallback;
+        const mockSignTransaction = vi
+          .fn()
+          .mockResolvedValue('witness-cbor-hex');
+
+        const api = createApi({
+          resolveChainedInputs,
+          userConfirmationRequest: mockConfirmation,
+          signTransaction: mockSignTransaction,
+        });
+
+        await expect(api.signTx('abcd1234', false, mockSender)).resolves.toBe(
+          'witness-cbor-hex',
+        );
+        expect(resolveChainedInputs).toHaveBeenCalledWith(
+          'abcd1234',
+          new Set([PAYMENT_ADDRESS_1]),
+        );
+      });
+
+      it('full-sign still throws ProofGeneration at the pre-check when the source tx was never cached', async () => {
+        const mockConfirmation = vi.fn().mockResolvedValue({
+          isConfirmed: true,
+        }) as unknown as CardanoConfirmationCallback;
+
+        const api = createApi({
+          resolveChainedInputs: () => [],
+          userConfirmationRequest: mockConfirmation,
+          signTransaction: vi.fn(),
+        });
+
+        await expect(
+          api.signTx('abcd1234', false, mockSender),
+        ).rejects.toMatchObject({
+          code: TxSignErrorCode.ProofGeneration,
+        });
+        expect(mockConfirmation).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('signTx foreign input pre-check', () => {
+    const accountId = AccountId('acc-1');
+    const walletId = WalletId('wallet-1');
+    const chainId = {
+      networkId: Cardano.NetworkId.Testnet,
+      networkMagic: Cardano.NetworkMagics.Preprod,
+    } as Cardano.ChainId;
+
+    const mockAccount: AnyAccount = {
+      accountId,
+      walletId,
+      accountIndex: 0,
+      accountType: 'InMemory',
+      name: 'Test Account',
+      blockchainName: 'Cardano',
+      blockchainSpecific: {
+        accountIndex: 0,
+        chainId,
+        extendedAccountPublicKey: '0'.repeat(128),
+      },
+    } as unknown as AnyAccount;
+
+    const mockWallet = {
+      walletId,
+      name: 'Test Wallet',
+      type: WalletType.InMemory,
+      metadata: {},
+      blockchainSpecific: {},
+    } as unknown as InMemoryWallet;
+
+    const mockAddresses = [
+      {
+        address: PAYMENT_ADDRESS_1,
+        accountId,
+        blockchainName: 'Cardano',
+        data: {
+          type: 0,
+          index: 0,
+          networkId: 0,
+          accountIndex: 0,
+          rewardAccount: REWARD_ACCOUNT,
+          stakeKeyDerivationPath: { role: 2, index: 0 },
+        },
+      } as unknown as AnyAddress,
+    ];
+
+    const ownPaymentKeyHash = Cardano.Address.fromBech32(PAYMENT_ADDRESS_1)
+      .asBase()!
+      .getPaymentCredential().hash as unknown as Ed25519KeyHashHex;
+
+    const ownScript: Cardano.NativeScript = {
+      __type: Cardano.ScriptType.Native,
+      kind: Cardano.NativeScriptKind.RequireSignature,
+      keyHash: ownPaymentKeyHash,
+    };
+
+    const foreignTxIn: Cardano.TxIn = {
+      txId: Cardano.TransactionId(`${'0'.repeat(63)}2`),
+      index: 0,
+    };
+
+    const txCbor = Serialization.Transaction.fromCore({
+      id: Cardano.TransactionId(`${'0'.repeat(63)}1`),
+      body: {
+        inputs: [foreignTxIn],
+        outputs: [
+          {
+            address: Cardano.PaymentAddress(PAYMENT_ADDRESS_1),
+            value: { coins: 1_000_000n },
+          },
+        ],
+        fee: 170_000n,
+      },
+      witness: { signatures: new Map(), scripts: [ownScript] },
+    } as Cardano.Tx).toCbor();
+
+    const createApi = () => {
+      const signTransaction = vi.fn().mockResolvedValue('witness-set-cbor');
+      const userConfirmationRequest = vi.fn().mockResolvedValue({
+        isConfirmed: true,
+      });
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of(mockAddresses),
+        chainId$: of(chainId),
+        allAccounts$: of([mockAccount]),
+        allWallets$: of([mockWallet]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        userConfirmationRequest:
+          userConfirmationRequest as unknown as CardanoConfirmationCallback,
+        signTransaction,
+        submitTransaction: vi.fn(),
+      });
+      return { api, signTransaction, userConfirmationRequest };
+    };
+
+    // The module mock stubs requiresForeignSignaturesFromCbor for the rest of
+    // the file; this block restores the real gate to prove the pre-check
+    // stays local-only and defers unknown-input resolution to post-consent.
+    beforeEach(async () => {
+      const actual = await vi.importActual<{
+        requiresForeignSignaturesFromCbor: typeof requiresForeignSignaturesFromCbor;
+      }>('../src/common/store/utils/input-resolver');
+      vi.mocked(requiresForeignSignaturesFromCbor).mockImplementation(
+        actual.requiresForeignSignaturesFromCbor,
+      );
+    });
+
+    afterEach(() => {
+      vi.mocked(requiresForeignSignaturesFromCbor).mockResolvedValue(false);
+    });
+
+    it('defers unknown-input resolution past the pre-check when an own-satisfiable script exists', async () => {
+      const { api, signTransaction, userConfirmationRequest } = createApi();
+
+      await expect(
+        api.signTx(txCbor, false, createMockSenderContext()),
+      ).resolves.toBe('witness-set-cbor');
+      expect(userConfirmationRequest).toHaveBeenCalledTimes(1);
+      expect(signTransaction).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects a full sign before consent when the tx carries no own-satisfiable script', async () => {
+      const { api, signTransaction, userConfirmationRequest } = createApi();
+      const noScriptTxCbor = Serialization.Transaction.fromCore({
+        id: Cardano.TransactionId(`${'0'.repeat(63)}3`),
+        body: {
+          inputs: [foreignTxIn],
+          outputs: [
+            {
+              address: Cardano.PaymentAddress(PAYMENT_ADDRESS_1),
+              value: { coins: 1_000_000n },
+            },
+          ],
+          fee: 170_000n,
+        },
+        witness: { signatures: new Map() },
+      } as Cardano.Tx).toCbor();
+
+      await expect(
+        api.signTx(noScriptTxCbor, false, createMockSenderContext()),
+      ).rejects.toMatchObject({ code: TxSignErrorCode.ProofGeneration });
+      expect(userConfirmationRequest).not.toHaveBeenCalled();
+      expect(signTransaction).not.toHaveBeenCalled();
     });
   });
 

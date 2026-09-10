@@ -18,6 +18,7 @@
     "@lace-contract/network": "*",
     "@lace-contract/onboarding-v2": "*",
     "@lace-contract/signer": "*",
+    "@lace-contract/vault": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/bitcoin-air-gapped-protocol": "*",
     "@lace-lib/util": "*",

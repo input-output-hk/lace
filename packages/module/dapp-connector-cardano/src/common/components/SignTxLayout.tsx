@@ -69,6 +69,7 @@ export const SignTxLayout = ({
               ? undefined
               : {
                   label: t('dapp-connector.cardano.sign-tx.confirm'),
+                  testID: 'dapp-sign-tx-confirm-button',
                   onPress: onConfirm,
                   iconColor: theme.brand.white,
                   disabled: isConfirmButtonDisabled,
@@ -76,6 +77,7 @@ export const SignTxLayout = ({
           }
           secondaryButton={{
             label: t('dapp-connector.cardano.sign-tx.cancel'),
+            testID: 'dapp-sign-tx-reject-button',
             onPress: onReject,
           }}
           showDivider={true}

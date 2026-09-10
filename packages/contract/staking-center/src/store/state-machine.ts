@@ -156,6 +156,16 @@ export const delegationFlowMachine = createStateMachine(
       reset: previousState => previousState,
     },
     Success: {
+      // Ignore stale fee-calculation results (e.g. duplicate emissions / races
+      // that resolve after the delegation already succeeded).
+      feeCalculationCompleted: (
+        previousState,
+        _payload: DelegationFeeCalculationCompletedPayload,
+      ) => previousState,
+      feeCalculationFailed: (
+        previousState,
+        _payload: DelegationFeeCalculationFailedPayload,
+      ) => previousState,
       reset: () => initialState,
     },
     Error: {

@@ -137,7 +137,7 @@ const getStyles = (theme: Theme, isStorybook?: boolean) =>
       height: 90,
     },
     heroBackgroundContainer: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       alignItems: 'center',
       justifyContent: 'center',
     },

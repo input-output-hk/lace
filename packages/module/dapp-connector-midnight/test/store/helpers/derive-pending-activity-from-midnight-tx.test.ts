@@ -4,13 +4,13 @@ import {
 } from '@lace-contract/midnight-context';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { BigNumber } from '@lace-lib/util';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { derivePendingActivityFromMidnightTx } from '../../../src/store/helpers/derive-pending-activity-from-midnight-tx';
 
 import type * as ledger from '@midnight-ntwrk/ledger-v8';
-import type { UtxoWithMeta } from '@midnight-ntwrk/wallet-sdk/facade';
+import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 
 const NETWORK_ID = NetworkId.NetworkId.Preview;
 const ACCOUNT_ID = AccountId('test-account');

@@ -1,0 +1,28 @@
+{
+  "name": "@lace-module/migrate-monolith-guest-data",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/address-book": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-lib/extension-shell-api": "*",
+    "@lace-lib/extension-shell-client": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-store": "*",
+    "@reduxjs/toolkit": "*",
+    "rxjs": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

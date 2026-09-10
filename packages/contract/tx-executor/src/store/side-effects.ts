@@ -1,5 +1,14 @@
 import { toItemsByBlockchainName } from '@lace-lib/util-store';
-import { EMPTY, defer, map, merge, of, shareReplay, switchMap } from 'rxjs';
+import {
+  EMPTY,
+  catchError,
+  defer,
+  map,
+  merge,
+  of,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 
 import { genericErrorResults } from './generic-error-results';
 
@@ -96,38 +105,59 @@ export const makeExecuteTxPhase =
     return txPhaseRequested$.pipe(
       switchMap(({ payload: { executionId, config } }) =>
         selectTxExecutorImplementation$.pipe(
-          switchMap(selectTxExecutorImplementation => {
-            const txExecutorImplementation = selectTxExecutorImplementation(
-              config.params.blockchainName,
-            );
+          switchMap(selectTxExecutorImplementation =>
+            // `defer` so a synchronous throw from an executor phase (built
+            // eagerly by `executeTxExecutorPhase`) surfaces as an error
+            // notification the `catchError` below can contain, instead of
+            // escaping the project function and tearing down
+            // `txPhaseRequested$` for the rest of the session.
+            defer(() => {
+              const txExecutorImplementation = selectTxExecutorImplementation(
+                config.params.blockchainName,
+              );
 
-            return merge(
-              merge(
-                !txExecutorImplementation
-                  ? of(genericErrorResults[config.type]())
+              return merge(
+                merge(
+                  !txExecutorImplementation
+                    ? of(genericErrorResults[config.type]())
+                    : EMPTY,
+                  txExecutorImplementation && config.type !== 'confirmTx'
+                    ? executeTxExecutorPhase(txExecutorImplementation, config)
+                    : EMPTY,
+                ).pipe(
+                  map(result =>
+                    actions.txExecutor.txPhaseCompleted({
+                      executionId,
+                      result,
+                    }),
+                  ),
+                ),
+
+                txExecutorImplementation && config.type === 'confirmTx'
+                  ? confirmTxFlow({
+                      ...config.params,
+                      actions,
+                      executionId,
+                      confirmTxImplementation:
+                        txExecutorImplementation.confirmTx,
+                    })
                   : EMPTY,
-                txExecutorImplementation && config.type !== 'confirmTx'
-                  ? executeTxExecutorPhase(txExecutorImplementation, config)
-                  : EMPTY,
-              ).pipe(
-                map(result =>
+              );
+            }).pipe(
+              // A buggy executor that throws (synchronously or through its
+              // observable) must not kill this shared stream — map the failure
+              // to the phase's generic error result so the requesting flow
+              // still receives a completion.
+              catchError((error: Error) =>
+                of(
                   actions.txExecutor.txPhaseCompleted({
                     executionId,
-                    result,
+                    result: genericErrorResults[config.type]({ error }),
                   }),
                 ),
               ),
-
-              txExecutorImplementation && config.type === 'confirmTx'
-                ? confirmTxFlow({
-                    ...config.params,
-                    actions,
-                    executionId,
-                    confirmTxImplementation: txExecutorImplementation.confirmTx,
-                  })
-                : EMPTY,
-            );
-          }),
+            ),
+          ),
         ),
       ),
     );

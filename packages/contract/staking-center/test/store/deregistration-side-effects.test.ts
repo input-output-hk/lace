@@ -481,6 +481,86 @@ describe('deregistration side effects', () => {
       vi.restoreAllMocks();
     });
 
+    it('carries the submit result’s blockchain metadata onto the pending activity', () => {
+      // Without this the in-flight view cannot subtract what this tx spends,
+      // so its inputs stay offered as spendable until it confirms.
+      const activityMetadata = {
+        Cardano: { consumedInputs: [{ txId: testTxId, index: 0 }] },
+      };
+      const submitResult: TxSubmissionResult = {
+        success: true,
+        txId: testTxId,
+        blockchainSpecificActivityMetadata: activityMetadata,
+      };
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeDeregistrationProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', { a: mapResult(submitResult) }),
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            deregistrationFlow: {
+              selectDeregistrationFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  serializedTx: testSerializedTx,
+                  wallet: testWallet,
+                  depositReturn: testDepositReturn,
+                  fees: testFees,
+                  withdrawalAmount: '5000000',
+                } as DeregistrationFlowState,
+              }),
+            },
+          },
+          dependencies: {
+            actions: { ...stakingCenterActions, ...activitiesActions },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: activitiesActions.activities.upsertActivities({
+                accountId: testAccountId,
+                activities: [
+                  {
+                    accountId: testAccountId,
+                    activityId: testTxId,
+                    timestamp: Timestamp(mockTimestamp),
+                    tokenBalanceChanges: [
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(-200000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(2000000n),
+                      },
+                      {
+                        tokenId: LOVELACE_TOKEN_ID,
+                        amount: BigNumber(5000000n),
+                      },
+                    ],
+                    type: ActivityType.Pending,
+                    blockchainSpecific: activityMetadata,
+                  },
+                ],
+              }),
+              b: stakingCenterActions.deregistrationFlow.processingResulted({
+                result: submitResult,
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
     it('omits deposit return from pending activity when depositReturn is zero', () => {
       const submitResult: TxSubmissionResult = {
         success: true,

@@ -1,0 +1,22 @@
+{
+  "name": "@lace-module/dapp-connector-host-pull",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/dapp-connector": "*",
+    "@lace-contract/module": "*",
+    "@lace-lib/extension-shell-api": "*",
+    "@lace-lib/extension-shell-client": "*",
+    "@lace-lib/util-store": "*",
+    "rxjs": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

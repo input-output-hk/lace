@@ -22,6 +22,7 @@ import claimModule from '@lace-module/cardano-uri-linking';
 import cryptoApollo from '@lace-module/crypto-apollo';
 import dappConnectorCardano from '@lace-module/dapp-connector-cardano';
 import dappExplorer from '@lace-module/dapp-explorer';
+import earnRewards from '@lace-module/earn-rewards';
 import featureDev from '@lace-module/feature-dev';
 import featurePosthog from '@lace-module/feature-posthog';
 import governanceCenter from '@lace-module/governance-center';
@@ -29,6 +30,7 @@ import hwConnector from '@lace-module/hw-connector';
 import i18n from '@lace-module/i18n';
 import identityCenter from '@lace-module/identity-center';
 import migrateMultiDelegation from '@lace-module/migrate-multi-delegation';
+import migrateWallet from '@lace-module/migrate-wallet';
 import notificationCenter from '@lace-module/notification-center';
 import onboarding from '@lace-module/onboarding';
 import posthogClientReactNative from '@lace-module/posthog-client-react-native';
@@ -44,6 +46,7 @@ import vaultInMemory from '@lace-module/vault-in-memory';
 import vaultInMemoryUI from '@lace-module/vault-in-memory-ui';
 import vaultKeystone from '@lace-module/vault-keystone';
 import vaultLedger from '@lace-module/vault-ledger';
+import vaultLocal from '@lace-module/vault-local';
 import vaultSeedSigner from '@lace-module/vault-seed-signer';
 import vaultTrezor from '@lace-module/vault-trezor';
 import viewsMobile from '@lace-module/views-mobile';
@@ -54,6 +57,7 @@ export const allModules = [
   appMobile,
   stakingCenter,
   governanceCenter,
+  earnRewards,
   identityCenter,
   addressBook,
   authenticationPromptUiV2Extension,
@@ -92,10 +96,12 @@ export const allModules = [
   appActivityMobile,
   vaultInMemory,
   vaultInMemoryUI,
+  vaultLocal,
   viewsMobile,
   dappConnectorCardano,
   adaHandle,
   migrateMultiDelegation,
+  migrateWallet,
   swapCenter,
   swapProviderSteelswap,
   vaultLedger,

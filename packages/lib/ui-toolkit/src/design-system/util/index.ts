@@ -6,6 +6,7 @@ import { Platform, Linking, Share } from 'react-native';
 
 export * from './backdrop';
 export * from './commons';
+export * from './get-earned-rewards';
 export * from './hooks';
 export * from './color-utils';
 export type * from './types';

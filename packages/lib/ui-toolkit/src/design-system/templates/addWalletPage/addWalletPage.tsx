@@ -13,6 +13,8 @@ export type AddWalletPageAction = {
   icon: IconName;
   title: string;
   onPress: () => void;
+  disabled?: boolean;
+  loading?: boolean;
   testID?: string;
 };
 
@@ -51,6 +53,8 @@ export const AddWalletPageTemplate = ({
               icon={action.icon}
               title={action.title}
               onPress={action.onPress}
+              disabled={action.disabled}
+              loading={action.loading}
               testID={action.testID}
               containerStyle={styles.actionButton}
               textAlign="left"

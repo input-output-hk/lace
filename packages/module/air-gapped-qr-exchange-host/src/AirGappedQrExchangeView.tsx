@@ -192,7 +192,7 @@ export const AirGappedQrExchangeView = ({
 const getStyles = (theme: Theme) =>
   StyleSheet.create({
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       backgroundColor: theme.background.page,
       zIndex: 1000,
       alignItems: 'center',

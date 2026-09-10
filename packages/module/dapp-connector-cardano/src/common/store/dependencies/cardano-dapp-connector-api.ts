@@ -40,6 +40,7 @@ import { supportedCip30Extensions } from '../../cip30-extensions';
 import { addrToSignWith, transformToGroupedAddresses } from '../util';
 import { requiresForeignSignaturesFromCbor } from '../utils/input-resolver';
 
+import type { ChainedTxOutputCache } from '../chained-tx-output-cache';
 import type { CardanoConfirmationCallback } from './create-confirmation-callback';
 import type {
   Address,
@@ -171,6 +172,7 @@ export interface CardanoDappConnectorApiDependencies {
   /** All wallets - needed for accessing encrypted root private key for signing */
   allWallets$: Observable<AnyWallet[]>;
   chainId$: Observable<Cardano.ChainId | undefined>;
+  /** Provider for resolving inputs absent from the local UTXO set */
   /** Per-account address transaction history; used to classify addresses as used/unused */
   accountTransactionHistory$: Observable<CardanoAccountAddressHistoryMap>;
   /**
@@ -178,6 +180,11 @@ export interface CardanoDappConnectorApiDependencies {
    * Enables per-dApp account isolation - each dApp uses its own selected account.
    */
   getAccountIdForOrigin: (origin: string) => AccountId | undefined;
+  /**
+   * Resolves tx inputs spending outputs of recently signed/submitted txs that
+   * the confirmed UTxO set cannot see yet (chained txs).
+   */
+  resolveChainedInputs: ChainedTxOutputCache['resolveChainedInputs'];
   /** Callback for user confirmation flows (required for signing) */
   userConfirmationRequest?: CardanoConfirmationCallback;
   /** Function to sign transactions (required for signTx) */
@@ -262,6 +269,15 @@ const deserializeValue = (cbor: Cbor): Cardano.Value => {
 };
 
 /**
+ * Whether the account's signer threads witness native scripts into signature
+ * detection. This pre-sign gate only runs on the extension flow (mobile routes
+ * signTx to its own side effect), where every signer except Ledger does.
+ * A missing wallet falls back to the stricter gate.
+ */
+const signerWitnessesScriptKeys = (wallet: AnyWallet | undefined): boolean =>
+  wallet !== undefined && wallet.type !== WalletType.HardwareLedger;
+
+/**
  * CardanoDappConnectorApi - Implements CIP-30 wallet API for Cardano dApps
  *
  * This class provides the Cardano implementation for the CIP-30 standard,
@@ -291,6 +307,7 @@ export class CardanoDappConnectorApi
   readonly #chainId$: Observable<Cardano.ChainId | undefined>;
   readonly #accountTransactionHistory$: Observable<CardanoAccountAddressHistoryMap>;
   readonly #getAccountIdForOrigin: (origin: string) => AccountId | undefined;
+  readonly #resolveChainedInputs: ChainedTxOutputCache['resolveChainedInputs'];
   readonly #userConfirmationRequest?: CardanoConfirmationCallback;
   readonly #signTransaction?: SignTransactionFunction;
   readonly #submitTransaction: SubmitTransactionFunction;
@@ -312,6 +329,7 @@ export class CardanoDappConnectorApi
     allWallets$,
     accountTransactionHistory$,
     getAccountIdForOrigin,
+    resolveChainedInputs,
     userConfirmationRequest,
     signTransaction,
     submitTransaction,
@@ -330,6 +348,7 @@ export class CardanoDappConnectorApi
     this.#chainId$ = chainId$;
     this.#accountTransactionHistory$ = accountTransactionHistory$;
     this.#getAccountIdForOrigin = getAccountIdForOrigin;
+    this.#resolveChainedInputs = resolveChainedInputs;
     this.#userConfirmationRequest = userConfirmationRequest;
     this.#signTransaction = signTransaction;
     this.#submitTransaction = submitTransaction;
@@ -1263,6 +1282,13 @@ export class CardanoDappConnectorApi
     } as Cardano.Value;
   }
 
+  /**
+   * Local-only pre-consent check: runs the foreign-signature gate without an
+   * input resolver so no network request happens before the user approves.
+   * Unknown inputs are optimistically exempted when an own-satisfiable
+   * witness script exists; the resolver-backed gate re-runs post-consent in
+   * the signTransaction wrapper and stays authoritative.
+   */
   async #validateCanSign(
     txCbor: Cbor,
     partialSign: boolean,
@@ -1276,10 +1302,11 @@ export class CardanoDappConnectorApi
       );
     }
 
-    const [chainId, allAccounts, allAddresses, accountUtxos] =
+    const [chainId, allAccounts, allWallets, allAddresses, accountUtxos] =
       await Promise.all([
         firstValueFrom(this.#chainId$),
         firstValueFrom(this.#allAccounts$),
+        firstValueFrom(this.#allWallets$),
         firstValueFrom(this.#addresses$),
         firstValueFrom(this.#accountUtxos$),
       ]);
@@ -1301,6 +1328,13 @@ export class CardanoDappConnectorApi
 
     const knownAddresses = transformToGroupedAddresses(allAddresses, accountId);
     const localUtxos = accountUtxos[accountId] ?? [];
+    const resolutionUtxos = [
+      ...localUtxos,
+      ...this.#resolveChainedInputs(
+        txCbor,
+        new Set<string>(knownAddresses.map(({ address }) => address)),
+      ),
+    ];
 
     const { extendedAccountPublicKey } = account.blockchainSpecific as {
       extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
@@ -1310,12 +1344,16 @@ export class CardanoDappConnectorApi
       await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
     );
 
+    const wallet = allWallets.find(w => w.walletId === account.walletId);
+
     if (!partialSign) {
       if (
-        requiresForeignSignaturesFromCbor(
+        await requiresForeignSignaturesFromCbor(
           txCbor,
-          localUtxos,
+          resolutionUtxos,
           knownAddresses,
+          undefined,
+          signerWitnessesScriptKeys(wallet),
           dRepKeyHash,
         )
       ) {

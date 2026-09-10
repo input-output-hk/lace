@@ -1,6 +1,7 @@
 import { markParameterizedSelector } from '@lace-contract/module';
 import { walletsActions, walletsSelectors } from '@lace-contract/wallet-repo';
 import { createSlice } from '@reduxjs/toolkit';
+import isEqual from 'lodash/isEqual';
 import { createSelector } from 'reselect';
 
 import type { Address, AnyAddress, AnyBlockchainAddress } from '../types';
@@ -45,24 +46,38 @@ const slice = createSlice({
   name: 'addresses',
   initialState,
   reducers: {
+    /**
+     * Inserts new addresses (deduped by address + accountId) and refreshes the
+     * `data` of already-present entries when the payload supplies different
+     * data, so persisted entries self-heal on the next sync. State is only
+     * mutated on an actual change: sync triggers combineLatest over the
+     * addresses list, so an unchanged re-upsert must keep the same reference.
+     */
     upsertAddresses: (
       state,
       { payload }: Readonly<PayloadAction<UpsertAddressesPayload>>,
     ) => {
-      const newAddresses = payload.addresses
-        .filter(
-          newAddress =>
-            !state.addresses.some(
-              existingAddress =>
-                existingAddress.address === newAddress.address &&
-                existingAddress.accountId === payload.accountId,
-            ),
-        )
-        .map<AnyAddress>(a => ({
-          ...a,
-          blockchainName: payload.blockchainName,
-          accountId: payload.accountId,
-        }));
+      const newAddresses: AnyAddress[] = [];
+      for (const incoming of payload.addresses) {
+        const existing = state.addresses.find(
+          a =>
+            a.address === incoming.address && a.accountId === payload.accountId,
+        );
+        if (existing) {
+          if (
+            incoming.data !== undefined &&
+            !isEqual(existing.data, incoming.data)
+          ) {
+            existing.data = incoming.data;
+          }
+        } else {
+          newAddresses.push({
+            ...incoming,
+            blockchainName: payload.blockchainName,
+            accountId: payload.accountId,
+          });
+        }
+      }
       if (newAddresses.length > 0) {
         state.addresses = [...state.addresses, ...newAddresses];
       }

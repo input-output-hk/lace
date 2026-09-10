@@ -7,6 +7,7 @@ import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-cont
 import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
 import { testFeatureFlagCompatibility } from '@lace-lib/util-dev-app';
 import { ADA_HANDLE_FEATURE_FLAG } from '@lace-module/ada-handle';
+import { FEATURE_FLAG_BITCOIN_DAPP_CONNECTOR } from '@lace-module/dapp-connector-bitcoin';
 import { FEATURES_DEV_FEATURE_FLAG } from '@lace-module/feature-dev';
 import { IDENTITY_FEATURE_FLAG } from '@lace-module/identity-center';
 import { MD_MIGRATION_FEATURE_FLAG } from '@lace-module/migrate-multi-delegation';
@@ -31,6 +32,7 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: V1_MIGRATION_FEATURE_FLAG },
   { key: MD_MIGRATION_FEATURE_FLAG },
   { key: ADA_HANDLE_FEATURE_FLAG },
+  { key: FEATURE_FLAG_BITCOIN_DAPP_CONNECTOR },
   { key: IDENTITY_FEATURE_FLAG },
   { key: FEATURE_FLAG_LEDGER },
   { key: FEATURE_FLAG_TREZOR },
@@ -41,6 +43,7 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('CNIGHT_DESIGNATION') },
   { key: FEATURE_FLAG_KEYSTONE },
   { key: FeatureFlagKey('GOVERNANCE_CENTER') },
+  { key: FeatureFlagKey('EARN_REWARDS') },
 ];
 
 testFeatureFlagCompatibility(

@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   absoluteFill: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     height: '100%',
     width: '100%',
   },

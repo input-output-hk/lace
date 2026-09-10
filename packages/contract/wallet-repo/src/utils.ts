@@ -111,3 +111,18 @@ export const stampWalletOnboardedAt = <T extends AnyWallet>(
     withOnboardedAt(account, onboardedAt),
   ),
 });
+
+/**
+ * Composes a display label for a wallet or account name, appending the
+ * caller-translated "[Migrated]" tag when the metadata carries a
+ * migrated-out stamp. Read-time by design: the stored name stays the user's
+ * own text, and the tag re-translates on every locale switch instead of
+ * freezing into persisted data.
+ */
+export const withMigratedTag = (
+  metadata: { name: string; migratedOutAt?: Timestamp },
+  migratedTag: string,
+): string =>
+  metadata.migratedOutAt === undefined
+    ? metadata.name
+    : `${metadata.name} ${migratedTag}`;

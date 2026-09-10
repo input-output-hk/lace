@@ -320,3 +320,18 @@ export type PortfolioBannerUICustomisation = UICustomisation<
   },
   BlockchainName | void
 >;
+
+/**
+ * A portfolio announcement — a conditional inline banner rendered in the
+ * portfolio banner region (above the asset list), contributed by any module.
+ *
+ * Unlike `PortfolioBannerUICustomisation` (per-blockchain, single, only on a
+ * selected-account view), this is blockchain-agnostic and multi-instance:
+ * several announcements render stacked, and each decides its own visibility
+ * (returning `null` when not applicable). The component receives the current
+ * account id. This is the slot for feature nudges (e.g. earn rewards) that
+ * should sit in the portfolio banner region rather than float as an overlay.
+ */
+export type PortfolioAnnouncement = UICustomisation<{
+  Announcement: ComponentType<{ accountId: string }>;
+}>;

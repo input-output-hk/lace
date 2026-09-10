@@ -130,7 +130,7 @@ describe('BitcoinTrezorSignerFactory', () => {
     ).toThrow('missing its network id');
   });
 
-  it('does not support BIP-322 data signing', () => {
+  it('does not support message signing', () => {
     const factory = new BitcoinTrezorSignerFactory({ getConnect });
     const signerAccount = account();
 
@@ -138,7 +138,7 @@ describe('BitcoinTrezorSignerFactory', () => {
       factory.createDataSigner(
         contextFor([signerAccount], signerAccount.accountId),
       ),
-    ).toThrow('BIP-322');
+    ).toThrow('Message signing is not supported');
   });
 });
 

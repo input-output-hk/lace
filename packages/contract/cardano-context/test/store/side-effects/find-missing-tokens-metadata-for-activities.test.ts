@@ -12,6 +12,7 @@ import {
 
 import type { Activity } from '@lace-contract/activities';
 import type { MetadataByTokenId, TokenId } from '@lace-contract/tokens';
+import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 
 const actions = {
   ...cardanoContextActions,
@@ -24,15 +25,26 @@ const tokenId1: TokenId = 'token1' as TokenId;
 const tokenId2: TokenId = 'token2' as TokenId;
 const tokenId3: TokenId = 'token3' as TokenId;
 
+const cardanoAccountId = 'cardano-account' as AccountId;
+const midnightAccountId = 'midnight-account' as AccountId;
+
+const cardanoAccount = {
+  accountId: cardanoAccountId,
+  blockchainName: 'Cardano',
+} as AnyAccount;
+
 const mockActivity1: Activity = {
+  accountId: cardanoAccountId,
   tokenBalanceChanges: [{ tokenId: tokenId1 }, { tokenId: tokenId2 }],
 } as Activity;
 
 const mockActivity2: Activity = {
+  accountId: cardanoAccountId,
   tokenBalanceChanges: [{ tokenId: tokenId2 }, { tokenId: tokenId3 }],
 } as Activity;
 
 const mockActivity3: Activity = {
+  accountId: cardanoAccountId,
   tokenBalanceChanges: [{ tokenId: tokenId1 }],
 } as Activity;
 
@@ -101,6 +113,11 @@ describe('cardano-context side effects', () => {
                 a: mockTokensMetadata,
               }),
             },
+            wallets: {
+              selectActiveNetworkAccounts$: hot<AnyAccount[]>('a', {
+                a: [cardanoAccount],
+              }),
+            },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
@@ -136,6 +153,11 @@ describe('cardano-context side effects', () => {
                 a: mockTokensMetadata,
               }),
             },
+            wallets: {
+              selectActiveNetworkAccounts$: hot<AnyAccount[]>('a', {
+                a: [cardanoAccount],
+              }),
+            },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
@@ -169,10 +191,64 @@ describe('cardano-context side effects', () => {
                 a: mockTokensMetadata,
               }),
             },
+            wallets: {
+              selectActiveNetworkAccounts$: hot<AnyAccount[]>('a', {
+                a: [cardanoAccount],
+              }),
+            },
           },
           dependencies: { actions },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$, '^ 10ms !').toBe('');
+          },
+        }),
+      );
+    });
+
+    it('excludes non-Cardano account activities so their non-hex token ids never reach the Cardano metadata provider', () => {
+      const midnightAccount = {
+        accountId: midnightAccountId,
+        blockchainName: 'Midnight',
+      } as AnyAccount;
+      // A Midnight unshielded token id is not hex — feeding it to
+      // Cardano.AssetId throws and would tear the whole metadata stream down.
+      const midnightActivity = {
+        accountId: midnightAccountId,
+        tokenBalanceChanges: [
+          { tokenId: 'unshielded-testnet-deadbeef' as TokenId },
+        ],
+      } as Activity;
+
+      testSideEffect(
+        findMissingTokensMetadataForActivities({ debounce: Milliseconds(0) }),
+        ({ hot, expectObservable }) => ({
+          actionObservables: {},
+          stateObservables: {
+            activities: {
+              selectAllFlat$: hot<Activity[]>('a', {
+                a: [mockActivity1, midnightActivity],
+              }),
+            },
+            tokens: {
+              selectTokensMetadata$: hot<MetadataByTokenId>('a', {
+                a: mockTokensMetadata,
+              }),
+            },
+            wallets: {
+              selectActiveNetworkAccounts$: hot<AnyAccount[]>('a', {
+                a: [cardanoAccount, midnightAccount],
+              }),
+            },
+          },
+          dependencies: { actions },
+          assertion: sideEffect$ => {
+            // Only the Cardano activity's missing token (tokenId2) is
+            // dispatched; the Midnight id is filtered out before the provider.
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.cardanoContext.loadTokenMetadata({
+                tokenId: tokenId2,
+              }),
+            });
           },
         }),
       );

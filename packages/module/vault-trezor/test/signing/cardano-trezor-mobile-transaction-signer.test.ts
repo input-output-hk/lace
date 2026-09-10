@@ -34,14 +34,18 @@ const hoisted = vi.hoisted(() => {
     body: vi.fn().mockReturnValue(mockTxBody),
     auxiliaryData: vi.fn().mockReturnValue({}),
     witnessSet: vi.fn().mockReturnValue(mockWitnessSet),
+    toCore: vi.fn().mockReturnValue({ witness: { scripts: [] } }),
   };
   const mockSignedTx = { toCbor: vi.fn().mockReturnValue('signed-tx-cbor') };
+  const cardanoSignTransaction = vi.fn();
   return {
     mockCoreBody,
     mockTransaction,
     mockSignedTx,
     matchSigningMode: vi.fn().mockReturnValue(0),
-    cardanoSignTransaction: vi.fn(),
+    cardanoSignTransaction,
+    getScriptOnlyKeyPaths: vi.fn().mockReturnValue([]),
+    getTrezorConnect: vi.fn().mockResolvedValue({ cardanoSignTransaction }),
     mapWithdrawals: vi.fn(),
     mapCerts: vi.fn(),
     mapTxIns: vi.fn().mockReturnValue([]),
@@ -92,13 +96,13 @@ vi.mock('@cardano-sdk/key-management', () => ({
 }));
 
 vi.mock('@lace-contract/cardano-context', () => ({
+  applyVkeyWitnesses: vi.fn(),
   createInputResolver: vi.fn(),
+  getScriptOnlyKeyPaths: hoisted.getScriptOnlyKeyPaths,
 }));
 
 vi.mock('../../src/mobile/trezor-connect-bridge', () => ({
-  getTrezorConnect: async () => ({
-    cardanoSignTransaction: hoisted.cardanoSignTransaction,
-  }),
+  getTrezorConnect: hoisted.getTrezorConnect,
 }));
 
 const baseProps = {
@@ -112,6 +116,10 @@ const baseProps = {
 describe('CardanoTrezorMobileTransactionSigner', () => {
   beforeEach(() => {
     hoisted.cardanoSignTransaction.mockReset();
+    hoisted.getTrezorConnect.mockClear().mockResolvedValue({
+      cardanoSignTransaction: hoisted.cardanoSignTransaction,
+    });
+    hoisted.getScriptOnlyKeyPaths.mockClear().mockReturnValue([]);
     hoisted.matchSigningMode.mockClear().mockReturnValue(0);
     hoisted.mapWithdrawals.mockClear().mockReturnValue(undefined);
     hoisted.mapCerts.mockClear().mockReturnValue(undefined);
@@ -314,5 +322,40 @@ describe('CardanoTrezorMobileTransactionSigner', () => {
 
     const [callArgs] = hoisted.cardanoSignTransaction.mock.calls;
     expect((callArgs[0] as { mint?: unknown }).mint).toBeUndefined();
+  });
+
+  it('evaluates the script guard against the tx witness scripts', async () => {
+    const scripts = [{ kind: 0, keyHash: 'own-key-hash' }];
+    hoisted.mockTransaction.toCore.mockReturnValueOnce({
+      witness: { scripts },
+    });
+    hoisted.cardanoSignTransaction.mockResolvedValue({
+      success: true,
+      payload: { hash: txHash, witnesses: [] },
+    });
+
+    const signer = new CardanoTrezorMobileTransactionSigner(baseProps);
+    await firstValueFrom(signer.sign({ serializedTx: HexBytes('cbor-hex') }));
+
+    expect(hoisted.getScriptOnlyKeyPaths).toHaveBeenCalledWith({
+      txBody: hoisted.mockCoreBody,
+      knownAddresses: baseProps.knownAddresses,
+      txInKeyPathMap: new Map(),
+      scripts,
+    });
+  });
+
+  it('rejects before contacting Trezor when a native script requires an own key the device cannot witness', async () => {
+    hoisted.getScriptOnlyKeyPaths.mockReturnValue([{ role: 0, index: 0 }]);
+
+    const signer = new CardanoTrezorMobileTransactionSigner(baseProps);
+
+    await expect(
+      firstValueFrom(signer.sign({ serializedTx: HexBytes('cbor-hex') })),
+    ).rejects.toThrow(
+      "Trezor mobile cannot witness keys required only by the transaction's native scripts: role 0 index 0",
+    );
+    expect(hoisted.getTrezorConnect).not.toHaveBeenCalled();
+    expect(hoisted.cardanoSignTransaction).not.toHaveBeenCalled();
   });
 });

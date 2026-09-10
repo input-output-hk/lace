@@ -2,6 +2,7 @@ import eslintNxPlugin from '@nx/eslint-plugin';
 import { defineConfig } from 'eslint/config';
 import checkFile from 'eslint-plugin-check-file';
 import eslintFunctionalPlugin from 'eslint-plugin-functional';
+import i18nextPlugin from 'eslint-plugin-i18next';
 import importPlugin from 'eslint-plugin-import';
 import eslintLodashPlugin from 'eslint-plugin-lodash';
 import packageJsonPlugin from 'eslint-plugin-package-json';
@@ -9,6 +10,24 @@ import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
 import eslintUnicornPlugin from 'eslint-plugin-unicorn';
 import jsoncParser from 'jsonc-eslint-parser';
 import tseslint from 'typescript-eslint';
+
+// `paths` (exact specifier), NOT `patterns`: gitignore-style group patterns
+// cannot re-include children of an excluded package, and the per-icon deep
+// imports (…/dist/esm/<Name>Icon) must stay legal. Exported so per-package
+// configs whose no-restricted-imports entry replaces the workspace-wide one
+// can re-include the ban.
+export const hugeiconsBarrelBans = [
+  {
+    name: '@hugeicons-pro/core-solid-rounded',
+    message:
+      'Import icons per module (…/dist/esm/<Name>Icon): Metro bundles the whole barrel (~18 MiB of unused icons).',
+  },
+  {
+    name: '@hugeicons-pro/core-stroke-rounded',
+    message:
+      'Import icons per module (…/dist/esm/<Name>Icon): Metro bundles the whole barrel (~18 MiB of unused icons).',
+  },
+];
 
 export default defineConfig(
   tseslint.configs.recommended,
@@ -118,6 +137,13 @@ export default defineConfig(
         'error',
         {
           allow: [],
+          // useSendPreview.ts lazy-loads '@lace-next/core/tx' (tx-construction
+          // is only needed once a Send preview builds); every other file in
+          // the workspace still statically imports the '@lace-next/core'
+          // barrel for its domain/store exports, which is unrelated and
+          // unaffected by that split — exempt it from the lazy/static mixing
+          // check instead of forcing those imports to become dynamic too.
+          checkDynamicDependenciesExceptions: ['@lace-next/core'],
           depConstraints: [
             {
               sourceTag: 'scope:lib',
@@ -137,6 +163,57 @@ export default defineConfig(
                 'scope:lib',
                 'scope:contract',
                 'scope:module',
+              ],
+            },
+            {
+              sourceTag: 'scope:next-core',
+              onlyDependOnLibsWithTags: ['scope:next-core', 'scope:sdk'],
+            },
+            {
+              sourceTag: 'scope:next-ui',
+              onlyDependOnLibsWithTags: [
+                'scope:next-core',
+                'scope:lib',
+                'scope:sdk',
+                'scope:contract',
+              ],
+            },
+            {
+              sourceTag: 'scope:next-platform',
+              onlyDependOnLibsWithTags: [
+                'scope:next-core',
+                'scope:next-ui',
+                'scope:lib',
+                'scope:sdk',
+                'scope:contract',
+              ],
+            },
+            // `@lace-next/hw-ledger` (LW-15041 T121): a DEDICATED tag, not
+            // folded into `scope:next-core`. It pulls in real transport deps
+            // (`@ledgerhq/*`, `react-native-ble-plx`, WebUSB) that must never
+            // be reachable from the pure core, the view layer, or the
+            // platform-adapter layer — only the app shell's gated
+            // composition root (`hwSignerBootstrap.ts`) may import it. This
+            // is why `scope:next-hw` is deliberately ABSENT from every other
+            // `next-*` constraint above/below except `scope:next-app`'s.
+            {
+              sourceTag: 'scope:next-hw',
+              onlyDependOnLibsWithTags: [
+                'scope:next-hw',
+                'scope:next-core',
+                'scope:sdk',
+              ],
+            },
+            {
+              sourceTag: 'scope:next-app',
+              onlyDependOnLibsWithTags: [
+                'scope:next-core',
+                'scope:next-ui',
+                'scope:next-platform',
+                'scope:next-hw',
+                'scope:lib',
+                'scope:sdk',
+                'scope:contract',
               ],
             },
           ],
@@ -250,6 +327,16 @@ export default defineConfig(
       'no-restricted-syntax': 'off',
     },
   },
+  // Metro does not tree-shake: a barrel import of a hugeicons pack bundles all
+  // ~4,700 icons (~18 MiB) into every Metro consumer (guest, mobile, extension
+  // tab) — it once pushed the guest entry bundle past Cloudflare Pages' hard
+  // 25 MiB/file limit. Flat-config rule entries replace per matching file, so
+  // any later block setting no-restricted-imports must re-include these paths.
+  {
+    rules: {
+      'no-restricted-imports': ['error', { paths: hugeiconsBarrelBans }],
+    },
+  },
   // ADR 28: contract packages must not depend on UI libraries
   {
     files: [
@@ -260,6 +347,8 @@ export default defineConfig(
       'no-restricted-imports': [
         'error',
         {
+          // Re-included: this entry replaces the workspace-wide one above.
+          paths: hugeiconsBarrelBans,
           patterns: [
             {
               group: ['@lace-lib/ui-toolkit', '@lace-lib/ui-toolkit/*'],
@@ -314,6 +403,27 @@ export default defineConfig(
       '@nx/enforce-module-boundaries': 'off',
     },
   },
+  // The privileged host's probe harness (ADR 37) keeps its own tsconfig and
+  // install outside the workspace, so the project list above cannot resolve
+  // it. Matched when ESLint runs from the workspace root; nx loads
+  // apps/lace-extension-shell/e2e/eslint.config.mjs instead, which mirrors
+  // this block — the rule rationale lives there.
+  {
+    files: ['apps/lace-extension-shell/e2e/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./apps/lace-extension-shell/e2e/tsconfig.eslint.json'],
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'max-params': 'off',
+      '@typescript-eslint/naming-convention': 'off',
+      'unicorn/prevent-abbreviations': 'off',
+      '@typescript-eslint/promise-function-async': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+    },
+  },
 
   // Package.json specific rules
   {
@@ -355,6 +465,20 @@ export default defineConfig(
       'package-json/no-empty-fields': 'warn',
       'package-json/no-redundant-files': 'warn',
       'package-json/repository-shorthand': 'warn',
+    },
+  },
+
+  // Hardcoded user-facing string guard: JSX text must go through i18next.
+  // Scoped to lace-next screens so the rule can be expanded screen-by-screen
+  // without breaking the entire codebase in one shot. Add new directories as
+  // they are converted to use t() / <Trans />.
+  {
+    files: ['packages/next/ui/src/screens/Language/**/*.{ts,tsx}'],
+    plugins: { i18next: i18nextPlugin },
+    rules: {
+      // 'jsx-only' only flags visible JSX text content (e.g. <Text>Hello</Text>)
+      // — not string literals used as props, style values, etc.
+      'i18next/no-literal-string': ['error', { mode: 'jsx-only' }],
     },
   },
 

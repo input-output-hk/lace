@@ -53,5 +53,16 @@ export interface ContactSheetProps {
   onSave: () => void;
   saveDisabled?: boolean;
   nameError?: string;
+  /**
+   * Reserve room for a side-menu-height footer instead of the default
+   * horizontal one. Set by hosts whose sheet renders the footer as navigator
+   * chrome over an auto-sized detent, where the default inset leaves the last
+   * row under the buttons.
+   *
+   * Off by default so lace-mobile / lace-extension — which size their own
+   * sheet — keep the original spacing. TEMPORARY: once lace-next replaces
+   * lace-mobile, drop this prop and make its behaviour the default.
+   */
+  hasVerticalFooter?: boolean;
   testID?: string;
 }

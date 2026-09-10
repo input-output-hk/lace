@@ -7,6 +7,8 @@ import {
   map,
   mergeMap,
   of,
+  take,
+  takeUntil,
   withLatestFrom,
 } from 'rxjs';
 
@@ -40,7 +42,7 @@ export const transactionPollingSync: SideEffect = (
     addresses: { selectAllAddresses$ },
     cardanoContext: { selectAccountTransactionHistory$ },
   },
-  { actions, cardanoProvider: { getAddressTransactionHistory } },
+  { actions, cardanoProvider: { getAddressTransactionHistory }, logger },
 ) =>
   addSyncOperation$.pipe(
     filter(
@@ -67,6 +69,14 @@ export const transactionPollingSync: SideEffect = (
           .filter(isCardanoAccount)
           .find(a => a.accountId === accountId);
         if (!account) return EMPTY;
+
+        // Cancel the in-flight fetch once the account leaves the active network
+        // (network switch / account removal), so the previous network's polling
+        // stops instead of running to completion and chaining a stale op.
+        const accountLeftActiveNetwork$ = selectActiveNetworkAccounts$.pipe(
+          filter(accounts => !accounts.some(a => a.accountId === accountId)),
+          take(1),
+        );
 
         const chainId = account.blockchainSpecific.chainId;
         const accountAddresses = getAccountAddresses(
@@ -117,18 +127,22 @@ export const transactionPollingSync: SideEffect = (
                 operationId,
               }),
             ]),
-            catchError(() =>
-              of(
+            catchError(error => {
+              logger.error(
+                `Transaction polling failed for account ${accountId}`,
+                error,
+              );
+              return of(
                 actions.sync.failSyncOperation({
                   accountId,
                   operationId,
                   error:
                     'sync.error.transaction-polling-failed' as TranslationKey,
                 }),
-              ),
-            ),
+              );
+            }),
           ),
-        );
+        ).pipe(takeUntil(accountLeftActiveNetwork$));
       },
     ),
   );

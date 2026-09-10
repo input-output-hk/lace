@@ -14,15 +14,8 @@ import type { StackRoutes, StackScreenProps } from '@lace-lib/navigation';
 export const DappExternalWebView = (
   props: StackScreenProps<StackRoutes.DappExternalWebView>,
 ) => {
-  const { dappOrigin, favorite, ...templateProps } =
+  const { favorite, currentHostname, ...templateProps } =
     useDappExternalWebView(props);
-
-  let displayUrl = '';
-  try {
-    displayUrl = new URL(dappOrigin).hostname;
-  } catch {
-    displayUrl = dappOrigin;
-  }
 
   const handleDone = useCallback(() => {
     props.navigation.goBack();
@@ -31,7 +24,7 @@ export const DappExternalWebView = (
   return (
     <WebViewTemplate
       {...templateProps}
-      navBar={{ displayUrl, onDone: handleDone, favorite }}
+      navBar={{ displayUrl: currentHostname, onDone: handleDone, favorite }}
     />
   );
 };

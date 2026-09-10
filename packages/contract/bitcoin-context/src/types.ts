@@ -17,7 +17,34 @@ export enum BitcoinNetwork {
   Testnet = 'testnet4',
 }
 
-export type BitcoinAddressData = { network: BitcoinNetwork };
+/** Script type of an address, naming its BIP-32 purpose (BIP-44/49/84/86). */
+export type BitcoinAddressType =
+  | 'Legacy'
+  | 'NativeSegWit'
+  | 'SegWit'
+  | 'Taproot';
+
+/**
+ * BIP-32 chain an address is derived on: 'external' for receiving addresses,
+ * 'internal' for change.
+ */
+export type BitcoinAddressChain = 'external' | 'internal';
+
+/**
+ * Data attached to a Bitcoin address in the addresses store. The optional
+ * fields carry the BIP-32 coordinates and public key of the derived address
+ * so signers can be reconstructed from stored addresses alone; they are
+ * optional because entries persisted before their introduction carry only
+ * the network until the next wallet sync backfills them.
+ */
+export type BitcoinAddressData = {
+  network: BitcoinNetwork;
+  addressType?: BitcoinAddressType;
+  account?: number;
+  chain?: BitcoinAddressChain;
+  index?: number;
+  publicKeyHex?: string;
+};
 
 export type BitcoinProviderContext = {
   network: BitcoinNetwork;

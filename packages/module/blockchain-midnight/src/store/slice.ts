@@ -2,7 +2,6 @@ import {
   createStateMachine,
   createStateMachineSlice,
 } from '@lace-lib/util-store';
-import { createAction } from '@reduxjs/toolkit';
 
 import type {
   MidnightNetworkConfig,
@@ -71,19 +70,10 @@ export const midnightReducers = {
   [slice.name]: slice.reducer,
 };
 
-const requestResync = createAction('midnight/requestResync');
-
-const resync = createAction('midnight/resync');
-
-const restartWalletWatch = createAction('midnight/restartWalletWatch');
-
 /** Direct import of this is an anti-pattern. OK for tests. */
 export const midnightActions = {
   midnight: {
     ...slice.actions,
-    requestResync,
-    resync,
-    restartWalletWatch,
   },
 };
 

@@ -251,6 +251,28 @@ describe('views/slice', () => {
 
         expect(state.activePage).toEqual(newPagePayload);
       });
+
+      it('should replace the page when only requestId differs', () => {
+        const initialPageState = {
+          ...initialState,
+          activePage: {
+            route: StackRoutes.OnboardingCreateWallet,
+            requestId: 0,
+          },
+        };
+
+        const repeatPayload = {
+          route: StackRoutes.OnboardingCreateWallet,
+          requestId: 1,
+        };
+
+        const state = viewsReducers.views(
+          initialPageState,
+          actions.views.setActivePage(repeatPayload),
+        );
+
+        expect(state.activePage).toEqual(repeatPayload);
+      });
     });
 
     describe('setActiveSheetPage action', () => {

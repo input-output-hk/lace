@@ -80,6 +80,13 @@ const withNxMetroResult = withNxMetro(
 );
 
 const patchNxConfig = nxConfig => {
+  // withNxMetro sets projectRoot to the workspace root, but Expo SDK 56's babel
+  // transformer resolves the project's babel config relative to projectRoot. With
+  // the workspace root it picks up the root babel.config.json (babelrcRoots), which
+  // babel rejects inside an `extends`ed file, and looks for a non-existent root
+  // .babelrc.js. Pointing projectRoot back at the app dir lets Expo resolve this
+  // app's own .babelrc.js. Workspace libraries stay resolvable via watchFolders.
+  nxConfig.projectRoot = projectRoot;
   const nxResolver = nxConfig.resolver.resolveRequest.bind(nxConfig.resolver);
   nxConfig.resolver.resolveRequest = (context, moduleName, platform) => {
     if (
@@ -151,11 +158,11 @@ const patchNxConfig = nxConfig => {
     const midnightBlackList = [
       './workaround-for-importing-midnight-ledger',
       '@midnight-ntwrk/ledger-v8',
-      '@midnight-ntwrk/wallet-sdk-indexer-client',
-      '@midnight-ntwrk/wallet-sdk-node-client',
-      '@midnight-ntwrk/wallet-sdk-runtime',
-      '@midnight-ntwrk/wallet-sdk-shielded',
-      '@midnight-ntwrk/wallet-sdk-utilities',
+      '@midnightntwrk/wallet-sdk-indexer-client',
+      '@midnightntwrk/wallet-sdk-node-client',
+      '@midnightntwrk/wallet-sdk-runtime',
+      '@midnightntwrk/wallet-sdk-shielded',
+      '@midnightntwrk/wallet-sdk-utilities',
       '@midnight-ntwrk/onchain-runtime-v3',
     ];
     if (midnightBlackList.some(name => moduleName.startsWith(name))) {

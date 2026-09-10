@@ -3,6 +3,7 @@ import React from 'react';
 import { spacing } from '../../../../../design-tokens';
 import { Column, CustomTextInput, Divider } from '../../../../atoms';
 import { DropdownMenu } from '../../../../molecules/dropdownMenu/dropdownMenu';
+import { useSheetSubmit } from '../../../../organisms';
 
 import type {
   FeeOption,
@@ -67,6 +68,7 @@ export const FeeSection = ({ copies, values, actions }: FeeSectionProps) => {
   const { customFeeLabel } = copies;
   const { feeOptions, feeRateOption, customFeeRate } = values;
   const { onFeeOptionChange, onCustomFeeChange } = actions;
+  const submitProps = useSheetSubmit();
 
   const dropdownItems = (feeOptions || []).map(opt => {
     const item = typeof opt === 'string' ? { label: opt, value: opt } : opt;
@@ -99,6 +101,7 @@ export const FeeSection = ({ copies, values, actions }: FeeSectionProps) => {
             if (onCustomFeeChange) onCustomFeeChange(normalized);
           }}
           label={customFeeLabel}
+          {...submitProps}
         />
       )}
     </Column>

@@ -24,8 +24,6 @@ const unwrapOrThrowError = <T, E extends Error>(result: Result<T, E>): T => {
   return result.unwrap();
 };
 
-const returnEmpty = () => EMPTY;
-
 export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
   tipPollFrequency =>
   (
@@ -34,7 +32,7 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
       cardanoContext: { selectChainId$ },
       wallets: { selectActiveNetworkAccounts$ },
     },
-    { actions, cardanoProvider: { getTip }, isWalletActive$ },
+    { actions, cardanoProvider: { getTip }, isWalletActive$, logger },
   ) =>
     // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
     // leaves the downstream `switchMap`'s in-flight inner alive on lock — it
@@ -56,7 +54,15 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
             getTip({ chainId }).pipe(
               map(unwrapOrThrowError),
               retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
-              catchError(returnEmpty),
+              // No tip -> the natural sync trigger never fires, so a swallowed
+              // error here stalls sync with no other symptom. Log loud.
+              catchError(error => {
+                logger.error(
+                  `Tip fetch failed for network ${chainId.networkMagic}; sync rounds cannot trigger without a tip`,
+                  error,
+                );
+                return EMPTY;
+              }),
             ),
           ),
           distinctUntilChanged((a, b) => a.hash === b.hash),

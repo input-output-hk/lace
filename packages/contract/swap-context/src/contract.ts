@@ -1,8 +1,9 @@
+import { activitiesStoreContract } from '@lace-contract/activities';
 import { addressesStoreContract } from '@lace-contract/addresses';
 import { analyticsStoreContract } from '@lace-contract/analytics';
 import { appStoreContract } from '@lace-contract/app';
-// Cardano-specific: needed for UTXOs in swap TX building.
-// TODO: abstract when adding cross-chain swap support.
+// Cardano-specific: needed for UTXOs in swap TX building; to be abstracted
+// when cross-chain swap support is added.
 import { cardanoProviderStoreContract } from '@lace-contract/cardano-context';
 import {
   ContractName,
@@ -31,6 +32,7 @@ export const swapContextStoreContract = inferContractContext({
   contractType: 'store',
   instance: 'exactly-one',
   dependsOn: combineContracts([
+    activitiesStoreContract,
     addressesStoreContract,
     analyticsStoreContract,
     appStoreContract,

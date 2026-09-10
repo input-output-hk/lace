@@ -26,7 +26,6 @@ const sheetPages: ContextualLaceInit<React.ReactNode, AvailableAddons> = () => (
     <SheetStack.Screen
       name={SheetRoutes.BrowsePoolFilterControls}
       component={BrowsePoolFiltersSheet}
-      options={{ stackBehavior: 'push' }}
     />
     <SheetStack.Screen
       name={SheetRoutes.StakePoolDetails}

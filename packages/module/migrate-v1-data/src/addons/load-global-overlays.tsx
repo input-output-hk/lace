@@ -728,7 +728,7 @@ const PasswordMigrationWizard = () => {
               }}>
               <ImageBackground
                 source={assets.onboarding}
-                style={{ ...StyleSheet.absoluteFillObject }}
+                style={{ ...StyleSheet.absoluteFill }}
                 contentFit="cover"
               />
               <Column

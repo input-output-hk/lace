@@ -1,0 +1,46 @@
+{
+  "name": "@lace-module/vault-local",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "type-check": "run-p type-check:*",
+    "type-check:src": "tsc --noEmit",
+    "type-check:test": "tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "@lace-contract/account-management": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/in-memory": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/onboarding-v2": "*",
+    "@lace-contract/vault": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
+    "@lace-lib/util-hw": "*",
+    "@lace-lib/util-render": "*",
+    "@lace-lib/util-store": "*",
+    "react": "*",
+    "react-native": "*",
+    "zxcvbn": "4.4.2"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*",
+    "@testing-library/react": "^16.3.0",
+    "@types/zxcvbn": "4.4.5",
+    "jsdom": "^26.1.0",
+    "vitest": "^3.2.6"
+  }
+}

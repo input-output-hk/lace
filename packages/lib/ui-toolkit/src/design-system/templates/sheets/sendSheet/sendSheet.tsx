@@ -35,7 +35,9 @@ interface SheetTextProps {
   accountText: string;
   customFeeLabel: string;
   balanceLabel: string;
-  assetErrors: string[];
+  // Aligned by asset index (AssetsSection reads assetErrors[index]); `undefined`
+  // = no error on that row. Covariant, so existing `string[]` callers still fit.
+  assetErrors: (string | undefined)[];
   addButtonLabel: string;
   maxButtonLabel: string;
 }
@@ -58,6 +60,8 @@ interface SheetUtilsProps {
   noteSectionLength: number;
   shouldShowNoteSection?: boolean;
   shouldShowMaxButton?: (tokenId: string) => boolean;
+  /** True while a row's Max is computing: the Max button shows a spinner. */
+  isMaxLoading?: (tokenId: string) => boolean;
   /** When false for an index, the remove (trash) control is hidden for that amount row (e.g. primary asset). */
   shouldShowRemoveAsset?: (index: number) => boolean;
   shouldShowFiatConversion?: boolean;
@@ -69,7 +73,8 @@ interface SheetUtilsProps {
 
 interface SheetActionsProps {
   onQrCodePress: () => void;
-  onContactsPress: () => void;
+  /** Omit to hide the contacts button (chains without contact support). */
+  onContactsPress?: () => void;
   onAddAssetPress: () => void;
   onRemoveAsset: (tokenId: string) => void;
   onMaxAmountPress: (index: number) => void;
@@ -78,6 +83,8 @@ interface SheetActionsProps {
   onReviewTransactionPress: () => void;
   onSelectAccount: (accountId: AccountId) => void;
   handleInputChange: (index: number, value: string) => void;
+  /** Reformat the amount at `index` when its input blurs (trim zeros, group). */
+  handleInputBlur?: (index: number) => void;
   onRecipientAddressChange: (value: string) => void;
 }
 
@@ -115,7 +122,7 @@ export const SendSheet = ({
   );
 
   return (
-    <Sheet.Scroll showsVerticalScrollIndicator={false}>
+    <Sheet.Scroll showsVerticalScrollIndicator={false} keyboardAware>
       <Column
         justifyContent="space-between"
         gap={spacing.M}

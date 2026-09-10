@@ -1,7 +1,7 @@
 import { WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { HexBytes } from '@lace-lib/util';
-import { Roles } from '@midnight-ntwrk/wallet-sdk/hd';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { Roles } from '@midnightntwrk/wallet-sdk/hd';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 
 import {
   MidnightAccountId,

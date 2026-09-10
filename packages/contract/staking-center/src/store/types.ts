@@ -94,5 +94,7 @@ export type BrowsePoolSortOption =
   | 'liveStake'
   | 'margin'
   | 'pledge'
+  | 'ranking'
+  | 'ros'
   | 'saturation'
   | 'ticker';

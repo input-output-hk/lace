@@ -472,7 +472,10 @@ describe('side-effects-extension', () => {
         },
       });
 
-      const createDepsForSubmit = (submitTxImpl?: ReturnType<typeof vi.fn>) => {
+      const createDepsForSubmit = (
+        submitTxImpl?: ReturnType<typeof vi.fn>,
+        getTransactionDetailsImpl?: ReturnType<typeof vi.fn>,
+      ) => {
         const captured: {
           submitTransaction?: (cbor: string) => Promise<string>;
         } = {};
@@ -500,6 +503,9 @@ describe('side-effects-extension', () => {
             submitTx:
               submitTxImpl ??
               vi.fn().mockReturnValue(of(Ok('submitted-tx-hash'))),
+            getTransactionDetails:
+              getTransactionDetailsImpl ??
+              vi.fn().mockReturnValue(of(Err(new Error('tx not found')))),
           },
           signerFactory: {},
           captured,
@@ -603,6 +609,78 @@ describe('side-effects-extension', () => {
 
         expect(deps.actions.activities.upsertActivities).not.toHaveBeenCalled();
         expect(emissions).toHaveLength(0);
+
+        sub.unsubscribe();
+      });
+
+      it('maps a failed resubmission to success when the tx is already on-chain', async () => {
+        const actionObservables = createActionObservables();
+        const stateObservables = createStateForSubmit();
+        const submitTxMock = vi
+          .fn()
+          .mockReturnValue(of(Err(new Error('BadInputsUTxO'))));
+        const getTransactionDetailsMock = vi
+          .fn()
+          .mockReturnValue(of(Ok({ status: 'confirmed' })));
+        const deps = createDepsForSubmit(
+          submitTxMock,
+          getTransactionDetailsMock,
+        );
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          actionObservables as unknown as ActionObservables<ActionCreators>,
+          stateObservables as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+
+        const sub = sideEffect$.subscribe();
+
+        const cbor = buildSignedTxCbor();
+        const expectedTxId = Serialization.Transaction.fromCbor(
+          Serialization.TxCBOR(cbor),
+        ).getId();
+        const txId = await deps.captured.submitTransaction!(cbor);
+
+        expect(txId).toBe(expectedTxId);
+        expect(getTransactionDetailsMock).toHaveBeenCalledWith(expectedTxId, {
+          chainId: CHAIN_ID,
+        });
+        expect(deps.actions.activities.upsertActivities).toHaveBeenCalledTimes(
+          1,
+        );
+
+        sub.unsubscribe();
+      });
+
+      it('propagates the submit error when the tx is not on-chain', async () => {
+        const actionObservables = createActionObservables();
+        const stateObservables = createStateForSubmit();
+        const submitTxMock = vi
+          .fn()
+          .mockReturnValue(of(Err(new Error('submit failed'))));
+        const getTransactionDetailsMock = vi
+          .fn()
+          .mockReturnValue(of(Err(new Error('tx not found'))));
+        const deps = createDepsForSubmit(
+          submitTxMock,
+          getTransactionDetailsMock,
+        );
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          actionObservables as unknown as ActionObservables<ActionCreators>,
+          stateObservables as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+
+        const sub = sideEffect$.subscribe();
+
+        const cbor = buildSignedTxCbor();
+        await expect(deps.captured.submitTransaction!(cbor)).rejects.toThrow(
+          'submit failed',
+        );
+        expect(getTransactionDetailsMock).toHaveBeenCalledTimes(1);
 
         sub.unsubscribe();
       });

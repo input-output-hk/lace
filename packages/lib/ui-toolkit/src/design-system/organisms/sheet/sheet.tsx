@@ -1,15 +1,30 @@
-import type { ReactNode, Ref } from 'react';
+import type { ReactNode, Ref, RefObject } from 'react';
 import type {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollViewProps,
   StyleProp,
   ViewProps,
   ViewStyle,
 } from 'react-native';
 
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useTrueSheet } from '@lodev09/react-native-true-sheet';
-import React, { useCallback, useMemo } from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Keyboard,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  View,
+} from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { spacing, useTheme } from '../../../design-tokens';
@@ -26,14 +41,11 @@ import {
 import { isWeb } from '../../util';
 import { getAssetImageUrl } from '../../util';
 
+import { SheetSubmitProvider } from './sheetSubmit';
+
 import type { Theme } from '../../../design-tokens';
 import type { IconName } from '../../atoms';
 import type { ButtonVariant } from '../../atoms/button/button.types';
-import type {
-  BottomSheetScrollableProps,
-  BottomSheetScrollViewMethods,
-} from '@gorhom/bottom-sheet';
-import type { AnimatedProps } from 'react-native-reanimated';
 import type { EdgeInsets } from 'react-native-safe-area-context';
 
 export const footerHeight = {
@@ -44,17 +56,12 @@ export const footerHeight = {
 const AVATAR_SIZE = 20;
 const isIPad = Platform.OS === 'ios' && Platform.isPad;
 
-type WebScrollableProps = BottomSheetScrollableProps &
-  Omit<
-    AnimatedProps<ScrollViewProps>,
-    'decelerationRate' | 'ref' | 'scrollEventThrottle'
-  >;
-
-type SheetScrollProps = Omit<ScrollViewProps, 'ref'> &
-  WebScrollableProps & {
-    ref?: Ref<BottomSheetScrollViewMethods | ScrollView>;
-    children: ReactNode | ReactNode[];
-  };
+type SheetScrollProps = Omit<ScrollViewProps, 'ref'> & {
+  ref?: Ref<ScrollView>;
+  children: ReactNode | ReactNode[];
+  /** Pads scroll content by keyboard height to keep inputs visible. Enable only when TrueSheet can't auto-manage the scroll (nested deep under a navigator). Default `false`. */
+  keyboardAware?: boolean;
+};
 
 type HeaderAvatar = {
   metadata: {
@@ -148,7 +155,10 @@ const Header = ({
   }, [headerAvatar]);
 
   return (
-    <Column testID={testID} style={styles.headerContainer}>
+    // Local gesture root: TrueSheet's native header slot sits outside the
+    // app-root GestureHandlerRootView on Android, so the back button's
+    // gesture-handler Pressable gets no taps without a root in its subtree.
+    <GestureHandlerRootView testID={testID} style={styles.headerContainer}>
       <Row alignItems="center" justifyContent="center" style={styles.headerRow}>
         {leftIconOnPress && (
           <IconButton.Static
@@ -197,7 +207,7 @@ const Header = ({
           {subtitle}
         </Text.S>
       )}
-    </Column>
+    </GestureHandlerRootView>
   );
 };
 
@@ -293,31 +303,144 @@ const Footer = ({
   );
 };
 
-const Scroll = (props: SheetScrollProps) => {
-  const { children, ref, contentContainerStyle, ...restProps } = props;
+// Breathing room kept between the focused input and the footer/keyboard.
+const KEYBOARD_SCROLL_MARGIN = spacing.L;
 
-  const mergedContentContainerStyle = useMemo(
-    () => [styles.scrollContentContainer, contentContainerStyle],
-    [contentContainerStyle],
+// While `enabled`, tracks keyboard height (for bottom padding) and scrolls the
+// focused input above the keyboard + floating footer. No listeners while disabled.
+const useKeyboardAwareScroll = (
+  enabled: boolean,
+  scrollRef: RefObject<ScrollView | null>,
+  scrollOffsetY: RefObject<number>,
+): number => {
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const showEvent =
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent =
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showSub = Keyboard.addListener(showEvent, event => {
+      const keyboardTop = event.endCoordinates?.screenY;
+      setHeight(event.endCoordinates?.height ?? 0);
+      if (keyboardTop === undefined) return;
+
+      // Defer a frame so the bottom padding applies first, leaving room to scroll into.
+      requestAnimationFrame(() => {
+        const focused = TextInput.State.currentlyFocusedInput();
+        if (!focused) return;
+
+        // measureInWindow's callback arity (x, y, width, height) is fixed by RN.
+        // eslint-disable-next-line max-params
+        focused.measureInWindow((_x, y, _width, inputHeight) => {
+          // The footer floats above the keyboard, so the input must clear both.
+          const overlap =
+            y +
+            inputHeight +
+            KEYBOARD_SCROLL_MARGIN +
+            footerHeight.vertical -
+            keyboardTop;
+          if (overlap > 0) {
+            scrollRef.current?.scrollTo({
+              y: scrollOffsetY.current + overlap,
+              animated: true,
+            });
+          }
+        });
+      });
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [enabled, scrollRef, scrollOffsetY]);
+
+  return enabled ? height : 0;
+};
+
+const Scroll = (props: SheetScrollProps) => {
+  const {
+    children,
+    ref,
+    contentContainerStyle,
+    keyboardAware: isKeyboardAware = false,
+    onScroll,
+    // Default to 'handled' so a tap on an in-scroll control while an input is
+    // focused activates the control instead of being swallowed to dismiss the
+    // keyboard (preserves the behavior the removed web BottomSheetScrollView had).
+    keyboardShouldPersistTaps = 'handled',
+    ...restProps
+  } = props;
+
+  const scrollRef = useRef<ScrollView | null>(null);
+  const scrollOffsetY = useRef(0);
+
+  // Merge the forwarded ref with our internal one (used by the auto-scroll).
+  const setScrollRef = useCallback(
+    (node: ScrollView | null) => {
+      scrollRef.current = node;
+      if (typeof ref === 'function') ref(node);
+      else if (ref) ref.current = node;
+    },
+    [ref],
   );
 
-  if (isWeb) {
-    return (
-      <BottomSheetScrollView
-        keyboardShouldPersistTaps={props.keyboardShouldPersistTaps ?? 'handled'}
-        ref={ref as Ref<BottomSheetScrollViewMethods>}
-        contentContainerStyle={mergedContentContainerStyle}
-        {...restProps}>
-        {children}
-      </BottomSheetScrollView>
-    );
-  }
+  const handleScroll = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      scrollOffsetY.current = event.nativeEvent.contentOffset.y;
+      onScroll?.(event);
+    },
+    [onScroll],
+  );
+
+  const keyboardInset = useKeyboardAwareScroll(
+    isKeyboardAware,
+    scrollRef,
+    scrollOffsetY,
+  );
+
+  const mergedContentContainerStyle = useMemo(() => {
+    const base: StyleProp<ViewStyle> = [
+      styles.scrollContentContainer,
+      contentContainerStyle,
+    ];
+    if (keyboardInset <= 0) return base;
+
+    // Add keyboard inset + footer height on top of the existing bottom padding
+    // (paddingBottom > paddingVertical > padding), not overwriting it.
+    const flattened = StyleSheet.flatten(base);
+    const basePaddingBottom =
+      flattened.paddingBottom ??
+      flattened.paddingVertical ??
+      flattened.padding ??
+      0;
+
+    return [
+      base,
+      {
+        paddingBottom:
+          (typeof basePaddingBottom === 'number' ? basePaddingBottom : 0) +
+          keyboardInset +
+          footerHeight.vertical,
+      },
+    ];
+  }, [contentContainerStyle, keyboardInset]);
 
   return (
     <ScrollView
-      ref={ref as Ref<ScrollView>}
+      ref={setScrollRef}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       contentContainerStyle={mergedContentContainerStyle}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       {...restProps}>
       {children}
     </ScrollView>
@@ -328,6 +451,7 @@ export const Sheet = Object.assign(SheetContainer, {
   Header,
   Footer,
   Scroll,
+  SubmitProvider: SheetSubmitProvider,
 });
 
 const styles = StyleSheet.create({

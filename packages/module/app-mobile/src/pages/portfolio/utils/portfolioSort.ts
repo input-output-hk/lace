@@ -7,39 +7,60 @@ import type { TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
 import type { BrowsePoolSortOrder } from '@lace-lib/ui-toolkit';
 
-export const TOKEN_SORT_OPTIONS = ['quantity', 'value', 'ticker'] as const;
+const TOKEN_SORT_OPTIONS = ['quantity', 'value', 'ticker'] as const;
 
 export type TokenSortOption = (typeof TOKEN_SORT_OPTIONS)[number];
 
 export type TokenSortOrder = BrowsePoolSortOrder;
 
-export const DEFAULT_TOKEN_SORT_OPTION: TokenSortOption = 'quantity';
+/** An absent `option` means no explicit choice: the list falls back to {@link DEFAULT_TOKEN_SORT_OPTION}. */
+export type TokenSortPreference = {
+  option?: TokenSortOption;
+  order: TokenSortOrder;
+};
+
+export const DEFAULT_TOKEN_SORT_OPTION: TokenSortOption = 'value';
 
 export const getDefaultTokenSortOrder = (
   option: TokenSortOption,
 ): TokenSortOrder => (option === 'ticker' ? ORDERS.ASC : ORDERS.DESC);
 
-export const isTokenSortOption = (
-  value: TokenSortOption,
-): value is TokenSortOption => TOKEN_SORT_OPTIONS.includes(value);
+export const getAvailableTokenSortOptions = (
+  isTokenPricingEnabled: boolean,
+): readonly TokenSortOption[] =>
+  isTokenPricingEnabled
+    ? TOKEN_SORT_OPTIONS
+    : TOKEN_SORT_OPTIONS.filter(option => option !== 'value');
 
-export const isTokenSortOrder = (value: TokenSortOrder) =>
-  value === ORDERS.ASC || value === ORDERS.DESC;
-
-export const getTokenSortOption = (
-  value: TokenSortOption | undefined,
+/**
+ * Narrows a stored preference to what the current network offers, returning
+ * `undefined` when the option is unavailable or unrecognised. A preference
+ * outlives the network it was chosen on, so without this the list could stay
+ * sorted by a criterion the sort sheet can no longer show as selected.
+ */
+export const resolveTokenSortOption = (
+  option: TokenSortOption | undefined,
+  isTokenPricingEnabled: boolean,
 ): TokenSortOption | undefined =>
-  isTokenSortOption(value as TokenSortOption) ? value : undefined;
+  option && getAvailableTokenSortOptions(isTokenPricingEnabled).includes(option)
+    ? option
+    : undefined;
 
-export const getTokenSortOrder = (
-  value: TokenSortOrder | undefined,
-  option?: TokenSortOption,
-): TokenSortOrder => {
-  if (!option) return ORDERS.ASC;
-  return isTokenSortOrder(value as TokenSortOrder)
-    ? (value as TokenSortOrder)
-    : getDefaultTokenSortOrder(option);
-};
+/**
+ * Resolves the sort the list actually applies. `order` belongs to the option the
+ * user picked, so the fallback derives its own: a narrowed-away preference leaves
+ * a stored order behind that would otherwise reverse the default sort.
+ */
+export const resolveEffectiveTokenSort = (
+  option: TokenSortOption | undefined,
+  order: TokenSortOrder,
+): Required<TokenSortPreference> =>
+  option
+    ? { option, order }
+    : {
+        option: DEFAULT_TOKEN_SORT_OPTION,
+        order: getDefaultTokenSortOrder(DEFAULT_TOKEN_SORT_OPTION),
+      };
 
 export const compareBigIntDesc = (left: bigint, right: bigint) => {
   if (left === right) return 0;

@@ -16,6 +16,7 @@
     "@lace-contract/analytics": "*",
     "@lace-contract/app": "*",
     "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/failures": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",

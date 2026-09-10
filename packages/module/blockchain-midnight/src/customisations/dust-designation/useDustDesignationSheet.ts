@@ -129,10 +129,11 @@ export const useDustDesignationSheet = (
     ) as Token | null;
   }, [tokensGroupedByAccount, accountId, networkType]);
 
-  // Get dust generation details from midnightContext
-  const dustGenerationDetails = useLaceSelector(
-    'midnightContext.selectDustGenerationDetails',
-    [midnightAccount.accountId],
+  // The SPENDABLE dust, not the generated total: a build moves the whole dust
+  // coin it pays with into pending, so right after a send the total still
+  // counts dust this fee cannot draw on.
+  const dustAvailable = useLaceSelector(
+    'midnightContext.selectDustAvailableByAccount',
   )[midnightAccount.accountId];
 
   // Format the available balance for display
@@ -208,16 +209,16 @@ export const useDustDesignationSheet = (
     const rawFeeAmount = BigNumber.valueOf(rawFees[0].amount);
     if (rawFeeAmount === 0n) return null; // First designation is free
 
-    const dustAvailable = dustGenerationDetails?.currentValue ?? 0n;
+    const spendableDust = dustAvailable ? BigNumber.valueOf(dustAvailable) : 0n;
 
-    if (dustAvailable < rawFeeAmount) {
+    if (spendableDust < rawFeeAmount) {
       return t('designation-flow.error.insufficient-dust', {
         dustTokenTicker: getDustTokenTickerByNetwork(networkType),
       });
     }
 
     return null;
-  }, [isFlowOpen, sendFlowState, dustGenerationDetails, t, networkType]);
+  }, [isFlowOpen, sendFlowState, dustAvailable, t, networkType]);
 
   // Debounced dispatch to Redux for address changes
   const debouncedAddressDispatch = useMemo(

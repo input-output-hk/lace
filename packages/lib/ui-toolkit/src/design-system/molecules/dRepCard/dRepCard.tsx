@@ -1,8 +1,11 @@
 import { useTranslation } from '@lace-contract/i18n';
 import { formatAmountToLocale } from '@lace-lib/util-render';
 import React, { useCallback } from 'react';
-import { StyleSheet } from 'react-native';
-import { Pressable } from 'react-native-gesture-handler';
+// Pressable must come from react-native, not react-native-gesture-handler: on
+// Android the sheet content is its own native RootView (TrueSheetViewController),
+// so it sits outside the app's GestureHandlerRootView and gesture-handler
+// touchables never receive events there. Matches poolCard / stakeCard.
+import { Pressable, StyleSheet } from 'react-native';
 
 import { spacing, useTheme } from '../../../design-tokens';
 import { Avatar, Card, Row, Text, Column } from '../../atoms';

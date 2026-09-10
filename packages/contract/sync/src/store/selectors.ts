@@ -185,6 +185,27 @@ export const selectHasEverSynced = createSelector(
 );
 
 /**
+ * Whether any account on the ACTIVE network has ever successfully synced.
+ *
+ * Network-scoped counterpart to `selectHasEverSynced` (ADR 11: accounts are
+ * network-specific). A successful sync on an inactive network must not count,
+ * so the portfolio initial-load gate keeps the skeleton while the active
+ * network still has no data.
+ *
+ * @returns true if at least one active-network account has `lastSuccessfulSync`
+ */
+export const selectActiveNetworkHasEverSynced = createSelector(
+  [
+    walletsSelectors.wallets.selectActiveNetworkAccounts,
+    syncSelectors.sync.selectSyncStatusByAccount,
+  ],
+  (accounts, syncStatusByAccount): boolean =>
+    accounts.some(
+      account => !!syncStatusByAccount[account.accountId]?.lastSuccessfulSync,
+    ),
+);
+
+/**
  * Calculates sync progress for the active account only.
  *
  * @returns value between 0 and 1.

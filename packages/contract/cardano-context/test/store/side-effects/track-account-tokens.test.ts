@@ -100,7 +100,7 @@ describe('trackAccountTokens', () => {
         a: [account2],
       });
 
-      const selectAccountUtxos$ = cold<AccountUtxoMap>('a', {
+      const selectAccountUtxosWithInFlight$ = cold<AccountUtxoMap>('a', {
         a: { [account2.accountId]: utxos },
       });
 
@@ -113,7 +113,7 @@ describe('trackAccountTokens', () => {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
-            selectAccountUtxos$,
+            selectAccountUtxosWithInFlight$,
             selectRewardAccountDetails$,
           },
         },
@@ -195,7 +195,7 @@ describe('trackAccountTokens', () => {
         a: [account0],
       });
 
-      const selectAccountUtxos$ = cold<AccountUtxoMap>('a--b', {
+      const selectAccountUtxosWithInFlight$ = cold<AccountUtxoMap>('a--b', {
         a: { [account0.accountId]: utxosInitial },
         b: { [account0.accountId]: utxosUpdated },
       });
@@ -209,7 +209,7 @@ describe('trackAccountTokens', () => {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
-            selectAccountUtxos$,
+            selectAccountUtxosWithInFlight$,
             selectRewardAccountDetails$,
           },
         },
@@ -276,7 +276,7 @@ describe('trackAccountTokens', () => {
         a: [account0],
       });
 
-      const selectAccountUtxos$ = cold<AccountUtxoMap>('a', {
+      const selectAccountUtxosWithInFlight$ = cold<AccountUtxoMap>('a', {
         a: { [account0.accountId]: utxos },
       });
 
@@ -301,7 +301,7 @@ describe('trackAccountTokens', () => {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
-            selectAccountUtxos$,
+            selectAccountUtxosWithInFlight$,
             selectRewardAccountDetails$,
           },
         },
@@ -336,7 +336,7 @@ describe('trackAccountTokens', () => {
         a: [account0],
       });
 
-      const selectAccountUtxos$ = cold<AccountUtxoMap>('a', {
+      const selectAccountUtxosWithInFlight$ = cold<AccountUtxoMap>('a', {
         a: { [account0.accountId]: [] },
       });
 
@@ -349,7 +349,7 @@ describe('trackAccountTokens', () => {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
-            selectAccountUtxos$,
+            selectAccountUtxosWithInFlight$,
             selectRewardAccountDetails$,
           },
         },

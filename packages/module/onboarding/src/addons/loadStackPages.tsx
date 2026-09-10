@@ -1,11 +1,6 @@
 import { Stack, StackRoutes } from '@lace-lib/navigation';
 import React from 'react';
 
-import { OnboardingCreateWallet } from '../pages/OnboardingCreateWallet';
-import { OnboardingDesktopLogin } from '../pages/OnboardingDesktopLogin';
-import { OnboardingHardwareSetup } from '../pages/OnboardingHardwareSetup';
-import { OnboardingHardwareWallet } from '../pages/OnboardingHardwareWallet';
-import { OnboardingRestoreWallet } from '../pages/OnboardingRestoreWallet';
 import { OnboardingStart } from '../pages/OnboardingStart';
 
 import type { AvailableAddons } from '..';
@@ -19,26 +14,6 @@ export const loadStackPages: ContextualLaceInit<
     <Stack.Screen
       name={StackRoutes.OnboardingStart}
       component={OnboardingStart}
-    />
-    <Stack.Screen
-      name={StackRoutes.OnboardingDesktopLogin}
-      component={OnboardingDesktopLogin}
-    />
-    <Stack.Screen
-      name={StackRoutes.OnboardingRestoreWallet}
-      component={OnboardingRestoreWallet}
-    />
-    <Stack.Screen
-      name={StackRoutes.OnboardingCreateWallet}
-      component={OnboardingCreateWallet}
-    />
-    <Stack.Screen
-      name={StackRoutes.OnboardingHardware}
-      component={OnboardingHardwareWallet}
-    />
-    <Stack.Screen
-      name={StackRoutes.OnboardingHardwareSetup}
-      component={OnboardingHardwareSetup}
     />
   </React.Fragment>
 );

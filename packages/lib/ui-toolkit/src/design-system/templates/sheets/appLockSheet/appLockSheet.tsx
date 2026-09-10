@@ -45,6 +45,7 @@ export const AppLockSheet = ({
 const styles = StyleSheet.create({
   content: {
     padding: spacing.L,
+    paddingBottom: spacing.XXXXL,
   },
   infoText: {
     paddingBottom: spacing.M,

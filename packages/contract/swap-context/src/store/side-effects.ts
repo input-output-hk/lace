@@ -1,5 +1,9 @@
 import { Serialization } from '@cardano-sdk/core';
+import { ActivityType } from '@lace-contract/activities';
+import { TokenId } from '@lace-contract/tokens';
+import { pendingActivityMetadata } from '@lace-contract/tx-executor';
 import { whileActive } from '@lace-contract/wallet-active-state';
+import { BigNumber, Timestamp } from '@lace-lib/util';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { firstStateOfStatus, serializeError } from '@lace-lib/util-store';
 import { retryBackoff } from 'backoff-rxjs';
@@ -31,6 +35,7 @@ import type {
 } from './types';
 import type { SideEffect } from '../contract';
 import type { Cardano } from '@cardano-sdk/core';
+import type { Activity } from '@lace-contract/activities';
 import type {
   SwapProvider,
   SwapQuote,
@@ -43,11 +48,25 @@ const QUOTE_REFRESH_INTERVAL_MS = 15_000;
 const QUOTE_TIMEOUT_MS = 30_000;
 const SWAP_TX_TTL_SECONDS = 900;
 
-const selectBestQuote = (quotes: SwapQuote[]): SwapQuote =>
-  quotes.reduce((best, current) =>
-    BigInt(current.expectedBuyAmount) > BigInt(best.expectedBuyAmount)
-      ? current
-      : best,
+const findWalletOwningAccount = (
+  wallets: readonly AnyWallet[],
+  accountId: AccountId,
+): AnyWallet | undefined =>
+  wallets.find(wallet =>
+    wallet.accounts.some(account => account.accountId === accountId),
+  );
+
+// Callers guard against an empty list before calling.
+const selectBestQuote = ([
+  firstQuote,
+  ...otherQuotes
+]: SwapQuote[]): SwapQuote =>
+  otherQuotes.reduce(
+    (best, current) =>
+      BigInt(current.expectedBuyAmount) > BigInt(best.expectedBuyAmount)
+        ? current
+        : best,
+    firstQuote,
   );
 
 const fetchQuotesFromAllProviders = (
@@ -105,8 +124,12 @@ export const makeFetchQuote: SideEffect = (
           switchMap(results => {
             const quotes: SwapQuote[] = [];
             for (const r of results) {
-              if (r !== undefined && r.isOk()) {
+              if (r === undefined) {
+                logger.error('[SWAP] provider quote timed out or threw');
+              } else if (r.isOk()) {
                 quotes.push(r.value);
+              } else {
+                logger.error('[SWAP] provider returned no quote', r.error);
               }
             }
 
@@ -187,7 +210,7 @@ export const makeQuoteRefresh: SideEffect = (
             switchMap(results => {
               const quotes: SwapQuote[] = [];
               for (const r of results) {
-                if (r !== undefined && r.isOk()) {
+                if (r?.isOk()) {
                   quotes.push(r.value);
                 }
               }
@@ -217,7 +240,15 @@ export const makeBuildSwapTx: SideEffect = (
     swapConfig: { selectSlippage$, selectExcludedDexes$ },
     swapAnalytics: { selectSwapSessionId$ },
     addresses: { selectByAccountId$ },
-    cardanoContext: { selectAccountUtxos$, selectAccountUnspendableUtxos$ },
+    // `selectAvailableAccountUtxos$`, not the raw tracked set: it excludes the
+    // collateral (unspendable) UTxOs and applies the in-flight overlay, so
+    // inputs consumed by a still-pending tx are never offered to the
+    // aggregator. Building on the raw set right after a swap re-offered
+    // just-spent inputs and the node rejected the next tx with BadInputsUTxO.
+    cardanoContext: {
+      selectAvailableAccountUtxos$,
+      selectAccountUnspendableUtxos$,
+    },
   },
   { actions, logger, swapProviders },
 ) =>
@@ -226,7 +257,7 @@ export const makeBuildSwapTx: SideEffect = (
       selectSlippage$,
       selectExcludedDexes$,
       selectByAccountId$,
-      selectAccountUtxos$,
+      selectAvailableAccountUtxos$,
       selectAccountUnspendableUtxos$,
       selectSwapSessionId$,
     ),
@@ -236,7 +267,7 @@ export const makeBuildSwapTx: SideEffect = (
         slippage,
         excludedDexes,
         selectByAccountId,
-        accountUtxos,
+        availableAccountUtxos,
         accountUnspendableUtxos,
         swapSessionId,
       ]: [SwapStateBuilding, number, string[], ...unknown[]]) => {
@@ -258,7 +289,10 @@ export const makeBuildSwapTx: SideEffect = (
         )(state.accountId);
         const userAddress = accountAddresses?.[0]?.address ?? '';
 
-        const utxoMap = accountUtxos as Record<string, Cardano.Utxo[]>;
+        const availableMap = availableAccountUtxos as Record<
+          string,
+          Cardano.Utxo[]
+        >;
         const unspendableMap = accountUnspendableUtxos as Record<
           string,
           Cardano.Utxo[]
@@ -267,17 +301,18 @@ export const makeBuildSwapTx: SideEffect = (
         // Restrict the UTXO set sent to the provider to only UTXOs at
         // addresses the signer can derive keys for — otherwise SteelSwap may
         // pick inputs we can't sign, producing `MissingVKeyWitnesses` on
-        // submission. The root fix belongs in confirm-tx.ts (see the
-        // `// TODO: We need account known addresses here.` there): once
-        // `knownAddresses` covers every address with a tracked UTXO, this
-        // filter can be removed.
+        // submission. The root fix belongs in confirm-tx.ts (its
+        // `knownAddresses` note): once that covers every address with a
+        // tracked UTXO, this filter can be removed.
         const accountAddressSet = new Set(
           (accountAddresses ?? []).map(a => a.address),
         );
         const isSignable = (utxo: Cardano.Utxo): boolean =>
           accountAddressSet.has(utxo[1].address);
 
-        const rawUtxos = (utxoMap[state.accountId] ?? []).filter(isSignable);
+        const rawUtxos = (availableMap[state.accountId] ?? []).filter(
+          isSignable,
+        );
         const rawCollateral = (unspendableMap[state.accountId] ?? []).filter(
           isSignable,
         );
@@ -424,7 +459,7 @@ export const makeFetchDexList: SideEffect = (
           const allDexes: SwapDexEntry[] = [];
           const seenIds = new Set<string>();
           for (const r of results) {
-            if (r !== undefined && r.isOk()) {
+            if (r?.isOk()) {
               for (const dex of r.value) {
                 if (!seenIds.has(dex.id)) {
                   seenIds.add(dex.id);
@@ -464,7 +499,7 @@ export const makeFetchTradableTokens: SideEffect = (
         switchMap(results => {
           const tokenMap = new Map<string, SwapProviderToken>();
           for (const r of results) {
-            if (r !== undefined && r.isOk()) {
+            if (r?.isOk()) {
               for (const token of r.value) {
                 if (!tokenMap.has(token.id)) {
                   tokenMap.set(token.id, {
@@ -508,9 +543,9 @@ export const makeAwaitConfirmation =
     firstStateOfStatus(selectSwapFlowState$, 'AwaitingConfirmation').pipe(
       withLatestFrom(selectAll$, selectSwapSessionId$),
       switchMap(([state, wallets, swapSessionId]) => {
-        const allWallets = wallets as readonly AnyWallet[];
-        const wallet = allWallets.find(w =>
-          w.accounts.some(a => a.accountId === state.accountId),
+        const wallet = findWalletOwningAccount(
+          wallets as readonly AnyWallet[],
+          state.accountId,
         );
 
         const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
@@ -617,8 +652,36 @@ export const makeProcessing =
             }
 
             if (value.success) {
+              // Record the swap as a pending activity (as Send does on
+              // submit): its consumed inputs drop out of
+              // `selectAvailableAccountUtxos` immediately, so a back-to-back
+              // swap can't offer just-spent inputs to the aggregator — the
+              // node rejected those with BadInputsUTxO until chain sync
+              // caught up. Also surfaces the swap in Activity right away.
+              const tokenBalanceChanges: Activity['tokenBalanceChanges'] = [];
+              try {
+                tokenBalanceChanges.push({
+                  tokenId: TokenId(state.sellTokenId),
+                  amount: BigNumber(-BigInt(state.selectedQuote.sellAmount)),
+                });
+              } catch {
+                // An unparsable provider amount must not block the submit
+                // result; the activity just shows no token delta.
+              }
+              const pendingActivity: Activity = {
+                accountId: state.accountId,
+                activityId: value.txId,
+                timestamp: Timestamp(Date.now()),
+                tokenBalanceChanges,
+                type: ActivityType.Pending,
+                ...pendingActivityMetadata(value),
+              };
               return from([
                 actions.swapFlow.submissionSucceeded({ txId: value.txId }),
+                actions.activities.upsertActivities({
+                  accountId: state.accountId,
+                  activities: [pendingActivity],
+                }),
                 actions.analytics.trackEvent({
                   eventName: 'swaps | sign success',
                   payload: {

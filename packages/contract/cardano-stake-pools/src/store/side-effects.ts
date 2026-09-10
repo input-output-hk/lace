@@ -61,6 +61,7 @@ interface NetworkDataFetchDeps {
   chainId: Cardano.ChainId;
   getNetworkData: CardanoStakePoolsProvider['getNetworkData'];
   getStakePools: CardanoStakePoolsProvider['getStakePools'];
+  logger: Parameters<SideEffect>[2]['logger'];
   now: () => number;
   retryDelay: number;
 }
@@ -69,20 +70,34 @@ const toFetchDataEvent =
   (data: StakePoolsNetworkData, deps: NetworkDataFetchDeps) =>
   (
     allResult: Result<BlockfrostPartialStakePool[], ProviderError>,
-  ): FetchDataEvent =>
-    allResult.isErr()
-      ? { delay: deps.retryDelay }
-      : {
-          data: { ...data, timestamp: deps.now() },
-          delay: deps.cacheTTL,
-          summaries: allResult.unwrap().map(toLacePartialStakePool),
-        };
+  ): FetchDataEvent => {
+    if (allResult.isErr()) {
+      deps.logger.error(
+        `Stake pools fetch failed for network ${deps.chainId.networkMagic}; retrying in ${deps.retryDelay}ms`,
+        allResult.error,
+      );
+      return { delay: deps.retryDelay };
+    }
+    return {
+      data: { ...data, timestamp: deps.now() },
+      delay: deps.cacheTTL,
+      summaries: allResult.unwrap().map(toLacePartialStakePool),
+    };
+  };
 
 const handleNetworkDataResult = (
   result: Result<StakePoolsNetworkData, ProviderError>,
   deps: NetworkDataFetchDeps,
 ): Observable<FetchDataEvent> => {
-  if (result.isErr()) return of({ delay: deps.retryDelay });
+  if (result.isErr()) {
+    // The retry loop is otherwise invisible: the staking UI just shows the
+    // network-info skeleton forever while this refetches every retryDelay.
+    deps.logger.error(
+      `Stake pools network data fetch failed for network ${deps.chainId.networkMagic}; retrying in ${deps.retryDelay}ms`,
+      result.error,
+    );
+    return of({ delay: deps.retryDelay });
+  }
 
   // Emit immediately with a timestamp of 0 so that even if the app closes before
   // getStakePools completes, a new fetch will be performed the next time the app is opened.
@@ -110,6 +125,7 @@ interface FetchPoolDeps {
   chainId: Cardano.ChainId;
   getMetadata: CardanoStakePoolsProvider['getMetadata'];
   getStakePool: CardanoStakePoolsProvider['getStakePool'];
+  logger: Parameters<SideEffect>[2]['logger'];
   now: () => number;
   retiringPools: Cardano.PoolId[];
   retryDelay: number;
@@ -129,19 +145,26 @@ const toFetchPoolEvent =
   }: {
     metadata: Result<BlockfrostStakePoolMetadata | null, ProviderError>;
     pool: Result<BlockfrostStakePool | null, ProviderError>;
-  }): FetchPoolEvent =>
-    pool.isErr() || metadata.isErr()
-      ? { delay: deps.retryDelay, poolId }
-      : {
-          data: toLaceStakePool({
-            metadata: metadata.unwrap(),
-            now: deps.now,
-            pool: pool.unwrap(),
-            poolId,
-            retiringPools: deps.retiringPools,
-          }),
-          poolId,
-        };
+  }): FetchPoolEvent => {
+    if (pool.isErr() || metadata.isErr()) {
+      deps.logger.error(
+        `Stake pool details fetch failed for pool ${poolId}; retrying in ${deps.retryDelay}ms`,
+        pool.isErr() ? pool.error : undefined,
+        metadata.isErr() ? metadata.error : undefined,
+      );
+      return { delay: deps.retryDelay, poolId };
+    }
+    return {
+      data: toLaceStakePool({
+        metadata: metadata.unwrap(),
+        now: deps.now,
+        pool: pool.unwrap(),
+        poolId,
+        retiringPools: deps.retiringPools,
+      }),
+      poolId,
+    };
+  };
 
 const fetchPoolWithMetadata = (
   deps: FetchPoolDeps,
@@ -195,6 +218,7 @@ export const createStakePoolsNetworkData =
       actions,
       cardanoStakePoolsProvider: { getNetworkData, getStakePools },
       isWalletActive$,
+      logger,
     },
   ) =>
     // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
@@ -224,6 +248,7 @@ export const createStakePoolsNetworkData =
           chainId,
           getNetworkData,
           getStakePools,
+          logger,
           now,
           retryDelay,
         };
@@ -275,7 +300,7 @@ export const createLoadStakePool =
         selectActivePoolSummaries$,
       },
     },
-    { actions, cardanoStakePoolsProvider },
+    { actions, cardanoStakePoolsProvider, logger },
   ) =>
     loadPools$.pipe(
       mergeMap(loadPoolsAction =>
@@ -322,6 +347,7 @@ export const createLoadStakePool =
             chainId,
             getMetadata,
             getStakePool,
+            logger,
             now,
             retiringPools,
             retryDelay,

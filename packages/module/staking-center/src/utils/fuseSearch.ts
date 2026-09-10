@@ -1,3 +1,7 @@
+import {
+  estimateSummaryROS,
+  recommendPools,
+} from '@lace-contract/cardano-stake-pools';
 import Fuse from 'fuse.js';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 
@@ -19,13 +23,34 @@ const FUSE_SEARCH_OPTIONS = {
   threshold: 0.3,
 };
 
+/**
+ * A listed pool: the bulk summary annotated with its estimated annual rate and
+ * its recommendation score. Both are computed here rather than per render —
+ * this is the one place holding the summaries and the network data they are
+ * measured against, and the recommendation needs the WHOLE list (a pool's
+ * yield depends on whether it places inside the desired pool count, and its
+ * concentration penalty on how many siblings it has).
+ */
+export type BrowsePoolListEntry = LacePartialStakePool & {
+  /** Absent when the network data cannot support the estimate — the card then
+   * renders "—" rather than a concrete `~0%` it cannot stand behind. */
+  ros?: number;
+  /**
+   * Absent for a pool a hard filter rejects — no headroom, abandoned, paying
+   * its members nothing, or nothing identifying it. The list's comparator sinks
+   * an absent score in BOTH directions, so such a pool stays present and
+   * searchable without ever being ordered as a recommendation.
+   */
+  recommendation?: number;
+};
+
 export interface FuseSearchState {
   /** Whether the system is still loading the stake pools */
   isLoading: boolean;
   /** The list of stake pools eligible for delegation */
-  pools: LacePartialStakePool[];
+  pools: BrowsePoolListEntry[];
   /** The function to perform the fuse search */
-  search: (query: string) => LacePartialStakePool[];
+  search: (query: string) => BrowsePoolListEntry[];
   /** The total number of stake pools before any filter is applied */
   totalPoolsCount: number;
 }
@@ -62,7 +87,7 @@ export class FuseSearch {
     list: LacePartialStakePool[],
     networkData: StakePoolsNetworkData,
   ) {
-    const pools = list.filter(
+    const eligible = list.filter(
       ({ declaredPledge, liveStake, poolId }) =>
         // Blockfrost bulk API doesn't provide the live pledge: we know we can't filter out by live pledge
         // We need to settle on this filter
@@ -70,6 +95,16 @@ export class FuseSearch {
         // Filter out retiring stake pools
         !networkData.retiringPools.includes(poolId),
     );
+
+    const recommendation = recommendPools(eligible, networkData);
+    // Annotated here, once per index build, because this is the one place
+    // that holds both the summaries and the network data they are estimated
+    // against — sorting or rendering per-frame would recompute ~3k pools.
+    const pools = eligible.map(pool => ({
+      ...pool,
+      ros: estimateSummaryROS(pool, networkData),
+      recommendation: recommendation.get(pool.poolId),
+    }));
 
     const fuse = new Fuse(
       pools,

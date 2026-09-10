@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
 import { Column, CustomTextInput } from '../../../atoms';
-import { footerHeight } from '../../../organisms';
+import { footerHeight, useSheetSubmit } from '../../../organisms';
 import { NAME_MAX_LENGTH } from '../../../util';
 
 interface LabelsProps {
@@ -30,6 +30,8 @@ export const EditWalletSheetTemplate = ({
   const { nameLabel, name, nameError } = labels;
   const { onNameChange } = actions;
 
+  const submitProps = useSheetSubmit();
+
   return (
     <Column testID="edit-wallet-sheet" style={styles.container}>
       <CustomTextInput
@@ -40,6 +42,7 @@ export const EditWalletSheetTemplate = ({
         testID="edit-wallet-sheet-name-input"
         animatedLabel
         maxLength={NAME_MAX_LENGTH}
+        {...submitProps}
       />
     </Column>
   );

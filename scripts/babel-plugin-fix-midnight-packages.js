@@ -6,14 +6,15 @@ const path = require('path');
 const Module = require('module');
 
 // List of problematic packages to patch (removes 'exports' field so Node falls back to 'main')
-// Only works when the package has a CJS file reachable via 'main' or root-level fallback.
+// Only works when the package has a CJS file reachable via 'main' or root-level fallback,
+// or when Node's require(esm) can load the 'main' file (ESM-only @midnightntwrk packages).
 const packagesToPatch = [
-  'dapp-connector-api',
-  'wallet-sdk-abstractions',
-  'wallet-sdk-address-format',
-  'wallet-sdk-hd',
-  'midnight-js-http-client-proof-provider',
-  'midnight-js-types',
+  '@midnight-ntwrk/dapp-connector-api',
+  '@midnightntwrk/wallet-sdk-abstractions',
+  '@midnightntwrk/wallet-sdk-address-format',
+  '@midnightntwrk/wallet-sdk-hd',
+  '@midnight-ntwrk/midnight-js-http-client-proof-provider',
+  '@midnight-ntwrk/midnight-js-types',
 ];
 
 // compact-js and platform-js have no CJS builds at all — their root-level files are also ESM.
@@ -38,14 +39,7 @@ Module._load = function (request, parent, isMain) {
 };
 
 const getPackageJsonPath = packageName =>
-  path.join(
-    __dirname,
-    '..',
-    'node_modules',
-    '@midnight-ntwrk',
-    packageName,
-    'package.json',
-  );
+  path.join(__dirname, '..', 'node_modules', packageName, 'package.json');
 const getPackageJsonBackupPath = packageJsonPath => packageJsonPath + '.backup';
 
 const patchMidnightPackages = () => {
@@ -60,9 +54,7 @@ const patchMidnightPackages = () => {
 
     try {
       if (!fs.existsSync(packageJsonPath)) {
-        console.warn(
-          `Package @midnight-ntwrk/${packageName} not found, skipping`,
-        );
+        console.warn(`Package ${packageName} not found, skipping`);
         return;
       }
 
@@ -84,14 +76,11 @@ const patchMidnightPackages = () => {
         // Write the patched version
         fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-        console.log(`Patched @midnight-ntwrk/${packageName} package.json`);
+        console.log(`Patched ${packageName} package.json`);
         patchedPackages.add(packageName);
       }
     } catch (error) {
-      console.warn(
-        `Could not patch @midnight-ntwrk/${packageName}:`,
-        error.message,
-      );
+      console.warn(`Could not patch ${packageName}:`, error.message);
     }
   });
 
@@ -110,15 +99,12 @@ const patchMidnightPackages = () => {
           // Remove backup file
           fs.unlinkSync(backupPath);
 
-          console.log(`Restored @midnight-ntwrk/${packageName} package.json`);
+          console.log(`Restored ${packageName} package.json`);
         } else {
           console.warn('Backup not found:', backupPath);
         }
       } catch (error) {
-        console.error(
-          `Could not restore @midnight-ntwrk/${packageName}:`,
-          error.message,
-        );
+        console.error(`Could not restore ${packageName}:`, error.message);
       }
     });
 

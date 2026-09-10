@@ -5,7 +5,7 @@ import {
 import { networkId } from '@lace-contract/midnight-context/src/stub-data';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { Observable, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,7 +33,7 @@ vi.mock('@midnight-ntwrk/ledger-v8', async () => {
   };
 });
 
-vi.mock('@midnight-ntwrk/wallet-sdk-address-format', () => ({
+vi.mock('@midnightntwrk/wallet-sdk-address-format', () => ({
   MidnightBech32m: { parse: (address: string) => address },
   ShieldedAddress: {
     codec: { decode: (_networkId: string, address: string) => address },

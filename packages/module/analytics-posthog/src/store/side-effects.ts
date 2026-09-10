@@ -1,17 +1,23 @@
-import { toEmpty } from '@cardano-sdk/util-rxjs';
+import { deepEquals } from '@cardano-sdk/util';
+import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { isHardwareWallet, WalletType } from '@lace-contract/wallet-repo';
 import {
   combineLatest,
+  debounceTime,
   distinctUntilChanged,
   EMPTY,
+  filter,
   map,
+  mergeMap,
+  of,
   startWith,
-  tap,
+  take,
 } from 'rxjs';
 
 import { buildCardanoGovernanceAccounts } from './cardano-governance-super-property';
 
 import type { SideEffect } from '..';
+import type { IdentifiedUser } from './slice';
 import type { AccountRewardAccountDetailsMap } from '@lace-contract/cardano-context';
 import type { CurrencyPreference } from '@lace-contract/token-pricing';
 import type { AnyAccount, AnyWallet } from '@lace-contract/wallet-repo';
@@ -24,6 +30,41 @@ export const initializePostHogAnalyticsDependencies: SideEffect = (
 ) => {
   initializePostHogAnalytics(posthog, getDefaultPostHogEventProperties);
   return EMPTY;
+};
+
+/**
+ * Whether `rewardAccountDetails` holds an entry for *every* account it
+ * describes.
+ *
+ * The map is not persisted while the accounts it describes are, so after every
+ * boot it is empty for accounts that certainly have stake, and
+ * `buildCardanoGovernanceAccounts` maps those to `votingPower: 0`. Reporting
+ * that would overwrite real voting power with zero; omitting the key leaves the
+ * last reported value untouched, because `posthog.identify` merges.
+ *
+ * `every`, not `some`: the accounts are written one at a time, so a partially
+ * loaded map still zeroes the accounts that are missing, and those zeroes are
+ * merged over their real values here as well as in PostHog.
+ */
+const hasLoadedRewardAccountDetails = (
+  cardanoAccounts: readonly Pick<AnyAccount, 'accountId'>[],
+  rewardAccountDetails: AccountRewardAccountDetailsMap,
+): boolean =>
+  cardanoAccounts.every(
+    ({ accountId }) =>
+      rewardAccountDetails[accountId]?.rewardAccountInfo !== undefined,
+  );
+
+/**
+ * Code-unit ordering, matching what a bare `sort()` does for strings.
+ *
+ * Deliberately not `localeCompare`: this array is compared against the
+ * persisted snapshot, so a locale-dependent order would make a language change
+ * look like a property change and re-identify.
+ */
+const compareBlockchainNames = (a: string, b: string): number => {
+  if (a < b) return -1;
+  return a > b ? 1 : 0;
 };
 
 const computeUserSuperProperties = ({
@@ -49,7 +90,7 @@ const computeUserSuperProperties = ({
   for (const wallet of wallets) accounts.push(...wallet.accounts);
   const blockchainsWithAccounts = [
     ...new Set(accounts.map(a => a.blockchainName)),
-  ].sort();
+  ].sort(compareBlockchainNames);
 
   return {
     num_wallets: wallets.length,
@@ -74,14 +115,46 @@ const computeUserSuperProperties = ({
     // Mainnet-only: rewardAccountDetails is cleared on network switch, so this
     // data only exists while mainnet is active. Omitting the key on testnet lets
     // posthog.identify's merge keep the last mainnet snapshot instead of blanking it.
-    ...(networkType === 'mainnet' && {
-      cardano_governance_accounts: buildCardanoGovernanceAccounts(
-        cardanoAccounts,
-        rewardAccountDetails,
-      ),
-    }),
+    ...(networkType === 'mainnet' &&
+      hasLoadedRewardAccountDetails(cardanoAccounts, rewardAccountDetails) && {
+        cardano_governance_accounts: buildCardanoGovernanceAccounts(
+          cardanoAccounts,
+          rewardAccountDetails,
+        ),
+      }),
   };
 };
+
+/**
+ * Window over which changed identities are coalesced into one identify. Sized
+ * for the async settling shortly after boot — the per-account writes of a
+ * single provider pass land a few hundred ms apart and each one is a distinct
+ * identity. Not for rehydration: that is awaited before epics run.
+ *
+ * Load-bearing for the once-per-session cap below: without it the session's
+ * single identify would be spent on the least settled identity of the boot.
+ */
+const IDENTIFY_DEBOUNCE_MS = 1000;
+
+/**
+ * Whether sending `next` would change the person PostHog holds, given `last` —
+ * what was last sent.
+ *
+ * `posthog.identify` merges: a key absent from the payload leaves the person's
+ * existing value untouched, so an absent key cannot change anything and must
+ * not force a re-identify. Compare present keys only.
+ *
+ * A null `last` (never identified) is caught by the userId comparison, since
+ * `next.userId` is always a string and so never equals `undefined`.
+ */
+const identifyWouldChangePerson = (
+  next: IdentifiedUser,
+  last: IdentifiedUser | null,
+): boolean =>
+  next.userId !== last?.userId ||
+  Object.entries(next.properties).some(
+    ([key, value]) => !deepEquals(value, last?.properties[key]),
+  );
 
 export const identifyUserWithSuperProperties: SideEffect = (
   _,
@@ -95,8 +168,9 @@ export const identifyUserWithSuperProperties: SideEffect = (
       selectActiveCardanoAccounts$,
       selectRewardAccountDetails$,
     },
+    posthogAnalytics: { selectIdentifiedUser$ },
   },
-  { posthog },
+  { posthog, actions, logger },
 ) =>
   combineLatest([
     selectAnalyticsUser$,
@@ -137,12 +211,32 @@ export const identifyUserWithSuperProperties: SideEffect = (
         };
       },
     ),
-    distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
-    tap(identity => {
-      if (!identity) return;
-      posthog.identify(identity.userId, identity.properties);
+    filter(
+      (identity): identity is NonNullable<typeof identity> => identity !== null,
+    ),
+    distinctUntilChanged(deepEquals),
+    debounceTime(IDENTIFY_DEBOUNCE_MS),
+    // Compare against the *persisted* snapshot, not just in-memory history:
+    // the extension service worker restarts constantly, and every restart
+    // would otherwise re-send an unchanged $identify (billed per event).
+    blockingWithLatestFrom(selectIdentifiedUser$),
+    filter(([next, last]) => identifyWouldChangePerson(next, last)),
+    mergeMap(([next]) => {
+      try {
+        posthog.identify(next.userId, next.properties);
+      } catch (error) {
+        // Deliberately no snapshot: an identify that never left must not be
+        // deduped against, and an uncaught throw here would take down the
+        // root epic with every other side effect in it.
+        logger.error('Failed to identify PostHog user', error);
+        return EMPTY;
+      }
+      return of(actions.posthogAnalytics.identified(next));
     }),
-    toEmpty,
+    // One identify per session, counted on the send rather than the attempt so
+    // a throw does not spend it. A change arriving after the cap still lands:
+    // the snapshot holds what was sent, so the next session sees it and sends.
+    take(1),
   );
 
 export const trackFeatureView: SideEffect = (

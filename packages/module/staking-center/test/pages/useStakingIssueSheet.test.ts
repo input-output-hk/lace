@@ -1,7 +1,13 @@
 /**
  * @vitest-environment jsdom
  */
-import { TADA_TOKEN_TICKER } from '@lace-contract/cardano-context';
+import {
+  LOVELACE_TOKEN_ID,
+  TADA_TOKEN_TICKER,
+} from '@lace-contract/cardano-context';
+import { resolveEarnRewardsTarget } from '@lace-contract/earn-rewards';
+import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
+import { BigNumber } from '@lace-lib/util';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,6 +16,7 @@ import { useStakingIssueSheet } from '../../src/pages/staking-issue/useStakingIs
 
 import type { Cardano } from '@cardano-sdk/core';
 import type { LaceStakePool } from '@lace-contract/cardano-stake-pools';
+import type { EarnRewardsTarget } from '@lace-contract/earn-rewards';
 
 // Mock the hooks
 vi.mock('../../src/hooks', async importOriginal => {
@@ -43,6 +50,7 @@ vi.mock('@lace-lib/ui-toolkit', () => ({
 
 vi.mock('@lace-lib/navigation', () => ({
   NavigationControls: {
+    navigate: vi.fn(),
     sheets: {
       navigate: vi.fn(),
     },
@@ -51,16 +59,34 @@ vi.mock('@lace-lib/navigation', () => ({
     },
   },
   SheetRoutes: {
+    BrowseDRep: 'BrowseDRep',
     BrowsePool: 'BrowsePool',
+    EarnRewards: 'EarnRewards',
   },
   StackRoutes: {
     DappExternalWebView: 'DappExternalWebView',
   },
 }));
 
+// Target resolution is covered by the earn-rewards contract's own tests; mocking
+// it keeps `earnRewardsMode` real so the audience gate below is genuinely exercised.
+vi.mock('@lace-contract/earn-rewards', async importOriginal => {
+  const actual =
+    // eslint-disable-next-line @typescript-eslint/consistent-type-imports
+    await importOriginal<typeof import('@lace-contract/earn-rewards')>();
+  return { ...actual, resolveEarnRewardsTarget: vi.fn() };
+});
+
 const convertQueryToPoolIds = (
   query: Cardano.PoolId | Cardano.PoolId[] | undefined,
 ) => (query ? (Array.isArray(query) ? query : [query]) : []);
+
+// The hook reads tokens to answer `hasAda`. Funded by default so the earn-rewards
+// audience rule isn't accidentally suppressed in unrelated cases.
+const fundedAdaTokens = [
+  { tokenId: LOVELACE_TOKEN_ID, available: BigNumber(200_000_000n) },
+];
+const noAdaTokens = [{ tokenId: LOVELACE_TOKEN_ID, available: BigNumber(0n) }];
 
 describe('useStakingIssueSheet', () => {
   const mockUseLaceSelector = vi.mocked(hooksModule.useLaceSelector);
@@ -118,6 +144,9 @@ describe('useStakingIssueSheet', () => {
       }
       if (selector === 'network.selectNetworkType') {
         return 'mainnet';
+      }
+      if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+        return fundedAdaTokens;
       }
       if (selector === 'features.selectLoadedFeatures') {
         return { featureFlags: [], modules: [] };
@@ -183,6 +212,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
+        }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [{ key: 'GOVERNANCE_CENTER' }], modules: [] };
         }
@@ -230,6 +262,113 @@ describe('useStakingIssueSheet', () => {
     });
   });
 
+  describe('onDelegateVote destination', () => {
+    const mockResolveTarget = vi.mocked(resolveEarnRewardsTarget);
+    const mockNavigate = vi.mocked(NavigationControls.navigate);
+
+    const earnRewardsTarget: EarnRewardsTarget = {
+      poolId: 'promoted-pool' as Cardano.PoolId,
+      dRep: {
+        type: 'specific',
+        drepId: 'drep1promoted' as Cardano.DRepID,
+      },
+    };
+
+    // GOVERNANCE_CENTER is what exposes onDelegateVote at all (see above).
+    const seedSelectors = ({
+      rewardAccountInfo,
+      pendingActivities = {},
+      tokens = fundedAdaTokens,
+    }: {
+      rewardAccountInfo: object;
+      pendingActivities?: Record<string, unknown[]>;
+      tokens?: typeof fundedAdaTokens;
+    }) => {
+      mockUseLaceSelector.mockImplementation((selector: string) => {
+        if (selector === 'cardanoContext.selectRewardAccountDetails') {
+          return { [mockAccountId]: { rewardAccountInfo } };
+        }
+        if (selector === 'addresses.selectByAccountId') {
+          return [{ data: { rewardAccount: 'stake_test1abc' } }];
+        }
+        if (selector === 'network.selectNetworkType') {
+          return 'mainnet';
+        }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return tokens;
+        }
+        if (selector === 'features.selectLoadedFeatures') {
+          return { featureFlags: [{ key: 'GOVERNANCE_CENTER' }], modules: [] };
+        }
+        if (selector === 'activities.selectPendingActivitiesByAccount') {
+          return pendingActivities;
+        }
+        return {};
+      });
+    };
+
+    const pressDelegateVote = () => {
+      const { result } = renderHook(() =>
+        useStakingIssueSheet(mockAccountId, 'locked'),
+      );
+      result.current?.onDelegateVote?.();
+    };
+
+    it('opens the earn-rewards flow when the account is still its audience', () => {
+      mockResolveTarget.mockReturnValue(earnRewardsTarget);
+      seedSelectors({
+        rewardAccountInfo: { ...mockRewardAccountDetails.rewardAccountInfo },
+      });
+
+      pressDelegateVote();
+
+      expect(mockNavigate).toHaveBeenCalledWith(SheetRoutes.EarnRewards, {
+        accountId: mockAccountId,
+      });
+    });
+
+    it('falls back to browsing DReps when no earn-rewards target is configured', () => {
+      mockResolveTarget.mockReturnValue(undefined);
+      seedSelectors({
+        rewardAccountInfo: { ...mockRewardAccountDetails.rewardAccountInfo },
+      });
+
+      pressDelegateVote();
+
+      expect(mockNavigate).toHaveBeenCalledWith(SheetRoutes.BrowseDRep, {
+        accountId: mockAccountId,
+      });
+    });
+
+    it('falls back to browsing DReps when the account holds no ADA', () => {
+      mockResolveTarget.mockReturnValue(earnRewardsTarget);
+      seedSelectors({
+        rewardAccountInfo: { ...mockRewardAccountDetails.rewardAccountInfo },
+        tokens: noAdaTokens,
+      });
+
+      pressDelegateVote();
+
+      expect(mockNavigate).toHaveBeenCalledWith(SheetRoutes.BrowseDRep, {
+        accountId: mockAccountId,
+      });
+    });
+
+    it('falls back to browsing DReps while a transaction is pending', () => {
+      mockResolveTarget.mockReturnValue(earnRewardsTarget);
+      seedSelectors({
+        rewardAccountInfo: { ...mockRewardAccountDetails.rewardAccountInfo },
+        pendingActivities: { [mockAccountId]: [{}] },
+      });
+
+      pressDelegateVote();
+
+      expect(mockNavigate).toHaveBeenCalledWith(SheetRoutes.BrowseDRep, {
+        accountId: mockAccountId,
+      });
+    });
+  });
+
   describe('common props', () => {
     it('should return pool metadata', () => {
       const { result } = renderHook(() =>
@@ -263,6 +402,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'testnet';
+        }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
         }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };
@@ -381,6 +523,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
+        }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };
         }
@@ -416,6 +561,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
+        }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
         }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };
@@ -453,6 +601,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
+        }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };
         }
@@ -486,6 +637,9 @@ describe('useStakingIssueSheet', () => {
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
         }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
+        }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };
         }
@@ -510,6 +664,9 @@ describe('useStakingIssueSheet', () => {
         }
         if (selector === 'network.selectNetworkType') {
           return 'mainnet';
+        }
+        if (selector === 'tokens.selectAggregatedFungibleTokensByAccountId') {
+          return fundedAdaTokens;
         }
         if (selector === 'features.selectLoadedFeatures') {
           return { featureFlags: [], modules: [] };

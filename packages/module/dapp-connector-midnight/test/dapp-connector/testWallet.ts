@@ -1,4 +1,4 @@
-import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { vi } from 'vitest';
 
 import type {

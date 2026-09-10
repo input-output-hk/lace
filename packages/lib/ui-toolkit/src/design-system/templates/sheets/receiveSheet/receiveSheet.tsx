@@ -2,7 +2,6 @@ import { useTranslation } from '@lace-contract/i18n';
 import React, { useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 
-import { footerHeight, Sheet } from '../../..';
 import { spacing } from '../../../../design-tokens';
 import {
   Button,
@@ -14,7 +13,13 @@ import {
   Box,
   Divider,
 } from '../../../atoms';
-import { DropdownMenu, Tabs } from '../../../molecules';
+import { DropdownMenu, EmptyStateMessage, Tabs } from '../../../molecules';
+// Sheet/footerHeight live in organisms/sheet, not the package root barrel —
+// importing from '../../..' (design-system/index.ts) here closed a require
+// cycle back through templates -> sheets -> this file (design-system/index.ts
+// -> ... -> receiveSheet.tsx -> design-system/index.ts), which Metro/Hermes
+// has to untangle on every cold start.
+import { footerHeight, Sheet } from '../../../organisms';
 
 import type { Theme } from '../../../../design-tokens';
 import type { AvatarContent } from '../../../../utils/avatarUtils';
@@ -52,7 +57,9 @@ export const getCurrentReceiveAddress = (
 };
 
 interface ReceiveSheetTemplateProps {
-  addressData: ReceiveSheetAddressData;
+  /** Omitted when the selected account has no discovered address; the account
+   *  dropdown still renders so the user can switch to a healthy account. */
+  addressData?: ReceiveSheetAddressData;
   accountName: string;
   index: number;
   items: DropdownItem[];
@@ -98,12 +105,16 @@ export const ReceiveSheet = ({
   const tagColor = isDarkMode ? 'black' : 'white';
 
   const tabbedItems = useMemo(
-    () => (isTabbedAddressData(addressData) ? addressData : undefined),
+    () =>
+      addressData && isTabbedAddressData(addressData) ? addressData : undefined,
     [addressData],
   );
 
   const currentAddress = useMemo(
-    () => getCurrentReceiveAddress(addressData, selectedAddressTabIndex),
+    () =>
+      addressData
+        ? getCurrentReceiveAddress(addressData, selectedAddressTabIndex)
+        : undefined,
     [addressData, selectedAddressTabIndex],
   );
 
@@ -114,14 +125,14 @@ export const ReceiveSheet = ({
       .map(entry => entry.alias);
   }, [currentAddress, aliasEntries]);
 
-  const addressInfo = getAddressInfo?.(currentAddress);
+  const addressInfo = currentAddress && getAddressInfo?.(currentAddress);
 
   return (
     <Sheet.Scroll style={styles.container}>
       <DropdownMenu
         title={accountName}
         items={items}
-        selectedItemId={selectedItem.id}
+        selectedItemId={selectedItem?.id}
         onSelectItem={onSelectItem}
         titleAvatar={{
           fallback,
@@ -131,57 +142,68 @@ export const ReceiveSheet = ({
       />
       {belowAccountSlot}
 
-      <Column alignItems="center" gap={spacing.M} style={styles.contentWrapper}>
-        <QrCode
-          data={currentAddress.address}
-          chainType={currentAddress.blockchainName}
-          backgroundColor={qrCodeBgColor}
-          testID="receive-sheet-qr-code"
-          logoSize={60}
-        />
+      {currentAddress ? (
+        <Column
+          alignItems="center"
+          gap={spacing.M}
+          style={styles.contentWrapper}>
+          <QrCode
+            data={currentAddress.address}
+            chainType={currentAddress.blockchainName}
+            backgroundColor={qrCodeBgColor}
+            testID="receive-sheet-qr-code"
+            logoSize={60}
+          />
 
-        {tabbedItems && tabbedItems.length > 0 && (
-          <Box style={styles.tabsContainer}>
-            <Tabs
-              tabs={tabbedItems.map(item => t(item.key))}
-              selectedTab={t(tabbedItems[selectedAddressTabIndex]?.key ?? '')}
-              onSelectTab={onSelectAddressTab}
-            />
-          </Box>
-        )}
-
-        <Text.XS
-          align="center"
-          style={styles.address}
-          testID="receive-sheet-address">
-          {currentAddress.address}
-        </Text.XS>
-
-        {aliases && aliases.length > 0 && (
-          <Row gap={spacing.S} style={styles.aliases}>
-            {aliases.map(alias => (
-              <CustomTag
-                key={alias}
-                size="S"
-                label={alias}
-                color={tagColor}
-                backgroundType="colored"
-                testID="receive-sheet-alias"
+          {tabbedItems && tabbedItems.length > 0 && (
+            <Box style={styles.tabsContainer}>
+              <Tabs
+                tabs={tabbedItems.map(item => t(item.key))}
+                selectedTab={t(tabbedItems[selectedAddressTabIndex]?.key ?? '')}
+                onSelectTab={onSelectAddressTab}
               />
-            ))}
-          </Row>
-        )}
+            </Box>
+          )}
 
-        <Button.Secondary
-          label={copyAddressText}
-          onPress={() => {
-            onCopyAddressPress(currentAddress.address);
-          }}
-          preIconName="Copy"
-          iconColor={theme.text.primary}
-          testID="receive-sheet-copy-address-button"
+          <Text.XS
+            align="center"
+            style={styles.address}
+            testID="receive-sheet-address">
+            {currentAddress.address}
+          </Text.XS>
+
+          {aliases && aliases.length > 0 && (
+            <Row gap={spacing.S} style={styles.aliases}>
+              {aliases.map(alias => (
+                <CustomTag
+                  key={alias}
+                  size="S"
+                  label={alias}
+                  color={tagColor}
+                  backgroundType="colored"
+                  testID="receive-sheet-alias"
+                />
+              ))}
+            </Row>
+          )}
+
+          <Button.Secondary
+            label={copyAddressText}
+            onPress={() => {
+              onCopyAddressPress(currentAddress.address);
+            }}
+            preIconName="Copy"
+            iconColor={theme.text.primary}
+            testID="receive-sheet-copy-address-button"
+          />
+        </Column>
+      ) : (
+        <EmptyStateMessage
+          message={t('v2.sheets.receive.no-address')}
+          style={styles.contentWrapper}
+          testID="receive-sheet-empty-state"
         />
-      </Column>
+      )}
 
       {addressInfo && (
         <>

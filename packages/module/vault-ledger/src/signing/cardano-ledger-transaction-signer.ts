@@ -1,7 +1,11 @@
 import { Serialization } from '@cardano-sdk/core';
 import { SodiumBip32Ed25519 } from '@cardano-sdk/crypto';
 import { util } from '@cardano-sdk/key-management';
-import { createInputResolver } from '@lace-contract/cardano-context';
+import {
+  applyVkeyWitnesses,
+  createInputResolver,
+  getScriptOnlyKeyPaths,
+} from '@lace-contract/cardano-context';
 import { HexBytes } from '@lace-lib/util';
 import { from } from 'rxjs';
 import { dummyLogger } from 'ts-log';
@@ -48,6 +52,31 @@ export class CardanoLedgerTransactionSigner
   }
 
   async #signTransaction(serializedTx: HexBytes): Promise<CardanoSignResult> {
+    const tx = Serialization.Transaction.fromCbor(
+      Serialization.TxCBOR(serializedTx),
+    );
+    const coreBody = tx.body().toCore();
+
+    const txInKeyPathMap = await util.createTxInKeyPathMap(
+      coreBody,
+      this.#props.knownAddresses,
+      createInputResolver(this.#props.utxo),
+    );
+
+    const scriptOnlyKeyPaths = getScriptOnlyKeyPaths({
+      txBody: coreBody,
+      knownAddresses: this.#props.knownAddresses,
+      txInKeyPathMap,
+      scripts: tx.toCore().witness.scripts,
+    });
+    if (scriptOnlyKeyPaths.length > 0) {
+      throw new Error(
+        `Ledger cannot witness keys required only by the transaction's native scripts: ${scriptOnlyKeyPaths
+          .map(({ role, index }) => `role ${role} index ${index}`)
+          .join(', ')}`,
+      );
+    }
+
     const bip32Ed25519 = await SodiumBip32Ed25519.create();
     const descriptor = await resolveLedgerDeviceDescriptor(
       this.#props.wallet.walletId,
@@ -63,16 +92,6 @@ export class CardanoLedgerTransactionSigner
       { bip32Ed25519, logger: dummyLogger },
     );
 
-    const tx = Serialization.Transaction.fromCbor(
-      Serialization.TxCBOR(serializedTx),
-    );
-
-    const txInKeyPathMap = await util.createTxInKeyPathMap(
-      tx.body().toCore(),
-      this.#props.knownAddresses,
-      createInputResolver(this.#props.utxo),
-    );
-
     try {
       const signatures = await keyAgent.signTransaction(tx.body(), {
         knownAddresses: this.#props.knownAddresses,
@@ -80,14 +99,7 @@ export class CardanoLedgerTransactionSigner
       });
 
       const witnessSet = tx.witnessSet();
-      witnessSet.setVkeys(
-        Serialization.CborSet.fromCore(
-          [...signatures.entries()] as Parameters<
-            typeof Serialization.VkeyWitness.fromCore
-          >[0][],
-          Serialization.VkeyWitness.fromCore,
-        ),
-      );
+      applyVkeyWitnesses(witnessSet, signatures);
 
       const signedTx = new Serialization.Transaction(
         tx.body(),

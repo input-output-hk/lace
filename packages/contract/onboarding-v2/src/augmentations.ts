@@ -4,6 +4,7 @@ import type {
   HwWalletConnector,
   HwAccountConnector,
   OnboardingConfig,
+  OnboardingEntryUICustomisation,
   OnboardingOption,
   OnboardingStartWalletDropdownUICustomisation,
 } from './types';
@@ -27,6 +28,7 @@ declare module '@lace-contract/module' {
       HwBlockchainSupport[]
     >;
     readonly loadOnboardingStartWalletDropdownUICustomisations: DynamicallyLoadedInit<OnboardingStartWalletDropdownUICustomisation>;
+    readonly loadOnboardingEntryUICustomisations: DynamicallyLoadedInit<OnboardingEntryUICustomisation>;
     readonly loadOnboardingConfig: DynamicallyLoadedInit<OnboardingConfig>;
   }
 

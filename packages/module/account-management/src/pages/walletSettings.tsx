@@ -1,7 +1,7 @@
 import { useUICustomisation } from '@lace-contract/app';
 import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-context';
 import { useTranslation } from '@lace-contract/i18n';
-import { WalletId, WalletType } from '@lace-contract/wallet-repo';
+import { WalletType } from '@lace-contract/wallet-repo';
 import {
   NavigationControls,
   SheetRoutes,
@@ -11,6 +11,7 @@ import {
   Button,
   getIsWideLayout,
   Icon,
+  Loader,
   Modal,
   PageContainerTemplate,
   PageHeader,
@@ -28,7 +29,12 @@ import {
   View,
 } from 'react-native';
 
-import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import { isVaultCapabilityEnabled } from '../capability-gating';
+import {
+  useDispatchLaceAction,
+  useLaceSelector,
+  useLoadModules,
+} from '../hooks';
 
 import type { WalletSettingsItem } from '@lace-contract/account-management';
 import type { InMemoryWallet } from '@lace-contract/wallet-repo';
@@ -95,11 +101,13 @@ export const WalletSettings = ({
     });
   }, [walletId]);
 
+  const requestRenameWalletCeremony = useDispatchLaceAction(
+    'vault.renameWalletCeremonyRequested',
+  );
+
   const handleEditWallet = useCallback(() => {
-    NavigationControls.navigate(SheetRoutes.EditWallet, {
-      walletId: walletId,
-    });
-  }, [navigation, walletId]);
+    requestRenameWalletCeremony({ walletId });
+  }, [requestRenameWalletCeremony, walletId]);
 
   const openRemoveWalletModal = useCallback(() => {
     setIsRemoveModalVisible(true);
@@ -109,29 +117,44 @@ export const WalletSettings = ({
     setIsRemoveModalVisible(false);
   }, []);
 
-  const attemptRemoveWallet = useDispatchLaceAction(
-    'accountManagement.attemptRemoveWallet',
+  const requestRemoveWalletCeremony = useDispatchLaceAction(
+    'vault.removeWalletCeremonyRequested',
   );
 
   const handleConfirmRemoveWallet = useCallback(() => {
     setIsRemoveModalVisible(false);
-    attemptRemoveWallet({
-      walletId: WalletId(walletId),
-      authenticationPromptConfig: {
-        cancellable: true,
-        confirmButtonLabel:
-          'authentication-prompt.confirm-button-label.remove-wallet',
-        message: 'authentication-prompt.message.remove-wallet',
-      },
-    });
-  }, [attemptRemoveWallet, walletId]);
+    requestRemoveWalletCeremony({ walletId });
+  }, [requestRemoveWalletCeremony, walletId]);
+
+  const requestAddAccountCeremony = useDispatchLaceAction(
+    'vault.addAccountCeremonyRequested',
+  );
+  // `undefined` until the capabilities promise resolves (ADR 52), so the entry
+  // appears when it lands rather than flashing an entry the arm cannot serve.
+  const vaultCapabilities = useLoadModules('addons.loadVaultCapabilities')?.[0];
+  const canAddAccount = isVaultCapabilityEnabled(
+    vaultCapabilities,
+    'addAccount',
+  );
 
   const handleNavigateToAddAccount = useCallback(() => {
-    NavigationControls.navigate(SheetRoutes.AddAccount, {
-      walletId: walletId,
-      hasNestedScrolling: true,
-    });
-  }, [walletId]);
+    requestAddAccountCeremony({ walletId });
+  }, [requestAddAccountCeremony, walletId]);
+
+  // On the shell host every ceremony here waits on a host surface mount —
+  // seconds on a cold service worker, and the remove flow closes its modal
+  // first, so without this the page looks inert. The host mounts one surface at
+  // a time, so any pending launch locks all three entries; only the pressed one
+  // shows a spinner.
+  const pendingCeremony = useLaceSelector('vault.selectPendingCeremony');
+  const isCeremonyPending = pendingCeremony !== null;
+  const isPendingForThisWallet = pendingCeremony?.walletId === walletId;
+  const isRenamePending =
+    isPendingForThisWallet && pendingCeremony?.ceremony === 'rename';
+  const isRemoveWalletPending =
+    isPendingForThisWallet && pendingCeremony?.ceremony === 'remove-wallet';
+  const isAddAccountPending =
+    isPendingForThisWallet && pendingCeremony?.ceremony === 'add-account';
 
   const accountsCount = useLaceSelector(
     'wallets.selectActiveNetworkAccountCountByWalletId',
@@ -201,9 +224,15 @@ export const WalletSettings = ({
               key="customise-wallet"
               testID="wallet-settings-customise-wallet"
               title={t('v2.wallet-settings.customise-wallet.title')}
-              rightNode={<Icon name="CaretRight" />}
+              rightNode={
+                isRenamePending ? (
+                  <Loader size={20} />
+                ) : (
+                  <Icon name="CaretRight" />
+                )
+              }
               quickActions={{
-                onCardPress: handleEditWallet,
+                onCardPress: isCeremonyPending ? undefined : handleEditWallet,
               }}
               isCritical={false}
               iconWrapperStyle={{}}
@@ -236,24 +265,46 @@ export const WalletSettings = ({
       openRemoveWalletModal,
       handleRecheckWalletKeys,
       isSecurityAlertsEnabled,
+      isCeremonyPending,
+      isRenamePending,
     ],
   );
 
   // Get settings list from customisations or use default
   const settingsList = useMemo((): WalletSettingsItem[] => {
-    const firstCustomisation = walletSettingsCustomisations[0];
-    let customSettings: WalletSettingsItem[] = [];
+    // EVERY matching customisation contributes, in registration order — more
+    // than one module can add rows for the same wallet type (e.g. the vault's
+    // recovery-phrase entry plus migrate-wallet's). Taking only the first
+    // silently dropped every later contributor.
+    let customSettings: WalletSettingsItem[] =
+      walletSettingsCustomisations.flatMap(customisation =>
+        'settings' in customisation ? customisation.settings || [] : [],
+      );
 
-    if (firstCustomisation && 'settings' in firstCustomisation) {
-      customSettings = firstCustomisation.settings || [];
-    } else {
-      // Default settings for wallet types without customisations
-      customSettings = [
-        'customise-wallet',
-        'wallet-security-check',
-        'remove-wallet',
-      ];
+    // The defaults stand in for the CORE rows, not for "no rows at all": a
+    // module contributing one additive row (e.g. migrate-wallet) must not cost
+    // a wallet type its customise and security-check rows just by matching.
+    const DEFAULT_SETTINGS: WalletSettingsItem[] = [
+      'customise-wallet',
+      'wallet-security-check',
+      'remove-wallet',
+    ];
+    const hasCoreSettings = customSettings.some(
+      item =>
+        (typeof item === 'string' ? item : item.id) === 'customise-wallet',
+    );
+    if (!hasCoreSettings) {
+      customSettings = [...DEFAULT_SETTINGS, ...customSettings];
     }
+
+    // The destructive action stays last no matter which contributor's rows
+    // merged in after it.
+    const settingId = (item: WalletSettingsItem) =>
+      typeof item === 'string' ? item : item.id;
+    customSettings = [
+      ...customSettings.filter(item => settingId(item) !== 'remove-wallet'),
+      ...customSettings.filter(item => settingId(item) === 'remove-wallet'),
+    ];
 
     // Filter out show-recovery-phrase if passphrase is not confirmed
     if (
@@ -299,26 +350,33 @@ export const WalletSettings = ({
               compact
             />
           </View>
-          <View style={defaultStyles.pageHeaderButtonContainer}>
-            <Button.Primary
-              size="small"
-              iconSize={18}
-              preIconName="Plus"
-              iconColor={theme.brand.white}
-              label={t('v2.wallet-settings.add-account')}
-              onPress={handleNavigateToAddAccount}
-              testID="wallet-settings-add-account-button"
-            />
-          </View>
+          {canAddAccount ? (
+            <View style={defaultStyles.pageHeaderButtonContainer}>
+              <Button.Primary
+                size="small"
+                iconSize={18}
+                preIconName="Plus"
+                iconColor={theme.brand.white}
+                label={t('v2.wallet-settings.add-account')}
+                onPress={handleNavigateToAddAccount}
+                disabled={isCeremonyPending}
+                loading={isAddAccountPending}
+                testID="wallet-settings-add-account-button"
+              />
+            </View>
+          ) : null}
         </Row>
       </View>
     ),
     [
       walletName,
       accountsSubtitle,
+      canAddAccount,
       handleGoBack,
       t,
       handleNavigateToAddAccount,
+      isAddAccountPending,
+      isCeremonyPending,
       theme,
       defaultStyles,
     ],
@@ -367,6 +425,8 @@ export const WalletSettings = ({
               iconColor={theme.brand.white}
               label={t('v2.wallet-settings.delete')}
               onPress={openRemoveWalletModal}
+              disabled={isCeremonyPending}
+              loading={isRemoveWalletPending}
               testID="wallet-settings-delete-button"
             />
           </View>

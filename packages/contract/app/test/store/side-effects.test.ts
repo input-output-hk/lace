@@ -4,7 +4,7 @@ import { type Features } from '@lace-contract/feature';
 import { ViewId } from '@lace-contract/module';
 import { viewsActions } from '@lace-contract/views';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { EMPTY, Subject, throwError } from 'rxjs';
+import { EMPTY, of, Subject, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -120,7 +120,11 @@ describe('Side Effects', () => {
       testSideEffect(performAppReload, ({ flush }) => ({
         actionObservables: { app: { reloadApplication$ } },
         stateObservables: {},
-        dependencies: { performAppReload: doReload, logger: dummyLogger },
+        dependencies: {
+          performAppReload: doReload,
+          flushPersistedState: () => of(undefined),
+          logger: dummyLogger,
+        },
         assertion: sideEffect$ => {
           sideEffect$.subscribe();
           flush();
@@ -147,7 +151,11 @@ describe('Side Effects', () => {
       testSideEffect(performAppReload, ({ flush }) => ({
         actionObservables: { app: { reloadApplication$ } },
         stateObservables: {},
-        dependencies: { performAppReload: doReload, logger: dummyLogger },
+        dependencies: {
+          performAppReload: doReload,
+          flushPersistedState: () => of(undefined),
+          logger: dummyLogger,
+        },
         assertion: sideEffect$ => {
           sideEffect$.subscribe();
           flush();
@@ -156,6 +164,66 @@ describe('Side Effects', () => {
           reloadApplication$.next(actions.app.reloadApplication());
 
           expect(doReload).toHaveBeenCalledTimes(2);
+        },
+      }));
+    });
+
+    it('withholds the reload until the flush emits', () => {
+      const reloadApplication$ = new Subject<
+        ReturnType<typeof actions.app.reloadApplication>
+      >();
+      // A controllable flush (not a synchronous `of()`): a same-tick stub
+      // can't distinguish "reload awaits the flush" from "reload fires anyway".
+      const flushSubject = new Subject<void>();
+      const flushPersistedState = vi.fn(() => flushSubject.asObservable());
+      const doReload = vi.fn(() => EMPTY);
+
+      testSideEffect(performAppReload, ({ flush }) => ({
+        actionObservables: { app: { reloadApplication$ } },
+        stateObservables: {},
+        dependencies: {
+          performAppReload: doReload,
+          flushPersistedState,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          reloadApplication$.next(actions.app.reloadApplication());
+          expect(flushPersistedState).toHaveBeenCalledTimes(1);
+          expect(doReload).not.toHaveBeenCalled();
+
+          flushSubject.next();
+          expect(doReload).toHaveBeenCalledTimes(1);
+        },
+      }));
+    });
+
+    it('still reloads when flushing persisted state fails', () => {
+      const reloadApplication$ = new Subject<
+        ReturnType<typeof actions.app.reloadApplication>
+      >();
+      const doReload = vi.fn(() => EMPTY);
+      const flushPersistedState = vi.fn(() =>
+        throwError(() => new Error('flush failed')),
+      );
+
+      testSideEffect(performAppReload, ({ flush }) => ({
+        actionObservables: { app: { reloadApplication$ } },
+        stateObservables: {},
+        dependencies: {
+          performAppReload: doReload,
+          flushPersistedState,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          sideEffect$.subscribe();
+          flush();
+
+          reloadApplication$.next(actions.app.reloadApplication());
+
+          expect(doReload).toHaveBeenCalledTimes(1);
         },
       }));
     });

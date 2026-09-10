@@ -3,7 +3,7 @@ import {
   MidnightBech32m,
   ShieldedAddress,
   UnshieldedAddress,
-} from '@midnight-ntwrk/wallet-sdk-address-format';
+} from '@midnightntwrk/wallet-sdk-address-format';
 
 import type { MidnightSDKNetworkId } from './const';
 import type { MidnightAddressKind } from './types';

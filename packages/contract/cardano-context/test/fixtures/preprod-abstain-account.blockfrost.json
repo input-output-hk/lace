@@ -1,0 +1,14 @@
+{
+  "stake_address": "stake_test1uzzt3l4w5u5h5ulyflj25p8kyp6devdnz23nn9cja0q5t8stjh5gw",
+  "active": true,
+  "registered": true,
+  "active_epoch": 301,
+  "controlled_amount": "0",
+  "rewards_sum": "0",
+  "withdrawals_sum": "0",
+  "reserves_sum": "0",
+  "treasury_sum": "0",
+  "drep_id": "drep_always_abstain",
+  "withdrawable_amount": "0",
+  "pool_id": "pool1wn6a6f23ctq06udwhw27ravdpd6zcr7jlut3yez0wzdackz3222"
+}

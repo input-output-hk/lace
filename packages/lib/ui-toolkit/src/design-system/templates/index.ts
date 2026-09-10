@@ -1,5 +1,6 @@
 export * from './base';
 export * from './claimCenter';
+export * from './lock/lockScreen';
 export * from './onboarding';
 export * from './sheets';
 export * from './optionList';

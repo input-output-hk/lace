@@ -1,6 +1,8 @@
 import {
   CardanoUtxoFetchFailureId,
+  extractOwnedPaymentCredentials,
   extractUniqueStakeKeys,
+  filterFrankenUtxos,
   getTopOnChainActivity,
   groupCardanoAddressesByAccount,
   isCardanoAccount,
@@ -24,15 +26,12 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
-import {
-  extractOwnedPaymentCredentials,
-  filterFrankenUtxos,
-} from '../helpers/filter-franken-utxos';
-
 import type { CardanoSyncAction, SideEffect } from '../..';
 import type { Cardano } from '@cardano-sdk/core';
+import type { Activity } from '@lace-contract/activities';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
+  CardanoActivityUtxoMetadata,
   CardanoAddressData,
   CardanoRewardAccount as CardanoRewardAccountType,
   TopOnChainActivity,
@@ -46,6 +45,8 @@ type FetchParams = {
   stakeKeys: CardanoRewardAccountType[];
   cacheKey: UtxoCacheKey;
   topActivity: TopOnChainActivity | undefined;
+  /** See {@link unspentAnchorOutpoints}. */
+  unspentAnchorOwnOutpoints: readonly Cardano.TxIn[];
   tip: Cardano.Tip | undefined;
 };
 
@@ -62,12 +63,139 @@ const NO_ACTIVITY_CACHE_KEY_SENTINEL = 'no-activity';
 const utxoKey = (utxo: Cardano.Utxo): string =>
   `${utxo[0].txId}#${utxo[0].index}`;
 
+const outpointKey = (outpoint: Cardano.TxIn): string =>
+  `${outpoint.txId}#${outpoint.index}`;
+
+/**
+ * The anchor's own outpoints that no loaded activity is known to have spent.
+ * An outpoint a newer transaction consumed is legitimately absent from a
+ * settled fetch — a same-block sibling that wins the timestamp-tie sort, or
+ * the next spend — so it cannot stand as evidence that a provider is behind.
+ *
+ * Evidence-based, so it under-subtracts: an activity carrying no
+ * `consumedInputs` reports nothing spent. Pending rows written without
+ * blockchain metadata (the staking and earn-rewards flows do this) therefore
+ * do not disarm the proof until their confirmed activity maps, which is what
+ * bounds the withhold rather than the pending row.
+ */
+const unspentAnchorOutpoints = (
+  topActivity: TopOnChainActivity | undefined,
+  accountActivities: Activity[] | undefined,
+): readonly Cardano.TxIn[] => {
+  const produced = topActivity?.producedOwnOutpoints ?? [];
+  if (produced.length === 0) return produced;
+  const spentByLoaded = new Set(
+    (accountActivities ?? []).flatMap(activity =>
+      (
+        (
+          activity.blockchainSpecific as
+            | { Cardano?: CardanoActivityUtxoMetadata }
+            | undefined
+        )?.Cardano?.consumedInputs ?? []
+      ).map(outpointKey),
+    ),
+  );
+  return produced.filter(outpoint => !spentByLoaded.has(outpointKey(outpoint)));
+};
+
 /** Order-insensitive equality by outpoint (`txId#index`). */
 const utxoSetsEqual = (a: Cardano.Utxo[], b: Cardano.Utxo[]): boolean => {
   if (a.length !== b.length) return false;
   const aKeys = new Set(a.map(utxoKey));
   for (const utxo of b) if (!aKeys.has(utxoKey(utxo))) return false;
   return true;
+};
+
+/**
+ * Whether this fetch's result can be taken as the settled state for `cacheKey`,
+ * which is what advancing the persisted key asserts. Advancing closes the gate:
+ * from then on the computed key equals the persisted one, so nothing refetches
+ * until the account's next transaction moves the anchor again.
+ *
+ * `false` keeps the key behind and lets the tip-driven trigger re-verify.
+ *
+ * The rules below rank, and the two proofs are deliberately asymmetric — see
+ * `packages/module/cardano-sync/docs/utxo-cache-key.md` before changing them.
+ */
+const canTrustFetchAsSettled = ({
+  isRetry,
+  utxos,
+  storedEntry,
+  persistedKey,
+  cacheKey,
+  topActivity,
+  unspentAnchorOwnOutpoints,
+  tip,
+}: {
+  /** A manual retry deliberately bypasses every gate below. */
+  isRetry: boolean;
+  utxos: Cardano.Utxo[];
+  storedEntry: Cardano.Utxo[] | undefined;
+  persistedKey: UtxoCacheKey | undefined;
+  cacheKey: UtxoCacheKey;
+  topActivity: TopOnChainActivity | undefined;
+  /** See {@link unspentAnchorOutpoints}. */
+  unspentAnchorOwnOutpoints: readonly Cardano.TxIn[];
+  tip: Cardano.Tip | undefined;
+}): boolean => {
+  // The provider just handed back an outpoint the anchoring transaction spent.
+  // That is not a settled set — it is a set from before that transaction, so
+  // accepting it as settled freezes it: the persisted key would equal the
+  // computed one, and nothing refetches until the account's next transaction
+  // moves the anchor. For an account emptied and then abandoned that never
+  // comes, and the pre-spend balance stands forever.
+  //
+  // Checked against the outpoints, not the activity's type. Type would be a
+  // guess: the mapper labels by net balance (`summary.coins > 0 ? Receive :
+  // Send`), so a transaction that spends this account's UTxOs but nets positive
+  // reads as `Receive`. An overlap is proof, and it needs no ownership
+  // resolution — `utxos` holds only this account's UTxOs, so intersecting is
+  // already scoped to ours.
+  //
+  // Self-clearing, so it cannot loop: the overlap disappears as soon as the
+  // provider applies the transaction, and then the changed set advances the key
+  // on the first branch below. An empty `consumedInputs` means unknown, and
+  // falls through to the confirmation-depth rule exactly as before.
+  const fetchedOutpoints = new Set(utxos.map(utxoKey));
+  const isStaleReadOfSpentOutpoint = (topActivity?.consumedInputs ?? []).some(
+    input => fetchedOutpoints.has(`${input.txId}#${input.index}`),
+  );
+  if (isStaleReadOfSpentOutpoint) return false;
+
+  // The receive mirror: a settled set must contain the anchor's own outpoints
+  // that nothing loaded has re-spent — ALL absent proves a pre-receive read.
+  // NONE-present, not some-missing: one present proves the tx was applied,
+  // and a partially-served multi-stake-key fetch must not read as staleness.
+  // Empty carries no evidence and falls through, exactly as consumedInputs.
+  const isStaleReadOfMissingProducedOutput =
+    unspentAnchorOwnOutpoints.length > 0 &&
+    !unspentAnchorOwnOutpoints.some(outpoint =>
+      fetchedOutpoints.has(outpointKey(outpoint)),
+    );
+  if (isStaleReadOfMissingProducedOutput) return false;
+
+  // Checked AFTER both proofs above, deliberately: proof outranks intent. A
+  // manual retry exists to get past a fetch failure, not to accept a
+  // demonstrably stale set — and the provider that just recovered may still be
+  // serving one. Withholding costs the retry nothing: the UTxOs are still written, the
+  // failure still auto-dismisses, and the tip-driven trigger keeps re-verifying.
+  if (isRetry) return true;
+
+  const hasUtxosChanged =
+    storedEntry === undefined || !utxoSetsEqual(utxos, storedEntry);
+  // Same activity id, different key: only ownership widened (address discovery
+  // / new stake keys). The set was just re-verified under that wider ownership
+  // — withholding here waits for a provider catch-up that is not pending, and
+  // can strand address-count-gated consumers with no tip movement.
+  const isOwnershipOnlyAdvance =
+    UtxoCacheKey.topOnChainActivityId(persistedKey) ===
+    UtxoCacheKey.topOnChainActivityId(cacheKey);
+
+  return (
+    hasUtxosChanged ||
+    isTipBeyondConfirmationDepth(topActivity, tip) ||
+    isOwnershipOnlyAdvance
+  );
 };
 
 const isTipBeyondConfirmationDepth = (
@@ -117,11 +245,16 @@ const isTipBeyondConfirmationDepth = (
  * Cache key advancement (per fetch):
  * - The UTxOs are dispatched on every successful fetch.
  * - The persisted cacheKey is advanced (via `setLastFetchedUtxoCacheKey`)
- *   only when either the just-fetched UTxO set differs from what we had
- *   stored, or the tip is at least `UTXO_SYNC_CONFIRMATION_DEPTH` slots
- *   beyond the anchoring activity's slot. While neither holds, the cacheKey
- *   stays behind and the natural trigger keeps re-fetching as the tip
- *   advances — this is what unblocks the indexer-lag stall.
+ *   when the just-fetched UTxO set differs from what we had stored, when the
+ *   tip is at least `UTXO_SYNC_CONFIRMATION_DEPTH` slots beyond the anchoring
+ *   activity's slot, or when the key moved on ownership alone (same activity
+ *   id: address discovery / stake keys widened) — that fetch re-verified the
+ *   set under the wider ownership, and nothing newer is awaited from the
+ *   provider, so withholding the key would strand consumers that wait for it
+ *   to cover the live address count (with no tip movement, forever). While
+ *   none holds, the cacheKey stays behind and the natural trigger keeps
+ *   re-fetching as the tip advances — this is what unblocks the indexer-lag
+ *   stall.
  *
  * Manual retry trigger:
  * - On `retrySyncRound` dispatches, refetches only accounts that currently
@@ -164,33 +297,52 @@ export const trackAccountUtxos: SideEffect = (
 
           const naturalTrigger$: Observable<FetchParams> = combineLatest([
             selectAllMap$.pipe(
-              map(activitiesByAccount =>
-                getTopOnChainActivity(activitiesByAccount, accountId),
-              ),
+              map(activitiesByAccount => {
+                const topActivity = getTopOnChainActivity(
+                  activitiesByAccount,
+                  accountId,
+                );
+                return {
+                  topActivity,
+                  unspentAnchorOwnOutpoints: unspentAnchorOutpoints(
+                    topActivity,
+                    activitiesByAccount[accountId],
+                  ),
+                };
+              }),
             ),
             selectAllAddresses$,
             selectTip$,
           ]).pipe(
-            map(([topActivity, allAddresses, tip]) => {
+            map(([anchor, allAddresses, tip]) => {
               const accountAddresses = computeAccountAddresses(allAddresses);
               const stakeKeys = extractUniqueStakeKeys(accountAddresses);
-              return { topActivity, accountAddresses, stakeKeys, tip };
+              return { ...anchor, accountAddresses, stakeKeys, tip };
             }),
             // Not gated on `topActivity` — fetch once addresses + stake keys
             // exist (see the bootstrap note in the JSDoc above).
             filter(p => p.stakeKeys.length > 0),
-            map(({ accountAddresses, stakeKeys, topActivity, tip }) => ({
-              accountAddresses,
-              stakeKeys,
-              topActivity,
-              tip,
-              cacheKey: UtxoCacheKey({
-                topOnChainActivityId:
-                  topActivity?.activityId ?? NO_ACTIVITY_CACHE_KEY_SENTINEL,
+            map(
+              ({
+                accountAddresses,
                 stakeKeys,
-                accountAddressCount: accountAddresses.length,
+                topActivity,
+                unspentAnchorOwnOutpoints,
+                tip,
+              }) => ({
+                accountAddresses,
+                stakeKeys,
+                topActivity,
+                unspentAnchorOwnOutpoints,
+                tip,
+                cacheKey: UtxoCacheKey({
+                  topOnChainActivityId:
+                    topActivity?.activityId ?? NO_ACTIVITY_CACHE_KEY_SENTINEL,
+                  stakeKeys,
+                  accountAddressCount: accountAddresses.length,
+                }),
               }),
-            })),
+            ),
             distinctUntilChanged(
               (a, b) =>
                 a.cacheKey === b.cacheKey && a.tip?.slot === b.tip?.slot,
@@ -228,6 +380,10 @@ export const trackAccountUtxos: SideEffect = (
                   accountAddresses,
                   stakeKeys,
                   topActivity,
+                  unspentAnchorOwnOutpoints: unspentAnchorOutpoints(
+                    topActivity,
+                    activitiesByAccount[accountId],
+                  ),
                   tip,
                   cacheKey: UtxoCacheKey({
                     topOnChainActivityId:
@@ -255,6 +411,7 @@ export const trackAccountUtxos: SideEffect = (
                 stakeKeys,
                 cacheKey,
                 topActivity,
+                unspentAnchorOwnOutpoints,
                 tip,
               } = params;
               return forkJoin(
@@ -276,18 +433,21 @@ export const trackAccountUtxos: SideEffect = (
                     accountId,
                   }),
                 ),
-                withLatestFrom(selectAccountUtxos$),
-                mergeMap(([utxos, storedUtxosByAccount]) => {
-                  const storedEntry = storedUtxosByAccount[accountId];
-                  const hasUtxosChanged =
-                    storedEntry === undefined ||
-                    !utxoSetsEqual(utxos, storedEntry);
-                  const isTipBeyondDepth = isTipBeyondConfirmationDepth(
+                withLatestFrom(
+                  selectAccountUtxos$,
+                  selectLastFetchedUtxoCacheKeyByAccount$,
+                ),
+                mergeMap(([utxos, storedUtxosByAccount, persistedKeys]) => {
+                  const shouldAdvanceCacheKey = canTrustFetchAsSettled({
+                    isRetry,
+                    utxos,
+                    storedEntry: storedUtxosByAccount[accountId],
+                    persistedKey: persistedKeys[accountId],
+                    cacheKey,
                     topActivity,
+                    unspentAnchorOwnOutpoints,
                     tip,
-                  );
-                  const shouldAdvanceCacheKey =
-                    isRetry || hasUtxosChanged || isTipBeyondDepth;
+                  });
 
                   const emissions: Observable<CardanoSyncAction>[] = [
                     of(
@@ -314,15 +474,19 @@ export const trackAccountUtxos: SideEffect = (
                   );
                   return rxMerge(...emissions);
                 }),
-                catchError(() =>
-                  of(
+                catchError(error => {
+                  logger.error(
+                    `Utxo fetch failed for account ${accountId}`,
+                    error,
+                  );
+                  return of(
                     actions.failures.addFailure({
                       failureId: CardanoUtxoFetchFailureId(accountId),
                       message:
                         'sync.error.cardano-utxo-fetch-failed' as TranslationKey,
                     }),
-                  ),
-                ),
+                  );
+                }),
               );
             }),
           );

@@ -25,7 +25,8 @@ const constructSentryConnectSource = dsn => {
 };
 
 const dedupeOrigins = urls =>
-  [...new Set(urls.map(u => new URL(u).origin))].join(' ');
+  // Skip blanks: provider URLs default to empty (see ADR 40); new URL('') throws.
+  [...new Set(urls.filter(Boolean).map(u => new URL(u).origin))].join(' ');
 
 const transformManifest = (content, mode) => {
   const path = require('node:path');
@@ -46,7 +47,10 @@ const transformManifest = (content, mode) => {
       manifest.content_security_policy.extension_pages
         .replace(
           '$CARDANO_SERVICES_URLS',
-          `${process.env.BLOCKFROST_URL_PREPROD} ${process.env.BLOCKFROST_URL_PREVIEW} ${process.env.BLOCKFROST_URL_MAINNET}`,
+          // Use the origin (not the full URL): every per-network proxy path
+          // (/extension/<net>/...) shares the one proxy origin, and CSP
+          // connect-src must allow that bare origin.
+          dedupeOrigins([process.env.BLOCKFROST_PROXY_URL]),
         )
         .replace(
           '$BITCOIN_SERVICES_URLS',
@@ -130,7 +134,13 @@ const transformManifest = (content, mode) => {
           '$DAPP_EXPLORER_URL',
           process.env.CARDANO_CUBE_BASE_URL ||
             process.env.EXPO_PUBLIC_CARDANO_CUBE_BASE_URL,
-        );
+        )
+        // Trezor Suite desktop exposes a Connect WebSocket on this origin;
+        // @trezor/connect-webextension routes through it when Suite is
+        // running (required for Safe 7+, which Trezor blocks from the popup).
+        // Keep in sync with TREZOR_SUITE_CONNECT_ORIGIN in
+        // packages/lib/util-hw/src/extension/trezor-suite-probe.ts.
+        .replace('$TREZOR_SUITE_CONNECT_SRC', 'ws://127.0.0.1:21335');
 
     if (process.env.EXTENSION_KEY) {
       manifest.key = manifest.key.replace(

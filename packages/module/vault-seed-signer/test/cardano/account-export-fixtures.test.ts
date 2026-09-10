@@ -43,7 +43,7 @@ const evidence = JSON.parse(
   readFileSync(
     join(
       __dirname,
-      '../../../../lib/cardano-seed-signer-protocol/test/fixtures/companion-evidence.json',
+      '../../../../lib/core/test/air-gapped/seed-signer/fixtures/companion-evidence.json',
     ),
     'utf8',
   ),

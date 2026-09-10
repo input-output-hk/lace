@@ -11,7 +11,7 @@ import {
   Column,
   CustomTextInput,
 } from '../../../atoms';
-import { Sheet, footerHeight } from '../../../organisms';
+import { Sheet, footerHeight, useSheetSubmit } from '../../../organisms';
 
 import type { NftItem } from '../..';
 
@@ -67,6 +67,7 @@ export const EditFolderSheet = ({
   editTokenFolderState,
 }: EditFolderSheetProps) => {
   const isSelectingTokens = editTokenFolderState.status === 'SelectingTokens';
+  const submitProps = useSheetSubmit();
 
   return (
     <Sheet.Scroll>
@@ -90,6 +91,7 @@ export const EditFolderSheet = ({
               onChange={event => {
                 folderName.onFolderNameChange(event.nativeEvent.text);
               }}
+              {...submitProps}
             />
           </Column>
           <Divider />
