@@ -60,7 +60,7 @@ anchored to the source file / symbol that carries it.
 | I-103 Unimplemented wallet-API codecs                  | The dApp-connector codecs perform real validation instead of unchecked type casts.                                                                                                                                                                                                                                                                                  |
 | R2 L-201 Plaintext secrets in Redux                    | Onboarding/restore secrets were moved out of the observable store into a short-lived in-memory buffer, off the action log and selectors (onboarding / account-management slices).                                                                                                                                                                                   |
 | R2 L-202 Recovery phrase not zeroized                  | The decrypted mnemonic is a byte array that is zeroized after use (`recovery-phrase` channel).                                                                                                                                                                                                                                                                      |
-| R2 L-204 Shared provider credentials                   | Blockfrost is moved behind the IOG proxy fleet (as every other provider already is), removing the client-side key; the same proxying is extended to the mobile client (Cardano provider configuration).                                                                                                                                                             |
+| R2 L-204 Shared provider credentials                   | Cardano's Blockfrost access is moved behind the IOG proxy fleet (as every other provider already is), removing the client-side key; the same proxying is extended to the mobile client (Cardano provider configuration). Midnight is a scoped exception — see the note on provider credentials below.                                                               |
 
 ### Mobile
 
@@ -105,6 +105,31 @@ decision) and **Defer** (accepted with a committed follow-up).
 > mobile. The only `EXPO_PUBLIC_*` values that remain are public-by-design
 > telemetry identifiers (the PostHog ingest token and Sentry DSN), which carry
 > no provider or data authority.
+>
+> **Scoped exception — Midnight.** In the browser extension, Midnight's indexer
+> and node are reached at Blockfrost directly, authenticated by a per-network
+> Blockfrost `project_id` that is present client-side and therefore extractable.
+> Cardano is unaffected: it stays behind the proxy with no client-side key, and
+> the extension's `connect-src` names the six Midnight hosts individually rather
+> than wildcarding `blockfrost.io`, so the Cardano direct hosts stay outside the
+> policy (`$MIDNIGHT_SERVICES` in `apps/lace-extension/webpack`). The dedicated
+> Midnight proxy that had provided this separation was withdrawn on data load
+> grounds: the unfiltered sync of Midnight adds an unreasonable doubling of
+> network traffic. A passthrough proxy carries every byte twice — inbound from
+> the provider and outbound again to the client — and a Midnight sync cannot be
+> narrowed to compensate: shielded outputs are recognised only by trial
+> decryption against keys the wallet never releases, so the client has to
+> receive the whole event stream rather than a filtered slice of it. Proxying
+> therefore doubled the volume of that stream while contributing nothing to it
+> beyond concealing the credential. That credential's only authority is read
+> access and request quota against one Midnight network: it confers no access
+> to funds, keys or user data, and the data it reaches is already public. The
+> residual exposure is therefore service abuse against that quota, which is the
+> risk NWL raised. The credential travels in the endpoint addresses themselves,
+> supplied as a feature-flag payload (`BLOCKCHAIN_MIDNIGHT_INDEXER_URLS` and
+> `BLOCKCHAIN_MIDNIGHT_NODE_URLS`, consumed in the `midnight-context` network
+> slice) rather than compiled into a build, so it is rotatable and revocable
+> without a release, and each network's id is scoped to that network alone.
 
 ### A. Cryptographic & numeric correctness
 
