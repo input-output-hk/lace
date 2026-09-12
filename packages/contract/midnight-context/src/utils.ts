@@ -37,8 +37,24 @@ import type {
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
 
-export const convertHttpUrlToWebsocket = (url: string) =>
-  `${url.replace(/(http)(s)?:\/\//, 'ws$2://').replace(/\/+$/, '')}/ws`;
+const WEBSOCKET_SCHEMES: Record<string, string | undefined> = {
+  'http:': 'ws:',
+  'https:': 'wss:',
+  'ws:': 'ws:',
+  'wss:': 'wss:',
+};
+
+export const convertHttpUrlToWebsocket = (url: string): string => {
+  const websocketUrl = new URL(url);
+  const scheme = WEBSOCKET_SCHEMES[websocketUrl.protocol];
+  if (!scheme)
+    throw new Error(
+      `Cannot derive a websocket URL from scheme "${websocketUrl.protocol}"`,
+    );
+  websocketUrl.protocol = scheme;
+  websocketUrl.pathname = `${websocketUrl.pathname.replace(/\/+$/, '')}/ws`;
+  return websocketUrl.toString();
+};
 
 // TODO: LW-13716 to be removed once Midnight starts to differentiate token types
 //  by kind (shielded, unshielded). As of now shielded tokens have identical

@@ -1,10 +1,10 @@
 Lace public source snapshot
 ===========================
 
-release-tag:         lace-extension@2.3.0
+release-tag:         lace-extension@2.3.3
 source-repo:         input-output-hk/lace-platform (private)
-source-commit:       995f1ee2bd40b0a5bc383bcb30269a81d9d96b7b
-snapshot-utc:        2026-09-10T15:17:55.126Z
+source-commit:       03bc787c3b30d4f2578c8a8f40ee6130e48e9da2
+snapshot-utc:        2026-09-12T10:35:17.693Z
 
 allowlist-sha256:    7a13d4005eaed44e227b246a28d454b4f0e98211ee94720774d90d9a6cd8579b
 excludelist-sha256:  a69f19b3b87a1bab8f71732616ca4f1430c6bec28516691b9e4e79ad178b3caa

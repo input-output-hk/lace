@@ -75,6 +75,12 @@ const transformManifest = (content, mode) => {
             'http://localhost:9944',
             'https://*.midnight.network',
             'https://blockfrost.lw.iog.io',
+            'https://midnight-mainnet.blockfrost.io',
+            'https://midnight-preprod.blockfrost.io',
+            'https://midnight-preview.blockfrost.io',
+            'https://rpc.midnight-mainnet.blockfrost.io',
+            'https://rpc.midnight-preprod.blockfrost.io',
+            'https://rpc.midnight-preview.blockfrost.io',
           ]
             .flatMap(url => [url, convertHttpToWebSocket(url)])
             .join(' '),

@@ -26,7 +26,29 @@ const testCases = [
     input: 'https://blockfrost.lw.iog.io/midnight-preview/',
     output: 'wss://blockfrost.lw.iog.io/midnight-preview/ws',
   },
+  {
+    input: 'https://midnight-mainnet.blockfrost.io/api/v0?project_id=key',
+    output: 'wss://midnight-mainnet.blockfrost.io/api/v0/ws?project_id=key',
+  },
+  {
+    input: 'https://midnight-mainnet.blockfrost.io/api/v0/?project_id=key',
+    output: 'wss://midnight-mainnet.blockfrost.io/api/v0/ws?project_id=key',
+  },
+  {
+    input: 'https://rpc.midnight-mainnet.blockfrost.io?project_id=key',
+    output: 'wss://rpc.midnight-mainnet.blockfrost.io/ws?project_id=key',
+  },
+  {
+    input: 'wss://indexer.example/api',
+    output: 'wss://indexer.example/api/ws',
+  },
+  {
+    input: 'ws://indexer.example/api',
+    output: 'ws://indexer.example/api/ws',
+  },
 ];
+
+const unsupportedSchemes = ['localhost:8088', 'ftp://indexer.example/api'];
 
 describe('utils', () => {
   it.each(testCases)(
@@ -35,6 +57,27 @@ describe('utils', () => {
       expect(convertHttpUrlToWebsocket(data.input)).toBe(data.output);
     },
   );
+
+  it.each(unsupportedSchemes)(
+    'convertHttpUrlToWebsocket rejects %s rather than returning it unconverted',
+    input => {
+      expect(() => convertHttpUrlToWebsocket(input)).toThrow(
+        /Cannot derive a websocket URL from scheme/,
+      );
+    },
+  );
+
+  it('convertHttpUrlToWebsocket keeps the rejected address out of the error', () => {
+    let message: string | undefined;
+    try {
+      convertHttpUrlToWebsocket('ftp://indexer.example/api?project_id=secret');
+    } catch (error) {
+      message = (error as Error).message;
+    }
+
+    expect(message).toBeDefined();
+    expect(message).not.toContain('secret');
+  });
 
   describe('isMidnightNetworkConfig', () => {
     it('should return true for valid MidnightNetworkConfig', () => {
