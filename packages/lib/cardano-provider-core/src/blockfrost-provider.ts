@@ -71,16 +71,17 @@ export abstract class BlockfrostProvider implements Provider {
     const url = `${endpoint}${separator}page=${page}&count=${pageSize}`;
     const response = await this.request<T>(url, requestInit);
 
-    return response.length === pageSize
-      ? ([
-          ...response,
-          ...(await this.paginatedRequests<T>({
-            endpoint,
-            pageSize,
-            requestInit,
-            page: page + 1,
-          })),
-        ] as T)
-      : response;
+    if (response.length !== pageSize) return response;
+
+    // Hermes corrupts a spread of an awaited value inside an array literal when
+    // the async frame resumes (LW-15491) — keep the await hoisted out of the literal.
+    const rest = await this.paginatedRequests<T>({
+      endpoint,
+      pageSize,
+      requestInit,
+      page: page + 1,
+    });
+
+    return [...response, ...rest] as T;
   }
 }

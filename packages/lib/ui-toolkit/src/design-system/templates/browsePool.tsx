@@ -11,7 +11,7 @@ import {
   NetworkInfoCard,
   type NetworkInfoCardProps,
 } from '../molecules';
-import { GenericFlashList } from '../organisms';
+import { GenericFlashList, SheetGestureRoot } from '../organisms';
 
 import type { Theme } from '../../design-tokens';
 import type { BrowsePoolSortOption } from '../util/types';
@@ -179,7 +179,12 @@ export const BrowsePoolTemplate = ({
   );
 
   return (
-    <View style={defaultStyles.container} testID="browse-pool-content">
+    // Gesture root, not a plain View: this template is a sheet body that never
+    // goes through `Sheet`, so the search bar's filter IconButton would get no
+    // taps on Android without one. Same layout box either way.
+    <SheetGestureRoot
+      style={defaultStyles.container}
+      testID="browse-pool-content">
       <GenericFlashList
         testID="browse-pool-list"
         renderItem={renderItem}
@@ -195,7 +200,7 @@ export const BrowsePoolTemplate = ({
         keyboardShouldPersistTaps="handled"
         maintainVisibleContentPosition={{ disabled: true }}
       />
-    </View>
+    </SheetGestureRoot>
   );
 };
 
