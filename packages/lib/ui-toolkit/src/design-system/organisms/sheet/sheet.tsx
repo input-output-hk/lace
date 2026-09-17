@@ -38,8 +38,7 @@ import {
   Row,
   Text,
 } from '../../atoms';
-import { isWeb } from '../../util';
-import { getAssetImageUrl } from '../../util';
+import { isAndroid, isWeb, getAssetImageUrl } from '../../util';
 
 import { SheetSubmitProvider } from './sheetSubmit';
 
@@ -79,7 +78,6 @@ interface SheetHeaderProps {
   headerIcon?: IconName;
   headerAvatar?: HeaderAvatar;
   showDivider?: boolean;
-  height?: number;
   handleClose?: () => void;
 }
 
@@ -104,6 +102,15 @@ interface SheetFooterProps {
   testID?: string;
 }
 
+/**
+ * One gesture root per sheet slot, Android only: TrueSheet's content is its own
+ * React root dispatching its own touches, so gesture-handler touchables inside a
+ * sheet get no taps without one. Keep it *inside* the slot — TrueSheet re-parents
+ * the outermost view, leaving a root placed there (the navigator's `screenLayout`)
+ * unregistered. See LW-15479.
+ */
+export const SheetGestureRoot = isAndroid ? GestureHandlerRootView : View;
+
 const SheetContainer = ({ children, style, ...props }: ViewProps) => {
   const containerStyle: StyleProp<ViewStyle> = useMemo(
     () => ({
@@ -114,9 +121,9 @@ const SheetContainer = ({ children, style, ...props }: ViewProps) => {
   );
 
   return (
-    <View {...props} style={containerStyle}>
+    <SheetGestureRoot {...props} style={containerStyle}>
       {children}
-    </View>
+    </SheetGestureRoot>
   );
 };
 
@@ -155,9 +162,8 @@ const Header = ({
   }, [headerAvatar]);
 
   return (
-    // Local gesture root: TrueSheet's native header slot sits outside the
-    // app-root GestureHandlerRootView on Android, so the back button's
-    // gesture-handler Pressable gets no taps without a root in its subtree.
+    // Unconditional, unlike the other slots: this root predates the Android
+    // fix and every platform's header has always had it.
     <GestureHandlerRootView testID={testID} style={styles.headerContainer}>
       <Row alignItems="center" justifyContent="center" style={styles.headerRow}>
         {leftIconOnPress && (
@@ -306,6 +312,36 @@ const Footer = ({
 // Breathing room kept between the focused input and the footer/keyboard.
 const KEYBOARD_SCROLL_MARGIN = spacing.L;
 
+// Scrolls whatever input currently holds focus clear of the keyboard, deferred a
+// frame so the bottom padding applies first and leaves room to scroll into.
+const scrollFocusedInputAboveKeyboard = (
+  keyboardTop: number,
+  scrollRef: RefObject<ScrollView | null>,
+  scrollOffsetY: RefObject<number>,
+) => {
+  requestAnimationFrame(() => {
+    const focused = TextInput.State.currentlyFocusedInput();
+    if (!focused) return;
+
+    // eslint-disable-next-line max-params
+    focused.measureInWindow((_x, y, _width, inputHeight) => {
+      // The footer floats above the keyboard, so the input must clear both.
+      const overlap =
+        y +
+        inputHeight +
+        KEYBOARD_SCROLL_MARGIN +
+        footerHeight.vertical -
+        keyboardTop;
+      if (overlap > 0) {
+        scrollRef.current?.scrollTo({
+          y: scrollOffsetY.current + overlap,
+          animated: true,
+        });
+      }
+    });
+  });
+};
+
 // While `enabled`, tracks keyboard height (for bottom padding) and scrolls the
 // focused input above the keyboard + floating footer. No listeners while disabled.
 const useKeyboardAwareScroll = (
@@ -328,29 +364,7 @@ const useKeyboardAwareScroll = (
       setHeight(event.endCoordinates?.height ?? 0);
       if (keyboardTop === undefined) return;
 
-      // Defer a frame so the bottom padding applies first, leaving room to scroll into.
-      requestAnimationFrame(() => {
-        const focused = TextInput.State.currentlyFocusedInput();
-        if (!focused) return;
-
-        // measureInWindow's callback arity (x, y, width, height) is fixed by RN.
-        // eslint-disable-next-line max-params
-        focused.measureInWindow((_x, y, _width, inputHeight) => {
-          // The footer floats above the keyboard, so the input must clear both.
-          const overlap =
-            y +
-            inputHeight +
-            KEYBOARD_SCROLL_MARGIN +
-            footerHeight.vertical -
-            keyboardTop;
-          if (overlap > 0) {
-            scrollRef.current?.scrollTo({
-              y: scrollOffsetY.current + overlap,
-              animated: true,
-            });
-          }
-        });
-      });
+      scrollFocusedInputAboveKeyboard(keyboardTop, scrollRef, scrollOffsetY);
     });
     const hideSub = Keyboard.addListener(hideEvent, () => {
       setHeight(0);
@@ -442,7 +456,16 @@ const Scroll = (props: SheetScrollProps) => {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       {...restProps}>
-      {children}
+      {/* Inside the ScrollView, never around it: a wrapping root has to pick one
+          sizing and the detents need opposite ones — 'auto' collapses under its
+          `flex: 1`, `scrollable` clips without it. See SheetGestureRoot. */}
+      {isAndroid ? (
+        <GestureHandlerRootView style={styles.gestureRoot}>
+          {children}
+        </GestureHandlerRootView>
+      ) : (
+        children
+      )}
     </ScrollView>
   );
 };
@@ -482,4 +505,6 @@ const styles = StyleSheet.create({
   scrollContentContainer: {
     padding: spacing.M,
   },
+  // Deliberately empty — see the Scroll gesture root.
+  gestureRoot: {},
 });

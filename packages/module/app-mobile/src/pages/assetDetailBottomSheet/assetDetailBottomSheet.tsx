@@ -86,7 +86,6 @@ export const AssetDetailBottomSheet = ({
           <Sheet.Header
             title={tokenHeaderTitle}
             headerAvatar={headerAvatar}
-            height={44}
             showDivider={false}
             testID="token-details-sheet-header"
             leftIconOnPress={

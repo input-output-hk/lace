@@ -1,6 +1,9 @@
 import type { ComponentRef, ReactNode } from 'react';
-import type { TextStyle, ViewStyle } from 'react-native';
-import type { TextInputProps as RNTextInputProps } from 'react-native';
+import type {
+  TextStyle,
+  ViewStyle,
+  TextInputProps as RNTextInputProps,
+} from 'react-native';
 
 import React, {
   forwardRef,
@@ -20,7 +23,7 @@ import { useSharedValue, withTiming, Easing } from 'react-native-reanimated';
 
 import { Text, BlurView, Avatar, Row, IconButton, Icon, Loader } from '..';
 import { useTheme, radius, spacing } from '../../../design-tokens';
-import { isWeb, useControlledState } from '../../util';
+import { isAndroid, isWeb, useControlledState } from '../../util';
 import { AnimatedLabel } from '../animatedLabel/animatedLabel';
 import {
   CtaButtonWrapper,
@@ -80,6 +83,8 @@ export type CustomTextInputStyles = Partial<AnimatedLabelStyles> & {
   inputError: TextStyle;
   mainContentWrapper: ViewStyle;
 };
+
+const claimResponder = () => true;
 
 type RNFocusEvent = Parameters<NonNullable<RNTextInputProps['onFocus']>>[0];
 type RNBlurEvent = Parameters<NonNullable<RNTextInputProps['onBlur']>>[0];
@@ -337,7 +342,14 @@ export const CustomTextInput = forwardRef<RnTextInputRef, CustomTextInputProps>(
             {!!postButton && <IconButton.Static {...postButton} />}
             {!!postIcon && <Icon name={postIcon} />}
             {Array.isArray(ctaButtons) && ctaButtons.length > 0 && (
-              <View style={styles.ctaButtonWrapper}>
+              <View
+                style={styles.ctaButtonWrapper}
+                // Android: claims the responder so a CTA press doesn't also focus
+                // the input, popping the keyboard behind whatever the CTA opened.
+                // iOS gives gesture-handler exclusive arbitration, so no claim.
+                onStartShouldSetResponder={
+                  isAndroid ? claimResponder : undefined
+                }>
                 {renderCtaButtons(
                   ctaButtons.filter(Boolean) as CtaButtonProps[],
                   CtaButtonWrapper,
@@ -357,6 +369,17 @@ export const CustomTextInput = forwardRef<RnTextInputRef, CustomTextInputProps>(
   },
 );
 
+const getBorderColor = (
+  theme: Theme,
+  {
+    inputError,
+    isFocusedOrHovered,
+  }: { inputError?: string; isFocusedOrHovered?: boolean },
+): string => {
+  if (inputError) return theme.data.negative;
+  return isFocusedOrHovered ? theme.border.focused : theme.border.middle;
+};
+
 const getStyles = (
   theme: Theme,
   {
@@ -369,11 +392,10 @@ const getStyles = (
   }: Omit<CustomTextInputProps, 'onChangeText' | 'testID' | 'value'>,
 ): CustomTextInputStyles => {
   const { isLarge, containerHeight } = getSize(size);
-  const borderColor = inputError
-    ? theme.data.negative
-    : isActive || isHover
-    ? theme.border.focused
-    : theme.border.middle;
+  const borderColor = getBorderColor(theme, {
+    inputError,
+    isFocusedOrHovered: isActive || isHover,
+  });
 
   return StyleSheet.create<CustomTextInputStyles>({
     container: {
