@@ -128,6 +128,73 @@ describe('activities slice', () => {
       });
     });
 
+    describe('removeActivities', () => {
+      it('removes the listed activities and keeps the rest', () => {
+        const otherActivity = { ...activity1, activityId: 'activity3' };
+        const state = activitiesReducers.activities(
+          {
+            ...initialState,
+            activities: { [accountId]: [activity1, otherActivity] },
+          },
+          actions.activities.removeActivities({
+            accountId,
+            activityIds: ['activity1'],
+          }),
+        );
+        expect(state.activities).toStrictEqual({
+          [accountId]: [otherActivity],
+        });
+      });
+
+      it('leaves state unchanged when the account has no activities', () => {
+        const state = activitiesReducers.activities(
+          initialState,
+          actions.activities.removeActivities({
+            accountId,
+            activityIds: ['activity1'],
+          }),
+        );
+        expect(state.activities).toStrictEqual({});
+      });
+
+      it('preserves the array reference when nothing matches', () => {
+        const activities = [activity1];
+        const initial: ActivitiesSliceState = {
+          ...initialState,
+          activities: { [accountId]: activities },
+        };
+        const state = activitiesReducers.activities(
+          initial,
+          actions.activities.removeActivities({
+            accountId,
+            activityIds: ['not-present'],
+          }),
+        );
+        expect(state.activities[accountId]).toBe(activities);
+      });
+
+      it('does not disturb other accounts', () => {
+        const otherAccountActivity = { ...activity2, accountId: account2Id };
+        const state = activitiesReducers.activities(
+          {
+            ...initialState,
+            activities: {
+              [accountId]: [activity1],
+              [account2Id]: [otherAccountActivity],
+            },
+          },
+          actions.activities.removeActivities({
+            accountId,
+            activityIds: ['activity1'],
+          }),
+        );
+        expect(state.activities).toStrictEqual({
+          [accountId]: [],
+          [account2Id]: [otherAccountActivity],
+        });
+      });
+    });
+
     describe('resetActivities', () => {
       it('resets activities', () => {
         const state = activitiesReducers.activities(

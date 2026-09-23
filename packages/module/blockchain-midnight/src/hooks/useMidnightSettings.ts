@@ -62,7 +62,14 @@ export const useMidnightSettings = () => {
   const isOpen = ['Open', 'Saving'].includes(settingsDrawerState.status);
   const isSaving = settingsDrawerState.status === 'Saving';
 
-  // Helper to get prove server options for a specific network
+  // Helper to get prove server options for a specific network.
+  //
+  // remoteProofServerAddress currently resolves to undefined for every network:
+  // the Shielded remote proof servers were retired (LW-15058) and no flag
+  // supplies proofServerAddress any more, so only the local option is offered.
+  // The seam is kept rather than collapsed because further proving providers are
+  // in flight (TEE, Confidential Space, zkPaaS) — feeding one an address here is
+  // all it takes to bring the radio list back.
   const getProveServerOptions = (targetNetworkId: MidnightSDKNetworkId) =>
     createProveServerOptions({
       localProofServerAddress:

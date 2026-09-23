@@ -1,3 +1,4 @@
+import { withCollateralOwnershipGuard } from '@lace-contract/cardano-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { pollCeremonyOutcome } from '@lace-lib/extension-shell-client';
 import { from, of, switchMap, throwError } from 'rxjs';
@@ -109,7 +110,10 @@ class HostSignerFactory implements CardanoSignerFactory {
         `Cardano account not found for ${context.accountId} in wallet ${context.wallet.walletId}`,
       );
     }
-    return new HostCardanoTransactionSigner(context.accountId);
+    return withCollateralOwnershipGuard(
+      new HostCardanoTransactionSigner(context.accountId),
+      context,
+    );
   }
 
   public createDataSigner(_context: CardanoSignerContext): CardanoDataSigner {

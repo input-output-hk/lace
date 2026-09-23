@@ -405,6 +405,8 @@ describe('cardanoDappConnector slice', () => {
       dapp: mockDappInfo,
       txHex: 'abcdef1234',
       partialSign: false,
+      // Reviewable request (no collateral block verdict).
+      collateralRefusal: null,
     };
 
     const mockPendingSignDataRequest: PendingSignDataRequest = {
@@ -642,30 +644,34 @@ describe('cardanoDappConnector slice', () => {
 
     it('confirmSignTx action is defined', () => {
       expect(actions.confirmSignTx).toBeDefined();
-      expect(actions.confirmSignTx().type).toBe(
-        'cardanoDappConnector/confirmSignTx',
-      );
+      expect(actions.confirmSignTx({ requestId: 'req-1' })).toEqual({
+        type: 'cardanoDappConnector/confirmSignTx',
+        payload: { requestId: 'req-1' },
+      });
     });
 
     it('rejectSignTx action is defined', () => {
       expect(actions.rejectSignTx).toBeDefined();
-      expect(actions.rejectSignTx().type).toBe(
-        'cardanoDappConnector/rejectSignTx',
-      );
+      expect(actions.rejectSignTx({ requestId: 'req-1' })).toEqual({
+        type: 'cardanoDappConnector/rejectSignTx',
+        payload: { requestId: 'req-1' },
+      });
     });
 
     it('confirmSignData action is defined', () => {
       expect(actions.confirmSignData).toBeDefined();
-      expect(actions.confirmSignData().type).toBe(
-        'cardanoDappConnector/confirmSignData',
-      );
+      expect(actions.confirmSignData({ requestId: 'req-1' })).toEqual({
+        type: 'cardanoDappConnector/confirmSignData',
+        payload: { requestId: 'req-1' },
+      });
     });
 
     it('rejectSignData action is defined', () => {
       expect(actions.rejectSignData).toBeDefined();
-      expect(actions.rejectSignData().type).toBe(
-        'cardanoDappConnector/rejectSignData',
-      );
+      expect(actions.rejectSignData({ requestId: 'req-1' })).toEqual({
+        type: 'cardanoDappConnector/rejectSignData',
+        payload: { requestId: 'req-1' },
+      });
     });
   });
 
@@ -680,6 +686,8 @@ describe('cardanoDappConnector slice', () => {
       dapp: mockDappInfo,
       txHex: 'abcdef1234',
       partialSign: false,
+      // Reviewable request (no collateral block verdict).
+      collateralRefusal: null,
     };
 
     const mockPendingSignDataRequest: PendingSignDataRequest = {

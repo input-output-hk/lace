@@ -1186,6 +1186,36 @@ describe('cardanoContext slice', () => {
       });
     });
 
+    // The only writer that can empty a live account's set — every other one
+    // deletes the account's entry outright. A "don't clobber the balance with
+    // an empty set" guard here would reinstate LW-15291 under the sync fix.
+    it('setAccountUtxos sets empty array to clear utxos for an account', () => {
+      const accountId = AccountId('acc1');
+
+      const state1 = reducers.cardanoContext(
+        initialState,
+        actions.cardanoContext.setAccountUtxos({
+          accountId,
+          utxos: [utxo1, utxo2],
+        }),
+      );
+      const state2 = reducers.cardanoContext(
+        state1,
+        actions.cardanoContext.setAccountUtxos({
+          accountId,
+          utxos: [],
+        }),
+      );
+
+      const result = selectors.cardanoContext.selectAccountUtxos({
+        cardanoContext: state2,
+      });
+
+      expect(result).toEqual({
+        [accountId]: [],
+      });
+    });
+
     describe('setLastFetchedUtxoCacheKey', () => {
       it('preserves previously persisted utxos when only the cacheKey is advanced', () => {
         const accountId = AccountId('acc1');
@@ -2619,6 +2649,236 @@ describe('cardanoContext slice', () => {
           cardanoContext: state,
         });
         expect(result).toEqual(accountUnspendableUtxos);
+      });
+    });
+
+    describe('selectCollateralOwnershipUtxos', () => {
+      const settledAccountId = AccountId('settled-acc');
+      const pendingOnlyAccountId = AccountId('pending-only-acc');
+      const ownAddress =
+        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp';
+      const foreignAddress =
+        'addr_test1qpuzeec0zqcm6lrdygkkvvd8e6qactnsl5zzeujsdpkpc939l2f2vykk0ctwq4ys6w3jg8pm0kknmy8m5pml8f9cauzq2zuc95';
+      const settledTx = Cardano.TransactionId('a'.repeat(64));
+      const pendingTx = Cardano.TransactionId('b'.repeat(64));
+      const laterTx = Cardano.TransactionId('c'.repeat(64));
+
+      const utxoAt = (
+        txId: Cardano.TransactionId,
+        index: number,
+        address: string,
+      ): Cardano.Utxo => [
+        { address: Cardano.PaymentAddress(address), txId, index },
+        {
+          address: Cardano.PaymentAddress(address),
+          value: { coins: 5_000_000n },
+        },
+      ];
+
+      const pending = ({
+        accountId,
+        activityId,
+        timestamp,
+        ...metadata
+      }: {
+        accountId: AccountId;
+        activityId: string;
+        timestamp: number;
+        consumedInputs: { txId: Cardano.TransactionId; index: number }[];
+        producedOutputs: Cardano.Utxo[];
+      }): Activity => ({
+        accountId,
+        activityId,
+        timestamp: Timestamp(timestamp),
+        tokenBalanceChanges: [],
+        type: ActivityType.Pending,
+        blockchainSpecific: Serializable.to({ Cardano: metadata }) as unknown,
+      });
+
+      const authorityFor = (
+        accountId: AccountId,
+        {
+          settled = [],
+          unspendable = [],
+          activities = {},
+        }: {
+          settled?: Cardano.Utxo[];
+          unspendable?: Cardano.Utxo[];
+          activities?: Record<string, Activity[]>;
+        },
+      ) => {
+        let cardanoContext = reducers.cardanoContext(
+          initialState,
+          actions.cardanoContext.setAccountUtxos({
+            accountId: settledAccountId,
+            utxos: settled,
+          }),
+        );
+        if (unspendable.length > 0) {
+          cardanoContext = reducers.cardanoContext(
+            cardanoContext,
+            actions.cardanoContext.setAccountUnspendableUtxos({
+              accountId: settledAccountId,
+              utxos: unspendable,
+            }),
+          );
+        }
+        const state = {
+          cardanoContext,
+          activities: {
+            activities,
+            desiredLoadedActivitiesCountPerAccount: {},
+            hasLoadedOldestEntry: {},
+          },
+          addresses: {
+            addresses: [
+              {
+                name: 'test',
+                address: ownAddress,
+                blockchainName: 'Cardano',
+                accountId: settledAccountId,
+              },
+              {
+                name: 'test',
+                address: ownAddress,
+                blockchainName: 'Cardano',
+                accountId: pendingOnlyAccountId,
+              },
+            ],
+          },
+        } as unknown as Parameters<
+          typeof selectors.cardanoContext.selectCollateralOwnershipUtxos
+        >[0];
+        return (
+          selectors.cardanoContext.selectCollateralOwnershipUtxos(state)[
+            accountId
+          ] ?? []
+        );
+      };
+
+      const outpoints = (utxos: Cardano.Utxo[]) =>
+        utxos.map(([txIn]) => `${txIn.txId}#${txIn.index}`).sort();
+
+      it('includes an own pending output the settled set does not have yet', () => {
+        const authority = authorityFor(settledAccountId, {
+          settled: [utxoAt(settledTx, 0, ownAddress)],
+          activities: {
+            [settledAccountId]: [
+              pending({
+                accountId: settledAccountId,
+                activityId: 'p1',
+                timestamp: 0,
+                consumedInputs: [],
+                producedOutputs: [utxoAt(pendingTx, 0, ownAddress)],
+              }),
+            ],
+          },
+        });
+
+        expect(outpoints(authority)).toEqual(
+          outpoints([
+            utxoAt(settledTx, 0, ownAddress),
+            utxoAt(pendingTx, 0, ownAddress),
+          ]),
+        );
+      });
+
+      it('covers an account whose ONLY funds are pending, with no settled entry at all', () => {
+        const authority = authorityFor(pendingOnlyAccountId, {
+          settled: [utxoAt(settledTx, 0, ownAddress)],
+          activities: {
+            [pendingOnlyAccountId]: [
+              pending({
+                accountId: pendingOnlyAccountId,
+                activityId: 'p1',
+                timestamp: 0,
+                consumedInputs: [],
+                producedOutputs: [utxoAt(pendingTx, 0, ownAddress)],
+              }),
+            ],
+          },
+        });
+
+        expect(outpoints(authority)).toEqual([`${pendingTx}#0`]);
+      });
+
+      it('keeps a collateral-reserved settled output that the spendable view filters out', () => {
+        const reserved = utxoAt(settledTx, 1, ownAddress);
+        const authority = authorityFor(settledAccountId, {
+          settled: [utxoAt(settledTx, 0, ownAddress), reserved],
+          unspendable: [reserved],
+        });
+
+        expect(outpoints(authority)).toContain(`${settledTx}#1`);
+      });
+
+      it('keeps a settled input a pending transaction consumes -- it still exists on chain', () => {
+        const authority = authorityFor(settledAccountId, {
+          settled: [utxoAt(settledTx, 0, ownAddress)],
+          activities: {
+            [settledAccountId]: [
+              pending({
+                accountId: settledAccountId,
+                activityId: 'p1',
+                timestamp: 0,
+                consumedInputs: [{ txId: settledTx, index: 0 }],
+                producedOutputs: [],
+              }),
+            ],
+          },
+        });
+
+        expect(outpoints(authority)).toContain(`${settledTx}#0`);
+      });
+
+      it('keeps a pending output a LATER pending transaction consumes', () => {
+        const authority = authorityFor(settledAccountId, {
+          settled: [],
+          activities: {
+            [settledAccountId]: [
+              pending({
+                accountId: settledAccountId,
+                activityId: 'p1',
+                timestamp: 0,
+                consumedInputs: [],
+                producedOutputs: [utxoAt(pendingTx, 0, ownAddress)],
+              }),
+              pending({
+                accountId: settledAccountId,
+                activityId: 'p2',
+                timestamp: 1,
+                consumedInputs: [{ txId: pendingTx, index: 0 }],
+                producedOutputs: [utxoAt(laterTx, 0, ownAddress)],
+              }),
+            ],
+          },
+        });
+
+        expect(outpoints(authority)).toEqual(
+          outpoints([
+            utxoAt(pendingTx, 0, ownAddress),
+            utxoAt(laterTx, 0, ownAddress),
+          ]),
+        );
+      });
+
+      it('excludes a pending output paying an address the account does not own', () => {
+        const authority = authorityFor(settledAccountId, {
+          settled: [],
+          activities: {
+            [settledAccountId]: [
+              pending({
+                accountId: settledAccountId,
+                activityId: 'p1',
+                timestamp: 0,
+                consumedInputs: [],
+                producedOutputs: [utxoAt(pendingTx, 0, foreignAddress)],
+              }),
+            ],
+          },
+        });
+
+        expect(authority).toEqual([]);
       });
     });
 

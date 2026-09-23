@@ -52,5 +52,14 @@ export const AnimatedQrCode = ({
     return null;
   }
 
-  return <QrCode data={frames[index % frameCount]} {...qrCodeProps} />;
+  // Every animated consumer in both stacks is a hardware wallet's camera, so
+  // the machine-readable rendering is the default here rather than a per-caller
+  // opt-in. Spread last so a caller can still say otherwise.
+  return (
+    <QrCode
+      optimiseForDeviceCamera
+      data={frames[index % frameCount]}
+      {...qrCodeProps}
+    />
+  );
 };

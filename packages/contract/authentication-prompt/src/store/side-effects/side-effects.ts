@@ -12,6 +12,7 @@ import { createVerifyAndPropagateAuthSecret } from './auth-verification-handler'
 import { authenticateSideEffect } from './authentication';
 import { makeAutoConfirmBiometricFromOpenPassword } from './auto-confirm-biometric-from-open-password';
 import { makeAuthenticationBiometricVerifying } from './biometrics-side-effects';
+import { cancelPromptWithoutView } from './cancel-prompt-without-view';
 import { makeAuthenticationPromptVerifying } from './password-side-effects';
 
 import type { SecureStorePasswordManager } from '../../authenticators/password/secure-store-password-manager';
@@ -283,5 +284,6 @@ export const initializeSideEffects: LaceInit<AnyLaceSideEffect[]> = async ({
       deferBiometricExtension,
     }),
     authenticateSideEffect,
+    cancelPromptWithoutView,
   ];
 };

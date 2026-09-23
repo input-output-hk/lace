@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import makeTxExecutor from '../src/exposed-modules/tx-executor-implementation';
 import {
+  canRequestMidnightDustDesignation,
   getMidnightSendResult,
+  requestMidnightDustDesignation,
   requestMidnightSend,
   requestMidnightSync,
 } from '../src/lace-client';
@@ -23,6 +25,8 @@ import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 vi.mock('../src/lace-client', () => ({
   requestMidnightSend: vi.fn(),
+  requestMidnightDustDesignation: vi.fn(),
+  canRequestMidnightDustDesignation: vi.fn(() => true),
   getMidnightSendResult: vi.fn(),
   requestMidnightSync: vi.fn(),
 }));
@@ -86,11 +90,36 @@ describe('midnight tx executor — build', () => {
     expect(result.fees[0].amount.toString()).toBe('0');
   });
 
-  it('fails closed for the dust-designation flow (no wire method)', async () => {
+  it('serializes the dust-designation flow kind so confirm can route it', async () => {
+    vi.mocked(canRequestMidnightDustDesignation).mockReturnValue(true);
+    const result = await firstValueFrom(
+      executor().buildTx(buildParams('dust-designation')),
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) throw new Error('expected success');
+    expect(
+      (
+        JSON.parse(HexBytes.toUTF8(HexBytes(result.serializedTx))) as {
+          flow?: string;
+        }
+      ).flow,
+    ).toBe('dust-designation');
+  });
+
+  it('fails closed for dust designation when the host does not advertise the capability', async () => {
+    vi.mocked(canRequestMidnightDustDesignation).mockReturnValue(false);
     const result = await firstValueFrom(
       executor().buildTx(buildParams('dust-designation')),
     );
     expect(result.success).toBe(false);
+    if (result.success) throw new Error('expected failure');
+    expect(result.errorTranslationKey).toBe(
+      'tx-executor.building-error.dust-designation-unsupported',
+    );
+    // A plain transfer is unaffected by the missing designation capability.
+    expect(
+      (await firstValueFrom(executor().buildTx(buildParams()))).success,
+    ).toBe(true);
   });
 
   it('fails closed (returns a generic error, never throws) when there are no token transfers', async () => {
@@ -160,6 +189,11 @@ describe('midnight tx executor — confirm (host send ceremony)', () => {
       ok: true,
       value: { syncId: 's1' },
     });
+    vi.mocked(requestMidnightDustDesignation).mockResolvedValue({
+      ok: true,
+      value: { ceremonyId: 'c1' },
+    });
+    vi.mocked(canRequestMidnightDustDesignation).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -424,7 +458,11 @@ describe('midnight tx executor — submit / preview / discard', () => {
         blockchainSpecificSendFlowData: { flowType: 'send' },
       } as never),
     );
-    expect(result).toEqual({ success: true, txId: 'txid1' });
+    expect(result).toEqual({
+      success: true,
+      txId: 'txid1',
+      awaitsFinalization: true,
+    });
   });
 
   it('previews with a minimum amount and discards successfully', async () => {
@@ -437,5 +475,87 @@ describe('midnight tx executor — submit / preview / discard', () => {
       } as never),
     );
     expect(discard.success).toBe(true);
+  });
+});
+
+describe('midnight tx executor — confirm (dust designation)', () => {
+  const designationTx = HexBytes.fromUTF8(
+    JSON.stringify({
+      flow: 'dust-designation',
+      amount: '1000',
+      receiverAddress: 'mn_dust_test1qreceiver',
+      type: 'night',
+      tokenKind: 'unshielded',
+    }),
+  );
+
+  const designationConfirm: ConfirmTxParams = {
+    blockchainName: 'Midnight',
+    accountId,
+    wallet,
+    serializedTx: designationTx,
+    blockchainSpecificSendFlowData: { flowType: 'dust-designation' },
+  } as unknown as ConfirmTxParams;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
+    vi.mocked(canRequestMidnightDustDesignation).mockReturnValue(true);
+    vi.mocked(requestMidnightDustDesignation).mockResolvedValue({
+      ok: true,
+      value: { ceremonyId: 'c1' },
+    });
+    vi.mocked(requestMidnightSync).mockResolvedValue({
+      ok: true,
+      value: { syncId: 's1' },
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('routes to requestDustDesignation with the dust address and settles on the shared poll', async () => {
+    vi.mocked(getMidnightSendResult).mockResolvedValue({
+      ok: true,
+      value: { status: 'confirmed', txId: 'txid1' },
+    });
+
+    const results: unknown[] = [];
+    executor()
+      .confirmTx(designationConfirm)
+      .subscribe(result => results.push(result));
+
+    await vi.advanceTimersByTimeAsync(2000);
+
+    expect(requestMidnightSend).not.toHaveBeenCalled();
+    expect(requestMidnightDustDesignation).toHaveBeenCalledWith({
+      walletId: 'w1',
+      accountIndex: 0,
+      network: NETWORK_ID,
+      dustAddress: 'mn_dust_test1qreceiver',
+    });
+    expect(results).toEqual([{ serializedTx: 'txid1', success: true }]);
+  });
+
+  it('refuses rather than mis-sending when the capability vanished after build', async () => {
+    vi.mocked(canRequestMidnightDustDesignation).mockReturnValue(false);
+
+    const results: Array<{
+      errorTranslationKeys?: { subtitle: string };
+      success: boolean;
+    }> = [];
+    executor()
+      .confirmTx(designationConfirm)
+      .subscribe(result => results.push(result));
+
+    await vi.advanceTimersByTimeAsync(100);
+
+    expect(requestMidnightDustDesignation).not.toHaveBeenCalled();
+    expect(requestMidnightSend).not.toHaveBeenCalled();
+    expect(results[0].success).toBe(false);
+    expect(results[0].errorTranslationKeys?.subtitle).toBe(
+      'tx-executor.building-error.dust-designation-unsupported',
+    );
   });
 });

@@ -17,9 +17,16 @@ import flatMap from 'lodash/flatMap';
 import pick from 'lodash/pick';
 import uniqBy from 'lodash/uniqBy';
 
-import { applyInFlightUtxoAdjustments } from '../apply-in-flight-utxo-adjustments';
+import {
+  applyInFlightUtxoAdjustments,
+  ownPendingOutputs,
+} from '../apply-in-flight-utxo-adjustments';
 import { EXPLOIT_DESCRIPTORS } from '../security/exploit-descriptors';
-import { filterSpendableUtxos, getEligibleCollateralUtxo } from '../util';
+import {
+  filterSpendableUtxos,
+  getEligibleCollateralUtxo,
+  utxoKey,
+} from '../util';
 import { CardanoNetworkId, CardanoSyncFailureId } from '../value-objects';
 
 import {
@@ -27,12 +34,22 @@ import {
   collateralFlowActions,
   collateralFlowSelectors,
 } from './collateral-flow/slice';
+import {
+  composerFlowActions,
+  composerFlowReducers,
+  composerFlowSelectors,
+} from './composer-flow';
 import { getRewardSpendableDate, mapRewardToActivity } from './helpers';
 import {
   nightDesignationFlowActions,
   nightDesignationFlowReducers,
   nightDesignationFlowSelectors,
 } from './night-designation-flow';
+import {
+  nightDesignationIndexActions,
+  nightDesignationIndexReducers,
+  nightDesignationIndexSelectors,
+} from './night-designation-index';
 import {
   isAddressDiscoveryOperation,
   isThoroughAddressDiscoveryOperation,
@@ -945,6 +962,55 @@ const selectCardanoAddressesByAccount = createSelector(
   },
 );
 
+/**
+ * The COLLATERAL-OWNERSHIP authority (LW-15390): every UTxO the
+ * collateral-return rule must treat as this account's.
+ *
+ * The full settled set — collateral-reserved UTxOs INCLUDED — unioned with the
+ * account's own outputs of transactions it has submitted but not yet seen
+ * settle. Built only by union: a UTxO missing here is one the guard will let a
+ * dApp send to a foreign collateral return.
+ *
+ * NOT {@link selectAvailableAccountUtxos}, which subtracts the reserved set,
+ * and NOT {@link selectAccountUtxosWithInFlight}, which also drops the inputs
+ * our own pending transactions consume — those still exist on chain until the
+ * spend confirms, so someone else can still name them as collateral.
+ *
+ * An ordinary Send is why the pending half matters: its change reaches this
+ * account through the pending activity, `getUtxos` serves it to the dApp, and
+ * it is absent from the settled set until the provider catches up.
+ */
+const selectCollateralOwnershipUtxos = createSelector(
+  selectAccountUtxos,
+  selectPendingActivitiesByAccount,
+  selectCardanoAddressesByAccount,
+  (accountUtxos, pendingActivitiesByAccount, addressesByAccount) => {
+    const result: AccountUtxoMap = {};
+
+    // Union of both key sets, as `selectAccountUtxosWithInFlight` does: a
+    // freshly funded account can hold a pending credit before its first
+    // settled fetch lands, and iterating settled alone would omit the account
+    // entirely — every collateral input it holds would then read as foreign.
+    const accountIds = new Set([
+      ...Object.keys(accountUtxos),
+      ...Object.keys(pendingActivitiesByAccount),
+    ]);
+    for (const accountId of accountIds) {
+      const settled = accountUtxos[AccountId(accountId)] ?? EMPTY_UTXOS;
+      const pending = ownPendingOutputs(
+        pendingActivitiesByAccount[AccountId(accountId)] ?? [],
+        addressesByAccount[AccountId(accountId)] ?? EMPTY_CARDANO_ADDRESSES,
+      );
+      const byOutpoint = new Map(
+        [...settled, ...pending].map(utxo => [utxoKey(utxo), utxo]),
+      );
+      result[AccountId(accountId)] = [...byOutpoint.values()];
+    }
+
+    return result;
+  },
+);
+
 /* eslint-disable max-params */
 const selectAvailableAccountUtxos = createSelector(
   selectAccountUtxos,
@@ -1454,7 +1520,9 @@ const selectNeedsSecurityRescan = markParameterizedSelector(
 export const cardanoContextReducers = {
   [slice.name]: slice.reducer,
   ...collateralFlowReducers,
+  ...composerFlowReducers,
   ...nightDesignationFlowReducers,
+  ...nightDesignationIndexReducers,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1480,7 +1548,9 @@ export const cardanoContextActions = {
     }>('cardanoContext/submitTxFailed'),
   },
   ...collateralFlowActions,
+  ...composerFlowActions,
   ...nightDesignationFlowActions,
+  ...nightDesignationIndexActions,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1493,6 +1563,7 @@ export const cardanoContextSelectors = {
     selectEraSummaries,
     selectAccountUtxos,
     selectAccountUtxosWithInFlight,
+    selectCollateralOwnershipUtxos,
     selectAccountUnspendableUtxos,
     selectLastFetchedUtxoCacheKeyByAccount,
     selectRewardAccountDetails,
@@ -1516,7 +1587,9 @@ export const cardanoContextSelectors = {
     selectActiveNetworkHasSyncFailure,
   },
   ...collateralFlowSelectors,
+  ...composerFlowSelectors,
   ...nightDesignationFlowSelectors,
+  ...nightDesignationIndexSelectors,
 };
 
 export type CardanoContextStoreState = StateFromReducersMapObject<

@@ -1,3 +1,4 @@
+import { Cardano } from '@cardano-sdk/core';
 import BigNumber from 'bignumber.js';
 
 import { COLLATERAL_AMOUNT_LOVELACES } from './const';
@@ -7,8 +8,9 @@ import type {
   CardanoAddressData,
   CardanoBip32AccountProps,
   CardanoMultiSigAccountProps,
+  CardanoProvider,
+  CardanoProviderContext,
 } from './types';
-import type { Cardano } from '@cardano-sdk/core';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type {
   AnyAddress,
@@ -106,8 +108,10 @@ export const convertLovelacesToAda = (
 export const txInEquals = (a: Cardano.TxIn, b: Cardano.TxIn) =>
   a.txId === b.txId && a.index === b.index;
 
-export const utxoKey = (utxo: Cardano.Utxo) =>
-  `${utxo[0].txId}#${utxo[0].index}`;
+/** Canonical outpoint identity — build BOTH sides of a set membership with this. */
+export const outpointKey = (txIn: Cardano.TxIn) => `${txIn.txId}#${txIn.index}`;
+
+export const utxoKey = (utxo: Cardano.Utxo) => outpointKey(utxo[0]);
 
 export const filterSpendableUtxos = (
   utxos: Cardano.Utxo[],
@@ -117,6 +121,45 @@ export const filterSpendableUtxos = (
   const unspendableSet = new Set(unspendable.map(utxoKey));
   return utxos.filter(utxo => !unspendableSet.has(utxoKey(utxo)));
 };
+
+/**
+ * The payment credential of a base, enterprise or pointer address; `undefined`
+ * for anything else (reward, Byron, unparseable).
+ */
+export const getPaymentCredential = (
+  address: Cardano.PaymentAddress,
+): Cardano.Credential | undefined => {
+  const parsed = Cardano.Address.fromString(address);
+  if (!parsed) return undefined;
+  return (
+    parsed.asBase()?.getPaymentCredential() ??
+    parsed.asEnterprise()?.getPaymentCredential() ??
+    parsed.asPointer()?.getPaymentCredential()
+  );
+};
+
+/**
+ * An input resolver that answers from `localUtxos` first and asks the
+ * provider only for inputs it does not hold. A provider error resolves to
+ * `null`, the same as an unknown input.
+ */
+export const createCombinedInputResolver = (
+  localUtxos: Cardano.Utxo[],
+  cardanoProvider: CardanoProvider,
+  context: CardanoProviderContext,
+): Cardano.InputResolver => ({
+  resolveInput: async (txIn: Cardano.TxIn): Promise<Cardano.TxOut | null> => {
+    const localMatch = localUtxos.find(([input]) => txInEquals(input, txIn));
+    if (localMatch) {
+      return localMatch[1];
+    }
+
+    const result = await cardanoProvider
+      .resolveInput(txIn, context)
+      .toPromise();
+    return result?.isOk() ? result.value : null;
+  },
+});
 
 export const createInputResolver = (
   utxos: Cardano.Utxo[],

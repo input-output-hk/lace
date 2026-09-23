@@ -1,15 +1,28 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
+import {
+  buildCip30SignTxWitnessSet,
+  countTransactionSignatures,
+} from '@lace-contract/cardano-context';
 import { DappId } from '@lace-contract/dapp-connector';
 import { ViewId } from '@lace-contract/module';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { Err, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { EMPTY, NEVER, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  NEVER,
+  of,
+  ReplaySubject,
+  Subject,
+} from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { CARDANO_DAPP_SIGN_TX_LOCATION } from '../src/browser/const';
 import {
   clearResolvedInputsOnSignTxClear,
   closeRequestedPopup,
+  closeRequestedSheet,
   connectCardanoDappConnectorApi,
   initializeSideEffects,
   promptCardanoAuthorizeDapp,
@@ -20,6 +33,7 @@ import { signData$, signTx$ } from '../src/browser/store/util';
 import type { ActionCreators, Selectors } from '../src';
 import type { SigningResult } from '../src/browser/store/util';
 import type { CardanoConfirmationRequest } from '../src/common/store/dependencies/create-confirmation-callback';
+import type * as CardanoContext from '@lace-contract/cardano-context';
 import type {
   AuthorizedDappsDataSlice,
   Dapp,
@@ -80,6 +94,17 @@ vi.mock('@cardano-sdk/key-management', async () => {
   };
 });
 
+vi.mock('@lace-contract/cardano-context', async () => {
+  const actual = await vi.importActual<typeof CardanoContext>(
+    '@lace-contract/cardano-context',
+  );
+  return {
+    ...actual,
+    buildCip30SignTxWitnessSet: vi.fn(actual.buildCip30SignTxWitnessSet),
+    countTransactionSignatures: vi.fn(actual.countTransactionSignatures),
+  };
+});
+
 vi.mock('@cardano-sdk/crypto', async () => {
   const actual = await vi.importActual('@cardano-sdk/crypto');
   return {
@@ -133,7 +158,7 @@ describe('side-effects-extension', () => {
       dappConnector: { selectAuthorizedDapps$: of({ Cardano: [] }) },
       cardanoContext: {
         selectChainId$: of(undefined),
-        selectAccountUtxos$: of({}),
+        selectCollateralOwnershipUtxos$: of({}),
         selectAvailableAccountUtxos$: of({}),
       },
       addresses: { selectAllAddresses$: of([]) },
@@ -242,6 +267,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
+        collateralRefusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
@@ -252,6 +278,7 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signTx',
+            collateralRefusal: null,
           }) as CardanoConfirmationRequest,
           selectOpenViews$: stateObservables.views.selectOpenViews$,
           actions: deps.actions,
@@ -286,6 +313,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
+        collateralRefusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
@@ -296,12 +324,103 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signTx',
+            collateralRefusal: null,
           }) as CardanoConfirmationRequest,
         }),
       );
     });
 
-    it('should block signTx requests when app is locked', () => {
+    it('queues a signing request that arrives mid-confirmation and serves it once the first settles', () => {
+      const deps = createDependencies();
+      connectCardanoDappConnectorApi(
+        createActionObservables() as unknown as ActionObservables<ActionCreators>,
+        createStateObservables() as unknown as StateObservables<Selectors>,
+        deps as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+
+      // A confirmation that stays open: the flow only completes when the user acts.
+      const firstFlow$ = new Subject<unknown>();
+      vi.mocked(signTx$).mockReturnValueOnce(
+        firstFlow$ as unknown as ReturnType<typeof signTx$>,
+      );
+
+      const requestSubject = new Subject<CardanoConfirmationRequest>();
+      deps.getHandleRequests()(requestSubject).subscribe();
+
+      const second = {
+        type: 'signTx' as const,
+        resolve: vi.fn(),
+        requestingDapp: mockDapp,
+        txHex: 'beefdead',
+        partialSign: false,
+      } as unknown as CardanoConfirmationRequest;
+
+      requestSubject.next({
+        type: 'signTx',
+        resolve: vi.fn(),
+        requestingDapp: mockDapp,
+        txHex: 'deadbeef',
+        partialSign: false,
+      } as unknown as CardanoConfirmationRequest);
+      requestSubject.next(second);
+
+      expect(signTx$).toHaveBeenCalledTimes(1);
+
+      firstFlow$.complete();
+
+      expect(signTx$).toHaveBeenCalledTimes(2);
+      expect(signTx$).toHaveBeenLastCalledWith(
+        expect.objectContaining({ request: second }),
+      );
+    });
+
+    it('refuses a queued request whose port dropped before its turn, without opening a prompt for it', () => {
+      const deps = createDependencies();
+      connectCardanoDappConnectorApi(
+        createActionObservables() as unknown as ActionObservables<ActionCreators>,
+        createStateObservables() as unknown as StateObservables<Selectors>,
+        deps as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+
+      const firstFlow$ = new Subject<unknown>();
+      vi.mocked(signTx$).mockReturnValueOnce(
+        firstFlow$ as unknown as ReturnType<typeof signTx$>,
+      );
+
+      const requestSubject = new Subject<CardanoConfirmationRequest>();
+      deps.getHandleRequests()(requestSubject).subscribe();
+
+      requestSubject.next({
+        type: 'signTx',
+        resolve: vi.fn(),
+        requestingDapp: mockDapp,
+        txHex: 'deadbeef',
+        partialSign: false,
+      } as unknown as CardanoConfirmationRequest);
+
+      // Replaying, like production's shareReplay: the drop lands while the
+      // request is queued, and must still be seen when its turn arrives.
+      const dropped$ = new ReplaySubject<void>(1);
+      const resolveQueued = vi.fn();
+      requestSubject.next({
+        type: 'signTx',
+        resolve: resolveQueued,
+        requestingDapp: mockDapp,
+        txHex: 'beefdead',
+        partialSign: false,
+        disconnected$: dropped$,
+      } as unknown as CardanoConfirmationRequest);
+
+      dropped$.next();
+      firstFlow$.complete();
+
+      expect(resolveQueued).toHaveBeenCalledWith({ outcome: 'disconnected' });
+      expect(signTx$).toHaveBeenCalledTimes(1);
+    });
+
+    it('routes signTx requests while the app is locked, so the popup can host the unlock prompt', () => {
       const actionObservables = createActionObservables();
       const stateObservables = {
         ...createStateObservables(),
@@ -328,13 +447,59 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
+        collateralRefusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
         partialSign: false,
       });
 
-      expect(signTx$).not.toHaveBeenCalled();
+      expect(signTx$).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            type: 'signTx',
+          }) as CardanoConfirmationRequest,
+        }),
+      );
+    });
+
+    it('routes signData requests while the app is locked', () => {
+      const actionObservables = createActionObservables();
+      const stateObservables = {
+        ...createStateObservables(),
+        appLock: {
+          isUnlocked$: of(false),
+        },
+      };
+      const deps = createDependencies();
+
+      connectCardanoDappConnectorApi(
+        actionObservables as unknown as ActionObservables<ActionCreators>,
+        stateObservables as unknown as StateObservables<Selectors>,
+        deps as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+
+      const handleRequests = deps.getHandleRequests();
+      const requestSubject = new Subject<CardanoConfirmationRequest>();
+
+      handleRequests(requestSubject).subscribe();
+
+      requestSubject.next({
+        type: 'signData',
+        resolve: vi.fn(),
+        requestingDapp: mockDapp,
+        signDataAddress: 'addr_test1',
+        signDataPayload: 'deadbeef',
+      } as unknown as CardanoConfirmationRequest);
+
+      expect(signData$).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            type: 'signData',
+          }) as CardanoConfirmationRequest,
+        }),
+      );
     });
 
     it('should route signData requests to signData$ utility', () => {
@@ -359,6 +524,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signData',
+        collateralRefusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         signDataAddress: 'addr_test1...',
@@ -369,6 +535,7 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signData',
+            collateralRefusal: null,
           }) as CardanoConfirmationRequest,
           selectOpenViews$: stateObservables.views.selectOpenViews$,
           actions: deps.actions,
@@ -450,7 +617,7 @@ describe('side-effects-extension', () => {
         dappConnector: { selectAuthorizedDapps$: of({ Cardano: [] }) },
         cardanoContext: {
           selectChainId$: of(CHAIN_ID),
-          selectAccountUtxos$: of({ [ACCOUNT_ID]: [ownUtxo] }),
+          selectCollateralOwnershipUtxos$: of({ [ACCOUNT_ID]: [ownUtxo] }),
           selectAvailableAccountUtxos$: of({ [ACCOUNT_ID]: [ownUtxo] }),
           selectAccountUnspendableUtxos$: of({}),
           selectRewardAccountDetails$: of({}),
@@ -558,7 +725,7 @@ describe('side-effects-extension', () => {
           ...createStateForSubmit(),
           cardanoContext: {
             ...createStateForSubmit().cardanoContext,
-            selectAccountUtxos$: of({}),
+            selectCollateralOwnershipUtxos$: of({}),
             selectAvailableAccountUtxos$: of({}),
           },
           addresses: { selectAllAddresses$: of([]) },
@@ -686,7 +853,7 @@ describe('side-effects-extension', () => {
       });
     });
 
-    describe('signTransaction signer factory errors', () => {
+    describe('signTransaction result reporting', () => {
       const CHAIN_ID = Cardano.ChainIds.Preprod;
       const ACCOUNT_ID = AccountId('acct-1');
       const WALLET_ID = WalletId('wallet-1');
@@ -721,6 +888,7 @@ describe('side-effects-extension', () => {
         cardanoContext: {
           selectChainId$: of(CHAIN_ID),
           selectAvailableAccountUtxos$: of({}),
+          selectCollateralOwnershipUtxos$: of({}),
           selectAccountUnspendableUtxos$: of({}),
           selectAccountTransactionHistory$: of({}),
           selectRewardAccountDetails$: of({}),
@@ -788,6 +956,67 @@ describe('side-effects-extension', () => {
         await expect(
           captured.signTransaction!('84a400', true, ORIGIN),
         ).rejects.toThrow('No signer factory registered');
+        expect(results).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
+
+        sub.unsubscribe();
+      });
+
+      it('emits error, not success, when the witness set fails to build after a successful sign', async () => {
+        const captured: {
+          signTransaction?: (
+            txCbor: string,
+            partialSign: boolean,
+            origin: string,
+          ) => Promise<string>;
+          signingResult$?: Subject<SigningResult>;
+        } = {};
+        const mockConnect = vi.fn(
+          (argument: {
+            signTransaction: (
+              txCbor: string,
+              partialSign: boolean,
+              origin: string,
+            ) => Promise<string>;
+            signingResult$: Subject<SigningResult>;
+          }) => {
+            captured.signTransaction = argument.signTransaction;
+            captured.signingResult$ = argument.signingResult$;
+            return EMPTY;
+          },
+        );
+        const deps = {
+          connectCardanoDappConnector: mockConnect,
+          actions: {},
+          authenticate: vi.fn().mockReturnValue(of(true)),
+          accessAuthSecret: vi.fn(),
+          cardanoProvider: { submitTx: vi.fn() },
+          signerFactory: {
+            canSign: () => true,
+            createTransactionSigner: () => ({
+              sign: () => of({ serializedTx: '84a400' }),
+            }),
+          },
+        };
+
+        vi.mocked(countTransactionSignatures).mockReturnValueOnce(1);
+        vi.mocked(buildCip30SignTxWitnessSet).mockImplementationOnce(() => {
+          throw new Error('witness set build failed');
+        });
+
+        const sideEffect$ = connectCardanoDappConnectorApi(
+          createActionObservables() as unknown as ActionObservables<ActionCreators>,
+          createStateForSignTx() as unknown as StateObservables<Selectors>,
+          deps as unknown as SideEffectDependencies &
+            WithLaceContext<Selectors, ActionCreators>,
+        );
+        const sub = sideEffect$.subscribe();
+
+        const results: SigningResult[] = [];
+        captured.signingResult$!.subscribe(result => results.push(result));
+
+        await expect(
+          captured.signTransaction!('84a400', true, ORIGIN),
+        ).rejects.toThrow('witness set build failed');
         expect(results).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
 
         sub.unsubscribe();
@@ -1757,6 +1986,268 @@ describe('side-effects-extension', () => {
     });
   });
 
+  describe('closeRequestedSheet', () => {
+    const runCloseRequested = (activeSheetPage: unknown) => {
+      const closeSheetRequested$ = new Subject<{
+        payload: { requestId?: string };
+      }>();
+      const emissions: unknown[] = [];
+      closeRequestedSheet(
+        { cardanoDappConnector: { closeSheetRequested$ } } as never,
+        { views: { getActiveSheetPage$: of(activeSheetPage) } } as never,
+        {
+          actions: {
+            views: {
+              setActiveSheetPage: (page: unknown) => ({
+                type: 'views/setActiveSheetPage',
+                payload: page,
+              }),
+            },
+          },
+        } as never,
+      ).subscribe(emission => emissions.push(emission));
+      return { closeSheetRequested$, emissions };
+    };
+
+    const sheetShowing = (requestId: string) => ({
+      route: 'SignTx',
+      params: { requestId },
+      targetViewId: 'side-panel-1',
+    });
+
+    // The side effect decides one task after the action arrives, so the
+    // assertion has to let that task run.
+    const settled = async () => new Promise(resolve => setTimeout(resolve, 0));
+
+    const dismissAction = { type: 'views/setActiveSheetPage', payload: null };
+
+    it('dismisses the sheet the asking request still holds', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested(
+        sheetShowing('request-a'),
+      );
+
+      closeSheetRequested$.next({ payload: { requestId: 'request-a' } });
+      await settled();
+
+      expect(emissions).toEqual([dismissAction]);
+    });
+
+    it('keeps the sheet a queued request has taken over', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested(
+        sheetShowing('request-b'),
+      );
+
+      closeSheetRequested$.next({ payload: { requestId: 'request-a' } });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('keeps an unrelated sheet that names no request', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested({
+        route: 'AuthorizeDapp',
+        params: { dapp: { origin: 'https://dapp.example' } },
+        targetViewId: 'side-panel-1',
+      });
+
+      closeSheetRequested$.next({ payload: { requestId: 'request-a' } });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('emits nothing when no sheet is presented', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested(null);
+
+      closeSheetRequested$.next({ payload: { requestId: 'request-a' } });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('ignores a close that names no request', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested(
+        sheetShowing('request-a'),
+      );
+
+      closeSheetRequested$.next({ payload: {} });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('keeps an unrelated sheet from a close that also names no request', async () => {
+      const { closeSheetRequested$, emissions } = runCloseRequested({
+        route: 'AuthorizeDapp',
+        params: { dapp: { origin: 'https://dapp.example' } },
+        targetViewId: 'side-panel-1',
+      });
+
+      closeSheetRequested$.next({ payload: {} });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('decides after the queue has had a task to claim the sheet', async () => {
+      // The slot still holds the answered request when the close arrives, and
+      // the successor claims it a task later — the real ordering that makes an
+      // arrival-time read dismiss the sheet the successor was just given.
+      const activeSheetPage$ = new BehaviorSubject<unknown>(
+        sheetShowing('request-a'),
+      );
+      const closeSheetRequested$ = new Subject<{
+        payload: { requestId?: string };
+      }>();
+      const emissions: unknown[] = [];
+      closeRequestedSheet(
+        { cardanoDappConnector: { closeSheetRequested$ } } as never,
+        { views: { getActiveSheetPage$: activeSheetPage$ } } as never,
+        {
+          actions: {
+            views: {
+              setActiveSheetPage: (page: unknown) => ({
+                type: 'views/setActiveSheetPage',
+                payload: page,
+              }),
+            },
+          },
+        } as never,
+      ).subscribe(emission => emissions.push(emission));
+
+      closeSheetRequested$.next({ payload: { requestId: 'request-a' } });
+      activeSheetPage$.next(sheetShowing('request-b'));
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+  });
+
+  describe('closeRequestedPopup', () => {
+    const popupViewId = ViewId('sign-tx-popup');
+    const signTxPopup = {
+      id: popupViewId,
+      type: 'popupWindow' as const,
+      location: CARDANO_DAPP_SIGN_TX_LOCATION,
+    };
+
+    const runCloseRequested = (
+      openViews: unknown[],
+      pendingSignTxRequest: { requestId: string } | null = null,
+    ) => {
+      const closePopupRequested$ = new Subject<{
+        payload: { location: string; requestId?: string };
+      }>();
+      const emissions: unknown[] = [];
+      closeRequestedPopup(
+        { cardanoDappConnector: { closePopupRequested$ } } as never,
+        {
+          views: { selectOpenViews$: of(openViews) },
+          cardanoDappConnector: {
+            selectPendingSignTxRequest$: of(pendingSignTxRequest),
+            selectPendingSignDataRequest$: of(null),
+          },
+        } as never,
+        {
+          actions: {
+            views: {
+              closeView: (id: unknown) => ({
+                type: 'views/closeView',
+                payload: id,
+              }),
+            },
+          },
+        } as never,
+      ).subscribe(emission => emissions.push(emission));
+      return { closePopupRequested$, emissions };
+    };
+
+    // The side effect decides one task after the action arrives, so the
+    // assertion has to let that task run.
+    const settled = async () => new Promise(resolve => setTimeout(resolve, 0));
+
+    const closeViewAction = { type: 'views/closeView', payload: popupViewId };
+
+    it('closes the popup window open at the requested location', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested([
+        { id: ViewId('side-panel'), type: 'sidePanel', location: '/' },
+        signTxPopup,
+      ]);
+
+      closePopupRequested$.next({
+        payload: { location: CARDANO_DAPP_SIGN_TX_LOCATION },
+      });
+      await settled();
+
+      expect(emissions).toEqual([closeViewAction]);
+    });
+
+    it('emits nothing when no popup window is open at that location', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested([
+        {
+          id: ViewId('side-panel'),
+          type: 'sidePanel',
+          location: CARDANO_DAPP_SIGN_TX_LOCATION,
+        },
+      ]);
+
+      closePopupRequested$.next({
+        payload: { location: CARDANO_DAPP_SIGN_TX_LOCATION },
+      });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('keeps the window open for a queued request that has taken it over', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-b' },
+      );
+
+      closePopupRequested$.next({
+        payload: {
+          location: CARDANO_DAPP_SIGN_TX_LOCATION,
+          requestId: 'request-a',
+        },
+      });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('closes the window when the request that asked still holds it', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-a' },
+      );
+
+      closePopupRequested$.next({
+        payload: {
+          location: CARDANO_DAPP_SIGN_TX_LOCATION,
+          requestId: 'request-a',
+        },
+      });
+      await settled();
+
+      expect(emissions).toEqual([closeViewAction]);
+    });
+
+    it('closes the window for a view that never showed a request', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-b' },
+      );
+
+      closePopupRequested$.next({
+        payload: { location: CARDANO_DAPP_SIGN_TX_LOCATION },
+      });
+      await settled();
+
+      expect(emissions).toEqual([closeViewAction]);
+    });
+  });
+
   describe('initializeSideEffects', () => {
     it('should return an array containing both extension side effects', () => {
       // initializeSideEffects doesn't use props or deps, so we can pass empty objects
@@ -1771,12 +2262,14 @@ describe('side-effects-extension', () => {
       // resolveForeignTransactionInputs: resolves foreign inputs via Blockfrost
       // clearResolvedInputsOnSignTxClear: clears resolved inputs when signTx request is cleared
       // closeRequestedPopup: resolves closePopupRequested into views.closeView
-      expect(sideEffects).toHaveLength(5);
+      // closeRequestedSheet: resolves closeSheetRequested into setActiveSheetPage
+      expect(sideEffects).toHaveLength(6);
       expect(sideEffects).toContain(connectCardanoDappConnectorApi);
       expect(sideEffects).toContain(promptCardanoAuthorizeDapp);
       expect(sideEffects).toContain(resolveForeignTransactionInputs);
       expect(sideEffects).toContain(clearResolvedInputsOnSignTxClear);
       expect(sideEffects).toContain(closeRequestedPopup);
+      expect(sideEffects).toContain(closeRequestedSheet);
     });
 
     it('should return the same side effect function references', () => {

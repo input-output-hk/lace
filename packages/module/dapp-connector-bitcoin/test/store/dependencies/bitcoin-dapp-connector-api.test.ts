@@ -31,6 +31,16 @@ const SECOND_ACCOUNT_ADDRESS = 'bc1qaccountaddress2';
 const VALID_PSBT_BASE64 = 'cHNidP8BAAoAAAAAAAAAAAAA';
 const VALID_PSBT_HEX = Buffer.from(VALID_PSBT_BASE64, 'base64').toString('hex');
 
+/**
+ * What a dApp is told when the wallet could not show its confirmation prompt.
+ * Bitcoin's outcome union has no 'disconnected', so this is the whole
+ * unanswered-prompt contract here — and `InternalError` alone cannot carry it,
+ * which is why these tests assert the message and not just the code.
+ */
+const PROMPT_UNAVAILABLE_INFO =
+  'The wallet could not display its confirmation prompt, so the request was ' +
+  'not approved. Please try again.';
+
 /** signPsbt speaks hex at the dApp boundary; the wallet works in base64. */
 const asPsbtHex = (psbtBase64: string): string =>
   Buffer.from(psbtBase64, 'base64').toString('hex');
@@ -151,7 +161,7 @@ const createDependencies = (
     origin === TEST_DAPP_ORIGIN ? ACCOUNT_ID : undefined,
   ),
   userConfirmationRequest: vi.fn(async () => ({
-    isConfirmed: true,
+    outcome: 'confirmed' as const,
   })) as unknown as BitcoinConfirmationCallback,
   signMessage: vi.fn(async () => 'deadbeef'),
   signPsbt: vi.fn(async (psbtBase64: string) => psbtBase64),
@@ -482,7 +492,7 @@ describe('BitcoinDappConnectorApi', () => {
       const { api } = createApi({
         signMessage,
         userConfirmationRequest: vi.fn(async () => ({
-          isConfirmed: false,
+          outcome: 'rejected' as const,
         })) as unknown as BitcoinConfirmationCallback,
       });
 
@@ -490,6 +500,23 @@ describe('BitcoinDappConnectorApi', () => {
         api.signMessage('hello', createMockSenderContext()),
         BitcoinAPIErrorCode.Refused,
         'User rejected message signing',
+      );
+      expect(signMessage).not.toHaveBeenCalled();
+    });
+
+    it('rejects with InternalError when the prompt could not be shown and never calls the signer', async () => {
+      const signMessage = vi.fn();
+      const { api } = createApi({
+        signMessage,
+        userConfirmationRequest: vi.fn(async () => ({
+          outcome: 'unavailable' as const,
+        })) as unknown as BitcoinConfirmationCallback,
+      });
+
+      await expectApiError(
+        api.signMessage('hello', createMockSenderContext()),
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
       );
       expect(signMessage).not.toHaveBeenCalled();
     });
@@ -662,7 +689,7 @@ describe('BitcoinDappConnectorApi', () => {
     it('rejects with Refused when the user declines and never signs', async () => {
       const { api, dependencies } = createApi({
         userConfirmationRequest: vi.fn(async () => ({
-          isConfirmed: false,
+          outcome: 'rejected' as const,
         })) as unknown as BitcoinConfirmationCallback,
       });
 
@@ -670,6 +697,21 @@ describe('BitcoinDappConnectorApi', () => {
         api.signPsbt(VALID_PSBT_HEX, createMockSenderContext()),
         BitcoinAPIErrorCode.Refused,
         'User rejected PSBT signing',
+      );
+      expect(dependencies.signPsbt).not.toHaveBeenCalled();
+    });
+
+    it('rejects with InternalError when the prompt could not be shown and never signs', async () => {
+      const { api, dependencies } = createApi({
+        userConfirmationRequest: vi.fn(async () => ({
+          outcome: 'unavailable' as const,
+        })) as unknown as BitcoinConfirmationCallback,
+      });
+
+      await expectApiError(
+        api.signPsbt(VALID_PSBT_HEX, createMockSenderContext()),
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
       );
       expect(dependencies.signPsbt).not.toHaveBeenCalled();
     });
@@ -968,7 +1010,7 @@ describe('BitcoinDappConnectorApi', () => {
     it('rejects with Refused and never confirms when the user declines', async () => {
       const { api, dependencies } = createApi({
         userConfirmationRequest: vi.fn(async () => ({
-          isConfirmed: false,
+          outcome: 'rejected' as const,
         })) as unknown as BitcoinConfirmationCallback,
       });
 
@@ -976,6 +1018,21 @@ describe('BitcoinDappConnectorApi', () => {
         api.sendBitcoin('bc1qrecipient', 1234, createMockSenderContext()),
         BitcoinAPIErrorCode.Refused,
         'User rejected the transaction',
+      );
+      expect(dependencies.confirmSendTx).not.toHaveBeenCalled();
+    });
+
+    it('rejects with InternalError when the prompt could not be shown and never confirms', async () => {
+      const { api, dependencies } = createApi({
+        userConfirmationRequest: vi.fn(async () => ({
+          outcome: 'unavailable' as const,
+        })) as unknown as BitcoinConfirmationCallback,
+      });
+
+      await expectApiError(
+        api.sendBitcoin('bc1qrecipient', 1234, createMockSenderContext()),
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
       );
       expect(dependencies.confirmSendTx).not.toHaveBeenCalled();
     });

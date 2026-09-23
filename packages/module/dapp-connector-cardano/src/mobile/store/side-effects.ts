@@ -5,9 +5,11 @@ import {
   cardanoAccountUnspendableUtxos$,
   cardanoAddresses$,
   cardanoChainId$,
+  cardanoRewardAccountDetails$,
+  CollateralOwnershipError,
+  collateralRefusalMessage,
   countTransactionSignatures,
   isCardanoAccount,
-  cardanoRewardAccountDetails$,
   UnknownSignWithError,
 } from '@lace-contract/cardano-context';
 import { DappId } from '@lace-contract/dapp-connector';
@@ -147,6 +149,7 @@ export const processWebViewMessage: SideEffect = (
     cardanoContext: {
       selectAccountTransactionHistory$,
       selectAvailableAccountUtxos$,
+      selectCollateralOwnershipUtxos$,
     },
     addresses: { selectAllAddresses$ },
     wallets: { selectActiveNetworkAccounts$, selectAll$ },
@@ -196,6 +199,10 @@ export const processWebViewMessage: SideEffect = (
         const handlerDeps = {
           authorizedDapps$: of(authorizedDapps ?? { Cardano: [] }),
           accountUtxos$: selectAvailableAccountUtxos$,
+          // Ownership authority for the pre-consent guard: the full settled
+          // set, NOT the available/spendable `accountUtxos$` above.
+          ownershipUtxos$: selectCollateralOwnershipUtxos$,
+          resolveChainedInputs: chainedTxOutputCache.resolveChainedInputs,
           accountUnspendableUtxos$: cardanoAccountUnspendableUtxos$,
           rewardAccountDetails$: cardanoRewardAccountDetails$,
           addresses$: cardanoAddresses$,
@@ -307,6 +314,9 @@ export const processWebViewMessage: SideEffect = (
                   dapp: dappInfo,
                   txHex: result.txHex ?? '',
                   partialSign: result.partialSign ?? false,
+                  // Evaluated pre-sheet by the handler (LW-15498); the sheet
+                  // renders the refused state off this slot.
+                  collateralRefusal: result.collateralRefusal ?? null,
                 };
 
                 NavigationControls.navigate(SheetRoutes.SignTx, {
@@ -315,6 +325,32 @@ export const processWebViewMessage: SideEffect = (
                   txHex: pendingSignTxRequest.txHex,
                   partialSign: pendingSignTxRequest.partialSign,
                 });
+
+                // A refused request is answered NOW, unconditionally, with the
+                // extension's code and sentence; the sheet is presentation only.
+                // The bridge keeps this response queued (pending id) until the
+                // sheet clears it on dismissal -- see handleSignTxRejection.
+                if (pendingSignTxRequest.collateralRefusal) {
+                  const refusedResponse: WebViewResponse = {
+                    id: requestId,
+                    success: false,
+                    error: {
+                      code: TxSignErrorCode.ProofGeneration,
+                      info: collateralRefusalMessage(
+                        pendingSignTxRequest.collateralRefusal,
+                      ),
+                    },
+                    timestamp: Date.now(),
+                  };
+                  return of(
+                    actions.cardanoDappConnector.setWebViewResponse(
+                      refusedResponse,
+                    ),
+                    actions.cardanoDappConnector.setPendingSignTxRequest(
+                      pendingSignTxRequest,
+                    ),
+                  );
+                }
 
                 return of(
                   actions.cardanoDappConnector.setPendingSignTxRequest(
@@ -772,7 +808,11 @@ export const handleSignTxConfirmation: SideEffect = (
     },
     wallets: { selectActiveNetworkAccounts$, selectAll$ },
     addresses: { selectAllAddresses$ },
-    cardanoContext: { selectChainId$, selectAvailableAccountUtxos$ },
+    cardanoContext: {
+      selectChainId$,
+      selectAvailableAccountUtxos$,
+      selectCollateralOwnershipUtxos$,
+    },
   },
   { actions, accessAuthSecret, authenticate, signerFactory, cardanoProvider },
 ) => {
@@ -785,6 +825,7 @@ export const handleSignTxConfirmation: SideEffect = (
       selectAllAddresses$,
       selectChainId$,
       selectAvailableAccountUtxos$,
+      selectCollateralOwnershipUtxos$,
     ),
     filter(([, pendingRequest]) => pendingRequest !== null),
     switchMap(
@@ -797,6 +838,7 @@ export const handleSignTxConfirmation: SideEffect = (
         allAddresses,
         chainId,
         availableAccountUtxos,
+        accountUtxos,
       ]) => {
         const {
           requestId,
@@ -897,12 +939,17 @@ export const handleSignTxConfirmation: SideEffect = (
         };
 
         const localUtxos = availableAccountUtxos[accountId] ?? [];
-        const resolutionUtxos = [
-          ...localUtxos,
-          ...chainedTxOutputCache.resolveChainedInputs(
-            txHex,
-            new Set<string>(knownAddresses.map(({ address }) => address)),
-          ),
+        const chainedOwnUtxos = chainedTxOutputCache.resolveChainedInputs(
+          txHex,
+          new Set<string>(knownAddresses.map(({ address }) => address)),
+        );
+        const resolutionUtxos = [...localUtxos, ...chainedOwnUtxos];
+
+        // Settled, not the available/spendable view above: that view
+        // subtracts exactly the collateral-reserved UTxOs.
+        const ownershipUtxos = [
+          ...(accountUtxos[accountId] ?? []),
+          ...chainedOwnUtxos,
         ];
 
         return from(
@@ -951,6 +998,11 @@ export const handleSignTxConfirmation: SideEffect = (
               accountId,
               knownAddresses,
               utxo: resolutionUtxos,
+              collateralInputResolver: createCombinedInputResolver(
+                ownershipUtxos,
+                cardanoProvider,
+                { chainId },
+              ),
               auth: signerAuthFromPrompt(
                 { accessAuthSecret, authenticate },
                 {
@@ -1007,6 +1059,25 @@ export const handleSignTxConfirmation: SideEffect = (
                 );
               }),
               catchError(error => {
+                // The signing-boundary guard's refusal keeps the extension's
+                // code (LW-15498): a collateral refusal is never a wallet crash.
+                if (error instanceof CollateralOwnershipError) {
+                  const refusedResponse: WebViewResponse = {
+                    id: requestId,
+                    success: false,
+                    error: {
+                      code: TxSignErrorCode.ProofGeneration,
+                      info: error.message,
+                    },
+                    timestamp: Date.now(),
+                  };
+                  return of(
+                    actions.cardanoDappConnector.setWebViewResponse(
+                      refusedResponse,
+                    ),
+                    actions.cardanoDappConnector.clearPendingSignTxRequest(),
+                  );
+                }
                 if (error instanceof AuthenticationCancelledError) {
                   const cancelResponse: WebViewResponse = {
                     id: requestId,
@@ -1091,6 +1162,17 @@ export const handleSignTxRejection: SideEffect = (
     withLatestFrom(selectPendingSignTxRequest$),
     filter(([, pendingRequest]) => pendingRequest !== null),
     switchMap(([, pendingRequest]) => {
+      // A refused request was answered when its sheet opened; dismissing the
+      // sheet settles nothing for the dApp. Retire the queued answer the bridge
+      // kept for the result view instead of sending a contradicting decline.
+      if (pendingRequest!.collateralRefusal) {
+        return of(
+          actions.cardanoDappConnector.clearWebViewResponse(
+            pendingRequest!.requestId,
+          ),
+          actions.cardanoDappConnector.clearPendingSignTxRequest(),
+        );
+      }
       const errorResponse: WebViewResponse = {
         id: pendingRequest!.requestId,
         success: false,
@@ -1130,7 +1212,11 @@ export const resolveForeignTransactionInputsMobile: SideEffect = (
 ) =>
   createResolveForeignInputsFlow({
     triggerAction$: setPendingSignTxRequest$.pipe(
-      filter(({ payload }) => payload !== null),
+      // A refused request is never reviewed and renders no transaction value,
+      // so its hostile CBOR must not drive provider input resolution either.
+      filter(
+        ({ payload }) => payload !== null && payload.collateralRefusal === null,
+      ),
     ),
     getTxHex: ({ payload }) => payload!.txHex,
     selectAccountUtxos$,

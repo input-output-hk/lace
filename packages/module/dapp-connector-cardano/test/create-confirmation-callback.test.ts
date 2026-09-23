@@ -1,12 +1,10 @@
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  createCardanoConfirmationCallback,
-  type CardanoConfirmationRequest,
-  type CardanoConfirmationResult,
-} from '../src/common/store/dependencies/create-confirmation-callback';
+import { createCardanoConfirmationCallback } from '../src/common/store/dependencies/create-confirmation-callback';
 
+import type { CardanoConfirmationRequest } from '../src/common/store/dependencies/create-confirmation-callback';
+import type { DisconnectEvent } from '@lace-lib/extension-messaging';
 import type { Subscriber, Observable } from 'rxjs';
 import type { Runtime } from 'webextension-polyfill';
 
@@ -29,6 +27,30 @@ const createMockSender = (
   ...overrides,
 });
 
+const senderWithTabId = (id: number): Runtime.MessageSender => {
+  const base = createMockSender();
+  return { ...base, tab: base.tab ? { ...base.tab, id } : undefined };
+};
+
+const senderWithFrame = (
+  tabId: number,
+  frameId: number,
+): Runtime.MessageSender => {
+  const base = createMockSender();
+  return {
+    ...base,
+    frameId,
+    tab: base.tab ? { ...base.tab, id: tabId } : undefined,
+  };
+};
+
+const createDisconnectEvent = (
+  sender: Runtime.MessageSender | undefined,
+): DisconnectEvent => ({
+  disconnected: { sender, postMessage: () => {} },
+  remaining: [],
+});
+
 const createMockHandleRequests = (
   emittedRequests: CardanoConfirmationRequest[],
   resolveWith: (request: CardanoConfirmationRequest) => void,
@@ -45,9 +67,11 @@ const createMockHandleRequests = (
 describe('createCardanoConfirmationCallback', () => {
   let mockSubscriber: Subscriber<unknown>;
   let emittedRequests: CardanoConfirmationRequest[];
+  let portDisconnected$: Subject<DisconnectEvent>;
 
   beforeEach(() => {
     emittedRequests = [];
+    portDisconnected$ = new Subject<DisconnectEvent>();
     mockSubscriber = {
       next: vi.fn(),
       error: vi.fn(),
@@ -60,6 +84,7 @@ describe('createCardanoConfirmationCallback', () => {
       const result = createCardanoConfirmationCallback(
         () => EMPTY,
         mockSubscriber,
+        portDisconnected$,
       );
 
       expect(typeof result.callback).toBe('function');
@@ -74,7 +99,11 @@ describe('createCardanoConfirmationCallback', () => {
         },
       );
 
-      createCardanoConfirmationCallback(handleRequests, mockSubscriber);
+      createCardanoConfirmationCallback(
+        handleRequests,
+        mockSubscriber,
+        portDisconnected$,
+      );
 
       expect(handleRequests).toHaveBeenCalled();
     });
@@ -84,27 +113,24 @@ describe('createCardanoConfirmationCallback', () => {
     it('creates a pending Promise for connect requests', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          // Simulate user confirming - connect doesn't need accessAuthSecret
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       const result = await callback(createMockSender(), 'connect');
 
-      expect(result.isConfirmed).toBe(true);
+      expect(result.outcome).toBe('confirmed');
     });
 
     it('includes dApp information from sender', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback(createMockSender(), 'connect');
@@ -120,16 +146,15 @@ describe('createCardanoConfirmationCallback', () => {
     it('handles rejection', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: false,
-          });
+          request.resolve({ outcome: 'rejected' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       const result = await callback(createMockSender(), 'connect');
 
-      expect(result.isConfirmed).toBe(false);
+      expect(result.outcome).toBe('rejected');
     });
   });
 
@@ -137,11 +162,10 @@ describe('createCardanoConfirmationCallback', () => {
     it('includes txHex and partialSign in request', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: CardanoConfirmationResult) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback(createMockSender(), 'signTx', {
@@ -153,14 +177,13 @@ describe('createCardanoConfirmationCallback', () => {
       expect(emittedRequests[0].partialSign).toBe(false);
     });
 
-    it('returns isConfirmed true when confirmed', async () => {
+    it('returns confirmed outcome when confirmed', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: CardanoConfirmationResult) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       const result = await callback(createMockSender(), 'signTx', {
@@ -168,17 +191,16 @@ describe('createCardanoConfirmationCallback', () => {
         partialSign: false,
       });
 
-      expect(result.isConfirmed).toBe(true);
+      expect(result.outcome).toBe('confirmed');
     });
 
     it('handles partialSign true', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: CardanoConfirmationResult) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback(createMockSender(), 'signTx', {
@@ -194,11 +216,10 @@ describe('createCardanoConfirmationCallback', () => {
     it('includes address and payload in request', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: CardanoConfirmationResult) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback(createMockSender(), 'signData', {
@@ -210,14 +231,13 @@ describe('createCardanoConfirmationCallback', () => {
       expect(emittedRequests[0].signDataPayload).toBe('deadbeef');
     });
 
-    it('returns isConfirmed true when confirmed', async () => {
+    it('returns confirmed outcome when confirmed', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: CardanoConfirmationResult) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       const result = await callback(createMockSender(), 'signData', {
@@ -225,7 +245,199 @@ describe('createCardanoConfirmationCallback', () => {
         payload: 'deadbeef',
       });
 
-      expect(result.isConfirmed).toBe(true);
+      expect(result.outcome).toBe('confirmed');
+    });
+  });
+
+  describe('port disconnect', () => {
+    it('resolves disconnected when the matching port disconnects', async () => {
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            // Mirror util.ts: cancel the pending confirmation on disconnect.
+            request.disconnected$?.subscribe(() => {
+              request.resolve({ outcome: 'disconnected' });
+            });
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      const promise = callback(createMockSender(), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(createMockSender()));
+
+      const result = await promise;
+      expect(result.outcome).toBe('disconnected');
+    });
+
+    it('ignores a disconnect from a different port', () => {
+      const disconnectSpy = vi.fn();
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            request.disconnected$?.subscribe(disconnectSpy);
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      void callback(senderWithTabId(1), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(senderWithTabId(999)));
+
+      expect(disconnectSpy).not.toHaveBeenCalled();
+    });
+
+    it('resolves disconnected when the same tab and frame disconnects', async () => {
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            request.disconnected$?.subscribe(() => {
+              request.resolve({ outcome: 'disconnected' });
+            });
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      const promise = callback(senderWithFrame(7, 0), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(senderWithFrame(7, 0)));
+
+      const result = await promise;
+      expect(result.outcome).toBe('disconnected');
+    });
+
+    it('ignores a disconnect from a different frame in the same tab', () => {
+      const disconnectSpy = vi.fn();
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            request.disconnected$?.subscribe(disconnectSpy);
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      void callback(senderWithFrame(7, 0), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(senderWithFrame(7, 1)));
+
+      expect(disconnectSpy).not.toHaveBeenCalled();
+    });
+
+    it('emits at most once and never completes', () => {
+      const next = vi.fn();
+      const complete = vi.fn();
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            request.disconnected$?.subscribe({ next, complete });
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      void callback(senderWithTabId(1), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(senderWithTabId(1)));
+      portDisconnected$.next(createDisconnectEvent(senderWithTabId(1)));
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(complete).not.toHaveBeenCalled();
+    });
+
+    it('replays the drop to a consumer that subscribes after it', () => {
+      const late = vi.fn();
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => emittedRequests.push(request));
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      void callback(senderWithTabId(1), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      portDisconnected$.next(createDisconnectEvent(senderWithTabId(1)));
+      emittedRequests[0].disconnected$?.subscribe(late);
+
+      expect(late).toHaveBeenCalledTimes(1);
+    });
+
+    it('releases the wallet-api subscription once the request resolves', async () => {
+      const { callback } = createCardanoConfirmationCallback(
+        createMockHandleRequests(emittedRequests, request => {
+          request.resolve({ outcome: 'rejected' });
+        }),
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      await callback(senderWithTabId(1), 'signTx', {
+        txHex: 'abcd1234',
+        partialSign: false,
+      });
+
+      expect(portDisconnected$.observed).toBe(false);
+    });
+
+    it('never fires disconnect when the sender has no tab id', () => {
+      const disconnectSpy = vi.fn();
+      const { callback } = createCardanoConfirmationCallback(
+        (request$: Observable<CardanoConfirmationRequest>) => {
+          request$.subscribe(request => {
+            emittedRequests.push(request);
+            request.disconnected$?.subscribe(disconnectSpy);
+          });
+          return of(undefined);
+        },
+        mockSubscriber,
+        portDisconnected$,
+      );
+
+      void callback({ url: 'https://test.com' }, 'connect');
+
+      portDisconnected$.next(
+        createDisconnectEvent({ url: 'https://test.com' }),
+      );
+
+      expect(disconnectSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -233,11 +445,10 @@ describe('createCardanoConfirmationCallback', () => {
     it('handles sender without tab information', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback({ url: 'https://test.com' }, 'connect');
@@ -249,11 +460,10 @@ describe('createCardanoConfirmationCallback', () => {
     it('handles sender without URL', async () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback({}, 'connect');
@@ -263,19 +473,18 @@ describe('createCardanoConfirmationCallback', () => {
     });
 
     it('handles multiple concurrent requests', async () => {
-      const resolvers: Array<(result: { isConfirmed: boolean }) => void> = [];
+      const resolvers: Array<CardanoConfirmationRequest['resolve']> = [];
 
       const { callback } = createCardanoConfirmationCallback(
         (request$: Observable<CardanoConfirmationRequest>) => {
           request$.subscribe(request => {
             emittedRequests.push(request);
-            resolvers.push(
-              request.resolve as (result: { isConfirmed: boolean }) => void,
-            );
+            resolvers.push(request.resolve);
           });
           return of(undefined);
         },
         mockSubscriber,
+        portDisconnected$,
       );
 
       const promise1 = callback(
@@ -290,13 +499,13 @@ describe('createCardanoConfirmationCallback', () => {
       expect(emittedRequests).toHaveLength(2);
 
       // Resolve in reverse order
-      resolvers[1]({ isConfirmed: false });
-      resolvers[0]({ isConfirmed: true });
+      resolvers[1]({ outcome: 'rejected' });
+      resolvers[0]({ outcome: 'confirmed' });
 
       const [result1, result2] = await Promise.all([promise1, promise2]);
 
-      expect(result1.isConfirmed).toBe(true);
-      expect(result2.isConfirmed).toBe(false);
+      expect(result1.outcome).toBe('confirmed');
+      expect(result2.outcome).toBe('rejected');
     });
   });
 
@@ -305,11 +514,10 @@ describe('createCardanoConfirmationCallback', () => {
       const { callback } = createCardanoConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           expect(request.type).toBe('connect');
-          (request.resolve as (r: { isConfirmed: boolean }) => void)({
-            isConfirmed: true,
-          });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
+        portDisconnected$,
       );
 
       await callback(createMockSender(), 'connect');
@@ -328,6 +536,7 @@ describe('createCardanoConfirmationCallback', () => {
           return of(undefined);
         },
         mockSubscriber,
+        portDisconnected$,
       );
 
       // Call shutdown before making any requests
@@ -353,6 +562,7 @@ describe('createCardanoConfirmationCallback', () => {
       const { shutdown } = createCardanoConfirmationCallback(
         () => of(undefined),
         mockSubscriber,
+        portDisconnected$,
       );
 
       // Should not throw

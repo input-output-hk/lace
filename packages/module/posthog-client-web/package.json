@@ -1,0 +1,17 @@
+{
+  "name": "@lace-module/posthog-client-web",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-contract/module": "*",
+    "@lace-contract/posthog": "*",
+    "@lace-lib/util-store": "*",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

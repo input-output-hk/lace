@@ -10,7 +10,10 @@ import {
 
 import { spacing } from '../../../design-tokens';
 import { Text, Box, Row } from '../../atoms';
-import { NavigationHeader } from '../../molecules';
+import {
+  HardwareWalletRestoreWarning,
+  NavigationHeader,
+} from '../../molecules';
 import {
   useAppForm,
   mnemonicFormOptions as defaultMnemonicFormOptions,
@@ -122,6 +125,10 @@ export const OnboardingRestoreWallet = ({
                         {instructionText}
                       </Text.XS>
 
+                      <View style={styles.warningWrapper}>
+                        <HardwareWalletRestoreWarning />
+                      </View>
+
                       {/* In normal flow, never absolute: the callout reserves
                           its own space so it cannot occlude the input below. */}
                       {callout && (
@@ -180,6 +187,9 @@ const createStyles = () =>
     instructionText: {
       marginBottom: spacing.XXL,
       paddingHorizontal: spacing.M,
+    },
+    warningWrapper: {
+      marginBottom: spacing.XXL,
     },
     calloutWrapper: {
       marginBottom: spacing.XXL,

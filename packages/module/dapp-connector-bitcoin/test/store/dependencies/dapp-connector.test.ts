@@ -294,7 +294,7 @@ describe('initializeBitcoinDappConnectorSideEffectDependencies', () => {
         request$.pipe(
           tap(request => {
             requests.push(request);
-            request.resolve({ isConfirmed: true });
+            request.resolve({ outcome: 'confirmed' });
           }),
           map(() => 'handled'),
         ),

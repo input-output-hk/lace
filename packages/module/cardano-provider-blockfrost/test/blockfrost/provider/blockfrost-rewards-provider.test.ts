@@ -1,10 +1,18 @@
 import { Cardano } from '@cardano-sdk/core';
 import { CardanoRewardAccount } from '@lace-contract/cardano-context';
 import { BigNumber } from '@lace-lib/util';
-import { HttpClientError } from '@lace-lib/util-provider';
+import {
+  measureRequestsUnderRetry,
+  PERMANENT_STATUS,
+  RETRIABLE_STATUS,
+} from '@lace-lib/util-dev';
+import {
+  HttpClientError,
+  PROVIDER_REQUEST_RETRY_CONFIG,
+} from '@lace-lib/util-provider';
 import { firstValueFrom } from 'rxjs';
 import { dummyLogger } from 'ts-log';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { BlockfrostRewardsProvider } from '../../../src/blockfrost';
 import { mockResponses } from '../util';
@@ -133,6 +141,109 @@ describe('BlockfrostRewardsProvider', () => {
       if (result.isOk()) {
         expect(result.value).toEqual([]);
       }
+    });
+  });
+
+  describe('getAccountRewards under retry', () => {
+    const issued: string[] = [];
+    const firstPage = `accounts/${rewardAccount}/rewards?order=desc&page=1&count=100`;
+    const secondPage = `accounts/${rewardAccount}/rewards?order=desc&page=2&count=100`;
+    let respond: (endpoint: string) => Promise<{ data: unknown }>;
+    let retryProvider: BlockfrostRewardsProvider;
+
+    const recordingClient = {
+      request: async (endpoint: string) => {
+        issued.push(endpoint);
+        return respond(endpoint);
+      },
+    } as unknown as HttpClient;
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      issued.length = 0;
+      retryProvider = new BlockfrostRewardsProvider(
+        recordingClient,
+        dummyLogger,
+      );
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('re-issues its first page on every retry attempt', async () => {
+      respond = async () => {
+        throw new HttpClientError(RETRIABLE_STATUS, 'unhealthy');
+      };
+
+      const attempts = await measureRequestsUnderRetry({
+        call: () => retryProvider.getAccountRewards({ rewardAccount }),
+        requests: () => issued,
+        retry: PROVIDER_REQUEST_RETRY_CONFIG,
+      });
+
+      expect(attempts).toEqual(Array.from({ length: 4 }, () => firstPage));
+    });
+
+    it('re-walks the pagination it had reached on every retry attempt', async () => {
+      const fullPage = Array.from({ length: 100 }, (_, index) => ({
+        epoch: 351 - index,
+        amount: '1000000',
+        pool_id: mockRewards[0].pool_id,
+      }));
+      respond = async endpoint => {
+        if (endpoint.includes('page=1')) return { data: fullPage };
+        throw new HttpClientError(RETRIABLE_STATUS, 'unhealthy');
+      };
+
+      const attempts = await measureRequestsUnderRetry({
+        call: () => retryProvider.getAccountRewards({ rewardAccount }),
+        requests: () => issued,
+        retry: PROVIDER_REQUEST_RETRY_CONFIG,
+      });
+
+      expect(attempts).toEqual(
+        Array.from({ length: 4 }, () => [firstPage, secondPage]).flat(),
+      );
+    });
+
+    it('issues one request when the failure is permanent', async () => {
+      respond = async () => {
+        throw new HttpClientError(PERMANENT_STATUS, 'forbidden');
+      };
+
+      const attempts = await measureRequestsUnderRetry({
+        call: () => retryProvider.getAccountRewards({ rewardAccount }),
+        requests: () => issued,
+        retry: PROVIDER_REQUEST_RETRY_CONFIG,
+      });
+
+      expect(attempts).toEqual([firstPage]);
+    });
+
+    it('issues one request when a 404 folds into no rewards', async () => {
+      respond = async () => {
+        throw new HttpClientError(404, 'Not Found');
+      };
+
+      const attempts = await measureRequestsUnderRetry({
+        call: () => retryProvider.getAccountRewards({ rewardAccount }),
+        requests: () => issued,
+        retry: PROVIDER_REQUEST_RETRY_CONFIG,
+      });
+
+      expect(attempts).toEqual([firstPage]);
+    });
+
+    it('issues no request until something subscribes', async () => {
+      respond = async () => {
+        throw new HttpClientError(RETRIABLE_STATUS, 'unhealthy');
+      };
+
+      retryProvider.getAccountRewards({ rewardAccount });
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(issued).toEqual([]);
     });
   });
 

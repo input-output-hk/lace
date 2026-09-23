@@ -1,21 +1,12 @@
 /** Quote arithmetic for the swap UI — pure, exact bigint maths. */
+// The funds pre-check and the intent gate must reserve the SAME allowance: a
+// pre-check that under-reserves sends the user to top up to an amount the gate
+// still refuses. One constant, owned by the rule that enforces it.
+import { SWAP_ADA_HEADROOM_LOVELACE } from '@lace-contract/swap-context';
+
 import type { SwapQuote } from '@lace-contract/swap-provider';
 
 export const LOVELACE_TOKEN_ID = 'lovelace';
-
-/**
- * Extra lovelace a swap consumes beyond the fees and deposit the quote
- * declares: the transaction's network fee plus the min-ADA that has to stay
- * behind in the change output, plus the aggregator's own headroom.
- *
- * Empirical, and deliberately generous. Measured against SteelSwap on
- * 2026-07-31: an account with 12 ADA in three clean UTxOs could sell at most
- * ~5.75 ADA of a quote declaring 3.69 in fees+deposit (2.56 unaccounted), and
- * one with 5.997583 ADA could sell 0.95 (1.36 unaccounted). Under-reserving
- * costs the user an opaque `500 Internal Server Error` from the build endpoint,
- * so err on the side of reserving too much.
- */
-const SWAP_ADA_HEADROOM_LOVELACE = 3_000_000n;
 
 /**
  * Lovelace cost a swap adds on top of the sold amount, from a live quote.

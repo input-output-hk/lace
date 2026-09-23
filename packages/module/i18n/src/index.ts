@@ -66,6 +66,7 @@ const mobileModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': mobileModule,
+  'lace-extension-carbon': mobileModule,
   'lace-extension-guest': mobileModule,
 };
 

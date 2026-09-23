@@ -21,6 +21,7 @@ import type {
 import type { Observable } from 'rxjs';
 
 export type App =
+  | 'lace-extension-carbon'
   | 'lace-extension-guest'
   | 'lace-extension'
   | 'lace-mobile'

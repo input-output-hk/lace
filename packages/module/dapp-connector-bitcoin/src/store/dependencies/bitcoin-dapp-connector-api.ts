@@ -169,6 +169,16 @@ const ensureValidSatoshis = (satoshis: number): number => {
 };
 
 /**
+ * Reported when the wallet could not show its confirmation prompt.
+ *
+ * Safe to retry, unlike a refusal: the user was never asked, so nothing can
+ * have been signed.
+ */
+const PROMPT_UNAVAILABLE_INFO =
+  'The wallet could not display its confirmation prompt, so the request was ' +
+  'not approved. Please try again.';
+
+/**
  * BitcoinDappConnectorApi - implements the Unisat/OKX de facto wallet API for
  * Bitcoin dApps on the service-worker side.
  *
@@ -301,13 +311,21 @@ export class BitcoinDappConnectorApi
     const address = await this.#getSigningAddress(origin);
     const signatureType: BitcoinSignatureType = type ?? 'ecdsa';
 
-    const { isConfirmed } = await this.#userConfirmationRequest(
+    const { outcome } = await this.#userConfirmationRequest(
       sender,
       'signMessage',
       { address, message, signatureType },
     );
 
-    if (!isConfirmed) {
+    if (outcome === 'unavailable') {
+      throw new BitcoinAPIError(
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
+      );
+    }
+
+    // Fail closed: an outcome added later must never fall through to signing.
+    if (outcome !== 'confirmed') {
       throw new BitcoinAPIError(
         BitcoinAPIErrorCode.Refused,
         'User rejected message signing',
@@ -358,13 +376,21 @@ export class BitcoinDappConnectorApi
     this.#validateAutoFinalized(options);
     await this.#validateSignableInputs(psbtBase64, accountId, options);
 
-    const { isConfirmed } = await this.#userConfirmationRequest(
+    const { outcome } = await this.#userConfirmationRequest(
       sender,
       'signPsbt',
       { psbtsBase64: [psbtBase64], accountId, options },
     );
 
-    if (!isConfirmed) {
+    if (outcome === 'unavailable') {
+      throw new BitcoinAPIError(
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
+      );
+    }
+
+    // Fail closed: an outcome added later must never fall through to signing.
+    if (outcome !== 'confirmed') {
       throw new BitcoinAPIError(
         BitcoinAPIErrorCode.Refused,
         'User rejected PSBT signing',
@@ -408,13 +434,21 @@ export class BitcoinDappConnectorApi
       { ...options, accountId },
     );
 
-    const { isConfirmed } = await this.#userConfirmationRequest(
+    const { outcome } = await this.#userConfirmationRequest(
       sender,
       'signPsbt',
       { psbtsBase64: [psbtBase64], accountId },
     );
 
-    if (!isConfirmed) {
+    if (outcome === 'unavailable') {
+      throw new BitcoinAPIError(
+        BitcoinAPIErrorCode.InternalError,
+        PROMPT_UNAVAILABLE_INFO,
+      );
+    }
+
+    // Fail closed: an outcome added later must never fall through to signing.
+    if (outcome !== 'confirmed') {
       throw new BitcoinAPIError(
         BitcoinAPIErrorCode.Refused,
         'User rejected the transaction',

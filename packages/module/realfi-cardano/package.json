@@ -1,0 +1,41 @@
+{
+  "name": "@lace-module/realfi-cardano",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@blaze-cardano/sdk": "0.2.48",
+    "@cardano-sdk/core": "*",
+    "@cardano-sdk/tx-construction": "*",
+    "@cardano-sdk/util": "*",
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/app": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/failures": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/realfi-staking": "*",
+    "@lace-contract/staking-center": "*",
+    "@lace-contract/token-pricing": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/views": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util": "*",
+    "@realfi-co/realfi-partner-sdk": "2.23.0",
+    "@sundaeswap/asset": "^1.0.11",
+    "@sundaeswap/core": "^2.13.1",
+    "bignumber.js": "9.0.1",
+    "react": "*",
+    "rxjs": "*"
+  },
+  "devDependencies": {
+    "@lace-lib/util-dev": "*"
+  }
+}

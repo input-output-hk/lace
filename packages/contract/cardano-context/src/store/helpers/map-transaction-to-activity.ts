@@ -14,6 +14,7 @@ import {
   deterministicNonce202606,
 } from '../../security';
 
+import { computeOwnNetCoins } from './compute-own-net-coins';
 import { assetProvider } from './get-fallback-asset';
 import { classifyTxAsNightDesignation } from './night-designation-script-addresses';
 
@@ -71,12 +72,15 @@ export const mapTransactionToActivity = ({
   logger,
   isNightDesignationEnabled,
 }: MapTransactionToActivityParams): Observable<Result<Activity, Error>> => {
+  const ownAddresses = accountAddresses.map(address =>
+    Cardano.PaymentAddress(address),
+  );
+  const ownRewardAccount = Cardano.RewardAccount(rewardAccount);
+
   const txSummaryInspector = createTxInspector({
     summary: transactionSummaryInspector({
-      addresses: accountAddresses.map(address =>
-        Cardano.PaymentAddress(address),
-      ),
-      rewardAccounts: [Cardano.RewardAccount(rewardAccount)],
+      addresses: ownAddresses,
+      rewardAccounts: [ownRewardAccount],
       inputResolver: {
         resolveInput,
       },
@@ -142,6 +146,14 @@ export const mapTransactionToActivity = ({
 
   return from(txSummaryInspector(txDetails)).pipe(
     mergeMap(async ({ summary }) => {
+      const ownNetCoins = computeOwnNetCoins({
+        accountAddresses: ownAddresses,
+        rewardAccount: ownRewardAccount,
+        protocolParameters,
+        txBody: txDetails.body,
+        summary,
+      });
+
       const tokenBalanceChanges = [
         ...Array.from(summary.assets.entries()).map(([assetId, assetInfo]) => ({
           tokenId: TokenId(assetId),
@@ -151,7 +163,7 @@ export const mapTransactionToActivity = ({
         // https://input-output.atlassian.net/browse/LW-13023
         {
           tokenId: TokenId('lovelace'),
-          amount: BigNumber(summary.coins),
+          amount: BigNumber(ownNetCoins),
         },
       ];
 
@@ -206,7 +218,7 @@ export const mapTransactionToActivity = ({
         activityId: txDetails.id,
         timestamp: Timestamp(txDetails.blockTime * 1000),
         tokenBalanceChanges,
-        type: summary.coins > 0 ? ActivityType.Receive : ActivityType.Send,
+        type: ownNetCoins > 0n ? ActivityType.Receive : ActivityType.Send,
         blockchainSpecific: {
           Cardano: {
             consumedInputs: spentOutpoints,

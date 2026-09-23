@@ -31,10 +31,19 @@ export const normalizeUrlForId = (url: string): string => {
   }
 };
 
+/**
+ * What a saved dApp is CALLED when the caller supplies no name: the host it
+ * points at, stripped of `www.`.
+ *
+ * The host rather than the hostname, so it carries a non-default port — two
+ * dApps served from one machine are otherwise saved under one indistinguishable
+ * name, and the port is the only thing that tells them apart. A default-port
+ * origin has no port to carry, so the common case is unchanged.
+ */
 export const deriveDappNameFromUrl = (url: string): string => {
   try {
-    const { hostname } = new URL(url);
-    return hostname.replace(/^www\./i, '');
+    const { host } = new URL(url);
+    return host.replace(/^www\./i, '');
   } catch {
     return url;
   }

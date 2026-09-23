@@ -1,3 +1,5 @@
+import { withCollateralOwnershipGuard } from '@lace-contract/cardano-context';
+
 import { CardanoTrezorDataSigner } from './cardano-trezor-data-signer';
 
 import type { CardanoTrezorTransactionSignerProps } from './cardano-trezor-transaction-signer';
@@ -57,14 +59,17 @@ export class CardanoTrezorSignerFactory implements CardanoSignerFactory {
     const { accountIndex, chainId, extendedAccountPublicKey, derivationType } =
       this.#extractAccountProps(context);
 
-    return this.#createTransactionSigner({
-      accountIndex,
-      chainId,
-      extendedAccountPublicKey,
-      derivationType,
-      knownAddresses: context.knownAddresses,
-      utxo: context.utxo,
-    });
+    return withCollateralOwnershipGuard(
+      this.#createTransactionSigner({
+        accountIndex,
+        chainId,
+        extendedAccountPublicKey,
+        derivationType,
+        knownAddresses: context.knownAddresses,
+        utxo: context.utxo,
+      }),
+      context,
+    );
   }
 
   public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {

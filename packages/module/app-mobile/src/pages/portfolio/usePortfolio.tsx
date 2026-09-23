@@ -39,9 +39,8 @@ import { useScrollAnimation } from './useScrollAnimation';
 
 import type { AccountView, AssetView } from './types';
 import type { TranslationKey } from '@lace-contract/i18n';
-import type { TokenPrice } from '@lace-contract/token-pricing';
+import type { TimeRange, TokenPrice } from '@lace-contract/token-pricing';
 import type { Token } from '@lace-contract/tokens';
-import type { TimeRange } from '@lace-lib/ui-toolkit';
 import type { SharedValue } from 'react-native-reanimated';
 
 /**

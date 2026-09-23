@@ -63,6 +63,11 @@ const getActivityStatus = (
       color: 'positive',
       statusKey: t('activity.activity.status.success'),
     },
+    [ActivityType.Self]: {
+      icon: 'Tick',
+      color: 'positive',
+      statusKey: t('activity.activity.status.success'),
+    },
     [ActivityType.Failed]: {
       icon: 'AlertTriangle',
       color: 'negative',

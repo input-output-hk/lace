@@ -15,6 +15,7 @@ import {
   BlockfrostRewardsProvider,
   BlockfrostStakePoolProvider,
   BlockfrostTokensProvider,
+  BlockfrostTxEvaluationProvider,
   BlockfrostUtxoProvider,
   BlockfrostWithdrawalsProvider,
   computeBlockfrostConfigIdentifier,
@@ -29,6 +30,7 @@ import memoize from 'lodash/memoize';
 import {
   combineLatest,
   debounceTime,
+  defer,
   filter,
   from,
   fromEvent,
@@ -62,6 +64,7 @@ import type {
   CardanoProviderContext,
   CardanoProviderDependencies,
   CardanoTokenMetadata,
+  EvaluateTxProps,
   GetAccountRewardsProps,
   GetTokensProps,
   GetUtxosAtAddressProps,
@@ -143,6 +146,14 @@ const getUtxoProvider = memoize(
 const getGovernanceProvider = memoize(
   (config: BlockfrostConfig, logger: Logger) =>
     new BlockfrostGovernanceProvider(getBlockfrostClient(config), logger),
+  computeBlockfrostConfigIdentifier,
+);
+
+// Script ex-units evaluation is a pure chain read (the tx is unsigned and is
+// never submitted), so it stays free-running rather than routed to the host.
+const getTxEvaluationProvider = memoize(
+  (config: BlockfrostConfig, logger: Logger) =>
+    new BlockfrostTxEvaluationProvider(getBlockfrostClient(config), logger),
   computeBlockfrostConfigIdentifier,
 );
 
@@ -260,6 +271,7 @@ export const initializeDependencies: LaceInit<
     canGetPendingCardanoTxs: hasLaceCapability('cardano.getPendingTxs'),
     getPendingCardanoTxs: ({ walletId, accountIndex, networkMagic }) =>
       from(getPendingCardanoTxs(walletId, accountIndex, networkMagic)),
+    getCardanoAddresses: params => from(getCardanoAddresses(params)),
     cardanoProvider: {
       // ---- free-running (blockfrost via the shared lib leaves) ----
       getTip: context => {
@@ -287,7 +299,7 @@ export const initializeDependencies: LaceInit<
             ),
           );
         const provider = getNetworkInfoProvider(config, logger);
-        return from(
+        return defer(async () =>
           provider
             .eraSummaries()
             .then(Ok<EraSummary[]>)
@@ -312,10 +324,13 @@ export const initializeDependencies: LaceInit<
             ),
           );
         const provider = getAssetProvider(config, logger);
-        return from(
+        // `AssetId` throws without a `reason`, which `isRetriableError` would
+        // read as retriable — a malformed id must fail at the call, not retry.
+        const assetId = Cardano.AssetId(tokenId);
+        return defer(async () =>
           provider
             .getAsset({
-              assetId: Cardano.AssetId(tokenId),
+              assetId,
               extraData: { nftMetadata: true, tokenMetadata: true },
             })
             .then(assetInfo =>
@@ -429,7 +444,9 @@ export const initializeDependencies: LaceInit<
             ),
           );
         const provider = getInputResolverProvider(config, logger);
-        return from(
+        // `defer`, not `from`: the caller's retry re-subscribes, and a settled
+        // promise replays instead of re-requesting.
+        return defer(async () =>
           provider
             .resolveInput(txIn)
             .then(Ok<Cardano.TxOut | null>)
@@ -458,6 +475,17 @@ export const initializeDependencies: LaceInit<
         const provider = getGovernanceProvider(config, logger);
         return provider.getDReps();
       },
+      evaluateTx: (props: EvaluateTxProps, context) => {
+        const config = getBlockfrostConfig(context, blockfrostConfigs);
+        if (!config)
+          return of(
+            Err<ProviderError>(
+              unprovisionedNetworkError(context.chainId.networkMagic),
+            ),
+          );
+        const provider = getTxEvaluationProvider(config, logger);
+        return provider.evaluateTx(props);
+      },
 
       // ---- host-owned (routed to window.lace) ----
       getProtocolParameters: context => {
@@ -468,14 +496,17 @@ export const initializeDependencies: LaceInit<
               unprovisionedNetworkError(context.chainId.networkMagic),
             ),
           );
+        const provider = getNetworkInfoProvider(config, logger);
+        // BOTH arms, not just the blockfrost one: a re-subscription re-subscribes
+        // every arm, and an arm left as `from` replays its settled failure.
         return combineLatest([
-          from(
-            getNetworkInfoProvider(config, logger)
+          defer(async () =>
+            provider
               .protocolParameters()
               .then(Ok<Cardano.ProtocolParameters>)
               .catch(Err<ProviderError>),
           ),
-          from(getCardanoParams(context.chainId.networkMagic)),
+          defer(async () => getCardanoParams(context.chainId.networkMagic)),
         ]).pipe(
           map(([full, host]) => {
             if (!full.isOk()) return full;

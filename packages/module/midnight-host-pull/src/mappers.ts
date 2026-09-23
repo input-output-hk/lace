@@ -127,8 +127,9 @@ export const snapshotToAddressTokenPayloads = ({
  * `tokens.upsertTokensMetadata` payload — one metadata entry per token type,
  * with `balances` so zero-balance tokens are filtered out by the reducer. The
  * per-coin `coins` detail the monolith carries is NOT on the wire (ADR 47), so
- * dust-designation coin selection degrades to the aggregate balance — an
- * accepted guest limitation (dust-designation is a monolith-only advanced flow).
+ * the guest sees only aggregate balances. Harmless for dust designation, whose
+ * coin selection is the host engine's: it registers the account's whole
+ * native-NIGHT set and never asks the guest which coins to use.
  */
 export const snapshotToTokenMetadataPayload = (
   snapshot: MidnightStateSnapshot,

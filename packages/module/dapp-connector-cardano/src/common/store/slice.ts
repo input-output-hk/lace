@@ -5,6 +5,7 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
+import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
 import type { ViewLocation } from '@lace-contract/views';
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 import type { HwSigningErrorTranslationKeys } from '@lace-lib/util-hw';
@@ -86,6 +87,34 @@ export type PendingSignDataRequest = {
 };
 
 /**
+ * A popup's request to have its own window closed.
+ *
+ * `requestId` is the request the view was showing; it is absent for views that
+ * never host a queued request, and for a view whose request was cleared before
+ * it ever rendered one.
+ */
+type ClosePopupRequest = {
+  location: ViewLocation;
+  requestId?: string;
+};
+
+type CloseSheetRequest = {
+  requestId?: string;
+};
+
+/**
+ * A user's answer to one signing request.
+ *
+ * Queued requests share one prompt and one action stream, so an answer must
+ * name the request it answers or it may settle a different one. `requestId` is
+ * absent only when the answering view never synced a request — `isAnswerTo` in
+ * `browser/store/util.ts` decides what such an answer applies to.
+ */
+export type SignRequestAnswer = {
+  requestId?: string;
+};
+
+/**
  * Pending sign transaction request for CIP-30 signTx.
  * Contains all information needed to display the sign transaction UI.
  * Used by both browser extension and mobile platforms.
@@ -96,6 +125,16 @@ export type PendingSignTxRequest = {
   dapp: DappInfo;
   txHex: string;
   partialSign: boolean;
+  /**
+   * The collateral guard's block verdict, or `null` for a reviewable request.
+   * The only channel that puts either render mode into the refused state.
+   *
+   * Required, never optional: each hop from `#validateCanSign` to the screen
+   * copies explicit fields, and an optional one would typecheck while
+   * shipping the normal review screen -- live Sign button -- on a blocked
+   * transaction.
+   */
+  collateralRefusal: CollateralOwnershipErrorCase | null;
 };
 
 /**
@@ -251,7 +290,9 @@ const rejectConnect = createAction('cardanoDappConnector/rejectConnect');
  *
  * Used by both platforms from their respective SignTx UI.
  */
-const confirmSignTx = createAction('cardanoDappConnector/confirmSignTx');
+const confirmSignTx = createAction<SignRequestAnswer>(
+  'cardanoDappConnector/confirmSignTx',
+);
 
 /**
  * Rejects transaction signing (CIP-30 signTx).
@@ -259,7 +300,9 @@ const confirmSignTx = createAction('cardanoDappConnector/confirmSignTx');
  *
  * Used by both platforms from their respective SignTx UI.
  */
-const rejectSignTx = createAction('cardanoDappConnector/rejectSignTx');
+const rejectSignTx = createAction<SignRequestAnswer>(
+  'cardanoDappConnector/rejectSignTx',
+);
 
 /**
  * Confirms data signing (CIP-8 signData).
@@ -268,7 +311,9 @@ const rejectSignTx = createAction('cardanoDappConnector/rejectSignTx');
  *
  * Used by both platforms from their respective SignData UI.
  */
-const confirmSignData = createAction('cardanoDappConnector/confirmSignData');
+const confirmSignData = createAction<SignRequestAnswer>(
+  'cardanoDappConnector/confirmSignData',
+);
 
 /**
  * Rejects data signing (CIP-8 signData).
@@ -276,7 +321,9 @@ const confirmSignData = createAction('cardanoDappConnector/confirmSignData');
  *
  * Used by both platforms from their respective SignData UI.
  */
-const rejectSignData = createAction('cardanoDappConnector/rejectSignData');
+const rejectSignData = createAction<SignRequestAnswer>(
+  'cardanoDappConnector/rejectSignData',
+);
 
 /**
  * Mobile-only: Action dispatched by WebView bridge when a CIP-30 message is received.
@@ -289,10 +336,31 @@ const receiveWebViewMessage = createAction<IncomingWebViewMessage>(
 /**
  * Browser-only: requests the SW to close the popupWindow at the given location.
  * Dispatched by the popup; a side effect resolves the view id and dispatches
- * `views.closeView` so the SW closes the window via `chrome.windows.remove`.
+ * `views.closeView`, which reaches that view's remote `close()` and has the
+ * popup document run `window.close()` on itself. The dispatcher addresses the
+ * window by view id because it holds no handle on that document.
+ *
+ * `requestId` names the request the closing view was showing. Queued requests
+ * share one window, so a close asked for by a request that has already been
+ * answered must not take the window from the one that inherited it — see
+ * `closeRequestedPopup`. Omit it only for views that never host a queued
+ * request.
  */
-const closePopupRequested = createAction<ViewLocation>(
+const closePopupRequested = createAction<ClosePopupRequest>(
   'cardanoDappConnector/closePopupRequested',
+);
+
+/**
+ * Browser-only: asks the SW to dismiss the sign sheet in the side panel.
+ * Dispatched by the sheet view; `closeRequestedSheet` clears
+ * `views.activeSheetPage`.
+ *
+ * `requestId` names the request the closing view was showing, and is required:
+ * `closeRequestedSheet` dismisses only while that request still holds the
+ * sheet, and refuses a close naming none.
+ */
+const closeSheetRequested = createAction<CloseSheetRequest>(
+  'cardanoDappConnector/closeSheetRequested',
 );
 
 const slice = createSlice({
@@ -579,6 +647,7 @@ export const cardanoDappConnectorActions = {
     rejectSignData,
     receiveWebViewMessage,
     closePopupRequested,
+    closeSheetRequested,
   },
 };
 

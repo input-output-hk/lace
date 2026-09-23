@@ -7,14 +7,14 @@ import {
   MidnightAccountId,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
+  SerialisedWalletState,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { syncActions } from '@lace-contract/sync';
 import { tokensActions } from '@lace-contract/tokens';
 import { walletsActions, WalletId } from '@lace-contract/wallet-repo';
-import { HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { EMPTY, of, throwError } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -60,10 +60,10 @@ describe('midnight-sync/store/side-effects', () => {
           accountId,
           networkId: MidnightSDKNetworkIds.TestNet,
           serializedState: {
-            dust: HexBytes(''),
-            shielded: HexBytes(''),
-            unshielded: HexBytes(''),
-            txHistory: HexBytes(''),
+            dust: SerialisedWalletState(''),
+            shielded: SerialisedWalletState(''),
+            unshielded: SerialisedWalletState(''),
+            txHistory: SerialisedWalletState(''),
           },
         },
         {
@@ -71,17 +71,16 @@ describe('midnight-sync/store/side-effects', () => {
           accountId: MidnightAccountId(otherWalletId, 0, networkId),
           networkId: MidnightSDKNetworkIds.TestNet,
           serializedState: {
-            dust: HexBytes(''),
-            shielded: HexBytes(''),
-            unshielded: HexBytes(''),
-            txHistory: HexBytes(''),
+            dust: SerialisedWalletState(''),
+            shielded: SerialisedWalletState(''),
+            unshielded: SerialisedWalletState(''),
+            txHistory: SerialisedWalletState(''),
           },
         },
       ];
 
       const storage = {
-        getAll: vi.fn(() => of(walletStates)),
-        setAll: vi.fn(() => of(void 0)),
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
       testSideEffect(
         createDeleteWalletSideEffect(storage),
@@ -112,10 +111,12 @@ describe('midnight-sync/store/side-effects', () => {
                 c: actions.activities.resetActivities({ accountId }),
               });
               flush();
-              expect(storage.getAll).toHaveBeenCalled();
-              expect(storage.setAll).toHaveBeenCalledWith([
-                walletStates.find(w => w.walletId === otherWalletId),
-              ]);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
+              // The predicate must select exactly the removed wallet's
+              // entries, leaving the other wallet's state untouched.
+              const predicate = vi.mocked(storage.removeWhere).mock.calls[0][0];
+              expect(predicate(walletStates[0])).toBe(true);
+              expect(predicate(walletStates[1])).toBe(false);
             },
           };
         },
@@ -126,7 +127,7 @@ describe('midnight-sync/store/side-effects', () => {
   describe('createClearWalletStateOnResync', () => {
     it('stops currently running midnight wallet', () => {
       const storage = {
-        setAll: vi.fn(() => of(void 0)),
+        clear: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -137,6 +138,7 @@ describe('midnight-sync/store/side-effects', () => {
               .fn()
               .mockReturnValue(cold('a', { a: null })),
             actions,
+            logger: dummyLogger,
           };
 
           return {
@@ -171,7 +173,7 @@ describe('midnight-sync/store/side-effects', () => {
 
     it('clears stored state', () => {
       const storage = {
-        setAll: vi.fn(() => of(void 0)),
+        clear: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -182,6 +184,7 @@ describe('midnight-sync/store/side-effects', () => {
               .fn()
               .mockReturnValue(cold('a', { a: null })),
             actions,
+            logger: dummyLogger,
           };
 
           return {
@@ -207,16 +210,19 @@ describe('midnight-sync/store/side-effects', () => {
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
               flush();
-              expect(storage.setAll).toHaveBeenCalledWith([]);
+              expect(storage.clear).toHaveBeenCalledTimes(1);
             },
           };
         },
       );
     });
 
-    it('resets tokens for the active account', () => {
+    it('resets every derived store the wiped documents fed, then restarts the watch', () => {
+      // Sync status is deliberately absent: requestResyncWallet registers a
+      // Pending operation immediately before dispatching resync, and clearing
+      // it here would drop the marker showing the resync running.
       const storage = {
-        setAll: vi.fn(() => of(void 0)),
+        clear: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -227,6 +233,7 @@ describe('midnight-sync/store/side-effects', () => {
               .fn()
               .mockReturnValue(cold('a', { a: null })),
             actions,
+            logger: dummyLogger,
           };
 
           return {
@@ -250,10 +257,12 @@ describe('midnight-sync/store/side-effects', () => {
             },
             dependencies,
             assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('--(ab)', {
-                a: actions.tokens.resetAccountTokens({ accountId }),
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                b: expect.any(Object),
+              expectObservable(sideEffect$).toBe('--(abcde)', {
+                a: actions.addresses.resetAddresses({ accountId }),
+                b: actions.tokens.resetAccountTokens({ accountId }),
+                c: actions.activities.resetActivities({ accountId }),
+                d: actions.midnightContext.resetAccountDust({ accountId }),
+                e: actions.midnightSync.restartWalletWatch(),
               });
             },
           };
@@ -261,9 +270,64 @@ describe('midnight-sync/store/side-effects', () => {
       );
     });
 
+    it('still wipes and restarts when stopping the wallets rejects', () => {
+      // stopAllMidnightWallets deregisters before it stops, so the wallets are
+      // already unreachable by the time it can fail. Aborting here would strand
+      // them stopped with nothing to restart them.
+      const logger = { ...dummyLogger, error: vi.fn() };
+      const storage = {
+        clear: vi.fn(() => of(void 0)),
+      } as unknown as CollectionStorage<SerializedMidnightWallet>;
+
+      testSideEffect(
+        createClearWalletStateOnResync(storage),
+        ({ flush, cold }) => ({
+          actionObservables: {
+            midnightSync: {
+              resync$: cold('--b', { b: actions.midnightSync.resync() }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              selectActiveNetworkAccounts$: cold('a', { a: [midnightAccount] }),
+            },
+            midnightContext: {
+              selectMidnightBlockchainNetworkId$: cold('a', {
+                a: MidnightNetworkId(networkId),
+              }),
+            },
+          },
+          dependencies: {
+            stopAllMidnightWallets: vi.fn(() =>
+              throwError(() => new Error('stop boom')),
+            ),
+            actions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            const emitted: unknown[] = [];
+            let hasErrored = false;
+            sideEffect$.subscribe({
+              next: action => emitted.push(action),
+              error: () => (hasErrored = true),
+            });
+            flush();
+
+            expect(hasErrored).toBe(false);
+            expect(logger.error).toHaveBeenCalled();
+            expect(storage.clear).toHaveBeenCalledTimes(1);
+            expect(emitted).toContainEqual(
+              actions.midnightSync.restartWalletWatch(),
+            );
+          },
+        }),
+      );
+    });
+
     it('requests wallet watch restart', () => {
       const storage = {
-        setAll: vi.fn(() => of(void 0)),
+        clear: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -274,6 +338,7 @@ describe('midnight-sync/store/side-effects', () => {
               .fn()
               .mockReturnValue(cold('a', { a: null })),
             actions,
+            logger: dummyLogger,
           };
 
           return {
@@ -297,10 +362,16 @@ describe('midnight-sync/store/side-effects', () => {
             },
             dependencies,
             assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('--(ab)', {
+              expectObservable(sideEffect$).toBe('--(abcde)', {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 a: expect.any(Object),
-                b: actions.midnightSync.restartWalletWatch(),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                b: expect.any(Object),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                c: expect.any(Object),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                d: expect.any(Object),
+                e: actions.midnightSync.restartWalletWatch(),
               });
             },
           };
@@ -311,8 +382,8 @@ describe('midnight-sync/store/side-effects', () => {
     it('runs operations in correct order: stop, clear, then emit actions', () => {
       const executionEvents: string[] = [];
       const storage = {
-        setAll: vi.fn(() => {
-          executionEvents.push('reset storage');
+        clear: vi.fn(() => {
+          executionEvents.push('clear storage');
           return of(void 0);
         }),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
@@ -355,9 +426,9 @@ describe('midnight-sync/store/side-effects', () => {
               flush();
               expect(executionEvents).toEqual([
                 'stop',
-                'reset storage',
-                'emit actions',
-                'emit actions',
+                'clear storage',
+                // four resets per account, then the watch restart
+                ...Array.from({ length: 5 }, () => 'emit actions'),
               ]);
             },
           };
@@ -368,28 +439,10 @@ describe('midnight-sync/store/side-effects', () => {
 
   describe('createResetSyncStateSideEffect', () => {
     const otherAccountId = MidnightAccountId(walletId, 1, networkId);
-    const walletState = (
-      id: SerializedMidnightWallet['accountId'],
-    ): SerializedMidnightWallet => ({
-      walletId,
-      accountId: id,
-      networkId: MidnightSDKNetworkIds.TestNet,
-      serializedState: {
-        dust: HexBytes(''),
-        shielded: HexBytes(''),
-        unshielded: HexBytes(''),
-        txHistory: HexBytes(''),
-      },
-    });
-    const persistedStates = [
-      walletState(accountId),
-      walletState(otherAccountId),
-    ];
 
     it("clears the account's persisted state, then reloads the app", () => {
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => of(void 0)),
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -435,10 +488,8 @@ describe('midnight-sync/store/side-effects', () => {
                 f: actions.app.reloadApplication(),
               });
               flush();
-              expect(storage.setAll).toHaveBeenCalledTimes(1);
-              expect(storage.setAll).toHaveBeenCalledWith([
-                walletState(otherAccountId),
-              ]);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
             },
           };
         },
@@ -448,8 +499,7 @@ describe('midnight-sync/store/side-effects', () => {
     it('targets only the requested account when several are active', () => {
       const secondAccount = { ...midnightAccount, accountId: otherAccountId };
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => of(void 0)),
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -508,9 +558,7 @@ describe('midnight-sync/store/side-effects', () => {
               expect(dependencies.stopMidnightWallet).toHaveBeenCalledWith(
                 otherAccountId,
               );
-              expect(storage.setAll).toHaveBeenCalledWith([
-                walletState(accountId),
-              ]);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
             },
           };
         },
@@ -520,8 +568,7 @@ describe('midnight-sync/store/side-effects', () => {
     it('stops the wallet before removing its persisted state, then emits', () => {
       const executionEvents: string[] = [];
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => {
+        removeWhere: vi.fn(() => {
           executionEvents.push('remove persisted state');
           return of(void 0);
         }),
@@ -585,8 +632,7 @@ describe('midnight-sync/store/side-effects', () => {
 
     it('does nothing when no active midnight account matches the payload', () => {
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => of(void 0)),
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -625,7 +671,7 @@ describe('midnight-sync/store/side-effects', () => {
             assertion: sideEffect$ => {
               expectObservable(sideEffect$).toBe('');
               flush();
-              expect(storage.setAll).not.toHaveBeenCalled();
+              expect(storage.removeWhere).not.toHaveBeenCalled();
               expect(dependencies.stopMidnightWallet).not.toHaveBeenCalled();
             },
           };
@@ -635,8 +681,7 @@ describe('midnight-sync/store/side-effects', () => {
 
     it('still wipes, resets and reloads when stop() fails', () => {
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => of(void 0)),
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -684,9 +729,7 @@ describe('midnight-sync/store/side-effects', () => {
                 f: actions.app.reloadApplication(),
               });
               flush();
-              expect(storage.setAll).toHaveBeenCalledWith([
-                walletState(otherAccountId),
-              ]);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
             },
           };
         },
@@ -695,8 +738,7 @@ describe('midnight-sync/store/side-effects', () => {
 
     it('still resets and reloads when the storage wipe fails', () => {
       const storage = {
-        getAll: vi.fn(() => of(persistedStates)),
-        setAll: vi.fn(() => throwError(() => new Error('write failed'))),
+        removeWhere: vi.fn(() => throwError(() => new Error('write failed'))),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -748,9 +790,9 @@ describe('midnight-sync/store/side-effects', () => {
 
     it('resets and reloads even when nothing is persisted yet', () => {
       const storage = {
-        // EMPTY, not of([]): that is how the real getAll reports an empty collection.
-        getAll: vi.fn(() => EMPTY),
-        setAll: vi.fn(() => of(void 0)),
+        // removeWhere is a no-op against an empty collection — it never reads
+        // the whole set, so "nothing persisted yet" needs no special mock.
+        removeWhere: vi.fn(() => of(void 0)),
       } as unknown as CollectionStorage<SerializedMidnightWallet>;
 
       testSideEffect(
@@ -794,7 +836,7 @@ describe('midnight-sync/store/side-effects', () => {
                 f: actions.app.reloadApplication(),
               });
               flush();
-              expect(storage.setAll).toHaveBeenCalledWith([]);
+              expect(storage.removeWhere).toHaveBeenCalledTimes(1);
             },
           };
         },

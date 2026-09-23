@@ -1,4 +1,5 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
+import { RemoteApiShutdownError } from '@lace-lib/extension-messaging';
 
 import { APIError, APIErrorCode } from '../common/api-error';
 import { supportedCip30Extensions } from '../common/cip30-extensions';
@@ -78,6 +79,51 @@ export interface CardanoWalletApiObject {
   enable(_extensions?: Cip30Extension[]): Promise<EnabledApi>;
 }
 
+// For calls that may have changed wallet state. Reports the outcome as UNKNOWN
+// and does not advise a retry: the page cannot tell whether the wallet went on
+// to sign or submit, so inviting a retry risks a double submission, and
+// claiming nothing happened may be false.
+const CONNECTION_CLOSED_INFO =
+  'The wallet connection closed before the request completed. Whether the ' +
+  'wallet completed it is unknown.';
+
+// For read-only calls, which cannot have changed anything, so a retry is safe
+// and saying so is strictly more useful than the unknown-outcome wording.
+const CONNECTION_CLOSED_READ_INFO =
+  'The wallet connection closed before the request completed. Nothing was ' +
+  'changed, so the request can be retried.';
+
+// A pending call rejects with RemoteApiShutdownError when the injected port
+// disconnects — e.g. the page was frozen into the back/forward cache. Surface
+// that to the dApp as a CIP-30 APIError, not the internal transport error.
+// InternalError (-2), never Refused (-3): the user did not decline, and dApps
+// branch on Refused to stop retrying.
+//
+// Applied to EVERY method, not just the signing ones. The read methods are the
+// ones configured to replay across a disconnect, so they are the calls a freeze
+// most reliably lands on — and when a replay ultimately fails they were leaking
+// the raw transport type, which is exactly what this is meant to prevent.
+const mapConnectionClosed =
+  <Args extends unknown[], Result>(
+    operation: (...args: Args) => Promise<Result>,
+    info: string = CONNECTION_CLOSED_INFO,
+  ) =>
+  async (...args: Args): Promise<Result> => {
+    try {
+      return await operation(...args);
+    } catch (error) {
+      if (error instanceof RemoteApiShutdownError) {
+        throw new APIError(APIErrorCode.InternalError, info);
+      }
+      throw error;
+    }
+  };
+
+/** Wraps a read-only CIP-30 method with the retry-safe connection-closed error. */
+const mapReadConnectionClosed = <Args extends unknown[], Result>(
+  operation: (...args: Args) => Promise<Result>,
+) => mapConnectionClosed(operation, CONNECTION_CLOSED_READ_INFO);
+
 /**
  * Creates an object that implements CIP-30 wallet API for Cardano dApps.
  * @see https://cips.cardano.org/cip/CIP-30
@@ -129,41 +175,54 @@ export const createCardanoWalletApi = (
     };
 
     return {
-      getNetworkId: api.getNetworkId.bind(api),
-      getUtxos: api.getUtxos.bind(api),
-      getCollateral: api.getCollateral.bind(api),
-      getBalance: api.getBalance.bind(api),
-      getUsedAddresses: api.getUsedAddresses.bind(api),
-      getUnusedAddresses: api.getUnusedAddresses.bind(api),
-      getChangeAddress: api.getChangeAddress.bind(api),
-      getRewardAddresses: api.getRewardAddresses.bind(api),
-      getExtensions: api.getExtensions.bind(api),
-      signTx: api.signTx.bind(api),
-      signData: api.signData.bind(api),
-      submitTx: api.submitTx.bind(api),
+      getNetworkId: mapReadConnectionClosed(api.getNetworkId.bind(api)),
+      getUtxos: mapReadConnectionClosed(api.getUtxos.bind(api)),
+      getCollateral: mapReadConnectionClosed(api.getCollateral.bind(api)),
+      getBalance: mapReadConnectionClosed(api.getBalance.bind(api)),
+      getUsedAddresses: mapReadConnectionClosed(api.getUsedAddresses.bind(api)),
+      getUnusedAddresses: mapReadConnectionClosed(
+        api.getUnusedAddresses.bind(api),
+      ),
+      getChangeAddress: mapReadConnectionClosed(api.getChangeAddress.bind(api)),
+      getRewardAddresses: mapReadConnectionClosed(
+        api.getRewardAddresses.bind(api),
+      ),
+      getExtensions: mapReadConnectionClosed(api.getExtensions.bind(api)),
+      signTx: mapConnectionClosed(api.signTx.bind(api)),
+      signData: mapConnectionClosed(api.signData.bind(api)),
+      submitTx: mapConnectionClosed(api.submitTx.bind(api)),
       cip95: {
-        getPubDRepKey: (
-          api.cip95?.getPubDRepKey ?? flatApi.getPubDRepKey!
-        ).bind(api.cip95 ?? api),
-        getRegisteredPubStakeKeys: (
-          api.cip95?.getRegisteredPubStakeKeys ??
-          flatApi.getRegisteredPubStakeKeys!
-        ).bind(api.cip95 ?? api),
-        getUnregisteredPubStakeKeys: (
-          api.cip95?.getUnregisteredPubStakeKeys ??
-          flatApi.getUnregisteredPubStakeKeys!
-        ).bind(api.cip95 ?? api),
+        getPubDRepKey: mapReadConnectionClosed(
+          (api.cip95?.getPubDRepKey ?? flatApi.getPubDRepKey!).bind(
+            api.cip95 ?? api,
+          ),
+        ),
+        getRegisteredPubStakeKeys: mapReadConnectionClosed(
+          (
+            api.cip95?.getRegisteredPubStakeKeys ??
+            flatApi.getRegisteredPubStakeKeys!
+          ).bind(api.cip95 ?? api),
+        ),
+        getUnregisteredPubStakeKeys: mapReadConnectionClosed(
+          (
+            api.cip95?.getUnregisteredPubStakeKeys ??
+            flatApi.getUnregisteredPubStakeKeys!
+          ).bind(api.cip95 ?? api),
+        ),
         // CIP-95 signData is the same extended implementation as the flat
-        // method; namespaced so cip95-first dApps find it.
-        signData: api.signData.bind(api),
+        // method; namespaced so cip95-first dApps find it. Wrapped like the
+        // flat one — governance dApps call this binding, not the flat method.
+        signData: mapConnectionClosed(api.signData.bind(api)),
       },
       cip142: {
-        getNetworkMagic: (
-          api.cip142?.getNetworkMagic ?? flatApi.getNetworkMagic!
-        ).bind(api.cip142 ?? api),
+        getNetworkMagic: mapReadConnectionClosed(
+          (api.cip142?.getNetworkMagic ?? flatApi.getNetworkMagic!).bind(
+            api.cip142 ?? api,
+          ),
+        ),
       },
       experimental: {
-        getCollateral: api.getCollateral.bind(api),
+        getCollateral: mapReadConnectionClosed(api.getCollateral.bind(api)),
       },
     };
   };
@@ -254,6 +313,6 @@ export const createCardanoWalletApi = (
     icon,
     supportedExtensions,
     isEnabled,
-    enable,
+    enable: mapConnectionClosed(enable),
   });
 };

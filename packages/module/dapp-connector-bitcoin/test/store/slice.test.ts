@@ -495,10 +495,15 @@ describe('bitcoinDappConnector slice', () => {
       );
     });
 
-    it('closePopupRequested carries the popup location', () => {
-      expect(actions.closePopupRequested('/bitcoin-dapp-sign-tx')).toEqual({
+    it('closePopupRequested carries the popup location and the request it showed', () => {
+      expect(
+        actions.closePopupRequested({
+          location: '/bitcoin-dapp-sign-tx',
+          requestId: 'request-a',
+        }),
+      ).toEqual({
         type: 'bitcoinDappConnector/closePopupRequested',
-        payload: '/bitcoin-dapp-sign-tx',
+        payload: { location: '/bitcoin-dapp-sign-tx', requestId: 'request-a' },
       });
     });
   });

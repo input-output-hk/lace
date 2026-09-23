@@ -1,4 +1,8 @@
 import { makeNightDesignationBuilding } from './night-designation/build-side-effect';
+import {
+  makeNightDesignationIndexRefresh,
+  makeNightDesignationIndexSettling,
+} from './night-designation/index-side-effect';
 
 import type { SideEffect } from '..';
 
@@ -22,10 +26,19 @@ import type { SideEffect } from '..';
 // because it depends on tx-executor (→ authentication-prompt → react-i18next)
 // and must NOT enter the SDK bundle. Only `index.ts`'s store composes it.
 //
+// The designation index side-effects sit here for the same reason: they read
+// the script address through the Cardano provider, which the SDK bundle can
+// reach — only tx-executor is off-limits on this side.
+//
 // Wires:
-//   Building → buildNightDesignationTx → buildCompleted
+//   Building                               → buildNightDesignationTx → buildCompleted
+//   nightDesignationIndex/refreshRequested → script-address scan → refreshCompleted
+//   nightDesignationFlow Success           → settlingStarted → (activity settles)
+//                                          → refreshRequested + settlingEnded
 // =====================================================================
 
 export const nightDesignationFlowSideEffects: SideEffect[] = [
   makeNightDesignationBuilding(),
+  makeNightDesignationIndexRefresh(),
+  makeNightDesignationIndexSettling(),
 ];

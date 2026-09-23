@@ -54,18 +54,40 @@ import type { Observable } from 'rxjs';
 const isNativeNightCoin = (coin: UtxoWithMeta) =>
   coin.utxo.type === nativeToken().raw;
 
-export type MidnightTxParameters = {
+type MidnightTransferParameters = {
   amount: BigNumber;
   receiverAddress: string;
   type: string;
   tokenKind: MidnightTokenKind;
 };
 
-type ConstructTxParams = {
+/**
+ * Serialized form of everything the user approved in the send flow. The signer
+ * reconstructs the transaction from this alone, so it must carry every
+ * transfer — a transfer absent here is silently not sent.
+ */
+export type MidnightTxParameters = {
+  transfers: readonly [
+    MidnightTransferParameters,
+    ...MidnightTransferParameters[],
+  ];
+};
+
+type TokenTransferParams = {
   address: string;
   amount: bigint;
-  networkId: MidnightSDKNetworkId;
   tokenId: TokenId;
+};
+
+type ConstructTxParams = {
+  networkId: MidnightSDKNetworkId;
+  transfers: readonly TokenTransferParams[];
+};
+
+const asNonEmpty = <T>(items: readonly T[]): readonly [T, ...T[]] => {
+  if (items.length === 0)
+    throw new Error('At least one token transfer is required');
+  return items as readonly [T, ...T[]];
 };
 
 type DustDesignationDependencies = {
@@ -128,26 +150,22 @@ export const constructDustDesignationTransaction = ({
 };
 
 export const constructUnshieldedTransaction = ({
-  address,
-  amount,
   networkId,
-  tokenId,
+  transfers,
 }: ConstructTxParams) => {
   const ttl = new Date(Date.now() + defaultTxTtlLength);
   const intent = ledger.Intent.new(ttl);
-  const parsedAddress = MidnightBech32m.parse(address);
-  const addressDataHex = UnshieldedAddress.codec
-    .decode(networkId, parsedAddress)
-    .data.toString('hex');
-  const ledgerOutput = {
+  const outputs = transfers.map(({ address, amount, tokenId }) => ({
     value: amount,
-    owner: addressDataHex,
+    owner: UnshieldedAddress.codec
+      .decode(networkId, MidnightBech32m.parse(address))
+      .data.toString('hex'),
     type: tokenId,
-  };
+  }));
   intent.guaranteedUnshieldedOffer = ledger.UnshieldedOffer.new(
     // No inputs (will be balanced later in confirm-tx)
     [],
-    [ledgerOutput],
+    outputs,
     // No signatures (added in confirm-tx)
     [],
   );
@@ -155,90 +173,125 @@ export const constructUnshieldedTransaction = ({
 };
 
 export const constructShieldedTransaction = ({
-  address,
-  amount,
   networkId,
-  tokenId,
+  transfers,
 }: ConstructTxParams) => {
-  const parsedAddress = MidnightBech32m.parse(address);
-  const decodedAddress = ShieldedAddress.codec.decode(networkId, parsedAddress);
-  const coin = ledger.createShieldedCoinInfo(tokenId, amount);
-  const output = ledger.ZswapOutput.new(
-    coin,
-    0,
-    decodedAddress.coinPublicKey.toHexString(),
-    decodedAddress.encryptionPublicKey.toHexString(),
-  );
-  const offer = ledger.ZswapOffer.fromOutput(output, tokenId, amount);
+  const toOffer = ({ address, amount, tokenId }: TokenTransferParams) => {
+    const decodedAddress = ShieldedAddress.codec.decode(
+      networkId,
+      MidnightBech32m.parse(address),
+    );
+    const output = ledger.ZswapOutput.new(
+      ledger.createShieldedCoinInfo(tokenId, amount),
+      0,
+      decodedAddress.coinPublicKey.toHexString(),
+      decodedAddress.encryptionPublicKey.toHexString(),
+    );
+    return ledger.ZswapOffer.fromOutput(output, tokenId, amount);
+  };
+
+  const [firstTransfer, ...remainingTransfers] = transfers;
+  if (!firstTransfer)
+    throw new Error('At least one token transfer is required');
+  // ZswapOffer.fromOutput is a singleton constructor by design; merge is the
+  // ledger's composition path for multi-token / multi-output offers.
+  const offer = remainingTransfers
+    .map(toOffer)
+    .reduce(
+      (merged, singleton) => merged.merge(singleton),
+      toOffer(firstTransfer),
+    );
   return ledger.Transaction.fromParts(networkId, offer);
 };
+
+/**
+ * Flattens the bundle into one entry per token transfer, preserving every
+ * transfer and its recipient. Throws when any token lacks metadata or when
+ * shielded and unshielded tokens are mixed — the two kinds require different
+ * signing paths and recipient address formats, and the send flow's address
+ * validation prevents composing such a selection.
+ */
+const flattenTransfers = (
+  txParams: TxParamsBundle<MidnightSpecificTokenMetadata>,
+): MidnightTxParameters['transfers'] => {
+  const transfers = asNonEmpty(
+    txParams.flatMap(({ address, tokenTransfers }) =>
+      tokenTransfers.map(
+        ({ normalizedAmount, token: { metadata, tokenId } }) => {
+          if (!metadata)
+            throw new Error(`Token metadata required for ${tokenId}`);
+          return {
+            amount: normalizedAmount,
+            receiverAddress: address,
+            type: tokenId,
+            tokenKind: metadata.blockchainSpecific.kind,
+          };
+        },
+      ),
+    ),
+  );
+
+  if (new Set(transfers.map(({ tokenKind }) => tokenKind)).size > 1) {
+    throw new Error(
+      'Mixed shielded and unshielded transfers in one transaction are not supported',
+    );
+  }
+
+  return transfers;
+};
+
+const toTokenTransferParams = (
+  transfers: MidnightTxParameters['transfers'],
+  toTokenId: (type: string) => TokenId,
+): TokenTransferParams[] =>
+  transfers.map(({ amount, receiverAddress, type }) => ({
+    address: receiverAddress,
+    amount: BigNumber.valueOf(amount),
+    tokenId: toTokenId(type),
+  }));
 
 const buildTransaction = ({
   blockchainSpecificSendFlowData: { flowType },
   networkId,
   nightUtxos,
   nightVerifyingKey,
-  txParams: [
-    {
-      address,
-      tokenTransfers: [
-        {
-          normalizedAmount,
-          token: { metadata, tokenId },
-        },
-      ],
-    },
-  ],
+  txParams,
 }: DustDesignationDependencies & {
   blockchainSpecificSendFlowData: MidnightSpecificSendFlowData;
   networkId: MidnightSDKNetworkId;
   txParams: TxParamsBundle<MidnightSpecificTokenMetadata>;
 }) => {
-  if (!metadata) throw new Error('Token metadata required');
-
   if (flowType === 'dust-designation') {
     return constructDustDesignationTransaction({
-      address,
+      address: txParams[0].address,
       networkId,
       nightUtxos,
       nightVerifyingKey,
     });
   }
 
-  const params: ConstructTxParams = {
-    address,
-    amount: BigNumber.valueOf(normalizedAmount),
-    networkId,
-    tokenId,
-  };
+  const transfers = flattenTransfers(txParams);
 
-  if (metadata.blockchainSpecific.kind === 'shielded') {
-    return constructShieldedTransaction(params);
+  if (transfers[0].tokenKind === 'shielded') {
+    return constructShieldedTransaction({
+      networkId,
+      transfers: toTokenTransferParams(transfers, TokenId),
+    });
   }
 
   return constructUnshieldedTransaction({
-    ...params,
-    tokenId: TokenId(fromUnshieldedTokenType(tokenId, networkId)),
+    networkId,
+    transfers: toTokenTransferParams(transfers, type =>
+      TokenId(fromUnshieldedTokenType(type, networkId)),
+    ),
   });
 };
 
-const serialiseTx = ([
-  {
-    address,
-    tokenTransfers: [
-      {
-        normalizedAmount,
-        token: { metadata, tokenId },
-      },
-    ],
-  },
-]: TxParamsBundle<MidnightSpecificTokenMetadata>) => {
-  if (!metadata) throw new Error('Token metadata required');
+const serialiseTx = (
+  txParams: TxParamsBundle<MidnightSpecificTokenMetadata>,
+) => {
   const txParameters: MidnightTxParameters = {
-    amount: normalizedAmount,
-    receiverAddress: address,
-    type: tokenId,
-    tokenKind: metadata?.blockchainSpecific.kind,
+    transfers: flattenTransfers(txParams),
   };
   return HexBytes.fromUTF8(JSON.stringify(txParameters));
 };

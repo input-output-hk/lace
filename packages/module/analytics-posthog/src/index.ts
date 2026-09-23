@@ -14,6 +14,7 @@ import {
 import { networkStoreContract } from '@lace-contract/network';
 import { posthogDependencyContract } from '@lace-contract/posthog';
 import { tokenPricingStoreContract } from '@lace-contract/token-pricing';
+import { tokensStoreContract } from '@lace-contract/tokens';
 import { viewsStoreContract } from '@lace-contract/views';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
@@ -42,6 +43,7 @@ const analyticsPosthogModule = inferModuleContext({
     networkStoreContract,
     viewsStoreContract,
     tokenPricingStoreContract,
+    tokensStoreContract,
     cardanoProviderStoreContract,
   ] as const),
   store,
@@ -56,8 +58,13 @@ const analyticsPosthogModule = inferModuleContext({
   addons: {},
 });
 
+// The carbon guest runs the same store: every contract it depends on has an
+// implementation there (posthog-client-web for the client, cardano-host-pull
+// for the provider), and nothing in this module touches chrome.* or
+// react-native.
 const moduleMap: LaceModuleMap = {
   'lace-extension': analyticsPosthogModule,
+  'lace-extension-carbon': analyticsPosthogModule,
   'lace-mobile': analyticsPosthogModule,
 };
 

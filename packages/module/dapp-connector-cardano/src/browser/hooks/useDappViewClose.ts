@@ -1,37 +1,47 @@
+import type { RefObject } from 'react';
+
 import { useCallback } from 'react';
 
-import { useDispatchLaceAction, useLaceSelector } from '../../common/hooks';
+import { useDispatchLaceAction } from '../../common/hooks';
 
 import type { ViewLocation } from '@lace-contract/views';
 
 /**
- * Close handler for sidePanel and popupWindow contexts.
+ * Close handler for the surface a dApp view is presented on.
  *
- * SidePanel: dismiss via `setActiveSheetPage(null)`.
- * PopupWindow: dispatch `closePopupRequested(location)` so a side effect
- * resolves the view id and asks the SW to close it via `chrome.windows.remove`
- * — `window.close()` is unreliable for SW-opened popups.
+ * `popupLocation` IS the surface: a location means the view owns a popup
+ * window, none means it is a sheet. Never infer the surface from
+ * `activeSheetPage` — every view of the wallet shares that state and it races
+ * the close, so a sheet view can read it as falsy while still presented.
+ *
+ * Both surfaces only ASK; the SW decides, since only it knows whether a queued
+ * request has inherited the window or the sheet since.
+ *
+ * `requestIdRef` names the request the close answers, read at close time so it
+ * follows the request the surface is showing. Required for a sheet:
+ * `closeRequestedSheet` refuses a close naming none, so such a sheet could not
+ * be dismissed. A popup close naming none is honoured.
  */
 export const useDappViewClose = (
   popupLocation?: ViewLocation,
+  requestIdRef?: RefObject<string | undefined>,
 ): (() => void) => {
-  const activeSheetPage = useLaceSelector('views.getActiveSheetPage');
-  const setActiveSheetPage = useDispatchLaceAction('views.setActiveSheetPage');
   const requestPopupClose = useDispatchLaceAction(
     'cardanoDappConnector.closePopupRequested',
   );
+  const requestSheetClose = useDispatchLaceAction(
+    'cardanoDappConnector.closeSheetRequested',
+  );
 
   return useCallback(() => {
-    if (activeSheetPage) {
-      setActiveSheetPage(null);
-      return;
-    }
-
     if (popupLocation) {
-      requestPopupClose(popupLocation);
+      requestPopupClose({
+        location: popupLocation,
+        requestId: requestIdRef?.current,
+      });
       return;
     }
 
-    window.close();
-  }, [activeSheetPage, popupLocation, requestPopupClose, setActiveSheetPage]);
+    requestSheetClose({ requestId: requestIdRef?.current });
+  }, [popupLocation, requestIdRef, requestPopupClose, requestSheetClose]);
 };

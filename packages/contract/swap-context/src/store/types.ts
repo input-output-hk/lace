@@ -1,3 +1,4 @@
+import type { SwapTxInspection } from '../check-swap-intent';
 import type { SwapQuote } from '@lace-contract/swap-provider';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { StateObject } from '@lace-lib/util-store';
@@ -58,6 +59,12 @@ export type SwapStateReviewing = StateObject<
     quotes: SwapQuote[];
     selectedQuote: SwapQuote;
     unsignedTxCbor: string;
+    /**
+     * What the built bytes actually do, decoded. The review renders these
+     * figures rather than the quote's for anything the transaction determines,
+     * and a `blocked` verdict must keep the user from confirming.
+     */
+    inspection: SwapTxInspection;
   }
 >;
 
@@ -70,6 +77,7 @@ export type SwapStateAwaitingConfirmation = StateObject<
     sellAmount: string;
     selectedQuote: SwapQuote;
     unsignedTxCbor: string;
+    inspection: SwapTxInspection;
   }
 >;
 

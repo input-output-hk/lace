@@ -5,9 +5,11 @@ import {
   defer,
   map,
   merge,
+  mergeMap,
   of,
   shareReplay,
   switchMap,
+  take,
 } from 'rxjs';
 
 import { genericErrorResults } from './generic-error-results';
@@ -103,7 +105,12 @@ export const makeExecuteTxPhase =
     ).pipe(shareReplay(1));
 
     return txPhaseRequested$.pipe(
-      switchMap(({ payload: { executionId, config } }) =>
+      // mergeMap, not switchMap: this stream carries every flow's phase
+      // requests, so switchMap would let one flow's request tear down
+      // another's in-flight confirm — a teardown raises no error, so the
+      // caller waiting on that executionId would never be completed. Do not
+      // bound the concurrency; a limit queues a fresh request behind a stale one.
+      mergeMap(({ payload: { executionId, config } }) =>
         selectTxExecutorImplementation$.pipe(
           switchMap(selectTxExecutorImplementation =>
             // `defer` so a synchronous throw from an executor phase (built
@@ -158,6 +165,12 @@ export const makeExecuteTxPhase =
               ),
             ),
           ),
+          // Cap each execution at one completion, then tear the inner down.
+          // Load-bearing: Cardano's confirmTx and submitTx project
+          // BehaviorSubjects that never complete, so a retained inner would
+          // re-prompt for an already-signed tx and re-broadcast an
+          // already-submitted one on the next address or chain-id tick.
+          take(1),
         ),
       ),
     );

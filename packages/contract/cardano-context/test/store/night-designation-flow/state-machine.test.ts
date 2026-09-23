@@ -39,11 +39,17 @@ const stateBuilding = execute(
   }),
 ) as StateWithStatusOf<'Building'>;
 
-const stateAwaitingConfirmation = execute(
+const stateSummary = execute(
   stateBuilding,
   nightDesignationFlowMachine.events.buildCompleted({
+    accountId: testAccountId,
     result: { success: true, serializedTx: testSerializedTx, fees: testFees },
   }),
+) as StateWithStatusOf<'Summary'>;
+
+const stateAwaitingConfirmation = execute(
+  stateSummary,
+  nightDesignationFlowMachine.events.confirmed(),
 ) as StateWithStatusOf<'AwaitingConfirmation'>;
 
 const stateProcessing = execute(
@@ -113,25 +119,21 @@ describe('nightDesignationFlow stateMachine', () => {
       });
     });
 
-    it('carries scriptWithdrawableLovelace (a serializable string) for update', () => {
+    it('carries only the intent for update — the build resolves the chain facts', () => {
       const state = execute(
         stateIdle,
         nightDesignationFlowMachine.events.designationRequested({
           accountId: testAccountId,
           action: 'update',
           dustPubkeyHex: 'c'.repeat(64),
-          scriptWithdrawableLovelace: '1500000',
         }),
       );
-      expect(state).toMatchObject({
+      expect(state).toEqual({
         status: 'Building',
-        scriptWithdrawableLovelace: '1500000',
+        accountId: testAccountId,
+        action: 'update',
+        dustPubkeyHex: 'c'.repeat(64),
       });
-      // Must be a plain string — no BigInt enters serializable-checked state.
-      expect(
-        typeof (state as { scriptWithdrawableLovelace?: unknown })
-          .scriptWithdrawableLovelace,
-      ).toBe('string');
     });
 
     it('keeps the "designationRequested" payload JSON-serializable', () => {
@@ -139,7 +141,6 @@ describe('nightDesignationFlow stateMachine', () => {
         accountId: testAccountId,
         action: 'update' as const,
         dustPubkeyHex: 'd'.repeat(64),
-        scriptWithdrawableLovelace: '1500000',
       };
       // The slice is run through redux serializableCheck; the request
       // payload must not carry non-serializable values (BigInt, Utxo, …).
@@ -151,11 +152,22 @@ describe('nightDesignationFlow stateMachine', () => {
       const state = execute(
         stateIdle,
         nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
           result: {
             success: true,
             serializedTx: testSerializedTx,
             fees: testFees,
           },
+        }),
+      );
+      expect(state).toEqual({ status: 'Idle' });
+    });
+
+    it('tolerates a late "confirmationCompleted" (post-reset race) as a no-op', () => {
+      const state = execute(
+        stateIdle,
+        nightDesignationFlowMachine.events.confirmationCompleted({
+          result: { success: true, serializedTx: testSignedTx },
         }),
       );
       expect(state).toEqual({ status: 'Idle' });
@@ -179,9 +191,9 @@ describe('nightDesignationFlow stateMachine', () => {
       });
     });
 
-    it('switches to "AwaitingConfirmation" on successful "buildCompleted"', () => {
-      expect(stateAwaitingConfirmation).toEqual({
-        status: 'AwaitingConfirmation',
+    it('switches to "Summary" on successful "buildCompleted"', () => {
+      expect(stateSummary).toEqual({
+        status: 'Summary',
         accountId: testAccountId,
         action: 'designate',
         fees: testFees,
@@ -193,6 +205,7 @@ describe('nightDesignationFlow stateMachine', () => {
       const state = execute(
         stateBuilding,
         nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
           result: {
             success: false,
             error: { name: 'BuildError', message: 'No cNIGHT in this account' },
@@ -209,9 +222,44 @@ describe('nightDesignationFlow stateMachine', () => {
       });
     });
 
+    it('ignores a "buildCompleted" reporting another account', () => {
+      const state = execute(
+        stateBuilding,
+        nightDesignationFlowMachine.events.buildCompleted({
+          accountId: 'other-account' as AccountId,
+          result: {
+            success: true,
+            serializedTx: 'c300818258...',
+            fees: testFees,
+          },
+        }),
+      );
+      expect(state).toEqual(stateBuilding);
+    });
+
     it('switches to "Idle" on "reset" event', () => {
       const state = execute(
         stateBuilding,
+        nightDesignationFlowMachine.events.reset(),
+      );
+      expect(state).toEqual({ status: 'Idle' });
+    });
+  });
+
+  describe('Summary', () => {
+    it('switches to "AwaitingConfirmation" on user "confirmed", carrying fees + serializedTx', () => {
+      expect(stateAwaitingConfirmation).toEqual({
+        status: 'AwaitingConfirmation',
+        accountId: testAccountId,
+        action: 'designate',
+        fees: testFees,
+        serializedTx: testSerializedTx,
+      });
+    });
+
+    it('switches to "Idle" on "reset" event', () => {
+      const state = execute(
+        stateSummary,
         nightDesignationFlowMachine.events.reset(),
       );
       expect(state).toEqual({ status: 'Idle' });
@@ -245,12 +293,49 @@ describe('nightDesignationFlow stateMachine', () => {
       });
     });
 
-    it('switches to "Idle" on "reset" event', () => {
+    it('stays in "AwaitingConfirmation" on "reset" event (signing in flight)', () => {
       const state = execute(
         stateAwaitingConfirmation,
         nightDesignationFlowMachine.events.reset(),
       );
-      expect(state).toEqual({ status: 'Idle' });
+      expect(state).toEqual(stateAwaitingConfirmation);
+    });
+
+    it('still submits a signing result that lands after a "reset"', () => {
+      // Built with a dustPubkeyHex (the production designate shape) so the
+      // reset→confirmationCompleted hop is proven to carry it into Processing.
+      const awaiting = execute(
+        stateIdle,
+        nightDesignationFlowMachine.events.designationRequested({
+          accountId: testAccountId,
+          action: 'designate',
+          dustPubkeyHex: 'ab'.repeat(33),
+        }),
+        nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
+          result: {
+            success: true,
+            serializedTx: testSerializedTx,
+            fees: testFees,
+          },
+        }),
+        nightDesignationFlowMachine.events.confirmed(),
+        nightDesignationFlowMachine.events.reset(),
+      );
+      const state = execute(
+        awaiting,
+        nightDesignationFlowMachine.events.confirmationCompleted({
+          result: { success: true, serializedTx: testSignedTx },
+        }),
+      );
+      expect(state).toEqual({
+        status: 'Processing',
+        accountId: testAccountId,
+        action: 'designate',
+        dustPubkeyHex: 'ab'.repeat(33),
+        fees: testFees,
+        serializedTx: testSignedTx,
+      });
     });
   });
 
@@ -306,7 +391,7 @@ describe('nightDesignationFlow stateMachine', () => {
       expect(state).toEqual({ status: 'Idle' });
     });
 
-    it('threads dustPubkeyHex through Idle → Building → AwaitingConfirmation → Processing → Success', () => {
+    it('threads dustPubkeyHex through Idle → Building → Summary → AwaitingConfirmation → Processing → Success', () => {
       const dustPubkeyHex = 'b'.repeat(64);
       const building = execute(
         stateIdle,
@@ -316,15 +401,20 @@ describe('nightDesignationFlow stateMachine', () => {
           dustPubkeyHex,
         }),
       ) as StateWithStatusOf<'Building'>;
-      const awaiting = execute(
+      const summary = execute(
         building,
         nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
           result: {
             success: true,
             serializedTx: testSerializedTx,
             fees: testFees,
           },
         }),
+      ) as StateWithStatusOf<'Summary'>;
+      const awaiting = execute(
+        summary,
+        nightDesignationFlowMachine.events.confirmed(),
       ) as StateWithStatusOf<'AwaitingConfirmation'>;
       const processing = execute(
         awaiting,
@@ -339,6 +429,7 @@ describe('nightDesignationFlow stateMachine', () => {
         }),
       ) as StateWithStatusOf<'Success'>;
       expect(building.dustPubkeyHex).toBe(dustPubkeyHex);
+      expect(summary.dustPubkeyHex).toBe(dustPubkeyHex);
       expect(awaiting.dustPubkeyHex).toBe(dustPubkeyHex);
       expect(processing.dustPubkeyHex).toBe(dustPubkeyHex);
       expect(success.dustPubkeyHex).toBe(dustPubkeyHex);
@@ -352,6 +443,67 @@ describe('nightDesignationFlow stateMachine', () => {
         nightDesignationFlowMachine.events.reset(),
       );
       expect(state).toEqual({ status: 'Idle' });
+    });
+
+    it('threads dustPubkeyHex into "Error" from build, confirmation and submit failures', () => {
+      const dustPubkeyHex = 'c'.repeat(64);
+      const building = execute(
+        stateIdle,
+        nightDesignationFlowMachine.events.designationRequested({
+          accountId: testAccountId,
+          action: 'update',
+          dustPubkeyHex,
+        }),
+      ) as StateWithStatusOf<'Building'>;
+      const fromBuild = execute(
+        building,
+        nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
+          result: {
+            success: false,
+            error: { name: 'BuildError', message: 'boom' },
+            errorTranslationKeys: txErrorTranslationKeys,
+          },
+        }),
+      ) as StateWithStatusOf<'Error'>;
+      const awaiting = execute(
+        building,
+        nightDesignationFlowMachine.events.buildCompleted({
+          accountId: testAccountId,
+          result: {
+            success: true,
+            serializedTx: testSerializedTx,
+            fees: testFees,
+          },
+        }),
+        nightDesignationFlowMachine.events.confirmed(),
+      ) as StateWithStatusOf<'AwaitingConfirmation'>;
+      const fromConfirmation = execute(
+        awaiting,
+        nightDesignationFlowMachine.events.confirmationCompleted({
+          result: {
+            success: false,
+            error: { name: 'ConfirmationError', message: 'boom' },
+            errorTranslationKeys: txErrorTranslationKeys,
+          },
+        }),
+      ) as StateWithStatusOf<'Error'>;
+      const fromSubmit = execute(
+        awaiting,
+        nightDesignationFlowMachine.events.confirmationCompleted({
+          result: { success: true, serializedTx: testSignedTx },
+        }),
+        nightDesignationFlowMachine.events.processingResulted({
+          result: {
+            success: false,
+            error: { name: 'SubmitError', message: 'boom' },
+            errorTranslationKeys: txErrorTranslationKeys,
+          },
+        }),
+      ) as StateWithStatusOf<'Error'>;
+      expect(fromBuild.dustPubkeyHex).toBe(dustPubkeyHex);
+      expect(fromConfirmation.dustPubkeyHex).toBe(dustPubkeyHex);
+      expect(fromSubmit.dustPubkeyHex).toBe(dustPubkeyHex);
     });
   });
 });

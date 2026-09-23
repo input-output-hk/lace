@@ -37,6 +37,7 @@ const guestModule = inferModuleContext({
 });
 
 const moduleMap: LaceModuleMap = {
+  'lace-extension-carbon': guestModule,
   'lace-extension-guest': guestModule,
 };
 

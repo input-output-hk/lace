@@ -88,7 +88,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -109,7 +109,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -129,11 +129,11 @@ describe('createBitcoinConfirmationCallback', () => {
       });
     });
 
-    it('resolves isConfirmed true when the user confirms', async () => {
+    it('resolves a confirmed outcome when the user confirms', async () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -145,14 +145,14 @@ describe('createBitcoinConfirmationCallback', () => {
         signatureType: 'ecdsa',
       });
 
-      expect(result.isConfirmed).toBe(true);
+      expect(result.outcome).toBe('confirmed');
     });
 
-    it('resolves isConfirmed false when the user rejects', async () => {
+    it('resolves a rejected outcome when the user rejects', async () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: false,
+            outcome: 'rejected' as const,
           });
         }),
         mockSubscriber,
@@ -164,7 +164,7 @@ describe('createBitcoinConfirmationCallback', () => {
         signatureType: 'ecdsa',
       });
 
-      expect(result.isConfirmed).toBe(false);
+      expect(result.outcome).toBe('rejected');
     });
   });
 
@@ -173,7 +173,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -196,7 +196,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -210,11 +210,11 @@ describe('createBitcoinConfirmationCallback', () => {
       expect(emittedRequests[0].psbtsBase64).toEqual(['solo-psbt']);
     });
 
-    it('resolves isConfirmed true when the user confirms', async () => {
+    it('resolves a confirmed outcome when the user confirms', async () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -225,7 +225,7 @@ describe('createBitcoinConfirmationCallback', () => {
         accountId: SIGNING_ACCOUNT_ID,
       });
 
-      expect(result.isConfirmed).toBe(true);
+      expect(result.outcome).toBe('confirmed');
     });
   });
 
@@ -234,7 +234,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -254,7 +254,7 @@ describe('createBitcoinConfirmationCallback', () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
           (request.resolve as (r: BitcoinConfirmationResult) => void)({
-            isConfirmed: true,
+            outcome: 'confirmed' as const,
           });
         }),
         mockSubscriber,
@@ -297,13 +297,13 @@ describe('createBitcoinConfirmationCallback', () => {
 
       expect(emittedRequests).toHaveLength(2);
 
-      resolvers[1]({ isConfirmed: false });
-      resolvers[0]({ isConfirmed: true });
+      resolvers[1]({ outcome: 'rejected' });
+      resolvers[0]({ outcome: 'confirmed' });
 
       const [result1, result2] = await Promise.all([promise1, promise2]);
 
-      expect(result1.isConfirmed).toBe(true);
-      expect(result2.isConfirmed).toBe(false);
+      expect(result1.outcome).toBe('confirmed');
+      expect(result2.outcome).toBe('rejected');
     });
   });
 
@@ -311,7 +311,7 @@ describe('createBitcoinConfirmationCallback', () => {
     it('sets the request type correctly for each request kind', async () => {
       const { callback } = createBitcoinConfirmationCallback(
         createMockHandleRequests(emittedRequests, request => {
-          request.resolve({ isConfirmed: true });
+          request.resolve({ outcome: 'confirmed' });
         }),
         mockSubscriber,
       );

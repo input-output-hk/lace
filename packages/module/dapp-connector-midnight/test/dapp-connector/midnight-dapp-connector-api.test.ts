@@ -1262,8 +1262,10 @@ describe('MidnightDappConnectorApi', () => {
         signature: 'mock-signature',
         verifyingKey: 'mock-verifying-key',
       });
+      // The wallet signs the connector-spec domain-separated bytes, not the raw
+      // decoded payload (LW-15403): `midnight_signed_message:<size>:` + "Hello".
       expect(mockSignData).toHaveBeenCalledWith(
-        new Uint8Array(Buffer.from('48656c6c6f', 'hex')),
+        new TextEncoder().encode('midnight_signed_message:5:Hello'),
       );
     });
 
@@ -1291,7 +1293,7 @@ describe('MidnightDappConnectorApi', () => {
         verifyingKey: 'mock-verifying-key',
       });
       expect(mockSignData).toHaveBeenCalledWith(
-        new Uint8Array(Buffer.from('SGVsbG8=', 'base64')),
+        new TextEncoder().encode('midnight_signed_message:5:Hello'),
       );
     });
 
@@ -1319,7 +1321,7 @@ describe('MidnightDappConnectorApi', () => {
         verifyingKey: 'mock-verifying-key',
       });
       expect(mockSignData).toHaveBeenCalledWith(
-        new TextEncoder().encode('Hello'),
+        new TextEncoder().encode('midnight_signed_message:5:Hello'),
       );
     });
 

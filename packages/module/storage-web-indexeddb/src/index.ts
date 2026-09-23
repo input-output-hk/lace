@@ -22,6 +22,7 @@ const webModule = inferModuleContext({
 });
 
 const moduleMap: LaceModuleMap = {
+  'lace-extension-carbon': webModule,
   'lace-extension-guest': webModule,
 };
 

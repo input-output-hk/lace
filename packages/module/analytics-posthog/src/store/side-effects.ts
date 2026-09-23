@@ -1,5 +1,6 @@
 import { deepEquals } from '@cardano-sdk/util';
-import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
+import { blockingWithLatestFrom, toEmpty } from '@cardano-sdk/util-rxjs';
+import { getRealFiConfigFromFlags } from '@lace-contract/realfi-staking';
 import { isHardwareWallet, WalletType } from '@lace-contract/wallet-repo';
 import {
   combineLatest,
@@ -12,6 +13,7 @@ import {
   of,
   startWith,
   take,
+  tap,
 } from 'rxjs';
 
 import { buildCardanoGovernanceAccounts } from './cardano-governance-super-property';
@@ -20,6 +22,7 @@ import type { SideEffect } from '..';
 import type { IdentifiedUser } from './slice';
 import type { AccountRewardAccountDetailsMap } from '@lace-contract/cardano-context';
 import type { CurrencyPreference } from '@lace-contract/token-pricing';
+import type { RawTokensState, TokenId } from '@lace-contract/tokens';
 import type { AnyAccount, AnyWallet } from '@lace-contract/wallet-repo';
 import type { JsonType } from '@lace-lib/util-store';
 
@@ -239,6 +242,141 @@ export const identifyUserWithSuperProperties: SideEffect = (
     take(1),
   );
 
+/** Whether any active account's synced token balances include sUSDr > 0. */
+const holdsSusdr = (
+  cardanoAccounts: readonly Pick<AnyAccount, 'accountId'>[],
+  rawTokensByAccount: RawTokensState,
+  susdrTokenId: string,
+): boolean =>
+  cardanoAccounts.some(({ accountId }) =>
+    Object.values(rawTokensByAccount[accountId] ?? {}).some(byTokenId => {
+      const raw = byTokenId?.[susdrTokenId as TokenId];
+      if (!raw) return false;
+      try {
+        return BigInt(raw.available.toString()) > 0n;
+      } catch {
+        // An unreadable balance is "not holding", never a stream error.
+        return false;
+      }
+    }),
+  );
+
+/**
+ * `realfi_staking` person property (LW-15494 AC4): whether the wallet holds
+ * sUSDr > 0 — "currently staking" is a state, not an action, so no event can
+ * answer it. Derived from the token slice the normal balance sync feeds (no
+ * extra network call). Separate from `identifyUserWithSuperProperties` because
+ * that identify is capped at one per session and routinely fires before UTxO
+ * sync lands token balances; this one waits for them and, unlike the session
+ * super-properties, re-identifies when the holding changes mid-session (a
+ * stake completing). The snapshot dedupe still keeps that to actual changes.
+ */
+export const identifyRealfiStaking: SideEffect = (
+  _,
+  {
+    analytics: { selectAnalyticsUser$ },
+    network: { selectNetworkType$, selectActiveNetworkId$ },
+    features: { selectLoadedFeatures$ },
+    cardanoContext: { selectActiveCardanoAccounts$ },
+    tokens: { selectAllRawMap$ },
+    posthogAnalytics: { selectIdentifiedUser$ },
+  },
+  { posthog, actions, logger },
+) =>
+  combineLatest([
+    selectAnalyticsUser$,
+    selectNetworkType$,
+    selectActiveNetworkId$,
+    selectLoadedFeatures$,
+    selectActiveCardanoAccounts$,
+    selectAllRawMap$,
+  ]).pipe(
+    map(
+      ([
+        user,
+        networkType,
+        selectActiveNetworkId,
+        loadedFeatures,
+        cardanoAccounts,
+        rawTokensByAccount,
+      ]) => {
+        if (!user) return null;
+        // Mainnet-only, like cardano_governance_accounts: identify merges, so
+        // omitting the key off mainnet keeps the last mainnet value instead of
+        // letting a testnet holding overwrite it.
+        if (networkType !== 'mainnet') return null;
+        const config = getRealFiConfigFromFlags(
+          loadedFeatures.featureFlags,
+          selectActiveNetworkId('Cardano'),
+        );
+        if (!config || cardanoAccounts.length === 0) return null;
+        const isStaking = holdsSusdr(
+          cardanoAccounts,
+          rawTokensByAccount,
+          config.susdrTokenId,
+        );
+        // `true` needs no wait — a visible sUSDr balance cannot be a sync
+        // artefact. `false` does: an account whose tokens haven't loaded is
+        // stored as `{}` (trackAccountTokens maps no-UTxOs-yet to
+        // `byAddress: []`), which is indistinguishable from a genuinely empty
+        // account, so reporting `false` on it would overwrite a staker's
+        // `true` at every boot. Staying silent instead only withholds the
+        // negative, and the tile this feeds counts `realfi_staking === true`.
+        if (
+          !isStaking &&
+          cardanoAccounts.some(
+            ({ accountId }) =>
+              Object.keys(rawTokensByAccount[accountId] ?? {}).length === 0,
+          )
+        ) {
+          return null;
+        }
+        return { userId: user.id, properties: { realfi_staking: isStaking } };
+      },
+    ),
+    filter(
+      (identity): identity is NonNullable<typeof identity> => identity !== null,
+    ),
+    distinctUntilChanged(deepEquals),
+    debounceTime(IDENTIFY_DEBOUNCE_MS),
+    blockingWithLatestFrom(selectIdentifiedUser$),
+    filter(([next, last]) => identifyWouldChangePerson(next, last)),
+    mergeMap(([next]) => {
+      try {
+        posthog.identify(next.userId, next.properties);
+      } catch (error) {
+        // No snapshot for an identify that never left (see the session
+        // identify above); a throw here must not kill the root epic.
+        logger.error('Failed to identify PostHog user', error);
+        return EMPTY;
+      }
+      return of(actions.posthogAnalytics.identified(next));
+    }),
+  );
+
+/**
+ * Stops the client delivering what it captured before an opt-out.
+ *
+ * The contract stops handing events over on a revoke, but a batching client has
+ * already accepted the ones before it, and a web client's page-hide flush sends
+ * those with `keepalive` — after the page is gone. The queue is the last place
+ * an opt-out has to reach.
+ *
+ * `reset` is optional on the contract: a client that delivers synchronously has
+ * no queue, and this is a no-op for it.
+ */
+export const dropQueuedEventsOnRevoke: SideEffect = (
+  { analytics: { revokeConsent$ } },
+  _,
+  { posthog },
+) =>
+  revokeConsent$.pipe(
+    tap(() => {
+      posthog.reset?.();
+    }),
+    toEmpty,
+  );
+
 export const trackFeatureView: SideEffect = (
   { features: { featureView$ } },
   _,
@@ -271,7 +409,9 @@ export const trackFeatureInteraction: SideEffect = (
   );
 
 export const posthogSideEffects: SideEffect[] = [
+  dropQueuedEventsOnRevoke,
   identifyUserWithSuperProperties,
+  identifyRealfiStaking,
   initializePostHogAnalyticsDependencies,
   trackFeatureView,
   trackFeatureInteraction,

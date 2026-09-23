@@ -335,6 +335,150 @@ describe('BlockfrostNetworkInfoProvider', () => {
     });
   });
 
+  test('protocolParameters maps canonically-ordered cost_models_raw for Plutus V3', async () => {
+    // Raw arrays are already in the ledger's canonical parameter order.
+    const plutusV3Raw = [100_788, 420, 1, 1, 1000, 173, 0, 1];
+    const mockedResponse = {
+      a0: 0.3,
+      coins_per_utxo_word: '4310',
+      // Named form is present but scrambled — proves the raw (ordered) form wins.
+      cost_models: {
+        PlutusV3: {
+          'listed-first': 173,
+          'listed-second': 100_788,
+        },
+      },
+      cost_models_raw: {
+        PlutusV3: plutusV3Raw,
+      },
+      key_deposit: '2000000',
+      max_collateral_inputs: 1,
+      max_tx_size: '16384',
+      max_val_size: '1000',
+      min_fee_a: 44,
+      min_fee_b: 155_381,
+      min_pool_cost: '340000000',
+      pool_deposit: '500000000',
+      protocol_major_ver: 10,
+      protocol_minor_ver: 0,
+      rho: 0.003,
+      tau: 0.2,
+    };
+    mockResponses(request, [
+      ['epochs/latest/parameters', { data: mockedResponse }],
+    ]);
+    const response = await provider.protocolParameters();
+
+    expect(response.costModels.get(Cardano.PlutusLanguageVersion.V3)).toEqual(
+      plutusV3Raw,
+    );
+  });
+
+  test('protocolParameters falls back to named cost_models when raw is absent', async () => {
+    const mockedResponse = {
+      a0: 0.3,
+      coins_per_utxo_word: '4310',
+      cost_models: {
+        PlutusV2: {
+          'addInteger-cpu-arguments-intercept': 197_209,
+          'addInteger-cpu-arguments-slope': 0,
+        },
+      },
+      key_deposit: '2000000',
+      max_collateral_inputs: 1,
+      max_tx_size: '16384',
+      max_val_size: '1000',
+      min_fee_a: 44,
+      min_fee_b: 155_381,
+      min_pool_cost: '340000000',
+      pool_deposit: '500000000',
+      protocol_major_ver: 10,
+      protocol_minor_ver: 0,
+      rho: 0.003,
+      tau: 0.2,
+    };
+    mockResponses(request, [
+      ['epochs/latest/parameters', { data: mockedResponse }],
+    ]);
+    const response = await provider.protocolParameters();
+
+    expect(response.costModels.get(Cardano.PlutusLanguageVersion.V2)).toEqual([
+      197_209, 0,
+    ]);
+    expect(response.costModels.has(Cardano.PlutusLanguageVersion.V3)).toBe(
+      false,
+    );
+  });
+
+  test('protocolParameters ignores an empty cost_models_raw entry and falls back to named', async () => {
+    const mockedResponse = {
+      a0: 0.3,
+      coins_per_utxo_word: '4310',
+      cost_models: {
+        PlutusV2: {
+          'addInteger-cpu-arguments-intercept': 197_209,
+          'addInteger-cpu-arguments-slope': 0,
+        },
+      },
+      cost_models_raw: {
+        PlutusV2: [],
+      },
+      key_deposit: '2000000',
+      max_collateral_inputs: 1,
+      max_tx_size: '16384',
+      max_val_size: '1000',
+      min_fee_a: 44,
+      min_fee_b: 155_381,
+      min_pool_cost: '340000000',
+      pool_deposit: '500000000',
+      protocol_major_ver: 10,
+      protocol_minor_ver: 0,
+      rho: 0.003,
+      tau: 0.2,
+    };
+    mockResponses(request, [
+      ['epochs/latest/parameters', { data: mockedResponse }],
+    ]);
+    const response = await provider.protocolParameters();
+
+    expect(response.costModels.get(Cardano.PlutusLanguageVersion.V2)).toEqual([
+      197_209, 0,
+    ]);
+  });
+
+  test('protocolParameters skips a language whose cost model is empty in both forms', async () => {
+    const mockedResponse = {
+      a0: 0.3,
+      coins_per_utxo_word: '4310',
+      cost_models: {
+        PlutusV3: {},
+      },
+      cost_models_raw: {
+        PlutusV3: [],
+      },
+      key_deposit: '2000000',
+      max_collateral_inputs: 1,
+      max_tx_size: '16384',
+      max_val_size: '1000',
+      min_fee_a: 44,
+      min_fee_b: 155_381,
+      min_pool_cost: '340000000',
+      pool_deposit: '500000000',
+      protocol_major_ver: 10,
+      protocol_minor_ver: 0,
+      rho: 0.003,
+      tau: 0.2,
+    };
+    mockResponses(request, [
+      ['epochs/latest/parameters', { data: mockedResponse }],
+    ]);
+    const response = await provider.protocolParameters();
+
+    expect(response.costModels.has(Cardano.PlutusLanguageVersion.V3)).toBe(
+      false,
+    );
+  });
+
   test('ledgerTip', async () => {
     mockResponses(request, [['blocks/latest', { data: blockResponse }]]);
     const response = await provider.ledgerTip();

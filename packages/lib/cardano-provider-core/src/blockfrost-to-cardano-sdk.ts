@@ -88,6 +88,11 @@ export const BlockfrostToCardanoSDK = {
     coinsPerUtxoByte: Number(blockfrost.coins_per_utxo_word),
     collateralPercentage: blockfrost.collateral_percent!,
     committeeTermLimit: Cardano.EpochNo(0),
+    // Cost models feed the positional script-data-hash language view, so their
+    // order must be canonical: prefer `cost_models_raw` (ordered arrays). The
+    // named `cost_models` object gives no ordering guarantee — Object.values can
+    // scramble V3 → PPViewHashesDontMatch at submit — so use it only as a
+    // fallback.
     costModels: new Map<Cardano.PlutusLanguageVersion, Cardano.CostModel>(
       (
         [
@@ -95,19 +100,23 @@ export const BlockfrostToCardanoSDK = {
           ['PlutusV2', Cardano.PlutusLanguageVersion.V2],
           ['PlutusV3', Cardano.PlutusLanguageVersion.V3],
         ] as const
-      )
-        .filter(([key]) => blockfrost.cost_models?.[key])
-        .map(
-          ([key, version]): [
-            Cardano.PlutusLanguageVersion,
-            Cardano.CostModel,
-          ] => [
-            version,
-            Object.values(
-              blockfrost.cost_models![key] as { [param: string]: number },
-            ),
-          ],
-        ),
+      ).flatMap(
+        ([key, version]): [
+          Cardano.PlutusLanguageVersion,
+          Cardano.CostModel,
+        ][] => {
+          const raw = blockfrost.cost_models_raw?.[key] as number[] | undefined;
+          // Guard on length, not mere presence: [] is truthy but carries no
+          // parameters, so `if (raw)` would install a zero-param cost model and
+          // skip the named fallback.
+          if (raw?.length) return [[version, raw]];
+          const named = blockfrost.cost_models?.[key] as
+            | Record<string, number>
+            | undefined;
+          const values = named ? Object.values(named) : [];
+          return values.length ? [[version, values]] : [];
+        },
+      ),
     ),
     dRepDeposit: blockfrost.drep_deposit
       ? Number(blockfrost.drep_deposit)

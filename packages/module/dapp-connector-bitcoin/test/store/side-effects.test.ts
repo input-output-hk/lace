@@ -349,7 +349,36 @@ describe('side-effects', () => {
       expect(emissions).toContainEqual({ type: 'SIGN_PSBT_ACTION' });
     });
 
-    it('blocks requests while the wallet is locked', () => {
+    it('queues a request that arrives mid-confirmation and serves it once the first settles', () => {
+      // A confirmation that stays open: the flow completes only when the user acts.
+      const firstFlow$ = new Subject<unknown>();
+      vi.mocked(signMessage$).mockReturnValueOnce(firstFlow$ as never);
+
+      const { dependencies } = runSideEffect();
+
+      dependencies.requestSubject.next({
+        resolve: vi.fn(),
+        type: 'signMessage',
+        requestingDapp: mockDapp,
+      });
+      const second = {
+        resolve: vi.fn(),
+        type: 'signMessage' as const,
+        requestingDapp: mockDapp,
+      };
+      dependencies.requestSubject.next(second);
+
+      expect(signMessage$).toHaveBeenCalledTimes(1);
+
+      firstFlow$.complete();
+
+      expect(signMessage$).toHaveBeenCalledTimes(2);
+      expect(signMessage$).toHaveBeenLastCalledWith(
+        expect.objectContaining({ request: second }),
+      );
+    });
+
+    it('routes requests without a lock gate of its own, which the transport already enforces', () => {
       const { dependencies } = runSideEffect({
         stateObservables: {
           ...createStateObservables(),
@@ -362,7 +391,13 @@ describe('side-effects', () => {
         requestingDapp: mockDapp,
       });
 
-      expect(signMessage$).not.toHaveBeenCalled();
+      expect(signMessage$).toHaveBeenCalledWith(
+        expect.objectContaining({
+          request: expect.objectContaining({
+            type: 'signMessage',
+          }) as BitcoinConfirmationRequest,
+        }),
+      );
     });
 
     it('ignores unknown request types', () => {
@@ -813,6 +848,26 @@ describe('side-effects', () => {
         };
       };
 
+      /**
+       * The send path reports onto the same subject the psbt flow receives, so
+       * an open psbt request is how a test observes what `confirmSendTx` says.
+       */
+      const captureSigningResults = (
+        requestSubject: Subject<BitcoinConfirmationRequest>,
+      ) => {
+        requestSubject.next({
+          resolve: vi.fn(),
+          type: 'signPsbt',
+          requestingDapp: mockDapp,
+          psbtsBase64: ['cHNidP8BAAoAAAAAAAAAAAAA'],
+        } as unknown as BitcoinConfirmationRequest);
+        const results: BitcoinSigningResult[] = [];
+        vi.mocked(signPsbt$).mock.calls[0][0].signingResult$.subscribe(result =>
+          results.push(result),
+        );
+        return results;
+      };
+
       it('builds the payment and returns its PSBT for review', async () => {
         const { requestedConfigs, buildSendTx } = setupSend();
 
@@ -919,7 +974,8 @@ describe('side-effects', () => {
       });
 
       it('confirms and submits the reviewed transaction', async () => {
-        const { requestedConfigs, confirmSendTx } = setupSend();
+        const { requestedConfigs, confirmSendTx, dependencies } = setupSend();
+        const results = captureSigningResults(dependencies.requestSubject);
 
         await expect(
           confirmSendTx({
@@ -943,6 +999,9 @@ describe('side-effects', () => {
           serializedTx: string;
         };
         expect(submitParams.serializedTx).toBe('signed-tx');
+        // The happy path reports too, exactly once: the flow awaiting this is
+        // what closes the review and frees the queue.
+        expect(results).toEqual([{ type: 'success' }]);
       });
 
       it('records the pending activity with the net effect the review screen showed', async () => {
@@ -1058,9 +1117,11 @@ describe('side-effects', () => {
       });
 
       it('rejects with Refused when confirmation fails or is cancelled', async () => {
-        const { confirmSendTx } = setupSend({
+        const { confirmSendTx, dependencies } = setupSend({
           confirmTx: { success: false, errorTranslationKeys: {} },
         });
+        const results = captureSigningResults(dependencies.requestSubject);
+
         await expect(
           confirmSendTx({
             accountId: ACCOUNT_ID,
@@ -1068,12 +1129,28 @@ describe('side-effects', () => {
             netSatoshis: -6000,
           }),
         ).rejects.toMatchObject({ code: BitcoinAPIErrorCode.Refused });
+
+        // Exactly one result: a second would be left for the next queued
+        // request to consume as its own outcome.
+        expect(results).toEqual([{ type: 'cancelled' }]);
       });
 
-      it('rejects when submission fails', async () => {
-        const { confirmSendTx } = setupSend({
-          submitTx: { success: false, errorTranslationKeys: {} },
-        });
+      it('reports a signing result when a post-consent lookup fails', async () => {
+        // The account list can change under an open confirmation: accounts are
+        // network-specific, so switching network (or removing the wallet)
+        // leaves the lookup with nothing to find.
+        const { confirmSendTx, dependencies } = setupSend(
+          {},
+          {
+            ...createStateObservables(),
+            wallets: {
+              selectActiveNetworkAccounts$: of([]),
+              selectAll$: of([wallet]),
+            },
+          },
+        );
+        const results = captureSigningResults(dependencies.requestSubject);
+
         await expect(
           confirmSendTx({
             accountId: ACCOUNT_ID,
@@ -1081,6 +1158,27 @@ describe('side-effects', () => {
             netSatoshis: -6000,
           }),
         ).rejects.toMatchObject({ code: BitcoinAPIErrorCode.InternalError });
+
+        // Without a result the flow waiting on it never completes, and every
+        // later Bitcoin request queues behind it.
+        expect(results).toEqual([{ type: 'error' }]);
+      });
+
+      it('rejects when submission fails', async () => {
+        const { confirmSendTx, dependencies } = setupSend({
+          submitTx: { success: false, errorTranslationKeys: {} },
+        });
+        const results = captureSigningResults(dependencies.requestSubject);
+
+        await expect(
+          confirmSendTx({
+            accountId: ACCOUNT_ID,
+            serializedTx: builtSerializedTx,
+            netSatoshis: -6000,
+          }),
+        ).rejects.toMatchObject({ code: BitcoinAPIErrorCode.InternalError });
+
+        expect(results).toEqual([{ type: 'error' }]);
       });
     });
   });
@@ -1304,36 +1402,99 @@ describe('side-effects', () => {
       location: '/bitcoin-dapp-sign-tx',
     };
 
-    const runCloseRequested = (openViews: unknown[]) => {
-      const closePopupRequested$ = new Subject<{ payload: string }>();
+    const runCloseRequested = (
+      openViews: unknown[],
+      pendingSignPsbtRequest: { requestId: string } | null = null,
+    ) => {
+      const closePopupRequested$ = new Subject<{
+        payload: { location: string; requestId?: string };
+      }>();
       const emissions: unknown[] = [];
       closeRequestedPopup(
         { bitcoinDappConnector: { closePopupRequested$ } } as never,
-        { views: { selectOpenViews$: of(openViews) } } as never,
+        {
+          views: { selectOpenViews$: of(openViews) },
+          bitcoinDappConnector: {
+            selectPendingSignMessageRequest$: of(null),
+            selectPendingSignPsbtRequest$: of(pendingSignPsbtRequest),
+          },
+        } as never,
         { actions } as never,
       ).subscribe(emission => emissions.push(emission));
       return { closePopupRequested$, emissions };
     };
 
-    it('closes the popup window open at the requested location', () => {
+    // The side effect decides one task after the action arrives, so the
+    // assertion has to let that task run.
+    const settled = async () => new Promise(resolve => setTimeout(resolve, 0));
+
+    it('closes the popup window open at the requested location', async () => {
       const { closePopupRequested$, emissions } = runCloseRequested([
         { id: 'view-0', type: 'sidePanel', location: '/' },
         signTxPopup,
       ]);
 
-      closePopupRequested$.next({ payload: '/bitcoin-dapp-sign-tx' });
+      closePopupRequested$.next({
+        payload: { location: '/bitcoin-dapp-sign-tx' },
+      });
+      await settled();
 
       expect(emissions).toEqual([viewsActions.views.closeView(popupViewId)]);
     });
 
-    it('emits nothing when no popup window is open at that location', () => {
+    it('emits nothing when no popup window is open at that location', async () => {
       const { closePopupRequested$, emissions } = runCloseRequested([
         { id: 'view-0', type: 'sidePanel', location: '/bitcoin-dapp-sign-tx' },
       ]);
 
-      closePopupRequested$.next({ payload: '/bitcoin-dapp-sign-tx' });
+      closePopupRequested$.next({
+        payload: { location: '/bitcoin-dapp-sign-tx' },
+      });
+      await settled();
 
       expect(emissions).toEqual([]);
+    });
+
+    it('keeps the window open for a queued request that has taken it over', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-b' },
+      );
+
+      closePopupRequested$.next({
+        payload: { location: '/bitcoin-dapp-sign-tx', requestId: 'request-a' },
+      });
+      await settled();
+
+      expect(emissions).toEqual([]);
+    });
+
+    it('closes the window when the request that asked still holds it', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-a' },
+      );
+
+      closePopupRequested$.next({
+        payload: { location: '/bitcoin-dapp-sign-tx', requestId: 'request-a' },
+      });
+      await settled();
+
+      expect(emissions).toEqual([viewsActions.views.closeView(popupViewId)]);
+    });
+
+    it('closes the window for a view that never showed a request', async () => {
+      const { closePopupRequested$, emissions } = runCloseRequested(
+        [signTxPopup],
+        { requestId: 'request-b' },
+      );
+
+      closePopupRequested$.next({
+        payload: { location: '/bitcoin-dapp-sign-tx' },
+      });
+      await settled();
+
+      expect(emissions).toEqual([viewsActions.views.closeView(popupViewId)]);
     });
   });
 

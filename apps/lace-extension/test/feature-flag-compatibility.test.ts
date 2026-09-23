@@ -5,6 +5,7 @@ import {
 import { PAUSE_NETWORK_POLLING_FEATURE_FLAG } from '@lace-contract/app-lock';
 import { FEATURE_FLAG_WALLET_SECURITY_ALERTS } from '@lace-contract/cardano-context';
 import { FeatureFlagKey, type FeatureFlag } from '@lace-contract/feature';
+import { FEATURE_FLAG_REALFI } from '@lace-contract/realfi-staking';
 import { testFeatureFlagCompatibility } from '@lace-lib/util-dev-app';
 import { ADA_HANDLE_FEATURE_FLAG } from '@lace-module/ada-handle';
 import { FEATURE_FLAG_BITCOIN_DAPP_CONNECTOR } from '@lace-module/dapp-connector-bitcoin';
@@ -36,7 +37,6 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: IDENTITY_FEATURE_FLAG },
   { key: FEATURE_FLAG_LEDGER },
   { key: FEATURE_FLAG_TREZOR },
-  { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   { key: PAUSE_NETWORK_POLLING_FEATURE_FLAG },
   { key: FEATURE_FLAG_WALLET_SECURITY_ALERTS },
   { key: FEATURE_FLAG_SEED_SIGNER },
@@ -44,6 +44,8 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FEATURE_FLAG_KEYSTONE },
   { key: FeatureFlagKey('GOVERNANCE_CENTER') },
   { key: FeatureFlagKey('EARN_REWARDS') },
+  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_SHIELDED_ACTIVITY_ROWS') },
+  { key: FEATURE_FLAG_REALFI },
 ];
 
 testFeatureFlagCompatibility(

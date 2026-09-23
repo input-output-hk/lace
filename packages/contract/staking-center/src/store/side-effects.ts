@@ -33,9 +33,9 @@ import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 // Statuses in which the machine handles each side-effect's RESULT event (see
 // `state-machine.ts`). A result arriving while the machine is outside these — a race,
-// or a close-all teardown — is stale and dropped (see `dropStaleResult`), otherwise the
-// machine throws "handler not found for status X and event Y". Keep in sync with the
-// state machine's handlers.
+// or a close-all teardown — is stale and dropped (see `dropStaleResult`); otherwise
+// `transition` logs "handler not found for status X and event Y" and no-ops (returns
+// the state unchanged). Keep in sync with the state machine's handlers.
 const FEE_CALCULATION_HANDLED_STATES = new Set<DelegationFlowState['status']>([
   'CalculatingFees',
 ]);

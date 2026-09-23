@@ -3,7 +3,7 @@ import {
   useDeepCompareMemo,
   createContextualUseLoadModules,
 } from '@lace-lib/util-render';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import type {
   LoadableKey,
@@ -52,34 +52,25 @@ export const useUICustomisation = <
   ...restParams: RestParams
 ) => {
   const loadedModules = useLoadModules(name);
-  const [customisations, setCustomisations] = useState<LoadedCustomisation[]>(
-    [],
-  );
-
   const selector = useDeepCompareMemo(restParams[0]);
+  const hasSelector = restParams.length === 1;
 
-  useEffect(() => {
+  const customisations = useMemo<LoadedCustomisation[]>(() => {
     if (!areThoseValidCustomisations<LoadedCustomisation>(loadedModules)) {
-      return;
+      return [];
     }
 
     const canRunSelector =
-      loadedModules.every(c => 'uiCustomisationSelector' in c) &&
-      restParams.length === 1;
+      loadedModules.every(c => 'uiCustomisationSelector' in c) && hasSelector;
 
     if (!canRunSelector) {
-      setCustomisations(loadedModules);
-      return;
+      return loadedModules;
     }
 
-    const selectedCustomisations = (
-      loadedModules as UICustomisation<object, unknown>[]
-    ).filter(({ uiCustomisationSelector }) =>
-      uiCustomisationSelector(selector),
-    );
-
-    setCustomisations(selectedCustomisations as LoadedCustomisation[]);
-  }, [loadedModules, selector]);
+    return (loadedModules as UICustomisation<object, unknown>[]).filter(
+      ({ uiCustomisationSelector }) => uiCustomisationSelector(selector),
+    ) as LoadedCustomisation[];
+  }, [loadedModules, selector, hasSelector]);
 
   return customisations;
 };

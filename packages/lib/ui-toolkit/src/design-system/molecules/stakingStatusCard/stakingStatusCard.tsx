@@ -17,6 +17,14 @@ export type StakingStatusCardStatus = 'loading' | 'staked' | 'unstaked';
 
 export type StakingStatusCardProps = {
   status: StakingStatusCardStatus;
+  /** Overrides the status-derived heading (e.g. the hub's "Total Earned"). */
+  title?: string;
+  /**
+   * Prefix for the summary testIDs. Surfaces that can coexist in the DOM
+   * (the hub card stays mounted, hidden, under the pushed Cardano detail)
+   * must use distinct prefixes or selectors match the hidden copy first.
+   */
+  testID?: string;
   totalEarned?: string;
   totalStaked?: string;
   totalUnstaked?: string;
@@ -24,6 +32,8 @@ export type StakingStatusCardProps = {
 
 export const StakingStatusCard = ({
   status,
+  title,
+  testID = 'staking-summary',
   totalEarned,
   totalStaked,
   totalUnstaked,
@@ -38,6 +48,7 @@ export const StakingStatusCard = ({
   }, [totalEarned]);
 
   const statusTitle = useMemo(() => {
+    if (title !== undefined) return title;
     switch (status) {
       case 'loading':
         return null;
@@ -46,7 +57,7 @@ export const StakingStatusCard = ({
       case 'unstaked':
         return t('v2.generic.staking.card.total.unstaked');
     }
-  }, [status, t]);
+  }, [status, title, t]);
 
   const mainAmount = useMemo(() => {
     switch (status) {
@@ -67,38 +78,46 @@ export const StakingStatusCard = ({
       case 'loading':
         return null;
       case 'staked':
+        // Consumers that carry only the headline figure (the hub's combined
+        // Total Earned) omit the split — blank label/value rows must not render.
+        if (totalStaked === undefined && totalUnstaked === undefined)
+          return null;
         return (
           <Row alignItems="center">
-            <View style={style.amountSection}>
-              <Text.XS
-                variant="secondary"
-                testID="staking-summary-total-staked-label">
-                {t('v2.generic.staking.card.total.staked')}
-              </Text.XS>
-              <Text.S testID="staking-summary-total-staked-value">
-                {totalStaked}
-              </Text.S>
-            </View>
-            <View style={style.amountSection}>
-              <Text.XS
-                variant="secondary"
-                testID="staking-summary-total-unstaked-label">
-                {t('v2.generic.staking.card.total.unstaked')}
-              </Text.XS>
-              <Text.S testID="staking-summary-total-unstaked-value">
-                {totalUnstaked}
-              </Text.S>
-            </View>
+            {totalStaked !== undefined && (
+              <View style={style.amountSection}>
+                <Text.XS
+                  variant="secondary"
+                  testID={`${testID}-total-staked-label`}>
+                  {t('v2.generic.staking.card.total.staked')}
+                </Text.XS>
+                <Text.S testID={`${testID}-total-staked-value`}>
+                  {totalStaked}
+                </Text.S>
+              </View>
+            )}
+            {totalUnstaked !== undefined && (
+              <View style={style.amountSection}>
+                <Text.XS
+                  variant="secondary"
+                  testID={`${testID}-total-unstaked-label`}>
+                  {t('v2.generic.staking.card.total.unstaked')}
+                </Text.XS>
+                <Text.S testID={`${testID}-total-unstaked-value`}>
+                  {totalUnstaked}
+                </Text.S>
+              </View>
+            )}
           </Row>
         );
       case 'unstaked':
         return (
-          <Text.XS variant="secondary" testID="staking-summary-instruction">
+          <Text.XS variant="secondary" testID={`${testID}-instruction`}>
             {t('v2.generic.staking.card.instruction')}
           </Text.XS>
         );
     }
-  }, [status, totalStaked, totalUnstaked, t, style]);
+  }, [status, totalStaked, totalUnstaked, t, style, testID]);
 
   if (status === 'loading') {
     return (
@@ -132,7 +151,7 @@ export const StakingStatusCard = ({
         <Row alignItems="center" gap={spacing.S}>
           <Text.XS
             variant="secondary"
-            testID="staking-summary-total-rewards-earned-label">
+            testID={`${testID}-total-rewards-earned-label`}>
             {statusTitle}
           </Text.XS>
         </Row>
@@ -140,17 +159,17 @@ export const StakingStatusCard = ({
           <Row alignItems="center" gap={spacing.XS}>
             <Text.XL
               style={style.earnedAmount}
-              testID="staking-summary-total-rewards-earned-value">
+              testID={`${testID}-total-rewards-earned-value`}>
               {amountParts.value}
             </Text.XL>
             <Text.XS
               style={style.earnedAmountTicker}
-              testID="staking-summary-total-rewards-earned-ticker">
+              testID={`${testID}-total-rewards-earned-ticker`}>
               {amountParts.ticker}
             </Text.XS>
           </Row>
         ) : (
-          <Text.L testID="staking-summary-total-rewards-earned-value">
+          <Text.L testID={`${testID}-total-rewards-earned-value`}>
             {mainAmount}
           </Text.L>
         )}

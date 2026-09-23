@@ -27,7 +27,7 @@ import type { SideEffect } from '../../contract';
  * without percentage" for accounts that have never reached
  * `lastSuccessfulSync`.
  *
- * See ADR 25.
+ * See ADR 29.
  */
 export const clearStaleCardanoSyncsOnResume: SideEffect = (
   _,

@@ -200,7 +200,7 @@ const slice = createSlice({
      * leaves a gap that surfaces as "syncing without percentage" for
      * accounts mid-first-sync (no `lastSuccessfulSync` yet).
      *
-     * See ADR 25.
+     * See ADR 29.
      */
     clearPendingSyncsForAccounts: (
       state,

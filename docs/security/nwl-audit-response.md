@@ -46,11 +46,11 @@ anchored to the source file / symbol that carries it.
 
 | Finding                                                | Fix                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| C-501 Unshielded private-key memory leak               | Midnight key buffers are zeroized after wallet build and on idle (`blockchain-midnight` account key manager).                                                                                                                                                                                                                                                       |
+| C-501 Unshielded private-key memory leak               | Midnight key buffers are zeroized after wallet build and on idle (`blockchain-midnight` account key manager). The shielded and dust sync streams hold their own copies for the duration of a sync — see R2 L-203 below.                                                                                                                                             |
 | M-302 / Mobile M-304 PBKDF2 iterations too low         | New wallet secrets are encrypted with an Argon2id key-derivation function at OWASP-aligned cost, replacing PBKDF2, in `SecretBox` key derivation (`packages/lib/core`); a legacy decrypt path is retained for existing wallets.                                                                                                                                     |
 | M-301 XSS via token/NFT metadata image                 | Inline-SVG data URIs are refused at the image-render boundary (`getAssetImageUrl` in `packages/lib/ui-toolkit/.../image-format.ts`); the extension CSP sets `object-src 'none'` and a lint rule bans raw-HTML sinks. A normalizing proxy for remote images is a tracked follow-up.                                                                                  |
 | M-304 Bundles exposed to every origin (narrowing)      | The content script no longer targets `file://` pages (extension manifest `content_scripts`); the all-origins http(s) injection itself is retained by design — see rationale.                                                                                                                                                                                        |
-| M-305 Password / ZSwap key not zeroized                | The unlock password and decrypted ZSwap key are zeroized after use; the auth secret is accessed only through short-lived clones that are auto-zeroed after each use.                                                                                                                                                                                                |
+| M-305 Password / ZSwap key not zeroized                | The unlock password and the key manager's decrypted ZSwap key are zeroized after use; the auth secret is accessed only through short-lived clones that are auto-zeroed after each use. Signing therefore still requires an unlock. The shielded sync stream holds a separate ZSwap copy while it runs — see R2 L-203 below.                                         |
 | L-201 Unlimited password attempts                      | Consecutive failed unlock attempts are counted and persisted across restarts; on each failure the prompt locks the entry field and disables submit, showing a countdown until an exponential backoff (1s → 60s cap) elapses, reset on a successful unlock. Applied at both the extension and mobile unlock prompts (`authentication-prompt` slice + unlock prompt). |
 | L-202 Weak password policy                             | Password creation is gated by a zxcvbn strength check (minimum score 3) in the onboarding password screen.                                                                                                                                                                                                                                                          |
 | L-203 Feature-flag cache controllable via page storage | Feature flags are delivered to content scripts over an extension-controlled channel instead of page `localStorage`.                                                                                                                                                                                                                                                 |
@@ -288,24 +288,30 @@ defined platform threat model makes it a requirement.
 
 ### D. Key memory hygiene
 
-#### R2 L-203 — Dust secret key not cleared on idle/lock, Midnight accounts (Low) · Defer
+#### R2 L-203 — Sync secret keys not cleared on idle/lock, Midnight accounts (Low) · Defer
 
-On wallet lock/idle, Lace zeroizes the Midnight Night and Zswap (shielded)
-private-key material from memory — the shielded keys are cleared on idle and
-re-derived on demand through the wallet's deferred-sync path. The Dust key is
-retained because the Dust wallet cannot be stopped once started without
-corrupting shared wallet state, and an equivalent deferred path for it requires
-a filtered dust-wallet indexer interface that Lace does not yet consume; until
-it lands, clearing the key while the Dust wallet runs would break Dust signing
-without removing the copy the running wallet already holds. Reaching the retained key requires an attacker
-to already have live access to the extension's process memory — a prior host- or
-extension-level compromise, outside the threat model idle-clearing defends — and
-the exposure is limited to Dust (a fee resource), not shielded funds. This is a
-tracked follow-up: once the filtered dust-wallet indexer is available, the Dust
-wallet will be stopped on lock and its key zeroized and re-derived on unlock,
-matching the shielded keys. **Re-open:** any change that lets the retained Dust
-key be reached without a prior process-memory compromise, or that extends its
-exposure beyond the Dust fee resource.
+On wallet lock/idle Lace zeroizes the Midnight Night and Zswap (shielded)
+private-key material held by the account key manager, so signing still requires
+an unlock. The shielded and Dust sync streams keep their own copies while they
+run: the shielded stream never completes, so it is given keys derived
+separately from the seed — zeroizing the manager's cached copy on idle would
+wedge it mid-sync — and the Dust wallet cannot be stopped once started without
+corrupting shared wallet state, its deferred path requiring a filtered
+dust-wallet indexer interface Lace does not yet consume. Both are cleared when
+the facade stops, and a stop that never settles leaves them resident until the
+service worker exits. Reaching either requires an attacker to already have live
+access to the extension's process memory — a prior host- or extension-level
+compromise, outside the threat model idle-clearing defends — and the exposure
+covers shielded viewing keys as well as Dust: a compromise during an active
+sync can reach transaction history and balances, though not spending authority,
+which still requires an unlock. Either of two tracked follow-ups removes the
+retention: an SDK `SecretKeysResource` whose scope finalizer zeroizes on stop,
+or the filtered dust-wallet indexer, after which the Dust wallet can be stopped
+on lock and its key zeroized and re-derived on unlock. **Re-open:** any change
+that lets a retained sync key be reached without a prior process-memory
+compromise, any widening from viewing capability to spending capability, or
+either follow-up landing, at which point the retention should be removed rather
+than re-accepted.
 
 ### E. Network & privacy
 

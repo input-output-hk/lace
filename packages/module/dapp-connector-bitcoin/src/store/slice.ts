@@ -18,6 +18,18 @@ export type DappInfo = {
 };
 
 /**
+ * A popup's request to have its own window closed.
+ *
+ * `requestId` is the request the view was showing; it is absent for views that
+ * never host a queued request, and for a view whose request was cleared before
+ * it ever rendered one.
+ */
+type ClosePopupRequest = {
+  location: ViewLocation;
+  requestId?: string;
+};
+
+/**
  * Pending signMessage request. Contains everything the sign message review
  * screen needs, including which signature scheme the dApp asked for.
  */
@@ -160,8 +172,14 @@ const rejectConnect = createAction('bitcoinDappConnector/rejectConnect');
  * `views.closeView`, which reaches that view's remote `close()` and has the
  * popup document run `window.close()` on itself. The dispatcher addresses the
  * window by view id because it holds no handle on that document.
+ *
+ * `requestId` names the request the closing view was showing. Queued requests
+ * share one window, so a close asked for by a request that has already been
+ * answered must not take the window from the one that inherited it — see
+ * `closeRequestedPopup`. Omit it only for views that never host a queued
+ * request.
  */
-const closePopupRequested = createAction<ViewLocation>(
+const closePopupRequested = createAction<ClosePopupRequest>(
   'bitcoinDappConnector/closePopupRequested',
 );
 

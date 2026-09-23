@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -50,6 +52,13 @@ export interface OnboardingHardwareWalletProps {
   // Use the sheet layout (SheetHeader + scroll + anchored SheetFooter) instead
   // of the full-screen OnboardingLayout. Set when hosting inside a sheet.
   embedded?: boolean;
+  /**
+   * Rendered inside the content flow, under the device list. A field a caller
+   * needs answered BEFORE Connect goes here rather than as a sibling of this
+   * template: the full-screen variant's `OnboardingLayout` takes an explicit
+   * window height, so anything after it lands below the viewport.
+   */
+  belowDevicesSlot?: ReactNode;
 }
 
 export const OnboardingHardwareWallet = ({
@@ -66,6 +75,7 @@ export const OnboardingHardwareWallet = ({
   isLoading = false,
   isError = false,
   embedded = false,
+  belowDevicesSlot,
 }: OnboardingHardwareWalletProps) => {
   const { theme } = useTheme();
 
@@ -78,6 +88,7 @@ export const OnboardingHardwareWallet = ({
         isError={isError}
         onSelectDevice={onSelectDevice}
         selectedDeviceId={selectedDeviceId}
+        belowDevicesSlot={belowDevicesSlot}
       />
     );
   }
@@ -109,6 +120,10 @@ export const OnboardingHardwareWallet = ({
               selectedDeviceId={selectedDeviceId}
             />
           </View>
+
+          {belowDevicesSlot === undefined ? undefined : (
+            <View style={slotStyles.slot}>{belowDevicesSlot}</View>
+          )}
 
           <View style={fullScreenStyles.instructionContainer}>
             <InstructionText
@@ -152,6 +167,7 @@ const EmbeddedHardwareWallet = ({
   instructionText,
   isError = false,
   onSelectDevice,
+  belowDevicesSlot,
 }: EmbeddedProps) => {
   const { theme } = useTheme();
   const styles = useMemo(
@@ -192,6 +208,10 @@ const EmbeddedHardwareWallet = ({
           onSelectDevice={onSelectDevice}
         />
       </View>
+
+      {belowDevicesSlot === undefined ? undefined : (
+        <View style={slotStyles.slot}>{belowDevicesSlot}</View>
+      )}
 
       <View style={styles.spacer} />
 
@@ -261,6 +281,23 @@ const DeviceList = ({
     })}
   </>
 );
+
+/**
+ * The slot spans the content width in BOTH variants.
+ *
+ * `alignSelf`, not just `width`: the embedded variant's scroll content centers
+ * its children, which sizes them by their own content — a percentage width has
+ * no parent width to resolve against there, so a field collapsed to its
+ * smallest intrinsic size. The founding-chain dropdown came out as a bare
+ * chevron in a ~90pt box, and its open list was narrow enough to break
+ * "Cardano" across three lines.
+ */
+const slotStyles = StyleSheet.create({
+  slot: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
+});
 
 const fullScreenStyles = StyleSheet.create({
   container: {

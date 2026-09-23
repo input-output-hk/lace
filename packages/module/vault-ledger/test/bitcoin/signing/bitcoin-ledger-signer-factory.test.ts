@@ -1,9 +1,12 @@
+import { Cardano, Serialization } from '@cardano-sdk/core';
 import {
   BitcoinNetwork,
   BitcoinNetworkId,
 } from '@lace-contract/bitcoin-context';
 import { CompositeSignerFactory } from '@lace-contract/signer';
 import { WalletId } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
+import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { BitcoinLedgerSignerFactory } from '../../../src/bitcoin/signer-factory';
@@ -167,6 +170,26 @@ describe('BitcoinLedgerSignerFactory', () => {
   });
 });
 
+// A real, decodable, collateral-free tx -- lets the guard allow
+// and delegate, so the positive routing assertion proves delegation into the
+// Cardano branch, not just "did not return Bitcoin's".
+const NO_COLLATERAL_TX = Serialization.Transaction.fromCore({
+  id: Cardano.TransactionId('0'.repeat(64)),
+  body: {
+    inputs: [{ txId: Cardano.TransactionId('1'.repeat(64)), index: 0 }],
+    outputs: [
+      {
+        address: Cardano.PaymentAddress(
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+        ),
+        value: { coins: 1_000_000n },
+      },
+    ],
+    fee: 170_000n,
+  },
+  witness: { signatures: new Map() },
+} as Cardano.Tx).toCbor();
+
 describe('CompositeSignerFactory with Ledger factories', () => {
   const cardanoTransport: LedgerCardanoTransport = {
     getXpub: vi.fn(),
@@ -199,17 +222,41 @@ describe('CompositeSignerFactory with Ledger factories', () => {
     expect(signer).toBeInstanceOf(BitcoinLedgerTransactionSigner);
   });
 
-  it('routes a Cardano account to the Cardano factory', () => {
+  it('routes a Cardano account to the Cardano factory', async () => {
     const bitcoinAccount = account();
+    // Spy rather than let the real Ledger device pipeline run (SodiumBip32Ed25519
+    // + device descriptor resolution + transport.createKeyAgent) -- this test's
+    // job is proving the COMPOSITE picked the Cardano branch, not exercising
+    // Ledger's own signing internals (covered elsewhere).
+    const innerSign = vi
+      .spyOn(CardanoLedgerTransactionSigner.prototype, 'sign')
+      .mockReturnValue(
+        of({ serializedTx: HexBytes('deadbeef'), signatureCount: 1 }),
+      );
 
     const signer = composite().createTransactionSigner({
       wallet: wallet([cardanoAccount, bitcoinAccount]),
       accountId: cardanoAccount.accountId,
       knownAddresses: [],
       utxo: [],
+      collateralInputResolver: { resolveInput: async () => null },
     } as never);
 
-    expect(signer).toBeInstanceOf(CardanoLedgerTransactionSigner);
+    // The Cardano factory returns a guard wrapper around the routed signer,
+    // not the signer instance itself. This Bitcoin-routing behaviour and its
+    // own factory/signer are untouched -- only the Cardano branch's return
+    // value shape changed.
+    expect(signer).not.toBeInstanceOf(CardanoLedgerTransactionSigner);
+    expect(typeof signer.sign).toBe('function');
+
+    // POSITIVE proof (not just "isn't Bitcoin's"): the guard allows this
+    // no-collateral fixture and delegates into the REAL CardanoLedgerTransactionSigner
+    // the composite constructed -- proving the Cardano branch was picked.
+    const request = { serializedTx: HexBytes(NO_COLLATERAL_TX) };
+    const result = await firstValueFrom(signer.sign(request));
+    expect(innerSign).toHaveBeenCalledWith(request);
+    expect(result.serializedTx).toBe('deadbeef');
+    innerSign.mockRestore();
   });
 
   it('throws when no factory supports the account', () => {

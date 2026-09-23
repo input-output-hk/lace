@@ -13,3 +13,4 @@ export * from './blockfrost-withdrawals-provider';
 export * from './blockfrost-utxo-provider';
 export * from './blockfrost-tx-provider';
 export * from './blockfrost-tx-submit-provider';
+export * from './blockfrost-tx-evaluation-provider';

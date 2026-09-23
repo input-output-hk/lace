@@ -157,5 +157,28 @@ export {
 } from '@cardano-sdk/core';
 export type { SubmitTxArgs, ValueNotConservedData } from '@cardano-sdk/core';
 
+// Passport contract
+export {
+  passportStoreContract,
+  passportDependencyContract,
+  AccountContractMissingError,
+  AccountExistsError,
+  AccountNotFoundError,
+  ArtefactIntegrityError,
+  CeremonyCancelledError,
+  DeviceEntryNotFoundError,
+  LastDeviceError,
+  NoAccountError,
+  NotAuthorisedError,
+  PrfUnsupportedError,
+  RecordCorruptedError,
+  RecordUnreadableError,
+  RemovalTargetNotFoundError,
+  SponsorExhaustedError,
+  PRF_SALT_AUTHORISER_LABEL,
+  PRF_SALT_STORAGE_LABEL,
+} from '@lace-contract/passport';
+export type * from '@lace-contract/passport';
+
 // Module maps (re-exported as namespace for single-entrypoint bundling)
 export * as m from './modules';

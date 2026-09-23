@@ -127,6 +127,44 @@ describe('useSignTx (mobile)', () => {
     vi.restoreAllMocks();
   });
 
+  // ───────────── LW-15498: refused presentation ─────────────
+
+  describe('refused pending request', () => {
+    const refusedPending = {
+      requestId: REQUEST_ID,
+      dappOrigin: 'https://dapp.example',
+      dapp: { name: 'dapp.example', origin: 'https://dapp.example' },
+      txHex: 'abcd1234',
+      partialSign: true,
+      collateralRefusal: 'foreign-collateral-return' as const,
+    };
+    const queuedRefusal = {
+      id: REQUEST_ID,
+      success: false,
+      error: { code: 1, info: 'refused' },
+      timestamp: 1,
+    };
+
+    it('test:mobile-refused-not-inspected — derives the refusal from the pending slot, suppresses the result view, and feeds empty bytes to the data hook', () => {
+      mockUseLaceSelector.mockImplementation((selector: string) => {
+        if (selector === 'cardanoDappConnector.selectPendingSignTxRequest')
+          return refusedPending;
+        if (selector === 'cardanoDappConnector.selectWebViewResponseQueue')
+          return [queuedRefusal];
+        return undefined;
+      });
+      const { result } = renderHook(() => useSignTx(createMockProps()));
+      expect(result.current.refusal).toEqual({
+        case: 'foreign-collateral-return',
+        dappOrigin: 'https://dapp.example',
+      });
+      expect(result.current.signTxResult).toBeNull();
+      expect(mockUseSignTxData).toHaveBeenCalledWith(
+        expect.objectContaining({ txHex: '' }),
+      );
+    });
+  });
+
   // ───────────── Common: route params passthrough ─────────────
 
   describe('route params', () => {
@@ -177,7 +215,9 @@ describe('useSignTx (mobile)', () => {
         result.current.handleConfirm();
       });
 
-      expect(mockDispatchConfirmSignTx).toHaveBeenCalled();
+      expect(mockDispatchConfirmSignTx).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
       expect(result.current.isSigning).toBe(true);
     });
   });
@@ -192,7 +232,9 @@ describe('useSignTx (mobile)', () => {
         result.current.handleReject();
       });
 
-      expect(mockDispatchRejectSignTx).toHaveBeenCalled();
+      expect(mockDispatchRejectSignTx).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
       expect(mockSheetsClose).toHaveBeenCalled();
     });
   });
@@ -253,7 +295,9 @@ describe('useSignTx (mobile)', () => {
 
       unmount();
 
-      expect(mockDispatchRejectSignTx).toHaveBeenCalled();
+      expect(mockDispatchRejectSignTx).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
     });
 
     it('does not reject on unmount when user already confirmed', () => {

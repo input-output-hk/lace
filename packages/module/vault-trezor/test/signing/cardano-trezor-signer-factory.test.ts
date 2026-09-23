@@ -1,4 +1,12 @@
+import { createInputResolver } from '@lace-contract/cardano-context';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
+import {
+  NO_COLLATERAL_TX,
+  OWN_COLLATERAL_UTXO,
+  expectCollateralGuardRefusesCaseB,
+} from '@lace-lib/util-dev-cardano';
+import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CardanoTrezorDataSigner } from '../../src/signing/cardano-trezor-data-signer';
@@ -8,6 +16,7 @@ import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type {
+  CardanoSignRequest,
   CardanoTransactionSigner,
   CardanoSignerContext,
   CardanoTransactionSignerContext,
@@ -77,10 +86,16 @@ const makeSignerContext = (
   knownAddresses: [] as GroupedAddress[],
   auth: dummyAuth,
   utxo: [] as Cardano.Utxo[],
+  // Non-empty on purpose: most of this suite never triggers the guard's
+  // ownership evaluation, but an empty set would make the guard inert.
+  collateralInputResolver: createInputResolver([OWN_COLLATERAL_UTXO]),
   ...partial,
 });
 
-const stubTransactionSigner = {} as CardanoTransactionSigner;
+const innerSign = vi.fn((_request: CardanoSignRequest) =>
+  of({ serializedTx: HexBytes('deadbeef'), signatureCount: 1 }),
+);
+const stubTransactionSigner: CardanoTransactionSigner = { sign: innerSign };
 
 const makeFactory = () => {
   const createTransactionSigner = vi.fn(() => stubTransactionSigner);
@@ -122,13 +137,13 @@ describe('CardanoTrezorSignerFactory', () => {
   // ─── createTransactionSigner ───────────────────────────────────────────────
 
   describe('createTransactionSigner', () => {
-    it('delegates to the injected createTransactionSigner with the account props and context', () => {
+    it('delegates to the injected createTransactionSigner with the account props and context, wrapped by the collateral ownership guard', async () => {
+      innerSign.mockClear();
       const { factory, createTransactionSigner } = makeFactory();
       const context = makeSignerContext(makeTrezorWallet());
 
       const signer = factory.createTransactionSigner(context);
 
-      expect(signer).toBe(stubTransactionSigner);
       expect(createTransactionSigner).toHaveBeenCalledTimes(1);
       expect(createTransactionSigner).toHaveBeenCalledWith({
         accountIndex: 0,
@@ -137,6 +152,25 @@ describe('CardanoTrezorSignerFactory', () => {
         derivationType: undefined,
         knownAddresses: context.knownAddresses,
         utxo: context.utxo,
+      });
+
+      // No collateral in this fixture -> the guard allows and delegates.
+      const request = { serializedTx: HexBytes(NO_COLLATERAL_TX) };
+      await firstValueFrom(signer.sign(request));
+      expect(innerSign).toHaveBeenCalledWith(request);
+    });
+
+    it('is wrapped by the collateral-ownership guard: a case-(b) transaction is refused and never reaches the injected signer', async () => {
+      innerSign.mockClear();
+      const { factory } = makeFactory();
+      await expectCollateralGuardRefusesCaseB({
+        createSigner: ownership =>
+          factory.createTransactionSigner(
+            makeSignerContext(makeTrezorWallet(), ownership),
+          ),
+        assertNotDelegated: () => {
+          expect(innerSign).not.toHaveBeenCalled();
+        },
       });
     });
 

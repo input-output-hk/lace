@@ -22,8 +22,9 @@ import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 import * as bitcoin from 'bitcoinjs-lib';
 import {
   catchError,
+  concatMap,
+  delay,
   EMPTY,
-  exhaustMap,
   filter,
   firstValueFrom,
   forkJoin,
@@ -35,12 +36,15 @@ import {
   of,
   Subject,
   switchMap,
-  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
 
 import { BitcoinAPIError, BitcoinAPIErrorCode } from '../api-error';
+import {
+  BITCOIN_DAPP_SIGN_MESSAGE_LOCATION,
+  BITCOIN_DAPP_SIGN_TX_LOCATION,
+} from '../const';
 import { toBitcoinJsNetwork } from '../utils/bitcoin-network';
 
 import { promptBitcoinAuthorizeDapp } from './authorize-dapp-util';
@@ -55,7 +59,11 @@ import type {
   SignBitcoinPsbtFunction,
 } from './dependencies/bitcoin-dapp-connector-api';
 import type { BitcoinConfirmationRequest } from './dependencies/create-confirmation-callback';
-import type { ResolvedPreviousOut } from './slice';
+import type {
+  PendingSignMessageRequest,
+  PendingSignPsbtRequest,
+  ResolvedPreviousOut,
+} from './slice';
 import type { BitcoinSigningResult } from './util';
 import type { ActionCreators, SideEffect } from '../index';
 import type { SignPsbtOptions } from '../types';
@@ -87,6 +95,7 @@ import type {
   TxParams,
   TxSubmissionResult,
 } from '@lace-contract/tx-executor';
+import type { ViewLocation } from '@lace-contract/views';
 import type {
   AccountId,
   AnyAccount,
@@ -696,6 +705,14 @@ const createConfirmSendTxWrapper = ({
   actions,
 }: CreateConfirmSendTxWrapperParams): ConfirmSendTxFunction => {
   return async ({ accountId, serializedTx, netSatoshis }) => {
+    // Every exit must report: a flow is already awaiting signingResult$ by
+    // now, and without a result it never completes, wedging every Bitcoin
+    // request behind it. The lookups below throw before any reporting path.
+    let hasReportedResult = false;
+    const reportResult = (result: BitcoinSigningResult) => {
+      hasReportedResult = true;
+      signingResult$.next(result);
+    };
     try {
       const accounts = await firstValueFrom(selectActiveNetworkAccounts$);
       const account = findBitcoinAccount(accounts, accountId);
@@ -717,7 +734,7 @@ const createConfirmSendTxWrapper = ({
       );
 
       if (!confirmResult.success) {
-        signingResult$.next({ type: 'cancelled' });
+        reportResult({ type: 'cancelled' });
         throw new BitcoinAPIError(
           BitcoinAPIErrorCode.Refused,
           'Transaction was not confirmed',
@@ -738,7 +755,7 @@ const createConfirmSendTxWrapper = ({
       );
 
       if (!submitResult.success) {
-        signingResult$.next({ type: 'error' });
+        reportResult({ type: 'error' });
         throw new BitcoinAPIError(
           BitcoinAPIErrorCode.InternalError,
           'Transaction submission failed',
@@ -760,12 +777,10 @@ const createConfirmSendTxWrapper = ({
         }),
       );
 
-      signingResult$.next({ type: 'success' });
+      reportResult({ type: 'success' });
       return submitResult.txId;
     } catch (error) {
-      if (!(error instanceof BitcoinAPIError)) {
-        signingResult$.next({ type: 'error' });
-      }
+      if (!hasReportedResult) reportResult({ type: 'error' });
       throw error;
     }
   };
@@ -953,39 +968,50 @@ export const connectBitcoinDappConnectorApi: SideEffect = (
     buildSendTx,
     confirmSendTx,
     submitRawTx,
+    // No `isUnlocked$` gate here, and unlike Cardano that is a simplification
+    // rather than a fix: `handleRequestValidation` already calls
+    // `ensureWalletUnlocked` for every method, so a locked wallet refuses the
+    // request at the transport boundary and it never reaches this handler. The
+    // gate was unreachable, and keeping the lock decision in one place avoids
+    // implying there are two. Signing stays gated regardless: both signers are
+    // built with `signerAuthFromPrompt`.
+    //
+    // Consequence worth knowing: a locked Bitcoin wallet answers `Refused`
+    // instead of prompting, so Bitcoin cannot host the unlock prompt the way
+    // Cardano now does. That is a product gap, not a hang, and out of scope.
+    // concatMap, not exhaustMap: exhaustMap discards a request that arrives
+    // while another confirmation is open — never subscribed, never queued, its
+    // resolve never called — leaving the dApp's promise pending forever.
+    // Serializing drains them in arrival order instead. Not mergeMap: the
+    // confirm actions carry no request id and the pending request is a single
+    // slot, so concurrent flows would let one approval sign two payloads.
     handleRequests: (request$: Observable<BitcoinConfirmationRequest>) =>
       request$.pipe(
-        exhaustMap(request =>
-          isUnlocked$.pipe(
-            filter(Boolean),
-            take(1),
-            switchMap(() => {
-              if (request.type === 'signMessage') {
-                return signMessage$({
-                  request,
-                  selectOpenViews$,
-                  actions,
-                  confirmSignMessage$,
-                  rejectSignMessage$,
-                  viewDisconnected$,
-                  signingResult$: messageSigningResult$,
-                });
-              }
-              if (request.type === 'signPsbt') {
-                return signPsbt$({
-                  request,
-                  selectOpenViews$,
-                  actions,
-                  confirmSignPsbt$,
-                  rejectSignPsbt$,
-                  viewDisconnected$,
-                  signingResult$: psbtSigningResult$,
-                });
-              }
-              return EMPTY;
-            }),
-          ),
-        ),
+        concatMap(request => {
+          if (request.type === 'signMessage') {
+            return signMessage$({
+              request,
+              selectOpenViews$,
+              actions,
+              confirmSignMessage$,
+              rejectSignMessage$,
+              viewDisconnected$,
+              signingResult$: messageSigningResult$,
+            });
+          }
+          if (request.type === 'signPsbt') {
+            return signPsbt$({
+              request,
+              selectOpenViews$,
+              actions,
+              confirmSignPsbt$,
+              rejectSignPsbt$,
+              viewDisconnected$,
+              signingResult$: psbtSigningResult$,
+            });
+          }
+          return EMPTY;
+        }),
       ),
   });
 
@@ -1114,22 +1140,81 @@ export const resolveForeignPsbtInputs: SideEffect = (
   );
 
 /**
- * Resolves a `closePopupRequested` action (carrying a popup location) into a
- * `views.closeView` dispatch by looking up the matching popupWindow view.
+ * The request currently occupying `location`, if that location is one a
+ * signing request can prompt at.
+ */
+const pendingRequestIdAt = (
+  location: ViewLocation,
+  pendingSignMessageRequest: PendingSignMessageRequest | null,
+  pendingSignPsbtRequest: PendingSignPsbtRequest | null,
+): string | undefined => {
+  if (location === BITCOIN_DAPP_SIGN_MESSAGE_LOCATION) {
+    return pendingSignMessageRequest?.requestId;
+  }
+  if (location === BITCOIN_DAPP_SIGN_TX_LOCATION) {
+    return pendingSignPsbtRequest?.requestId;
+  }
+  return undefined;
+};
+
+/**
+ * Resolves a `closePopupRequested` action into a `views.closeView` dispatch by
+ * looking up the popupWindow view at the requested location.
+ *
+ * Skips the close when the location is occupied by a request other than the
+ * one the closing view was showing. Queued requests share a window — opening a
+ * popupWindow where one already stands just focuses it — so honouring such a
+ * close destroys the prompt a successor has already inherited, and the
+ * view-closure arm answers that successor "user rejected" unseen.
  */
 export const closeRequestedPopup: SideEffect = (
   { bitcoinDappConnector: { closePopupRequested$ } },
-  { views: { selectOpenViews$ } },
+  {
+    views: { selectOpenViews$ },
+    bitcoinDappConnector: {
+      selectPendingSignMessageRequest$,
+      selectPendingSignPsbtRequest$,
+    },
+  },
   { actions },
 ) =>
   closePopupRequested$.pipe(
-    withLatestFrom(selectOpenViews$),
-    mergeMap(([{ payload: location }, openViews]) => {
-      const popupView = openViews.find(
-        view => view.type === 'popupWindow' && view.location === location,
-      );
-      return popupView ? of(actions.views.closeView(popupView.id)) : EMPTY;
-    }),
+    // Decide one task late: the action that publishes the next request reaches
+    // the store a task after the queue binds it (`toEpic` delays every side
+    // effect), so an arrival-time read would still name the cancelled request.
+    delay(0),
+    withLatestFrom(
+      selectOpenViews$,
+      selectPendingSignMessageRequest$,
+      selectPendingSignPsbtRequest$,
+    ),
+    mergeMap(
+      ([
+        {
+          payload: { location, requestId },
+        },
+        openViews,
+        pendingSignMessageRequest,
+        pendingSignPsbtRequest,
+      ]) => {
+        const occupant = pendingRequestIdAt(
+          location,
+          pendingSignMessageRequest,
+          pendingSignPsbtRequest,
+        );
+        if (
+          requestId !== undefined &&
+          occupant !== undefined &&
+          occupant !== requestId
+        ) {
+          return EMPTY;
+        }
+        const popupView = openViews.find(
+          view => view.type === 'popupWindow' && view.location === location,
+        );
+        return popupView ? of(actions.views.closeView(popupView.id)) : EMPTY;
+      },
+    ),
   );
 
 /**

@@ -38,12 +38,14 @@ import type {
   SignTxEmission,
   SignTxResult,
 } from '../../src/store/side-effects';
+import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { Logger } from '@cardano-sdk/util-dev';
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
   CardanoBip32AccountProps,
   CardanoProvider,
   CardanoTransactionSigner,
+  CardanoTransactionSignerContext,
   RequiredProtocolParameters,
   RewardAccountInfo,
   TransactionBuilder,
@@ -203,6 +205,7 @@ describe('migrate-multi-delegation side-effects', () => {
         toCore: () =>
           ({
             body: { inputs: [], outputs: [] },
+            witness: { signatures: new Map() },
           } as unknown as Cardano.Tx),
         toCbor: () => cbor as unknown as Serialization.TxCBOR,
       }),
@@ -346,7 +349,7 @@ describe('migrate-multi-delegation side-effects', () => {
               a: () => mockWallet,
             }),
             selectByAccountId$: hot('a', { a: () => [] }),
-            selectAvailableAccountUtxos$: hot('a', {
+            utxosByAccount$: hot('a', {
               a: { [accountId]: utxos },
             }),
           });
@@ -376,7 +379,7 @@ describe('migrate-multi-delegation side-effects', () => {
             b: () => mockWallet,
           }),
           selectByAccountId$: hot('a', { a: () => [] }),
-          selectAvailableAccountUtxos$: hot('a', { a: { [accountId]: utxos } }),
+          utxosByAccount$: hot('a', { a: { [accountId]: utxos } }),
         });
 
         expectObservable(wallet$.pipe(map(() => 'x'))).toBe('--x');
@@ -395,7 +398,7 @@ describe('migrate-multi-delegation side-effects', () => {
               }),
           }),
           selectByAccountId$: hot('a', { a: () => [] }),
-          selectAvailableAccountUtxos$: hot('a-b', {
+          utxosByAccount$: hot('a-b', {
             a: {},
             b: { [accountId]: utxos },
           }),
@@ -429,7 +432,7 @@ describe('migrate-multi-delegation side-effects', () => {
             a: () => mock<InMemoryWallet>({ walletId }),
           }),
           selectByAccountId$: hot('a', { a: () => [cardanoAddress] }),
-          selectAvailableAccountUtxos$: hot('a', { a: { [accountId]: utxos } }),
+          utxosByAccount$: hot('a', { a: { [accountId]: utxos } }),
         });
 
         expectObservable(accountAddresses$).toBe('a', {
@@ -680,7 +683,7 @@ describe('migrate-multi-delegation side-effects', () => {
       createTestScheduler().run(({ hot, expectObservable }) => {
         const result$ = awaitAndMarkCollateral({
           accountId,
-          selectAccountUtxos$: hot('a', {
+          spendableUtxos$: hot('a', {
             a: { [accountId]: [collateralUtxo] },
           }),
           setAccountUnspendableUtxos,
@@ -707,7 +710,7 @@ describe('migrate-multi-delegation side-effects', () => {
       createTestScheduler().run(({ hot, expectObservable }) => {
         const result$ = awaitAndMarkCollateral({
           accountId,
-          selectAccountUtxos$: hot('a', {
+          spendableUtxos$: hot('a', {
             a: { [accountId]: [ineligibleUtxo] },
           }),
           setAccountUnspendableUtxos,
@@ -780,7 +783,7 @@ describe('migrate-multi-delegation side-effects', () => {
             },
           },
         }),
-        selectAccountUtxos$: hot('a', {
+        selectCollateralOwnershipUtxos$: hot('a', {
           a: { [accountId]: utxos },
         }),
         selectAvailableAccountUtxos$: hot('a', {
@@ -1004,7 +1007,9 @@ describe('migrate-multi-delegation side-effects', () => {
               protocolParameters: mockProtocolParameters,
             },
           }),
-          selectAccountUtxos$: of({ [accountId]: [oldCollateralUtxo] }),
+          selectCollateralOwnershipUtxos$: of({
+            [accountId]: [oldCollateralUtxo],
+          }),
           // Available UTXOs contain the new collateral output (simulating the
           // post-confirmation state where the migration tx output is visible).
           selectAvailableAccountUtxos$: of({
@@ -1063,6 +1068,23 @@ describe('migrate-multi-delegation side-effects', () => {
       wallet$: hot('a', { a: createInMemoryWallet() }),
       accountAddresses$: hot('a', { a: [] }),
       accountUtxo$: hot('a', { a: utxos }),
+      ownershipUtxo$: hot('a', { a: utxos }),
+    });
+
+    /**
+     * A collateral-reserved own UTxO: present in the settled authority,
+     * ABSENT from the available/spendable view -- the shape the rule exists
+     * for, and the one a selector swap would misclassify.
+     */
+    const reservedCollateralUtxo = createUtxo(address0);
+    const createReservedCollateralContext = (): AccountContext => ({
+      account: createInMemoryAccount(accountId),
+      wallet$: of(createInMemoryWallet()),
+      accountAddresses$: of([
+        { address: address0 } as unknown as GroupedAddress,
+      ]),
+      accountUtxo$: of([]),
+      ownershipUtxo$: of([reservedCollateralUtxo]),
     });
 
     const createHardwareAccountContext = (
@@ -1080,6 +1102,7 @@ describe('migrate-multi-delegation side-effects', () => {
       }),
       accountAddresses$: hot('a', { a: [] }),
       accountUtxo$: hot('a', { a: utxos }),
+      ownershipUtxo$: hot('a', { a: utxos }),
     });
 
     const buildDeps = (
@@ -1093,6 +1116,48 @@ describe('migrate-multi-delegation side-effects', () => {
         authenticate: vi.fn(),
         signerFactory: createMockSignerFactory(signer),
       } as never);
+
+    it('hands the signer the settled authority, not the available view', async () => {
+      let handed: CardanoTransactionSignerContext | undefined;
+      const createTransactionSigner = vi.fn(
+        (
+          context: CardanoTransactionSignerContext,
+        ): CardanoTransactionSigner => {
+          handed = context;
+          return { sign: vi.fn().mockReturnValue(EMPTY) };
+        },
+      );
+
+      signTx(
+        createReservedCollateralContext(),
+        {
+          logger: createLogger(),
+          actions,
+          accessAuthSecret: vi.fn(),
+          authenticate: vi.fn(),
+          signerFactory: {
+            canSign: vi.fn().mockReturnValue(true),
+            createDataSigner: vi.fn(),
+            createTransactionSigner,
+          },
+        } as never,
+        false,
+      )(createMockTx()).subscribe();
+
+      expect(createTransactionSigner).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // The collateral-reserved UTxO is absent from the key-path
+          // resolution set...
+          utxo: [],
+        }),
+      );
+      // ...and the collateral resolver still knows it, from its local layer:
+      // no provider was handed in, so this answer cannot have come from one.
+      if (!handed) throw new Error('signer never created');
+      await expect(
+        handed.collateralInputResolver.resolveInput(reservedCollateralUtxo[0]),
+      ).resolves.toEqual(reservedCollateralUtxo[1]);
+    });
 
     it('InMemory: emits single signed result (no hwSigningStarted)', () => {
       const mockTx = createMockTx('deadbeef');
@@ -1381,6 +1446,9 @@ describe('migrate-multi-delegation side-effects', () => {
           },
         }),
         selectAvailableAccountUtxos$: hot('a', {
+          a: { [accountId]: utxos },
+        }),
+        selectCollateralOwnershipUtxos$: hot('a', {
           a: { [accountId]: utxos },
         }),
       },

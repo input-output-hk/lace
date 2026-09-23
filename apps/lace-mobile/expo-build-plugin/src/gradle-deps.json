@@ -9,5 +9,5 @@
       "implementation": "implementation 'org.bouncycastle:bcprov-jdk18on:1.80'"
     }
   ],
-  "subprojectsBlock": "subprojects {\n  configurations.all {\n    resolutionStrategy {\n      force 'org.bouncycastle:bcprov-jdk18on:1.80'\n      dependencySubstitution {\n        substitute module('org.bouncycastle:bcprov-jdk15to18') using module('org.bouncycastle:bcprov-jdk18on:1.80')\n      }\n    }\n  }\n}"
+  "subprojectsBlock": "subprojects {\n  configurations.all {\n    resolutionStrategy {\n      // Do not drop back to apollo-android's own pin (5.16.0): its new Structure field-list cache\n      // (jna#1626) races, crashing key derivation with a getFieldOrder Error. Not 5.19.0 either,\n      // which requires minSdk 26 (jna#1730).\n      force 'net.java.dev.jna:jna:5.19.1'\n      force 'org.bouncycastle:bcprov-jdk18on:1.80'\n      dependencySubstitution {\n        substitute module('org.bouncycastle:bcprov-jdk15to18') using module('org.bouncycastle:bcprov-jdk18on:1.80')\n      }\n    }\n  }\n}"
 }

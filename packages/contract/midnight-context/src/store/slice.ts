@@ -11,7 +11,6 @@ import {
   EMPTY_PARTIAL_NETWORKS_CONFIG,
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
-  FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
 } from '../const';
 import { MidnightSDKNetworkId } from '../const';
 import { getValidNetworkStringPayload } from '../utils';
@@ -26,7 +25,6 @@ import type {
   MidnightAccountPublicKeys,
   MidnightContextSliceState,
   MidnightNetwork,
-  ShouldAcknowledgeMidnightDisclaimer,
 } from '../types';
 import type { MidnightAccountId } from '../value-objects';
 import type { FeatureFlagKey } from '@lace-contract/feature';
@@ -49,7 +47,6 @@ export const initialState: MidnightContextSliceState = {
   dustBalanceByAccount: {},
   dustAvailableByAccount: {},
   dustGenerationDetailsByAccount: {},
-  shouldAcknowledgeMidnightDisclaimer: 'not-shown',
   publicKeysByAccount: {},
 };
 
@@ -167,13 +164,6 @@ const slice = createSlice({
         },
       }),
     },
-    setShouldAcknowledgeMidnightDisclaimer: (
-      state,
-      { payload }: PayloadAction<ShouldAcknowledgeMidnightDisclaimer>,
-    ) => {
-      state.shouldAcknowledgeMidnightDisclaimer = payload;
-    },
-
     setPublicKeys: (
       state,
       {
@@ -184,13 +174,6 @@ const slice = createSlice({
       }>,
     ) => {
       state.publicKeysByAccount[accountId] = publicKeys;
-    },
-
-    setNetworkTermsAndConditions: (
-      state,
-      { payload }: PayloadAction<{ url: string; hash: string } | undefined>,
-    ) => {
-      state.networkTermsAndConditions = payload;
     },
 
     /**
@@ -233,12 +216,7 @@ const slice = createSlice({
     selectSerializedDustGenerationDetailsByAccount: state =>
       state.dustGenerationDetailsByAccount,
 
-    selectShouldAcknowledgeMidnightDisclaimer: state =>
-      state.shouldAcknowledgeMidnightDisclaimer,
-
     selectPublicKeysByAccount: state => state.publicKeysByAccount,
-
-    selectNetworkTermsAndConditions: state => state.networkTermsAndConditions,
   },
 });
 
@@ -309,7 +287,7 @@ const selectInitialNetworkId = createSelector(
 
 /**
  * Every config field a feature flag can override, and the flag that carries it.
- * All three must stay on this derived path: a field routed through a side effect
+ * Both must stay on this derived path: a field routed through a side effect
  * into `userNetworksConfigOverrides` instead shadows later flag changes and is
  * indistinguishable from a genuine user setting.
  */
@@ -319,7 +297,6 @@ const NETWORK_CONFIG_FEATURE_FLAG_KEYS: [
 ][] = [
   ['nodeAddress', FEATURE_FLAG_MIDNIGHT_NODE_URLS],
   ['indexerAddress', FEATURE_FLAG_MIDNIGHT_INDEXER_URLS],
-  ['proofServerAddress', FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER],
 ];
 
 /**

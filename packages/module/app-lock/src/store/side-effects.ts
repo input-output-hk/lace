@@ -129,7 +129,7 @@ export const closePopupsOnLock: SideEffect = (
  * Wires the `appLock.isWalletActive$` redux selector to the module-level
  * `isWalletActive$` observable, which is provided to other contracts as a
  * side effect dependency via `walletActiveStateDependencyContract`. See the
- * comment on `isWalletActive$` and ADR 25.
+ * comment on `isWalletActive$` and ADR 29.
  */
 export const wireIsWalletActiveObservable: SideEffect = (
   _,

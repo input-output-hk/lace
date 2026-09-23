@@ -11,6 +11,7 @@
     "@lace-contract/app": "*",
     "@lace-contract/app-lock": "*",
     "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/failures": "*",
     "@lace-contract/feature": "*",
     "@lace-contract/i18n": "*",
     "@lace-contract/in-memory": "*",
@@ -26,8 +27,10 @@
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/core": "*",
     "@lace-lib/util": "*",
+    "@lace-lib/util-provider": "*",
     "@lace-lib/util-redacted": "*",
-    "@lace-lib/util-store": "*"
+    "@lace-lib/util-store": "*",
+    "backoff-rxjs": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

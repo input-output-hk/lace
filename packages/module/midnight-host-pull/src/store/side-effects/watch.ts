@@ -434,7 +434,7 @@ const isWatched = (wallet: AnyWallet): boolean =>
  * Restarts all polls on a network switch (`switchMap`), starts a fresh poll per
  * newly-appearing wallet (`groupBy` + `exhaustMap`) and tears it down when the
  * wallet leaves the repo (`takeUntil`). `whileActive` sits at the END of the pipe
- * so a lock tears the whole chain down (ADR 25), stopping the intervals +
+ * so a lock tears the whole chain down (ADR 29), stopping the intervals +
  * in-flight host calls.
  */
 export const watchMidnightWallets: SideEffect = (

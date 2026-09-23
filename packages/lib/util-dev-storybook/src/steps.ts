@@ -1,14 +1,24 @@
-import { fireEvent, waitFor, within } from '@testing-library/dom';
-import userEvent, {
-  PointerEventsCheckLevel,
-} from '@testing-library/user-event';
+// user-event MUST come from `storybook/test`, which bundles its own copy. A
+// direct '@testing-library/user-event' import puts a SECOND instance on the
+// shared page: both install a `value` interceptor and prepare the document, and
+// the chained interceptor updates React's _valueTracker on write, so
+// updateValueIfChanged() sees no change and React silently drops every keystroke
+// in the next story that types.
+import { fireEvent, userEvent, waitFor, within } from 'storybook/test';
 
 import type { BoundFunctions, queries } from '@testing-library/dom';
+
+/**
+ * `PointerEventsCheckLevel.Never`, inlined: `storybook/test` does not re-export
+ * the enum, and importing it from user-event would reintroduce the second
+ * instance the import above exists to avoid.
+ */
+const POINTER_EVENTS_CHECK_NEVER = 0;
 
 // some elements seem to be initially loaded with 'pointer-events: none',
 // which results in flaky test
 const NO_POINTER_EVENTS_CHECK = {
-  pointerEventsCheck: PointerEventsCheckLevel.Never,
+  pointerEventsCheck: POINTER_EVENTS_CHECK_NEVER,
 };
 
 type Canvas = BoundFunctions<typeof queries>;
@@ -16,17 +26,31 @@ type Canvas = BoundFunctions<typeof queries>;
 const waitForNotDisabled = async (element: Element, timeout: number) =>
   waitFor(
     () => {
-      const disabledAttribute = element.getAttribute('disabled');
+      // `IconButton.Static` hangs `testID` on a childless inner <View>; the
+      // Pressable holding the state is its parent, and RN-web marks a non-form
+      // element with `aria-disabled` only, so the queried node always reads enabled.
+      //
+      // First match wins, so a nearer `aria-disabled="false"` would shadow a
+      // disabled ancestor. Safe only while RN-web writes the attribute for
+      // `disabled === true` alone; a raw `aria-disabled={false}` reopens it.
+      const target =
+        element.closest('[aria-disabled],[role="button"],button') ?? element;
+
+      const disabledAttribute = target.getAttribute('disabled');
       // React Native's TouchableOpacity and Pressable don't expose a real disabled attribute when
       // disabled={true}
       // Instead they mark the element with accessibility props such as aria-disabled
       // See https://callstack.github.io/react-native-testing-library/docs/api/jest-matchers#tobeenabled
-      const ariaDisabledAttribute = element.getAttribute('aria-disabled');
+      const ariaDisabledAttribute = target.getAttribute('aria-disabled');
       const isDisabled =
         (disabledAttribute !== null && disabledAttribute !== 'false') ||
         ariaDisabledAttribute === 'true';
 
-      return !isDisabled;
+      // Throw, don't return false: waitFor resolves as soon as the callback
+      // does not throw, so returning a boolean made this resolve on the first
+      // tick and never wait. click() then pressed a still-disabled control,
+      // which RN-web ignores — a silent no-op that stranded the flow later.
+      if (isDisabled) throw new Error('element is disabled');
     },
     {
       timeout,
@@ -84,6 +108,39 @@ export const click = async (
 };
 
 /**
+ * Resolves a node only once its identity has survived two consecutive polls.
+ *
+ * A screen that is still settling replaces the node between the query and
+ * `userEvent.type`'s own click: the keystrokes then land on a detached element,
+ * focus falls back to <body>, and the field is left EMPTY rather than partly
+ * typed — measured at 4 failures in 20 runs on the governance search. Settling
+ * the identity first is what lets a caller type once instead of retyping until
+ * the text happens to stick.
+ */
+const findSettledElement = async (
+  canvas: Canvas,
+  testId: string,
+  options: { timeout?: number },
+): Promise<HTMLElement> => {
+  let previous: HTMLElement | undefined;
+
+  return waitFor(() => {
+    const current = canvas.getByTestId<HTMLElement>(testId);
+    // A dismissing sheet stays mounted carrying the same testIDs and values as
+    // the replacement that follows it, and React discards it mid-typing. The
+    // identity check below cannot separate the two; the drawer's state can.
+    if (current.closest('[data-vaul-drawer][data-state="closed"]')) {
+      throw new Error(`element '${testId}' is inside a dismissing sheet`);
+    }
+    if (current !== previous || !current.isConnected) {
+      previous = current;
+      throw new Error(`element '${testId}' has not settled`);
+    }
+    return current;
+  }, options);
+};
+
+/**
  * Types text into an input field with optional configuration.
  * @param params - Configuration object
  * @param params.canvas - The testing canvas context
@@ -102,9 +159,9 @@ export const inputText = async (params: {
 }) => {
   const options =
     params.timeout !== undefined ? { timeout: params.timeout } : {};
-  const inputElement = await params.canvas.findByTestId(
+  const inputElement = await findSettledElement(
+    params.canvas,
     params.testId,
-    {},
     options,
   );
   if (params.clear) {
@@ -156,7 +213,13 @@ export const pressEnter = async (
   timeout = 5000,
 ) => {
   const element = await canvas.findByTestId(testId, {}, { timeout });
-  fireEvent.keyDown(element, { key: 'Enter', code: 'Enter' });
+  await fireEvent.keyDown(element, { key: 'Enter', code: 'Enter' });
+  // react-native-web blurs a single-line TextInput on Enter via
+  // setTimeout(blur, 0). Yield one macrotask so it lands here — equal-delay
+  // timers run in scheduling order — not mid-typing in the caller's next step.
+  await new Promise(resolve => {
+    setTimeout(resolve, 0);
+  });
 };
 
 export const goThroughAuthenticationPromptMobile = async (

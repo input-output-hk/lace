@@ -11,7 +11,7 @@ describe('storage-web-indexeddb:storage-api-adapter', () => {
       await expect(storageApi.getItem('missing')).resolves.toBeNull();
     });
 
-    it('returns null when the storage fails', async () => {
+    it('rejects when the storage fails', async () => {
       vi.resetModules();
       vi.stubGlobal('indexedDB', {
         open: () => {
@@ -21,27 +21,32 @@ describe('storage-web-indexeddb:storage-api-adapter', () => {
       const { storageApi: brokenStorageApi } = await import(
         '../src/storage-api-adapter'
       );
-      await expect(brokenStorageApi.getItem('key')).resolves.toBeNull();
+      await expect(brokenStorageApi.getItem('key')).rejects.toThrow(
+        'storage failure',
+      );
     });
 
-    it('logs when the storage fails', async () => {
-      const warn = vi.spyOn(console, 'warn').mockImplementation(() => void 0);
+    it('reopens the database after a failed open', async () => {
       vi.resetModules();
-      const error = new Error('storage failure');
+      const realIndexedDB = globalThis.indexedDB;
+      let attempts = 0;
       vi.stubGlobal('indexedDB', {
-        open: () => {
-          throw error;
+        open: (...args: Parameters<IDBFactory['open']>) => {
+          attempts += 1;
+          if (attempts === 1) throw new Error('storage failure');
+          return realIndexedDB.open(...args);
         },
       });
-      const { storageApi: brokenStorageApi } = await import(
+      const { storageApi: recoveringStorageApi } = await import(
         '../src/storage-api-adapter'
       );
-      await expect(brokenStorageApi.getItem('key')).resolves.toBeNull();
-      expect(warn).toHaveBeenCalledWith(
-        "storage-web-indexeddb: failed to read 'key'",
-        error,
+
+      await expect(recoveringStorageApi.getItem('key')).rejects.toThrow(
+        'storage failure',
       );
-      warn.mockRestore();
+
+      await expect(recoveringStorageApi.getItem('key')).resolves.toBeNull();
+      expect(attempts).toBe(2);
     });
   });
 

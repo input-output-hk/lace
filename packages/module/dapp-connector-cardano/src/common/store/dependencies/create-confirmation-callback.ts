@@ -1,8 +1,18 @@
 import { DappId } from '@lace-contract/dapp-connector';
 import { senderOrigin } from '@lace-lib/dapp-connector';
-import { Subject } from 'rxjs';
+import {
+  concatWith,
+  filter,
+  map,
+  NEVER,
+  shareReplay,
+  Subject,
+  take,
+} from 'rxjs';
 
+import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
 import type { Dapp } from '@lace-contract/dapp-connector';
+import type { DisconnectEvent } from '@lace-lib/extension-messaging';
 import type { Observable, Subscriber } from 'rxjs';
 import type { Runtime } from 'webextension-polyfill';
 
@@ -19,6 +29,13 @@ export type SignTxRequestData = {
   txHex: string;
   /** Whether this is a partial sign (multiple signers) */
   partialSign: boolean;
+  /**
+   * Present ONLY when the collateral-ownership guard blocked the request: the
+   * consent surface is then opened in the refused state instead of the review
+   * state. Omitted entirely on the allow path, which keeps the ordinary
+   * request payload byte-identical to today.
+   */
+  collateralRefusal?: CollateralOwnershipErrorCase;
 };
 
 /**
@@ -41,11 +58,19 @@ export type RequestData<R extends CardanoRequestType> = R extends 'signTx'
   : undefined;
 
 /**
- * Result of a user confirmation action.
+ * Outcome of a user confirmation action.
+ *
+ * `disconnected` is deliberately distinct from `rejected`: it means the dApp's
+ * port dropped (e.g. the page froze into the back/forward cache) before the
+ * user acted, so it is surfaced as a connection error rather than a false
+ * "user rejected".
+ *
+ * `unavailable` means the wallet never managed to show the prompt, so the user
+ * was never asked. It is likewise not a refusal.
  */
 export type CardanoConfirmationResult = {
-  /** Whether the user confirmed or rejected the request */
-  isConfirmed: boolean;
+  /** How the confirmation request was resolved */
+  outcome: 'confirmed' | 'disconnected' | 'rejected' | 'unavailable';
 };
 
 /**
@@ -73,10 +98,24 @@ export type CardanoConfirmationRequest = ConfirmationRequestBase & {
   txHex?: string;
   /** Partial sign flag for signTx requests */
   partialSign?: boolean;
+  /**
+   * The collateral guard's refusal, or `null` when the request carries none.
+   * Required, never optional: a required key must be PRESENT in an object
+   * literal, so it cannot be dropped where the request is built -- and a
+   * dropped verdict would render a refused transaction as an ordinary review,
+   * live Sign button and all.
+   */
+  collateralRefusal: CollateralOwnershipErrorCase | null;
   /** Address for signData requests */
   signDataAddress?: string;
   /** Payload for signData requests */
   signDataPayload?: string;
+  /**
+   * Emits once when the wallet-api port of this request's originating sender
+   * disconnects, so the pending confirmation can be cancelled. Absent when the
+   * sender has no tab id (nothing to match against).
+   */
+  disconnected$?: Observable<void>;
 };
 
 /**
@@ -110,6 +149,8 @@ export type CardanoConfirmationCallback =
  * @param handleRequests - Function that receives an Observable of confirmation requests
  *                         and returns an Observable of actions to emit
  * @param subscriber - RxJS Subscriber to emit actions from handleRequests
+ * @param portDisconnected$ - Wallet-api channel disconnects; per request, filtered
+ *                            to the originating sender to cancel a pending confirmation
  * @returns Object containing the callback function and a shutdown function for cleanup
  */
 export const createCardanoConfirmationCallback = <T>(
@@ -117,6 +158,7 @@ export const createCardanoConfirmationCallback = <T>(
     request$: Observable<CardanoConfirmationRequest>,
   ) => Observable<T>,
   subscriber: Subscriber<T>,
+  portDisconnected$: Observable<DisconnectEvent>,
 ): CardanoConfirmationCallbackResult => {
   const confirmationRequest$ = new Subject<CardanoConfirmationRequest>();
   const subscription =
@@ -138,9 +180,45 @@ export const createCardanoConfirmationCallback = <T>(
   ): Promise<CardanoConfirmationResult> => {
     const dappOrigin = senderOrigin(sender) || '';
 
+    const senderTabId = sender.tab?.id;
+    // A request whose sender has no tab id must never match another port's
+    // undefined tab id, so it gets a signal that never fires.
+    const disconnected$: Observable<void> =
+      senderTabId === undefined
+        ? NEVER
+        : portDisconnected$.pipe(
+            filter(
+              ({ disconnected }) =>
+                disconnected.sender?.tab?.id === senderTabId &&
+                disconnected.sender?.frameId === sender.frameId,
+            ),
+            map(() => undefined),
+            take(1),
+            // Emits at most once and NEVER completes: this is an arm of the
+            // signing race, and rxjs 7.8.2 lets a completing arm end that race
+            // — post-confirm that kills the flow before its result arrives.
+            concatWith(NEVER),
+            // Replayed, and subscribed eagerly below, because requests are
+            // served one at a time: the queue may only reach this request
+            // after its port is already gone. The source is a hot event with
+            // no replay of its own, so without this the drop lands in the
+            // window before the request is active and is missed entirely —
+            // and the queue then opens a prompt for a dApp that has left.
+            shareReplay({ bufferSize: 1, refCount: true }),
+          );
+
     return new Promise<CardanoConfirmationResult>(resolve => {
+      // Observe the drop from the moment the request arrives, not from the
+      // moment it becomes active. refCount keeps this from outliving the
+      // request: the last unsubscribe tears the upstream filter down AND
+      // discards the replayed drop, so nothing may subscribe after `resolve`.
+      const dropWatch = disconnected$.subscribe();
       const request: CardanoConfirmationRequest = {
-        resolve,
+        resolve: result => {
+          dropWatch.unsubscribe();
+          resolve(result);
+        },
+        disconnected$,
         requestingDapp: {
           id: DappId(dappOrigin),
           name: sender.tab?.title || '',
@@ -149,6 +227,14 @@ export const createCardanoConfirmationCallback = <T>(
         },
         windowId: sender.tab?.windowId,
         type,
+        // Hoisted out of the conditional spread below: `null` on a connect or
+        // signData request is TRUE, not filler -- that request carries no
+        // verdict -- and only a plain key can be compile-checked for presence.
+        collateralRefusal:
+          type === 'signTx'
+            ? (requestData as SignTxRequestData | undefined)
+                ?.collateralRefusal ?? null
+            : null,
         ...(type === 'signTx' &&
           requestData && {
             txHex: (requestData as SignTxRequestData).txHex,

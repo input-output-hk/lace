@@ -228,6 +228,7 @@ const runConfirmation = async (
     cardanoContext: {
       selectChainId$: of(FIXTURE.chainId),
       selectAvailableAccountUtxos$: of({ [ACCOUNT_ID]: localUtxos }),
+      selectCollateralOwnershipUtxos$: of({ [ACCOUNT_ID]: localUtxos }),
     },
   };
   const deps = {

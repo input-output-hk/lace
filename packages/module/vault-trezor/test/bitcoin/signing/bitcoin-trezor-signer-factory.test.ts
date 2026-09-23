@@ -1,9 +1,12 @@
+import { Cardano, Serialization } from '@cardano-sdk/core';
 import {
   BitcoinNetwork,
   BitcoinNetworkId,
 } from '@lace-contract/bitcoin-context';
 import { CompositeSignerFactory } from '@lace-contract/signer';
 import { WalletId } from '@lace-contract/wallet-repo';
+import { HexBytes } from '@lace-lib/util';
+import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { BitcoinTrezorSignerFactory } from '../../../src/bitcoin/signer-factory';
@@ -153,7 +156,30 @@ describe('CompositeSignerFactory with Trezor factories', () => {
     },
   } as Partial<AnyAccount>);
 
-  const cardanoSigner = {} as CardanoTransactionSigner;
+  const cardanoSign = vi.fn(() =>
+    of({ serializedTx: HexBytes('deadbeef'), signatureCount: 1 }),
+  );
+  const cardanoSigner: CardanoTransactionSigner = { sign: cardanoSign };
+
+  // A real, decodable, collateral-free tx -- lets the guard
+  // allow and delegate, so the positive routing assertion below proves
+  // delegation into the Cardano branch, not just "did not return Bitcoin's".
+  const NO_COLLATERAL_TX = Serialization.Transaction.fromCore({
+    id: Cardano.TransactionId('0'.repeat(64)),
+    body: {
+      inputs: [{ txId: Cardano.TransactionId('1'.repeat(64)), index: 0 }],
+      outputs: [
+        {
+          address: Cardano.PaymentAddress(
+            'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+          ),
+          value: { coins: 1_000_000n },
+        },
+      ],
+      fee: 170_000n,
+    },
+    witness: { signatures: new Map() },
+  } as Cardano.Tx).toCbor();
 
   const composite = () =>
     new CompositeSignerFactory([
@@ -173,7 +199,7 @@ describe('CompositeSignerFactory with Trezor factories', () => {
     expect(signer).toBeInstanceOf(BitcoinTrezorTransactionSigner);
   });
 
-  it('routes a Cardano account to the Cardano factory', () => {
+  it('routes a Cardano account to the Cardano factory', async () => {
     const bitcoinAccount = account();
 
     const signer = composite().createTransactionSigner({
@@ -181,9 +207,24 @@ describe('CompositeSignerFactory with Trezor factories', () => {
       accountId: cardanoAccount.accountId,
       knownAddresses: [],
       utxo: [],
+      collateralInputResolver: { resolveInput: async () => null },
     } as never);
 
-    expect(signer).toBe(cardanoSigner);
+    // The Cardano factory returns a guard wrapper around the routed signer,
+    // not the signer instance itself. This Bitcoin-routing behaviour and its
+    // own factory/signer are untouched -- only the Cardano branch's return
+    // value shape changed.
+    expect(signer).not.toBe(cardanoSigner);
+    expect(typeof signer.sign).toBe('function');
+
+    // POSITIVE proof (not just "isn't Bitcoin's"): the guard allows this
+    // no-collateral fixture and delegates into the REAL Cardano signer the
+    // composite constructed -- proving the Cardano branch was picked, not a
+    // mis-route that also happens to fail the two negatives above.
+    const request = { serializedTx: HexBytes(NO_COLLATERAL_TX) };
+    const result = await firstValueFrom(signer.sign(request));
+    expect(cardanoSign).toHaveBeenCalledWith(request);
+    expect(result.serializedTx).toBe('deadbeef');
   });
 
   it('throws when no factory supports the account', () => {

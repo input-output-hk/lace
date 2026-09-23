@@ -216,6 +216,27 @@ export type GetUtxosAtAddressProps = {
   pageSize?: number;
 };
 
+export type EvaluateTxProps = {
+  /**
+   * CBOR of the transaction to evaluate. Witnesses are not required: the
+   * scripts are re-executed against the chain's own UTxO set, so an unsigned
+   * draft evaluates exactly like the signed transaction that follows it.
+   */
+  tx: Serialization.TxCBOR;
+};
+
+/**
+ * One redeemer's execution budget, identified the way `Cardano.Redeemer` is:
+ * by purpose plus the redeemer's index within that purpose group. Structurally
+ * the SDK's `TxEvaluationResult` entry, so a provider-backed `TxEvaluator` can
+ * hand it to the tx builder unchanged.
+ */
+export type RedeemerExecutionUnits = {
+  purpose: Cardano.RedeemerPurpose;
+  index: number;
+  budget: Cardano.ExUnits;
+};
+
 export type RewardAccountInfo = {
   poolId?: Cardano.PoolId;
   drepId?: string;
@@ -426,6 +447,22 @@ export interface CardanoProvider {
     props: SubmitTxArgs,
     context: CardanoProviderContext,
   ) => Observable<Result<Cardano.TransactionId, ProviderError>>;
+
+  /**
+   * Evaluate how many execution units each redeemer of `props.tx` consumes, by
+   * running its scripts against the chain's UTxO set.
+   *
+   * @return Observable that emits one budget per redeemer once and completes.
+   * `Ok([])` means the transaction carries no redeemers at all; every state in
+   * which the network could not produce budgets — a script failure, a provider
+   * fault, an unparseable response, a transport error — is an `Err`, so a
+   * caller can tell "nothing to evaluate" from "evaluation unavailable" and
+   * fall back to a fixed budget only in the latter case.
+   */
+  evaluateTx: (
+    props: EvaluateTxProps,
+    context: CardanoProviderContext,
+  ) => Observable<Result<RedeemerExecutionUnits[], ProviderError>>;
 
   /**
    * @return Observable that emits the complete registered-DRep list once and

@@ -9,14 +9,12 @@ import { addressBookAddressValidatorAddonContract } from '@lace-contract/address
 import { addressesStoreContract } from '@lace-contract/addresses';
 import {
   appStoreContract,
-  dialogsAddonContract,
   blockchainSpecificAppCustomizationsAddonContract,
   blockchainSpecificAppSettingsPageCustomizationsAddonContract,
   sendFlowSheetUICustomisationAddonContract,
 } from '@lace-contract/app';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
 import { dappConnectorStoreContract } from '@lace-contract/dapp-connector';
-import { failuresStoreContract } from '@lace-contract/failures';
 import { featureStoreContract } from '@lace-contract/feature';
 import { midnightContextStoreContract } from '@lace-contract/midnight-context';
 import {
@@ -64,7 +62,6 @@ const implementsContracts = combineContracts([
   sendFlowAnalyticsEnhancerAddonContract,
   addressBookAddressValidatorAddonContract,
   sheetPagesAddonContract,
-  dialogsAddonContract,
 ] as const);
 
 const dependsOnContracts = combineContracts([
@@ -76,7 +73,6 @@ const dependsOnContracts = combineContracts([
   viewsStoreContract,
   authenticationPromptStoreContract,
   txExecutorStoreContract,
-  failuresStoreContract,
   sendFlowStoreContract,
   tokenPricingStoreContract,
 ] as const);
@@ -126,7 +122,6 @@ const reactNativeModule = inferModuleContext({
     loadSheetPages: async () => import('./customisations/settings/sheetPages'),
     loadAboutPageUICustomisations: async () =>
       import('./exported-modules/about-page-ui-customisation'),
-    loadDialogs: async () => import('./exported-modules/dialogs/v2'),
     loadAccountSettingsUICustomisations: async () =>
       import('./exported-modules/account-settings'),
   },

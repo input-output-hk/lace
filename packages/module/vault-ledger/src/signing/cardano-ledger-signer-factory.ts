@@ -1,3 +1,5 @@
+import { withCollateralOwnershipGuard } from '@lace-contract/cardano-context';
+
 import { CardanoLedgerDataSigner } from './cardano-ledger-data-signer';
 import { CardanoLedgerTransactionSigner } from './cardano-ledger-transaction-signer';
 
@@ -55,16 +57,19 @@ export class CardanoLedgerSignerFactory implements CardanoSignerFactory {
     const { accountIndex, chainId, extendedAccountPublicKey } =
       this.#extractAccountProps(context);
 
-    return new CardanoLedgerTransactionSigner(
-      {
-        accountIndex,
-        chainId,
-        extendedAccountPublicKey,
-        knownAddresses: context.knownAddresses,
-        utxo: context.utxo,
-        wallet: context.wallet,
-      },
-      this.#dependencies,
+    return withCollateralOwnershipGuard(
+      new CardanoLedgerTransactionSigner(
+        {
+          accountIndex,
+          chainId,
+          extendedAccountPublicKey,
+          knownAddresses: context.knownAddresses,
+          utxo: context.utxo,
+          wallet: context.wallet,
+        },
+        this.#dependencies,
+      ),
+      context,
     );
   }
 

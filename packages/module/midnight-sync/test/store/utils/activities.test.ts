@@ -9,12 +9,24 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildTokenBalanceChangesFromUtxos,
+  deriveUnshieldedActivity,
+  entryHasUnshieldedActivity,
   formatFee,
   getAddressFromUtxos,
   mapStatusToActivityType,
 } from '../../../src/store/utils/activities';
 
+import type { WalletEntry } from '@midnightntwrk/wallet-sdk';
+
 const networkId = MidnightSDKNetworkIds.Preview;
+
+const utxoOf = (value: bigint, owner = 'a', tokenType = 'NIGHT') => ({
+  value,
+  owner,
+  tokenType,
+  intentHash: 'h',
+  outputIndex: 0,
+});
 
 describe('buildTokenBalanceChangesFromUtxos', () => {
   it('aggregates net amounts by token type from created and spent UTXOs', () => {
@@ -273,9 +285,30 @@ describe('mapStatusToActivityType', () => {
     expect(mapStatusToActivityType('FAILURE')).toBe(ActivityType.Failed);
   });
 
-  it('maps PARTIAL_SUCCESS to ActivityType.Pending', () => {
+  it('maps PARTIAL_SUCCESS with no balance changes (undefined) to ActivityType.Receive', () => {
     expect(mapStatusToActivityType('PARTIAL_SUCCESS')).toBe(
-      ActivityType.Pending,
+      ActivityType.Receive,
+    );
+  });
+
+  it('maps PARTIAL_SUCCESS with a negative balance change to ActivityType.Send', () => {
+    const changes = [{ amount: BigNumber(-100n) }];
+    expect(mapStatusToActivityType('PARTIAL_SUCCESS', changes)).toBe(
+      ActivityType.Send,
+    );
+  });
+
+  it('maps PARTIAL_SUCCESS with a positive balance change to ActivityType.Receive', () => {
+    const changes = [{ amount: BigNumber(100n) }];
+    expect(mapStatusToActivityType('PARTIAL_SUCCESS', changes)).toBe(
+      ActivityType.Receive,
+    );
+  });
+
+  it('maps PARTIAL_SUCCESS with mixed balance changes to ActivityType.Receive when any is positive', () => {
+    const changes = [{ amount: BigNumber(-100n) }, { amount: BigNumber(10n) }];
+    expect(mapStatusToActivityType('PARTIAL_SUCCESS', changes)).toBe(
+      ActivityType.Receive,
     );
   });
 });
@@ -293,5 +326,119 @@ describe('formatFee', () => {
     expect(
       formatFee(undefined as unknown as Parameters<typeof formatFee>[0]),
     ).toBe('0');
+  });
+});
+
+describe('entryHasUnshieldedActivity', () => {
+  const utxo = utxoOf(1n, 'a', 't');
+  const entry = (unshielded: WalletEntry['unshielded']): WalletEntry =>
+    ({
+      hash: 'h',
+      protocolVersion: 1,
+      status: 'SUCCESS',
+      unshielded,
+    } as WalletEntry);
+
+  it('is true when there are created unshielded UTxOs', () => {
+    expect(
+      entryHasUnshieldedActivity(
+        entry({ id: 1, createdUtxos: [utxo], spentUtxos: [] }),
+      ),
+    ).toBe(true);
+  });
+
+  it('is true when there are spent unshielded UTxOs', () => {
+    expect(
+      entryHasUnshieldedActivity(
+        entry({ id: 1, createdUtxos: [], spentUtxos: [utxo] }),
+      ),
+    ).toBe(true);
+  });
+
+  it('is true for a self-transfer, whose UTxOs net to zero', () => {
+    expect(
+      entryHasUnshieldedActivity(
+        entry({ id: 1, createdUtxos: [utxo], spentUtxos: [utxo] }),
+      ),
+    ).toBe(true);
+  });
+
+  it('is false when the unshielded section is empty (shielded-only)', () => {
+    expect(
+      entryHasUnshieldedActivity(
+        entry({ id: 1, createdUtxos: [], spentUtxos: [] }),
+      ),
+    ).toBe(false);
+  });
+
+  it('is false when there is no unshielded section', () => {
+    expect(entryHasUnshieldedActivity(entry(undefined))).toBe(false);
+  });
+});
+
+describe('deriveUnshieldedActivity', () => {
+  it('classifies a net-positive movement as Receive', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'SUCCESS',
+      createdUtxos: [utxoOf(100n)],
+      spentUtxos: [],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Receive);
+    expect(result.tokenBalanceChanges).toEqual(
+      buildTokenBalanceChangesFromUtxos([utxoOf(100n)], [], networkId),
+    );
+  });
+
+  it('classifies a net-negative movement as Send', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'SUCCESS',
+      createdUtxos: [utxoOf(30n)],
+      spentUtxos: [utxoOf(100n)],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Send);
+  });
+
+  it('classifies a net-zero movement as Self with no amount', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'SUCCESS',
+      createdUtxos: [utxoOf(100n)],
+      spentUtxos: [utxoOf(100n)],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Self);
+    expect(result.tokenBalanceChanges).toEqual([]);
+  });
+
+  it('classifies a net-zero PARTIAL_SUCCESS movement as Self', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'PARTIAL_SUCCESS',
+      createdUtxos: [utxoOf(100n)],
+      spentUtxos: [utxoOf(100n)],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Self);
+  });
+
+  it('keeps FAILURE as Failed even when net-zero', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'FAILURE',
+      createdUtxos: [utxoOf(100n)],
+      spentUtxos: [utxoOf(100n)],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Failed);
+  });
+
+  it('classifies no movement as Receive, not Self', () => {
+    const result = deriveUnshieldedActivity({
+      status: 'SUCCESS',
+      createdUtxos: [],
+      spentUtxos: [],
+      networkId,
+    });
+    expect(result.type).toBe(ActivityType.Receive);
+    expect(result.tokenBalanceChanges).toEqual([]);
   });
 });

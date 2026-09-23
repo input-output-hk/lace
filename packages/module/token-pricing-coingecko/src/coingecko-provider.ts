@@ -6,12 +6,13 @@ import { findCoinGeckoId } from './utils';
 
 import type { CoinGeckoCoinsList } from './types';
 import type {
+  PriceDataPoint,
+  TimeRange,
   TokenPriceHistoryResponse,
   TokenPriceRequest,
   TokenPriceResponse,
   TokenPricingProvider,
 } from '@lace-contract/token-pricing';
-import type { PriceDataPoint, TimeRange } from '@lace-lib/ui-toolkit';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 

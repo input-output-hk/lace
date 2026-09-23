@@ -1,8 +1,12 @@
-import type { StyleProp, ViewStyle } from 'react-native';
-
 import { Image } from 'expo-image';
 import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text as NativeText,
+  TextInput,
+  View,
+} from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
 import { Icon, Row } from '../../atoms';
@@ -17,7 +21,10 @@ const NUMERIC_INPUT_REGEX = /^\d*\.?\d*$/;
 
 export interface SwapInputToken {
   name: string;
+  /** Raster/URI icon (e.g. wallet asset image). */
   icon?: ImageSource;
+  /** Vector icon node (e.g. a brand logo component); takes priority over `icon`. */
+  iconNode?: React.ReactNode;
   balance?: string;
 }
 
@@ -25,11 +32,15 @@ export interface SwapInputProps {
   token?: SwapInputToken;
   amount: string;
   fiatAmount?: string;
+  /** Field label rendered above the token row. */
+  label?: string;
+  /** Replaces the bare balance figure next to the token name. */
+  balanceHint?: string;
   error?: string;
   onTokenPress?: () => void;
   onAmountChange?: (value: string) => void;
+  /** Rendered as direct Row children — each element must carry its own key. */
   quickActions?: React.ReactNode[];
-  style?: StyleProp<ViewStyle>;
   testID?: string;
   placeholder: string;
   disabled?: boolean;
@@ -50,17 +61,19 @@ const TokenAvatar = ({
   theme: ReturnType<typeof useTheme>['theme'];
   testID?: string;
 }) => {
+  let content: React.ReactNode;
+  if (token?.iconNode) {
+    content = token.iconNode;
+  } else if (token?.icon) {
+    content = <Image source={token.icon} style={styles.avatarImage} />;
+  } else {
+    content = (
+      <Icon name="Plus" size={AVATAR_SIZE * 0.5} color={theme.text.secondary} />
+    );
+  }
   return (
     <View style={styles.avatar} testID={testID}>
-      {token?.icon ? (
-        <Image source={token.icon} style={styles.avatarImage} />
-      ) : (
-        <Icon
-          name="Plus"
-          size={AVATAR_SIZE * 0.5}
-          color={theme.text.secondary}
-        />
-      )}
+      {content}
     </View>
   );
 };
@@ -71,6 +84,8 @@ export const SwapInput = forwardRef<SwapInputHandle, SwapInputProps>(
       token,
       amount,
       fiatAmount,
+      label,
+      balanceHint,
       error,
       onTokenPress,
       onAmountChange,
@@ -103,8 +118,19 @@ export const SwapInput = forwardRef<SwapInputHandle, SwapInputProps>(
       <View
         style={[styles.container, hasError && styles.containerError]}
         testID={testID}>
+        {label !== undefined && (
+          <Text.XS
+            variant="secondary"
+            weight="medium"
+            testID={testID ? `${testID}-label` : undefined}>
+            {label}
+          </Text.XS>
+        )}
         <Pressable
           style={styles.tokenSelector}
+          // No picker → not pressable, so the row doesn't offer a pointer
+          // cursor / focus target it can't honor.
+          disabled={onTokenPress === undefined}
           onPress={() => {
             onTokenPress?.();
           }}
@@ -123,29 +149,46 @@ export const SwapInput = forwardRef<SwapInputHandle, SwapInputProps>(
             {token?.name ?? placeholder}
           </Text.XS>
           <Text.XS variant="secondary" weight="medium">
-            {token?.balance ?? '0.00'}
+            {balanceHint ?? token?.balance ?? '0.00'}
           </Text.XS>
-          <View style={styles.chevronSeparator}>
-            <Icon name="CaretDown" size={16} color={theme.text.secondary} />
-          </View>
+          {onTokenPress !== undefined && (
+            <View style={styles.chevronSeparator}>
+              <Icon name="CaretDown" size={16} color={theme.text.secondary} />
+            </View>
+          )}
         </Pressable>
 
         <View style={styles.divider} />
 
         <View style={styles.valueRow}>
           <View style={styles.valueContainer}>
-            <TextInput
-              ref={inputRef}
-              style={styles.amountInput}
-              value={amount}
-              onChangeText={handleChangeText}
-              keyboardType="decimal-pad"
-              inputMode="decimal"
-              placeholder="0.00"
-              placeholderTextColor={theme.text.secondary}
-              testID={testID ? `${testID}-amount-input` : undefined}
-              editable={!disabled}
-            />
+            {disabled ? (
+              // A disabled amount only ever displays an API-derived value, so
+              // it renders as text — a read-only TextInput still takes focus,
+              // draws an outline and shows a text cursor on web, all of which
+              // read as editable.
+              <NativeText
+                style={[
+                  styles.amountInput,
+                  amount === '' && styles.amountPlaceholder,
+                ]}
+                numberOfLines={1}
+                testID={testID ? `${testID}-amount-input` : undefined}>
+                {amount === '' ? '0.00' : amount}
+              </NativeText>
+            ) : (
+              <TextInput
+                ref={inputRef}
+                style={styles.amountInput}
+                value={amount}
+                onChangeText={handleChangeText}
+                keyboardType="decimal-pad"
+                inputMode="decimal"
+                placeholder="0.00"
+                placeholderTextColor={theme.text.secondary}
+                testID={testID ? `${testID}-amount-input` : undefined}
+              />
+            )}
             {fiatAmount !== undefined && (
               <Text.XS variant="secondary" weight="medium">
                 {`\u2248  ${fiatAmount}`}
@@ -158,11 +201,7 @@ export const SwapInput = forwardRef<SwapInputHandle, SwapInputProps>(
             )}
           </View>
           {quickActions && quickActions.length > 0 && (
-            <Row gap={spacing.S}>
-              {quickActions.map((action, index) => (
-                <View key={index}>{action}</View>
-              ))}
-            </Row>
+            <Row gap={spacing.S}>{quickActions}</Row>
           )}
         </View>
       </View>
@@ -232,6 +271,9 @@ export const getStyles = (theme: Theme) =>
       lineHeight: 20,
       color: theme.text.primary,
       padding: 0,
+    },
+    amountPlaceholder: {
+      color: theme.text.secondary,
     },
     buttonsContainer: {
       flexDirection: 'row',

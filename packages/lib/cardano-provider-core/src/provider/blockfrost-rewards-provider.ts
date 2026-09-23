@@ -1,7 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { BigNumber, Err, Ok } from '@lace-lib/util';
 import { isNotFoundError } from '@lace-lib/util-provider';
-import { catchError, from, map, of } from 'rxjs';
+import { catchError, defer, from, map, of } from 'rxjs';
 
 import { BlockfrostProvider } from '../blockfrost-provider';
 
@@ -56,7 +56,9 @@ export class BlockfrostRewardsProvider extends BlockfrostProvider {
   public getAccountRewards({
     rewardAccount,
   }: GetAccountRewardsProps): Observable<Result<Reward[], ProviderError>> {
-    return from(
+    // `defer`, not `from`: the caller's retry re-subscribes, and a settled
+    // promise replays instead of re-requesting.
+    return defer(async () =>
       this.paginatedRequests<BlockfrostRewardList>({
         endpoint: `accounts/${rewardAccount}/rewards?order=desc`,
         pageSize: 100,

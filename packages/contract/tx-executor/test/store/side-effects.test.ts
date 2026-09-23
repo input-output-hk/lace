@@ -28,10 +28,11 @@ const requestedParams = {
 const makeTxPhaseRequested = ({
   type = requestedType,
   params = requestedParams,
+  id = executionId,
 }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-{ params?: any; type?: TxPhaseConfig['type'] } = {}) =>
+{ id?: string; params?: any; type?: TxPhaseConfig['type'] } = {}) =>
   txExecutorActions.txExecutor.txPhaseRequested({
-    executionId,
+    executionId: id,
     config: {
       type,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -401,6 +402,115 @@ describe('txExecutor side-effects', () => {
           }),
         );
       });
+    });
+
+    it('completes an in-flight phase even when a later request arrives while it runs', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) => {
+            const slowConfirmImplementation: MakeTxExecutorImplementation = vi
+              .fn()
+              .mockImplementation(() => ({
+                blockchainName: 'Midnight',
+                confirmTx: vi.fn().mockReturnValue(
+                  cold('--a', {
+                    a: { success: true, serializedTx: 'signedTx' },
+                  }),
+                ),
+                buildTx: vi.fn(),
+                previewTx: vi.fn(),
+                discardTx: vi.fn(),
+                submitTx: vi
+                  .fn()
+                  .mockReturnValue(of({ success: true, txId: 'ok' })),
+              }));
+
+            return makeExecuteTxPhase({
+              implementationFactories: [slowConfirmImplementation],
+            });
+          },
+        },
+        ({ cold, expectObservable }) => ({
+          actionObservables: {
+            txExecutor: {
+              txPhaseRequested$: cold('ab', {
+                a: makeTxPhaseRequested({ id: 'exec-a', type: 'confirmTx' }),
+                b: makeTxPhaseRequested({ id: 'exec-b', type: 'submitTx' }),
+              }),
+            },
+          },
+          dependencies: { actions: txExecutorActions },
+          stateObservables: {
+            wallets: {
+              selectAll$: cold('a', { a: [wallet] }),
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-ba', {
+              b: txExecutorActions.txExecutor.txPhaseCompleted({
+                executionId: 'exec-b',
+                result: { success: true, txId: 'ok' },
+              }),
+              a: txExecutorActions.txExecutor.txPhaseCompleted({
+                executionId: 'exec-a',
+                result: { success: true, serializedTx: 'signedTx' },
+              }),
+            });
+          },
+        }),
+      );
+    });
+
+    it('stops listening to an executor phase once it has produced its result', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) => {
+            const chattyImplementation: MakeTxExecutorImplementation = vi
+              .fn()
+              .mockImplementation(() => ({
+                blockchainName: 'Midnight',
+                confirmTx: vi.fn(),
+                buildTx: vi.fn(),
+                previewTx: vi.fn(),
+                discardTx: vi.fn(),
+                // No completion notation: the real Cardano submitTx and
+                // confirmTx project BehaviorSubjects that never complete, so a
+                // retained inner re-emits on the next source tick.
+                submitTx: vi.fn().mockReturnValue(
+                  cold('ab', {
+                    a: { success: true, txId: 'first' },
+                    b: { success: true, txId: 'second' },
+                  }),
+                ),
+              }));
+
+            return makeExecuteTxPhase({
+              implementationFactories: [chattyImplementation],
+            });
+          },
+        },
+        ({ cold, expectObservable }) => ({
+          actionObservables: {
+            txExecutor: {
+              txPhaseRequested$: cold('a', { a: makeTxPhaseRequested() }),
+            },
+          },
+          dependencies: { actions: txExecutorActions },
+          stateObservables: {
+            wallets: {
+              selectAll$: cold('a', { a: [wallet] }),
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: txExecutorActions.txExecutor.txPhaseCompleted({
+                executionId,
+                result: { success: true, txId: 'first' },
+              }),
+            });
+          },
+        }),
+      );
     });
   });
 });

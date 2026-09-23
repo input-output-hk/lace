@@ -27,11 +27,11 @@ export const selectTokenPriceHistoryForRange = createSelector(
       return EMPTY_PRICE_DATA_POINTS;
     }
 
-    const history = priceHistory[priceId];
-    if (!history || !history[timeRange] || history[timeRange].length === 0) {
+    const points = priceHistory[priceId]?.[timeRange];
+    if (!points || points.length === 0) {
       return EMPTY_PRICE_DATA_POINTS;
     }
-    return history[timeRange];
+    return points;
   },
 );
 
@@ -138,6 +138,33 @@ export const selectCurrencyFallback = createSelector(
   },
 );
 
+/**
+ * USD → selected-currency conversion rate, for values that are inherently
+ * USD-denominated (e.g. USD-pegged stablecoin positions). Every cached price
+ * carries both `price` (in the user's currency) and `priceInUsd`, so their
+ * ratio is the live exchange rate. Undefined while no fresh price in the
+ * selected currency is cached — callers should then fall back to displaying
+ * USD rather than mislabeling an unconverted value.
+ */
+export const selectUsdToCurrencyRate = createSelector(
+  [slice.selectors.selectPrices, slice.selectors.selectCurrencyPreference],
+  (prices, preference): number | undefined => {
+    const preferred = preference.name.toLowerCase();
+    if (preferred === 'usd') return 1;
+    for (const price of Object.values(prices)) {
+      if (
+        !price.isStale &&
+        price.fiatCurrency.toLowerCase() === preferred &&
+        price.priceInUsd > 0 &&
+        price.price > 0
+      ) {
+        return price.price / price.priceInUsd;
+      }
+    }
+    return undefined;
+  },
+);
+
 export const tokenPricingSliceSelectors = {
   tokenPricing: {
     ...slice.selectors,
@@ -146,5 +173,6 @@ export const tokenPricingSliceSelectors = {
     selectPortfolioValueHistory,
     selectSupportedCurrencyPreferences,
     selectCurrencyFallback,
+    selectUsdToCurrencyRate,
   },
 };

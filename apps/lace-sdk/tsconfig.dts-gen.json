@@ -29,7 +29,9 @@
     "../../packages/module/cardano-provider-blockfrost/src/sdk.ts",
     "../../packages/module/crypto-cardano-sdk/src/sdk.ts",
     "../../packages/module/feature-dev/src/sdk.ts",
+    "../../packages/module/passport-account/src/sdk.ts",
     "../../packages/module/storage-in-memory/src/sdk.ts",
+    "../../packages/module/storage-web-indexeddb/src/sdk.ts",
     "../../packages/module/swap-provider-steelswap/src/sdk.ts"
   ],
   "exclude": [

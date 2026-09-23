@@ -38,7 +38,7 @@ import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
 
 import { TimeToFullDisplay } from '../../components/observability/TimeToFullDisplay';
 import { SecurityAlertsBanner } from '../../components/security-alerts/SecurityAlertsBanner';
-import { useLaceSelector } from '../../hooks';
+import { useLaceSelector, useLoadModules } from '../../hooks';
 
 import { ActivitiesFlatlist } from './activities';
 import { NftsList } from './nfts';
@@ -201,6 +201,11 @@ export const Portfolio = ({
   const portfolioAnnouncements = useUICustomisation(
     'addons.loadPortfolioAnnouncements',
   );
+  // Gates the slot below: `portfolioAnnouncements` is an empty array both before
+  // the addon loads and when every announcement opts out, so it cannot say which.
+  const announcementsLoaded = useLoadModules(
+    'addons.loadPortfolioAnnouncements',
+  );
 
   const AssetListHeader = useCallback(
     () => (
@@ -208,11 +213,15 @@ export const Portfolio = ({
         {currentAccount ? (
           <SecurityAlertsBanner accountId={currentAccount.accountId} />
         ) : null}
-        {currentAccount
-          ? portfolioAnnouncements.map(({ key, Announcement }) => (
+        {currentAccount && announcementsLoaded ? (
+          // Rendered even when no announcement opts in: its presence is what
+          // tells a reader (and an absence assertion) that the slot has decided.
+          <View testID="portfolio-announcements">
+            {portfolioAnnouncements.map(({ key, Announcement }) => (
               <Announcement key={key} accountId={currentAccount.accountId} />
-            ))
-          : null}
+            ))}
+          </View>
+        ) : null}
         {activeBannerAccount &&
         portfolioBannerCustomisation?.PortfolioBanner ? (
           <portfolioBannerCustomisation.PortfolioBanner
@@ -226,6 +235,7 @@ export const Portfolio = ({
       activeBannerAccount,
       portfolioBannerCustomisation?.PortfolioBanner,
       portfolioAnnouncements,
+      announcementsLoaded,
     ],
   );
 
@@ -386,6 +396,17 @@ export const Portfolio = ({
       const accountData = accountCards[item.accountIndex];
       if (!accountData) return null;
 
+      // Blockchains that keep the shared default card can still append their own
+      // action(s) via `AccountCardExtraActions` (e.g. Cardano's cNIGHT → DUST entry).
+      const extraActionsCustomisation = accountCardCustomisations.find(
+        c =>
+          c.AccountCardExtraActions &&
+          c.uiCustomisationSelector({
+            blockchainName: account.blockchainName,
+          }),
+      );
+      const ExtraActions = extraActionsCustomisation?.AccountCardExtraActions;
+
       return (
         <Column style={pageStyle}>
           <View style={contentStyle}>
@@ -393,6 +414,16 @@ export const Portfolio = ({
               {...accountData}
               containerStyle={cardContainerStyle}
               formatChartValue={formatChartValue}
+              extraActions={
+                ExtraActions
+                  ? ({ variant }) => (
+                      <ExtraActions
+                        accountId={account.accountId}
+                        variant={variant}
+                      />
+                    )
+                  : undefined
+              }
             />
           </View>
         </Column>

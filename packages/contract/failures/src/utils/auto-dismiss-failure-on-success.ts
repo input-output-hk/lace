@@ -24,7 +24,7 @@ import type { Observable, OperatorFunction } from 'rxjs';
  * // In a side effect:
  * return operation$.pipe(
  *   // ... operation logic ...
- *   map(() => MidnightWalletFailureId('wallet-123')),
+ *   map(() => MidnightSyncFailureId('account-123')),
  *   autoDismissFailureOnSuccess(selectFailureById$),
  * );
  * ```

@@ -6,6 +6,8 @@ import { radius, spacing } from '../../../design-tokens';
 import { isExtensionSidePanel } from '../../util/commons';
 import { Icon } from '../icons/Icon';
 
+import { FALLBACK_PIECE_SIZE, qrDrawMetrics } from './qrDrawMetrics';
+
 import type { BlockchainName } from '@lace-lib/util-store';
 import type { QRCodeOptions } from 'qrcode';
 
@@ -17,6 +19,8 @@ import type { QRCodeOptions } from 'qrcode';
  */
 const QR_COLOR = '#1E1E1E';
 const QR_BACKGROUND_COLOR = '#FFFFFF';
+/** Maximum contrast for a camera; the decorative near-black is a design choice. */
+const DEVICE_CAMERA_QR_COLOR = '#000000';
 
 const BRIGHTNESS_MIDPOINT = 128;
 
@@ -49,9 +53,15 @@ const logoColorOn = (badgeColor?: string): string => {
     : QR_COLOR;
 };
 
-const FALLBACK_PIECE_SIZE = 5;
-
 const ERROR_CORRECTION_LEVEL = 'Q' as const;
+/**
+ * Level M for a device camera, not Q. Lower correction means FEWER modules for
+ * the same payload (a 215-char UR part is 49 across at M, 57 at Q), and module
+ * SIZE is what a camera actually needs. The per-frame redundancy Q buys is
+ * already provided across frames by the UR fountain: a misread frame comes back
+ * on the next loop, while denser modules are misread on every frame.
+ */
+const DEVICE_CAMERA_ERROR_CORRECTION_LEVEL = 'M' as const;
 
 const useQRCodeDataSafe = useQRCodeData as unknown as (
   message: string,
@@ -64,6 +74,21 @@ type QrCodeProps = {
   testID?: string;
   logoSize?: number;
   backgroundColor?: string;
+  /**
+   * Render for a hardware wallet's camera rather than for a person.
+   *
+   * Every decorative choice this component makes costs machine readability, and
+   * the animated exchange is read by a device across a desk: rounded pieces blur
+   * their own edges, `#1E1E1E` is not the maximum contrast the spec assumes, a
+   * fixed 8px padding is half the quiet zone at these densities, a dark border
+   * sits right where the decoder looks for that zone, and 70% (50% in the side
+   * panel) of a 400px card leaves ~4px per module — 2.8px in the panel.
+   *
+   * Set by {@link AnimatedQrCode}, since every animated consumer in both stacks
+   * is a device camera. Left OFF for Receive and Account Key, which a human
+   * points a phone at.
+   */
+  optimiseForDeviceCamera?: boolean;
 };
 
 export const QrCode = ({
@@ -72,33 +97,41 @@ export const QrCode = ({
   testID,
   logoSize = 48,
   backgroundColor,
+  optimiseForDeviceCamera = false,
 }: QrCodeProps) => {
-  const qrCodeStyle = styles(backgroundColor);
+  const errorCorrectionLevel = optimiseForDeviceCamera
+    ? DEVICE_CAMERA_ERROR_CORRECTION_LEVEL
+    : ERROR_CORRECTION_LEVEL;
 
   const qrCodeOptions: QRCodeOptions = useMemo(
-    () => ({ errorCorrectionLevel: ERROR_CORRECTION_LEVEL }),
-    [],
+    () => ({ errorCorrectionLevel }),
+    [errorCorrectionLevel],
   );
 
   const { qrCodeSize } = useQRCodeDataSafe(data, qrCodeOptions);
 
-  const [innerDrawSide, setInnerDrawSide] = useState(0);
+  const [containerSide, setContainerSide] = useState(0);
 
   const onContainerLayout = useCallback(
     ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
-      const side = Math.min(layout.width, layout.height);
-      const paddingInset = spacing.S * 2;
-      setInnerDrawSide(Math.max(0, side - paddingInset));
+      setContainerSide(Math.min(layout.width, layout.height));
     },
     [],
   );
 
-  const pieceSize = useMemo(() => {
-    if (qrCodeSize <= 0 || innerDrawSide <= 0) {
-      return FALLBACK_PIECE_SIZE;
+  const { pieceSize, quietZone } = useMemo(() => {
+    if (optimiseForDeviceCamera) {
+      return qrDrawMetrics({ moduleCount: qrCodeSize, side: containerSide });
     }
-    return innerDrawSide / qrCodeSize;
-  }, [innerDrawSide, qrCodeSize]);
+    const inner = Math.max(0, containerSide - spacing.S * 2);
+    return {
+      pieceSize:
+        qrCodeSize <= 0 || inner <= 0
+          ? FALLBACK_PIECE_SIZE
+          : inner / qrCodeSize,
+      quietZone: spacing.S,
+    };
+  }, [containerSide, optimiseForDeviceCamera, qrCodeSize]);
 
   const renderLogo = () => {
     if (!chainType) return;
@@ -110,12 +143,8 @@ export const QrCode = ({
       <View
         testID={`qr-code-chain-icon-${chainType}`}
         style={[
-          qrCodeStyle.logoContainer,
-          {
-            width: logoSize,
-            height: logoSize,
-            backgroundColor,
-          },
+          styles.logoContainer,
+          { backgroundColor, height: logoSize, width: logoSize },
         ]}>
         <Icon
           name={chainType}
@@ -130,47 +159,74 @@ export const QrCode = ({
 
   return (
     <View
-      style={qrCodeStyle.container}
+      style={[
+        styles.container,
+        optimiseForDeviceCamera
+          ? styles.deviceCameraContainer
+          : styles.decorativeContainer,
+        { padding: quietZone },
+      ]}
       testID={testID}
       onLayout={onContainerLayout}>
-      <QRCodeStyled
-        pieceCornerType="rounded"
-        pieceBorderRadius={2}
-        data={data}
-        pieceSize={pieceSize}
-        outerEyesOptions={{ borderRadius: spacing.S }}
-        innerEyesOptions={{ borderRadius: spacing.XS }}
-        color={QR_COLOR}
-        errorCorrectionLevel={ERROR_CORRECTION_LEVEL}
-      />
+      {/*
+        Nothing until measured, in camera mode: the fallback module size is a
+        guess, and a guess too large is drawn CROPPED by `overflow: hidden` and
+        then replaced once layout arrives — the flash the QA recording caught.
+        One blank frame beats one wrong one.
+      */}
+      {optimiseForDeviceCamera && containerSide <= 0 ? undefined : (
+        <QRCodeStyled
+          // Square pieces for a camera: rounded ones cost a per-module corner
+          // analysis on EVERY frame (the animated QR's ANR) and soften the very
+          // edges the decoder thresholds on.
+          {...(optimiseForDeviceCamera
+            ? {}
+            : {
+                innerEyesOptions: { borderRadius: spacing.XS },
+                outerEyesOptions: { borderRadius: spacing.S },
+                pieceBorderRadius: 2,
+                pieceCornerType: 'rounded' as const,
+              })}
+          data={data}
+          pieceSize={pieceSize}
+          color={optimiseForDeviceCamera ? DEVICE_CAMERA_QR_COLOR : QR_COLOR}
+          errorCorrectionLevel={errorCorrectionLevel}
+        />
+      )}
       {renderLogo()}
     </View>
   );
 };
 
-const styles = (backgroundColor?: string) =>
-  StyleSheet.create({
-    container: {
-      position: 'relative',
-      alignSelf: 'center',
-      width: isExtensionSidePanel ? '50%' : '70%',
-      aspectRatio: 1,
-      maxWidth: isExtensionSidePanel ? '50%' : '70%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: spacing.S,
-      backgroundColor: QR_BACKGROUND_COLOR,
-      borderWidth: 1,
-      borderColor: QR_COLOR,
-      borderRadius: radius.XS,
-      overflow: 'hidden',
-    },
-    logoContainer: {
-      position: 'absolute',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: backgroundColor ?? 'transparent',
-      borderRadius: radius.L,
-      padding: spacing.M,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    position: 'relative',
+    alignSelf: 'center',
+    aspectRatio: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: QR_BACKGROUND_COLOR,
+    overflow: 'hidden',
+  },
+  decorativeContainer: {
+    width: isExtensionSidePanel ? '50%' : '70%',
+    maxWidth: isExtensionSidePanel ? '50%' : '70%',
+    borderWidth: 1,
+    borderColor: QR_COLOR,
+    borderRadius: radius.XS,
+  },
+  // Nearly the full card, and NO border: at these densities the panel's 50%
+  // left ~2.8px per module, and a dark border sits exactly where the decoder
+  // looks for the quiet zone.
+  deviceCameraContainer: {
+    width: '96%',
+    maxWidth: '96%',
+  },
+  logoContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: radius.L,
+    padding: spacing.M,
+  },
+});

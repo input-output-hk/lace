@@ -3,6 +3,7 @@ import {
   CardanoInMemoryTransactionSigner,
   createCardanoKeyAgentFromEncryptedRoot,
   deriveDRepKeyHash,
+  withCollateralOwnershipGuard,
 } from '@lace-contract/cardano-context';
 import { defer, from, switchMap } from 'rxjs';
 
@@ -48,16 +49,19 @@ export class CardanoInMemorySignerFactory implements CardanoSignerFactory {
     const encryptedRootPrivateKey =
       this.#extractEncryptedRootPrivateKey(context);
 
-    return new CardanoInMemoryTransactionSigner({
-      withKeyAgent$: this.#buildWithKeyAgent$({
+    return withCollateralOwnershipGuard(
+      new CardanoInMemoryTransactionSigner({
+        withKeyAgent$: this.#buildWithKeyAgent$({
+          auth,
+          accountProps,
+          encryptedRootPrivateKey,
+        }),
+        knownAddresses,
+        utxo,
         auth,
-        accountProps,
-        encryptedRootPrivateKey,
       }),
-      knownAddresses,
-      utxo,
-      auth,
-    });
+      context,
+    );
   }
 
   public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {

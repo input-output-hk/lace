@@ -46,6 +46,7 @@ export const useDustDesignationSheet = (
   const hasInitialSynced = useRef(false);
   const wasFlowOpen = useRef(false);
   const hasInitiatedConfirmation = useRef(false);
+  const hasOpenedFlowRef = useRef(false);
   const isClosingRef = useRef(false);
   // Set right before navigating to SendResult so the unmount cleanup below
   // skips resetting the flow — the send flow must continue while processing.
@@ -239,11 +240,11 @@ export const useDustDesignationSheet = (
     // Skip if prerequisites are missing or sheet is being dismissed
     if (!nightToken || !ownDustAddress || isClosingRef.current) return;
 
-    // Handle terminal states from a previous flow
     if (
       sendFlowState.status === 'Success' ||
       sendFlowState.status === 'Failure'
     ) {
+      if (hasOpenedFlowRef.current) return;
       dispatchClosed();
       return; // Wait for state to change and effect to re-run
     }
@@ -254,6 +255,7 @@ export const useDustDesignationSheet = (
       sendFlowState.status === 'Idle' ||
       sendFlowState.status === 'DiscardingTx'
     ) {
+      hasOpenedFlowRef.current = true;
       dispatchOpenRequested({
         accountId,
         blockchainSpecificData: { flowType: 'dust-designation' },

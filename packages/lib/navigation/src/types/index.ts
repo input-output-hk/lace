@@ -122,6 +122,10 @@ export type StackParameterList = {
   [StackRoutes.NotificationDetails]: {
     notificationId: string;
   };
+  // RealFi USDr staking (Earn) — full-screen detail
+  [StackRoutes.UsdrStakingDetail]: { accountId: string };
+  // Cardano staking — full-screen detail (Staking Center sub-page)
+  [StackRoutes.CardanoStakingDetail]: undefined;
 };
 
 /**
@@ -425,6 +429,9 @@ export type SheetParameterList = {
   [SheetRoutes.DustDesignation]: {
     accountId: AccountId;
   };
+  [SheetRoutes.CnightDesignation]: {
+    accountId: AccountId;
+  };
   // Identity center
 
   [SheetRoutes.ConnectionDetails]: undefined;
@@ -460,6 +467,34 @@ export type SheetParameterList = {
   [SheetRoutes.EarnRewards]: {
     accountId: string;
   };
+
+  // RealFi USDr staking (Earn)
+  [SheetRoutes.RealFiStakeDetail]: { accountId: string; activityId: string };
+  [SheetRoutes.RealFiManageStake]: {
+    accountId: string;
+    tab?: 'stake' | 'unstake';
+  };
+  // The stake-input token picker, opened from Manage Stake. The options are
+  // passed in (already derived there) as a serializable list; the picked token
+  // is returned via the `stakeInputTokenSelected` redux action, and the sheet
+  // closes back to Manage Stake (mirrors the swap select-token sheet).
+  [SheetRoutes.RealFiSelectStakeToken]: {
+    tokens: {
+      tokenId: string;
+      name: string;
+      decimals: number;
+      available: string;
+      iconUri?: string;
+    }[];
+    selectedTokenId: string;
+  };
+  [SheetRoutes.RealFiReviewTransaction]: undefined;
+  [SheetRoutes.RealFiAddedToQueue]: undefined;
+  [SheetRoutes.RealFiWithdraw]: { accountId: string };
+  [SheetRoutes.RealFiOnboarding]: { accountId: string };
+  [SheetRoutes.RealFiTransactionError]: undefined;
+  [SheetRoutes.RealFiRPointsExplainer]: undefined;
+  [SheetRoutes.RealFiRPointsByAccount]: undefined;
 };
 
 export type StackScreenProps<T extends keyof StackParameterList> =

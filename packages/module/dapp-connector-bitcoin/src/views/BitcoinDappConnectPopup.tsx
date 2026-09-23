@@ -68,7 +68,8 @@ export const BitcoinDappConnectPopup = () => {
   if (request) dappRef.current = request.dapp;
 
   useEffect(() => {
-    if (!request) requestPopupClose(BITCOIN_DAPP_CONNECT_LOCATION);
+    if (!request)
+      requestPopupClose({ location: BITCOIN_DAPP_CONNECT_LOCATION });
   }, [request, requestPopupClose]);
 
   useEffect(

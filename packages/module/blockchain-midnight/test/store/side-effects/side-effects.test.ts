@@ -15,7 +15,7 @@ import { ModuleName } from '@lace-contract/module';
 import { networkActions } from '@lace-contract/network';
 import { tokensActions } from '@lace-contract/tokens';
 import { viewsActions } from '@lace-contract/views';
-import { walletsActions, WalletId } from '@lace-contract/wallet-repo';
+import { walletsActions } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { beforeEach, describe, it, vi } from 'vitest';
 
@@ -24,17 +24,14 @@ import {
   FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_PREVIEW_SUPPORT,
 } from '../../../src/const';
 import {
-  autoDismissMidnightWalletFailure,
   handleMidnightSettingsChange,
   registerMidnightBlockchainNetworks,
   syncSupportedNetworksWithFeatureFlags,
 } from '../../../src/store/side-effects';
 import { midnightActions } from '../../../src/store/slice';
-import { MidnightWalletFailureId } from '../../../src/value-objects/midnight-wallet-failure-id.vo';
 
 import type { Features } from '@lace-contract/feature';
 import type { MidnightNetworkConfig } from '@lace-contract/midnight-context';
-import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 const { midnightAccount, midnightWallet, networkId } = stubData;
 
@@ -852,130 +849,4 @@ describe('midnight-wallet/store/side-effects', () => {
   });
 
   // NOTE: updateDustBalance tests moved to subscribe-to-wallet.test.ts
-
-  describe('autoDismissMidnightWalletFailure', () => {
-    const testWalletId = stubData.walletId;
-    const secondWalletId = WalletId('second-wallet-id');
-    const testMidnightWallet = {
-      walletId: testWalletId,
-      accounts: [stubData.midnightAccount],
-    } as AnyWallet;
-    const secondMidnightWallet = {
-      walletId: secondWalletId,
-      accounts: [stubData.midnightAccount],
-    } as AnyWallet;
-
-    const failureId = MidnightWalletFailureId(testWalletId);
-    const secondFailureId = MidnightWalletFailureId(secondWalletId);
-
-    it('dismisses failures for all wallets when the wallet resumes', () => {
-      testSideEffect(
-        {
-          build: () => autoDismissMidnightWalletFailure,
-        },
-        ({ expectObservable, cold, hot }) => ({
-          stateObservables: {
-            wallets: {
-              selectAll$: hot('a', {
-                a: [testMidnightWallet, secondMidnightWallet],
-              }),
-            },
-            failures: {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              selectFailureById$: hot('a', {
-                a: (id: typeof failureId) =>
-                  id === failureId
-                    ? {
-                        failureId,
-                        message: 'sync.error.midnight-wallet-start-failed',
-                      }
-                    : id === secondFailureId
-                    ? {
-                        failureId: secondFailureId,
-                        message: 'sync.error.midnight-wallet-start-failed',
-                      }
-                    : undefined,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              }) as any,
-            },
-          },
-          dependencies: {
-            actions,
-            walletResumed$: cold('-a', { a: undefined }),
-          },
-          assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('-(ab)', {
-              a: actions.failures.dismissFailure(failureId),
-              b: actions.failures.dismissFailure(secondFailureId),
-            });
-          },
-        }),
-      );
-    });
-
-    it('does not emit when the wallet has not resumed', () => {
-      testSideEffect(
-        {
-          build: () => autoDismissMidnightWalletFailure,
-        },
-        ({ expectObservable, cold, hot }) => ({
-          stateObservables: {
-            wallets: {
-              selectAll$: hot('a', {
-                a: [testMidnightWallet, secondMidnightWallet],
-              }),
-            },
-            failures: {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              selectFailureById$: hot('a', {
-                a: () => ({
-                  failureId,
-                  message: 'sync.error.midnight-wallet-start-failed',
-                }),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              }) as any,
-            },
-          },
-          dependencies: {
-            actions,
-            walletResumed$: cold(''),
-          },
-          assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('');
-          },
-        }),
-      );
-    });
-
-    it('does not emit when failure does not exist', () => {
-      testSideEffect(
-        {
-          build: () => autoDismissMidnightWalletFailure,
-        },
-        ({ expectObservable, cold, hot }) => ({
-          stateObservables: {
-            wallets: {
-              selectAll$: hot('a', {
-                a: [testMidnightWallet, secondMidnightWallet],
-              }),
-            },
-            failures: {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              selectFailureById$: hot('a', {
-                a: () => undefined,
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              }) as any,
-            },
-          },
-          dependencies: {
-            actions,
-            walletResumed$: cold('-a', { a: undefined }),
-          },
-          assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('');
-          },
-        }),
-      );
-    });
-  });
 });

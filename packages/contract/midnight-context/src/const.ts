@@ -5,9 +5,6 @@ import { MidnightNetworkId } from './value-objects';
 
 import type { BlockchainNetworkId } from '@lace-contract/network';
 
-export const FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER = FeatureFlagKey(
-  'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
-);
 export const FEATURE_FLAG_MIDNIGHT_INDEXER_URLS = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_INDEXER_URLS',
 );

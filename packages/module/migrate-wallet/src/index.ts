@@ -40,11 +40,13 @@ import store from './store';
 
 import type {
   ActionType,
+  ContractsActionCreators,
+  ContractsSelectors,
   LaceModuleMap,
   LaceSideEffect,
-  ModuleActionCreators,
   ModuleAddons,
-  ModuleSelectors,
+  ModuleStoreActionCreators,
+  ModuleStoreSelectors,
 } from '@lace-contract/module';
 export * from './const';
 
@@ -114,8 +116,19 @@ const moduleMap: LaceModuleMap = {
 
 export default moduleMap;
 
-export type Selectors = ModuleSelectors<typeof multiPlatformModule>;
-export type ActionCreators = ModuleActionCreators<typeof multiPlatformModule>;
+// Built part-wise, NOT ModuleSelectors/ModuleActionCreators<typeof
+// multiPlatformModule>: a `typeof module` reference makes declaration emit
+// serialize the whole inferred LaceModule as ONE node, which exceeds the
+// compiler's serialization cap (TS7056) as the shared contract surface grows —
+// same workaround as blockchain-cardano's and earn-rewards' module maps.
+export type Selectors = ContractsSelectors<typeof dependsOnContracts> &
+  ContractsSelectors<typeof implementsContracts> &
+  ModuleStoreSelectors<typeof store>;
+export type ActionCreators = ContractsActionCreators<
+  typeof dependsOnContracts
+> &
+  ContractsActionCreators<typeof implementsContracts> &
+  ModuleStoreActionCreators<typeof store>;
 export type MigrateWalletAction = ActionType<ActionCreators>;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 export type AvailableAddons = ModuleAddons<

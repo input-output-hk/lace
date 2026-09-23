@@ -10,15 +10,17 @@ import { TokenId } from '@lace-contract/tokens';
 import { whileActive } from '@lace-contract/wallet-active-state';
 import { SecretBox } from '@lace-lib/core';
 import { BigNumber, ByteArray, HexBytes, Timestamp } from '@lace-lib/util';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
+import { retryBackoff } from 'backoff-rxjs';
 import isEqual from 'lodash/isEqual';
 import {
   catchError,
   combineLatest,
   defaultIfEmpty,
+  defer,
   distinctUntilChanged,
-  EMPTY,
   exhaustMap,
   filter,
   finalize,
@@ -30,7 +32,6 @@ import {
   mergeMap,
   of,
   share,
-  skip,
   switchMap,
   take,
   takeUntil,
@@ -42,6 +43,7 @@ import {
 } from 'rxjs';
 
 import { FEATURE_FLAG_MIDNIGHT_UNSHIELDED } from '../../const';
+import { MidnightSyncFailureId } from '../../value-objects/midnight-sync-failure-id.vo';
 
 import { createAccountKeyManager as createAccountKeyManagerImpl } from './account-key-manager';
 
@@ -311,27 +313,17 @@ export const updateSyncProgress =
           const { accountId } = wallet;
           const operationId = `${accountId}-midnight-sync`;
           const accountSyncStatus = syncStatusByAccount[accountId];
-          const progressValues = [shielded];
+          // Dust counts even at 0: the bar reports how synced the wallet IS,
+          // so an unstarted dust wallet is 0% synced, not absent from the
+          // reading. Excluding it overstated syncedness exactly when dust was
+          // furthest behind.
+          const progressValues = [shielded, dust];
 
           if (isUnshieldedEnabled) {
             progressValues.push(unshielded);
           }
 
-          // Track whether dust should be required for completion:
-          // - when dust has made progress (it's running and needs to finish), OR
-          // - when other wallets are still in progress (prevents premature completion before dust can start)
-          const isDustIncluded = dust > 0 || progressValues.some(p => p < 1);
-
-          // Only include dust in the progress DISPLAY when it has actually started (dust > 0).
-          // Before dust starts, its ratio is 0 and would artificially halve the displayed percentage
-          // (e.g. shielded at 90% with unstarted dust shows 45% instead of 90%).
-          if (dust > 0) {
-            progressValues.push(dust);
-          }
-
-          const progress =
-            progressValues.reduce((sum, p) => sum + p, 0) /
-            progressValues.length;
+          const progress = Math.min(...progressValues);
 
           // Sync is complete only when the SDK confirms strict completion for all active wallets.
           // This prevents false positives from the initial "connected + empty state" where
@@ -339,7 +331,7 @@ export const updateSyncProgress =
           const isComplete =
             isStrictlyComplete.shielded &&
             (!isUnshieldedEnabled || isStrictlyComplete.unshielded) &&
-            (!isDustIncluded || isStrictlyComplete.dust);
+            isStrictlyComplete.dust;
 
           // If no pending InProgress operation exists yet (e.g. first sync or resync Pending
           // placeholder), create a new InProgress+Determinate operation instead of updating.
@@ -575,45 +567,6 @@ export const subscribeToWallet =
   };
 
 /**
- * Resets the idle timer when relevant dust sync activity is detected.
- *
- * Problem: DustWallet receives keys via `dust.start(dustSecretKey)` and the SDK
- * handles sync internally. Unlike ShieldedWallet's deferred sync which subscribes
- * to `keyManager.keys$` for each event (resetting the idle timer), DustWallet
- * sync doesn't touch `keys$` at all, causing the idle timeout to fire during
- * active dust sync.
- *
- * Solution: Observe `wallet.state().dust.availableCoins` changes. When the count
- * changes (indicating a relevant dust event was applied), touch `keyManager.keys$`
- * to reset the idle timer. The initial emission is skipped since it represents
- * restoration, not sync activity.
- *
- * @param wallet - The MidnightWallet to observe
- * @param keyManager - The AccountKeyManager whose idle timer should be reset
- * @returns Observable that completes without emitting (side effect only)
- */
-export const resetIdleTimerOnDustActivity = (
-  wallet: MidnightWallet,
-  keyManager: AccountKeyManager,
-): Observable<never> =>
-  wallet.state().pipe(
-    map(state => state.dust.availableCoins.length),
-    distinctUntilChanged(),
-    skip(1), // Skip initial emission (restoration, not sync activity)
-    withLatestFrom(keyManager.areKeysAvailable$),
-    // Only reset timer if keys are currently cached.
-    // If keys have been cleared (idle timeout fired), don't trigger a new key request.
-    filter(([_, areKeysAvailable]) => areKeysAvailable),
-    switchMap(() =>
-      keyManager.keys$.pipe(
-        take(1),
-        // Don't emit any value - this is purely for the side effect of resetting the timer
-        switchMap(() => EMPTY),
-      ),
-    ),
-  );
-
-/**
  * Helper to decrypt an encrypted key buffer with an auth secret.
  */
 const decryptKey = async (
@@ -650,13 +603,13 @@ const buildAccountKeys = (
     clear: () => {
       nightKeyBuffer.fill(0);
       zswapKeyBuffer.fill(0);
-      // Dust key clearing is intentionally skipped: the Dust wallet
-      // is never stopped once started (destroying it would corrupt
-      // shared state), and clearing the key would invalidate any
-      // future signing. Pending the filtered dust wallet indexer.
-      // dustKeyBuffer.fill(0);
-      // dustSecretKey.clear();
+      dustKeyBuffer.fill(0);
+      // Safe for both: the sync streams hold their own copies derived from
+      // these buffers, so clearing here cannot wedge them. Transaction paths
+      // re-derive on their NEXT keys$ read; a call already in flight holds
+      // these and fails — intended when locking mid-signing.
       zswapSecretKeys.clear();
+      dustSecretKey.clear();
     },
   };
 };
@@ -747,13 +700,10 @@ export const watchMidnightAccount =
           });
         }),
         mergeMap(midnightWallet =>
-          merge(
-            subscribeToWallet(midnightWallet)(
-              actionObservables,
-              stateObservables,
-              dependencies,
-            ),
-            resetIdleTimerOnDustActivity(midnightWallet, keyManager),
+          subscribeToWallet(midnightWallet)(
+            actionObservables,
+            stateObservables,
+            dependencies,
           ).pipe(
             finalize(() => {
               midnightWallet.stop().subscribe();
@@ -786,16 +736,58 @@ const watchSingleMidnightAccount =
     watchAccount,
   }: WatchSingleMidnightAccountOptions): SideEffect =>
   (actionObservables, selectorObservables, dependencies) =>
-    watchAccount(account, config, store)(
-      actionObservables,
-      selectorObservables,
-      dependencies,
+    // defer, so each retry re-runs watchMidnightAccount for a fresh key manager
+    // and wallet; resubscribing the already-invoked observable would reuse the
+    // key manager its own finalize() destroyed, leaving keys$ empty and the
+    // wallet dead.
+    defer(() =>
+      watchAccount(account, config, store)(
+        actionObservables,
+        selectorObservables,
+        dependencies,
+      ),
     ).pipe(
-      takeUntil(accounts$.pipe(noLongerHasAccount(account.accountId))),
+      // Transparent tier (ADR 15): self-heal a transient wallet-startup failure
+      // or rare runtime fault. NOT mid-sync indexer/WS blips — the SDK retries
+      // those internally on a detached fiber and models disconnection as
+      // `isConnected` state, so they never reach this operator.
+      // TODO(LW-15236): this budget is per-subscription-lifetime, not
+      // per-incident — wants a stream-scoped per-incident retry operator.
+      retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+      // Surfaced tier (ADR 15): retries exhausted. addSyncOperation, not
+      // failSyncOperation — the latter no-ops unless an operation is already
+      // pending, and the only thing registering one is the live wallet's
+      // progress stream. A failure BEFORE the wallet exists therefore wrote
+      // nothing, leaving persisted lastSuccessfulSync to render a green
+      // "synced" pill over stale balances. Adding the operation already failed
+      // creates pendingSync unconditionally, so the pill reports the error
+      // whether or not sync ever started.
       catchError(error => {
         dependencies.logger.error('Account watch failure:', error);
-        return EMPTY;
+        const failedAt = Timestamp(Date.now());
+        return from([
+          dependencies.actions.failures.addFailure({
+            failureId: MidnightSyncFailureId(account.accountId),
+            message: 'sync.error.midnight-sync-failed',
+            retryAction: dependencies.actions.midnightSync.restartWalletWatch(),
+          }),
+          dependencies.actions.sync.addSyncOperation({
+            accountId: account.accountId,
+            operation: {
+              operationId: `${account.accountId}-midnight-sync`,
+              status: 'Failed',
+              description: 'sync.operation.midnight-wallet-sync',
+              error: 'sync.error.midnight-sync-failed',
+              startedAt: failedAt,
+              failedAt,
+            },
+          }),
+        ]);
       }),
+      // Account removal tears the watcher down — abandoning the retry loop
+      // rather than burning the rest of its budget, and surfacing no failure
+      // for an account that is already gone.
+      takeUntil(accounts$.pipe(noLongerHasAccount(account.accountId))),
     );
 
 const watchMidnightAccountsInNetwork =
@@ -864,7 +856,7 @@ export const watchMidnightAccounts =
     // `startMidnightAccountWallet`, which restores from the persisted
     // `SerializedMidnightWallet` (written every 5s by the SDK) — the SDK
     // resumes from the stored `appliedIndex` rather than performing a full
-    // resync. See ADR 25.
+    // resync. See ADR 29.
     merge(of(0), actionObservables.midnightSync.restartWalletWatch$).pipe(
       switchMap(() =>
         selectorObservables.midnightContext.selectCurrentNetwork$.pipe(

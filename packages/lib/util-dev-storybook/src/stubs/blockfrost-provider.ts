@@ -5,7 +5,7 @@ import {
   ProviderFailure,
 } from '@cardano-sdk/core';
 import { Hash28ByteBase16 } from '@cardano-sdk/crypto';
-import { AddressType } from '@cardano-sdk/key-management';
+import { AddressType, Bip32Account } from '@cardano-sdk/key-management';
 import {
   CardanoPaymentAddress,
   CardanoRewardAccount,
@@ -20,8 +20,8 @@ import {
   ModuleName,
 } from '@lace-contract/module';
 import '@lace-contract/feature';
-import { Err, Ok, Timestamp } from '@lace-lib/util';
-import { type Observable, of } from 'rxjs';
+import { BigNumber, Err, Ok, Timestamp } from '@lace-lib/util';
+import { from, map, type Observable, of } from 'rxjs';
 
 import { protocolParameters } from './protocol-parameters';
 
@@ -644,6 +644,144 @@ export const stubCardanoProvider: CardanoProvider = {
   getDReps: (_context: CardanoProviderContext) => {
     return of(Ok(stubDReps));
   },
+
+  evaluateTx: (_props, _context: CardanoProviderContext) => {
+    // "Evaluation unavailable" rather than `Ok([])`: an empty budget list means
+    // a script-free transaction, which would starve a Plutus build of the
+    // budgets its redeemers need instead of sending it to its fallback.
+    return of(
+      Err(
+        new ProviderError(
+          ProviderFailure.NotImplemented,
+          undefined,
+          'Stub implementation - no tx evaluation',
+        ),
+      ),
+    );
+  },
+};
+
+/**
+ * Provider overlay for the migrate-wallet BIP44 sweep scan — the only storybook
+ * flow that runs `scanActiveAccounts`. Each deviation from
+ * {@link stubCardanoProvider} is needed for that flow to finish, and all are kept
+ * OUT of the shared stub because other suites depend on today's behaviour:
+ *
+ * - `discoverAddresses` derives from the requested `accountIndex` and always
+ *   emits the first address, matching the real provider — which returns the
+ *   derived index-0/External address whether or not the key has on-chain
+ *   history. Only account 0 is recorded as FUNDED, so the source's BIP44 gap
+ *   closes on inactivity rather than on an empty address list. The shared stub
+ *   ignores `accountIndex` and always reports the same funded reward account, so
+ *   the scan never terminates; it cannot be narrowed there because receive-flow
+ *   asserts a rendered address for fixture account index 1.
+ *   Account 0 stays funded for the DESTINATION wallet too, which is why the
+ *   freshness probe lands the sweep in account 1 rather than 0.
+ * - `getRewardAccountInfo` mirrors the real provider's 404 handling — a fresh
+ *   stake key is never-active, not an error. In the shared stub an `Ok` here
+ *   would let `trackRewardAccountDetails`, which dispatches unconditionally on
+ *   success, overwrite every suite's seeded `setRewardAccountDetails` with zeros.
+ * - `maxTxSize` is raised to the real protocol limit. The shared stub's 400
+ *   bytes is below a real one-input sweep, so the builder rejects the tx it just
+ *   had the user confirm. Overridden only here because the shared value feeds
+ *   every suite's fee and size arithmetic.
+ * - addresses are DERIVED from the requested xpub, and the UTxO fetch serves
+ *   coins at the address it derived. The shared stub returns one hardcoded
+ *   address whatever the key, so the signer cannot produce a witness for the
+ *   payment credential the sweep spends — the tx fails with
+ *   `TransactionUnderSignedError: missing vkey witnesses for required signers`.
+ *   Only this story signs a real sweep, so the derivation is scoped here.
+ */
+export const createStubCardanoProviderForBip44Scan = (): Pick<
+  CardanoProvider,
+  | 'discoverAddresses'
+  | 'getAccountUtxos'
+  | 'getProtocolParameters'
+  | 'getRewardAccountInfo'
+> => {
+  // Stake keys the stub treats as holding coins — account 0 only. Per call rather
+  // than module state, so a second consumer of this overlay starts clean instead of
+  // inheriting whatever the first one funded.
+  const fundedAddressByRewardAccount = new Map<string, CardanoPaymentAddress>();
+
+  return {
+    discoverAddresses: (props, context) =>
+      from(
+        (async () => {
+          const account = new Bip32Account(
+            {
+              extendedAccountPublicKey: props.xpub,
+              accountIndex: props.accountIndex,
+              chainId: context.chainId,
+            },
+            await Bip32Account.createDefaultDependencies(),
+          );
+          return account.deriveAddress(
+            { index: 0, type: AddressType.External },
+            0,
+          );
+        })(),
+      ).pipe(
+        map(grouped => {
+          const address = CardanoPaymentAddress(grouped.address);
+          if (props.accountIndex === 0) {
+            fundedAddressByRewardAccount.set(
+              String(grouped.rewardAccount),
+              address,
+            );
+          }
+          return Ok({
+            address,
+            name: 'Derived Address',
+            data: {
+              accountIndex: grouped.accountIndex,
+              index: grouped.index,
+              networkId: grouped.networkId,
+              networkMagic: context.chainId.networkMagic,
+              type: grouped.type,
+              rewardAccount: CardanoRewardAccount(grouped.rewardAccount),
+              stakeKeyDerivationPath: grouped.stakeKeyDerivationPath,
+            },
+          });
+        }),
+      ),
+
+    getAccountUtxos: ({ rewardAccount }) => {
+      const address = fundedAddressByRewardAccount.get(String(rewardAccount));
+      if (address === undefined) return of(Ok([]));
+      return of(
+        Ok([
+          [
+            {
+              txId: Cardano.TransactionId(
+                'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+              ),
+              index: 0,
+              address: Cardano.PaymentAddress(address),
+            },
+            {
+              address: Cardano.PaymentAddress(address),
+              value: { coins: STUB_ACCOUNT_LOVELACE_BALANCE },
+            },
+          ] as Cardano.Utxo,
+        ]),
+      );
+    },
+
+    getProtocolParameters: () =>
+      of(Ok({ ...protocolParameters, maxTxSize: 16_384 })),
+
+    getRewardAccountInfo: () =>
+      of(
+        Ok({
+          isActive: false,
+          isRegistered: false,
+          rewardsSum: BigNumber(0n),
+          withdrawableAmount: BigNumber(0n),
+          controlledAmount: BigNumber(0n),
+        }),
+      ),
+  };
 };
 
 // Stub store

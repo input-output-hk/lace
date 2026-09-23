@@ -53,10 +53,32 @@ describe('useDappViewClose', () => {
     expect(mocks.dispatched).toEqual([
       {
         key: 'bitcoinDappConnector.closePopupRequested',
-        args: [BITCOIN_DAPP_SIGN_TX_LOCATION],
+        args: [
+          { location: BITCOIN_DAPP_SIGN_TX_LOCATION, requestId: undefined },
+        ],
       },
     ]);
     expect(window.close).not.toHaveBeenCalled();
+  });
+
+  it('names the request the view is showing, read at close time', () => {
+    const requestIdRef = { current: 'request-a' };
+    const { result } = renderHook(() =>
+      useDappViewClose(BITCOIN_DAPP_SIGN_TX_LOCATION, requestIdRef),
+    );
+
+    // The queued request takes the window over after the handler is built.
+    requestIdRef.current = 'request-b';
+    result.current();
+
+    expect(mocks.dispatched).toEqual([
+      {
+        key: 'bitcoinDappConnector.closePopupRequested',
+        args: [
+          { location: BITCOIN_DAPP_SIGN_TX_LOCATION, requestId: 'request-b' },
+        ],
+      },
+    ]);
   });
 
   it('falls back to window.close when no popup location is known', () => {

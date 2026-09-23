@@ -16,11 +16,11 @@ import type { Observable } from 'rxjs';
  * infinite inner (`interval`, WebSocket) is incorrect: `whileActive`'s output
  * stops emitting on lock but does not complete or error, and RxJS only tears
  * down a `switchMap` inner on a new emission, completion, or error from its
- * outer — so the inner keeps polling. See ADR 25 for the rule and the leak
+ * outer — so the inner keeps polling. See ADR 29 for the rule and the leak
  * mechanics.
  *
  * Required for any side effect that uses `interval()`, `timer()`, or
- * establishes long-lived connections. See ADR 25.
+ * establishes long-lived connections. See ADR 29.
  */
 export const whileActive =
   (isWalletActive$: Observable<boolean>) =>

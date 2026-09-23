@@ -1,5 +1,7 @@
 import { Serialization } from '@cardano-sdk/core';
+import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import { ActivityType } from '@lace-contract/activities';
+import { utxoKey } from '@lace-contract/cardano-context';
 import { TokenId } from '@lace-contract/tokens';
 import { pendingActivityMetadata } from '@lace-contract/tx-executor';
 import { whileActive } from '@lace-contract/wallet-active-state';
@@ -9,6 +11,7 @@ import { firstStateOfStatus, serializeError } from '@lace-lib/util-store';
 import { retryBackoff } from 'backoff-rxjs';
 import {
   catchError,
+  combineLatest,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -24,18 +27,25 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
+import { inspectSwapTransaction } from '../check-swap-intent';
 import { getQuoteAnalyticsContext } from '../get-quote-analytics-context';
+import { getSwapValueAnalytics } from '../get-swap-value-bucket';
 
 import type {
   SwapDexEntry,
   SwapProviderToken,
-  SwapStateBuilding,
   SwapStateIdle,
   SwapStateQuoting,
 } from './types';
+import type { SwapTxInspection } from '../check-swap-intent';
 import type { SideEffect } from '../contract';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
+import type { AnyAddress } from '@lace-contract/addresses';
+import type {
+  AccountUtxoMap,
+  CardanoPaymentAddress,
+} from '@lace-contract/cardano-context';
 import type {
   SwapProvider,
   SwapQuote,
@@ -43,10 +53,62 @@ import type {
 } from '@lace-contract/swap-provider';
 import type { ConfirmTx, SubmitTx } from '@lace-contract/tx-executor';
 import type { AnyWallet, AccountId } from '@lace-contract/wallet-repo';
+import type { HexBytes } from '@lace-lib/util';
 
 const QUOTE_REFRESH_INTERVAL_MS = 15_000;
 const QUOTE_TIMEOUT_MS = 30_000;
 const SWAP_TX_TTL_SECONDS = 900;
+
+/**
+ * Decode a built swap transaction and check it against the frozen quote.
+ *
+ * Resolves inputs against the union of every set this account is recorded as
+ * owning — settled, in-flight adjusted, collateral — never the signable subset
+ * offered to the aggregator: an own UTxO missing from the resolution set is
+ * indistinguishable from a foreign input, so its outflow goes uncounted. The
+ * union matters in each direction: the in-flight set drops a UTxO our own
+ * pending tx spent (still on-chain, so an external builder can spend it), the
+ * settled set lacks the pending change a chained swap is built on, and the
+ * collateral set is reconciled against the settled one only asynchronously.
+ */
+const inspectBuiltSwapTx = ({
+  serializedTx,
+  accountId,
+  selectByAccountId,
+  accountUnspendableUtxos,
+  accountUtxos,
+  accountUtxosWithInFlight,
+  quote,
+  slippagePercent,
+}: {
+  serializedTx: HexBytes;
+  accountId: AccountId;
+  selectByAccountId: (accountId: AccountId) => AnyAddress[];
+  accountUnspendableUtxos: AccountUtxoMap;
+  accountUtxos: AccountUtxoMap;
+  accountUtxosWithInFlight: AccountUtxoMap;
+  quote: SwapQuote;
+  slippagePercent: number;
+}): SwapTxInspection => {
+  const byOutpoint = new Map<string, Cardano.Utxo>();
+  for (const utxo of [
+    ...(accountUtxos[accountId] ?? []),
+    ...(accountUtxosWithInFlight[accountId] ?? []),
+    ...(accountUnspendableUtxos[accountId] ?? []),
+  ])
+    byOutpoint.set(utxoKey(utxo), utxo);
+
+  return inspectSwapTransaction({
+    // `AnyAddress` is blockchain-agnostic; this effect is Cardano-only.
+    accountAddresses: selectByAccountId(accountId).map(
+      entry => entry.address as CardanoPaymentAddress,
+    ),
+    accountUtxos: [...byOutpoint.values()],
+    intent: quote,
+    serializedTx,
+    slippagePercent,
+  });
+};
 
 const findWalletOwningAccount = (
   wallets: readonly AnyWallet[],
@@ -156,7 +218,10 @@ export const makeFetchQuote: SideEffect = (
                 payload: {
                   tokenIn: state.sellTokenId,
                   tokenOut: state.buyTokenId,
-                  amount: state.sellAmount,
+                  // Every swap event reports the quote's smallest units, never
+                  // the state's display amount: the two differ by the token's
+                  // decimals, and a funnel mixing the scales cannot be summed.
+                  amount: selectedQuote.sellAmount,
                   excludedDexs: excludedDexes,
                   ...getQuoteAnalyticsContext(selectedQuote),
                   ...(swapSessionId && { swapSessionId }),
@@ -185,7 +250,7 @@ export const makeQuoteRefresh: SideEffect = (
   // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
   // leaves the downstream `switchMap`'s in-flight `interval` alive on lock —
   // it only blocks future outer emissions, not the already-running poll.
-  // See ADR 25.
+  // See ADR 29.
   return firstStateOfStatus(selectSwapFlowState$, 'Quoted').pipe(
     switchMap(state =>
       interval(QUOTE_REFRESH_INTERVAL_MS).pipe(
@@ -240,14 +305,15 @@ export const makeBuildSwapTx: SideEffect = (
     swapConfig: { selectSlippage$, selectExcludedDexes$ },
     swapAnalytics: { selectSwapSessionId$ },
     addresses: { selectByAccountId$ },
-    // `selectAvailableAccountUtxos$`, not the raw tracked set: it excludes the
-    // collateral (unspendable) UTxOs and applies the in-flight overlay, so
-    // inputs consumed by a still-pending tx are never offered to the
-    // aggregator. Building on the raw set right after a swap re-offered
+    // The aggregator is offered `selectAvailableAccountUtxos$` + collateral,
+    // never the raw tracked set: building on raw right after a swap re-offered
     // just-spent inputs and the node rejected the next tx with BadInputsUTxO.
+    // The wider resolution set `inspectBuiltSwapTx` unions is not an offer.
     cardanoContext: {
-      selectAvailableAccountUtxos$,
       selectAccountUnspendableUtxos$,
+      selectAccountUtxos$,
+      selectAccountUtxosWithInFlight$,
+      selectAvailableAccountUtxos$,
     },
   },
   { actions, logger, swapProviders },
@@ -259,6 +325,8 @@ export const makeBuildSwapTx: SideEffect = (
       selectByAccountId$,
       selectAvailableAccountUtxos$,
       selectAccountUnspendableUtxos$,
+      selectAccountUtxos$,
+      selectAccountUtxosWithInFlight$,
       selectSwapSessionId$,
     ),
     switchMap(
@@ -269,8 +337,10 @@ export const makeBuildSwapTx: SideEffect = (
         selectByAccountId,
         availableAccountUtxos,
         accountUnspendableUtxos,
+        accountUtxos,
+        accountUtxosWithInFlight,
         swapSessionId,
-      ]: [SwapStateBuilding, number, string[], ...unknown[]]) => {
+      ]) => {
         const targetProvider = swapProviders[0];
 
         if (!targetProvider) {
@@ -282,21 +352,8 @@ export const makeBuildSwapTx: SideEffect = (
         }
 
         // Cardano-specific: get address and UTXOs for the account
-        const accountAddresses = (
-          selectByAccountId as (
-            accountId: string,
-          ) => Array<{ address: string }> | undefined
-        )(state.accountId);
-        const userAddress = accountAddresses?.[0]?.address ?? '';
-
-        const availableMap = availableAccountUtxos as Record<
-          string,
-          Cardano.Utxo[]
-        >;
-        const unspendableMap = accountUnspendableUtxos as Record<
-          string,
-          Cardano.Utxo[]
-        >;
+        const accountAddresses = selectByAccountId(state.accountId);
+        const userAddress = accountAddresses[0]?.address ?? '';
 
         // Restrict the UTXO set sent to the provider to only UTXOs at
         // addresses the signer can derive keys for — otherwise SteelSwap may
@@ -304,18 +361,18 @@ export const makeBuildSwapTx: SideEffect = (
         // submission. The root fix belongs in confirm-tx.ts (its
         // `knownAddresses` note): once that covers every address with a
         // tracked UTXO, this filter can be removed.
-        const accountAddressSet = new Set(
-          (accountAddresses ?? []).map(a => a.address),
+        const accountAddressSet = new Set<string>(
+          accountAddresses.map(a => a.address),
         );
         const isSignable = (utxo: Cardano.Utxo): boolean =>
           accountAddressSet.has(utxo[1].address);
 
-        const rawUtxos = (availableMap[state.accountId] ?? []).filter(
+        const rawUtxos = (availableAccountUtxos[state.accountId] ?? []).filter(
           isSignable,
         );
-        const rawCollateral = (unspendableMap[state.accountId] ?? []).filter(
-          isSignable,
-        );
+        const rawCollateral = (
+          accountUnspendableUtxos[state.accountId] ?? []
+        ).filter(isSignable);
 
         // Serialize UTXOs to CBOR for the provider
         const utxos = rawUtxos.map(utxo =>
@@ -338,8 +395,27 @@ export const makeBuildSwapTx: SideEffect = (
             retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
             switchMap(result => {
               if (result.isOk()) {
+                // Decoded here, while the UTxOs that resolve its inputs are
+                // already in hand; the review renders this and the confirm
+                // step re-derives it from the bytes it is about to sign.
+                const inspection = inspectBuiltSwapTx({
+                  accountId: state.accountId,
+                  accountUnspendableUtxos,
+                  accountUtxos,
+                  accountUtxosWithInFlight,
+                  quote: state.selectedQuote,
+                  selectByAccountId,
+                  serializedTx: result.value.unsignedTxCbor as HexBytes,
+                  slippagePercent: slippage,
+                });
+                if (inspection.verdict === 'blocked')
+                  logger.error(
+                    'Built swap transaction does not match the reviewed intent',
+                    inspection.violations,
+                  );
                 return from([
                   actions.swapFlow.buildCompleted({
+                    inspection,
                     unsignedTxCbor: result.value.unsignedTxCbor,
                   }),
                   actions.analytics.trackEvent({
@@ -347,12 +423,10 @@ export const makeBuildSwapTx: SideEffect = (
                     payload: {
                       tokenIn: state.sellTokenId,
                       tokenOut: state.buyTokenId,
-                      amount: state.sellAmount,
+                      amount: state.selectedQuote.sellAmount,
                       excludedDexs: excludedDexes,
                       ...getQuoteAnalyticsContext(state.selectedQuote),
-                      ...((swapSessionId as string | undefined) && {
-                        swapSessionId: swapSessionId as string,
-                      }),
+                      ...(swapSessionId && { swapSessionId }),
                     },
                   }),
                 ]);
@@ -547,7 +621,6 @@ export const makeAwaitConfirmation =
           wallets as readonly AnyWallet[],
           state.accountId,
         );
-
         const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
         const sessionContext: Record<string, string> =
           typeof swapSessionId === 'string' ? { swapSessionId } : {};
@@ -562,6 +635,39 @@ export const makeAwaitConfirmation =
               eventName: 'swaps | sign failure',
               payload: {
                 reason: 'v2.swap.error.no-wallet-found',
+                ...quoteContext,
+                ...sessionContext,
+              },
+            }),
+          ]);
+        }
+
+        /**
+         * The gate is the build's inspection, carried in state beside the
+         * bytes it describes (the state machine writes them together).
+         *
+         * Deliberately NOT a re-run of the rule against freshly read UTxOs:
+         * a re-run's inputs come from the same store as the verdict it would
+         * check, so it adds no protection, while a UTxO set that shifted
+         * since the build would make own inputs unresolvable and refuse an
+         * honest swap.
+         */
+        if (state.inspection.verdict === 'blocked') {
+          logger.error(
+            'Swap transaction does not match the reviewed intent',
+            state.inspection.violations,
+          );
+          const reason = state.inspection.violations
+            .map(violation => violation.code)
+            .join(', ');
+          return from([
+            actions.swapFlow.confirmationFailed({
+              errorMessage: 'v2.swap.error.intent-mismatch',
+            }),
+            actions.analytics.trackEvent({
+              eventName: 'swaps | sign failure',
+              payload: {
+                reason: `intentMismatch: ${reason}`,
                 ...quoteContext,
                 ...sessionContext,
               },
@@ -628,100 +734,114 @@ export const makeProcessing =
       swapFlow: { selectSwapFlowState$ },
       swapConfig: { selectSlippage$ },
       swapAnalytics: { selectSwapSessionId$ },
+      tokenPricing: { selectPrices$ },
+      tokens: { selectTokenById$ },
     },
     { actions, logger },
   ) =>
     firstStateOfStatus(selectSwapFlowState$, 'Processing').pipe(
       withLatestFrom(selectSlippage$, selectSwapSessionId$),
-      switchMap(([state, slippage, swapSessionId]) => {
-        const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
-        const sessionContext: Record<string, string> =
-          typeof swapSessionId === 'string' ? { swapSessionId } : {};
-        return submitTx(
-          {
-            accountId: state.accountId,
-            serializedTx: state.serializedTx,
-            blockchainName: 'Cardano',
-            blockchainSpecificSendFlowData: {},
-          },
-          result => result,
-        ).pipe(
-          mergeMap(value => {
-            if (!('success' in value)) {
-              return of(value);
-            }
-
-            if (value.success) {
-              // Record the swap as a pending activity (as Send does on
-              // submit): its consumed inputs drop out of
-              // `selectAvailableAccountUtxos` immediately, so a back-to-back
-              // swap can't offer just-spent inputs to the aggregator — the
-              // node rejected those with BadInputsUTxO until chain sync
-              // caught up. Also surfaces the swap in Activity right away.
-              const tokenBalanceChanges: Activity['tokenBalanceChanges'] = [];
-              try {
-                tokenBalanceChanges.push({
-                  tokenId: TokenId(state.sellTokenId),
-                  amount: BigNumber(-BigInt(state.selectedQuote.sellAmount)),
-                });
-              } catch {
-                // An unparsable provider amount must not block the submit
-                // result; the activity just shows no token delta.
+      blockingWithLatestFrom(combineLatest([selectPrices$, selectTokenById$])),
+      switchMap(
+        ([[state, slippage, swapSessionId], [prices, selectTokenById]]) => {
+          const quoteContext = getQuoteAnalyticsContext(state.selectedQuote);
+          const valueContext = getSwapValueAnalytics(
+            state.selectedQuote,
+            selectTokenById(state.selectedQuote.sellTokenId),
+            prices,
+          );
+          const sessionContext: Record<string, string> =
+            typeof swapSessionId === 'string' ? { swapSessionId } : {};
+          return submitTx(
+            {
+              accountId: state.accountId,
+              serializedTx: state.serializedTx,
+              blockchainName: 'Cardano',
+              blockchainSpecificSendFlowData: {},
+            },
+            result => result,
+          ).pipe(
+            mergeMap(value => {
+              if (!('success' in value)) {
+                return of(value);
               }
-              const pendingActivity: Activity = {
-                accountId: state.accountId,
-                activityId: value.txId,
-                timestamp: Timestamp(Date.now()),
-                tokenBalanceChanges,
-                type: ActivityType.Pending,
-                ...pendingActivityMetadata(value),
-              };
-              return from([
-                actions.swapFlow.submissionSucceeded({ txId: value.txId }),
-                actions.activities.upsertActivities({
+
+              if (value.success) {
+                // Record the swap as a pending activity (as Send does on
+                // submit): its consumed inputs drop out of
+                // `selectAvailableAccountUtxos` immediately, so a back-to-back
+                // swap can't offer just-spent inputs to the aggregator — the
+                // node rejected those with BadInputsUTxO until chain sync
+                // caught up. Also surfaces the swap in Activity right away.
+                const tokenBalanceChanges: Activity['tokenBalanceChanges'] = [];
+                try {
+                  tokenBalanceChanges.push({
+                    tokenId: TokenId(state.sellTokenId),
+                    amount: BigNumber(-BigInt(state.selectedQuote.sellAmount)),
+                  });
+                } catch {
+                  // An unparsable provider amount must not block the submit
+                  // result; the activity just shows no token delta.
+                }
+                const pendingActivity: Activity = {
                   accountId: state.accountId,
-                  activities: [pendingActivity],
-                }),
+                  activityId: value.txId,
+                  timestamp: Timestamp(Date.now()),
+                  tokenBalanceChanges,
+                  type: ActivityType.Pending,
+                  ...pendingActivityMetadata(value),
+                };
+                return from([
+                  actions.swapFlow.submissionSucceeded({ txId: value.txId }),
+                  actions.activities.upsertActivities({
+                    accountId: state.accountId,
+                    activities: [pendingActivity],
+                  }),
+                  actions.analytics.trackEvent({
+                    eventName: 'swaps | sign success',
+                    payload: {
+                      tokenIn: state.sellTokenId,
+                      tokenOut: state.buyTokenId,
+                      // The quote's lovelace, not the state's display amount:
+                      // `expectedBuyAmount` below is smallest-unit, and one payload
+                      // reporting two amounts on two scales cannot be summed.
+                      quantity: state.selectedQuote.sellAmount,
+                      expectedBuyAmount: state.selectedQuote.expectedBuyAmount,
+                      quotedPrice: state.selectedQuote.price,
+                      targetSlippage: slippage.toString(),
+                      txId: value.txId,
+                      ...quoteContext,
+                      ...sessionContext,
+                      ...valueContext,
+                    },
+                  }),
+                ]);
+              }
+
+              const reason =
+                value.error?.message ?? 'v2.swap.error.submission-failed';
+              return from([
+                actions.swapFlow.submissionFailed({ errorMessage: reason }),
                 actions.analytics.trackEvent({
-                  eventName: 'swaps | sign success',
-                  payload: {
-                    tokenIn: state.sellTokenId,
-                    tokenOut: state.buyTokenId,
-                    quantity: state.sellAmount,
-                    expectedBuyAmount: state.selectedQuote.expectedBuyAmount,
-                    quotedPrice: state.selectedQuote.price,
-                    targetSlippage: slippage.toString(),
-                    txId: value.txId,
-                    ...quoteContext,
-                    ...sessionContext,
-                  },
+                  eventName: 'swaps | sign failure',
+                  payload: { reason, ...quoteContext, ...sessionContext },
                 }),
               ]);
-            }
-
-            const reason =
-              value.error?.message ?? 'v2.swap.error.submission-failed';
-            return from([
-              actions.swapFlow.submissionFailed({ errorMessage: reason }),
-              actions.analytics.trackEvent({
-                eventName: 'swaps | sign failure',
-                payload: { reason, ...quoteContext, ...sessionContext },
-              }),
-            ]);
-          }),
-          catchError(error => {
-            logger.error('Swap submission failed', error);
-            const reason = String(error);
-            return from([
-              actions.swapFlow.submissionFailed({ errorMessage: reason }),
-              actions.analytics.trackEvent({
-                eventName: 'swaps | sign failure',
-                payload: { reason, ...quoteContext, ...sessionContext },
-              }),
-            ]);
-          }),
-        );
-      }),
+            }),
+            catchError(error => {
+              logger.error('Swap submission failed', error);
+              const reason = String(error);
+              return from([
+                actions.swapFlow.submissionFailed({ errorMessage: reason }),
+                actions.analytics.trackEvent({
+                  eventName: 'swaps | sign failure',
+                  payload: { reason, ...quoteContext, ...sessionContext },
+                }),
+              ]);
+            }),
+          );
+        },
+      ),
     );
 
 /**

@@ -2,6 +2,7 @@ import {
   AuthenticatorError,
   AuthenticatorErrorCode,
 } from '@lace-contract/dapp-connector';
+import { RemoteApiShutdownError } from '@lace-lib/extension-messaging';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,7 +10,7 @@ import {
   createCardanoWalletApi,
   type CardanoWalletApiObject,
 } from '../src/browser/cardano-wallet-api';
-import { APIErrorCode } from '../src/common/api-error';
+import { APIError, APIErrorCode } from '../src/common/api-error';
 import {
   CIP30_API_VERSION,
   FEATURE_FLAG_CARDANO_DAPP_CONNECTOR,
@@ -439,6 +440,164 @@ describe('CardanoWalletApi', () => {
 
       expect(mockAuthenticator.requestAccess).toHaveBeenCalledTimes(2);
       expect(enabledApi).toHaveProperty('getNetworkId');
+    });
+  });
+
+  describe('connection closed (bfcache) mapping', () => {
+    beforeEach(() => {
+      mockAuthenticator = createMockAuthenticator(false, true);
+      walletApi = createCardanoWalletApi(
+        { name: 'lace' },
+        {
+          logger: mockLogger,
+          authenticator: mockAuthenticator,
+          api: mockApi,
+          featureFlagProbe: mockFeatureFlagProbe,
+        },
+      );
+    });
+
+    it('maps a RemoteApiShutdownError from signData to an InternalError APIError', async () => {
+      vi.mocked(mockApi.signData).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.signData('addr', 'payload');
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
+    });
+
+    it('maps a RemoteApiShutdownError from the cip95 signData binding, which governance dApps call', async () => {
+      vi.mocked(mockApi.signData).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.cip95.signData('addr', 'payload');
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
+    });
+
+    it('maps a RemoteApiShutdownError from signTx to an InternalError APIError', async () => {
+      vi.mocked(mockApi.signTx).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.signTx('tx', true);
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
+    });
+
+    it('maps a RemoteApiShutdownError from submitTx to an InternalError APIError', async () => {
+      vi.mocked(mockApi.submitTx).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.submitTx('tx');
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
+    });
+
+    it('maps a RemoteApiShutdownError from a read method, telling the dApp a retry is safe', async () => {
+      // Read methods are the ones configured to replay across a disconnect, so
+      // they are the calls a freeze most reliably lands on. Nothing was
+      // changed, so their wording invites the retry the signing wording must
+      // not.
+      vi.mocked(mockApi.getUtxos).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.getUtxos();
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+        info: expect.stringContaining('can be retried') as string,
+      });
+    });
+
+    it('does not tell the dApp a signTx retry is safe, since the wallet may have signed', async () => {
+      vi.mocked(mockApi.signTx).mockRejectedValue(
+        new RemoteApiShutdownError('cardano-wallet'),
+      );
+      const enabledApi = await walletApi.enable();
+
+      const rejection = enabledApi.signTx('tx', false);
+      await expect(rejection).rejects.toMatchObject({
+        info: expect.stringContaining('unknown') as string,
+      });
+      await expect(rejection).rejects.not.toMatchObject({
+        info: expect.stringContaining('can be retried') as string,
+      });
+    });
+
+    it('does not remap non-shutdown errors from signData', async () => {
+      vi.mocked(mockApi.signData).mockRejectedValue(new Error('boom'));
+      const enabledApi = await walletApi.enable();
+
+      await expect(enabledApi.signData('addr', 'payload')).rejects.toThrow(
+        'boom',
+      );
+    });
+
+    it('maps a RemoteApiShutdownError from requestAccess during enable', async () => {
+      mockAuthenticator = {
+        haveAccess: vi.fn().mockResolvedValue(false),
+        requestAccess: vi
+          .fn()
+          .mockRejectedValue(
+            new RemoteApiShutdownError('cardano-authenticator'),
+          ),
+      };
+      walletApi = createCardanoWalletApi(
+        { name: 'lace' },
+        {
+          logger: mockLogger,
+          authenticator: mockAuthenticator,
+          api: mockApi,
+          featureFlagProbe: mockFeatureFlagProbe,
+        },
+      );
+
+      const rejection = walletApi.enable();
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
+    });
+
+    it('maps a RemoteApiShutdownError from the feature-flag probe during enable', async () => {
+      mockFeatureFlagProbe = {
+        getFeatureFlags: vi
+          .fn()
+          .mockRejectedValue(new RemoteApiShutdownError('feature-flags')),
+      };
+      walletApi = createCardanoWalletApi(
+        { name: 'lace' },
+        {
+          logger: mockLogger,
+          authenticator: mockAuthenticator,
+          api: mockApi,
+          featureFlagProbe: mockFeatureFlagProbe,
+        },
+      );
+
+      const rejection = walletApi.enable();
+      await expect(rejection).rejects.toBeInstanceOf(APIError);
+      await expect(rejection).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+      });
     });
   });
 });

@@ -8,6 +8,9 @@
 //   - 'no-stake-credential': payment address has no stake credential
 //     (enterprise address); script's `check_auth` cannot succeed
 //   - 'dust-address-too-long': the 33-byte on-chain limit is hit
+//   - 'invalid-dust-payload': the target is not the minimal SCALE-compact
+//     encoding of an in-field BLS12-381 scalar, so its claimability on
+//     Midnight is unknown — it must never reach the datum
 //   - 'no-registration-utxo': update/deregister with nothing to spend
 //   - 'no-cardano-utxos': wallet has no ADA at all
 //   - 'phase-2-not-implemented': full tx-assembly is deferred to the
@@ -24,6 +27,7 @@ export type NightDesignationError =
       actualBytes: number;
       maxBytes: number;
     }
+  | { code: 'invalid-dust-payload'; message: string }
   | { code: 'no-cardano-utxos'; message: string }
   | { code: 'no-cnight'; message: string }
   | { code: 'no-registration-utxo'; message: string }

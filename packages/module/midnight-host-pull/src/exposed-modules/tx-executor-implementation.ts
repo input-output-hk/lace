@@ -7,9 +7,11 @@
 //               the host engine and rendered on the host sign surface at approve
 //               time — D6; the guest cannot know it, so the send-flow fee line
 //               shows 0 until the host summary. Documented UX difference.)
-//   • confirm → `midnight.requestSend` + poll `getSendResult` to the terminal
-//               outcome; the host has already submitted by then, so the txId is
-//               threaded through `serializedTx`.
+//   • confirm → `midnight.requestSend` (or `midnight.requestDustDesignation`
+//               for the dust-designation flow, capability-gated) + poll
+//               `getSendResult` to the terminal outcome; the host has already
+//               submitted by then, so the txId is threaded through
+//               `serializedTx`.
 //   • submit  → pass the txId back (already-submitted host-side).
 
 import { getDustTokenIdByNetwork } from '@lace-contract/midnight-context';
@@ -18,7 +20,9 @@ import { BigNumber, HexBytes } from '@lace-lib/util';
 import { catchError, from, map, of, switchMap, tap } from 'rxjs';
 
 import {
+  canRequestMidnightDustDesignation,
   getMidnightSendResult,
+  requestMidnightDustDesignation,
   requestMidnightSend,
   requestMidnightSync,
 } from '../lace-client';
@@ -42,12 +46,16 @@ import type {
   MidnightSendParams,
   MidnightSendResult,
 } from '@lace-lib/extension-shell-api';
+import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 
 /** The transfer facts serialized by build and re-read by confirm — the guest's
  * own wire (both ends are this module), so `amount` rides as a decimal string
- * (avoids BigNumber JSON pitfalls). */
+ * (avoids BigNumber JSON pitfalls). `flow` carries the send-flow's own
+ * `flowType` across that hop, which is the only thing telling confirm which host
+ * method to call; absent means a plain transfer. */
 type WireTxParams = {
+  flow?: 'dust-designation';
   amount: string;
   receiverAddress: string;
   type: string;
@@ -170,13 +178,17 @@ const buildTx: TxExecutorImplementation<
   MidnightSpecificSendFlowData,
   MidnightSpecificTokenMetadata
 >['buildTx'] = ({ accountId, txParams, blockchainSpecificSendFlowData }) => {
-  // Dust designation is a monolith-only advanced flow with no wire method (the
-  // host exposes a transfer-only `requestSend`, ADR 47) — fail closed in the
-  // guest rather than mis-send it as a plain transfer.
-  if (blockchainSpecificSendFlowData.flowType === 'dust-designation') {
+  const isDesignation =
+    blockchainSpecificSendFlowData.flowType === 'dust-designation';
+  // Gate at BUILD, not only at confirm: an older host that does not advertise
+  // the method can never settle this flow, and saying so on the form beats
+  // letting the user reach the summary first. Fail closed — mis-sending a
+  // designation as a plain transfer would move the NIGHT it must only register.
+  if (isDesignation && !canRequestMidnightDustDesignation()) {
     return of({
       success: false,
-      errorTranslationKey: 'tx-executor.building-error.generic',
+      errorTranslationKey:
+        'tx-executor.building-error.dust-designation-unsupported',
     });
   }
 
@@ -202,6 +214,7 @@ const buildTx: TxExecutorImplementation<
   }
 
   const wireParams: WireTxParams = {
+    ...(isDesignation ? { flow: 'dust-designation' as const } : {}),
     amount: normalizedAmount.toString(),
     receiverAddress: address,
     type: token.tokenId,
@@ -265,7 +278,37 @@ const makeConfirmTx =
       tokenKind: wireParams.tokenKind,
     };
 
-    return from(requestMidnightSend(params)).pipe(
+    // Defence in depth behind the build-time gate: the capability is read again
+    // here because a host whose advertised set changed between build and confirm
+    // must refuse, not mis-send the designation as a transfer.
+    if (
+      wireParams.flow === 'dust-designation' &&
+      !canRequestMidnightDustDesignation()
+    ) {
+      return of({
+        success: false,
+        errorTranslationKeys: {
+          title: 'tx-executor.confirmation-error.generic.title',
+          subtitle:
+            'tx-executor.building-error.dust-designation-unsupported' as const,
+        },
+      });
+    }
+    // The designation settles on the SAME poll handle, so only the opening call
+    // differs.
+    const handle$: Observable<LaceResult<{ ceremonyId: string }>> =
+      wireParams.flow === 'dust-designation'
+        ? from(
+            requestMidnightDustDesignation({
+              walletId: wallet.walletId,
+              accountIndex,
+              network: networkId,
+              dustAddress: wireParams.receiverAddress,
+            }),
+          )
+        : from(requestMidnightSend(params));
+
+    return handle$.pipe(
       switchMap(handle => {
         if (!handle.ok) return of(genericConfirmError());
         const { ceremonyId } = handle.value;
@@ -310,7 +353,9 @@ const submitTx: TxExecutorImplementation<
   // The host pipeline already submitted during confirm; `serializedTx` carries
   // the confirmed txId, so submit is a pass-through (matches the executor's
   // build → confirm → submit contract without a second submission).
-  of({ success: true, txId: serializedTx });
+  // That host submit waits for finality, so the tx is on chain by now and the
+  // txId is an SDK identifier rather than the hash the synced row uses.
+  of({ success: true, txId: serializedTx, awaitsFinalization: true });
 
 export const makeTxExecutor = () =>
   (({ logger }) => ({

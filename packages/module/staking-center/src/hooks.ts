@@ -58,7 +58,11 @@ export const useStakePools = (
     const poolIds = Array.isArray(query) ? query : [query];
 
     if (!withROS) return poolIds.map(poolId => pools[poolId]);
-    if (!data) return [];
+    // Network data lags the pool details: blanking every pool until it
+    // resolves would starve already-delegated cards (stuck loading, retiring/
+    // saturation warnings silenced). Serve the pools un-annotated instead —
+    // `ros` fills in when the data arrives.
+    if (!data) return poolIds.map(poolId => pools[poolId]);
 
     return poolIds.map(poolId => estimateROS(pools[poolId], data));
   }, [data, pools, query, withROS]);

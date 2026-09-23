@@ -43,6 +43,9 @@ const ICON_STYLE = { size: 20 } as const;
 const showAccountsButton = (variant: AccountCardVariant) =>
   variant === 'standard' || variant === 'clear';
 
+/** Button style the account card wants an extra action to render as. */
+export type AccountCardActionVariant = 'action' | 'icon';
+
 export type AccountCardProps = {
   avatarImage?: { uri: string };
   accountName: string;
@@ -74,6 +77,14 @@ export type AccountCardProps = {
   arePricesAvailable?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
   formatChartValue?: (value: number) => string;
+  /**
+   * Blockchain-specific action button(s) rendered inline in the account action
+   * row, e.g. cNIGHT → DUST. Called with the row's button style so the action
+   * can render to match it (`icon` = plain icon button, `action` = bordered).
+   */
+  extraActions?: (options: {
+    variant: AccountCardActionVariant;
+  }) => React.ReactNode;
 };
 
 export const AccountCard: React.FC<AccountCardProps> = ({
@@ -100,6 +111,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
   arePricesAvailable = true,
   containerStyle,
   formatChartValue,
+  extraActions,
 }) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -254,9 +266,17 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             testID="account-card-swap-button"
           />
         )}
+        {extraActions?.({ variant: 'action' })}
       </Row>
     ),
-    [SharedActionButtons, onBuyPress, styles.actionButton, t, onSwapPress],
+    [
+      SharedActionButtons,
+      onBuyPress,
+      styles.actionButton,
+      t,
+      onSwapPress,
+      extraActions,
+    ],
   );
 
   const renderClearActions = useCallback(
@@ -283,9 +303,17 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             testID="account-card-swap-button"
           />
         )}
+        {extraActions?.({ variant: 'action' })}
       </>
     ),
-    [SharedActionButtons, onBuyPress, styles.actionButton, t, onSwapPress],
+    [
+      SharedActionButtons,
+      onBuyPress,
+      styles.actionButton,
+      t,
+      onSwapPress,
+      extraActions,
+    ],
   );
 
   const renderAlternativeActions = useCallback(
@@ -319,6 +347,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             testID="account-card-swap-button"
           />
         )}
+        {extraActions?.({ variant: 'icon' })}
         <ActionButton
           icon="CarouselHorizontal"
           title={t('v2.portfolio-card.accounts')}
@@ -336,6 +365,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
       onReceivePress,
       onAccountsPress,
       onSwapPress,
+      extraActions,
       styles.iconButtonsGroup,
       styles.alternativeActionButton,
       t,
@@ -372,6 +402,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
             testID="account-card-swap-button"
           />
         )}
+        {extraActions?.({ variant: 'icon' })}
         <IconButton.Static
           icon={<Icon name="Dashboard" size={18} />}
           onPress={onDashboardPress}
@@ -387,6 +418,7 @@ export const AccountCard: React.FC<AccountCardProps> = ({
       onDashboardPress,
       onSwapPress,
       styles.iconButton,
+      extraActions,
     ],
   );
 

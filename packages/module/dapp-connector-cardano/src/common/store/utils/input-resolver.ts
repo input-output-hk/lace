@@ -1,15 +1,18 @@
 import { Cardano, Serialization } from '@cardano-sdk/core';
 import { util } from '@cardano-sdk/key-management';
+import {
+  createCombinedInputResolver,
+  getPaymentCredential,
+} from '@lace-contract/cardano-context';
 
 import type { Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type {
   AccountKeyDerivationPath,
   GroupedAddress,
 } from '@cardano-sdk/key-management';
-import type {
-  CardanoProvider,
-  CardanoProviderContext,
-} from '@lace-contract/cardano-context';
+
+/** Lives in the contract now; re-exported so existing importers keep their path. */
+export { createCombinedInputResolver };
 
 type StakeKeySignerData = {
   poolId: Cardano.PoolId;
@@ -85,18 +88,6 @@ const hasCommitteeCertificates = ({ certificates }: Cardano.TxBody): boolean =>
         Cardano.CertificateType.AuthorizeCommitteeHot ||
       certificate.__typename === Cardano.CertificateType.ResignCommitteeCold,
   );
-
-const getPaymentCredential = (
-  address: Cardano.PaymentAddress,
-): Cardano.Credential | undefined => {
-  const parsed = Cardano.Address.fromString(address);
-  if (!parsed) return undefined;
-  return (
-    parsed.asBase()?.getPaymentCredential() ??
-    parsed.asEnterprise()?.getPaymentCredential() ??
-    parsed.asPointer()?.getPaymentCredential()
-  );
-};
 
 const getOwnKeyHashes = (
   knownAddresses: GroupedAddress[],
@@ -177,33 +168,6 @@ const isForeignInput = async (
     ownedScriptHashes.has(paymentCredential.hash)
   );
 };
-
-/**
- * Creates an input resolver that first checks local UTXOs, then falls back
- * to the Cardano provider for foreign inputs.
- *
- * @param localUtxos - Array of locally available UTXOs
- * @param cardanoProvider - Provider for resolving foreign inputs
- * @param context - Provider context including chain ID
- * @returns Input resolver that resolves from local state or provider
- */
-export const createCombinedInputResolver = (
-  localUtxos: Cardano.Utxo[],
-  cardanoProvider: CardanoProvider,
-  context: CardanoProviderContext,
-): Cardano.InputResolver => ({
-  resolveInput: async (txIn: Cardano.TxIn): Promise<Cardano.TxOut | null> => {
-    const localMatch = localUtxos.find(([input]) => txInEquals(input, txIn));
-    if (localMatch) {
-      return localMatch[1];
-    }
-
-    const result = await cardanoProvider
-      .resolveInput(txIn, context)
-      .toPromise();
-    return result?.isOk() ? result.value : null;
-  },
-});
 
 /**
  * Determines if a transaction requires signatures from parties other than this wallet.

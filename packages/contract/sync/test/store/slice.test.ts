@@ -558,6 +558,51 @@ describe('sync slice', () => {
           state.syncStatusByAccount[accountId]?.lastFailedSync,
         ).toBeUndefined();
       });
+
+      // A sync that fails before it ever starts has no operation to fail, and a
+      // previously-synced account keeps its persisted lastSuccessfulSync — so
+      // reporting the failure by failSyncOperation alone leaves the UI deriving
+      // "synced" from stale state. Callers must ADD the operation already failed.
+      it('reports a failure that arrives before any operation was registered', () => {
+        const previouslySynced: SyncSliceState = {
+          syncStatusByAccount: {
+            [accountId]: { lastSuccessfulSync: Timestamp(Date.now()) },
+          },
+        };
+
+        const ignored = syncReducers.sync(
+          previouslySynced,
+          actions.sync.failSyncOperation({
+            accountId,
+            operationId: 'op1',
+            error: 'sync.error.midnight-sync-failed',
+          }),
+        );
+
+        expect(
+          ignored.syncStatusByAccount[accountId]?.pendingSync,
+        ).toBeUndefined();
+
+        const recorded = syncReducers.sync(
+          previouslySynced,
+          actions.sync.addSyncOperation({
+            accountId,
+            operation: {
+              operationId: 'op1',
+              status: 'Failed',
+              description: 'sync.operation.midnight-wallet-sync',
+              error: 'sync.error.midnight-sync-failed',
+              startedAt: Timestamp(Date.now()),
+              failedAt: Timestamp(Date.now()),
+            },
+          }),
+        );
+
+        expect(
+          recorded.syncStatusByAccount[accountId]?.pendingSync?.operations.op1
+            ?.status,
+        ).toBe('Failed');
+      });
     });
 
     describe('markAccountAsSynced', () => {

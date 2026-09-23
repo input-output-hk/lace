@@ -37,7 +37,7 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
     // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
     // leaves the downstream `switchMap`'s in-flight inner alive on lock — it
     // only blocks future outer emissions, not the already-running interval.
-    // See ADR 25.
+    // See ADR 29.
     combineLatest([
       selectChainId$.pipe(filter(Boolean), distinctUntilChanged()),
       selectActiveNetworkAccounts$.pipe(

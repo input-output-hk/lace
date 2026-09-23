@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@bitcoinerlab/secp256k1": "1.2.0",
+    "@lace-lib/util-dev-cardano": "*",
     "ecpair": "^3.0.0"
   }
 }

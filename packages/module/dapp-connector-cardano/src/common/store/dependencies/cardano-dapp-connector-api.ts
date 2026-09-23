@@ -4,6 +4,10 @@ import {
   type AccountRewardAccountDetailsMap,
   type CardanoAccountAddressHistoryMap,
   type CardanoPaymentAddress,
+  type CollateralOwnershipErrorCase,
+  collateralOwnershipSets,
+  collateralRefusalMessage,
+  collateralRefusalCase,
   isCardanoAccount,
   isCardanoAddress,
   resolveSignDataContext,
@@ -103,6 +107,26 @@ export type DeriveNextUnusedAddressFunction = (
 ) => Promise<AnyAddress<CardanoAddressData>>;
 
 /**
+ * Reported when the dApp's port dropped before the confirmation settled.
+ *
+ * Safe to retry, like a prompt the wallet could not show: every producer of
+ * this outcome is gated on the user not having confirmed yet, so signing
+ * cannot have started.
+ */
+const CONNECTION_LOST_INFO =
+  'The dApp connection was lost before the request was approved, so nothing ' +
+  'was signed. Please try again.';
+
+/**
+ * Reported when the wallet could not show its confirmation prompt.
+ *
+ * Safe to retry: the user was never asked, so nothing can have been signed.
+ */
+const PROMPT_UNAVAILABLE_INFO =
+  'The wallet could not display its confirmation prompt, so the request was ' +
+  'not approved. Please try again.';
+
+/**
  * Checks if the stake key for the given account is registered.
  * @param details - account reward details to check against
  */
@@ -165,6 +189,16 @@ const derivePublicKeyForAccount = async ({
  */
 export interface CardanoDappConnectorApiDependencies {
   accountUtxos$: Observable<AccountUtxoMap>;
+  /**
+   * Ownership authority for the collateral-return guard: the signing
+   * account's FULL SETTLED UTxO set (e.g.
+   * `selectAccountUtxos$`-family), INCLUDING collateral-reserved/unspendable
+   * UTxOs -- distinct from `accountUtxos$` above, which is wired to the
+   * available/spendable view for its existing (unrelated) consumers and
+   * must stay that way. Additive; unioned in `#validateCanSign` with the
+   * chained-tx-output-cache's own outputs via `resolveChainedInputs`.
+   */
+  ownershipUtxos$: Observable<AccountUtxoMap>;
   accountUnspendableUtxos$: Observable<AccountUtxoMap>;
   rewardAccountDetails$: Observable<AccountRewardAccountDetailsMap>;
   addresses$: Observable<AnyAddress[]>;
@@ -219,6 +253,26 @@ export type SigningResult =
   | { type: 'cancelled' }
   | { type: 'error'; hwErrorKeys?: HwSigningErrorTranslationKeys }
   | { type: 'success' };
+
+/**
+ * Block-path observability: one greppable anchor, and a `stage` on the
+ * payload so the states stay machine-distinguishable without depending on
+ * four separate sentences surviving copy-editing.
+ */
+export const COLLATERAL_BLOCK_LOG =
+  '[dapp-connector-cardano] collateral-ownership block';
+
+/**
+ * Where a blocked request got to. `refused` always happens; the others say
+ * whether the user was actually told. A blocked request with no
+ * `screen-presented` was refused WITHOUT the user ever seeing why, which is
+ * what a dApp parking the consent slot achieves.
+ */
+export type CollateralBlockStage =
+  | 'disclosure-failed'
+  | 'disclosure-requested'
+  | 'refused'
+  | 'screen-presented';
 
 /**
  * Applies CIP-30 pagination: a page starting beyond the available items is
@@ -299,6 +353,7 @@ export class CardanoDappConnectorApi
   public readonly experimental: WithSenderContext<Cip30ExperimentalApi>;
 
   readonly #accountUtxos$: Observable<AccountUtxoMap>;
+  readonly #ownershipUtxos$: Observable<AccountUtxoMap>;
   readonly #accountUnspendableUtxos$: Observable<AccountUtxoMap>;
   readonly #rewardAccountDetails$: Observable<AccountRewardAccountDetailsMap>;
   readonly #addresses$: Observable<AnyAddress[]>;
@@ -321,6 +376,7 @@ export class CardanoDappConnectorApi
 
   public constructor({
     accountUtxos$,
+    ownershipUtxos$,
     accountUnspendableUtxos$,
     rewardAccountDetails$,
     addresses$,
@@ -342,6 +398,7 @@ export class CardanoDappConnectorApi
     cardanoProvider,
   }: CardanoDappConnectorApiDependencies) {
     this.#accountUtxos$ = accountUtxos$;
+    this.#ownershipUtxos$ = ownershipUtxos$;
     this.#accountUnspendableUtxos$ = accountUnspendableUtxos$;
     this.#rewardAccountDetails$ = rewardAccountDetails$;
     this.#addresses$ = addresses$;
@@ -632,15 +689,54 @@ export class CardanoDappConnectorApi
 
     const origin = this.#extractOrigin({ sender });
 
-    await this.#validateCanSign(tx, partialSign, origin);
-
-    const { isConfirmed } = await this.#userConfirmationRequest(
-      sender,
-      'signTx',
-      { txHex: tx, partialSign },
+    const collateralRefusal = await this.#validateCanSign(
+      tx,
+      partialSign,
+      origin,
     );
 
-    if (!isConfirmed) {
+    if (collateralRefusal) {
+      // The screen informs, it does not authorize: the throw below is
+      // unconditional and must never await a consent outcome. Not awaiting is
+      // also what keeps the consent slot held, so `exhaustMap` upstream drops
+      // the follow-up signTx an attacker would use to repaint the screen away.
+      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+        stage: 'refused' satisfies CollateralBlockStage,
+        origin,
+        case: collateralRefusal,
+        partialSign,
+      });
+      this.#presentCollateralRefusal({
+        requestConfirmation: this.#userConfirmationRequest,
+        sender,
+        txHex: tx,
+        partialSign,
+        collateralRefusal,
+        origin,
+      });
+      throw new TxSignError(
+        TxSignErrorCode.ProofGeneration,
+        collateralRefusalMessage(collateralRefusal),
+      );
+    }
+
+    const { outcome } = await this.#userConfirmationRequest(sender, 'signTx', {
+      txHex: tx,
+      partialSign,
+    });
+
+    if (outcome === 'disconnected') {
+      // Defensive: the dApp usually already has the injected-side connection
+      // error, since this throw goes back over a likely-dead port.
+      throw new APIError(APIErrorCode.InternalError, CONNECTION_LOST_INFO);
+    }
+
+    if (outcome === 'unavailable') {
+      throw new APIError(APIErrorCode.InternalError, PROMPT_UNAVAILABLE_INFO);
+    }
+
+    if (outcome !== 'confirmed') {
+      // Fail closed: an outcome added later must never fall through to signing.
       throw new TxSignError(
         TxSignErrorCode.UserDeclined,
         'User rejected transaction',
@@ -694,133 +790,163 @@ export class CardanoDappConnectorApi
     const gateAccountId = this.#getAccountId(origin);
     await this.validateCanSignData(addr, origin);
 
-    const { isConfirmed } = await this.#userConfirmationRequest(
+    const { outcome } = await this.#userConfirmationRequest(
       sender,
       'signData',
-      { address: addr, payload },
+      {
+        address: addr,
+        payload,
+      },
     );
 
-    if (!isConfirmed) {
+    if (outcome === 'disconnected') {
+      // Defensive: the dApp usually already has the injected-side connection
+      // error, since this throw goes back over a likely-dead port.
+      throw new APIError(APIErrorCode.InternalError, CONNECTION_LOST_INFO);
+    }
+
+    if (outcome === 'unavailable') {
+      throw new APIError(APIErrorCode.InternalError, PROMPT_UNAVAILABLE_INFO);
+    }
+
+    if (outcome !== 'confirmed') {
+      // Fail closed: an outcome added later must never fall through to signing.
       throw new DataSignError(
         DataSignErrorCode.UserDeclined,
         'User rejected data signing',
       );
     }
 
-    const accountId = this.#getAccountId(origin);
-    // The gate classified against gate-time state; a session rebind while the
-    // prompt was open must answer AccountChange, not a misleading
-    // ProofGeneration from the stale classification.
-    if (accountId !== gateAccountId) {
-      throw new APIError(
-        APIErrorCode.AccountChange,
-        `Session account changed while awaiting confirmation for origin: ${origin}. Please reconnect the dApp.`,
-      );
-    }
-
-    const allAccounts = await firstValueFrom(this.#allAccounts$);
-    const account = allAccounts.find(a => a.accountId === accountId);
-
-    if (!account) {
-      throw new APIError(
-        APIErrorCode.AccountChange,
-        `Account not found for ID: ${accountId}`,
-      );
-    }
-
-    if (!isCardanoAccount(account)) {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        `Account is not a Cardano account: ${accountId}`,
-      );
-    }
-
-    if (account.accountType === 'MultiSig') {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        `signData is not supported for MultiSig accounts: ${accountId}`,
-      );
-    }
-
-    const allWallets = await firstValueFrom(this.#allWallets$);
-    const wallet = allWallets.find(w => w.walletId === account.walletId);
-
-    if (!wallet) {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        `Wallet not found for ID: ${account.walletId}`,
-      );
-    }
-
-    const cardanoAddresses = await this.#getCardanoAddresses(origin);
-    const knownAddresses = this.#transformToGroupedAddresses(cardanoAddresses);
-
-    if (
-      !this.#signerFactory ||
-      !this.#accessAuthSecret ||
-      !this.#authenticate
-    ) {
-      throw new APIError(
-        APIErrorCode.InternalError,
-        'Signer factory not configured for this API instance',
-      );
-    }
-
-    const auth = signerAuthFromPrompt(
-      {
-        accessAuthSecret: this.#accessAuthSecret,
-        authenticate: this.#authenticate,
-      },
-      {
-        cancellable: true,
-        confirmButtonLabel:
-          'authentication-prompt.confirm-button-label.sign-data',
-        message: 'authentication-prompt.message.sign-data',
-      },
-    );
-
-    const signerContext: CardanoSignerContext = {
-      wallet,
-      accountId,
-      knownAddresses,
-      auth,
+    // From here on the user has confirmed, so a flow is waiting on
+    // signingResult$. Every exit must report one: if nothing arrives that flow
+    // never completes, wedging every request serialized behind it. The checks
+    // below all throw before the signing try/catch that used to be the only
+    // reporting path.
+    let hasReportedResult = false;
+    const reportResult = (result: SigningResult) => {
+      hasReportedResult = true;
+      this.#signingResult$?.next(result);
     };
     try {
-      const dataSigner = this.#signerFactory.createDataSigner(signerContext);
-      const result = (await firstValueFrom(
-        dataSigner.signData({
-          signWith: addrToSignWith(addr),
-          payload,
-        }),
-      )) as DataSignature;
-      this.#signingResult$?.next({ type: 'success' });
-      return result;
-    } catch (error) {
-      if (error instanceof AuthenticationCancelledError) {
-        this.#signingResult$?.next({ type: 'cancelled' });
-        throw new DataSignError(
-          DataSignErrorCode.UserDeclined,
-          'User cancelled authentication',
+      const accountId = this.#getAccountId(origin);
+      // The gate classified against gate-time state; a session rebind while the
+      // prompt was open must answer AccountChange, not a misleading
+      // ProofGeneration from the stale classification.
+      if (accountId !== gateAccountId) {
+        throw new APIError(
+          APIErrorCode.AccountChange,
+          `Session account changed while awaiting confirmation for origin: ${origin}. Please reconnect the dApp.`,
         );
       }
-      const hwErrorKeys = isHardwareWallet(wallet)
-        ? mapHwSigningError(error)
-        : undefined;
-      this.#signingResult$?.next({ type: 'error', hwErrorKeys });
-      this.#logger?.warn(
-        `[cip30] signData failed for ${origin}: ${
-          error instanceof Error
-            ? `${error.name}: ${error.message}`
-            : String(error)
-        }`,
+
+      const allAccounts = await firstValueFrom(this.#allAccounts$);
+      const account = allAccounts.find(a => a.accountId === accountId);
+
+      if (!account) {
+        throw new APIError(
+          APIErrorCode.AccountChange,
+          `Account not found for ID: ${accountId}`,
+        );
+      }
+
+      if (!isCardanoAccount(account)) {
+        throw new APIError(
+          APIErrorCode.InternalError,
+          `Account is not a Cardano account: ${accountId}`,
+        );
+      }
+
+      if (account.accountType === 'MultiSig') {
+        throw new APIError(
+          APIErrorCode.InternalError,
+          `signData is not supported for MultiSig accounts: ${accountId}`,
+        );
+      }
+
+      const allWallets = await firstValueFrom(this.#allWallets$);
+      const wallet = allWallets.find(w => w.walletId === account.walletId);
+
+      if (!wallet) {
+        throw new APIError(
+          APIErrorCode.InternalError,
+          `Wallet not found for ID: ${account.walletId}`,
+        );
+      }
+
+      const cardanoAddresses = await this.#getCardanoAddresses(origin);
+      const knownAddresses =
+        this.#transformToGroupedAddresses(cardanoAddresses);
+
+      if (
+        !this.#signerFactory ||
+        !this.#accessAuthSecret ||
+        !this.#authenticate
+      ) {
+        throw new APIError(
+          APIErrorCode.InternalError,
+          'Signer factory not configured for this API instance',
+        );
+      }
+
+      const auth = signerAuthFromPrompt(
+        {
+          accessAuthSecret: this.#accessAuthSecret,
+          authenticate: this.#authenticate,
+        },
+        {
+          cancellable: true,
+          confirmButtonLabel:
+            'authentication-prompt.confirm-button-label.sign-data',
+          message: 'authentication-prompt.message.sign-data',
+        },
       );
-      if (error instanceof UnknownSignWithError) {
-        throw new DataSignError(
-          DataSignErrorCode.ProofGeneration,
-          error.message,
+
+      const signerContext: CardanoSignerContext = {
+        wallet,
+        accountId,
+        knownAddresses,
+        auth,
+      };
+      try {
+        const dataSigner = this.#signerFactory.createDataSigner(signerContext);
+        const result = (await firstValueFrom(
+          dataSigner.signData({
+            signWith: addrToSignWith(addr),
+            payload,
+          }),
+        )) as DataSignature;
+        reportResult({ type: 'success' });
+        return result;
+      } catch (error) {
+        if (error instanceof AuthenticationCancelledError) {
+          reportResult({ type: 'cancelled' });
+          throw new DataSignError(
+            DataSignErrorCode.UserDeclined,
+            'User cancelled authentication',
+          );
+        }
+        const hwErrorKeys = isHardwareWallet(wallet)
+          ? mapHwSigningError(error)
+          : undefined;
+        reportResult({ type: 'error', hwErrorKeys });
+        this.#logger?.warn(
+          `[cip30] signData failed for ${origin}: ${
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : String(error)
+          }`,
         );
+        if (error instanceof UnknownSignWithError) {
+          throw new DataSignError(
+            DataSignErrorCode.ProofGeneration,
+            error.message,
+          );
+        }
+        throw error;
       }
-      throw error;
+    } catch (postConsentError) {
+      if (!hasReportedResult) reportResult({ type: 'error' });
+      throw postConsentError;
     }
   }
 
@@ -1090,6 +1216,19 @@ export class CardanoDappConnectorApi
   }
 
   /**
+   * The collateral-return verdict alone, for a surface that presents its own
+   * consent (mobile): the same local, best-effort evaluation `signTx` runs
+   * before consent, without the foreign-signature half, so nothing else moves
+   * pre-sheet. Throws the same typed errors as that half.
+   */
+  public async getCollateralRefusal(
+    txHex: Cbor,
+    origin: string,
+  ): Promise<CollateralOwnershipErrorCase | null> {
+    return (await this.#collateralVerdict(txHex, origin)).collateralRefusal;
+  }
+
+  /**
    * Cache-first stake-key registration status. The tracked cache answers
    * instantly when warm; a cold cache (fresh service worker, indexer lag)
    * falls back to one direct provider query so the CIP-95 buckets answer
@@ -1283,58 +1422,87 @@ export class CardanoDappConnectorApi
   }
 
   /**
+   * Opens the dApp consent surface in the REFUSED state.
+   *
+   * Never awaited and never allowed to throw: the CIP-30 rejection must not
+   * depend on the surface. Both branches log at WARN, and a failure is worded
+   * differently from a successful request -- a dApp can suppress this screen
+   * by parking the consent slot, and the log pair is the only trace left.
+   *
+   * Takes the consent channel as a parameter rather than reading the field,
+   * because the caller has already proved it exists.
+   */
+  #presentCollateralRefusal({
+    requestConfirmation,
+    sender,
+    txHex,
+    partialSign,
+    collateralRefusal,
+    origin,
+  }: {
+    requestConfirmation: CardanoConfirmationCallback;
+    sender: SenderContext['sender'];
+    txHex: Cbor;
+    partialSign: boolean;
+    collateralRefusal: CollateralOwnershipErrorCase;
+    origin: string;
+  }): void {
+    const context = { origin, case: collateralRefusal, partialSign };
+    try {
+      const disclosure = requestConfirmation(sender, 'signTx', {
+        txHex,
+        partialSign,
+        collateralRefusal,
+      });
+      // "Requested", never "shown": whether a screen appears is decided
+      // downstream (see `refusedSignTx$`, which logs when it does).
+      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+        ...context,
+        stage: 'disclosure-requested' satisfies CollateralBlockStage,
+      });
+      void disclosure.catch((error: unknown) => {
+        this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+          ...context,
+          stage: 'disclosure-failed' satisfies CollateralBlockStage,
+          error,
+        });
+      });
+    } catch (error) {
+      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+        ...context,
+        stage: 'disclosure-failed' satisfies CollateralBlockStage,
+        error,
+      });
+    }
+  }
+
+  /**
    * Local-only pre-consent check: runs the foreign-signature gate without an
    * input resolver so no network request happens before the user approves.
    * Unknown inputs are optimistically exempted when an own-satisfiable
    * witness script exists; the resolver-backed gate re-runs post-consent in
    * the signTransaction wrapper and stays authoritative.
+   *
+   * Throws for every pre-existing refusal (account change, missing chain id,
+   * unknown account, foreign signatures) and RETURNS the collateral refusal,
+   * so `signTx` can open the consent surface in the refused state before
+   * rejecting. `null` means the collateral rule allowed the transaction.
    */
   async #validateCanSign(
     txCbor: Cbor,
     partialSign: boolean,
     origin: string,
-  ): Promise<void> {
-    const accountId = this.#getAccountIdForOrigin(origin);
-    if (!accountId) {
-      throw new APIError(
-        APIErrorCode.AccountChange,
-        `No account found for origin: ${origin}. Please reconnect the dApp.`,
-      );
+  ): Promise<CollateralOwnershipErrorCase | null> {
+    const {
+      collateralRefusal,
+      account,
+      wallet,
+      knownAddresses,
+      resolutionUtxos,
+    } = await this.#collateralVerdict(txCbor, origin);
+    if (collateralRefusal) {
+      return collateralRefusal;
     }
-
-    const [chainId, allAccounts, allWallets, allAddresses, accountUtxos] =
-      await Promise.all([
-        firstValueFrom(this.#chainId$),
-        firstValueFrom(this.#allAccounts$),
-        firstValueFrom(this.#allWallets$),
-        firstValueFrom(this.#addresses$),
-        firstValueFrom(this.#accountUtxos$),
-      ]);
-
-    if (!chainId) {
-      throw new TxSignError(
-        TxSignErrorCode.ProofGeneration,
-        'Cannot sign transaction: chain ID is undefined',
-      );
-    }
-
-    const account = allAccounts.find(a => a.accountId === accountId);
-    if (!account || !isCardanoAccount(account)) {
-      throw new TxSignError(
-        TxSignErrorCode.ProofGeneration,
-        `Cardano account not found for ID: ${accountId}`,
-      );
-    }
-
-    const knownAddresses = transformToGroupedAddresses(allAddresses, accountId);
-    const localUtxos = accountUtxos[accountId] ?? [];
-    const resolutionUtxos = [
-      ...localUtxos,
-      ...this.#resolveChainedInputs(
-        txCbor,
-        new Set<string>(knownAddresses.map(({ address }) => address)),
-      ),
-    ];
 
     const { extendedAccountPublicKey } = account.blockchainSpecific as {
       extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
@@ -1343,8 +1511,6 @@ export class CardanoDappConnectorApi
     const dRepKeyHash = hashEd25519PublicKey(
       await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
     );
-
-    const wallet = allWallets.find(w => w.walletId === account.walletId);
 
     if (!partialSign) {
       if (
@@ -1363,5 +1529,89 @@ export class CardanoDappConnectorApi
         );
       }
     }
+
+    return null;
+  }
+
+  /**
+   * The collateral half of the pre-consent check, computed once: the verdict
+   * plus the prelude the foreign-signature half consumes, so `#validateCanSign`
+   * never reads the store or decodes the transaction twice.
+   */
+  async #collateralVerdict(txCbor: Cbor, origin: string) {
+    const accountId = this.#getAccountIdForOrigin(origin);
+    if (!accountId) {
+      throw new APIError(
+        APIErrorCode.AccountChange,
+        `No account found for origin: ${origin}. Please reconnect the dApp.`,
+      );
+    }
+
+    const [
+      chainId,
+      allAccounts,
+      allWallets,
+      allAddresses,
+      accountUtxos,
+      ownershipAccountUtxos,
+    ] = await Promise.all([
+      firstValueFrom(this.#chainId$),
+      firstValueFrom(this.#allAccounts$),
+      firstValueFrom(this.#allWallets$),
+      firstValueFrom(this.#addresses$),
+      firstValueFrom(this.#accountUtxos$),
+      firstValueFrom(this.#ownershipUtxos$),
+    ]);
+
+    if (!chainId) {
+      throw new TxSignError(
+        TxSignErrorCode.ProofGeneration,
+        'Cannot sign transaction: chain ID is undefined',
+      );
+    }
+
+    const account = allAccounts.find(a => a.accountId === accountId);
+    if (!account || !isCardanoAccount(account)) {
+      throw new TxSignError(
+        TxSignErrorCode.ProofGeneration,
+        `Cardano account not found for ID: ${accountId}`,
+      );
+    }
+
+    const knownAddresses = transformToGroupedAddresses(allAddresses, accountId);
+    const chainedOwnUtxos = this.#resolveChainedInputs(
+      txCbor,
+      new Set<string>(knownAddresses.map(({ address }) => address)),
+    );
+    const localUtxos = accountUtxos[accountId] ?? [];
+    const resolutionUtxos = [...localUtxos, ...chainedOwnUtxos];
+
+    // Runs for BOTH partialSign values, BEFORE the review sheet/password
+    // prompt, and local-only: `ownershipUtxos$` -- the full settled set plus
+    // own pending outputs, NOT the `accountUtxos$` above, which subtracts the
+    // collateral-reserved UTxOs this rule exists to catch. A collateral input
+    // this set lacks reads as foreign HERE, so the refusal screen is
+    // best-effort; the resolver-backed guard at the signing boundary
+    // (`withCollateralOwnershipGuard`) re-runs the rule and stays authoritative.
+    const collateralRefusal = collateralRefusalCase(
+      Serialization.Transaction.fromCbor(Serialization.TxCBOR(txCbor)).toCore()
+        .body,
+      collateralOwnershipSets({
+        ownershipUtxos: [
+          ...(ownershipAccountUtxos[accountId] ?? []),
+          ...chainedOwnUtxos,
+        ],
+        knownAddresses,
+      }),
+    );
+    const wallet = allWallets.find(w => w.walletId === account.walletId);
+
+    return {
+      collateralRefusal,
+      account,
+      wallet,
+      knownAddresses,
+      resolutionUtxos,
+    };
   }
 }

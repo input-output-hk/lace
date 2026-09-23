@@ -29,6 +29,54 @@ export const hugeiconsBarrelBans = [
   },
 ];
 
+// A second user-event instance on the shared page silently swallows keystrokes in
+// every later story; packages/lib/util-dev-storybook/src/steps.ts has the mechanism.
+// Applied from the two storybook packages' own configs, not here: nx lints each
+// project with that project's directory as the config base, so a workspace-relative
+// `files` glob in this file never matches.
+export const storybookUserEventBan = [
+  {
+    name: '@testing-library/user-event',
+    message:
+      'Use the click()/inputText()/... helpers from @lace-lib/util-dev-storybook, which share the single user-event instance storybook/test provides. A second instance silently swallows keystrokes in later stories.',
+  },
+];
+
+// The passport flows (packages/module/passport-account/src/flows) are the
+// code that moves upstream to the Passport SDK unchanged, so they may only
+// consume the module's seams and their own types. Applied from that
+// package's own config, not here: nx lints each project with that project's
+// directory as the config base, so a workspace-relative `files` glob in this
+// file never matches.
+export const passportFlowBoundaryBans = [
+  {
+    group: ['rxjs', 'rxjs/*'],
+    message:
+      'The flow layer is platform neutral so it can move upstream unchanged: flows are plain async functions, and the promise-to-observable conversion lives in store/dependencies.ts.',
+  },
+  {
+    group: [
+      'redux',
+      'redux/*',
+      '@reduxjs/toolkit',
+      '@reduxjs/toolkit/*',
+      'redux-observable',
+    ],
+    message:
+      'The flow layer is platform neutral so it can move upstream unchanged: a flow reports through its onProgress callback and never dispatches or reads the store.',
+  },
+  {
+    group: ['@lace-contract/module', '@lace-contract/module/*'],
+    message:
+      'The flow layer is platform neutral so it can move upstream unchanged: a flow consumes the passport seams through FlowContext, not the module contract.',
+  },
+  {
+    group: ['../store/*', '../../store/*', '**/store/*'],
+    message:
+      'The flow layer is platform neutral so it can move upstream unchanged: the store consumes the flows, never the other way round; shared types belong in flows/types.ts.',
+  },
+];
+
 export default defineConfig(
   tseslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,

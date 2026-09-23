@@ -146,11 +146,11 @@ const canTrustFetchAsSettled = ({
   // comes, and the pre-spend balance stands forever.
   //
   // Checked against the outpoints, not the activity's type. Type would be a
-  // guess: the mapper labels by net balance (`summary.coins > 0 ? Receive :
-  // Send`), so a transaction that spends this account's UTxOs but nets positive
-  // reads as `Receive`. An overlap is proof, and it needs no ownership
-  // resolution — `utxos` holds only this account's UTxOs, so intersecting is
-  // already scoped to ours.
+  // guess: the mapper labels by net value change, so a transaction that spends
+  // this account's UTxOs but nets positive — a deposit refund, say — reads as
+  // `Receive`. An overlap is proof, and it needs no ownership resolution —
+  // `utxos` holds only this account's UTxOs, so intersecting is already scoped
+  // to ours.
   //
   // Self-clearing, so it cannot loop: the overlap disappears as soon as the
   // provider applies the transaction, and then the changed set advances the key

@@ -79,8 +79,9 @@ export type CardanoActivityUtxoMetadata = {
  * (designate / update / deregister) and the target dust pubkey
  * without re-parsing the tx CBOR.
  *
- * `dustPubkeyHex` is 32-byte hex when the action is `designate` or
- * `update` (carries the Midnight coin pubkey written into the new
+ * `dustPubkeyHex` is the hex of the variable-length (≤33-byte)
+ * dust-address payload when the action is `designate` or
+ * `update` (the bytes written into the new
  * `DustMappingDatum`). Absent for `deregister` — there's no new
  * datum, the existing one is burned with the NFT.
  */

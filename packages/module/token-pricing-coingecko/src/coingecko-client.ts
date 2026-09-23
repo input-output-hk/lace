@@ -9,7 +9,7 @@ import {
 } from './utils';
 
 import type { CoinGeckoCoinsList, CoinGeckoPriceData } from './types';
-import type { PriceDataPoint, TimeRange } from '@lace-lib/ui-toolkit';
+import type { PriceDataPoint, TimeRange } from '@lace-contract/token-pricing';
 
 interface CoinGeckoSimplePriceResponse {
   [coinId: string]: {

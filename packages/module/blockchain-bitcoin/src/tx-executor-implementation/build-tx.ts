@@ -22,6 +22,7 @@ import type {
 } from '@lace-contract/activities';
 import type {
   BitcoinBlockchainSpecificTxData,
+  BitcoinEstimatedFees,
   BitcoinInFlightUtxoActivityMetadata,
   BitcoinUTxO,
 } from '@lace-contract/bitcoin-context';
@@ -108,6 +109,37 @@ export const applyInFlightUtxoAdjustments = (
   if (spent.size === 0) return [...utxos];
 
   return utxos.filter(utxo => !spent.has(outpointKey(utxo)));
+};
+
+/**
+ * Resolves the rate to build against, in BTC per kilobyte.
+ *
+ * The market is read ONLY for the three quoted tiers. `Custom` is a rate the
+ * user typed and must stay buildable while mempool.space is unreachable — do
+ * not hoist the fetch above that branch, or an unreachable market fails every
+ * Bitcoin build. A tier build still fails when the market cannot be read.
+ *
+ * @param feeRate The chosen option, plus the typed rate when it is `Custom`.
+ * @param getCurrentFeeMarket Fetches the market; called only for a tier.
+ */
+const resolveFeeRate = async (
+  feeRate: BitcoinBlockchainSpecificTxData['feeRate'],
+  getCurrentFeeMarket: () => Observable<
+    Result<BitcoinEstimatedFees, ProviderError>
+  >,
+): Promise<number> => {
+  if (feeRate.feeOption === 'Custom') return feeRate.customFeeRate ?? 0.0;
+
+  const market = (await firstValueFrom(getCurrentFeeMarket())).unwrap();
+
+  switch (feeRate.feeOption) {
+    case 'Fast':
+      return market.fast.feeRate;
+    case 'Average':
+      return market.standard.feeRate;
+    case 'Low':
+      return market.slow.feeRate;
+  }
 };
 
 /**
@@ -202,21 +234,9 @@ export const makeBuildTx =
       const { feeRate, memo } = txParams[0]
         .blockchainSpecific as BitcoinBlockchainSpecificTxData;
 
-      const currentFeeRate = (
-        await firstValueFrom(bitcoinAccountWallet.getCurrentFeeMarket())
-      ).unwrap();
-
-      let rateToUse = 0.0;
-
-      if (feeRate.feeOption === 'Custom') {
-        rateToUse = feeRate.customFeeRate ?? 0.0;
-      } else if (feeRate.feeOption === 'Fast') {
-        rateToUse = currentFeeRate.fast.feeRate;
-      } else if (feeRate.feeOption === 'Average') {
-        rateToUse = currentFeeRate.standard.feeRate;
-      } else if (feeRate.feeOption === 'Low') {
-        rateToUse = currentFeeRate.slow.feeRate;
-      }
+      const rateToUse = await resolveFeeRate(feeRate, () =>
+        bitcoinAccountWallet.getCurrentFeeMarket(),
+      );
 
       if (!Number.isFinite(rateToUse) || rateToUse <= 0) {
         throw new BitcoinTxBuildError(

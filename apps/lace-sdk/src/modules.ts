@@ -2,4 +2,11 @@ export { default as blockchainCardano } from '@lace-module/blockchain-cardano/sd
 export { default as cardanoProviderBlockfrost } from '@lace-module/cardano-provider-blockfrost/sdk';
 export { default as cryptoCardanoSdk } from '@lace-module/crypto-cardano-sdk/sdk';
 export { default as featureDev } from '@lace-module/feature-dev/sdk';
+export {
+  createDevSponsor,
+  createHttpProver,
+  createPasskeyAuthoriser,
+  createPassportAccountModule,
+} from '@lace-module/passport-account/sdk';
 export { default as storageInMemory } from '@lace-module/storage-in-memory/sdk';
+export { default as storageWebIndexeddb } from '@lace-module/storage-web-indexeddb/sdk';

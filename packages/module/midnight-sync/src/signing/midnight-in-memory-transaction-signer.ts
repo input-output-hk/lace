@@ -27,43 +27,42 @@ import type { AccountId } from '@lace-contract/wallet-repo';
 import type { CombinedTokenTransfer } from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 
+/**
+ * Maps the serialized transfers into the facade's combined-transfer shape.
+ * Every transfer shares one kind — mixed selections are rejected at build
+ * time by flattenTransfers — so exactly one CombinedTokenTransfer entry is
+ * built, holding all outputs; the SDK covers them in a single transaction.
+ */
 const toOutputs = (
-  { amount, receiverAddress, tokenKind, type }: MidnightTxParameters,
+  { transfers }: MidnightTxParameters,
   networkId: MidnightSDKNetworkId,
 ): CombinedTokenTransfer[] => {
-  const parsedAddress = MidnightBech32m.parse(receiverAddress);
-
-  if (tokenKind === 'unshielded') {
+  if (transfers[0].tokenKind === 'unshielded') {
     return [
       {
-        type: tokenKind,
-        outputs: [
-          {
-            type: fromUnshieldedTokenType(type, networkId),
-            receiverAddress: UnshieldedAddress.codec.decode(
-              networkId,
-              parsedAddress,
-            ),
-            amount: BigNumber.valueOf(amount),
-          },
-        ],
+        type: 'unshielded',
+        outputs: transfers.map(({ amount, receiverAddress, type }) => ({
+          type: fromUnshieldedTokenType(type, networkId),
+          receiverAddress: UnshieldedAddress.codec.decode(
+            networkId,
+            MidnightBech32m.parse(receiverAddress),
+          ),
+          amount: BigNumber.valueOf(amount),
+        })),
       },
     ];
   }
-
   return [
     {
-      type: tokenKind,
-      outputs: [
-        {
-          type,
-          receiverAddress: ShieldedAddress.codec.decode(
-            networkId,
-            parsedAddress,
-          ),
-          amount: BigNumber.valueOf(amount),
-        },
-      ],
+      type: 'shielded',
+      outputs: transfers.map(({ amount, receiverAddress, type }) => ({
+        type,
+        receiverAddress: ShieldedAddress.codec.decode(
+          networkId,
+          MidnightBech32m.parse(receiverAddress),
+        ),
+        amount: BigNumber.valueOf(amount),
+      })),
     },
   ];
 };
@@ -79,13 +78,18 @@ const signWithWallet = (
     request.flowType === 'dust-designation'
       ? []
       : toOutputs(txParams, midnightWallet.networkId);
-  const tokenKind = txParams.tokenKind;
+  // Unshielded inputs are signature-based and need the explicit signRecipe
+  // step; a shielded-only recipe is signed as part of proving instead. All
+  // transfers share one kind (mixed selections are rejected at build time),
+  // so the first transfer determines the signing path.
+  const hasUnshieldedTransfer =
+    txParams.transfers[0].tokenKind === 'unshielded';
   const ttl = new Date(Date.now() + defaultTxTtlLength);
 
   if (request.flowType === 'dust-designation') {
     const dustAddress = DustAddress.codec.decode(
       midnightWallet.networkId,
-      MidnightBech32m.parse(txParams.receiverAddress),
+      MidnightBech32m.parse(txParams.transfers[0].receiverAddress),
     );
     return midnightWallet.state().pipe(
       take(1),
@@ -127,7 +131,7 @@ const signWithWallet = (
     );
   }
 
-  if (tokenKind === 'unshielded') {
+  if (hasUnshieldedTransfer) {
     return midnightWallet.transferTransaction(outputs, { ttl }).pipe(
       switchMap(recipe => midnightWallet.signRecipe(recipe)),
       switchMap(signedRecipe => midnightWallet.finalizeRecipe(signedRecipe)),
@@ -137,7 +141,7 @@ const signWithWallet = (
     );
   }
 
-  // tokenKind shielded
+  // shielded-only transfers
   return midnightWallet.transferTransaction(outputs, { ttl }).pipe(
     switchMap(signedRecipe => midnightWallet.finalizeRecipe(signedRecipe)),
     map(transaction => ({

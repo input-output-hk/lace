@@ -10,6 +10,7 @@ import {
 import { networkStoreContract } from '@lace-contract/network';
 import {
   FEATURE_FLAG_STAKING_CENTER,
+  stakingCenterProductCardAddonContract,
   stakingCenterStoreContract,
 } from '@lace-contract/staking-center';
 import { tokenPricingStoreContract } from '@lace-contract/token-pricing';
@@ -18,6 +19,7 @@ import {
   initializeExtensionViewAddonContract,
   initializeMobileViewAddonContract,
   sheetPagesAddonContract,
+  stackPagesAddonContract,
   tabPagesAddonContract,
 } from '@lace-contract/views';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
@@ -36,6 +38,7 @@ import type {
 const implementsContracts = combineContracts([
   tabPagesAddonContract,
   sheetPagesAddonContract,
+  stackPagesAddonContract,
   initializeExtensionViewAddonContract,
   initializeMobileViewAddonContract,
 ] as const);
@@ -50,6 +53,7 @@ const dependsOnContracts = combineContracts([
   networkStoreContract,
   cardanoStakePoolsStoreContract,
   failuresStoreContract,
+  stakingCenterProductCardAddonContract,
 ] as const);
 
 const sharedModule = inferModuleContext({
@@ -68,6 +72,7 @@ const sharedModule = inferModuleContext({
   addons: {
     loadTabPages: async () => import('./addons/tabPages'),
     loadSheetPages: async () => import('./addons/sheetPages'),
+    loadStackPages: async () => import('./addons/stackPages'),
     loadInitializeExtensionView: async () => import('./initialize-view'),
     loadInitializeMobileView: async () => import('./initialize-view'),
   },

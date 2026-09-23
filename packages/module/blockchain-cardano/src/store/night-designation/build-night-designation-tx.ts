@@ -115,10 +115,16 @@ export const buildNightDesignationTx = async (
     });
 
   // One multi-purpose Plutus V3 script serves mint + spend + withdrawal.
+  // Core PlutusScript.bytes needs the RAW script bytes, not blueprint.scriptCbor's
+  // double-CBOR-wrapped form (that form is for PlutusV3Script.fromCbor). Attaching
+  // the wrapped form witnesses the wrong script hash, so the ledger rejects the tx
+  // at submit (Missing/Extraneous/Malformed script witnesses).
   builder.attachScript({
     __type: Cardano.ScriptType.Plutus,
     version: Cardano.PlutusLanguageVersion.V3,
-    bytes: blueprint.scriptCbor,
+    bytes: Serialization.PlutusV3Script.fromCbor(
+      blueprint.scriptCbor,
+    ).rawBytes(),
   });
 
   // Inputs: every cNIGHT UTxO (the validator's rotation scan) plus, for

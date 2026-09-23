@@ -8,6 +8,7 @@ import {
 
 import { spacing } from '../../../../design-tokens';
 import { Column, Row, Text } from '../../../atoms';
+import { HardwareWalletRestoreWarning } from '../../../molecules';
 import {
   mnemonicFormOptions,
   useAppForm,
@@ -116,6 +117,7 @@ export const RestoreWalletRecoverySheetTemplate = ({
                     testID={`${testID}-instructions`}>
                     {instructionText}
                   </Text.XS>
+                  <HardwareWalletRestoreWarning />
                   <View style={styles.inputContainer}>
                     <field.MnemonicTextInput
                       placeholderText={placeholderText}

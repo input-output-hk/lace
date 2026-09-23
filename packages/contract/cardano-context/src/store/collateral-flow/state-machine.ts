@@ -140,10 +140,14 @@ export const collateralFlowMachine = createStateMachine(
           serializedTx: previousState.serializedTx,
         } satisfies StateConfirming;
       },
-      closed: ({ serializedTx }: StateReady): CollateralFlowSliceState => {
+      closed: ({
+        accountId,
+        serializedTx,
+      }: StateReady): CollateralFlowSliceState => {
         if (serializedTx) {
           // Transaction needs to be discarded
           return {
+            accountId,
             serializedTx,
             status: 'DiscardingTx',
           } satisfies StateDiscardingTx;
@@ -213,8 +217,9 @@ export const collateralFlowMachine = createStateMachine(
       utxoSet: () => {
         return initialState;
       },
-      utxoNotFound: () => {
+      utxoNotFound: (previousState: StateSettingUnspendable) => {
         return {
+          accountId: previousState.accountId,
           status: 'Failure',
           error: undefined,
           errorTranslationKeys: {
@@ -258,9 +263,13 @@ export const collateralFlowMachine = createStateMachine(
       closed: () => initialState,
     },
     Failure: {
-      closed: ({ serializedTx }: StateFailure): CollateralFlowSliceState => {
+      closed: ({
+        accountId,
+        serializedTx,
+      }: StateFailure): CollateralFlowSliceState => {
         if (serializedTx) {
           return {
+            accountId,
             serializedTx,
             status: 'DiscardingTx',
           } satisfies StateDiscardingTx;

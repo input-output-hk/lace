@@ -1,6 +1,11 @@
+import { createInputResolver } from '@lace-contract/cardano-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { HexBytes } from '@lace-lib/util';
+import {
+  OWN_COLLATERAL_UTXO,
+  expectCollateralGuardRefusesCaseB,
+} from '@lace-lib/util-dev-cardano';
 import { EMPTY, of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -62,6 +67,9 @@ const txContext = (accountIndex = 0): CardanoTransactionSignerContext => {
     accountId,
     knownAddresses: [],
     utxo: [],
+    // Non-empty on purpose: most of this suite never triggers the guard's
+    // ownership evaluation, but an empty set would make the guard inert.
+    collateralInputResolver: createInputResolver([OWN_COLLATERAL_UTXO]),
     auth: {
       authenticate: () => of(true),
       accessAuthSecret: () => EMPTY,
@@ -103,6 +111,17 @@ describe('HostSignerFactory', () => {
   it('refuses data signing (host-owned, no guest consumer)', () => {
     const factory = initSignerFactory();
     expect(() => factory.createDataSigner(txContext())).toThrow('host-owned');
+  });
+
+  it('is wrapped by the collateral-ownership guard: a case-(b) transaction is refused and never reaches the host', async () => {
+    const factory = initSignerFactory();
+    await expectCollateralGuardRefusesCaseB({
+      createSigner: ownership =>
+        factory.createTransactionSigner({ ...txContext(), ...ownership }),
+      assertNotDelegated: () => {
+        expect(requestSignCardanoTx).not.toHaveBeenCalled();
+      },
+    });
   });
 });
 

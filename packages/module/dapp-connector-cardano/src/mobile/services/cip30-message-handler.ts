@@ -14,6 +14,7 @@ import {
   type DeriveNextUnusedAddressFunction,
 } from '../../common/store/dependencies/cardano-dapp-connector-api';
 
+import type { ChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import type { Cbor, Paginate, SenderContext } from '../../common/types';
 import type { Cardano } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
@@ -23,6 +24,7 @@ import type {
   CardanoAccountAddressHistoryMap,
   CardanoProvider,
 } from '@lace-contract/cardano-context';
+import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
 import type { AuthorizedDappsDataSlice } from '@lace-contract/dapp-connector';
 import type {
   AccountId,
@@ -99,6 +101,11 @@ export interface SigningRequired {
   txHex?: string;
   /** For signTx - whether partial signing is allowed */
   partialSign?: boolean;
+  /**
+   * For signTx - the collateral-return verdict evaluated BEFORE the sheet
+   * (LW-15498), or `null` for a reviewable request. `null` on signData.
+   */
+  collateralRefusal: CollateralOwnershipErrorCase | null;
 }
 
 /**
@@ -137,6 +144,12 @@ export interface Cip30MessageHandlerDependencies {
   authorizedDapps$: Observable<AuthorizedDappsDataSlice>;
   /** Observable of UTXOs indexed by account ID */
   accountUtxos$: Observable<AccountUtxoMap>;
+  /**
+   * Ownership authority for the collateral-return guard: the account's full
+   * settled UTxO set, additive to `accountUtxos$` above
+   * -- see `CardanoDappConnectorApiDependencies.ownershipUtxos$`.
+   */
+  ownershipUtxos$: Observable<AccountUtxoMap>;
   /** Observable of unspendable UTXOs indexed by account ID */
   accountUnspendableUtxos$: Observable<AccountUtxoMap>;
   /** Observable of reward account details (stake key registration status) indexed by account ID */
@@ -166,6 +179,11 @@ export interface Cip30MessageHandlerDependencies {
   isSessionAuthorized: (origin: string) => boolean;
   /** Cardano provider instance for submitting transactions and resolving inputs */
   cardanoProvider: CardanoProvider;
+  /**
+   * Own outputs of recently signed/submitted txs, so a chained own collateral
+   * input is seen by the pre-sheet collateral check (LW-15498).
+   */
+  resolveChainedInputs: ChainedTxOutputCache['resolveChainedInputs'];
   /** Derives and persists the next unused External address */
   deriveNextUnusedAddress?: DeriveNextUnusedAddressFunction;
   /** Logger for dApp-request diagnostics; silent when omitted */
@@ -195,17 +213,14 @@ export const handleCip30Message = async (
 
   const apiDeps: CardanoDappConnectorApiDependencies = {
     accountUtxos$: deps.accountUtxos$,
+    ownershipUtxos$: deps.ownershipUtxos$,
     accountUnspendableUtxos$: deps.accountUnspendableUtxos$,
     addresses$: deps.addresses$,
     accountTransactionHistory$: deps.accountTransactionHistory$,
     chainId$: deps.chainId$,
     rewardAccountDetails$: deps.rewardAccountDetails$,
     getAccountIdForOrigin: deps.getAccountIdForOrigin,
-    /**
-     * Mobile answers signTx with signing_required before the API's sign
-     * pre-check runs, so chained-input resolution is never consulted here.
-     */
-    resolveChainedInputs: () => [],
+    resolveChainedInputs: deps.resolveChainedInputs,
     allAccounts$: deps.allAccounts$,
     allWallets$: deps.allWallets$,
     deriveNextUnusedAddress: deps.deriveNextUnusedAddress,
@@ -383,11 +398,18 @@ export const handleCip30Message = async (
           // Confirmation re-checks this: a rebind while the sheet is open
           // answers AccountChange instead of signing under the new account.
           accountId: deps.getAccountIdForOrigin(dappOrigin),
+          collateralRefusal: null,
         };
       },
 
       signTx: async () => {
         const [txHex, isPartialSign] = args as [string, boolean | undefined];
+        // Before the sheet, like signData's pre-check above: a refused request
+        // is answered at once and shown as refused, never reviewed.
+        const collateralRefusal = await walletApi.getCollateralRefusal(
+          txHex,
+          dappOrigin,
+        );
         return {
           type: 'signing_required' as const,
           requestId: id,
@@ -396,6 +418,7 @@ export const handleCip30Message = async (
           signingType: 'signTx' as const,
           txHex,
           partialSign: isPartialSign ?? false,
+          collateralRefusal,
         };
       },
 

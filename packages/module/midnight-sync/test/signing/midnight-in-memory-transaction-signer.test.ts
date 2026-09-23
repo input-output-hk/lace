@@ -53,20 +53,38 @@ vi.mock('@midnightntwrk/wallet-sdk-address-format', () => ({
 vi.mock('@lace-contract/midnight-context', async () => ({
   ...(await vi.importActual('@lace-contract/midnight-context')),
   midnightWallets$: of({ [testAccountId]: mockMidnightWallet }),
-  fromUnshieldedTokenType: vi.fn().mockReturnValue('tDUST'),
 }));
 
 const { MidnightInMemoryTransactionSigner } = await import(
   '../../src/signing/midnight-in-memory-transaction-signer'
 );
 
-const unshieldedTx = HexBytes.fromUTF8(
-  '{"amount":"1","receiverAddress":"addr_test1","tokenKind":"unshielded","type":"tDUST"}',
-);
+const serialise = (
+  transfers: {
+    amount: string;
+    receiverAddress: string;
+    tokenKind: string;
+    type: string;
+  }[],
+) => HexBytes.fromUTF8(JSON.stringify({ transfers }));
 
-const shieldedTx = HexBytes.fromUTF8(
-  '{"amount":"1","receiverAddress":"addr_test1","tokenKind":"shielded","type":"NIGHT"}',
-);
+const unshieldedTx = serialise([
+  {
+    amount: '1',
+    receiverAddress: 'addr_test1',
+    tokenKind: 'unshielded',
+    type: 'tDUST',
+  },
+]);
+
+const shieldedTx = serialise([
+  {
+    amount: '1',
+    receiverAddress: 'addr_test1',
+    tokenKind: 'shielded',
+    type: 'NIGHT',
+  },
+]);
 
 const resetWalletMocks = () => {
   const transfer = vi.mocked(
@@ -132,9 +150,87 @@ describe('MidnightInMemoryTransactionSigner', () => {
     expect(mockMidnightWallet.signRecipe).not.toHaveBeenCalled();
   });
 
+  it('passes every transfer of a multi-token shielded transaction as one combined entry without signing the recipe (LW-15154)', async () => {
+    const multiShieldedTx = serialise([
+      {
+        amount: '5',
+        receiverAddress: 'addr_test1',
+        tokenKind: 'shielded',
+        type: '88aa',
+      },
+      {
+        amount: '7',
+        receiverAddress: 'addr_test1',
+        tokenKind: 'shielded',
+        type: '7dbb',
+      },
+    ]);
+
+    const signer = new MidnightInMemoryTransactionSigner({
+      accountId: testAccountId,
+      auth: testSignerAuth,
+    });
+    await firstValueFrom(
+      signer.sign({ serializedTx: multiShieldedTx, flowType: 'send' }),
+    );
+
+    expect(mockMidnightWallet.transferTransaction).toHaveBeenCalledWith(
+      [
+        {
+          type: 'shielded',
+          outputs: [
+            expect.objectContaining({ type: '88aa', amount: 5n }),
+            expect.objectContaining({ type: '7dbb', amount: 7n }),
+          ],
+        },
+      ],
+      expect.anything(),
+    );
+    expect(mockMidnightWallet.signRecipe).not.toHaveBeenCalled();
+  });
+
+  it('passes every transfer of a multi-token unshielded transaction as one combined entry and signs the recipe (LW-15154)', async () => {
+    const multiUnshieldedTx = serialise([
+      {
+        amount: '3',
+        receiverAddress: 'addr_test1',
+        tokenKind: 'unshielded',
+        type: 'unshielded-testnet88aa',
+      },
+      {
+        amount: '4',
+        receiverAddress: 'addr_test2',
+        tokenKind: 'unshielded',
+        type: 'unshielded-testnet7dbb',
+      },
+    ]);
+
+    const signer = new MidnightInMemoryTransactionSigner({
+      accountId: testAccountId,
+      auth: testSignerAuth,
+    });
+    await firstValueFrom(
+      signer.sign({ serializedTx: multiUnshieldedTx, flowType: 'send' }),
+    );
+
+    expect(mockMidnightWallet.transferTransaction).toHaveBeenCalledWith(
+      [
+        {
+          type: 'unshielded',
+          outputs: [
+            expect.objectContaining({ type: '88aa', amount: 3n }),
+            expect.objectContaining({ type: '7dbb', amount: 4n }),
+          ],
+        },
+      ],
+      expect.anything(),
+    );
+    expect(mockMidnightWallet.signRecipe).toHaveBeenCalled();
+  });
+
   it('handles dust-designation flow', async () => {
     const dustTx = HexBytes.fromUTF8(
-      '{"amount":"0","receiverAddress":"dust_addr","tokenKind":"unshielded","type":"tDUST"}',
+      '{"transfers":[{"amount":"0","receiverAddress":"dust_addr","tokenKind":"unshielded","type":"tDUST"}]}',
     );
 
     const mockState = {
@@ -179,7 +275,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
 
   it('dust-designation balances unproven tx when NIGHT is already registered for dust', async () => {
     const dustTx = HexBytes.fromUTF8(
-      '{"amount":"0","receiverAddress":"dust_addr","tokenKind":"unshielded","type":"tDUST"}',
+      '{"transfers":[{"amount":"0","receiverAddress":"dust_addr","tokenKind":"unshielded","type":"tDUST"}]}',
     );
 
     const mockState = {

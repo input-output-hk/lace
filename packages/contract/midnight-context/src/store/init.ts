@@ -26,7 +26,7 @@ const store: LaceInit<LaceModuleStoreInit> = ({
   },
   persistConfig: {
     midnightContext: {
-      version: 10,
+      version: 12,
       whitelist: [
         'userNetworksConfigOverrides',
         'isActivityPageHeaderBannerDismissed',
@@ -38,7 +38,6 @@ const store: LaceInit<LaceModuleStoreInit> = ({
         // observable chain is set up, improving perceived load time.
         'dustBalanceByAccount',
         'dustGenerationDetailsByAccount',
-        'shouldAcknowledgeMidnightDisclaimer',
       ],
       migrate: createMigrate({
         3: state => {
@@ -61,7 +60,8 @@ const store: LaceInit<LaceModuleStoreInit> = ({
         },
         6: state => {
           const typedState = state as PersistedState<MidnightContextSliceState>;
-          typedState.shouldAcknowledgeMidnightDisclaimer = 'not-shown';
+          // Migration 6 no longer needed; shouldAcknowledgeMidnightDisclaimer
+          // removed when the Midnight disclaimer was deleted (see migration 11).
           return typedState;
         },
         7: state => {
@@ -107,6 +107,30 @@ const store: LaceInit<LaceModuleStoreInit> = ({
             if (!networkOverrides) continue;
             delete networkOverrides.nodeAddress;
             delete networkOverrides.indexerAddress;
+          }
+          return typedState;
+        },
+        11: state => {
+          const typedState = state as PersistedState<MidnightContextSliceState>;
+          // shouldAcknowledgeMidnightDisclaimer removed with the Midnight disclaimer.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          delete (typedState as any).shouldAcknowledgeMidnightDisclaimer;
+          return typedState;
+        },
+        12: state => {
+          const typedState = state as PersistedState<MidnightContextSliceState>;
+          // The Shielded remote proof servers are being switched off, so the
+          // only remaining option is the local default. A profile that selected
+          // a remote one holds it as a user override, which would otherwise
+          // survive as an address nothing answers on. Dropping the override
+          // falls back to the default; a later provider is a fresh choice.
+          const userOverrides = typedState.userNetworksConfigOverrides;
+          if (userOverrides) {
+            for (const networkId in userOverrides) {
+              const override =
+                userOverrides[networkId as keyof typeof userOverrides];
+              if (override) delete override.proofServerAddress;
+            }
           }
           return typedState;
         },

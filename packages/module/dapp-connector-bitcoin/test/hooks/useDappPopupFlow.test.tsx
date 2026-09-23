@@ -62,6 +62,60 @@ describe('useDappPopupFlow loading state', () => {
   });
 });
 
+describe('useDappPopupFlow error state', () => {
+  beforeEach(() => {
+    mocks.dispatched = [];
+    setSelectors({});
+  });
+
+  it('reports isError for an instance that never saw the request', () => {
+    // A request can settle into an error before a popup syncs state even once
+    // — a late-mounting popup would otherwise sit on the loading state for
+    // good. A stale flag cannot leak in: setting a pending request clears the
+    // error in the same reducer.
+    setSelectors({
+      'bitcoinDappConnector.selectSignMessageError': true,
+    });
+
+    const { result } = renderHook(() =>
+      useDappPopupFlow({ type: 'signMessage' }),
+    );
+
+    expect(result.current.isError).toBe(true);
+  });
+
+  it('reports isError after the request it showed failed', () => {
+    setSelectors({
+      'bitcoinDappConnector.selectPendingSignPsbtRequest': {
+        requestId: 'req-1',
+      },
+    });
+    const { result, rerender } = renderHook(() =>
+      useDappPopupFlow({ type: 'signPsbt' }),
+    );
+    expect(result.current.isError).toBe(false);
+
+    // The failure clears the request and raises the flag together.
+    setSelectors({ 'bitcoinDappConnector.selectSignPsbtError': true });
+    rerender();
+
+    expect(result.current.isError).toBe(true);
+  });
+
+  it('reports no error while a request is pending', () => {
+    setSelectors({
+      'bitcoinDappConnector.selectPendingSignPsbtRequest': {
+        requestId: 'req-1',
+      },
+      'bitcoinDappConnector.selectSignPsbtError': true,
+    });
+
+    const { result } = renderHook(() => useDappPopupFlow({ type: 'signPsbt' }));
+
+    expect(result.current.isError).toBe(false);
+  });
+});
+
 describe('useDappPopupFlow confirm and reject dispatch', () => {
   beforeEach(() => {
     mocks.dispatched = [];

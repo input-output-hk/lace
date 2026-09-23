@@ -21,6 +21,39 @@ const getCardanoInFlight = (
   return blockchainSpecific?.Cardano;
 };
 
+/**
+ * Every own output of the account's not-yet-settled transactions, deduped by
+ * outpoint. Additive only: unlike {@link applyInFlightUtxoAdjustments} it does
+ * NOT drop outputs a later pending transaction consumes, because an outpoint
+ * our own pending transaction spends still exists on chain and can still be
+ * named as collateral by someone else.
+ *
+ * Deliberately not reused by `applyInFlightUtxoAdjustments`: spendability and
+ * ownership answer different questions, so that function must drop an output
+ * a later pending transaction consumes while this one must keep it. Reworking
+ * its event ordering to share this code would change the spendable view for no
+ * gain here.
+ */
+export const ownPendingOutputs = (
+  pendingActivities: readonly Activity[],
+  accountAddresses: readonly CardanoPaymentAddress[],
+): Cardano.Utxo[] => {
+  const ownAddresses = new Set<string>(accountAddresses);
+  const byOutpoint = new Map<string, Cardano.Utxo>();
+
+  for (const activity of pendingActivities) {
+    const inFlight = getCardanoInFlight(activity);
+    if (!inFlight) continue;
+    for (const utxo of inFlight.producedOutputs) {
+      if (ownAddresses.has(utxo[1].address)) {
+        byOutpoint.set(outpointKey(utxo[0]), utxo);
+      }
+    }
+  }
+
+  return [...byOutpoint.values()];
+};
+
 export const applyInFlightUtxoAdjustments = (
   availableUtxo: Cardano.Utxo[],
   accountAddresses: readonly CardanoPaymentAddress[],

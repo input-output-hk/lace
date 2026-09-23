@@ -164,6 +164,81 @@ const FORBIDDEN_PACKAGE_PATTERNS = [
 const FORBIDDEN_EXTERNAL = FORBIDDEN_PACKAGE_PATTERNS.map(
   p => new RegExp(`^${p.source}$`),
 );
+
+// The Midnight packages ship WebAssembly a JS bundle cannot inline, so both
+// @midnight scopes stay external. They are imported only from lazily loaded
+// passport-account chunks; a consumer registering the Passport module
+// installs them alongside the SDK. @polkadot backs the passport node relay
+// submitter, ships Node-conditioned transport code the browser bundle cannot
+// inline, and arrives transitively with the Midnight wallet stack, so it
+// stays external under the same rule.
+const MIDNIGHT_EXTERNAL = [
+  /^@midnight-ntwrk\//,
+  /^@midnightntwrk\//,
+  /^@polkadot\//,
+];
+
+// Static import/require specifiers, one line each in tsdown's unminified
+// output. Dynamic import(...) deliberately doesn't match: `import` must be
+// followed by whitespace or a quoted specifier, never by `(`.
+const STATIC_SPECIFIER_PATTERNS = [
+  /^\s*import\s[^;]*?from\s*['"]([^'"]+)['"]/,
+  /^\s*import\s*['"]([^'"]+)['"]/,
+  /^\s*export\s[^;]*?from\s*['"]([^'"]+)['"]/,
+];
+// A require preceded by `=>` is rolldown's CJS lowering of dynamic
+// import() -- `Promise.resolve().then(() => require(...))` -- which only
+// resolves when called, so it is not a static edge.
+const REQUIRE_PATTERN = /(?<!=>\s*)require\(\s*['"]([^'"]+)['"]\s*\)/g;
+
+const staticSpecifiers = (code: string): string[] => {
+  const specifiers: string[] = [];
+  for (const line of code.split('\n')) {
+    for (const pattern of STATIC_SPECIFIER_PATTERNS) {
+      const match = pattern.exec(line);
+      if (match) specifiers.push(match[1]);
+    }
+    for (const match of line.matchAll(REQUIRE_PATTERN)) {
+      specifiers.push(match[1]);
+    }
+  }
+  return specifiers;
+};
+
+// Midnight packages are external and absent from the SDK's dependency list,
+// so a Midnight specifier statically reachable from the entry chunk breaks
+// `import '@input-output-hk/lace-sdk'` for every consumer that doesn't have
+// them installed. Walk the entry's static-import closure; chunks reached
+// only via dynamic import() may reference Midnight freely.
+const findStaticMidnightImports = (
+  distDir: string,
+  entry: string,
+): string[] => {
+  const violations: string[] = [];
+  const visited = new Set<string>();
+  const queue = [entry];
+  while (queue.length > 0) {
+    const file = queue.shift() as string;
+    if (visited.has(file)) continue;
+    visited.add(file);
+    const code = fs.readFileSync(path.join(distDir, file), 'utf8');
+    const specifiers = staticSpecifiers(code);
+    if (file === entry && !specifiers.some(s => s.startsWith('.'))) {
+      throw new Error(
+        `Static import scan found no relative imports in ${entry}; the output shape no longer matches the line-based patterns and the Midnight check would pass vacuously`,
+      );
+    }
+    for (const specifier of specifiers) {
+      if (specifier.startsWith('.')) {
+        queue.push(path.normalize(path.join(path.dirname(file), specifier)));
+      } else if (MIDNIGHT_EXTERNAL.some(pattern => pattern.test(specifier))) {
+        violations.push(`${file}: static import of "${specifier}"`);
+      }
+    }
+  }
+  return violations;
+};
+
 const assertNoForbiddenPackages = {
   'build:done': async () => {
     const distDir = path.resolve(__dirname, 'dist');
@@ -194,6 +269,16 @@ const assertNoForbiddenPackages = {
         )}`,
       );
     }
+    const midnightViolations = ['index.js', 'index.cjs'].flatMap(entry =>
+      findStaticMidnightImports(distDir, entry),
+    );
+    if (midnightViolations.length > 0) {
+      throw new Error(
+        `Midnight packages statically reachable from the SDK entry (they are external and must only be reached through dynamic import()):\n  ${midnightViolations.join(
+          '\n  ',
+        )}`,
+      );
+    }
   },
 };
 
@@ -204,7 +289,7 @@ export default defineConfig({
   platform: 'browser',
   target: 'es2022',
   clean: true,
-  external: FORBIDDEN_EXTERNAL,
+  external: [...FORBIDDEN_EXTERNAL, ...MIDNIGHT_EXTERNAL],
   plugins,
   inputOptions,
   hooks: assertNoForbiddenPackages,

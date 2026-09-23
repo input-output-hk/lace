@@ -32,14 +32,34 @@ export type SetAliasesPayload = {
   aliases: ReadonlyArray<AddressAliasEntry>;
 };
 
+export type SetNextUnusedAddressPayload = {
+  accountId: AccountId;
+  address: Address;
+};
+
 export type AddressesSliceState = {
   addresses: AnyAddress[];
   aliases: Partial<Record<Address, AddressAliasEntry[]>>;
+  /**
+   * The account's one receive address with no history yet — what a receive
+   * surface offers so each payment lands on a fresh address. Keyed by
+   * accountId, which pins the network too (ADR 11).
+   *
+   * Deliberately NOT an `addresses` entry: every entry there is a per-round
+   * FETCH target (transaction history, transaction polling), so an address
+   * that by definition holds nothing would cost a provider request per round
+   * per account, and entries carry the derivation data a re-derivation
+   * produced, which nothing can supply for an index the wallet never derived.
+   * Held exactly as the owner of the address walk served it, and left out of
+   * the persist whitelist: a value from the last boot may have been used since.
+   */
+  nextUnusedAddresses: Partial<Record<AccountId, Address>>;
 };
 
 const initialState: AddressesSliceState = {
   addresses: [],
   aliases: {},
+  nextUnusedAddresses: {},
 };
 
 const slice = createSlice({
@@ -82,6 +102,17 @@ const slice = createSlice({
         state.addresses = [...state.addresses, ...newAddresses];
       }
     },
+    /**
+     * Records the account's unused receive address, as served by the authority
+     * that owns its address walk. Re-recording the address already held keeps
+     * the state reference, so a re-read answering the same address is free.
+     */
+    setNextUnusedAddress: (
+      state,
+      { payload }: Readonly<PayloadAction<SetNextUnusedAddressPayload>>,
+    ) => {
+      state.nextUnusedAddresses[payload.accountId] = payload.address;
+    },
     resetAddresses: (
       state,
       { payload }: Readonly<PayloadAction<ResetAddressesPayload>>,
@@ -89,9 +120,11 @@ const slice = createSlice({
       state.addresses = state.addresses.filter(
         a => a.accountId !== payload.accountId,
       );
+      delete state.nextUnusedAddresses[payload.accountId];
     },
     clearAddresses: state => {
       state.addresses = [];
+      state.nextUnusedAddresses = {};
     },
     setAliases: (
       state,
@@ -115,6 +148,7 @@ const slice = createSlice({
     builder.addCase(walletsActions.wallets.removeAccount, (state, action) => {
       const { accountId } = action.payload;
       state.addresses = state.addresses.filter(a => a.accountId !== accountId);
+      delete state.nextUnusedAddresses[accountId];
     });
 
     /**
@@ -127,11 +161,15 @@ const slice = createSlice({
       state.addresses = state.addresses.filter(
         a => !accountIds.includes(a.accountId),
       );
+      for (const accountId of accountIds) {
+        delete state.nextUnusedAddresses[accountId];
+      }
     });
   },
   selectors: {
     selectAllAddresses: ({ addresses }) => addresses,
     selectAddressAliases: ({ aliases }) => aliases,
+    selectNextUnusedAddresses: ({ nextUnusedAddresses }) => nextUnusedAddresses,
   },
 });
 

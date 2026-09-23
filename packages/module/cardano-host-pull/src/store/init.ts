@@ -1,5 +1,6 @@
 import { initializeDependencies } from './dependencies';
 import { navigateHomeOnFirstWallet } from './side-effects/navigate-home-on-first-wallet';
+import { pullNextUnusedAddress } from './side-effects/pull-next-unused-address';
 import { pullPendingTxs } from './side-effects/pull-pending-txs';
 import { pushActiveNetwork } from './side-effects/push-active-network';
 import { showWalletAddedSheet } from './side-effects/show-wallet-added-sheet';
@@ -18,6 +19,7 @@ const redux: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => ({
     syncWalletsOnCeremonySettled,
     pushActiveNetwork,
     pullPendingTxs,
+    pullNextUnusedAddress,
   ],
   sideEffectDependencies: await initializeDependencies(props, dependencies),
 });

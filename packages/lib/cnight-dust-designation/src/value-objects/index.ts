@@ -2,7 +2,6 @@ export { CardanoDustNetwork } from './network-id.vo';
 export {
   MidnightCoinPubkey,
   MidnightCoinPubkeyError,
-  MIDNIGHT_COIN_PUBKEY_LENGTH,
   MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
 } from './midnight-coin-pubkey.vo';
 export {

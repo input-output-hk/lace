@@ -5,6 +5,7 @@ import {
   convertLovelacesToAda,
   getAdaTokenTickerByNetwork,
 } from '@lace-contract/cardano-context';
+import { toPercentage } from '@lace-contract/cardano-stake-pools';
 import {
   earnRewardsPoolSelectionId,
   earnRewardsMode,
@@ -14,6 +15,7 @@ import {
 import { FeatureFlagKey } from '@lace-contract/feature';
 import { useTranslation } from '@lace-contract/i18n';
 import { FeatureIds } from '@lace-contract/network';
+import { getTokenPriceId } from '@lace-contract/token-pricing';
 import { NavigationControls, SheetRoutes } from '@lace-lib/navigation';
 import {
   formatAmountToLocale,
@@ -24,6 +26,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useLaceSelector, useStakePools } from '../hooks';
 import { useNetworkInfo } from '../hooks/useNetworkInfo';
+import { formatProductCardBalance } from '../utils';
+import { formatHubTotalEarned } from '../utils/hubTotalEarned';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type {
@@ -32,6 +36,7 @@ import type {
 } from '@lace-contract/cardano-context';
 import type { LaceStakePool } from '@lace-contract/cardano-stake-pools';
 import type { EarnRewardsMode } from '@lace-contract/earn-rewards';
+import type { StakingCenterProductCard } from '@lace-contract/staking-center';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type {
   StakeCardProps,
@@ -120,6 +125,13 @@ export const useStakingCenter = () => {
   const pendingActivitiesByAccount = useLaceSelector(
     'activities.selectPendingActivitiesByAccount',
   );
+  // Fungible tokens aggregated across accounts on the ACTIVE network only — the
+  // source for the two Total Balance figures (ADA for the Cardano card, sUSDr
+  // for product cards). Network-scoped so switching e.g. preview → preprod
+  // doesn't leak the other network's balances (ADR 11).
+  const aggregatedFungibleTokens = useLaceSelector(
+    'tokens.selectAggregatedFungibleTokensForVisibleAccounts',
+  );
 
   const rewardAccountDetailsMap = useLaceSelector(
     'cardanoContext.selectRewardAccountDetails',
@@ -131,7 +143,7 @@ export const useStakingCenter = () => {
     [cardanoAccounts, rewardAccountDetailsMap],
   );
 
-  const stakePools = useStakePools(query);
+  const stakePools = useStakePools(query, true);
 
   const poolsMap = useMemo(
     () =>
@@ -171,6 +183,172 @@ export const useStakingCenter = () => {
       )} ${adaDisplayTicker}`,
     }),
     [stakingStatus, adaDisplayTicker],
+  );
+
+  // Total ADA across all accounts (the wallet's ADA holdings, not just staked).
+  const totalAdaDisplay = useMemo(() => {
+    const adaToken = aggregatedFungibleTokens.find(
+      token => token.tokenId === LOVELACE_TOKEN_ID,
+    );
+    // No ADA token entry can mean "still loading" as easily as "truly zero" —
+    // an em dash never invents a 0 balance during load; a loaded wallet always
+    // has a lovelace entry (possibly 0).
+    if (!adaToken) return `— ${adaDisplayTicker}`;
+    const amount = formatAmountToLocale(
+      adaToken.available.toString(),
+      adaToken.decimals ?? ADA_DECIMALS,
+      DEFAULT_DECIMALS,
+    );
+    return `${amount} ${adaDisplayTicker}`;
+  }, [aggregatedFungibleTokens, adaDisplayTicker]);
+
+  // Cardano card Yield = average of the delegated pools' estimated ROS,
+  // weighted by each staked account's controlled amount. Accounts that aren't
+  // delegated (or whose pool hasn't loaded yet) contribute nothing.
+  const cardanoYieldDisplay = useMemo(() => {
+    // Accounts not resolved yet = loading, not an actual 0% yield.
+    if (!Array.isArray(cardanoAccounts)) return '—';
+    let weightedRos = 0;
+    let totalStaked = 0;
+    cardanoAccounts.forEach((account: AnyAccount) => {
+      const info =
+        rewardAccountDetailsMap[account.accountId]?.rewardAccountInfo;
+      const pool = poolsMap.get(info?.poolId);
+      // A delegated pool whose ROS estimate hasn't resolved must not join the
+      // average — counting its stake with a 0 numerator dilutes real yields.
+      if (!info?.poolId || pool?.ros === undefined) return;
+      const staked = Number(info.controlledAmount);
+      weightedRos += staked * pool.ros;
+      totalStaked += staked;
+    });
+    if (totalStaked === 0) return `0%`;
+    return `${toPercentage(weightedRos / totalStaked)}%`;
+  }, [cardanoAccounts, rewardAccountDetailsMap, poolsMap]);
+
+  const currencyPreference = useLaceSelector(
+    'tokenPricing.selectCurrencyPreference',
+  );
+  const usdToCurrencyRate = useLaceSelector(
+    'tokenPricing.selectUsdToCurrencyRate',
+  );
+  // Fresh ADA→USD price for valuing lifetime Cardano rewards in the hub's
+  // combined Total Earned; undefined while unpriced/stale (no invented value).
+  const prices = useLaceSelector('tokenPricing.selectPrices');
+  const activeNetworkIdForEarned = useLaceSelector(
+    'network.selectActiveNetworkId',
+    'Cardano',
+  );
+  const loadedFeaturesForEarned = useLaceSelector(
+    'features.selectLoadedFeatures',
+  );
+
+  const productCardBalanceOf = useCallback(
+    (card: StakingCenterProductCard): string =>
+      formatProductCardBalance(
+        card,
+        {
+          // Per-render resolution: live vault rate + flag-payload token ids —
+          // a load-time snapshot froze a cold boot's $1 fallback for the mount.
+          usdBalance: card.usdBalance?.(
+            loadedFeaturesForEarned.featureFlags,
+            activeNetworkIdForEarned,
+          ),
+          aggregatedFungibleTokens,
+        },
+        {
+          currency: currencyPreference,
+          usdToCurrencyRate,
+          // Funds mid-flow (unstake cooldown / withdraw-ready) that have left
+          // every wallet balance — supplied per render by the card (LW-14651 AC1).
+          pendingUsd: card.pendingUsd?.(
+            loadedFeaturesForEarned.featureFlags,
+            activeNetworkIdForEarned,
+          ),
+        },
+      ),
+    [
+      aggregatedFungibleTokens,
+      currencyPreference,
+      usdToCurrencyRate,
+      loadedFeaturesForEarned,
+      activeNetworkIdForEarned,
+    ],
+  );
+  const adaPriceUsd = useMemo(() => {
+    const adaToken = aggregatedFungibleTokens.find(
+      token => token.tokenId === LOVELACE_TOKEN_ID,
+    );
+    const priceId = adaToken ? getTokenPriceId(adaToken) : undefined;
+    const price = priceId ? prices?.[priceId] : undefined;
+    return price && price.priceInUsd > 0 && !price.isStale
+      ? price.priceInUsd
+      : undefined;
+  }, [aggregatedFungibleTokens, prices]);
+
+  /**
+   * The hub's Staking Status card (LW-14651): combined "Total Earned" =
+   * lifetime Cardano rewards (at the live ADA price) + each product card's
+   * token earnings (live wallet balance × the card's USD-earned rate), in the
+   * selected display currency. `undefined` hides the card — it renders only
+   * once the user has at least one staking position (Cardano delegation or a
+   * held product token); a visible-but-unpriceable total shows the loading
+   * shimmer rather than a partial figure.
+   */
+  const hubStakingStatusOf = useCallback(
+    (cards: StakingCenterProductCard[]): StakingStatusCardProps | undefined => {
+      const earnedTokens = cards.flatMap(
+        card =>
+          card.earnedUsdPerToken?.(
+            loadedFeaturesForEarned.featureFlags,
+            activeNetworkIdForEarned,
+          ) ?? [],
+      );
+      // A position is held tokens OR funds mid-unstake (cooldown / awaiting
+      // claim, which have left every wallet balance) — a pending-only user
+      // still has a staking position the card must reflect.
+      const hasProductPosition =
+        earnedTokens.some(({ tokenId }) => {
+          const token = aggregatedFungibleTokens.find(
+            entry => entry.tokenId === tokenId,
+          );
+          return token !== undefined && Number(token.available.toString()) > 0;
+        }) ||
+        cards.some(
+          card =>
+            (card.pendingUsd?.(
+              loadedFeaturesForEarned.featureFlags,
+              activeNetworkIdForEarned,
+            ) ?? 0) > 0,
+        );
+      const hasCardanoPosition = stakingStatus.stakingStatus === 'staked';
+      if (!hasCardanoPosition && !hasProductPosition) return undefined;
+      const totalEarned = formatHubTotalEarned({
+        // Lifetime rewards are a historical sum — an undelegated wallet keeps
+        // its past earnings; only the card's visibility is position-gated.
+        cardanoRewardsLovelace: stakingStatus.totalRewardsSum.toString(),
+        adaPriceUsd,
+        earnedTokens,
+        aggregatedFungibleTokens,
+        currencyContext: {
+          currency: currencyPreference,
+          usdToCurrencyRate,
+        },
+      });
+      // AC label is "Total Earned" (LW-14651) — override the molecule's
+      // status-derived "Total rewards earned" heading.
+      const title = t('v2.generic.staking.center.total-earned');
+      return { status: 'staked', title, totalEarned };
+    },
+    [
+      loadedFeaturesForEarned,
+      activeNetworkIdForEarned,
+      aggregatedFungibleTokens,
+      stakingStatus,
+      adaPriceUsd,
+      currencyPreference,
+      usdToCurrencyRate,
+      t,
+    ],
   );
 
   const isBuyAvailable = useLaceSelector(
@@ -450,6 +628,10 @@ export const useStakingCenter = () => {
   return {
     stakeCards: filteredStakeCards,
     stakingStatusCard,
+    hubStakingStatusOf,
+    totalAdaDisplay,
+    cardanoYieldDisplay,
+    productCardBalanceOf,
     networkInfoCard,
     cardanoAccounts,
     hasCardanoAccounts,

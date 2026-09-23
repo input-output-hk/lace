@@ -66,7 +66,9 @@ const mockT = vi.fn((key: string) => {
     'activity.history.registration': 'Registration',
     'activity.history.deregistration': 'Deregistration',
     'activity.history.withdrawal': 'Withdrawal',
-    'activity.history.night-designation': 'NIGHT Designation',
+    'activity.history.night-designation': 'DUST designation',
+    'activity.history.night-designation.update': 'DUST target changed',
+    'activity.history.night-designation.deregister': 'DUST generation stopped',
     'activity.assets.nfts': 'NFTs',
     'activity.assets.tokens': 'Tokens',
     'activity.assets.mixed': 'Mixed',
@@ -554,34 +556,82 @@ describe('formatAndGroupActivitiesByDate', () => {
       });
     });
 
-    it('formats NightDesignation activity correctly', () => {
-      const activity: Activity = {
-        accountId,
-        activityId: 'night-designation-activity',
-        timestamp: Timestamp(fakeNowTimestamp),
-        tokenBalanceChanges: [
-          { tokenId: tokenId1, amount: BigNumber(-2000000n) },
-        ],
-        type: ActivityType.NightDesignation,
-      };
+    it.each([
+      ['designate', 'DUST designation'],
+      ['update', 'DUST target changed'],
+      ['deregister', 'DUST generation stopped'],
+    ] as const)(
+      'formats a NightDesignation activity with action %s using the per-action label',
+      (action, expectedTitle) => {
+        const activity: Activity = {
+          accountId,
+          activityId: `night-designation-${action}-activity`,
+          timestamp: Timestamp(fakeNowTimestamp),
+          tokenBalanceChanges: [
+            { tokenId: tokenId1, amount: BigNumber(-2000000n) },
+          ],
+          type: ActivityType.NightDesignation,
+          blockchainSpecific: { Cardano: { nightDesignation: { action } } },
+        };
 
-      const result = formatAndGroupActivitiesByDate({
-        activities: [activity],
-        t: mockT,
-        tokensMetadataByTokenId,
-      });
+        const result = formatAndGroupActivitiesByDate({
+          activities: [activity],
+          t: mockT,
+          tokensMetadataByTokenId,
+        });
 
-      expect(result[0].items[0]).toMatchObject({
-        id: activity.activityId,
-        rowKey: activityListRowKey(activity),
-        iconBackground: 'secondary',
-        iconName: 'Moon',
-        status: 'nightDesignation',
-        info: {
-          title: 'NIGHT Designation',
-        },
-      });
-    });
+        expect(result[0].items[0]).toMatchObject({
+          id: activity.activityId,
+          rowKey: activityListRowKey(activity),
+          iconBackground: 'secondary',
+          iconName: 'Moon',
+          status: 'nightDesignation',
+          info: {
+            title: expectedTitle,
+          },
+        });
+      },
+    );
+
+    it.each([
+      ['no blockchainSpecific at all', undefined],
+      ['Cardano metadata without a nightDesignation entry', { Cardano: {} }],
+      [
+        'an action outside the known union',
+        { Cardano: { nightDesignation: { action: 'future-action' } } },
+      ],
+    ])(
+      'formats a NightDesignation activity with %s using the generic fallback label',
+      (_shape, blockchainSpecific) => {
+        const activity: Activity = {
+          accountId,
+          activityId: 'night-designation-activity',
+          timestamp: Timestamp(fakeNowTimestamp),
+          tokenBalanceChanges: [
+            { tokenId: tokenId1, amount: BigNumber(-2000000n) },
+          ],
+          type: ActivityType.NightDesignation,
+          ...(blockchainSpecific === undefined ? {} : { blockchainSpecific }),
+        };
+
+        const result = formatAndGroupActivitiesByDate({
+          activities: [activity],
+          t: mockT,
+          tokensMetadataByTokenId,
+        });
+
+        expect(result[0].items[0]).toMatchObject({
+          id: activity.activityId,
+          rowKey: activityListRowKey(activity),
+          iconBackground: 'secondary',
+          iconName: 'Moon',
+          status: 'nightDesignation',
+          info: {
+            title: 'DUST designation',
+          },
+        });
+      },
+    );
 
     it('formats Withdrawal activity correctly', () => {
       const activity: Activity = {
@@ -723,7 +773,7 @@ describe('formatAndGroupActivitiesByDate', () => {
   });
 
   describe('edge cases', () => {
-    it('should handle activities with empty token balance changes', () => {
+    it('should show no value for activities with empty token balance changes', () => {
       const activity: Activity = {
         accountId,
         activityId: 'empty-tokens-activity',
@@ -740,18 +790,7 @@ describe('formatAndGroupActivitiesByDate', () => {
 
       const item = result[0].items[0];
       expect(item.rowKey).toBe(activityListRowKey(activity));
-      expect(
-        'title' in item.value &&
-          item.value.title &&
-          'amount' in item.value.title &&
-          item.value.title.amount,
-      ).toBe('');
-      expect(
-        'title' in item.value &&
-          item.value.title &&
-          'label' in item.value.title &&
-          item.value.title.label,
-      ).toBe('Unknown');
+      expect('title' in item.value && item.value.title).toBeFalsy();
     });
 
     it('should preserve original activities array (immutability)', () => {

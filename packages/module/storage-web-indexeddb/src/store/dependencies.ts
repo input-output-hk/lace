@@ -33,11 +33,13 @@ export const initializeDependencies: LaceInitSync<
       ),
     createCollectionStorage: <T extends object>({
       collectionId,
+      computeDocId,
     }: Readonly<CreateCollectionStorageProps<T>>) =>
-      new CollectionStore<T>(
+      new CollectionStore<T>({
         collectionId,
-        storageApi as StorageAdapter<T[]>,
+        storage: storageApi,
         logger,
-      ),
+        computeDocId,
+      }),
   };
 };

@@ -40,28 +40,25 @@ const openDatabase = async () => {
 
 const getDatabase = (() => {
   let database: Promise<IDBDatabase> | undefined;
-  return async () => (database ??= openDatabase());
+  return async () =>
+    (database ??= openDatabase().catch((error: unknown) => {
+      // Drop the memo on failure. A cached rejection fails every later read for
+      // the rest of the session, leaving no path back to a working database.
+      database = undefined;
+      throw error;
+    }));
 })();
 
 export const storageApi: StorageAdapter<unknown> = {
   getItem: async key => {
-    try {
-      const db = await getDatabase();
-      const value = await awaitRequest<unknown>(
-        db
-          .transaction(OBJECT_STORE_NAME, 'readonly')
-          .objectStore(OBJECT_STORE_NAME)
-          .get(key),
-      );
-      return Serializable.from(value as Serializable<unknown>) ?? null;
-    } catch (error) {
-      // null (not throw) because DocumentStorage.get() is documented to complete
-      // without emitting on failure and BaseStore has no catchError — but a broken
-      // db must not be silently indistinguishable from a fresh install
-      // eslint-disable-next-line no-console
-      console.warn(`storage-web-indexeddb: failed to read '${key}'`, error);
-      return null;
-    }
+    const db = await getDatabase();
+    const value = await awaitRequest<unknown>(
+      db
+        .transaction(OBJECT_STORE_NAME, 'readonly')
+        .objectStore(OBJECT_STORE_NAME)
+        .get(key),
+    );
+    return Serializable.from(value as Serializable<unknown>) ?? null;
   },
   setItem: async (key, value) => {
     const db = await getDatabase();

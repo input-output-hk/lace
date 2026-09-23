@@ -51,11 +51,16 @@ export type BitcoinRequestData<R extends BitcoinRequestType> =
   R extends 'signMessage' ? SignMessageRequestData : SignPsbtRequestData;
 
 /**
- * Result of a user confirmation action.
+ * Outcome of a user confirmation action.
+ *
+ * `unavailable` is deliberately distinct from `rejected`: it means the wallet
+ * never managed to show the prompt, so the user was never asked. Reporting it
+ * as a refusal would be a lie a dApp acts on — refusals are what dApps branch
+ * on to stop retrying. Mirrors the Cardano connector's outcome union.
  */
 export type BitcoinConfirmationResult = {
-  /** Whether the user confirmed or rejected the request */
-  isConfirmed: boolean;
+  /** How the confirmation request was resolved */
+  outcome: 'confirmed' | 'rejected' | 'unavailable';
 };
 
 /**

@@ -1,8 +1,9 @@
 import { isHardwareWallet } from '@lace-contract/wallet-repo';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { SignTxLayout, SignTxResult } from '../../common/components';
+import { useSignTxRefusal } from '../../common/components/useSignTxRefusal';
 import { useLaceSelector } from '../../common/hooks';
 import {
   useSignTxData,
@@ -10,13 +11,23 @@ import {
 } from '../../common/hooks/useSignTxData';
 import { useDappPopupFlow, useDappViewClose } from '../hooks';
 
+type CardanoDappSignTxProps = {
+  /** The request this sheet presents, from its route params. */
+  requestId: string;
+};
+
 /**
  * Extension popup view for dApp transaction signing.
  * Uses the same common SignTx UI (SignTxView, SignTxContent, SignTxResult) as mobile.
  * Flow (confirm/reject, success close) is browser-specific; shared tx data comes from useSignTxData.
  */
-export const CardanoDappSignTx = () => {
-  const closeDappView = useDappViewClose();
+export const CardanoDappSignTx = ({ requestId }: CardanoDappSignTxProps) => {
+  // The route param, not the synced request: it is the discriminator the slot
+  // is matched against, and it outlives the request being cleared — which a
+  // port drop can do before this view ever renders one.
+  const requestIdRef = useRef<string | undefined>(requestId);
+  requestIdRef.current = requestId;
+  const closeDappView = useDappViewClose(undefined, requestIdRef);
 
   const {
     request,
@@ -30,8 +41,17 @@ export const CardanoDappSignTx = () => {
     onReject: closeDappView,
   });
 
+  // The verdict reaches this view through the pending-request slice only --
+  // the sheet route params are discarded by `sheetPages.tsx`.
+  const refusal = useSignTxRefusal({
+    collateralRefusal: request?.collateralRefusal,
+    dappOrigin: request?.dapp.origin,
+  });
+
   const signTxData: UseSignTxDataResult = useSignTxData({
-    txHex: request?.txHex ?? '',
+    // Shape A: a refused request renders no transaction-derived value, so it
+    // is not inspected, resolved or priced either -- the CBOR is hostile.
+    txHex: refusal ? '' : request?.txHex ?? '',
     dappOrigin: request?.dappOrigin,
   });
 
@@ -104,7 +124,8 @@ export const CardanoDappSignTx = () => {
   ) : null;
 
   const hasError = Boolean(request && signTxData.transactionError);
-  const isShowingLoading = !isComplete && !isError && (isLoading || !request);
+  const isShowingLoading =
+    !refusal && !isComplete && !isError && (isLoading || !request);
 
   const contentProps =
     request && signTxData.transactionInfo
@@ -131,6 +152,7 @@ export const CardanoDappSignTx = () => {
     <SignTxLayout
       resultView={resultView}
       hasError={hasError}
+      refusal={refusal}
       showLoading={isShowingLoading}
       contentProps={contentProps}
       onConfirm={handleConfirmWithHwIndicator}

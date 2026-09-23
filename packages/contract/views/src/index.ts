@@ -6,6 +6,7 @@ export type {
   HistoryMethod,
   LocationChangedPayload,
   OpenViewPayload,
+  ThemePreference,
   ViewsHistory,
   ViewsSliceState,
   ViewsStoreState,

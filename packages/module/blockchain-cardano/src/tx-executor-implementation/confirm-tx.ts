@@ -1,6 +1,9 @@
 import { Cardano } from '@cardano-sdk/core';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
-import { isCardanoAddress } from '@lace-contract/cardano-context';
+import {
+  createInputResolver,
+  isCardanoAddress,
+} from '@lace-contract/cardano-context';
 import { signerAuthFromPrompt } from '@lace-contract/signer';
 import {
   genericErrorResults,
@@ -11,7 +14,7 @@ import { HexBytes } from '@lace-lib/util';
 import { mapHwSigningError } from '@lace-lib/util-hw';
 import { filterRedacted } from '@lace-lib/util-redacted';
 import { serializeError, type ErrorObject } from '@lace-lib/util-store';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, combineLatest, map, of, switchMap } from 'rxjs';
 
 import { mergePreExistingVkeys } from './merge-pre-existing-vkeys';
 
@@ -33,6 +36,7 @@ export const makeConfirmTx = (
     signerFactory,
   }: SideEffectDependencies,
   cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
+  cardanoCollateralOwnershipUtxos$: Observable<AccountUtxoMap>,
 ): TxExecutorImplementation['confirmTx'] => {
   return ({ serializedTx, wallet, accountId }) => {
     const auth = signerAuthFromPrompt(
@@ -45,8 +49,14 @@ export const makeConfirmTx = (
     );
 
     return cardanoAddresses$.pipe(
-      blockingWithLatestFrom(cardanoAvailableAccountUtxos$),
-      switchMap(([cardanoAddresses, cardanoAvailableAccountUtxos]) => {
+      blockingWithLatestFrom(
+        combineLatest([
+          cardanoAvailableAccountUtxos$,
+          cardanoCollateralOwnershipUtxos$,
+        ]),
+      ),
+      switchMap(([cardanoAddresses, utxoViews]) => {
+        const [cardanoAvailableAccountUtxos, cardanoOwnershipUtxos] = utxoViews;
         // TODO: We need account known addresses here.
         const knownAddresses = cardanoAddresses
           .filter(
@@ -66,12 +76,18 @@ export const makeConfirmTx = (
           }));
 
         const availableUtxo = cardanoAvailableAccountUtxos[accountId] ?? [];
+        // The collateral resolver's only layer: the ownership authority
+        // (settled + own pending outputs), not `availableUtxo`, which
+        // subtracts the collateral-reserved UTxOs. No provider here: an
+        // input this cannot resolve is not ours (LW-15506).
+        const ownershipUtxos = cardanoOwnershipUtxos[accountId] ?? [];
 
         const context: CardanoTransactionSignerContext = {
           wallet,
           accountId,
           knownAddresses,
           utxo: availableUtxo,
+          collateralInputResolver: createInputResolver(ownershipUtxos),
           auth,
         };
         const signer = signerFactory.createTransactionSigner(context);

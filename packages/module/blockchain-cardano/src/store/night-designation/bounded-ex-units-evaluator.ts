@@ -9,11 +9,13 @@ import type { TxEvaluator } from '@cardano-sdk/tx-construction';
 // declare ~2× the tx limit and be rejected at Phase-1. The cNIGHT
 // validator's redeemers are tiny (a signature check, a singleton-NFT
 // check, a rotation-list scan, a datum-shape check) — well under the
-// budget below — so we feed `initializeTx` a fixed per-redeemer budget
-// instead. It over-pays the fee by ~0.3–0.9 ADA across the redeemers,
-// which the protocol accepts; this mirrors the budget the Carbon app
-// ships. Swapping in a provider-backed evaluator (Ogmios / Blockfrost
-// `/utils/txs/evaluate`) later is a drop-in on this same seam.
+// budget below — so this assigns a fixed per-redeemer budget instead.
+// It over-pays the fee by ~0.3–0.9 ADA across the redeemers, which the
+// protocol accepts.
+//
+// `provider-ex-units-evaluator.ts` wraps this and replaces each budget
+// with what the network prices the redeemer at; what stays here is the
+// floor a redeemer keeps when no price arrives.
 //
 // Per-redeemer budget × at most 3 redeemers stays comfortably under the
 // Plutus V3 mainnet tx limit (mem 14_000_000, steps 10_000_000_000):
