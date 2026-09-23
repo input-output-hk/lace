@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*",
+    "@lace-lib/util-dev-cardano": "*",
     "@lace-lib/util-provider": "*"
   }
 }

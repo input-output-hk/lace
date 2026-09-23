@@ -8,8 +8,11 @@ import React, { useEffect } from 'react';
 import { SignTxContent } from './SignTxContent';
 import { SignTxError } from './SignTxError';
 import { SignTxLoadingContent } from './SignTxLoadingContent';
+import { SignTxRefused } from './SignTxRefused';
 import { SignTxView } from './SignTxView';
+import { signTxCopy } from './useSignTxRefusal';
 
+import type { SignTxRefusalDetails } from './sign-tx-refused-keys';
 import type { SignTxContentProps } from './SignTxContent';
 
 export interface SignTxLayoutProps {
@@ -17,6 +20,18 @@ export interface SignTxLayoutProps {
   resultView: React.ReactNode | null;
   /** Show error state (error title + error content). */
   hasError: boolean;
+  /**
+   * When set, the collateral-ownership guard blocked this request, so the
+   * sheet shows the REFUSED state -- refusal copy, the requesting origin, no
+   * transaction detail, and NO confirm button (the `primaryButton` prop is
+   * omitted entirely, the same idiom `hasError` already uses). Case and
+   * origin travel together so neither can be rendered without the other.
+   *
+   * Distinct from `hasError` on purpose: a technical failure must keep
+   * rendering the generic `error-title`/`error-try-again` copy, never the
+   * `refused.*` copy.
+   */
+  refusal?: SignTxRefusalDetails | null;
   /** Show loading spinner instead of content. */
   showLoading: boolean;
   /** When present and not loading/error, show SignTxContent with these props. */
@@ -38,6 +53,7 @@ export interface SignTxLayoutProps {
 export const SignTxLayout = ({
   resultView,
   hasError,
+  refusal = null,
   showLoading,
   contentProps,
   onConfirm,
@@ -50,9 +66,11 @@ export const SignTxLayout = ({
   const { theme } = useTheme();
   const navigation = useNavigation();
 
-  const title = hasError
-    ? t('dapp-connector.cardano.sign-tx.error-title')
-    : t('dapp-connector.cardano.sign-tx.title');
+  const { titleKey, dismissLabelKey, shouldSuppressPrimary } = signTxCopy(
+    refusal,
+    hasError,
+  );
+  const title = t(titleKey);
 
   const isConfirmButtonDisabled =
     confirmDisabled || showLoading || !contentProps;
@@ -65,7 +83,7 @@ export const SignTxLayout = ({
       footer: (
         <Sheet.Footer
           primaryButton={
-            hasError
+            shouldSuppressPrimary
               ? undefined
               : {
                   label: t('dapp-connector.cardano.sign-tx.confirm'),
@@ -76,7 +94,7 @@ export const SignTxLayout = ({
                 }
           }
           secondaryButton={{
-            label: t('dapp-connector.cardano.sign-tx.cancel'),
+            label: t(dismissLabelKey),
             testID: 'dapp-sign-tx-reject-button',
             onPress: onReject,
           }}
@@ -89,6 +107,8 @@ export const SignTxLayout = ({
     resultView,
     title,
     hasError,
+    shouldSuppressPrimary,
+    dismissLabelKey,
     isConfirmButtonDisabled,
     onConfirm,
     onReject,
@@ -97,7 +117,11 @@ export const SignTxLayout = ({
   ]);
 
   let scrollContent: React.ReactNode;
-  if (hasError) {
+  if (refusal) {
+    // Precedence over `hasError`: a blocked transaction is refused, not
+    // broken, and the two states never co-render.
+    scrollContent = <SignTxRefused refusal={refusal} style={errorStyle} />;
+  } else if (hasError) {
     scrollContent = <SignTxError style={errorStyle} />;
   } else if (showLoading || !contentProps) {
     scrollContent = <SignTxLoadingContent style={loadingStyle} />;

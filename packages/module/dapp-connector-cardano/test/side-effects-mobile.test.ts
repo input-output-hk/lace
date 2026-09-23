@@ -1,4 +1,5 @@
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
+import { collateralRefusalMessage } from '@lace-contract/cardano-context';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { Ok, Timestamp } from '@lace-lib/util';
 import { type DeepPartialTilObservable } from '@lace-lib/util-dev';
@@ -16,6 +17,7 @@ import {
   handleSignDataConfirmation,
   handleSignDataRejection,
   handleSignTxRejection,
+  resolveForeignTransactionInputsMobile,
   processWebViewMessage,
 } from '../src/mobile/store/side-effects';
 
@@ -54,6 +56,9 @@ vi.mock('@lace-contract/cardano-context', async importOriginal => {
     isCardanoAccount: () => true,
     // Real class so the signData error mapping's instanceof checks work.
     UnknownSignWithError: actual.UnknownSignWithError,
+    // Real guard error + copy so the collateral refusal paths run unmocked.
+    CollateralOwnershipError: actual.CollateralOwnershipError,
+    collateralRefusalMessage: actual.collateralRefusalMessage,
   };
 });
 
@@ -552,6 +557,9 @@ describe('mobile side effects', () => {
             dapp: expectedDappInfo,
             txHex,
             partialSign: false,
+            // Mobile has no pre-sheet collateral seam yet, so every request
+            // it presents is reviewable.
+            collateralRefusal: null,
           },
         ),
       );
@@ -603,6 +611,106 @@ describe('mobile side effects', () => {
     });
   });
 
+  describe('processWebViewMessage - refused signTx (LW-15498)', () => {
+    it("test:mobile-refused-response-identity — answers the dApp at once with the extension's code and sentence and opens the sheet with the verdict", async () => {
+      const message = createMessage('req-refused-1', 'signTx');
+      const dappOrigin = 'https://dapp.example';
+      cip30Mocks.handleCip30Message.mockResolvedValue({
+        type: 'signing_required',
+        requestId: message.id,
+        dappOrigin,
+        dappName: 'dapp.example',
+        signingType: 'signTx',
+        txHex: 'abcd1234',
+        partialSign: true,
+        collateralRefusal: 'foreign-collateral-return',
+      });
+      const action =
+        cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
+          message,
+          dappOrigin,
+          timestamp: 0,
+        });
+      const output$ = invokeProcessWebViewMessage(action, {
+        cardanoDappConnector: {
+          selectSessionAuthorizedOrigins$: of([dappOrigin]),
+          selectSessionAccountByOrigin$: of({
+            [dappOrigin]: AccountId('acc-1'),
+          }),
+        },
+      });
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: message.id,
+          success: false,
+          error: {
+            code: TxSignErrorCode.ProofGeneration,
+            info: collateralRefusalMessage('foreign-collateral-return'),
+          },
+          timestamp: expect.any(Number) as unknown as number,
+        }),
+        cardanoDappConnectorActions.cardanoDappConnector.setPendingSignTxRequest(
+          {
+            requestId: message.id,
+            dappOrigin,
+            dapp: { name: 'dapp.example', origin: dappOrigin },
+            txHex: 'abcd1234',
+            partialSign: true,
+            collateralRefusal: 'foreign-collateral-return',
+          },
+        ),
+      ]);
+      expect(navigationMocks.navigate).toHaveBeenCalledWith(
+        'SignTx',
+        expect.objectContaining({ requestId: message.id }),
+      );
+    });
+
+    it('test:mobile-refused-not-inspected — the foreign-input resolver skips a refused pending request and never calls the provider', async () => {
+      const resolveInput = vi.fn();
+      const deps = createDependencies();
+      (
+        deps as unknown as { cardanoProvider: { resolveInput: unknown } }
+      ).cardanoProvider.resolveInput = resolveInput;
+      const output$ = resolveForeignTransactionInputsMobile(
+        {
+          cardanoDappConnector: {
+            setPendingSignTxRequest$: of(
+              cardanoDappConnectorActions.cardanoDappConnector.setPendingSignTxRequest(
+                {
+                  requestId: 'req-refused-2',
+                  dappOrigin: 'https://dapp.example',
+                  dapp: {
+                    name: 'dapp.example',
+                    origin: 'https://dapp.example',
+                  },
+                  txHex: 'abcd1234',
+                  partialSign: true,
+                  collateralRefusal: 'foreign-collateral-return',
+                },
+              ),
+            ),
+          },
+        } as unknown as ActionObservables<ActionCreators>,
+        {
+          cardanoContext: {
+            selectAccountUtxos$: of({}),
+            selectChainId$: of(undefined),
+          },
+        } as unknown as StateObservables<Selectors>,
+        deps as unknown as SideEffectDependencies &
+          WithLaceContext<Selectors, ActionCreators>,
+      );
+      const emitted: unknown[] = [];
+      const sub = output$.subscribe(a => emitted.push(a));
+      await new Promise(r => setTimeout(r, 10));
+      sub.unsubscribe();
+      expect(emitted).toEqual([]);
+      expect(resolveInput).not.toHaveBeenCalled();
+    });
+  });
+
   describe('handleSignTxRejection', () => {
     const invokeHandleSignTxRejection = (
       pendingRequest: {
@@ -611,6 +719,7 @@ describe('mobile side effects', () => {
         dapp: { icon: { fallback: string }; name: string; origin: string };
         txHex: string;
         partialSign: boolean;
+        collateralRefusal?: 'foreign-collateral-return' | null;
       } | null,
     ) => {
       const actionObservables = {
@@ -659,6 +768,28 @@ describe('mobile side effects', () => {
           },
           timestamp: 789,
         }),
+        cardanoDappConnectorActions.cardanoDappConnector.clearPendingSignTxRequest(),
+      ]);
+    });
+
+    it('test:mobile-refused-dismissal-silent — a refused request is cleared, its queued answer retired, and no second answer is sent', async () => {
+      const output$ = invokeHandleSignTxRejection({
+        requestId: 'tx-refused',
+        dappOrigin: 'https://dapp.example',
+        dapp: {
+          icon: { fallback: 'D' },
+          name: 'dapp.example',
+          origin: 'https://dapp.example',
+        },
+        txHex: 'abcd1234',
+        partialSign: true,
+        collateralRefusal: 'foreign-collateral-return',
+      });
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.clearWebViewResponse(
+          'tx-refused',
+        ),
         cardanoDappConnectorActions.cardanoDappConnector.clearPendingSignTxRequest(),
       ]);
     });

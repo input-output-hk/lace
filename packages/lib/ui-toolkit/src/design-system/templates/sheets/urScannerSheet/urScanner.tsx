@@ -23,6 +23,7 @@ export const UrScanner = ({
   onComplete,
   onCancel,
   onError,
+  createDecoder,
   theme,
 }: UrScannerProps) => {
   const { t } = useTranslation();
@@ -31,6 +32,7 @@ export const UrScanner = ({
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
 
   const { progress, isComplete, receiveFrame } = useUrReassembly({
+    createDecoder,
     onComplete,
     onError,
   });
@@ -53,13 +55,22 @@ export const UrScanner = ({
   }, [requestPermission]);
 
   useEffect(() => {
-    if (
-      !permission?.granted &&
-      permission?.canAskAgain !== false &&
-      !hasRequestedOnce
-    ) {
-      void handleRequestPermission();
-    }
+    // WAIT for the first permission read before asking for anything.
+    //
+    // `useCameraPermissions` answers `null` until its async check resolves, and
+    // `!null?.granted` is `true` — so this asked on EVERY mount, including when
+    // the permission was already granted. On Android that ask is not a no-op:
+    // `requestPermissions` launches the system GrantPermissionsActivity, which
+    // is a real Activity (transparent, so it auto-resolves with nothing on
+    // screen). The host activity is PAUSED for it, React Native reports
+    // AppState 'background', and the app's own auto-lock treats backgrounding
+    // as lock-now — clearing the session AND cancelling the in-flight hardware
+    // operation. The air-gapped exchange this scanner was mounted for died
+    // before the camera could read one frame, and a retry repeated it.
+    if (permission === null) return;
+    if (permission.granted || !permission.canAskAgain) return;
+    if (hasRequestedOnce) return;
+    void handleRequestPermission();
   }, [permission, hasRequestedOnce, handleRequestPermission]);
 
   useEffect(() => {
@@ -81,8 +92,13 @@ export const UrScanner = ({
     [isComplete, receiveFrame],
   );
 
-  if (!permission?.granted) {
-    const canAskAgain = permission?.canAskAgain !== false;
+  // The initial read is in flight; `null` is not "denied". Rendering the denied
+  // state here flashed a permission wall over a scanner that was about to be
+  // perfectly usable.
+  if (permission === null) return null;
+
+  if (!permission.granted) {
+    const { canAskAgain } = permission;
     return (
       <View style={styles.permissionContent}>
         <Text.L style={styles.permissionTitle}>

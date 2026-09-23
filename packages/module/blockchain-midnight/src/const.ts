@@ -25,10 +25,6 @@ export const FEATURE_FLAG_BLOCKCHAIN_MIDNIGHT_TESTNET_SUPPORT = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_TESTNET_SUPPORT',
 );
 
-export const FEATURE_FLAG_MIDNIGHT_DISCLAIMER = FeatureFlagKey(
-  'MIDNIGHT_DISCLAIMER',
-);
-
 export type GatedMidnightSDKNetworkId = Exclude<
   MidnightSDKNetworkId,
   'undeployed'

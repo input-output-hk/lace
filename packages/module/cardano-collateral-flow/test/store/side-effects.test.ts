@@ -5,6 +5,7 @@ import {
   COLLATERAL_AMOUNT_LOVELACES,
   utxoKey,
 } from '@lace-contract/cardano-context';
+import { makeConfirmTx } from '@lace-contract/tx-executor';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
@@ -28,7 +29,10 @@ import {
 
 import type { CollateralFlowSliceState } from '@lace-contract/cardano-context';
 import type { Token } from '@lace-contract/tokens';
-import type { TxBuildResult } from '@lace-contract/tx-executor';
+import type {
+  TxBuildResult,
+  TxConfirmationResult,
+} from '@lace-contract/tx-executor';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 vi.mock('@lace-contract/tx-executor', async importOriginal => {
@@ -45,10 +49,9 @@ vi.mock('@lace-contract/tx-executor', async importOriginal => {
       fees: [],
       serializedTx: 'serializedTx',
     }),
-    makeConfirmTx: makeStub({
-      success: true as const,
-      serializedTx: 'signedTx',
-    }),
+    makeConfirmTx: vi.fn(
+      makeStub({ success: true as const, serializedTx: 'signedTx' }),
+    ),
     makeSubmitTx: makeStub({
       success: true as const,
       txId: 'txId123',
@@ -394,6 +397,49 @@ describe('collateral-flow sideEffects', () => {
           });
         },
       }));
+    });
+
+    it('drops a confirmation that lands after the flow left Confirming', () => {
+      testSideEffect(
+        {
+          build: ({ cold }) => {
+            vi.mocked(makeConfirmTx).mockReturnValueOnce(((
+              _params: unknown,
+              mapResult: (r: TxConfirmationResult) => unknown,
+            ) =>
+              cold('-----a', {
+                a: mapResult({ success: true, serializedTx: 'signedTx' }),
+              })) as unknown as ReturnType<typeof makeConfirmTx>);
+            return confirmingSideEffect;
+          },
+        },
+        ({ cold, expectObservable }) => ({
+          actionObservables: {
+            txExecutor: { txPhaseCompleted$: cold('') },
+          },
+          stateObservables: {
+            collateralFlow: {
+              // The sheet closes while the prompt is open: Confirming ->
+              // DiscardingTx, and the synchronous discard settles in Idle by
+              // frame 3. The prompt only resolves at frame 5.
+              selectState$: cold('a--b', {
+                a: {
+                  status: 'Confirming',
+                  accountId: testAccountId,
+                  wallet: testWallet,
+                  fees: [],
+                  serializedTx: 'serializedTx',
+                } satisfies CollateralFlowSliceState,
+                b: { status: 'Idle' } satisfies CollateralFlowSliceState,
+              }),
+            },
+          },
+          dependencies: { actions },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('');
+          },
+        }),
+      );
     });
   });
 

@@ -1,3 +1,4 @@
+import { featureStoreContract } from '@lace-contract/feature';
 import {
   ContractName,
   combineContracts,
@@ -30,7 +31,13 @@ export const analyticsStoreContract = inferContractContext({
   contractType: 'store',
   name: ContractName('analytics-store'),
   instance: 'exactly-one',
-  dependsOn: combineContracts([analyticsProviderDependencyContract] as const),
+  // featureStoreContract: the consent gate reads ANALYTICS_CONSENT_REQUIRED
+  // out of the loaded features. Every analytics implementation already
+  // declared this dependency, so no loadout changes.
+  dependsOn: combineContracts([
+    analyticsProviderDependencyContract,
+    featureStoreContract,
+  ] as const),
   mixin: createMixin(laceModule => ({
     store: combineStore(laceModule, store),
   })),

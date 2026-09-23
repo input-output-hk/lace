@@ -9,6 +9,7 @@ import {
   type TokenTransferValue,
 } from '../../compute-net-flows';
 
+import { computeOwnNetCoins } from './compute-own-net-coins';
 import { inputOutputTransformer } from './input-output-transform';
 import {
   createTransactionInspector,
@@ -54,18 +55,27 @@ export type BuildCardanoTransactionParams = {
       Cardano.HydratedTxBody,
       | 'certificates'
       | 'donation'
+      | 'inputs'
       | 'outputs'
       | 'proposalProcedures'
       | 'votingProcedures'
+      | 'withdrawals'
     >;
   };
   summary: Pick<
     TransactionSummaryInspection,
-    'coins' | 'collateral' | 'deposit' | 'resolvedInputs' | 'returnedDeposit'
+    | 'coins'
+    | 'collateral'
+    | 'deposit'
+    | 'resolvedInputs'
+    | 'returnedDeposit'
+    | 'unresolved'
   >;
   metadata: MetadataInspection;
   assetsInfo: Map<Cardano.AssetId, TokenMetadata<CardanoTokenMetadata>>;
   accountAddresses: Cardano.PaymentAddress[];
+  rewardAccount: Cardano.RewardAccount;
+  protocolParameters: RequiredProtocolParameters;
   tokenTransfer: {
     fromAddress: Map<Cardano.PaymentAddress, SdkTokenTransferValue>;
     toAddress: Map<Cardano.PaymentAddress, SdkTokenTransferValue>;
@@ -165,18 +175,23 @@ const buildCardanoTransaction = ({
   txDetails: {
     auxiliaryData,
     body: {
+      inputs,
       outputs,
       votingProcedures,
       proposalProcedures,
       certificates,
       donation,
+      withdrawals,
     },
   },
-  summary: { coins, resolvedInputs, collateral, deposit, returnedDeposit },
+  summary,
   assetsInfo,
   accountAddresses,
+  rewardAccount,
+  protocolParameters,
   tokenTransfer,
 }: BuildCardanoTransactionParams): CardanoTransaction => {
+  const { collateral, deposit, resolvedInputs, returnedDeposit } = summary;
   const addrInputs = resolvedInputs.map(input =>
     inputOutputTransformer(input, assetsInfo),
   );
@@ -194,7 +209,13 @@ const buildCardanoTransaction = ({
     txSummary = buildTxSummaryFromNetFlows(
       netFlows,
       accountAddresses,
-      coins > 0n,
+      computeOwnNetCoins({
+        accountAddresses,
+        rewardAccount,
+        protocolParameters,
+        txBody: { certificates, inputs, outputs, withdrawals },
+        summary,
+      }) > 0n,
     );
   }
 
@@ -252,6 +273,8 @@ export const mapTransactionToActivityDetails = ({
         metadata,
         assetsInfo,
         accountAddresses,
+        rewardAccount: Cardano.RewardAccount(rewardAccount),
+        protocolParameters,
         tokenTransfer,
       }),
     })),

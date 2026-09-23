@@ -2,6 +2,7 @@ import { Serialization } from '@cardano-sdk/core';
 import {
   applyVkeyWitnesses,
   createCardanoKeyAgentFromEncryptedRoot,
+  createInputResolver,
 } from '@lace-contract/cardano-context';
 import {
   AuthenticationCancelledError,
@@ -152,13 +153,24 @@ export const signSweepTxWithDevice = (
     ),
   ).pipe(
     concatMap(account => {
+      // `utxos` spans every account in the sweep plan; the ownership authority
+      // is this account's alone, so a sibling account's collateral is not
+      // identifiable here and reads as not ours (LW-15506).
+      const accountKnownAddresses = addresses.filter(
+        a => a.accountIndex === account.accountIndex,
+      );
+      const accountAddressSet = new Set(
+        accountKnownAddresses.map(({ address }) => address),
+      );
+      const ownershipUtxos = utxos.filter(([, txOut]) =>
+        accountAddressSet.has(txOut.address),
+      );
       const context: CardanoTransactionSignerContext = {
         wallet,
         accountId: account.accountId,
-        knownAddresses: addresses.filter(
-          a => a.accountIndex === account.accountIndex,
-        ),
+        knownAddresses: accountKnownAddresses,
         utxo: utxos,
+        collateralInputResolver: createInputResolver(ownershipUtxos),
         auth,
       };
       return dependencies.signerFactory

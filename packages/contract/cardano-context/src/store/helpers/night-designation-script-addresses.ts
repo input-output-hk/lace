@@ -27,8 +27,8 @@ import type { Cardano } from '@cardano-sdk/core';
 // inputs; the registry alone classifies the tx as "NightDesignation"
 // but the inspector resolves the variant from the tx body.
 //
-// `dustPubkeyHex` (the 32-byte Midnight coin pubkey written into the
-// new DustMappingDatum) is NOT extracted from the on-chain tx in
+// `dustPubkeyHex` (the variable-length ≤33-byte dust-address payload
+// written into the new DustMappingDatum) is NOT extracted from the on-chain tx in
 // this classifier — that requires decoding the inline datum's
 // PlutusData. The pending-activity side-effect carries it directly
 // from the slice state (where it's known to the caller); the

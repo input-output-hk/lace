@@ -18,10 +18,13 @@ const mocks = vi.hoisted(() => ({
   isResolvingInputs: false,
   inspection: undefined as unknown,
   hasError: false,
+  isError: false,
   handleConfirm: vi.fn(),
   handleReject: vi.fn(),
+  closeDappView: vi.fn(),
   psbtContentProps: { current: null as SignPsbtContentProps | null },
   viewCloseLocation: { current: undefined as string | undefined },
+  hookOptions: { current: null as { onReject?: () => void } | null },
   layoutProps: {
     current: null as {
       primaryButton?: LayoutButton;
@@ -36,14 +39,16 @@ vi.mock('@lace-contract/i18n', async importOriginal => ({
 }));
 
 vi.mock('../../src/hooks', () => ({
-  useDappPopupFlow: () => ({
+  useDappPopupFlow: (options: { onReject?: () => void }) => ({
     request: mocks.request,
     handleConfirm: mocks.handleConfirm,
     handleReject: mocks.handleReject,
+    isError: mocks.isError,
+    options: (mocks.hookOptions.current = options),
   }),
   useDappViewClose: (location?: string) => {
     mocks.viewCloseLocation.current = location;
-    return vi.fn();
+    return mocks.closeDappView;
   },
   useDispatchLaceAction: () => vi.fn(),
   useSignPsbtData: () => ({
@@ -110,11 +115,14 @@ describe('BitcoinDappSignTxPopup', () => {
     mocks.isResolvingInputs = false;
     mocks.inspection = undefined;
     mocks.hasError = false;
+    mocks.isError = false;
     mocks.handleConfirm.mockClear();
     mocks.handleReject.mockClear();
+    mocks.closeDappView.mockClear();
     mocks.psbtContentProps.current = null;
     mocks.layoutProps.current = null;
     mocks.viewCloseLocation.current = undefined;
+    mocks.hookOptions.current = null;
   });
 
   it('closes through the sign tx popup location instead of window.close', () => {
@@ -154,5 +162,76 @@ describe('BitcoinDappSignTxPopup', () => {
     expect(screen.queryByTestId('sign-psbt-content')).toBeNull();
     expect(mocks.layoutProps.current?.primaryButton).toBeUndefined();
     expect(mocks.layoutProps.current?.secondaryButton).toBeDefined();
+  });
+
+  it('rejects through the view close so the error state has an exit', () => {
+    mocks.isError = true;
+
+    render(<BitcoinDappSignTxPopup />);
+
+    expect(mocks.hookOptions.current?.onReject).toBe(mocks.closeDappView);
+    expect(mocks.layoutProps.current?.secondaryButton).toBeDefined();
+  });
+
+  it('offers a plain close on the error state, dispatching no reject', () => {
+    mocks.isError = true;
+
+    render(<BitcoinDappSignTxPopup />);
+    mocks.layoutProps.current?.secondaryButton?.action();
+
+    expect(mocks.layoutProps.current?.secondaryButton?.label).toBe(
+      'dapp-connector.bitcoin.result.close',
+    );
+    expect(mocks.closeDappView).toHaveBeenCalled();
+    expect(mocks.handleReject).not.toHaveBeenCalled();
+  });
+
+  it('declines the request through its Cancel while it is still unanswered', () => {
+    mocks.request = request;
+
+    render(<BitcoinDappSignTxPopup />);
+    mocks.layoutProps.current?.secondaryButton?.action();
+
+    expect(mocks.layoutProps.current?.secondaryButton?.label).toBe(
+      'dapp-connector.bitcoin.sign-psbt.cancel',
+    );
+    expect(mocks.handleReject).toHaveBeenCalled();
+  });
+
+  it('shows the error content when the signing result failed, with no request left', () => {
+    mocks.isError = true;
+
+    render(<BitcoinDappSignTxPopup />);
+
+    expect(screen.getByTestId('sign-review-error')).toBeTruthy();
+    expect(screen.queryByTestId('sign-review-loading')).toBeNull();
+    expect(mocks.layoutProps.current?.primaryButton).toBeUndefined();
+  });
+
+  it('keeps the popup open on a signing failure after the user confirmed', () => {
+    mocks.request = request;
+    mocks.inspection = { inputs: [], outputs: [] };
+    const { rerender } = render(<BitcoinDappSignTxPopup />);
+    mocks.layoutProps.current?.primaryButton?.action();
+
+    // The failure clears the request and raises the error together.
+    mocks.request = null;
+    mocks.isError = true;
+    rerender(<BitcoinDappSignTxPopup />);
+
+    expect(mocks.closeDappView).not.toHaveBeenCalled();
+    expect(screen.getByTestId('sign-review-error')).toBeTruthy();
+  });
+
+  it('closes the popup once a confirmed signing succeeds', () => {
+    mocks.request = request;
+    mocks.inspection = { inputs: [], outputs: [] };
+    const { rerender } = render(<BitcoinDappSignTxPopup />);
+    mocks.layoutProps.current?.primaryButton?.action();
+
+    mocks.request = null;
+    rerender(<BitcoinDappSignTxPopup />);
+
+    expect(mocks.closeDappView).toHaveBeenCalled();
   });
 });

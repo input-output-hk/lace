@@ -4,16 +4,18 @@ import {
   coalesceValueQuantities,
   setInConwayEra,
 } from '@cardano-sdk/core';
-import {
-  computeScriptDataHash,
-  minAdaRequired,
-} from '@cardano-sdk/tx-construction';
+import { minAdaRequired } from '@cardano-sdk/tx-construction';
 
 import { resolveSlotNo } from '../common/time';
 import { LargeFirstCoinSelector } from '../input-selection/LargeFirstCoinSelector';
 import { RoundRobinRandomCoinSelector } from '../input-selection/RoundRobinRandomCoinSelector';
 
-import { balanceTransaction, correctFeeAfterEvaluation } from './balancing';
+import {
+  balanceTransaction,
+  correctFeeAfterEvaluation,
+  type CollateralBodyFields,
+} from './balancing';
+import { computeConwayScriptDataHash } from './script-data-hash';
 
 import type { CoinSelector } from '../input-selection/types';
 import type { RequiredProtocolParameters } from '../types';
@@ -55,11 +57,12 @@ export interface PlutusContext {
 }
 
 /**
- * Per-redeemer ex-units used to SEED the witness before balancing, so the
- * balancer's `minFee` prices script execution. The injected evaluator replaces
- * these with concrete budgets after balancing, before the script-data-hash is
- * computed. A generous figure (the Plutus V3 mainnet per-tx max) is safe here:
- * it only inflates the pre-balance fee estimate, which the evaluator corrects.
+ * Per-TX ex-units budget used to SEED the witness before balancing — split
+ * across redeemers by `seedRedeemers` — so the balancer's `minFee` prices
+ * script execution. The injected evaluator replaces the seeds with concrete
+ * budgets after balancing, before the script-data-hash is computed. A generous
+ * figure (the Plutus V3 mainnet per-tx max) is safe here: it only inflates the
+ * pre-balance fee estimate, which the evaluator corrects.
  */
 const SEED_EX_UNITS: Cardano.ExUnits = {
   memory: 14_000_000,
@@ -802,21 +805,48 @@ export class TransactionBuilder {
   // --- private: Plutus finalisation ----------------------------------------
 
   /**
-   * Flattens the accumulated redeemers, seeding every one with the per-tx max
-   * execution units. Indices are placeholders here (0); they are corrected
-   * canonically after balancing in {@link reindexRedeemers}.
+   * Flattens the accumulated redeemers, seeding each with a SHARE of the per-tx
+   * max execution units so their TOTAL stays at (just above, from rounding) the
+   * per-tx maximum — never `count × max`. The seed only prices `minFee` during
+   * balancing (the evaluator assigns concrete budgets afterwards), so it must
+   * upper-bound the tx's real ex-units, which the ledger caps at the per-tx
+   * maximum regardless of redeemer count — seeding each redeemer at the full
+   * max would over-price a multi-redeemer tx by that multiple. Indices are
+   * placeholders (0); corrected canonically after balancing in
+   * {@link reindexRedeemers}.
    */
   private seedRedeemers(): Cardano.Redeemer[] {
+    const count =
+      this.spendRedeemers.size +
+      this.mintRedeemers.size +
+      this.withdrawalRedeemers.size;
+    // ceil keeps the summed seed >= the per-tx max (a valid upper bound) while
+    // staying ~1× it rather than count×.
+    const perRedeemer: Cardano.ExUnits =
+      count <= 1
+        ? SEED_EX_UNITS
+        : {
+            memory: Math.ceil(SEED_EX_UNITS.memory / count),
+            steps: Math.ceil(SEED_EX_UNITS.steps / count),
+          };
     const redeemers: Cardano.Redeemer[] = [];
     for (const data of this.spendRedeemers.values()) {
-      redeemers.push(this.seedRedeemer(Cardano.RedeemerPurpose.spend, data));
+      redeemers.push(
+        this.seedRedeemer(Cardano.RedeemerPurpose.spend, data, perRedeemer),
+      );
     }
     for (const data of this.mintRedeemers.values()) {
-      redeemers.push(this.seedRedeemer(Cardano.RedeemerPurpose.mint, data));
+      redeemers.push(
+        this.seedRedeemer(Cardano.RedeemerPurpose.mint, data, perRedeemer),
+      );
     }
     for (const data of this.withdrawalRedeemers.values()) {
       redeemers.push(
-        this.seedRedeemer(Cardano.RedeemerPurpose.withdrawal, data),
+        this.seedRedeemer(
+          Cardano.RedeemerPurpose.withdrawal,
+          data,
+          perRedeemer,
+        ),
       );
     }
     return redeemers;
@@ -825,8 +855,9 @@ export class TransactionBuilder {
   private seedRedeemer(
     purpose: Cardano.RedeemerPurpose,
     data: Cardano.PlutusData,
+    executionUnits: Cardano.ExUnits,
   ): Cardano.Redeemer {
-    return { index: 0, purpose, data, executionUnits: SEED_EX_UNITS };
+    return { index: 0, purpose, data, executionUnits };
   }
 
   /**
@@ -924,26 +955,44 @@ export class TransactionBuilder {
    *
    * Collateral is selected once, before balancing, but the amount the ledger
    * requires is `ceil(fee * collateralPercentage / 100)`, derived from the
-   * post-evaluation fee. Selecting against the bare {@link COLLATERAL_COVERAGE_TARGET}
-   * fallback under-sizes the reservation whenever that fee-derived requirement
-   * is larger, tripping `buildCollateralFields` on the same reserved UTxOs.
+   * post-evaluation fee. The reservation must therefore cover the worst-case
+   * fee the balancer could price — `ceil(maxFee * collateralPercentage / 100)` —
+   * because the fee is only corrected downward from there.
    *
-   * The requirement can never exceed `ceil(maxFee * collateralPercentage / 100)`:
-   * the balancer prices the fee with redeemers seeded at the per-tx max
-   * ex-units and finalisation only corrects it downward. `maxFee`'s size
-   * component (`minFeeConstant + minFeeCoefficient * maxTxSize`) is derivable
-   * from protocol params; the 5 ADA floor covers the script-execution
-   * component, which the current protocol ex-unit limits keep well under it.
+   * `maxFee = maxSizeFee + maxScriptFee`, both derivable from protocol params:
+   * the size component is `minFeeConstant + minFeeCoefficient * maxTxSize`, and
+   * the script component prices `SEED_EX_UNITS` (the per-tx max ex-units, which
+   * — post seed-cap — is exactly the TOTAL {@link seedRedeemers} seeds
+   * regardless of redeemer count, so this matches the fee the balancer prices).
+   *
+   * This omits Conway's third fee term, `minFeeRefScriptCostPerByte * refScript
+   * size`, so the bound is exhaustive only while every script ships inline —
+   * which it does today: the builder has no reference-script API, and `minFee`
+   * charges that term only over inputs whose resolved output carries a
+   * `scriptReference`. Add it here if a reference-input API ever lands.
+   *
+   * A blunt 5-ADA floor here would over-reserve: on a wallet with few cover
+   * UTxOs it forces a whole large UTxO to be locked as collateral (its excess
+   * over the floor falls below a return output's min-ADA, so a second UTxO is
+   * grabbed), starving the tx of funding inputs (LW-15113). `COLLATERAL_COVERAGE_TARGET`
+   * is kept only for the `collateralPercentage === 0` case, mirroring
+   * `finalizePlutusTx`'s collateral derivation.
    */
   private collateralCoverageTarget(): bigint {
+    const pct = BigInt(this.params.collateralPercentage);
+    if (pct === 0n) return COLLATERAL_COVERAGE_TARGET;
     const maxSizeFee =
       BigInt(this.params.minFeeConstant) +
       BigInt(this.params.minFeeCoefficient) * BigInt(this.params.maxTxSize);
-    const proportional =
-      (maxSizeFee * BigInt(this.params.collateralPercentage) + 99n) / 100n;
-    return proportional > COLLATERAL_COVERAGE_TARGET
-      ? proportional
-      : COLLATERAL_COVERAGE_TARGET;
+    // 0 when prices are missing/zero; the target is then size-proportional,
+    // which still upper-bounds the (zero-script) fee's proportional collateral.
+    const maxScriptFee = BigInt(
+      Math.ceil(
+        (this.params.prices?.memory ?? 0) * SEED_EX_UNITS.memory +
+          (this.params.prices?.steps ?? 0) * SEED_EX_UNITS.steps,
+      ),
+    );
+    return ((maxSizeFee + maxScriptFee) * pct + 99n) / 100n;
   }
 
   /**
@@ -1033,9 +1082,21 @@ export class TransactionBuilder {
       BigInt(this.params.coinsPerUtxoByte),
     );
     if (returnCoin < minReturn) {
-      throw new InsufficientCollateralError(
-        `Collateral return needs ${minReturn} lovelace but only ${returnCoin} is available`,
-      );
+      if (hasAssets) {
+        // Native assets can only leave the collateral inputs through a return
+        // output, so a return that cannot meet min-ADA is unrecoverable.
+        throw new InsufficientCollateralError(
+          `Collateral return needs ${minReturn} lovelace but only ${returnCoin} is available`,
+        );
+      }
+      // Over-declare instead of failing: the ledger checks only
+      // `totalCollateral === inputs - return` plus `>= ceil(fee * pct / 100)`,
+      // and both hold when the whole reservation is declared with no return.
+      // The alternative is a hard failure, because a dust remainder cannot ship
+      // as an output — and the first pricing pass reaches here on ANY
+      // exact-cover reservation, whose remainder is only
+      // `minFeeCoefficient * pct% * (maxTxSize - txSize)` (LW-15113).
+      return { totalCollateral: collateralValue.coins };
     }
     return { totalCollateral: amount, collateralReturn };
   }
@@ -1082,32 +1143,46 @@ export class TransactionBuilder {
         ? [...selection, ...reservedCollateral]
         : selection;
 
-    const { outputs: correctedOutputs, fee: correctedFee } =
-      correctFeeAfterEvaluation({
-        balancedTx,
-        evaluatedRedeemers,
-        resolvedInputs: allResolvedInputs,
-        protocolParameters: this.params,
-        changeAddress: this.changeAddress!,
-      });
-
     const usedLanguages = [...this.scriptVersions];
-    const scriptIntegrityHash = computeScriptDataHash(
-      context.costModels,
+    const scriptIntegrityHash = computeConwayScriptDataHash({
+      costModels: context.costModels,
       usedLanguages,
-      evaluatedRedeemers,
-      this.datums.length > 0 ? this.datums : undefined,
-    );
+      redeemers: evaluatedRedeemers,
+      datums: this.datums.length > 0 ? this.datums : undefined,
+    });
 
+    // The ledger requires `ceil(fee * collateralPercentage / 100)` collateral,
+    // but collateral was reserved before balancing against the (larger)
+    // coverage target. Re-derive the collateral fields per candidate fee so the
+    // fee correction prices the fee over the exact fields that ship (see
+    // correctFeeAfterEvaluation).
     const pct = BigInt(this.params.collateralPercentage);
-    const collateralAmount =
-      pct === 0n || correctedFee === 0n
-        ? COLLATERAL_COVERAGE_TARGET
-        : (correctedFee * pct + 99n) / 100n;
-    const collateralBodyFields =
-      reservedCollateral.length > 0 && this.collateralReturnAddress
-        ? this.buildCollateralFields(reservedCollateral, collateralAmount)
-        : {};
+    const deriveCollateralFields = (
+      fee: Cardano.Lovelace,
+    ): CollateralBodyFields => {
+      if (reservedCollateral.length === 0 || !this.collateralReturnAddress) {
+        return {};
+      }
+      const amount =
+        pct === 0n || fee === 0n
+          ? COLLATERAL_COVERAGE_TARGET
+          : (fee * pct + 99n) / 100n;
+      return this.buildCollateralFields(reservedCollateral, amount);
+    };
+
+    const {
+      outputs: correctedOutputs,
+      fee: correctedFee,
+      collateralFields,
+    } = correctFeeAfterEvaluation({
+      balancedTx,
+      evaluatedRedeemers,
+      resolvedInputs: allResolvedInputs,
+      protocolParameters: this.params,
+      changeAddress: this.changeAddress!,
+      scriptIntegrityHash,
+      deriveCollateralFields,
+    });
 
     return {
       ...balancedTx,
@@ -1116,7 +1191,8 @@ export class TransactionBuilder {
         fee: correctedFee,
         outputs: correctedOutputs,
         scriptIntegrityHash,
-        ...collateralBodyFields,
+        collateralReturn: undefined,
+        ...collateralFields,
       },
       witness: {
         ...balancedTx.witness,

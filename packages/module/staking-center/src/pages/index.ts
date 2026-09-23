@@ -1,4 +1,5 @@
 export { StakingCenterPage } from './StakingCenterPage';
+export { CardanoStakingDetail } from './CardanoStakingDetail';
 export { BrowsePoolSheet } from './browse-pool/BrowsePoolSheet';
 export { BrowsePoolFiltersSheet } from './browse-pool-filters/BrowsePoolFiltersSheet';
 export { StakePoolDetailsSheet } from './stake-pool-details/StakePoolDetailsSheet';

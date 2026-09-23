@@ -2,6 +2,8 @@ import { Timestamp } from '@lace-lib/util';
 import {
   EMPTY,
   catchError,
+  combineLatest,
+  distinctUntilChanged,
   filter,
   map,
   mergeMap,
@@ -10,11 +12,12 @@ import {
   takeUntil,
 } from 'rxjs';
 
+import { FEATURE_FLAG_MIDNIGHT_SHIELDED_ACTIVITY_ROWS } from '../../const';
 import {
-  buildTokenBalanceChangesFromUtxos,
+  deriveUnshieldedActivity,
+  entryHasUnshieldedActivity,
   formatFee,
   getAddressFromUtxos,
-  mapStatusToActivityType,
 } from '../utils/activities';
 
 import type { SideEffect } from '../..';
@@ -26,6 +29,7 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { WalletEntry } from '@midnightntwrk/wallet-sdk';
+import type { Observable } from 'rxjs';
 
 export const mapTxHistoryEntryToActivity = ({
   accountId,
@@ -34,18 +38,21 @@ export const mapTxHistoryEntryToActivity = ({
 }: {
   accountId: AccountId;
   txHistoryEntry: WalletEntry;
-  networkId?: MidnightSDKNetworkId;
+  networkId: MidnightSDKNetworkId;
 }): Activity => {
   const { hash, timestamp, status } = txHistoryEntry;
   const createdUtxos = txHistoryEntry.unshielded?.createdUtxos ?? [];
   const spentUtxos = txHistoryEntry.unshielded?.spentUtxos ?? [];
-  const tokenBalanceChanges = networkId
-    ? buildTokenBalanceChangesFromUtxos(createdUtxos, spentUtxos, networkId)
-    : [];
+  const { type, tokenBalanceChanges } = deriveUnshieldedActivity({
+    status,
+    createdUtxos,
+    spentUtxos,
+    networkId,
+  });
   return {
     accountId,
     activityId: hash,
-    type: mapStatusToActivityType(status, tokenBalanceChanges),
+    type,
     timestamp: Timestamp(timestamp?.getTime() ?? 0),
     tokenBalanceChanges,
   };
@@ -80,9 +87,27 @@ type WalletsDiff = {
   added: MidnightWallet[];
 };
 
+/**
+ * Whether confirmed rows with no unshielded section are shown. They carry no
+ * readable value or date, so they render as amount-less "unknown" / 1970 rows;
+ * hiding them is the default and the flag restores the earlier behaviour while
+ * the product decision is open.
+ */
+const showShieldedOnlyRows$ = (
+  stateObservables: Parameters<SideEffect>[1],
+): Observable<boolean> =>
+  stateObservables.features.selectLoadedFeatures$.pipe(
+    map(loaded =>
+      loaded.featureFlags.some(
+        flag => flag.key === FEATURE_FLAG_MIDNIGHT_SHIELDED_ACTIVITY_ROWS,
+      ),
+    ),
+    distinctUntilChanged(),
+  );
+
 export const updateActivities: SideEffect = (
   _,
-  __,
+  stateObservables,
   { actions, midnightWallets$ },
 ) =>
   midnightWallets$.pipe(
@@ -97,21 +122,49 @@ export const updateActivities: SideEffect = (
     ),
     mergeMap(({ added }) => added),
     mergeMap(wallet =>
-      wallet.transactionHistory$.pipe(
-        map(transactionHistory =>
-          transactionHistory.map(txHistoryEntry =>
-            mapTxHistoryEntryToActivity({
-              accountId: wallet.accountId,
-              txHistoryEntry,
-              networkId: wallet.networkId,
-            }),
-          ),
-        ),
-        mergeMap(activities => [
+      // Read per wallet, not once for the effect: flipping the flag must
+      // re-evaluate every wallet's history, not only the newest one.
+      combineLatest([
+        wallet.transactionHistory$,
+        showShieldedOnlyRows$(stateObservables),
+      ]).pipe(
+        map(([transactionHistory, showShieldedOnlyRows]) => ({
+          activities: transactionHistory
+            .filter(
+              entry =>
+                showShieldedOnlyRows || entryHasUnshieldedActivity(entry),
+            )
+            .map(txHistoryEntry =>
+              mapTxHistoryEntryToActivity({
+                accountId: wallet.accountId,
+                txHistoryEntry,
+                networkId: wallet.networkId,
+              }),
+            ),
+          // No shipped build has ever suppressed these rows, so every upgrading
+          // user has them persisted by hash; upsert never removes, so purge them
+          // explicitly once their entry reappears in the history.
+          suppressedActivityIds: showShieldedOnlyRows
+            ? []
+            : transactionHistory
+                .filter(entry => !entryHasUnshieldedActivity(entry))
+                .map(entry => entry.hash),
+        })),
+        mergeMap(({ activities, suppressedActivityIds }) => [
           actions.activities.upsertActivities({
             accountId: wallet.accountId,
             activities,
           }),
+          // Skipped when nothing is suppressed (always, with the flag on) so a
+          // steady sync does not dispatch a no-op on every history emission.
+          ...(suppressedActivityIds.length > 0
+            ? [
+                actions.activities.removeActivities({
+                  accountId: wallet.accountId,
+                  activityIds: suppressedActivityIds,
+                }),
+              ]
+            : []),
           actions.activities.setHasLoadedOldestEntry({
             accountId: wallet.accountId,
             hasLoadedOldestEntry: true,

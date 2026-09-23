@@ -38,6 +38,7 @@ const sharedModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': sharedModule,
   'lace-mobile': sharedModule,
+  'lace-extension-carbon': sharedModule,
   'lace-extension-guest': sharedModule,
 };
 

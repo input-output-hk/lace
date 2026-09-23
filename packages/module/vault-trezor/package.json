@@ -28,6 +28,7 @@
     "buffer": "^6.0.3"
   },
   "devDependencies": {
-    "@lace-lib/util-dev": "*"
+    "@lace-lib/util-dev": "*",
+    "@lace-lib/util-dev-cardano": "*"
   }
 }

@@ -7,19 +7,18 @@ import {
   useShouldShowPrivacyNotice,
 } from '../../hooks/index';
 
+import { SendTransactionData } from './SendTransactionData';
+
 /**
  * Midnight-specific notices for the send sheet:
  * - Designation notice: when sending designated NIGHT tokens
  * - Privacy notice: when sending shielded tokens or to a shielded address
+ * - Transaction data: collapsed disclosure of the payload to be signed
  */
 export const SendNotices = () => {
   const { t } = useTranslation();
   const shouldShowDesignation = useShouldShowDesignationWarning();
   const shouldShowPrivacy = useShouldShowPrivacyNotice();
-
-  if (!shouldShowDesignation && !shouldShowPrivacy) {
-    return null;
-  }
 
   return (
     <>
@@ -33,6 +32,7 @@ export const SendNotices = () => {
           {t('v2.midnight.send-flow.form.designation-notice')}
         </Text.S>
       )}
+      <SendTransactionData />
     </>
   );
 };

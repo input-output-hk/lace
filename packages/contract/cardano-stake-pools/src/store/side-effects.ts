@@ -224,7 +224,7 @@ export const createStakePoolsNetworkData =
     // `whileActive` MUST stay at the end of the pipe. Mid-pipeline placement
     // leaves the downstream `switchMap`'s in-flight `timer` / `expand` chain
     // alive on lock — it only blocks future outer emissions, not the
-    // already-running TTL refresh cycle. See ADR 25.
+    // already-running TTL refresh cycle. See ADR 29.
     combineLatest([
       selectChainId$.pipe(filter(isNotNil), distinctUntilChanged()),
       selectActiveNetworkAccounts$.pipe(
@@ -279,7 +279,7 @@ export const createStakePoolsNetworkData =
 /**
  * Loads pool details on demand when `loadPools` is dispatched.
  *
- * Not gated on `isWalletActive$` — qualifies for ADR 25's UI-action-cascade
+ * Not gated on `isWalletActive$` — qualifies for ADR 29's UI-action-cascade
  * pattern. `loadPools` is dispatched only from staking-related UI (pool
  * list, delegation flow); the lock screen blocks all UI interaction, so
  * this action cannot fire while locked.
@@ -380,7 +380,7 @@ export const createDeleteExpiredPools =
     { actions, isWalletActive$ },
   ) =>
     // `whileActive` MUST stay at the end of the pipe so the upstream
-    // `timer(0, interval)` is torn down on lock. See ADR 25.
+    // `timer(0, interval)` is torn down on lock. See ADR 29.
     timer(0, interval).pipe(
       withLatestFrom(selectPoolDetails$),
       switchMap(([, details]) => {

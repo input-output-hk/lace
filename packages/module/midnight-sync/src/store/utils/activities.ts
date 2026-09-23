@@ -61,12 +61,28 @@ export const getAddressFromUtxos = (
   return first?.owner ?? '';
 };
 
+/**
+ * Whether the wallet took part in an unshielded movement in this transaction —
+ * the gate for surfacing it as an activity. True for unshielded and mixed sends,
+ * and for dust designation (which rotates night UTxOs into the unshielded
+ * section). False for shielded-only entries: their values are encrypted and
+ * unreadable, and the fee-dust they spend never lands in the unshielded section,
+ * so surfacing them would only produce an empty/unknown row.
+ */
+export const entryHasUnshieldedActivity = (entry: WalletEntry): boolean =>
+  (entry.unshielded?.createdUtxos.length ?? 0) > 0 ||
+  (entry.unshielded?.spentUtxos.length ?? 0) > 0;
+
 export const mapStatusToActivityType = (
   status: WalletEntry['status'],
   tokenBalanceChanges?: Array<{ amount: ReturnType<typeof BigNumber> }>,
 ): ActivityType => {
   switch (status) {
-    case 'SUCCESS': {
+    // PARTIAL_SUCCESS is a terminal on-chain outcome, not an in-flight state: this
+    // history only ever holds confirmed, on-block transactions. Mapping it to
+    // Pending stranded transfers on "Sending".
+    case 'SUCCESS':
+    case 'PARTIAL_SUCCESS': {
       const isReceive =
         !tokenBalanceChanges?.length ||
         tokenBalanceChanges.some(({ amount }) => BigInt(amount) > 0n);
@@ -74,9 +90,50 @@ export const mapStatusToActivityType = (
     }
     case 'FAILURE':
       return ActivityType.Failed;
-    case 'PARTIAL_SUCCESS':
-      return ActivityType.Pending;
   }
+};
+
+type TokenBalanceChanges = ReturnType<typeof buildTokenBalanceChangesFromUtxos>;
+
+/**
+ * Resolves the activity type and displayed token amounts for a transaction's
+ * unshielded section. A transaction that moved unshielded value but nets to zero
+ * is a self-transfer — a plain self-send, or a dust designation, which rotates
+ * NIGHT back to the owner — so it is surfaced as {@link ActivityType.Self}.
+ * No amount is shown: no value left the wallet, and the intended amount is not
+ * recoverable (a self output is indistinguishable from change). Failures keep
+ * their Failed type regardless.
+ */
+export const deriveUnshieldedActivity = ({
+  status,
+  createdUtxos,
+  spentUtxos,
+  networkId,
+}: {
+  status: WalletEntry['status'];
+  createdUtxos: readonly HistoryUtxo[];
+  spentUtxos: readonly HistoryUtxo[];
+  networkId: MidnightSDKNetworkId;
+}): { type: ActivityType; tokenBalanceChanges: TokenBalanceChanges } => {
+  const netChanges = buildTokenBalanceChangesFromUtxos(
+    createdUtxos,
+    spentUtxos,
+    networkId,
+  );
+
+  const isSelfTransfer =
+    status !== 'FAILURE' &&
+    netChanges.length === 0 &&
+    (createdUtxos.length > 0 || spentUtxos.length > 0);
+
+  if (isSelfTransfer) {
+    return { type: ActivityType.Self, tokenBalanceChanges: [] };
+  }
+
+  return {
+    type: mapStatusToActivityType(status, netChanges),
+    tokenBalanceChanges: netChanges,
+  };
 };
 
 export const formatFee = (fees: WalletEntry['fees']): string =>

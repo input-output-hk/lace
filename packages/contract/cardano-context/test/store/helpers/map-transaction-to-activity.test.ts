@@ -27,6 +27,21 @@ import type * as Core from '@cardano-sdk/core';
 
 const logger = dummyLogger;
 
+/**
+ * A summary with every input resolved. The real `TransactionSummaryInspection`
+ * always carries these fields, so a mock that omits one is not a shape the code
+ * can receive.
+ */
+const summaryOf = (fields: Partial<Core.TransactionSummaryInspection>) =>
+  ({
+    assets: new Map(),
+    coins: 0n,
+    resolvedInputs: [],
+    returnedDeposit: 0n,
+    unresolved: { inputs: [], value: { coins: 0n } },
+    ...fields,
+  } as Core.TransactionSummaryInspection);
+
 // Mock the Cardano SDK functions
 vi.mock('@cardano-sdk/core', async importActual => {
   const module = await importActual<typeof Core>();
@@ -113,7 +128,15 @@ describe('mapTransactionToActivity', () => {
     blockTime: mockBlockTime,
     body: {
       inputs: [],
-      outputs: [],
+      // The recomputed net change reads the body, so a summary reporting a
+      // 1 ADA gain needs an own output that accounts for it — a gain with no
+      // own output is not a transaction the inspector can report.
+      outputs: [
+        {
+          address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+          value: { coins: 1_000_000n },
+        },
+      ] as Cardano.TxOut[],
       fee: 1000000n,
       validityInterval: {
         invalidBefore: undefined,
@@ -164,14 +187,31 @@ describe('mapTransactionToActivity', () => {
   });
 
   describe('mapTransactionToActivity', () => {
+    const spentA = {
+      txId: Cardano.TransactionId(
+        '1111111111111111111111111111111111111111111111111111111111111111',
+      ),
+      index: 0,
+    };
+    const spentB = {
+      txId: Cardano.TransactionId(
+        '2222222222222222222222222222222222222222222222222222222222222222',
+      ),
+      index: 3,
+    };
+    const ownOutput = {
+      address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+      value: { coins: 5000000n },
+    };
+
     it('should create tx inspector with correct configuration', () => {
-      const mockSummary = {
+      const mockSummary = summaryOf({
         coins: 1000000n,
         assets: new Map([
           ['asset123', { amount: 100n }],
           ['asset456', { amount: 200n }],
-        ]),
-      };
+        ]) as Core.TransactionSummaryInspection['assets'],
+      });
       (
         transactionSummaryInspector as unknown as ReturnType<typeof vi.fn>
       ).mockReturnValue(mockSummary);
@@ -214,22 +254,10 @@ describe('mapTransactionToActivity', () => {
     // withholds its UTxO cache key on that basis. Recorded straight off the tx
     // body, unresolved — ownership filtering happens where it is consumed.
     it('records every outpoint the transaction spent, whatever the net direction', async () => {
-      const spentA = {
-        txId: Cardano.TransactionId(
-          '1111111111111111111111111111111111111111111111111111111111111111',
-        ),
-        index: 0,
-      };
-      const spentB = {
-        txId: Cardano.TransactionId(
-          '2222222222222222222222222222222222222222222222222222222222222222',
-        ),
-        index: 3,
-      };
       // Net-positive, so the mapper types it `Receive` — the case a
       // type-based test would have wrongly read as "spent nothing".
       mockTxSummaryInspector.mockReturnValue(
-        of({ summary: { coins: 1000000n, assets: new Map() } }),
+        of({ summary: summaryOf({ coins: 1000000n }) }),
       );
 
       const result = await firstValueFrom(
@@ -268,10 +296,6 @@ describe('mapTransactionToActivity', () => {
     // provider has not applied the receive yet. Own addresses only — a foreign
     // output's absence proves nothing.
     it('records only the outpoints paying own addresses', async () => {
-      const ownOutput = {
-        address: Cardano.PaymentAddress(mockAccountAddresses[0]),
-        value: { coins: 5000000n },
-      };
       const foreignOutput = {
         address: Cardano.PaymentAddress(
           'addr_test1qzuk9c0qaq8ustvatan8xelmp3wjn9n99c78004dsfjwvs4h5kpytryyph0d9vyzj9g9e5rwsnxc2djcandyywdvu8kq54t0f8',
@@ -279,7 +303,7 @@ describe('mapTransactionToActivity', () => {
         value: { coins: 1000000n },
       };
       mockTxSummaryInspector.mockReturnValue(
-        of({ summary: { coins: 5000000n, assets: new Map() } }),
+        of({ summary: summaryOf({ coins: 5000000n }) }),
       );
 
       const result = await firstValueFrom(
@@ -321,12 +345,8 @@ describe('mapTransactionToActivity', () => {
     // withhold the cache key until the account's next transaction; recording
     // body.outputs would wait forever on outputs the chain never produced.
     it('records no produced outpoints when the chain consumed collateral, even for an own collateral return', async () => {
-      const ownOutput = {
-        address: Cardano.PaymentAddress(mockAccountAddresses[0]),
-        value: { coins: 5000000n },
-      };
       mockTxSummaryInspector.mockReturnValue(
-        of({ summary: { coins: -1000n, assets: new Map() } }),
+        of({ summary: summaryOf({ coins: -1000n }) }),
       );
 
       const result = await firstValueFrom(
@@ -386,7 +406,7 @@ describe('mapTransactionToActivity', () => {
         index: 2,
       };
       mockTxSummaryInspector.mockReturnValue(
-        of({ summary: { coins: -1000n, assets: new Map() } }),
+        of({ summary: summaryOf({ coins: -1000n }) }),
       );
 
       const result = await firstValueFrom(
@@ -425,13 +445,13 @@ describe('mapTransactionToActivity', () => {
     });
 
     it('should return Ok with correct activity for receive transaction', async () => {
-      const mockSummary = {
+      const mockSummary = summaryOf({
         coins: 1000000n,
         assets: new Map([
           ['asset123', { amount: 100n }],
           ['asset456', { amount: 200n }],
-        ]),
-      };
+        ]) as Core.TransactionSummaryInspection['assets'],
+      });
 
       mockTxSummaryInspector.mockReturnValue(of({ summary: mockSummary }));
 
@@ -467,7 +487,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
-              producedOwnOutpoints: [],
+              producedOwnOutpoints: [{ txId: mockTxDetails.id, index: 0 }],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },
@@ -478,20 +498,30 @@ describe('mapTransactionToActivity', () => {
       }
     });
 
+    // `getTopOnChainActivity` skips only Pending and Rewards, so a
+    // NightDesignation CAN be the anchor cardano-sync proves a fetch against —
+    // and "designate once, then leave the wallet alone" is an abandoned account.
     it.each(['designate', 'update', 'deregister'] as const)(
-      'maps a classified %s tx to a NightDesignation activity carrying the action metadata',
+      'maps a classified %s tx to a NightDesignation activity carrying the action metadata and the utxo evidence',
       async action => {
         (
           classifyTxAsNightDesignation as unknown as ReturnType<typeof vi.fn>
         ).mockReturnValueOnce({ action });
         mockTxSummaryInspector.mockReturnValue(
-          of({ summary: { coins: -2000000n, assets: new Map() } }),
+          of({ summary: summaryOf({ coins: -2000000n }) }),
         );
 
         const result = await firstValueFrom(
           mapTransactionToActivity({
             accountId: AccountId('account1'),
-            txDetails: mockTxDetails,
+            txDetails: {
+              ...mockTxDetails,
+              body: {
+                ...mockTxDetails.body,
+                inputs: [spentA, spentB],
+                outputs: [ownOutput],
+              },
+            } as ExtendedTxDetails,
             accountAddresses: mockAccountAddresses.map(addr =>
               CardanoPaymentAddress(addr),
             ),
@@ -511,6 +541,8 @@ describe('mapTransactionToActivity', () => {
             type: ActivityType.NightDesignation,
             blockchainSpecific: {
               Cardano: {
+                consumedInputs: [spentA, spentB],
+                producedOwnOutpoints: [{ txId: mockTxDetails.id, index: 0 }],
                 slot: mockTxDetails.blockHeader.slot,
                 nightDesignation: { action },
                 // Compromise detection runs for designation txs too — a
@@ -528,7 +560,7 @@ describe('mapTransactionToActivity', () => {
         classifyTxAsNightDesignation as unknown as ReturnType<typeof vi.fn>
       ).mockReturnValueOnce({ action: 'designate' });
       mockTxSummaryInspector.mockReturnValue(
-        of({ summary: { coins: -2000000n, assets: new Map() } }),
+        of({ summary: summaryOf({ coins: -2000000n }) }),
       );
 
       const result = await firstValueFrom(
@@ -560,7 +592,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
-              producedOwnOutpoints: [],
+              producedOwnOutpoints: [{ txId: mockTxDetails.id, index: 0 }],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },
@@ -573,10 +605,12 @@ describe('mapTransactionToActivity', () => {
     });
 
     it('should return Ok with correct activity for send transaction', async () => {
-      const mockSummary = {
+      const mockSummary = summaryOf({
         coins: -500000n,
-        assets: new Map([['asset123', { amount: -50n }]]),
-      };
+        assets: new Map([
+          ['asset123', { amount: -50n }],
+        ]) as Core.TransactionSummaryInspection['assets'],
+      });
 
       mockTxSummaryInspector.mockReturnValue(of({ summary: mockSummary }));
 
@@ -611,7 +645,7 @@ describe('mapTransactionToActivity', () => {
             Cardano: {
               consumedInputs: [],
               producedOutputs: [],
-              producedOwnOutpoints: [],
+              producedOwnOutpoints: [{ txId: mockTxDetails.id, index: 0 }],
               slot: mockTxDetails.blockHeader.slot,
               security: {
                 exploits: { deterministicNonce202606: false },
@@ -620,6 +654,139 @@ describe('mapTransactionToActivity', () => {
           },
         });
       }
+    });
+    // ─── Send/Receive classification and amount ─────────────────────────
+    //
+    // Net-change semantics are covered against the real inspector in
+    // compute-own-net-coins.test.ts; these cover the wiring only — that the
+    // mapper feeds it the body and the whole summary, never `summary.coins`.
+
+    const ownInput = {
+      txId: Cardano.TransactionId(
+        '4444444444444444444444444444444444444444444444444444444444444444',
+      ),
+      index: 0,
+      address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+    };
+    const ownOutputOf = (coins: bigint) =>
+      ({
+        address: Cardano.PaymentAddress(mockAccountAddresses[0]),
+        value: { coins },
+      } as Cardano.TxOut);
+    const foreignOutputOf = (coins: bigint) =>
+      ({
+        address: Cardano.PaymentAddress(
+          'addr_test1wpnlxv2xv9a9ucvnvzqakwepzl9ltx7jzgm53av2e9ncv4sysemm8',
+        ),
+        value: { coins },
+      } as Cardano.TxOut);
+
+    const activityFor = async (
+      txDetails: ExtendedTxDetails,
+      summary: Core.TransactionSummaryInspection,
+    ) => {
+      mockTxSummaryInspector.mockReturnValue(of({ summary }));
+      return firstValueFrom(
+        mapTransactionToActivity({
+          accountId: AccountId('account1'),
+          txDetails,
+          accountAddresses: mockAccountAddresses.map(addr =>
+            CardanoPaymentAddress(addr),
+          ),
+          rewardAccount: CardanoRewardAccount(mockRewardAccount),
+          protocolParameters: mockProtocolParameters,
+          resolveInput: mockResolveInput,
+          logger,
+          isNightDesignationEnabled: true,
+        }),
+      );
+    };
+
+    const spendingOwnInput = (
+      outputs: Cardano.TxOut[] = [],
+    ): ExtendedTxDetails =>
+      ({
+        ...mockTxDetails,
+        body: { ...mockTxDetails.body, inputs: [ownInput], outputs },
+      } as ExtendedTxDetails);
+
+    const lovelaceChange = (activity: { tokenBalanceChanges: unknown[] }) =>
+      (
+        activity.tokenBalanceChanges as {
+          tokenId: string;
+          amount: BigNumber;
+        }[]
+      ).find(({ tokenId }) => tokenId === 'lovelace')?.amount;
+
+    it('types a transaction whose net change is a loss as Send', async () => {
+      const result = await activityFor(
+        spendingOwnInput([ownOutputOf(1_000_000n)]),
+        summaryOf({
+          coins: -500_000n,
+          resolvedInputs: [
+            { ...ownInput, value: { coins: 1_500_000n } },
+          ] as Core.TransactionSummaryInspection['resolvedInputs'],
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) expect(result.value.type).toBe(ActivityType.Send);
+    });
+
+    it('types a transaction whose net change is a gain as Receive', async () => {
+      const result = await activityFor(
+        spendingOwnInput([ownOutputOf(101_000_000n)]),
+        summaryOf({
+          coins: 1_000_000n,
+          resolvedInputs: [
+            { ...ownInput, value: { coins: 100_000_000n } },
+          ] as Core.TransactionSummaryInspection['resolvedInputs'],
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) expect(result.value.type).toBe(ActivityType.Receive);
+    });
+
+    it('reports the recomputed loss, not the reported gain, when an own input never resolved', async () => {
+      const result = await activityFor(
+        spendingOwnInput([
+          foreignOutputOf(100_000_000n),
+          ownOutputOf(399_000_000n),
+        ]),
+        summaryOf({
+          coins: 399_000_000n,
+          unresolved: {
+            inputs: [{ txId: ownInput.txId, index: ownInput.index }],
+            value: { coins: 500_000_000n } as Cardano.Value,
+          },
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.type).toBe(ActivityType.Send);
+        expect(lovelaceChange(result.value)).toEqual(BigNumber(-101_000_000n));
+      }
+    });
+
+    it('still produces an activity when an input could not be resolved at all', async () => {
+      // A real 404 and a pruned or Byron-era outpoint both surface as an
+      // unresolved input. Dropping the activity would make those transactions
+      // vanish from Activities and be re-requested every sync round.
+      const result = await activityFor(
+        spendingOwnInput([ownOutputOf(1_000_000n)]),
+        summaryOf({
+          coins: 1_000_000n,
+          unresolved: {
+            inputs: [{ txId: ownInput.txId, index: ownInput.index }],
+            value: { coins: 2_000_000n } as Cardano.Value,
+          },
+        }),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) expect(result.value.activityId).toBe(mockTxId);
     });
   });
 });

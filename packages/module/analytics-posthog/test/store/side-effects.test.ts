@@ -1,6 +1,11 @@
 import { analyticsActions } from '@lace-contract/analytics';
 import { featuresActions } from '@lace-contract/feature';
 import { FeatureFlagKey } from '@lace-contract/feature';
+import {
+  CARDANO_NETWORK_MAGIC,
+  FEATURE_FLAG_REALFI,
+  getRealFiConfigFromFlags,
+} from '@lace-contract/realfi-staking';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { BigNumber } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
@@ -8,6 +13,8 @@ import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  dropQueuedEventsOnRevoke,
+  identifyRealfiStaking,
   identifyUserWithSuperProperties,
   initializePostHogAnalyticsDependencies,
   trackFeatureInteraction,
@@ -125,6 +132,46 @@ describe('Side Effects', () => {
       );
 
       await promise; // wait until expect inside mock passes
+    });
+  });
+
+  describe('dropQueuedEventsOnRevoke', () => {
+    it('drops what a batching client has accepted but not yet delivered', () => {
+      const reset = vi.fn();
+      const dependencies = makeDependencies(vi.fn());
+      testSideEffect(dropQueuedEventsOnRevoke, ({ cold, flush }) => ({
+        actionObservables: {
+          analytics: {
+            revokeConsent$: cold('a', {
+              a: actions.analytics.revokeConsent(),
+            }),
+          },
+        },
+        dependencies: {
+          ...dependencies,
+          posthog: { ...dependencies.posthog, reset },
+        },
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toHaveLength(0);
+          expect(reset).toHaveBeenCalledTimes(1);
+        },
+      }));
+    });
+
+    it('is a no-op for a client that has no queue to drop', () => {
+      testSideEffect(dropQueuedEventsOnRevoke, ({ cold, flush }) => ({
+        actionObservables: {
+          analytics: {
+            revokeConsent$: cold('a', {
+              a: actions.analytics.revokeConsent(),
+            }),
+          },
+        },
+        dependencies: makeDependencies(vi.fn()),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toHaveLength(0);
+        },
+      }));
     });
   });
 
@@ -813,6 +860,262 @@ describe('Side Effects', () => {
             Record<string, unknown>,
           ];
           expect(props).not.toHaveProperty('cardano_governance_accounts');
+        },
+      }));
+    });
+  });
+
+  describe('identifyRealfiStaking', () => {
+    const mainnetNetworkId = `cardano-${CARDANO_NETWORK_MAGIC.mainnet}`;
+    const realfiFlag = { key: FEATURE_FLAG_REALFI, payload: { mainnet: {} } };
+    const mainnetConfig = getRealFiConfigFromFlags(
+      [realfiFlag] as never,
+      mainnetNetworkId as never,
+    );
+    const susdrTokenId = mainnetConfig?.susdrTokenId ?? '';
+    const stakingAccount = AccountId('acct-staking');
+
+    const rawTokenEntry = (tokenId: string, available: bigint) => ({
+      accountId: stakingAccount,
+      address: 'addr1',
+      blockchainName: 'Cardano',
+      tokenId,
+      available: BigNumber(available),
+      pending: BigNumber(0n),
+    });
+
+    const rawTokensFor = (available: bigint) => ({
+      [stakingAccount]: {
+        addr1: { [susdrTokenId]: rawTokenEntry(susdrTokenId, available) },
+      },
+    });
+
+    // "Synced, holds no sUSDr". Deliberately NOT `{}`: trackAccountTokens
+    // writes an address carrying at least its lovelace entry once UTxOs land,
+    // and `{}` is the pre-sync shape (see the unsynced test below).
+    const rawTokensWithoutSusdr = () => ({
+      [stakingAccount]: {
+        addr1: { lovelace: rawTokenEntry('lovelace', 5_000_000n) },
+      },
+    });
+
+    const buildRealfiStateObservables = ({
+      cold,
+      networkType = 'mainnet',
+      featureFlags = [realfiFlag],
+      accounts = [{ accountId: stakingAccount }],
+      rawTokensMarble = 'a',
+      rawTokensValues = { a: rawTokensFor(1n) },
+      identifiedUser = null,
+    }: {
+      cold: (pattern: string, values?: Record<string, unknown>) => unknown;
+      networkType?: string;
+      featureFlags?: object[];
+      accounts?: Array<{ accountId: AccountId }>;
+      rawTokensMarble?: string;
+      rawTokensValues?: Record<string, unknown>;
+      identifiedUser?: IdentifiedUser | null;
+    }) => ({
+      analytics: { selectAnalyticsUser$: cold('a', { a: { id: 'user-1' } }) },
+      network: {
+        selectNetworkType$: cold('a', { a: networkType }),
+        selectActiveNetworkId$: cold('a', { a: () => mainnetNetworkId }),
+      },
+      features: {
+        selectLoadedFeatures$: cold('a', { a: { featureFlags, modules: [] } }),
+      },
+      cardanoContext: {
+        selectActiveCardanoAccounts$: cold('a', { a: accounts }),
+      },
+      tokens: {
+        selectAllRawMap$: cold(rawTokensMarble, rawTokensValues),
+      },
+      posthogAnalytics: {
+        selectIdentifiedUser$: cold('a', { a: identifiedUser }),
+      },
+    });
+
+    it('sets realfi_staking true when an active account holds sUSDr', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({ cold }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([
+            actions.posthogAnalytics.identified({
+              userId: 'user-1',
+              properties: { realfi_staking: true },
+            }),
+          ]);
+          expect(identify).toHaveBeenCalledWith('user-1', {
+            realfi_staking: true,
+          });
+        },
+      }));
+    });
+
+    it('sets realfi_staking false when balances are loaded and no sUSDr is held', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          rawTokensValues: { a: rawTokensWithoutSusdr() },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([
+            actions.posthogAnalytics.identified({
+              userId: 'user-1',
+              properties: { realfi_staking: false },
+            }),
+          ]);
+        },
+      }));
+    });
+
+    it('withholds a false while any account is still syncing, so a staker never flaps to false at boot', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          // No sUSDr visible yet AND an account with no entry at all: the
+          // holding cannot be ruled out, so nothing may be reported.
+          accounts: [
+            { accountId: stakingAccount },
+            { accountId: AccountId('acct-unsynced') },
+          ],
+          rawTokensValues: { a: rawTokensWithoutSusdr() },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([]);
+          expect(identify).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('reports a staker even when another account is empty or still syncing', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          // A funded staking account alongside an unused one. The unused
+          // account is `{}` forever, so waiting on it would withhold the
+          // property for good — but the sUSDr balance is already proof.
+          accounts: [
+            { accountId: stakingAccount },
+            { accountId: AccountId('acct-empty') },
+          ],
+          rawTokensValues: {
+            a: { ...rawTokensFor(1n), [AccountId('acct-empty')]: {} },
+          },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([
+            actions.posthogAnalytics.identified({
+              userId: 'user-1',
+              properties: { realfi_staking: true },
+            }),
+          ]);
+        },
+      }));
+    });
+
+    it('treats an empty token entry as unsynced, not as "holds nothing"', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          // The shape trackAccountTokens writes before any UTxO lands: the
+          // account key exists but carries no addresses.
+          rawTokensValues: { a: { [stakingAccount]: {} } },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([]);
+          expect(identify).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('re-identifies when the holding changes mid-session (stake completes)', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          rawTokensMarble: 'a 2s b',
+          rawTokensValues: {
+            a: rawTokensWithoutSusdr(),
+            b: rawTokensFor(1n),
+          },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([
+            actions.posthogAnalytics.identified({
+              userId: 'user-1',
+              properties: { realfi_staking: false },
+            }),
+            actions.posthogAnalytics.identified({
+              userId: 'user-1',
+              properties: { realfi_staking: true },
+            }),
+          ]);
+          expect(identify).toHaveBeenNthCalledWith(1, 'user-1', {
+            realfi_staking: false,
+          });
+          expect(identify).toHaveBeenNthCalledWith(2, 'user-1', {
+            realfi_staking: true,
+          });
+        },
+      }));
+    });
+
+    it('does not re-identify when the persisted snapshot already carries the value', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          identifiedUser: {
+            userId: 'user-1',
+            properties: { realfi_staking: true },
+          },
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([]);
+          expect(identify).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('stays silent off mainnet — testnet holdings must not pollute the person', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          networkType: 'testnet',
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([]);
+          expect(identify).not.toHaveBeenCalled();
+        },
+      }));
+    });
+
+    it('stays silent when no RealFi config resolves for the active network', () => {
+      const identify = vi.fn();
+      testSideEffect(identifyRealfiStaking, ({ cold, flush }) => ({
+        stateObservables: buildRealfiStateObservables({
+          cold,
+          featureFlags: [],
+        }) as never,
+        dependencies: makeDependencies(identify),
+        assertion: sideEffect$ => {
+          expect(runSideEffect(sideEffect$, flush)).toEqual([]);
+          expect(identify).not.toHaveBeenCalled();
         },
       }));
     });

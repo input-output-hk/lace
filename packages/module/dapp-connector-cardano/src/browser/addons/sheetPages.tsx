@@ -30,20 +30,22 @@ const styles = StyleSheet.create({
   },
 });
 
-const SignTxWithAuthPrompt = (_props: SheetScreenProps<SheetRoutes.SignTx>) => (
+const SignTxWithAuthPrompt = ({
+  route,
+}: SheetScreenProps<SheetRoutes.SignTx>) => (
   <View style={styles.wrapper}>
-    <CardanoDappSignTx />
+    <CardanoDappSignTx requestId={route.params.requestId} />
     <View style={styles.authPromptOverlay}>
       <AuthPromptUI />
     </View>
   </View>
 );
 
-const SignDataWithAuthPrompt = (
-  _props: SheetScreenProps<SheetRoutes.SignData>,
-) => (
+const SignDataWithAuthPrompt = ({
+  route,
+}: SheetScreenProps<SheetRoutes.SignData>) => (
   <View style={styles.wrapper}>
-    <CardanoDappSignData />
+    <CardanoDappSignData requestId={route.params.requestId} />
     <View style={styles.authPromptOverlay}>
       <AuthPromptUI />
     </View>

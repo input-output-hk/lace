@@ -34,11 +34,11 @@ import { TokenDetailActivityList } from './tokenDetailActivityList';
 
 import type { SelectedToken, Transaction } from './tokenDetailActivityList';
 import type { Theme } from '../../../../design-tokens';
-import type { TimeRange } from '../../../../utils/priceHistoryUtils';
 import type {
   ActivityCardType,
   ActivitySection,
 } from '../../../organisms/activityList/activityList';
+import type { TimeRange } from '@lace-contract/token-pricing';
 import type { FlashListRef } from '@shopify/flash-list';
 
 const COPY_BUTTON_SIZE = 28;
@@ -1000,6 +1000,7 @@ const renderHintWithAction = ({
 const PortfolioTokenDetailContent = ({
   defaultStyles,
   staticContent,
+  activitiesHeader,
   labels,
   utils,
   globalState,
@@ -1007,6 +1008,7 @@ const PortfolioTokenDetailContent = ({
 }: {
   defaultStyles: ReturnType<typeof sheetStyles>;
   staticContent: React.ReactNode;
+  activitiesHeader?: React.ReactNode;
   labels: LabelsProps;
   utils: UtilsProps;
   globalState: GlobalStateProps;
@@ -1018,6 +1020,10 @@ const PortfolioTokenDetailContent = ({
     <Column style={defaultStyles.content} gap={spacing.M}>
       {staticContent}
       <Divider />
+      {/* Contributed slot (e.g. RealFi Manage Stake) — the portfolio path is the
+          primary route to a token detail, so it must render the header too, not
+          only the per-account path. */}
+      {activitiesHeader}
       <TokenDetailActivityList
         labels={labels}
         utils={utils}
@@ -1176,6 +1182,7 @@ export const TokenDetailBottomSheet = ({
       <PortfolioTokenDetailContent
         defaultStyles={model.defaultStyles}
         staticContent={staticContent}
+        activitiesHeader={model.activitiesHeader}
         labels={model.labels}
         utils={model.utils}
         globalState={model.globalState}

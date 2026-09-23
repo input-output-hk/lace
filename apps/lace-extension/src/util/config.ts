@@ -110,9 +110,6 @@ const validateEnvironment = (): AppConfig => {
       MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL:
         process.env.MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL ||
         process.env.EXPO_PUBLIC_MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL,
-      MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL:
-        process.env.MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL ||
-        process.env.EXPO_PUBLIC_MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL,
       LACE_TERMS_OF_USE_URL:
         process.env.LACE_TERMS_OF_USE_URL ||
         process.env.EXPO_PUBLIC_LACE_TERMS_OF_USE_URL,
@@ -227,9 +224,6 @@ const validateEnvironment = (): AppConfig => {
       MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL: str({
         desc: 'URL to Midnight Foundation Terms and Conditions',
       }),
-      MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL: str({
-        desc: 'URL to Midnight Global Terms and Conditions',
-      }),
       LACE_TERMS_OF_USE_URL: str({
         desc: 'URL to Lace Terms of Use',
       }),
@@ -327,8 +321,6 @@ const validateEnvironment = (): AppConfig => {
     coinGeckoApiBaseUrl: validatedEnvironment.COINGECKO_API_BASE_URL,
     midnightFoundationTermsAndConditionsUrl:
       validatedEnvironment.MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL,
-    midnightGlobalTermsAndConditionsUrl:
-      validatedEnvironment.MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL,
     laceTermsOfUseUrl: validatedEnvironment.LACE_TERMS_OF_USE_URL,
     steelswapApiBaseUrl: validatedEnvironment.STEELSWAP_API_BASE_URL,
     nftCdnUrl: validatedEnvironment.NFT_CDN_URL,

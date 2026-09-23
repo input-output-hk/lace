@@ -6,7 +6,8 @@ import type { Observable } from 'rxjs';
  * State-machine side-effects deliver their results asynchronously, so a result can
  * arrive after the machine has already advanced past — or torn down from — the state
  * that owns it (a race, or an abrupt close-all teardown). Dispatching it then makes
- * {@link createStateMachine} throw "handler not found for status X and event Y".
+ * {@link createStateMachine} log "handler not found for status X and event Y" and
+ * no-op (return the state unchanged), so the result is lost rather than raised.
  *
  * This operator drops the side-effect's RESULT action (identified by its RTK matcher)
  * when the live machine status is no longer one that handles it, while passing every

@@ -167,7 +167,10 @@ export const useDappPopupFlow = <T extends 'signMessage' | 'signPsbt'>({
       request: null,
       isLoading: true,
       isComplete: hadRequest.current && isSigningCompleted,
-      isError: hadRequest.current && isSigningError,
+      // Not gated on hadRequest, unlike isComplete: a request can settle into
+      // an error before this popup syncs state even once, and nothing stale
+      // can leak in — setting a pending request clears the error.
+      isError: isSigningError,
       handleConfirm,
       handleReject,
     };

@@ -146,7 +146,33 @@ const transformManifest = (content, mode) => {
         // running (required for Safe 7+, which Trezor blocks from the popup).
         // Keep in sync with TREZOR_SUITE_CONNECT_ORIGIN in
         // packages/lib/util-hw/src/extension/trezor-suite-probe.ts.
-        .replace('$TREZOR_SUITE_CONNECT_SRC', 'ws://127.0.0.1:21335');
+        .replace('$TREZOR_SUITE_CONNECT_SRC', 'ws://127.0.0.1:21335')
+        // RealFi USDr staking: one origin trio per network — SundaeSwap
+        // GraphQL, RealFi GraphQL, and the product host serving the runtime
+        // partner-config.json. Mirrors the endpoints pinned in the partner
+        // SDK's API_REGISTRY / @sundaeswap/core and the flag-payload
+        // realfiApiUrl / sundaeApiUrl / partnerConfigUrl; drift after an SDK
+        // bump fails closed (CSP blocks the request). Mainnet is the irregular
+        // env: 'app' on realfi.co, bare api.sundae.fi.
+        //
+        // LIMITATION (extension only, by MV3 design): the CSP is fixed at
+        // build time, so rotating these hosts through the REALFI flag payload
+        // (the CMS capability the mobile app honors) CANNOT take effect here —
+        // a rotated endpoint is CSP-blocked until a release updates this list.
+        // Rotation to a NEW origin therefore requires an extension release;
+        // treat a planned host move as a release-blocking config change.
+        .replace(
+          '$REALFI_SERVICES_URLS',
+          ['preview', 'preprod', 'app']
+            .flatMap(environment => [
+              `https://api${
+                environment === 'app' ? '' : `.${environment}`
+              }.sundae.fi`,
+              `https://api.${environment}.realfi.co`,
+              `https://${environment}.realfi.co`,
+            ])
+            .join(' '),
+        );
 
     if (process.env.EXTENSION_KEY) {
       manifest.key = manifest.key.replace(

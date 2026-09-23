@@ -10,6 +10,7 @@ export type {
   ColorScheme,
   LocationChangedPayload,
   OpenViewPayload,
+  ThemePreference,
   ViewsSliceState,
   ViewsStoreState,
 } from './slice';

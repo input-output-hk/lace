@@ -152,7 +152,9 @@ describe('useSignData (mobile)', () => {
         result.current.handleConfirm();
       });
 
-      expect(mockDispatchConfirmSignData).toHaveBeenCalled();
+      expect(mockDispatchConfirmSignData).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
     });
   });
 
@@ -166,7 +168,9 @@ describe('useSignData (mobile)', () => {
         result.current.handleReject();
       });
 
-      expect(mockDispatchRejectSignData).toHaveBeenCalled();
+      expect(mockDispatchRejectSignData).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
       expect(mockSheetsClose).toHaveBeenCalled();
     });
   });
@@ -227,7 +231,9 @@ describe('useSignData (mobile)', () => {
 
       unmount();
 
-      expect(mockDispatchRejectSignData).toHaveBeenCalled();
+      expect(mockDispatchRejectSignData).toHaveBeenCalledWith({
+        requestId: REQUEST_ID,
+      });
     });
 
     it('does not reject on unmount when user already confirmed', () => {

@@ -40,10 +40,11 @@
       "migrate-wallet.error.cannot-cover-delegation",
       "migrate-wallet.error.delegation-failed",
       "v2.pages.browse-pool.select-*",
-      "v2.pages.pool-details.select-button"
+      "v2.pages.pool-details.select-button",
+      "v2.cnight-designation.*"
     ],
-    "reason": "Earn Rewards and the delegation it sets up on a migration destination shipped ahead of their parallel manual check. These strings ARE accuracy-critical (advertised rate, stake-key deposit, which pool and DRep the stake goes to, and whether a wallet that has just been swept finished being set up) and were only de-classified to keep main green at merge time — not because the surfaces stopped being financial.",
-    "restoreWhen": "The es/ja review is complete for each pattern: docs/i18n-review/earn-rewards-critical-review.md covers v2.earn-rewards.*; the migrate-wallet / pool-selection patterns still need their review table drafted. A pattern is restorable once each of its keys is mtpe/human in {lang}-provenance.json and listed in verified-critical-{lang}.json. Move restored patterns into `patterns` individually; delete this block when it empties.",
+    "reason": "Earn Rewards and the delegation it sets up on a migration destination shipped ahead of their parallel manual check. These strings ARE accuracy-critical (advertised rate, stake-key deposit, which pool and DRep the stake goes to, and whether a wallet that has just been swept finished being set up) and were only de-classified to keep main green at merge time — not because the surfaces stopped being financial. The cNIGHT DUST designation build errors (`v2.cnight-designation.*`, ten keys) joined this list on 2026-09-07 for the same reason: they tell a user why a Plutus designation transaction could not be built (no Cardano UTxOs, no registration UTxO, unregistered script stake credential) and shipped machine-translated to keep the gate green.",
+    "restoreWhen": "The es/ja review is complete for each pattern: docs/i18n-review/earn-rewards-critical-review.md covers v2.earn-rewards.*; the migrate-wallet / pool-selection patterns still need their review table drafted. A pattern is restorable once each of its keys is mtpe/human in {lang}-provenance.json and listed in verified-critical-{lang}.json. Move restored patterns into `patterns` individually; delete this block when it empties. The cNIGHT keys are reviewed with the carbon guest es/ja review follow-up of LW-15388.",
     "ticket": "https://input-output.atlassian.net/browse/LW-15273"
   }
 }

@@ -18,7 +18,23 @@ import type {
 
 const MAX_BALANCE_ITERATIONS = 20;
 
+// Fee-correction fixpoint bound. The correction lowers the fee toward the true
+// minimum over the final shipped body; for the cNIGHT designation tx (the sole
+// Plutus consumer) the collateral/change coin fields sit far from any CBOR
+// width boundary, so it converges in <=3 steps. The bound is a runaway guard.
+const MAX_FEE_CORRECTION_ITERATIONS = 5;
+
 const BALANCE_EXHAUSTED_MESSAGE = 'Failed to balance transaction';
+
+/**
+ * The subset of the tx body the Plutus collateral reservation contributes.
+ * Derived per-candidate-fee during fee correction so the fee is priced over
+ * the exact fields that ship (see {@link correctFeeAfterEvaluation}).
+ */
+export type CollateralBodyFields = Pick<
+  Cardano.TxBody,
+  'collateralReturn' | 'totalCollateral'
+>;
 
 type BalancingLoopParams = Omit<
   BalanceTransactionParams,
@@ -99,12 +115,16 @@ const cborArrayHeaderSize = (elementCount: number): bigint => {
 /**
  * Estimates the additional fee attributable to VK witnesses (vkey + signature pairs).
  *
- * The estimate treats witness data as:
- * - A fixed 3-byte "tag" (map key + major type overhead),
- * - The CBOR array header size for `signatureCount` elements,
- * - Plus `101` bytes per witness structure (vkey + signature) as an approximation.
- *
- * The size is then multiplied by `minFeeCoefficient` (aka `a` parameter) to get a fee delta.
+ * The 3-byte framing term is deliberately one byte under the wire encoding,
+ * whose framing for a signed tx is 4 bytes (map key `0x00` + the 3-byte Conway
+ * set tag 258). That missing byte cancels the `isValid` byte the ledger's
+ * fee-size omits (`toCBORForSizeComputation` prices the tx without it), so the
+ * estimate lands exactly on the ledger minimum for any tx with at least one
+ * signer — independent of signer count, since the map key is emitted once. Do
+ * not "fix" the 3n to 4n: that overpays by one byte per tx and fails the
+ * drift-guard test in TransactionBuilder.test.ts, which pins this delta
+ * against the serializer. At 0 signers the framing is over-counted (the wire
+ * witness set stays `a0`) — an overpay, never an underpay.
  *
  * @param signatureCount - Number of (vkey, signature) pairs expected.
  * @param minFeeCoefficient - Protocol parameter `a` as bigint.
@@ -114,7 +134,8 @@ const computeVkWitnessesCost = (
   signatureCount: number,
   minFeeCoefficient: bigint,
 ): bigint => {
-  // Tag 3 bytes + length of the list + 101 bytes for each structure with 2 fields (signature, public key)
+  // Framing (one byte under wire — see above) + array header + 101 bytes per
+  // (vkey, signature) pair
   const vkWitnessSetSize =
     3n + cborArrayHeaderSize(signatureCount) + 101n * BigInt(signatureCount);
   return vkWitnessSetSize * minFeeCoefficient;
@@ -361,11 +382,30 @@ export const balanceTransaction = ({
 };
 
 /**
- * Recomputes the minimum fee using actual post-evaluation ex-units and, if
- * lower than the seeded fee, returns corrected outputs (the largest change
- * output at `changeAddress` increased by the saving) and the corrected fee.
- * Returns the original values unchanged when no correction is possible (no
- * change output at changeAddress) or when the evaluated fee is not lower.
+ * Corrects the fee downward after ex-unit evaluation, pricing `minFee` over the
+ * EXACT body that will ship: post-evaluation redeemers, the real
+ * `scriptIntegrityHash`, the fee-derived collateral fields, and the largest
+ * change output at `changeAddress` credited with the fee saving. Because the
+ * collateral fields' size depends on the fee (a smaller fee shrinks the
+ * collateral, which can add a collateral-return output) and the fee depends on
+ * the body's size, it iterates to a fixpoint, accepting a candidate fee only
+ * when that fee covers its own shipped body (`requiredFee <= fee`).
+ *
+ * Pricing over a stale pre-finalisation body under-priced the fee whenever
+ * finalisation changed the collateral fields' size — e.g. a collateral input
+ * summing to the coverage target seeds no collateral-return, but the smaller
+ * fee-derived collateral does emit one, adding ~66 bytes the fee never saw
+ * (Conway `FeeTooSmallUTxO`).
+ *
+ * Returns the shipped `outputs`, `fee`, and `collateralFields` so the caller
+ * can ship exactly what was priced. The fee is never raised above
+ * `balancedTx.body.fee` (the balancer already funded that from inputs); with no
+ * change output there is nowhere to refund a saving, so the balanced fee ships
+ * unchanged.
+ *
+ * @throws Error When the balanced fee does not cover the body that would ship —
+ *   the shipped fee is always one proven to cover its own body, and raising it
+ *   would need a re-balance this function cannot perform.
  */
 export const correctFeeAfterEvaluation = ({
   balancedTx,
@@ -373,55 +413,138 @@ export const correctFeeAfterEvaluation = ({
   resolvedInputs,
   protocolParameters,
   changeAddress,
+  scriptIntegrityHash,
+  deriveCollateralFields,
 }: {
   balancedTx: Cardano.Tx;
   evaluatedRedeemers: Cardano.Redeemer[];
   resolvedInputs: Cardano.Utxo[];
   protocolParameters: RequiredProtocolParameters;
   changeAddress: Cardano.PaymentAddress;
-}): { outputs: Cardano.TxOut[]; fee: Cardano.Lovelace } => {
-  const txWithEvaluation: Cardano.Tx = {
-    ...balancedTx,
-    witness: { ...balancedTx.witness, redeemers: evaluatedRedeemers },
-  };
+  scriptIntegrityHash?: Cardano.TxBody['scriptIntegrityHash'];
+  deriveCollateralFields: (fee: Cardano.Lovelace) => CollateralBodyFields;
+}): {
+  outputs: Cardano.TxOut[];
+  fee: Cardano.Lovelace;
+  collateralFields: CollateralBodyFields;
+} => {
+  const seedFee = balancedTx.body.fee;
+  const witness = { ...balancedTx.witness, redeemers: evaluatedRedeemers };
   const uniqueSigners = getUniqueSignerKeyHashes(
-    txWithEvaluation,
+    { ...balancedTx, witness },
     resolvedInputs,
   );
   const vkCost = computeVkWitnessesCost(
     uniqueSigners.size,
     BigInt(protocolParameters.minFeeCoefficient),
   );
-  const evaluatedFee =
-    minFee(txWithEvaluation, resolvedInputs, protocolParameters) + vkCost;
-  const currentFee = balancedTx.body.fee;
-  if (evaluatedFee >= currentFee) {
-    return { outputs: balancedTx.body.outputs, fee: currentFee };
-  }
-  const saving = currentFee - evaluatedFee;
-  const outputs = balancedTx.body.outputs;
+
+  const baseOutputs = balancedTx.body.outputs;
   let changeIndex = -1;
-  for (let index = 0; index < outputs.length; index++) {
+  for (let index = 0; index < baseOutputs.length; index++) {
     if (
-      outputs[index].address === changeAddress &&
+      baseOutputs[index].address === changeAddress &&
       (changeIndex < 0 ||
-        outputs[index].value.coins > outputs[changeIndex].value.coins)
+        baseOutputs[index].value.coins > baseOutputs[changeIndex].value.coins)
     ) {
       changeIndex = index;
     }
   }
-  if (changeIndex < 0) {
-    return { outputs, fee: currentFee };
-  }
-  const correctedOutputs = [...outputs];
-  correctedOutputs[changeIndex] = {
-    ...correctedOutputs[changeIndex],
-    value: {
-      ...correctedOutputs[changeIndex].value,
-      coins: correctedOutputs[changeIndex].value.coins + saving,
-    },
+
+  // Build the exact body shipped at `fee` and return its required minimum fee.
+  // `collateralReturn: undefined` clears any pre-balance seeded return before
+  // the fee-derived fields re-add it, so the priced body equals the ship body.
+  const priceAt = (
+    fee: Cardano.Lovelace,
+  ): {
+    requiredFee: Cardano.Lovelace;
+    outputs: Cardano.TxOut[];
+    collateralFields: CollateralBodyFields;
+  } => {
+    const collateralFields = deriveCollateralFields(fee);
+    const outputs = [...baseOutputs];
+    const saving = seedFee - fee;
+    if (changeIndex >= 0 && saving > 0n) {
+      outputs[changeIndex] = {
+        ...outputs[changeIndex],
+        value: {
+          ...outputs[changeIndex].value,
+          coins: outputs[changeIndex].value.coins + saving,
+        },
+      };
+    }
+    const candidate: Cardano.Tx = {
+      ...balancedTx,
+      body: {
+        ...balancedTx.body,
+        fee,
+        outputs,
+        scriptIntegrityHash:
+          scriptIntegrityHash ?? balancedTx.body.scriptIntegrityHash,
+        collateralReturn: undefined,
+        ...collateralFields,
+      },
+      witness,
+    };
+    const requiredFee =
+      minFee(candidate, resolvedInputs, protocolParameters) + vkCost;
+    return { requiredFee, outputs, collateralFields };
   };
-  return { outputs: correctedOutputs, fee: evaluatedFee };
+
+  // The fee is never raised here, so a shipped body needing more than the fee
+  // covers cannot be fixed by this function — it needs a re-balance. Fail loudly
+  // instead of shipping a body Conway rejects with FeeTooSmallUTxO.
+  const assertFunded = (
+    required: Cardano.Lovelace,
+    fee: Cardano.Lovelace,
+  ): void => {
+    if (required > fee) {
+      throw new Error(
+        `Evaluated transaction body requires ${required} lovelace of fee, balanced fee is ${fee}`,
+      );
+    }
+  };
+
+  // No change output → nowhere to refund a saving, so the fee can't be lowered.
+  // Ship the balanced fee with its collateral fields, once proven to cover them.
+  if (changeIndex < 0) {
+    const priced = priceAt(seedFee);
+    assertFunded(priced.requiredFee, seedFee);
+    return {
+      outputs: baseOutputs,
+      fee: seedFee,
+      collateralFields: priced.collateralFields,
+    };
+  }
+
+  // Seed at the balancer's fee (priced with the per-tx max SEED ex-units, so the
+  // real evaluated body needs less for scripts) and lower it only to a value that
+  // still covers its own shipped body.
+  let fee = seedFee;
+  let priced = priceAt(fee);
+  for (
+    let iteration = 0;
+    iteration < MAX_FEE_CORRECTION_ITERATIONS && priced.requiredFee < fee;
+    iteration++
+  ) {
+    const candidateFee = priced.requiredFee;
+    const candidatePriced = priceAt(candidateFee);
+    // The candidate fee must cover the body priced at that fee; otherwise keep
+    // the last fee that did (guards a coin-width straddle across the step).
+    if (candidatePriced.requiredFee > candidateFee) break;
+    fee = candidateFee;
+    priced = candidatePriced;
+  }
+
+  // Covers the seed too: the loop never runs when the seed fee is already short,
+  // and is a no-op on every fee the loop did accept.
+  assertFunded(priced.requiredFee, fee);
+
+  return {
+    outputs: priced.outputs,
+    fee,
+    collateralFields: priced.collateralFields,
+  };
 };
 
 /**

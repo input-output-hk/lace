@@ -6,7 +6,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
-    "./sdk": "./src/sdk.ts"
+    "./sdk": "./src/sdk.ts",
+    "./src/state": "./src/state.ts"
   },
   "main": "src/index.ts",
   "dependencies": {
@@ -27,14 +28,20 @@
     "@lace-lib/cnight-dust-designation": "*",
     "@lace-lib/core": "*",
     "@lace-lib/extension-messaging": "*",
+    "@lace-lib/navigation": "*",
+    "@lace-lib/ui-toolkit": "*",
     "@lace-lib/util": "*",
     "@lace-lib/util-hw": "*",
+    "@lace-lib/util-provider": "*",
     "@lace-lib/util-redacted": "*",
+    "@lace-lib/util-render": "*",
     "@lace-lib/util-store": "*",
+    "backoff-rxjs": "^7.0.0",
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*",
+    "@lace-lib/util-dev-cardano": "*",
     "@types/webextension-polyfill": "^0.10.7"
   }
 }

@@ -22,7 +22,10 @@ export {
   isThoroughAddressDiscoveryOperation,
   parseTipHashFromOperationId,
 } from './store/side-effects/sync-operation-utils';
-export { applyInFlightUtxoAdjustments } from './apply-in-flight-utxo-adjustments';
+export {
+  applyInFlightUtxoAdjustments,
+  ownPendingOutputs,
+} from './apply-in-flight-utxo-adjustments';
 export {
   extractOwnedPaymentCredentials,
   extractPaymentCredential,
@@ -51,14 +54,21 @@ export * from './get-network-details';
 export * from './cardano-native-token-info';
 export * from './util';
 export * from './compute-net-flows';
+export * from './inspect-cardano-tx-effects';
 export * from './store/collateral-flow';
+export * from './store/composer-flow';
 export * from './store/night-designation-flow';
+export * from './store/night-designation-index';
 
 export type * from './store';
 export * from './types';
-export type { CardanoActivityUtxoMetadata } from './augmentations';
+export type {
+  CardanoActivityUtxoMetadata,
+  CardanoNightDesignationActivityMetadata,
+} from './augmentations';
 
 export * from './tx-builder';
+export { InputSelectionError } from './input-selection/InputSelectionError';
 export * from './signing';
 export * from './serialization';
 

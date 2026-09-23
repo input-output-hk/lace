@@ -262,6 +262,10 @@ describe('collateral-flow stateMachine', () => {
 
       expect(state.status).toEqual('DiscardingTx');
       expect(state.serializedTx).toEqual(stateReadyFromBuild.serializedTx);
+      // The machine is global, so a surface tells this account's work from
+      // another's by the account on the state — a discard that dropped it would
+      // read on every account's page as someone else's run.
+      expect(state.accountId).toEqual(testAccountId);
     });
 
     it('switches to "Idle" when "closed" and state has no serializedTx', () => {
@@ -403,6 +407,9 @@ describe('collateral-flow stateMachine', () => {
       ) as StateWithStatusOf<'Failure'>;
 
       expect(state.status).toEqual('Failure');
+      // The account is known here, so the failure names it: an unattributed one
+      // reads on every account's page as another account's run.
+      expect(state.accountId).toEqual(testAccountId);
       expect(state.errorTranslationKeys?.title).toEqual(
         'collateral.sheet.failure.title',
       );
@@ -526,6 +533,7 @@ describe('collateral-flow stateMachine', () => {
 
       expect(state.status).toEqual('DiscardingTx');
       expect(state.serializedTx).toEqual('signedTx');
+      expect(state.accountId).toEqual(testAccountId);
     });
 
     it('switches to "Idle" when "closed" and state has no serializedTx', () => {

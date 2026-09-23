@@ -8,6 +8,7 @@ import {
   Row,
   Sheet,
   Text,
+  footerHeight,
   useCopyToClipboard,
   useTheme,
   spacing,
@@ -132,9 +133,13 @@ export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
       ...('buyTokenId' in swapFlowState && {
         tokenOut: swapFlowState.buyTokenId,
       }),
-      ...('sellAmount' in swapFlowState && {
-        quantity: swapFlowState.sellAmount,
-      }),
+      // Omitted, never filled from `swapFlowState.sellAmount`: a quote failure
+      // leaves no quote, and the state's amount is in display units where
+      // `quantity` is smallest-unit on every other swap event.
+      ...('selectedQuote' in swapFlowState &&
+        swapFlowState.selectedQuote && {
+          quantity: swapFlowState.selectedQuote.sellAmount,
+        }),
       ...(swapSessionId && { swapSessionId }),
     });
     dispatchRetry();
@@ -225,7 +230,9 @@ export const SwapResult = (props: SheetScreenProps<SheetRoutes.SwapResult>) => {
 
 const getStyles = () =>
   StyleSheet.create({
-    scrollContainer: {},
+    scrollContainer: {
+      paddingBottom: footerHeight.horizontal,
+    },
     content: {
       flex: 1,
       padding: spacing.M,

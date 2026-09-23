@@ -15,7 +15,8 @@ export const SignTxError = ({
       alignItems="center"
       justifyContent="center"
       gap={spacing.L}
-      style={style}>
+      style={style}
+      testID="sign-tx-error">
       <Icon name="Sad" size={43} variant="solid" />
       <Text.M>{t('dapp-connector.cardano.sign-tx.error-try-again')}</Text.M>
     </Column>

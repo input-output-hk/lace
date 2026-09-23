@@ -18,6 +18,7 @@ import type {
   ActivitySection,
   FormattedActivityListItem,
 } from '../design-system/organisms/activityList/activityList';
+import type { CardanoNightDesignationActivityMetadata } from '@lace-contract/cardano-context';
 import type { TFunction } from '@lace-contract/i18n';
 import type { MetadataByTokenId, TokenId } from '@lace-contract/tokens';
 
@@ -49,8 +50,35 @@ const activityToIconName: Record<ActivityType, IconName> = {
   NightDesignation: 'Moon',
 };
 
-const mapActivityTypeToLabel = (type: ActivityType, t: TFunction) => {
-  switch (type) {
+// `Activity.blockchainSpecific` is `unknown` on the base type; the cast is
+// typed against cardano-context's activity augmentation (type-only import),
+// so a renamed or added action fails compilation here instead of silently
+// falling back to the generic label. `default` still guards rows persisted
+// by other app versions, whose action can be outside today's union.
+const nightDesignationLabelKey = (blockchainSpecific: unknown) => {
+  const action = (
+    blockchainSpecific as
+      | {
+          Cardano?: {
+            nightDesignation?: CardanoNightDesignationActivityMetadata;
+          };
+        }
+      | undefined
+  )?.Cardano?.nightDesignation?.action;
+  switch (action) {
+    case 'update':
+      return 'activity.history.night-designation.update';
+    case 'deregister':
+      return 'activity.history.night-designation.deregister';
+    case 'designate':
+    case undefined:
+    default:
+      return 'activity.history.night-designation';
+  }
+};
+
+const mapActivityToLabel = (activity: Activity, t: TFunction) => {
+  switch (activity.type) {
     case ActivityType.Send:
       return t('activity.history.send');
     case ActivityType.Receive:
@@ -72,7 +100,7 @@ const mapActivityTypeToLabel = (type: ActivityType, t: TFunction) => {
     case ActivityType.Withdrawal:
       return t('activity.history.withdrawal');
     case ActivityType.NightDesignation:
-      return t('activity.history.night-designation');
+      return t(nightDesignationLabelKey(activity.blockchainSpecific));
   }
 };
 
@@ -141,20 +169,25 @@ export const formatAndGroupActivitiesByDate = ({
         mainTokenChange.token?.displayDecimalPlaces,
       );
 
-    const tokensInfoSummary = getTokensInfoSummary?.(
-      enrichedTokenBalanceChanges,
-      {
+    const tokensInfoSummary =
+      getTokensInfoSummary?.(enrichedTokenBalanceChanges, {
         nfts: t('activity.assets.nfts'),
         tokens: t('activity.assets.tokens'),
         mixed: t('activity.assets.mixed'),
         unknownToken: t('activity.unknown.ticker'),
-      },
-    ) ?? {
-      title: {
-        amount: amount ?? '',
-        label: mainTokenChange?.token?.ticker ?? t('activity.unknown.ticker'),
-      },
-    };
+      }) ??
+      // No token movement (e.g. a self-transfer that nets to zero) → show no value
+      // rather than a meaningless "unknown" ticker. A present-but-unmetadatred
+      // token still falls back to the unknown ticker.
+      (mainTokenChange
+        ? {
+            title: {
+              amount: amount ?? '',
+              label:
+                mainTokenChange.token?.ticker ?? t('activity.unknown.ticker'),
+            },
+          }
+        : { title: undefined, subtitle: '' });
 
     const formattedTimeOfDay = formatTime({
       date: timestamp,
@@ -163,7 +196,7 @@ export const formatAndGroupActivitiesByDate = ({
 
     const title = [ActivityType.Receive, ActivityType.Send].includes(type)
       ? activityId
-      : mapActivityTypeToLabel(type, t);
+      : mapActivityToLabel(activity, t);
 
     const status = ActivityToFormattedType[type];
     const iconName = activityToIconName[type];
@@ -202,7 +235,7 @@ export const formatAndGroupActivitiesByDate = ({
           return {
             ...commonProps,
             info: {
-              title: mapActivityTypeToLabel(type, t),
+              title,
             },
             value: {
               subtitle: mapPendingOrFailedTypeToValueSubtitle(

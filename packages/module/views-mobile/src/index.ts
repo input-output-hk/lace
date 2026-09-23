@@ -23,6 +23,7 @@ const extensionModule = inferModuleContext({
 
 const moduleMap: LaceModuleMap = {
   'lace-mobile': extensionModule,
+  'lace-extension-carbon': extensionModule,
   'lace-extension-guest': extensionModule,
 };
 

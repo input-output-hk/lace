@@ -17,6 +17,7 @@ import {
   balanceTransaction,
   correctFeeAfterEvaluation,
   isTransactionBalanced,
+  type CollateralBodyFields,
 } from '../../src/tx-builder/balancing';
 
 import type { RequiredProtocolParameters } from '../../src';
@@ -1049,6 +1050,7 @@ describe('correctFeeAfterEvaluation', () => {
       resolvedInputs: selection,
       protocolParameters: protocol,
       changeAddress: createAddress(changeAddr),
+      deriveCollateralFields: () => ({}),
     });
 
     expect(fee).toBeLessThan(overpaidFee);
@@ -1070,6 +1072,7 @@ describe('correctFeeAfterEvaluation', () => {
       resolvedInputs: selection,
       protocolParameters: protocol,
       changeAddress: createAddress(changeAddr),
+      deriveCollateralFields: () => ({}),
     });
     expect(second.fee).toBe(fee);
     expect(second.outputs).toEqual(outputs);
@@ -1085,9 +1088,104 @@ describe('correctFeeAfterEvaluation', () => {
       resolvedInputs: selection,
       protocolParameters: protocol,
       changeAddress: createAddress(otherAddr),
+      deriveCollateralFields: () => ({}),
     });
 
     expect(fee).toBe(overpaidTx.body.fee);
     expect(outputs).toBe(overpaidTx.body.outputs);
+  });
+
+  // Regression (LW-15113): finalisation ships a fee-derived collateral-return
+  // output that the balanced (coverage-target) fee never priced — ~66 bytes
+  // that caused Conway FeeTooSmallUTxO. The correction must price the fee over
+  // the collateral fields it actually ships, so a run whose shipped body gains
+  // a collateral-return output must yield a HIGHER fee than one that ships none
+  // (previously both were priced over the same stale body → identical fee).
+  it('prices the fee over the collateral-return output it ships', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+    const overpaidTx = overpayFee(balanced, 100_000n);
+    // Fee-derived collateral (ceil(fee * 150 / 100)) from a 5-ADA collateral
+    // input, mirroring finalizePlutusTx's deriveCollateralFields.
+    const withReturn = (fee: bigint): CollateralBodyFields => {
+      const amount = (fee * 150n + 99n) / 100n;
+      return {
+        totalCollateral: amount,
+        collateralReturn: {
+          address: createAddress(changeAddr),
+          value: { coins: 5_000_000n - amount },
+        },
+      };
+    };
+    const withoutReturn = (fee: bigint): CollateralBodyFields => ({
+      totalCollateral: (fee * 150n + 99n) / 100n,
+    });
+
+    const shared = {
+      balancedTx: overpaidTx,
+      evaluatedRedeemers: [],
+      resolvedInputs: selection,
+      protocolParameters: protocol,
+      changeAddress: createAddress(changeAddr),
+    };
+    const priced = correctFeeAfterEvaluation({
+      ...shared,
+      deriveCollateralFields: withReturn,
+    });
+    const pricedNoReturn = correctFeeAfterEvaluation({
+      ...shared,
+      deriveCollateralFields: withoutReturn,
+    });
+
+    expect(priced.collateralFields.collateralReturn).toBeDefined();
+    expect(priced.fee).toBeGreaterThan(pricedNoReturn.fee);
+  });
+
+  // Multi-asset so the collateral return's size growth dwarfs any residual
+  // slack left by runBalancingLoop's `computedFee <= fee` exit.
+  const heavyCollateralReturn = (fee: bigint): CollateralBodyFields => {
+    const amount = (fee * 150n + 99n) / 100n;
+    const assets = new Map<Cardano.AssetId, bigint>(
+      ['4e46542d303031', '4e46542d303032', '4e46542d303033'].map(assetName => [
+        `0b0d621b5c26d0a1fd0893a4b04c19d860296a69ede1fbcfc5179882${assetName}` as unknown as Cardano.AssetId,
+        1n,
+      ]),
+    );
+    return {
+      totalCollateral: amount,
+      collateralReturn: {
+        address: createAddress(changeAddr),
+        value: { coins: 5_000_000n - amount, assets },
+      },
+    };
+  };
+
+  it('throws when the balanced fee cannot cover the collateral fields it would ship', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+
+    expect(() =>
+      correctFeeAfterEvaluation({
+        balancedTx: balanced,
+        evaluatedRedeemers: [],
+        resolvedInputs: selection,
+        protocolParameters: protocol,
+        changeAddress: createAddress(changeAddr),
+        deriveCollateralFields: heavyCollateralReturn,
+      }),
+    ).toThrow(/balanced fee is/);
+  });
+
+  it('throws when the balanced fee cannot cover the collateral fields and there is no change output', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+
+    expect(() =>
+      correctFeeAfterEvaluation({
+        balancedTx: balanced,
+        evaluatedRedeemers: [],
+        resolvedInputs: selection,
+        protocolParameters: protocol,
+        changeAddress: createAddress(otherAddr),
+        deriveCollateralFields: heavyCollateralReturn,
+      }),
+    ).toThrow(/balanced fee is/);
   });
 });

@@ -1,3 +1,5 @@
+import { composerFlowSideEffects } from './composer-flow-side-effects';
+import { composerFlowTxSideEffects } from './composer-flow-tx-side-effects';
 import { initializeDependencies } from './dependencies';
 import { nightDesignationFlowSideEffects } from './night-designation-flow-side-effects';
 import { nightDesignationFlowTxSideEffects } from './night-designation-flow-tx-side-effects';
@@ -14,6 +16,8 @@ import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';
 const redux: LaceInit<LaceModuleStoreInit> = async (props, dependencies) => ({
   sideEffects: [
     ...createCardanoSideEffects(props.runtime.config),
+    ...composerFlowSideEffects,
+    ...composerFlowTxSideEffects,
     ...nightDesignationFlowSideEffects,
     ...nightDesignationFlowTxSideEffects,
   ],

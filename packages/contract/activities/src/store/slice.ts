@@ -142,6 +142,27 @@ const slice = createSlice({
         payload: { accountId, activities: activities.map(encodeActivity) },
       }),
     },
+    removeActivities: (
+      state,
+      {
+        payload: { accountId, activityIds },
+      }: Readonly<
+        PayloadAction<{ accountId: AccountId; activityIds: string[] }>
+      >,
+    ) => {
+      const currentActivities = state.activities[accountId];
+      if (!currentActivities) return;
+      const idsToRemove = new Set(activityIds);
+      const remaining = currentActivities.filter(
+        activity => !idsToRemove.has(activity.activityId),
+      );
+      // Preserve the reference when nothing matched: callers dispatch this on
+      // every sync tick, and an unconditional write would churn the slice (and
+      // its selectors) on every tick that removes nothing.
+      if (remaining.length !== currentActivities.length) {
+        state.activities[accountId] = remaining;
+      }
+    },
     resetActivities: (
       state,
       {

@@ -701,6 +701,22 @@ describe('handleInteractiveSheetDismiss', () => {
     expect(mockPopToTop).not.toHaveBeenCalled();
   });
 
+  it('dismisses a nested picker alone, keeping the opener sheet presented', () => {
+    vi.mocked(navigationRef.getRootState).mockReturnValue({
+      index: 2,
+      routes: [
+        { key: 'root', name: SheetRoutes.RootStack },
+        { key: 'manage-stake', name: SheetRoutes.RealFiManageStake },
+        { key: 'select-token', name: SheetRoutes.RealFiSelectStakeToken },
+      ],
+    } as unknown as NavigationState);
+
+    handleInteractiveSheetDismiss('select-token');
+
+    expect(mockPopToTop).not.toHaveBeenCalled();
+    expect(mockPop).not.toHaveBeenCalled();
+  });
+
   it('does nothing when only one sheet is open (dismissing it already returns to base)', () => {
     vi.mocked(navigationRef.getRootState).mockReturnValue({
       index: 1,

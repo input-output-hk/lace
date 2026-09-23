@@ -3,6 +3,7 @@ import { addressesStoreContract } from '@lace-contract/addresses';
 import { appStoreContract } from '@lace-contract/app';
 import { appLockStoreContract } from '@lace-contract/app-lock';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
+import { failuresStoreContract } from '@lace-contract/failures';
 import { featureStoreContract } from '@lace-contract/feature';
 import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
@@ -48,6 +49,7 @@ const dependsOnContracts = combineContracts([
   activitiesStoreContract,
   appStoreContract,
   appLockStoreContract,
+  failuresStoreContract,
   featureStoreContract,
   midnightContextStoreContract,
   walletActiveStateDependencyContract,

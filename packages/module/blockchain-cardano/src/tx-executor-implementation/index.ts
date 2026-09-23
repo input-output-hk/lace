@@ -15,6 +15,7 @@ export { makeBuildEarnRewardsTx } from './build-earn-rewards-tx';
 type StateObservablesWithAvailableAccountUtxos = {
   cardanoContext?: {
     selectAvailableAccountUtxos$?: Observable<AccountUtxoMap>;
+    selectCollateralOwnershipUtxos$?: Observable<AccountUtxoMap>;
   };
 };
 
@@ -23,16 +24,23 @@ export const makeTxExecutor =
     const cardanoAvailableAccountUtxos$ = (
       stateObservables as StateObservablesWithAvailableAccountUtxos
     )?.cardanoContext?.selectAvailableAccountUtxos$;
-    if (!cardanoAvailableAccountUtxos$) {
+    const cardanoCollateralOwnershipUtxos$ = (
+      stateObservables as StateObservablesWithAvailableAccountUtxos
+    )?.cardanoContext?.selectCollateralOwnershipUtxos$;
+    if (!cardanoAvailableAccountUtxos$ || !cardanoCollateralOwnershipUtxos$) {
       throw new Error(
-        '[blockchain-cardano] makeTxExecutor requires cardanoContext.selectAvailableAccountUtxos$ state observable',
+        '[blockchain-cardano] makeTxExecutor requires cardanoContext.selectAvailableAccountUtxos$ and selectCollateralOwnershipUtxos$ state observables',
       );
     }
     return {
       blockchainName: 'Cardano',
       buildTx: makeBuildTx(dependencies, cardanoAvailableAccountUtxos$),
       previewTx: makePreviewTx(dependencies, cardanoAvailableAccountUtxos$),
-      confirmTx: makeConfirmTx(dependencies, cardanoAvailableAccountUtxos$),
+      confirmTx: makeConfirmTx(
+        dependencies,
+        cardanoAvailableAccountUtxos$,
+        cardanoCollateralOwnershipUtxos$,
+      ),
       discardTx: makeDiscardTx(),
       submitTx: makeSubmitTx(dependencies),
     };

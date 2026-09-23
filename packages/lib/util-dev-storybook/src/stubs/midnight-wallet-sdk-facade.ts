@@ -22,10 +22,6 @@ export class WalletFacade {
     return new WalletFacade();
   }
 
-  public static async fetchTermsAndConditions() {
-    return { url: 'https://midnight.network/terms', hash: 'stub-hash' };
-  }
-
   public start() {}
   public state = () =>
     of({

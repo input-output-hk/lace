@@ -1,5 +1,11 @@
 import { isHardwareWallet } from '@lace-contract/wallet-repo';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet } from 'react-native';
 
 import { SignDataLayout, SignDataResult } from '../../common/components';
@@ -16,11 +22,23 @@ const styles = StyleSheet.create({
   },
 });
 
+type CardanoDappSignDataProps = {
+  /** The request this sheet presents, from its route params. */
+  requestId: string;
+};
+
 /**
  * Extension popup for CIP-8 sign data. Same shell and body as mobile (`SignDataLayout` / `SignDataContent`).
  */
-export const CardanoDappSignData = () => {
-  const closeDappView = useDappViewClose();
+export const CardanoDappSignData = ({
+  requestId,
+}: CardanoDappSignDataProps) => {
+  // The route param, not the synced request: it is the discriminator the slot
+  // is matched against, and it outlives the request being cleared — which a
+  // port drop can do before this view ever renders one.
+  const requestIdRef = useRef<string | undefined>(requestId);
+  requestIdRef.current = requestId;
+  const closeDappView = useDappViewClose(undefined, requestIdRef);
 
   const {
     request,

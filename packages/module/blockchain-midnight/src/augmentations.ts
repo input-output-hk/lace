@@ -8,7 +8,6 @@ declare module '@lace-contract/module' {
 declare module '@lace-contract/module' {
   interface AppConfig {
     midnightFoundationTermsAndConditionsUrl: string;
-    midnightGlobalTermsAndConditionsUrl: string;
     laceTermsOfUseUrl: string;
   }
 }

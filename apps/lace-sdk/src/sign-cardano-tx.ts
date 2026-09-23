@@ -1,6 +1,7 @@
 import { Cardano } from '@cardano-sdk/core';
 import { AuthSecret } from '@lace-contract/authentication-prompt';
 import {
+  createInputResolver,
   isCardanoAddress,
   type CardanoSignRequest,
   type CardanoSignResult,
@@ -89,7 +90,7 @@ export const signCardanoTx = async (
       obs.addresses.selectAllAddresses$,
     );
     const accountUtxos = await firstValueFrom(
-      obs.cardanoContext.selectAccountUtxos$,
+      obs.cardanoContext.selectCollateralOwnershipUtxos$,
     );
 
     const signableWallets = allWallets.filter(isSignableCardanoWallet);
@@ -189,11 +190,18 @@ export const signCardanoTx = async (
     )) as SignerFactory[];
     const signerFactory = new CompositeSignerFactory(signerFactories);
 
+    // `utxo` above -- settled plus this account's own pending outputs, never
+    // an available/spendable view -- is both the key-path resolution set and
+    // the collateral resolver's only layer: this origin has no provider and
+    // no chained-tx-output cache. A collateral input it cannot resolve is not
+    // the account's own: third-party collateral signs, and own collateral this
+    // set lacks is not protected (LW-15506).
     const context: CardanoTransactionSignerContext = {
       wallet: walletEntity,
       accountId,
       knownAddresses,
       utxo,
+      collateralInputResolver: createInputResolver(utxo),
       auth,
     };
 

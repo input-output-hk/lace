@@ -8,7 +8,10 @@ import {
   requestResyncWallet,
   resyncWalletOnConfigChangeFromFeatureFlags,
 } from './resync';
-import { fetchNetworkTermsAndConditions } from './terms-and-conditions';
+import {
+  autoDismissMidnightSyncFailureOnResume,
+  autoDismissMidnightSyncFailureOnSyncSuccess,
+} from './sync-failure';
 import { watchMidnightAccount, watchMidnightAccounts } from './watch';
 
 import type { SideEffect } from '../..';
@@ -21,7 +24,10 @@ export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
       const midnightStateStorage =
         dependencies.createCollectionStorage<SerializedMidnightWallet>({
           collectionId: 'midnightWalletState',
-          computeDocId: wallet => `${wallet.walletId}-${wallet.networkId}`,
+          // accountId is the id every lookup keys on, and unlike
+          // walletId+networkId it cannot collide between two entries — a
+          // collision here would silently merge two accounts' documents.
+          computeDocId: wallet => String(wallet.accountId),
         });
 
       const deleteWallet = createDeleteWalletSideEffect(midnightStateStorage);
@@ -51,8 +57,9 @@ export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
           resetSyncState,
           resyncWalletOnConfigChangeFromFeatureFlags,
           requestResyncWallet,
+          autoDismissMidnightSyncFailureOnResume,
+          autoDismissMidnightSyncFailureOnSyncSuccess,
           accountWalletWatcher,
-          fetchNetworkTermsAndConditions,
         ].map(sideEffect =>
           sideEffect(actionObservables, stateObservables, dependencies),
         ),

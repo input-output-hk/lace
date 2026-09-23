@@ -57,3 +57,5 @@ export * from './governanceCard/governanceCard';
 export * from './governanceStatusCard/governanceStatusCard';
 export * from './dRepCard/dRepCard';
 export * from './earnRewardsCard/earnRewardsCard';
+export * from './warningAlert/warningAlert';
+export * from './hardwareWalletRestoreWarning/hardwareWalletRestoreWarning';

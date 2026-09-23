@@ -1,4 +1,4 @@
-import type { UrResult } from './useUrReassembly';
+import type { UrReassemblyDecoder, UrResult } from './useUrReassembly';
 import type { Theme } from '../../../../design-tokens';
 
 export type { UrResult } from './useUrReassembly';
@@ -20,5 +20,7 @@ export interface UrScannerProps {
   onCancel: () => void;
   /** Called when reassembly fails irrecoverably. Optional. */
   onError?: (message: string) => void;
+  /** Overrides the reassembly decoder — see `useUrReassembly`'s doc. */
+  createDecoder?: () => UrReassemblyDecoder;
   theme: Theme;
 }

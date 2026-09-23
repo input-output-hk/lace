@@ -19,6 +19,11 @@ import {
 } from './editTokenFolderFlowSlice';
 import { groupTokensIntoFolders } from './group-tokens-into-folders';
 import {
+  portfolioPolicyActions,
+  portfolioPolicyReducers,
+  portfolioPolicySelectors,
+} from './portfolioPolicySlice';
+import {
   rawTokensActions,
   rawTokensSelectors,
   rawTokensReducers,
@@ -41,7 +46,12 @@ import {
 } from './tokensMetadataSlice';
 import { createToken } from './utils';
 
-import type { RawToken, Token, TokenMetadata } from '../../types';
+import type {
+  RawToken,
+  StoredTokenMetadata,
+  Token,
+  TokenMetadata,
+} from '../../types';
 import type {
   AccountTokensMap,
   TokenDistributionWithTotals,
@@ -52,6 +62,19 @@ import type { StateFromReducersMapObject } from '@reduxjs/toolkit';
 
 /** Stable fallback so input selectors stay referentially stable (Reselect dev checks). */
 const EMPTY_WALLET_ENTITIES = {} as WalletEntitiesMap;
+
+/** Stable empty fallback so the portfolio-policy input stays referentially stable. */
+const EMPTY_CURATED_METADATA = {} as Partial<
+  Record<TokenId, StoredTokenMetadata>
+>;
+
+/** Resilient input selector (the portfolioPolicy slice may be absent in unit fixtures). */
+const selectCuratedMetadataSafe = (state: {
+  portfolioPolicy?: {
+    curatedMetadataByTokenId?: Partial<Record<TokenId, StoredTokenMetadata>>;
+  };
+}): Partial<Record<TokenId, StoredTokenMetadata>> =>
+  state.portfolioPolicy?.curatedMetadataByTokenId ?? EMPTY_CURATED_METADATA;
 
 type TokenWithSelection = Token & { isSelected: boolean };
 
@@ -65,9 +88,11 @@ const sortTokensByTicker = (t1: Token, t2: Token): number => {
 const selectAllTokens = createSelector(
   rawTokensSelectors.selectAll,
   tokensMetadataSelectors.selectTokensMetadata,
-  (tokens, tokensMetadata) =>
+  selectCuratedMetadataSafe,
+  (tokens, tokensMetadata, curatedMetadata) =>
     tokens.map(token => {
-      const metadata = tokensMetadata[token.tokenId];
+      const metadata =
+        tokensMetadata[token.tokenId] ?? curatedMetadata[token.tokenId];
       return createToken(token, metadata);
     }),
 );
@@ -649,6 +674,7 @@ const tokensActions = {
   tokens: {
     ...rawTokensActions,
     ...tokensMetadataActions,
+    ...portfolioPolicyActions,
   },
   tokenFolders: tokenFolderActions,
   createTokenFolderFlow: createTokenFolderFlowActions,
@@ -671,6 +697,10 @@ const tokensSelectors = {
     selectAggregatedFungibleTokensForVisibleAccounts,
     /** Visible account ids based on network type + selected testnets */
     selectVisibleAccountIds,
+
+    /** Portfolio-policy curated metadata registry */
+    selectCuratedMetadataByTokenId:
+      portfolioPolicySelectors.selectCuratedMetadataByTokenId,
 
     // === Global token lists ===
     selectAllTokens,
@@ -713,6 +743,7 @@ const reducers = {
   ...tokenFolderReducers,
   ...createTokenFolderFlowReducers,
   ...editTokenFolderFlowReducers,
+  ...portfolioPolicyReducers,
 };
 
 export type * from './rawTokensSlice';

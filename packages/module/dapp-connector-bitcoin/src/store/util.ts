@@ -10,6 +10,7 @@ import {
   take,
   takeWhile,
   tap,
+  timer,
 } from 'rxjs';
 
 import {
@@ -94,6 +95,37 @@ export const detectViewClosure = ({
   );
 
 /**
+ * How long the popup window gets to register in `openViews` before the request
+ * is failed.
+ *
+ * Waiting without a bound parks the request on a prompt that may never appear:
+ * confirm, reject and closure all originate from the very view that never
+ * opened, so nothing can settle it. Requests are served one at a time, so such
+ * a request also wedges every later one behind it.
+ */
+const POPUP_REGISTRATION_CAP_MS = 15_000;
+
+/**
+ * Waits for the popup at `location` to register, giving up after
+ * {@link POPUP_REGISTRATION_CAP_MS}.
+ *
+ * The cap covers registration ONLY — once the view is found the caller waits on
+ * the user for as long as it takes, so nobody is timed out mid-decision.
+ */
+const awaitPopupRegistration = (
+  selectOpenViews$: Observable<View[]>,
+  location: string,
+): Observable<View | undefined> =>
+  race(
+    selectOpenViews$.pipe(
+      map(views => views.find(view => view.location === location)),
+      filter(Boolean),
+      take(1),
+    ),
+    timer(POPUP_REGISTRATION_CAP_MS).pipe(map(() => undefined)),
+  );
+
+/**
  * Finds the side panel view for a specific browser window, or any side panel
  * if no windowId is provided. Returns undefined on browsers without the side
  * panel API, so the flow falls back to a popup window.
@@ -162,6 +194,8 @@ const batchSigningOutcome$ = (
 
 type SignFlowParams = SharedParams & {
   request: BitcoinConfirmationRequest;
+  /** Identifies this request; names it on the close it asks for. */
+  requestId: string;
   confirm$: Observable<unknown>;
   reject$: Observable<unknown>;
   viewDisconnected$: Observable<{ payload: ViewId }>;
@@ -191,6 +225,7 @@ const signFlow$ = ({
   actions,
   selectOpenViews$,
   request,
+  requestId,
   confirm$,
   reject$,
   viewDisconnected$,
@@ -204,6 +239,17 @@ const signFlow$ = ({
   setCompletedAction,
   setErrorAction,
 }: SignFlowParams): Observable<ActionType<ActionCreators>> => {
+  // Once the user confirms, the signing result is the flow's only terminal
+  // event. Signing runs outside this pipeline and can take minutes on a
+  // hardware wallet, and the confirm arm does not emit until its result
+  // arrives — so without this guard a view closure or a late Cancel in that
+  // window would win the race, complete the flow, and let the NEXT queued
+  // request consume this request's signing result and report it as its own.
+  // `filter`, not `takeUntil`: takeUntil would complete this arm and so end
+  // the race. `filter` suppresses the value only — a source that COMPLETES
+  // still ends it, and these action streams never complete.
+  let hasConfirmed = false;
+
   const resultActions = (
     result: BitcoinSigningResult | { type: 'rejected' },
     closeUiActions: ActionType<ActionCreators>[],
@@ -224,16 +270,18 @@ const signFlow$ = ({
     confirm$.pipe(
       take(1),
       tap(() => {
-        request.resolve({ isConfirmed: true });
+        hasConfirmed = true;
+        request.resolve({ outcome: 'confirmed' });
       }),
       switchMap(() =>
         batchSigningOutcome$(signingResult$, expectedResultCount),
       ),
     ),
     reject$.pipe(
+      filter(() => !hasConfirmed),
       take(1),
       tap(() => {
-        request.resolve({ isConfirmed: false });
+        request.resolve({ outcome: 'rejected' });
       }),
       map(() => ({ type: 'rejected' as const })),
     ),
@@ -260,9 +308,10 @@ const signFlow$ = ({
             ),
             viewDisconnected$.pipe(
               filter(({ payload }) => payload === sidePanel.id),
+              filter(() => !hasConfirmed),
               take(1),
               tap(() => {
-                request.resolve({ isConfirmed: false });
+                request.resolve({ outcome: 'rejected' });
               }),
               switchMap(() => [
                 actions.views.setActiveSheetPage(null),
@@ -271,18 +320,33 @@ const signFlow$ = ({
             ),
           );
         }
-        return selectOpenViews$.pipe(
-          map(views =>
-            views.find(view => view.location === popupWindowLocation),
-          ),
-          filter(Boolean),
-          take(1),
-          switchMap(dappConnectorView =>
-            race(
+        return awaitPopupRegistration(
+          selectOpenViews$,
+          popupWindowLocation,
+        ).pipe(
+          switchMap(dappConnectorView => {
+            if (!dappConnectorView) {
+              // The prompt never appeared, so the user cannot answer it. Not
+              // `rejected`: the user never declined, and dApps branch on a
+              // refusal to stop retrying. Settle the dApp and free the queue.
+              request.resolve({ outcome: 'unavailable' });
+              // The error flag matters even though no view registered: one may
+              // still mount late, and without it that window would render the
+              // loading state forever on an already-settled request.
+              return [setErrorAction(), clearPendingAction()];
+            }
+            return race(
               confirmOrReject$.pipe(
                 switchMap(result =>
                   resultActions(result, [
-                    actions.views.closeView(dappConnectorView.id),
+                    // Asking to close, rather than closing outright: a queued
+                    // request binds to this same window the instant this flow
+                    // completes, and `closeRequestedPopup` is what knows
+                    // whether that has happened by the time the close lands.
+                    actions.bitcoinDappConnector.closePopupRequested({
+                      location: popupWindowLocation,
+                      requestId,
+                    }),
                   ]),
                 ),
               ),
@@ -292,19 +356,38 @@ const signFlow$ = ({
                 ),
                 detectViewClosure({ dappConnectorView, selectOpenViews$ }),
               ).pipe(
+                filter(() => !hasConfirmed),
                 take(1),
                 tap(() => {
-                  request.resolve({ isConfirmed: false });
+                  request.resolve({ outcome: 'rejected' });
                 }),
                 map(() => clearPendingAction()),
               ),
-            ),
-          ),
+            );
+          }),
         );
       }),
     ),
   );
 };
+
+/**
+ * Identifies one signing request for its whole life.
+ *
+ * The sequence number is what makes the id unique: `Date.now()` alone repeats
+ * for two requests stamped in the same millisecond, and `closeRequestedPopup`
+ * tells a queued request apart from the one whose window it inherited by this
+ * id — so a repeat would let a close cross over between them.
+ */
+const createRequestIdFactory = () => {
+  let sequence = 0;
+  return (origin: string, type: string): string => {
+    sequence += 1;
+    return `${origin}-${type}-${Date.now()}-${sequence}`;
+  };
+};
+
+const nextRequestId = createRequestIdFactory();
 
 /**
  * Handles the message signing (signMessage) review flow.
@@ -319,7 +402,7 @@ export const signMessage$ = ({
   signingResult$,
 }: SignMessageParams): Observable<ActionType<ActionCreators>> => {
   const { requestingDapp } = request;
-  const requestId = `${requestingDapp.origin}-signMessage-${Date.now()}`;
+  const requestId = nextRequestId(requestingDapp.origin, 'signMessage');
   const dapp = {
     name: requestingDapp.name,
     origin: requestingDapp.origin,
@@ -333,6 +416,7 @@ export const signMessage$ = ({
     actions,
     selectOpenViews$,
     request,
+    requestId,
     confirm$: confirmSignMessage$,
     reject$: rejectSignMessage$,
     viewDisconnected$,
@@ -385,13 +469,14 @@ export const signPsbt$ = ({
   signingResult$,
 }: SignPsbtParams): Observable<ActionType<ActionCreators>> => {
   const { requestingDapp } = request;
-  const requestId = `${requestingDapp.origin}-signPsbt-${Date.now()}`;
+  const requestId = nextRequestId(requestingDapp.origin, 'signPsbt');
   const psbtsBase64 = request.psbtsBase64 ?? [];
 
   return signFlow$({
     actions,
     selectOpenViews$,
     request,
+    requestId,
     confirm$: confirmSignPsbt$,
     reject$: rejectSignPsbt$,
     viewDisconnected$,

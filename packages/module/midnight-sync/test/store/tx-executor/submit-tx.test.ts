@@ -151,6 +151,7 @@ describe('blockchain-midnight submitTx', () => {
         a: {
           success: true,
           txId: 'txId',
+          awaitsFinalization: true,
         },
       });
     });

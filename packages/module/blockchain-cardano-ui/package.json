@@ -13,7 +13,8 @@
     "@lace-contract/i18n": "*",
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
-    "@lace-contract/tokens": "*"
+    "@lace-contract/tokens": "*",
+    "@lace-lib/cnight-dust-designation": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

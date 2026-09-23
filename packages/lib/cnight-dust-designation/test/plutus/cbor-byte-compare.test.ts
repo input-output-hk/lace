@@ -66,6 +66,18 @@ const DUST_PUBKEY_SEQUENTIAL = MidnightCoinPubkey(
 const DUST_PUBKEY_ALL_ZERO = MidnightCoinPubkey(new Uint8Array(32));
 const DUST_PUBKEY_ALL_EF = MidnightCoinPubkey(new Uint8Array(32).fill(0xef));
 const SCRIPT_HASH_ALL_FF = new Uint8Array(28).fill(0xff);
+// A real dust_address (a `mn_dust_undeployed…` stub payload). The
+// synthetic 32-byte vectors above never exercise the full width the
+// on-chain field carries in production.
+const DUST_PUBKEY_REAL_33 = MidnightCoinPubkey(
+  Uint8Array.from(
+    (
+      '7358cbf0deff08a5228ed0203883234d4b77e3837093d5259eee0c532a8746c221'.match(
+        /.{2}/g,
+      ) ?? []
+    ).map(byte => parseInt(byte, 16)),
+  ),
+);
 
 // =====================================================================
 // Dapp-produced CBOR fixtures.
@@ -83,6 +95,8 @@ const DAPP_FIXTURES = {
     'd8799fd87a9f581cffffffffffffffffffffffffffffffffffffffffffffffffffffffffff58200000000000000000000000000000000000000000000000000000000000000000ff',
   datumVkAsymStakeAsymDust:
     'd8799fd8799f581cababababababababababababababababababababababababababababff5820efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefff',
+  datumVkAllZeroStakeReal33Dust:
+    'd8799fd8799f581c00000000000000000000000000000000000000000000000000000000ff58217358cbf0deff08a5228ed0203883234d4b77e3837093d5259eee0c532a8746c221ff',
 } as const;
 
 describe('CBOR byte-compare vs upstream dapp encoder', () => {
@@ -133,6 +147,17 @@ describe('CBOR byte-compare vs upstream dapp encoder', () => {
         dustAddress: DUST_PUBKEY_ALL_EF,
       });
       expect(cbor.toString()).toBe(DAPP_FIXTURES.datumVkAsymStakeAsymDust);
+    });
+
+    it('Real 33-byte dust_address — covers the full on-chain payload width', () => {
+      const cbor = dustMappingDatumToCbor({
+        cWallet: {
+          kind: 'verificationKey',
+          stakeKeyHash: STAKE_KEY_HASH_ALL_ZERO,
+        },
+        dustAddress: DUST_PUBKEY_REAL_33,
+      });
+      expect(cbor.toString()).toBe(DAPP_FIXTURES.datumVkAllZeroStakeReal33Dust);
     });
   });
 });

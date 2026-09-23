@@ -3,13 +3,13 @@
 
 // Lifted directly from @cardano-sdk/wallet
 import {
+  EMPTY,
+  Subject,
   concat,
   defaultIfEmpty,
   delay,
-  EMPTY,
   of,
   race,
-  Subject,
   tap,
 } from 'rxjs';
 
@@ -29,12 +29,21 @@ export const observeAll =
     );
   };
 
+/**
+ * A second, independent implementation of {@link CollectionStorage} with no
+ * conformance test against CollectionStore — and the only storage module the
+ * public SDK namespace exposes, so an SDK consumer gets this one. It diverges:
+ * observeAll does not de-duplicate and getAll returns the internal array by
+ * reference. Rebuilding it on CollectionStore is tracked as LW-15268.
+ */
 export class InMemoryCollectionStore<T> implements CollectionStorage<T> {
   readonly #updates$ = new Subject<T[]>();
+  readonly #computeDocId: (document: T) => string;
   protected docs: T[] = [];
   observeAll: CollectionStorage<T>['observeAll'];
 
-  constructor() {
+  constructor(computeDocId: (document: T) => string) {
+    this.#computeDocId = computeDocId;
     this.observeAll = observeAll(this, this.#updates$);
   }
 
@@ -43,10 +52,45 @@ export class InMemoryCollectionStore<T> implements CollectionStorage<T> {
     return of(this.docs);
   }
 
+  get(docId: string): Observable<T> {
+    const document = this.docs.find(
+      candidate => this.#computeDocId(candidate) === docId,
+    );
+    return document === undefined ? EMPTY : of(document).pipe(delay(1));
+  }
+
   setAll(docs: T[]): Observable<void> {
     this.docs = docs;
+    return this.#emitAsync();
+  }
+
+  upsert(document: T): Observable<void> {
+    const docId = this.#computeDocId(document);
+    const index = this.docs.findIndex(
+      existing => this.#computeDocId(existing) === docId,
+    );
+    this.docs =
+      index === -1
+        ? [...this.docs, document]
+        : this.docs.map((existing, existingIndex) =>
+            existingIndex === index ? document : existing,
+          );
+    return this.#emitAsync();
+  }
+
+  removeWhere(predicate: (document: T) => boolean): Observable<void> {
+    this.docs = this.docs.filter(document => !predicate(document));
+    return this.#emitAsync();
+  }
+
+  clear(): Observable<void> {
+    this.docs = [];
+    return this.#emitAsync();
+  }
+
+  #emitAsync(): Observable<void> {
     return of(void 0).pipe(
-      // if setAll is called on 1st emission of observeAll,
+      // if a write is called on 1st emission of observeAll,
       // then this has to be asynchronous for observeAll to emit the 2nd item.
       // any delay duration is ok: it's enough that this is called in the next tick
       delay(1),

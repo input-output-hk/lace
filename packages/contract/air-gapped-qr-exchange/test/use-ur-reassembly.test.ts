@@ -2,10 +2,11 @@
  * @vitest-environment jsdom
  */
 import { useUrReassembly } from '@lace-lib/ui-toolkit/src/design-system/templates/sheets/urScannerSheet/useUrReassembly';
-import { encodeToParts } from '@lace-lib/ur-transport';
+import { createUrDecoder, encodeToParts } from '@lace-lib/ur-transport';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import type { UrReassemblyDecoder } from '@lace-lib/ui-toolkit/src/design-system/templates/sheets/urScannerSheet/useUrReassembly';
 import type { UrPartDecoder } from '@lace-lib/ur-transport';
 
 const mocks = vi.hoisted(() => ({
@@ -36,6 +37,27 @@ const MAX_FRAGMENT_LENGTH = 90;
 
 const buildParts = (): string[] =>
   encodeToParts(URTYPE, PAYLOAD, { maxFragmentLength: MAX_FRAGMENT_LENGTH });
+
+/**
+ * The real decoder plus a `canAccept` that answers on UR type, as the next
+ * stack's decoder does. Built here because ui-toolkit cannot import that
+ * package and the legacy default answers nothing.
+ */
+const typeAwareDecoder = (): UrReassemblyDecoder => {
+  const inner = createUrDecoder();
+  let expected: string | undefined;
+  const typeOf = (part: string) => part.toLowerCase().split('/')[0].slice(3);
+  return {
+    receivePart: part => {
+      expected ??= typeOf(part);
+      return inner.receivePart(part);
+    },
+    canAccept: part => expected === undefined || typeOf(part) === expected,
+    progress: () => inner.progress(),
+    failureMessage: () => inner.failureMessage(),
+    result: () => inner.result(),
+  };
+};
 
 const renderReassembly = (
   onComplete: ReturnType<typeof vi.fn>,
@@ -103,6 +125,35 @@ describe('useUrReassembly bad frames', () => {
 
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(result.current.isComplete).toBe(true);
+  });
+});
+
+describe('useUrReassembly latched decoder', () => {
+  it('replaces a decoder that reports it cannot accept the frame, and refeeds it', () => {
+    const onComplete = vi.fn();
+    // A decoder that answers `canAccept` — what the next stack's does. The
+    // legacy default deliberately does not, so the hook's own reaction is what
+    // is under test here, not the type rule that produces the answer.
+    const { result } = renderHook(() =>
+      useUrReassembly({ createDecoder: typeAwareDecoder, onComplete }),
+    );
+    const stale = encodeToParts(
+      'bytes',
+      Uint8Array.from({ length: 400 }, () => 1),
+      { maxFragmentLength: MAX_FRAGMENT_LENGTH },
+    );
+    const payload = Uint8Array.from({ length: 40 }, (_, index) => index);
+    const live = encodeToParts('crypto-hdkey', payload);
+    // The whole point: one frame. The camera's re-reads are dropped as
+    // duplicates, so the stalled-frame budget can never see a second one.
+    expect(live).toHaveLength(1);
+
+    feed(result, [stale[0], live[0]]);
+
+    expect(onComplete).toHaveBeenCalledWith({
+      urType: 'crypto-hdkey',
+      cbor: payload,
+    });
   });
 });
 

@@ -12,6 +12,12 @@ export type PostHogClient = {
     featureFlagPayloads?: Record<string, JsonType>;
   }>;
   identify: (distinctId: string, properties?: Record<string, JsonType>) => void;
+  /**
+   * Drop every queued, not-yet-delivered event and cancel any pending flush.
+   *
+   * Optional because a client that delivers synchronously has nothing to drop.
+   */
+  reset?: () => void;
 };
 
 export type GetDefaultPostHogEventProperties = () => Record<string, JsonType>;

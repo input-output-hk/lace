@@ -1,3 +1,4 @@
+import { FeatureFlagKey } from '@lace-contract/feature';
 import { BigNumber, HexBytes } from '@lace-lib/util';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -5,7 +6,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
-  FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
 } from '../../src/const';
 import { MidnightSDKNetworkIds } from '../../src/const';
 import {
@@ -191,38 +191,6 @@ describe('midnight slice', () => {
             state.userNetworksConfigOverrides[testNetworkId],
           ).toStrictEqual({});
         });
-      });
-    });
-
-    describe('setNetworkTermsAndConditions', () => {
-      it('should store fetched terms and conditions', () => {
-        const termsAndConditions = {
-          url: 'https://midnight.network/terms',
-          hash: 'abc123',
-        };
-        const action =
-          actions.midnightContext.setNetworkTermsAndConditions(
-            termsAndConditions,
-          );
-        const state = reducers.midnightContext(initialState, action);
-
-        expect(state.networkTermsAndConditions).toEqual(termsAndConditions);
-      });
-
-      it('should clear terms and conditions when set to undefined', () => {
-        const stateWithTerms = reducers.midnightContext(
-          initialState,
-          actions.midnightContext.setNetworkTermsAndConditions({
-            url: 'https://midnight.network/terms',
-            hash: 'abc123',
-          }),
-        );
-
-        const action =
-          actions.midnightContext.setNetworkTermsAndConditions(undefined);
-        const state = reducers.midnightContext(stateWithTerms, action);
-
-        expect(state.networkTermsAndConditions).toBeUndefined();
       });
     });
 
@@ -621,7 +589,11 @@ describe('midnight slice', () => {
         }
       });
 
-      it('should derive proof server override from feature flags', () => {
+      it('does not derive a proof server override, even from a flag carrying one', () => {
+        // The Shielded remote proof servers were retired (LW-15058), so
+        // proofServerAddress is no longer a flag-overridable field. A flag still
+        // carrying an address must not resurrect the option: local is the only
+        // one offered until a replacement provider is wired in deliberately.
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -630,7 +602,9 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  key: FeatureFlagKey(
+                    'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
+                  ),
                   payload: {
                     [testNetworkId]: 'https://remote-proof-server.example.com',
                   },
@@ -644,9 +618,7 @@ describe('midnight slice', () => {
             state,
           );
 
-        expect(overrides[testNetworkId]).toEqual({
-          proofServerAddress: 'https://remote-proof-server.example.com',
-        });
+        expect(overrides[testNetworkId]?.proofServerAddress).toBeUndefined();
       });
 
       it('should derive indexer override from feature flags', () => {
@@ -705,7 +677,7 @@ describe('midnight slice', () => {
         });
       });
 
-      it('should derive all three overrides from feature flags', () => {
+      it('should derive both remaining overrides from feature flags', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -725,12 +697,6 @@ describe('midnight slice', () => {
                     [testNetworkId]: 'https://indexer.example.com',
                   },
                 },
-                {
-                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
-                  payload: {
-                    [testNetworkId]: 'https://remote-proof-server.example.com',
-                  },
-                },
               ],
             },
           },
@@ -743,11 +709,10 @@ describe('midnight slice', () => {
         expect(overrides[testNetworkId]).toEqual({
           nodeAddress: 'https://rpc.example.com',
           indexerAddress: 'https://indexer.example.com',
-          proofServerAddress: 'https://remote-proof-server.example.com',
         });
       });
 
-      it('should derive both proof server and indexer overrides', () => {
+      it('derives only the indexer override when a retired proof-server flag is also present', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -756,7 +721,9 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  key: FeatureFlagKey(
+                    'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
+                  ),
                   payload: {
                     [testNetworkId]: 'https://remote-proof-server.example.com',
                   },
@@ -777,7 +744,6 @@ describe('midnight slice', () => {
           );
 
         expect(overrides[testNetworkId]).toEqual({
-          proofServerAddress: 'https://remote-proof-server.example.com',
           indexerAddress: 'https://indexer.example.com',
         });
       });
@@ -808,9 +774,9 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  key: FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
                   payload: {
-                    [testNetworkId]: 'newProofServerAddress',
+                    [testNetworkId]: 'newIndexerAddress',
                   },
                 },
               ],
@@ -822,7 +788,7 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
-          proofServerAddress: 'newProofServerAddress',
+          indexerAddress: 'newIndexerAddress',
         });
       });
 
@@ -833,7 +799,7 @@ describe('midnight slice', () => {
             userNetworksConfigOverrides: {
               ...initialState.userNetworksConfigOverrides,
               [testNetworkId]: {
-                proofServerAddress: 'userProofServerAddress',
+                indexerAddress: 'userIndexerAddress',
               },
             },
           },
@@ -843,9 +809,9 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  key: FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
                   payload: {
-                    [testNetworkId]: 'newProofServerAddress',
+                    [testNetworkId]: 'flagIndexerAddress',
                   },
                 },
               ],
@@ -857,7 +823,7 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
-          proofServerAddress: 'userProofServerAddress',
+          indexerAddress: 'userIndexerAddress',
         });
       });
     });
@@ -910,37 +876,6 @@ describe('midnight slice', () => {
         );
 
         expect(result).toBeUndefined();
-      });
-    });
-
-    describe('selectNetworkTermsAndConditions', () => {
-      it('should return undefined when no terms have been fetched', () => {
-        const state: TestState = {
-          midnightContext: initialState,
-        };
-
-        const result =
-          selectors.midnightContext.selectNetworkTermsAndConditions(state);
-
-        expect(result).toBeUndefined();
-      });
-
-      it('should return the stored terms and conditions', () => {
-        const termsAndConditions = {
-          url: 'https://midnight.network/terms',
-          hash: 'abc123',
-        };
-        const state: TestState = {
-          midnightContext: {
-            ...initialState,
-            networkTermsAndConditions: termsAndConditions,
-          },
-        };
-
-        const result =
-          selectors.midnightContext.selectNetworkTermsAndConditions(state);
-
-        expect(result).toEqual(termsAndConditions);
       });
     });
 

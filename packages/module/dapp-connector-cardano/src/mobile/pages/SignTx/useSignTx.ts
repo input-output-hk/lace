@@ -1,3 +1,4 @@
+import { useSignTxRefusal } from '../../../common/components/useSignTxRefusal';
 import { useDispatchLaceAction, useLaceSelector } from '../../../common/hooks';
 import {
   useSignTxData,
@@ -5,6 +6,7 @@ import {
 } from '../../../common/hooks/useSignTxData';
 import { useDappSignRequest } from '../../hooks/useDappSignRequest';
 
+import type { SignTxRefusalDetails } from '../../../common/components/sign-tx-refused-keys';
 import type { DappSignResult } from '../../hooks/useDappSignRequest';
 import type {
   SheetParameterList,
@@ -25,6 +27,8 @@ export interface UseSignTxResult extends UseSignTxDataResult {
   isLoading: boolean;
   isSigning: boolean;
   signTxResult: DappSignResult | null;
+  /** The collateral guard's verdict for this request, or `null` (LW-15498). */
+  refusal: SignTxRefusalDetails | null;
 }
 
 export const useSignTx = ({
@@ -39,8 +43,16 @@ export const useSignTx = ({
 
   const { requestId, dapp, txHex, partialSign: isPartialSign } = params;
 
+  // The verdict comes from the pending slot, the only channel that carries it.
+  const refusal = useSignTxRefusal({
+    collateralRefusal: pendingRequest?.collateralRefusal,
+    dappOrigin: pendingRequest?.dapp?.origin,
+  });
+
   const signTxData: UseSignTxDataResult = useSignTxData({
-    txHex,
+    // A refused request renders nothing transaction-derived, so it is not
+    // inspected, resolved or priced either -- the CBOR is hostile.
+    txHex: refusal ? '' : txHex,
     dappOrigin: dapp?.origin,
   });
 
@@ -79,6 +91,8 @@ export const useSignTx = ({
     handleCloseResult,
     isLoading,
     isSigning,
-    signTxResult,
+    // The queued code-1 answer IS the refusal, not a result to show over it.
+    signTxResult: refusal ? null : signTxResult,
+    refusal,
   };
 };

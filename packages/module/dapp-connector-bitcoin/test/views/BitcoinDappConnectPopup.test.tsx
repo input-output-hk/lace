@@ -184,7 +184,7 @@ describe('BitcoinDappConnectPopup', () => {
 
     expect(mocks.dispatched).toContainEqual({
       key: 'bitcoinDappConnector.closePopupRequested',
-      args: ['/bitcoin-dapp-connect'],
+      args: [{ location: '/bitcoin-dapp-connect' }],
     });
     expect(window.close).not.toHaveBeenCalled();
   });

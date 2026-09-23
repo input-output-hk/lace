@@ -9,7 +9,7 @@ import {
 } from '../../src';
 import { tokenPricingSliceSelectors } from '../../src/store/selectors';
 
-import type { TokenPricingState } from '../../src';
+import type { TokenPrice, TokenPricingState } from '../../src';
 import type { Address } from '@lace-contract/addresses';
 import type { State } from '@lace-contract/module';
 import type {
@@ -749,6 +749,57 @@ describe('selectors', () => {
       expect(select(buildState(eur, null, ['eur']))).toEqual({
         fallback: true,
       });
+    });
+  });
+
+  describe('selectUsdToCurrencyRate', () => {
+    const select =
+      tokenPricingSliceSelectors.tokenPricing.selectUsdToCurrencyRate;
+    const eur = { name: 'EUR', ticker: '€' };
+
+    const rateState = (
+      currencyPreference: { name: string; ticker: string },
+      priceOverrides: Partial<TokenPrice> = {},
+      prices: TokenPricingState['prices'] | undefined = undefined,
+    ): { tokenPricing: TokenPricingState } => ({
+      tokenPricing: {
+        ...mockState.tokenPricing,
+        currencyPreference,
+        prices: prices ?? {
+          [priceId]: {
+            ...mockState.tokenPricing.prices[priceId],
+            price: 0.46,
+            priceInUsd: 0.5,
+            fiatCurrency: 'EUR',
+            ...priceOverrides,
+          },
+        },
+      },
+    });
+
+    it('is 1 for the USD preference regardless of cached prices', () => {
+      expect(select(rateState(DEFAULT_CURRENCY_PREFERENCE, {}, {}))).toBe(1);
+    });
+
+    it('derives the rate from a fresh price cached in the selected currency', () => {
+      expect(select(rateState(eur))).toBeCloseTo(0.92);
+    });
+
+    it('is undefined while no price is cached', () => {
+      expect(select(rateState(eur, {}, {}))).toBeUndefined();
+    });
+
+    it('ignores stale prices', () => {
+      expect(select(rateState(eur, { isStale: true }))).toBeUndefined();
+    });
+
+    it('ignores prices cached in a previously selected currency', () => {
+      expect(select(rateState(eur, { fiatCurrency: 'USD' }))).toBeUndefined();
+    });
+
+    it('ignores unusable zero prices', () => {
+      expect(select(rateState(eur, { priceInUsd: 0 }))).toBeUndefined();
+      expect(select(rateState(eur, { price: 0 }))).toBeUndefined();
     });
   });
 });

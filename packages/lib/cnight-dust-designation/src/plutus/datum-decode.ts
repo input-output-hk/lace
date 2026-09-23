@@ -2,7 +2,10 @@ import { Serialization } from '@cardano-sdk/core';
 import { HexBlob } from '@cardano-sdk/util';
 
 import { CardanoStakeKeyHash } from '../value-objects/cardano-stake-key-hash.vo';
-import { MidnightCoinPubkey } from '../value-objects/midnight-coin-pubkey.vo';
+import {
+  MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
+  MidnightCoinPubkey,
+} from '../value-objects/midnight-coin-pubkey.vo';
 
 import type { CWalletVariant, DustMappingDatumValue } from './datum';
 
@@ -55,9 +58,10 @@ export const decodeDustMappingDatum = (
     return undefined;
   }
 
-  // dust_address — 32-byte coin public key.
+  // Field 1: dust_address (verbatim payload; see MidnightCoinPubkey).
   const dustBytes = fields.get(1).asBoundedBytes();
-  if (!dustBytes || dustBytes.length > 33) return undefined;
+  if (!dustBytes || dustBytes.length > MIDNIGHT_DUST_ADDRESS_MAX_BYTES)
+    return undefined;
   let dustAddress: MidnightCoinPubkey;
   try {
     dustAddress = MidnightCoinPubkey(dustBytes);

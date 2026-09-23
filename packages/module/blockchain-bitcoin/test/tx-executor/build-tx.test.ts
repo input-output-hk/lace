@@ -12,7 +12,7 @@ import {
   Transaction,
 } from 'bitcoinjs-lib';
 import { firstValueFrom, of } from 'rxjs';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { decodeUnsignedTxFromString } from '../../src/common';
 import {
@@ -25,6 +25,7 @@ import type {
   PendingActivitiesByAccount,
 } from '@lace-contract/activities';
 import type {
+  BitcoinBlockchainSpecificTxData,
   BitcoinInFlightUtxoActivityMetadata,
   BitcoinUTxO,
 } from '@lace-contract/bitcoin-context';
@@ -280,7 +281,10 @@ const makeTokenTransfer = (normalizedAmount: bigint): TokenTransfer =>
     },
   } as unknown as TokenTransfer);
 
-const makeBuildParams = (normalizedAmount: bigint): BuildTxParamsShape =>
+const makeBuildParams = (
+  normalizedAmount: bigint,
+  feeRate: BitcoinBlockchainSpecificTxData['feeRate'] = { feeOption: 'Low' },
+): BuildTxParamsShape =>
   ({
     accountId: testAccountId,
     blockchainName: 'Bitcoin',
@@ -292,7 +296,7 @@ const makeBuildParams = (normalizedAmount: bigint): BuildTxParamsShape =>
         tokenTransfers: [makeTokenTransfer(normalizedAmount)],
         blockchainSpecific: {
           memo: '',
-          feeRate: { feeOption: 'Low' as const },
+          feeRate,
         },
       },
     ],
@@ -484,6 +488,103 @@ describe('makeBuildTx in-flight wiring (bitcoin)', () => {
     const result = await firstValueFrom(buildTx(buildParams));
     expect(result.success).toBe(true);
   });
+});
+
+describe('makeBuildTx fee rate resolution (bitcoin)', () => {
+  const fundedUtxos = [
+    makeUtxo({ txId: previousTxIdA, index: 0, satoshis: 10_000_000 }),
+  ];
+
+  const unreachableFeeMarket = () =>
+    vi.fn(() =>
+      of(
+        Err(
+          new ProviderError(
+            ProviderFailure.ConnectionFailure,
+            undefined,
+            'Fee market unreachable',
+          ),
+        ),
+      ),
+    );
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('builds a Custom rate without reading the fee market', async () => {
+    const getCurrentFeeMarket = unreachableFeeMarket();
+    const deps = makeDeps(fundedUtxos, { getCurrentFeeMarket });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(
+      buildTx(
+        makeBuildParams(1_000_000n, {
+          feeOption: 'Custom',
+          customFeeRate: 0.0002,
+        }),
+      ),
+    );
+
+    expect(result.success).toBe(true);
+    expect(getCurrentFeeMarket).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      'Bitcoin buildTx: Using fee rate of 0.0002 BTC/kB',
+    );
+  });
+
+  it('refuses a Custom build with no typed rate without reading the fee market', async () => {
+    const getCurrentFeeMarket = unreachableFeeMarket();
+    const deps = makeDeps(fundedUtxos, { getCurrentFeeMarket });
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(
+      buildTx(makeBuildParams(1_000_000n, { feeOption: 'Custom' })),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      errorTranslationKey: 'tx-executor.building-error.invalid-fee-rate',
+    });
+    expect(getCurrentFeeMarket).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['Fast', 0.001],
+    ['Average', 0.0005],
+    ['Low', 0.0001],
+  ] as const)('resolves %s to its fee market tier', async (feeOption, rate) => {
+    const deps = makeDeps(fundedUtxos);
+    const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+    const result = await firstValueFrom(
+      buildTx(makeBuildParams(1_000_000n, { feeOption })),
+    );
+
+    expect(result.success).toBe(true);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Bitcoin buildTx: Using fee rate of ${rate} BTC/kB`,
+    );
+  });
+
+  it.each(['Fast', 'Average', 'Low'] as const)(
+    'fails a %s build when the fee market cannot be read',
+    async feeOption => {
+      const deps = makeDeps(fundedUtxos, {
+        getCurrentFeeMarket: unreachableFeeMarket(),
+      });
+      const buildTx = makeBuildTx(deps, toPendingActivities$());
+
+      const result = await firstValueFrom(
+        buildTx(makeBuildParams(1_000_000n, { feeOption })),
+      );
+
+      expect(result).toEqual({
+        success: false,
+        errorTranslationKey: 'tx-executor.building-error.generic',
+      });
+    },
+  );
 });
 
 describe('makeBuildTx previous transaction embedding (bitcoin)', () => {

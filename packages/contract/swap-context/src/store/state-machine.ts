@@ -1,6 +1,7 @@
 import { createStateMachine } from '@lace-lib/util-store';
 
 import type { SwapFlowState } from './types';
+import type { SwapTxInspection } from '../check-swap-intent';
 import type { SwapQuote } from '@lace-contract/swap-provider';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { EventOf } from '@lace-lib/util-store';
@@ -188,11 +189,15 @@ export const swapFlowMachine = createStateMachine('swapFlow', initialState, {
   Building: {
     buildCompleted: (
       previousState,
-      { unsignedTxCbor }: { unsignedTxCbor: string },
+      {
+        unsignedTxCbor,
+        inspection,
+      }: { unsignedTxCbor: string; inspection: SwapTxInspection },
     ) => ({
       ...previousState,
       status: 'Reviewing',
       unsignedTxCbor,
+      inspection,
     }),
     buildFailed: (
       previousState,

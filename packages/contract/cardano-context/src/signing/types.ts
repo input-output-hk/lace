@@ -60,6 +60,17 @@ export interface CardanoSignerContext extends SignerContext {
 /** Extends CardanoSignerContext with UTXOs for input resolution. */
 export interface CardanoTransactionSignerContext extends CardanoSignerContext {
   utxo: Cardano.Utxo[];
+  /**
+   * Resolves each collateral input to the output it spends, for the
+   * collateral-return ownership rule (LW-15390). Its local layer is the
+   * account's ownership UTxOs -- the FULL settled set, collateral-reserved
+   * UTxOs included, plus own pending outputs and whatever chained-transaction
+   * outputs the origin can see -- and, where the origin has a provider, the
+   * chain behind it. An input it cannot resolve is not the wallet's
+   * (LW-15506). Required, not optional, so every construction site decides it
+   * explicitly. Unrelated to `utxo` above, which serves key-path resolution.
+   */
+  collateralInputResolver: Cardano.InputResolver;
 }
 
 /** Transaction sign request. */

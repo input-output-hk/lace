@@ -290,15 +290,29 @@ export type AccountCardCustomisationProps = {
   containerStyle?: StyleProp<ViewStyle>;
 };
 
+// Duplicated from `@lace-lib/ui-toolkit`'s AccountCardActionVariant (see ADR 28
+// — contracts must not depend on UI libraries). Keep in sync.
+export type AccountCardActionVariant = 'action' | 'icon';
+
 /**
  * Per-blockchain account customisation.
  *
  * When `AccountCard` is provided the entire card is replaced — the blockchain
  * module owns the full rendering (layout, data fetching, actions).
+ *
+ * `AccountCardExtraActions` is the additive alternative: it is rendered in the
+ * shared default card's action row so a blockchain can add its own action
+ * button (e.g. Cardano's cNIGHT → DUST designation) without owning the whole
+ * card.
  */
 export type AccountUICustomisation = UICustomisation<{
   supportsNfts: boolean;
   AccountCard?: ComponentType<AccountCardCustomisationProps>;
+  /** Extra action button(s) rendered in the shared default card's action row for this blockchain. */
+  AccountCardExtraActions?: ComponentType<{
+    accountId: AccountId;
+    variant: AccountCardActionVariant;
+  }>;
   uiCustomisationSelector: (params: { blockchainName: string }) => boolean;
   /**
    * Native currency for this blockchain on the active network — same contract as

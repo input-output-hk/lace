@@ -1,4 +1,4 @@
-import { EMPTY, from, mergeMap, of } from 'rxjs';
+import { catchError, EMPTY, from, mergeMap, of } from 'rxjs';
 
 import type { StorageAdapter } from '../types';
 import type { Observable } from 'rxjs';
@@ -29,6 +29,10 @@ export abstract class BaseStore<T> {
       mergeMap(value => {
         if (value === null) return EMPTY;
         return of(value);
+      }),
+      catchError(error => {
+        this.logger.warn(`Failed to read '${key}'; treating as absent`, error);
+        return EMPTY;
       }),
     );
   }

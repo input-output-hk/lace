@@ -32,10 +32,12 @@ export const UrScanner = ({
   onComplete,
   onCancel,
   onError,
+  createDecoder,
   theme,
 }: UrScannerProps) => {
   const { t } = useTranslation();
   const { progress, isComplete, receiveFrame } = useUrReassembly({
+    createDecoder,
     onComplete,
     onError,
   });

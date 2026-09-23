@@ -101,6 +101,13 @@ export type StateFailure = StateObject<
 export type StateDiscardingTx = StateObject<
   'DiscardingTx',
   {
+    /**
+     * The account the discarded transaction was built for. Optional only
+     * because the `Failure` it can be reached from carries the account
+     * optionally too; every transition that knows it passes it on, so a surface
+     * can keep attributing the flow while it winds down.
+     */
+    accountId?: AccountId;
     serializedTx: string;
   }
 >;

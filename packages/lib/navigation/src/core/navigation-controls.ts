@@ -481,6 +481,17 @@ type SheetStateRoute = NavigationState['routes'][number] & {
  * - otherwise            → backdrop tap / swipe-down with no intent; close the
  *                          whole sheet stack.
  */
+
+/**
+ * Sheets whose interactive dismiss closes THEM ALONE: nested pickers presented
+ * above the sheet that opened them, where swipe-down / backdrop means "cancel
+ * the pick" and must reveal the opener again — never "abandon the whole flow".
+ * Every route not listed keeps the whole-stack default above.
+ */
+const SELF_DISMISSING_SHEET_ROUTES: ReadonlySet<string> = new Set([
+  SheetRoutes.RealFiSelectStakeToken,
+]);
+
 export const handleInteractiveSheetDismiss = (
   routeKey: string | undefined,
 ): void => {
@@ -499,6 +510,10 @@ export const handleInteractiveSheetDismiss = (
 
   // Programmatic dismiss (button → goBack/pop): route pre-marked `closing`.
   if (dismissingRoute.closing) return;
+
+  // A nested picker dismisses alone: the native gesture already tore it down
+  // and the router pops its route, revealing the opener sheet beneath.
+  if (SELF_DISMISSING_SHEET_ROUTES.has(dismissingRoute.name)) return;
 
   // A close-all cascade is already running (closeSheet/Done marked the
   // bottom-most sheet `closing`); the native dismissal tears down the rest.

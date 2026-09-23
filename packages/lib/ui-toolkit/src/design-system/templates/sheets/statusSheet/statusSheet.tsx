@@ -8,6 +8,9 @@ import type { IconName } from '../../../atoms';
 
 interface StatusSheetProps {
   body: string;
+  /** Optional secondary line under `body` for a concrete reason (e.g. the
+   * specific ledger/build error behind a friendly failure message). */
+  detail?: string;
   icon?: {
     name: IconName;
     variant?: 'solid' | 'stroke';
@@ -18,6 +21,7 @@ interface StatusSheetProps {
 
 export const StatusSheet = ({
   body,
+  detail,
   icon,
   testID = 'status-sheet',
 }: StatusSheetProps) => {
@@ -36,9 +40,23 @@ export const StatusSheet = ({
           testID={`${testID}-icon`}
         />
       )}
-      <Text.M align="center" testID={`${testID}-message`}>
-        {body}
-      </Text.M>
+      <Column alignItems="center" gap={spacing.S} style={styles.message}>
+        <Text.M
+          align="center"
+          style={styles.message}
+          testID={`${testID}-message`}>
+          {body}
+        </Text.M>
+        {!!detail && (
+          <Text.S
+            align="center"
+            variant="secondary"
+            style={styles.message}
+            testID={`${testID}-detail`}>
+            {detail}
+          </Text.S>
+        )}
+      </Column>
     </Column>
   );
 };
@@ -47,5 +65,10 @@ const styles = StyleSheet.create({
   centeredContent: {
     marginVertical: '30%',
     marginHorizontal: spacing.M,
+  },
+  // Fill the (center-aligned) column width so a long unbreakable body — e.g. a
+  // 64-char tx id — wraps instead of stretching the Text past the sheet edge.
+  message: {
+    alignSelf: 'stretch',
   },
 });

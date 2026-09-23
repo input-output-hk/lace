@@ -41,6 +41,10 @@ export enum StackRoutes {
   IntroPrivacy = 'IntroPrivacy',
   IntroComplete = 'IntroComplete',
   NotificationDetails = 'NotificationDetails',
+  // RealFi USDr staking (Earn) — full-screen detail
+  UsdrStakingDetail = 'UsdrStakingDetail',
+  // Cardano staking — full-screen detail (Staking Center sub-page)
+  CardanoStakingDetail = 'CardanoStakingDetail',
 }
 
 export enum SheetRoutes {
@@ -112,6 +116,7 @@ export enum SheetRoutes {
   MidnightSettings = 'MidnightSettings',
   EditTokenName = 'EditTokenName',
   DustDesignation = 'DustDesignation',
+  CnightDesignation = 'CnightDesignation',
   ConnectionPending = 'ConnectionPending',
   ConnectionDetails = 'ConnectionDetails',
   ConnectionComplete = 'ConnectionComplete',
@@ -131,4 +136,16 @@ export enum SheetRoutes {
   DRepDelegationSuccess = 'DRepDelegationSuccess',
   // Earn rewards
   EarnRewards = 'EarnRewards',
+
+  // RealFi USDr staking (Earn)
+  RealFiStakeDetail = 'RealFiStakeDetail',
+  RealFiManageStake = 'RealFiManageStake',
+  RealFiSelectStakeToken = 'RealFiSelectStakeToken',
+  RealFiReviewTransaction = 'RealFiReviewTransaction',
+  RealFiAddedToQueue = 'RealFiAddedToQueue',
+  RealFiWithdraw = 'RealFiWithdraw',
+  RealFiOnboarding = 'RealFiOnboarding',
+  RealFiTransactionError = 'RealFiTransactionError',
+  RealFiRPointsExplainer = 'RealFiRPointsExplainer',
+  RealFiRPointsByAccount = 'RealFiRPointsByAccount',
 }

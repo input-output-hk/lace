@@ -3,12 +3,13 @@ import { type GroupedAddress } from '@cardano-sdk/key-management';
 import { isNotNil } from '@cardano-sdk/util';
 import {
   CardanoPaymentAddress,
+  type CardanoTransactionSignerContext,
   COLLATERAL_AMOUNT_LOVELACES,
+  createCombinedInputResolver,
   derivePendingActivityFromCbor,
   getEligibleCollateralUtxo,
   isCardanoAddress,
   TransactionBuilder,
-  type CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import { signerAuthFromPrompt } from '@lace-contract/signer';
 import {
@@ -112,7 +113,7 @@ export const createAccountObservables = ({
   multiDelegationAccount,
   selectWalletById$,
   selectByAccountId$,
-  selectAvailableAccountUtxos$,
+  utxosByAccount$,
 }: {
   multiDelegationAccount: MultiDelegationAccount;
   selectWalletById$: Observable<
@@ -121,7 +122,12 @@ export const createAccountObservables = ({
     ) => AnyWallet | undefined
   >;
   selectByAccountId$: Observable<(accountId: AccountId) => AnyAddress[]>;
-  selectAvailableAccountUtxos$: Observable<AccountUtxoMap>;
+  /**
+   * Which UTxO view the account observable is built from. Callers pass the
+   * available/spendable view for resolution and the FULL settled set for
+   * collateral-ownership -- the two are not interchangeable.
+   */
+  utxosByAccount$: Observable<AccountUtxoMap>;
 }) => {
   const wallet$ = selectWalletById$.pipe(
     map(select => select(multiDelegationAccount.account.walletId)),
@@ -146,7 +152,7 @@ export const createAccountObservables = ({
     ),
   );
 
-  const accountUtxo$ = selectAvailableAccountUtxos$.pipe(
+  const accountUtxo$ = utxosByAccount$.pipe(
     map(utxoMap => utxoMap[multiDelegationAccount.account.accountId]),
     filter(isNotNil),
   );
@@ -239,6 +245,12 @@ export type AccountContext = {
   wallet$: Observable<AnyWallet>;
   accountAddresses$: Observable<GroupedAddress[]>;
   accountUtxo$: Observable<Cardano.Utxo[]>;
+  /**
+   * Collateral-ownership authority: the account's FULL settled UTxO set. Not
+   * `accountUtxo$` above, which is the available/spendable view and subtracts
+   * the collateral-reserved UTxOs the rule needs to see.
+   */
+  ownershipUtxo$: Observable<Cardano.Utxo[]>;
 };
 
 const isHardwareAccount = (
@@ -247,7 +259,13 @@ const isHardwareAccount = (
 
 export const signTx =
   (
-    { account, wallet$, accountAddresses$, accountUtxo$ }: AccountContext,
+    {
+      account,
+      wallet$,
+      accountAddresses$,
+      accountUtxo$,
+      ownershipUtxo$,
+    }: AccountContext,
     dependencies: SideEffectDeps,
     hasCollateral: boolean,
   ) =>
@@ -270,14 +288,20 @@ export const signTx =
       wallet$,
       accountAddresses$,
       accountUtxo$,
+      ownershipUtxo$,
     ]).pipe(
       take(1),
-      switchMap(([wallet, knownAddresses, utxo]) => {
+      switchMap(([wallet, knownAddresses, utxo, ownershipUtxos]) => {
         const context: CardanoTransactionSignerContext = {
           wallet,
           accountId: account.accountId,
           knownAddresses,
           utxo,
+          collateralInputResolver: createCombinedInputResolver(
+            ownershipUtxos,
+            dependencies.cardanoProvider,
+            { chainId: account.blockchainSpecific.chainId },
+          ),
           auth,
         };
         const signer = signerFactory.createTransactionSigner(context);
@@ -333,19 +357,20 @@ const AWAIT_COLLATERAL_UTXO_TIMEOUT_MS = 120_000;
 
 export const awaitAndMarkCollateral = ({
   accountId,
-  selectAccountUtxos$,
+  spendableUtxos$,
   setAccountUnspendableUtxos,
   logger,
 }: {
   accountId: AccountId;
-  selectAccountUtxos$: Observable<AccountUtxoMap>;
+  /** Collateral is SELECTED from what is spendable, not from the ownership authority. */
+  spendableUtxos$: Observable<AccountUtxoMap>;
   setAccountUnspendableUtxos: (params: {
     accountId: AccountId;
     utxos: Cardano.Utxo[];
   }) => MigrateMultiDelegationAction;
   logger: SideEffectDependencies['logger'];
 }): Observable<MigrateMultiDelegationAction> => {
-  const utxoFound$ = selectAccountUtxos$.pipe(
+  const utxoFound$ = spendableUtxos$.pipe(
     map(utxos => getEligibleCollateralUtxo(utxos[accountId] ?? [])),
     filter(isNotNil),
     take(1),
@@ -368,7 +393,7 @@ export const submitTx =
   (
     dependencies: SideEffectDeps,
     collateralContext?: {
-      selectAccountUtxos$: Observable<AccountUtxoMap>;
+      spendableUtxos$: Observable<AccountUtxoMap>;
       accountId: AccountId;
       setAccountUnspendableUtxos: (params: {
         accountId: AccountId;
@@ -409,7 +434,7 @@ export const submitTx =
                 upsert$,
                 awaitAndMarkCollateral({
                   accountId: collateralContext.accountId,
-                  selectAccountUtxos$: collateralContext.selectAccountUtxos$,
+                  spendableUtxos$: collateralContext.spendableUtxos$,
                   setAccountUnspendableUtxos:
                     collateralContext.setAccountUnspendableUtxos,
                   logger: dependencies.logger,
@@ -444,6 +469,7 @@ export const makeMigrateAccount =
       cardanoContext: {
         selectAllNetworkInfo$,
         selectAvailableAccountUtxos$,
+        selectCollateralOwnershipUtxos$,
         selectAccountUnspendableUtxos$,
       },
     },
@@ -467,8 +493,14 @@ export const makeMigrateAccount =
         multiDelegationAccount,
         selectWalletById$,
         selectByAccountId$,
-        selectAvailableAccountUtxos$,
+        utxosByAccount$: selectAvailableAccountUtxos$,
       });
+    const { accountUtxo$: ownershipUtxo$ } = createAccountObservables({
+      multiDelegationAccount,
+      selectWalletById$,
+      selectByAccountId$,
+      utxosByAccount$: selectCollateralOwnershipUtxos$,
+    });
 
     return selectAccountUnspendableUtxos$.pipe(
       take(1),
@@ -487,6 +519,7 @@ export const makeMigrateAccount =
           wallet$,
           accountAddresses$,
           accountUtxo$: effectiveAccountUtxo$,
+          ownershipUtxo$,
           account: multiDelegationAccount.account,
         };
 
@@ -494,7 +527,7 @@ export const makeMigrateAccount =
           dependencies,
           hasCollateral
             ? {
-                selectAccountUtxos$: selectAvailableAccountUtxos$,
+                spendableUtxos$: selectAvailableAccountUtxos$,
                 accountId,
                 setAccountUnspendableUtxos:
                   dependencies.actions.cardanoContext
@@ -599,7 +632,11 @@ export const makePrepareVoteDelegation =
     {
       wallets: { selectWalletById$ },
       addresses: { selectByAccountId$ },
-      cardanoContext: { selectAllNetworkInfo$, selectAvailableAccountUtxos$ },
+      cardanoContext: {
+        selectAllNetworkInfo$,
+        selectAvailableAccountUtxos$,
+        selectCollateralOwnershipUtxos$,
+      },
     },
     dependencies,
   ) =>
@@ -654,14 +691,21 @@ export const makePrepareVoteDelegation =
                 multiDelegationAccount,
                 selectWalletById$,
                 selectByAccountId$,
-                selectAvailableAccountUtxos$,
+                utxosByAccount$: selectAvailableAccountUtxos$,
               });
+            const { accountUtxo$: ownershipUtxo$ } = createAccountObservables({
+              multiDelegationAccount,
+              selectWalletById$,
+              selectByAccountId$,
+              utxosByAccount$: selectCollateralOwnershipUtxos$,
+            });
 
             const accountContext: AccountContext = {
               account: multiDelegationAccount.account,
               wallet$,
               accountAddresses$,
               accountUtxo$,
+              ownershipUtxo$,
             };
 
             return combineLatest([builder$, accountUtxo$]).pipe(

@@ -2,6 +2,7 @@ import { Cardano, Serialization } from '@cardano-sdk/core';
 import { computeMinimumCoinQuantity } from '@cardano-sdk/tx-construction';
 
 import { LOVELACE_FOR_REGISTRATION } from '../constants';
+import { canonicalDustPayloadDefect } from '../dust-address-decode';
 import {
   Err as Error_,
   Ok,
@@ -20,7 +21,10 @@ import {
   getDustMappingNftPolicyId,
 } from '../plutus';
 import { getDustGeneratorScriptCbor } from '../scripts';
-import { MIDNIGHT_DUST_ADDRESS_MAX_BYTES } from '../value-objects/midnight-coin-pubkey.vo';
+import {
+  MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
+  type MidnightCoinPubkey,
+} from '../value-objects/midnight-coin-pubkey.vo';
 
 import type {
   BuildNightDesignationTxParams,
@@ -81,15 +85,20 @@ const computeScriptOutputLovelace = ({
 // the network and does NOT produce a CBOR-encoded tx — callers
 // integrating this for sign + submit must fill in those pieces.
 //
-// The validation here is deliberately minimal and exhaustive of the
-// shape the validator enforces on-chain:
+// The validation here is deliberately minimal. Checks 1-3 mirror the
+// shape the validator enforces on-chain; 2b is ours, not the validator's:
 //
 //   1. cnightUtxos must be non-empty (the Aiken `list.any(inputs,
 //      ...)` rotation check).
 //   2. dustPubkey must be <= 33 bytes (the Aiken `length_of_bytearray
-//      (dust_address) <= 33` check). Construction via `MidnightCoinPubkey
-//      (bytes)` already enforces 32 bytes exactly — this is a belt-and-
-//      braces re-check for direct callers who skip the constructor.
+//      (dust_address) <= 33` check). `MidnightCoinPubkey(bytes)` already
+//      caps at 33 — this is a belt-and-braces re-check for direct
+//      callers who skip the constructor.
+//   2b. dustPubkey must be the canonical (minimal) SCALE-compact
+//      encoding of an in-field BLS12-381 scalar. NOT a validator rule —
+//      the validator accepts any <= 33 bytes. Enforced here because a
+//      padded encoding's DUST claimability on Midnight is unknown, and
+//      this is the last boundary before the bytes become a signed datum.
 //   3. For update + deregister, a registration UTxO must be provided
 //      (no shape to derive it from at runtime — caller resolves via
 //      the script-address scan documented in `useCNightDesignation`).
@@ -99,6 +108,29 @@ const computeScriptOutputLovelace = ({
 // The Carbon UI layer is responsible for ensuring the active network
 // of the account matches the lib's `network` argument.
 // =====================================================================
+
+// Both datum-writing branches validate identically. Keep the call after the
+// no-cnight check so the flow's error precedence is unchanged.
+const dustPubkeyError = (
+  dustPubkey: MidnightCoinPubkey,
+): NightDesignationError | undefined => {
+  if (dustPubkey.length > MIDNIGHT_DUST_ADDRESS_MAX_BYTES) {
+    return {
+      code: 'dust-address-too-long',
+      message: `dust_address exceeds the on-chain ${MIDNIGHT_DUST_ADDRESS_MAX_BYTES}-byte limit enforced by the validator.`,
+      actualBytes: dustPubkey.length,
+      maxBytes: MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
+    };
+  }
+
+  const defect = canonicalDustPayloadDefect(dustPubkey);
+  return defect === undefined
+    ? undefined
+    : {
+        code: 'invalid-dust-payload',
+        message: `dust_address is not a canonical SCALE-compact payload (${defect}).`,
+      };
+};
 
 export const buildNightDesignationTxBlueprint = (
   params: BuildNightDesignationTxParams,
@@ -121,14 +153,8 @@ export const buildNightDesignationTxBlueprint = (
   };
 
   if (params.action.kind === 'register') {
-    if (params.action.dustPubkey.length > MIDNIGHT_DUST_ADDRESS_MAX_BYTES) {
-      return Error_({
-        code: 'dust-address-too-long',
-        message: `dust_address exceeds the on-chain ${MIDNIGHT_DUST_ADDRESS_MAX_BYTES}-byte limit enforced by the validator.`,
-        actualBytes: params.action.dustPubkey.length,
-        maxBytes: MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
-      });
-    }
+    const dustError = dustPubkeyError(params.action.dustPubkey);
+    if (dustError) return Error_(dustError);
 
     const datumCbor = dustMappingDatumToCbor({
       cWallet: { kind: 'verificationKey', stakeKeyHash: params.stakeKeyHash },
@@ -167,14 +193,8 @@ export const buildNightDesignationTxBlueprint = (
   }
 
   if (params.action.kind === 'update') {
-    if (params.action.dustPubkey.length > MIDNIGHT_DUST_ADDRESS_MAX_BYTES) {
-      return Error_({
-        code: 'dust-address-too-long',
-        message: `dust_address exceeds the on-chain ${MIDNIGHT_DUST_ADDRESS_MAX_BYTES}-byte limit enforced by the validator.`,
-        actualBytes: params.action.dustPubkey.length,
-        maxBytes: MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
-      });
-    }
+    const dustError = dustPubkeyError(params.action.dustPubkey);
+    if (dustError) return Error_(dustError);
 
     const datumCbor = dustMappingDatumToCbor({
       cWallet: { kind: 'verificationKey', stakeKeyHash: params.stakeKeyHash },

@@ -1,8 +1,5 @@
 import { deepEquals } from '@cardano-sdk/util';
-import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import {
-  hasMidnightAccount,
-  isInMemoryMidnightAccount,
   midnightAccounts$,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
@@ -16,18 +13,15 @@ import {
   from,
   map,
   merge,
-  pairwise,
   switchMap,
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
 
 import {
-  FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
   FeatureFlagKeysByNetworkId,
   GatedMidnightSDKNetworkId,
 } from '../../const';
-import { MidnightWalletFailureId } from '../../value-objects/midnight-wallet-failure-id.vo';
 
 import {
   sendFlowAddressValidation,
@@ -103,27 +97,6 @@ export const registerMidnightBlockchainNetworks: SideEffect = (
         testnet: MidnightNetworkId(testnetNetworkId),
       });
     }),
-  );
-
-/**
- * Auto-dismiss Midnight wallet failure when the wallet resumes.
- *
- * `walletResumed$` fires on the rising edge after a genuine pause (the
- * unlock transition), so any failure accumulated while the wallet was
- * paused is dismissed on resume — automatic error recovery without user
- * intervention.
- */
-export const autoDismissMidnightWalletFailure: SideEffect = (
-  _,
-  { wallets: { selectAll$ }, failures: { selectFailureById$ } },
-  { walletResumed$ },
-) =>
-  walletResumed$.pipe(
-    withLatestFrom(selectAll$),
-    switchMap(([, wallets]) =>
-      wallets.map(w => MidnightWalletFailureId(w.walletId)),
-    ),
-    autoDismissFailureOnSuccess(selectFailureById$),
   );
 
 const getFeatureFlagByName = (
@@ -254,96 +227,6 @@ export const handleMidnightSettingsChange: SideEffect = (
   );
 
 /**
- * Sets the Midnight disclaimer to `shown` when an in-memory Midnight account is introduced and
- * `shouldAcknowledgeMidnightDisclaimer` is still `not-shown` — via `addWallet` (wallet includes
- * Midnight) or `updateWallet` (Midnight added to an existing wallet).
- *
- * The Midnight `accountId` diff on `updateWallet` matters because the persisted flag can return to
- * `not-shown` while wallets already list Midnight (e.g. persist migrate step 6 in
- * `packages/contract/midnight-context/src/store/init.ts`), and each `updateWallet` sends the full
- * `accounts` array so unrelated edits still carry existing Midnight rows.
- */
-export const triggerMidnightDisclaimerOnWalletCreation: SideEffect = (
-  { wallets: { addWallet$, updateWallet$ } },
-  {
-    features: { selectLoadedFeatures$ },
-    midnightContext: { selectShouldAcknowledgeMidnightDisclaimer$ },
-    wallets: { selectAll$ },
-  },
-  { actions },
-) => {
-  const setDisclaimerShown = () =>
-    actions.midnightContext.setShouldAcknowledgeMidnightDisclaimer('shown');
-
-  const walletsPairwise$ = selectAll$.pipe(pairwise());
-
-  return merge(
-    addWallet$.pipe(
-      filter(({ payload }) => hasMidnightAccount(payload)),
-      withLatestFrom(
-        selectShouldAcknowledgeMidnightDisclaimer$,
-        selectLoadedFeatures$,
-      ),
-      filter(
-        ([, status, loadedFeatures]) =>
-          status === 'not-shown' &&
-          loadedFeatures.featureFlags.some(
-            f => f.key === FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
-          ),
-      ),
-      map(() => setDisclaimerShown()),
-    ),
-    updateWallet$.pipe(
-      filter(({ payload }) => payload.changes.accounts !== undefined),
-      withLatestFrom(
-        walletsPairwise$,
-        selectShouldAcknowledgeMidnightDisclaimer$,
-        selectLoadedFeatures$,
-      ),
-      filter(
-        ([
-          action,
-          [previousWallets, nextWallets],
-          disclaimerStatus,
-          loadedFeatures,
-        ]) => {
-          if (disclaimerStatus !== 'not-shown') return false;
-          if (
-            !loadedFeatures.featureFlags.some(
-              f => f.key === FEATURE_FLAG_MIDNIGHT_DISCLAIMER,
-            )
-          )
-            return false;
-
-          const walletId = action.payload.id;
-          const previousWallet = previousWallets.find(
-            w => w.walletId === walletId,
-          );
-          const nextWallet = nextWallets.find(w => w.walletId === walletId);
-          if (!previousWallet || !nextWallet) return false;
-
-          // `updateWallet` carries the full `accounts` array. Any edit (e.g. add Cardano, rename)
-          // still includes existing Midnight rows, so "has Midnight in next" is not enough.
-          // Require a new Midnight accountId vs. the previous snapshot so we do not fire on
-          // unrelated updates while the disclaimer flag is still `not-shown` (see effect JSDoc).
-          const previousMidnightIds = new Set(
-            previousWallet.accounts
-              .filter(isInMemoryMidnightAccount)
-              .map(a => a.accountId),
-          );
-          const isNewMidnightAccountAdded = nextWallet.accounts
-            .filter(isInMemoryMidnightAccount)
-            .some(account => !previousMidnightIds.has(account.accountId));
-
-          return isNewMidnightAccountAdded;
-        },
-      ),
-      map(() => setDisclaimerShown()),
-    ),
-  );
-};
-
-/**
  * Updates the active account context when the network switches.
  *
  * When a network switch occurs, the active midnight accounts change (filtered by
@@ -379,11 +262,9 @@ export const initializeSideEffects: LaceInitSync<SideEffect[]> = () => {
         ...[
           registerMidnightBlockchainNetworks,
           syncSupportedNetworksWithFeatureFlags,
-          autoDismissMidnightWalletFailure,
           handleMidnightSettingsChange,
           sendFlowAddressValidation,
           sendFlowAnalyticsEnhancer,
-          triggerMidnightDisclaimerOnWalletCreation,
           updateActiveAccountContextOnNetworkSwitch,
         ].map(sideEffect =>
           sideEffect(actionObservables, stateObservables, dependencies),

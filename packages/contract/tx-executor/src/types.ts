@@ -112,6 +112,14 @@ export type TxSubmissionResult = Result<
   {
     txId: TxId;
     blockchainSpecificActivityMetadata?: unknown;
+    /**
+     * Set when submitTx resolves only after on-chain finalization (Midnight):
+     * the tx is already confirmed on success, so the send flow skips the
+     * optimistic pending activity and lets the confirmed row arrive via sync.
+     * Omitted for chains whose submit returns before confirmation — they keep
+     * the optimistic "Sending" row until the confirmed one supersedes it.
+     */
+    awaitsFinalization?: boolean;
   },
   {
     error?: ErrorObject;

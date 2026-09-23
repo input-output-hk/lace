@@ -1716,6 +1716,107 @@ describe('send-flow sideEffects', () => {
       vi.restoreAllMocks();
     });
 
+    it('skips the optimistic pending activity when the submit awaits finalization', () => {
+      const txId = 'test tx id';
+      const testAccountId = AccountId('test-account');
+      // Mock Date.now for deterministic timestamp
+      const mockTimestamp = 1700000000000;
+      vi.spyOn(Date, 'now').mockReturnValue(mockTimestamp);
+
+      testSideEffect(
+        {
+          build: ({ cold }) =>
+            makeSendFlowProcessing({
+              submitTx: (_, mapResult) =>
+                cold('a', {
+                  a: mapResult({
+                    success: true,
+                    txId,
+                    awaitsFinalization: true,
+                  }),
+                }),
+              selectTokenIdMapper: () => null,
+            }),
+        },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            sendFlow: {
+              selectSendFlowState$: cold('a', {
+                a: {
+                  status: 'Processing',
+                  accountId: testAccountId,
+                  blockchainName: 'Midnight',
+                  form: {
+                    address: {
+                      value: 'address',
+                    },
+                    tokenTransfers: [
+                      {
+                        amount: {
+                          value: BigNumber(1n),
+                        },
+                        token: {
+                          value: midnightToken,
+                        },
+                      },
+                    ],
+                  },
+                } as unknown as SendFlowSliceState,
+              }),
+            },
+            tokenPricing: {
+              selectPrices$: cold('a', { a: {} }),
+            },
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [] }),
+            },
+            wallets: {
+              selectAll$: cold('a', { a: [] }),
+            },
+            network: {
+              selectNetworkType$: cold<NetworkType>('a', { a: 'mainnet' }),
+            },
+            sendFlowAnalytics: {
+              selectRecipientSource$: cold('a', { a: undefined }),
+            },
+          },
+          dependencies: {
+            actions: {
+              ...sendFlowActions,
+              ...activitiesActions,
+              ...analyticsActions,
+            },
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ac)', {
+              a: analyticsActions.analytics.trackEvent({
+                eventName: 'send | transaction | success',
+                payload: {
+                  blockchain: 'Midnight',
+                  networkType: 'mainnet',
+                  transferCount: 1,
+                  transferType: 'foreign',
+                  nftCount: 0,
+                  fungibleCount: 1,
+                  assetMix: 'fungible-only',
+                  transferValue: 'UNKNOWN',
+                },
+              }),
+              c: sendFlowActions.sendFlow.processingResulted({
+                result: {
+                  success: true,
+                  txId,
+                  awaitsFinalization: true,
+                },
+              }),
+            });
+          },
+        }),
+      );
+
+      vi.restoreAllMocks();
+    });
+
     it('omits transferValue on testnet but still emits asset-mix counts', () => {
       const txId = 'testnet-tx';
       const testAccountId = AccountId('testnet-account');

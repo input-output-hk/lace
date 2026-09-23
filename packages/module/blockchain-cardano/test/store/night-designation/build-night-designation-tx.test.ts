@@ -12,6 +12,7 @@ import {
   dustMappingDatumToCbor,
   getCnightAssetId,
   getDustGeneratorPaymentAddress,
+  getDustGeneratorScriptHash,
   getDustMappingNftAssetId,
 } from '@lace-lib/cnight-dust-designation';
 import { describe, expect, it } from 'vitest';
@@ -31,7 +32,12 @@ const scriptAddress = getDustGeneratorPaymentAddress(network);
 
 const stakeKeyHash = CardanoStakeKeyHash(new Uint8Array(28).fill(0xab));
 const paymentKeyHash = CardanoPaymentKeyHash(new Uint8Array(28).fill(0xcd));
-const dustPubkey = MidnightCoinPubkey(new Uint8Array(32).fill(0xef));
+// Canonical SCALE-compact: the 0x6f header selects big-integer mode declaring
+// 31 scalar bytes and the top byte is non-zero, so this 32-byte payload is
+// minimal and in-field.
+const dustPubkey = MidnightCoinPubkey(
+  new Uint8Array([0x6f, ...Array.from({ length: 30 }, () => 0xef), 0x11]),
+);
 const ttlSlot = Cardano.Slot(Number(ledgerTip.slot) + 7200);
 
 // Plutus V3 needs cost models + realistic ex-unit limits, which the
@@ -147,12 +153,24 @@ const assertExUnitsUnderLimit = (tx: Cardano.Tx) => {
 // tripwire for any tx-construction change on a future SDK bump.
 const assertScriptDataHash = (tx: Cardano.Tx) => {
   expect(tx.body.scriptIntegrityHash).toBeDefined();
-  const versions = new Set(
-    (tx.witness.scripts ?? []).map(script =>
-      script.__type === Cardano.ScriptType.Plutus ? script.version : 'native',
-    ),
+  const scripts = tx.witness.scripts ?? [];
+  const plutusScripts = scripts.filter(
+    (script): script is Cardano.PlutusScript =>
+      script.__type === Cardano.ScriptType.Plutus,
   );
-  expect([...versions]).toEqual([Cardano.PlutusLanguageVersion.V3]);
+  // Exactly one script, Plutus V3, no native scripts.
+  expect(plutusScripts).toHaveLength(scripts.length);
+  expect(plutusScripts.map(script => script.version)).toEqual([
+    Cardano.PlutusLanguageVersion.V3,
+  ]);
+  // The attached witness must hash to the real dust-generator script (= mint
+  // policy id + script address). Double-CBOR-wrapped script bytes witness the
+  // WRONG hash and the ledger rejects the tx at submit (Missing/Extraneous
+  // script witnesses); the builder-local scriptIntegrityHash alone does not
+  // catch it.
+  expect(Serialization.Script.fromCore(plutusScripts[0]).hash()).toBe(
+    getDustGeneratorScriptHash(network),
+  );
 };
 
 describe('buildNightDesignationTx', () => {
@@ -188,11 +206,11 @@ describe('buildNightDesignationTx', () => {
     assertScriptDataHash(tx);
     assertExUnitsUnderLimit(tx);
     // Pinned tripwire: the register script-data-hash is fully deterministic
-    // (one mint redeemer at a fixed budget, no inputs-dependent index). A
-    // change here means tx-construction altered redeemer/language-view
-    // encoding — e.g. on a future @cardano-sdk bump.
+    // (one mint redeemer at a fixed budget, no input-dependent index). It is
+    // hashed over the Conway MAP redeemer encoding (computeConwayScriptDataHash);
+    // a shift here means the redeemer or language-view encoding changed.
     expect(tx.body.scriptIntegrityHash).toMatchInlineSnapshot(
-      `"9d9572f55da73137e54e2235d0e61f11da69d9b38fa0a5cb403d0452cbadf65e"`,
+      `"4b227858c3af67bab1b834cdd55cec969e97205462568950cd0df4bbd539d37a"`,
     );
 
     // Rotation: every cNIGHT UTxO is an input.
@@ -320,17 +338,18 @@ describe('buildNightDesignationTx', () => {
   });
 
   it('propagates the raw InsufficientCollateralError (→ generic build failure) rather than mislabeling it no-cardano-utxos', async () => {
-    // A non-empty cover pool whose only UTxO can't satisfy collateral (return
-    // min-ADA / combined amount) is NOT the empty-pool "not enough ADA" case
-    // (that's caught upstream). The builder error must surface as-is — carrying
-    // no `no-cardano-utxos` code — so the side-effect maps it to generic copy.
+    // A non-empty cover pool whose only UTxO can't satisfy collateral (below
+    // the ~2.6 ADA coverage target for these params) is NOT the empty-pool
+    // "not enough ADA" case (that's caught upstream). The builder error must
+    // surface as-is — carrying no `no-cardano-utxos` code — so the side-effect
+    // maps it to generic copy.
     const smallAda: Cardano.Utxo = [
       {
         txId: '88'.repeat(32) as Cardano.TransactionId,
         index: 0,
         address: ownAddress,
       },
-      { address: ownAddress, value: { coins: 4_000_000n } },
+      { address: ownAddress, value: { coins: 1_500_000n } },
     ];
     await expect(
       buildNightDesignationTx(
@@ -407,5 +426,94 @@ describe('buildNightDesignationTx', () => {
         },
       ),
     ).rejects.toThrow(/No ex-units evaluation/);
+  });
+
+  // KNOWN DEFECT, pinned: collateral is reserved as a WHOLE UTxO and then
+  // removed from the funding pool, so an account whose only non-cNIGHT UTxO
+  // backs collateral has nothing left to fund the tx — it fails topping up the
+  // change min-ADA and surfaces as "not enough ADA" on an account with plenty.
+  // When that exclusion is removed this test FAILS: swap the rejection for
+  // `expect(result.ok).toBe(true)` rather than deleting the case.
+  it('known defect: a lone cover UTxO reserved as collateral leaves nothing to fund the build', async () => {
+    // 12 distinct policies, because change min-ADA scales with policy count
+    // (2,835,980 here) — 12 names under a single policy would be far too cheap
+    // to reproduce the shortfall. The coin figure is 4 ADA rather than the
+    // reported wallet's 5.707587 because `boundedExUnitsEvaluator` prices a
+    // ~0.47 ADA fee where production seeded ~1.7 ADA; 4 ADA puts the change one
+    // step below its min-ADA, which is the same shortfall the account hit.
+    const tightCnightUtxo: Cardano.Utxo = [
+      {
+        txId: 'a1'.repeat(32) as Cardano.TransactionId,
+        index: 0,
+        address: ownAddress,
+      },
+      {
+        address: ownAddress,
+        value: {
+          coins: 4_000_000n,
+          assets: new Map<Cardano.AssetId, bigint>([
+            [cnightAssetId, 100n],
+            ...Array.from(
+              { length: 11 },
+              (_, index) =>
+                [
+                  Cardano.AssetId(
+                    `${(0xa0 + index).toString(16).repeat(28)}746f6b`,
+                  ),
+                  1n,
+                ] as const,
+            ),
+          ]),
+        },
+      },
+    ];
+    const consolidatedCover: Cardano.Utxo = [
+      {
+        txId: 'b2'.repeat(32) as Cardano.TransactionId,
+        index: 0,
+        address: ownAddress,
+      },
+      { address: ownAddress, value: { coins: 236_652_484n } },
+    ];
+    const secondCover: Cardano.Utxo = [
+      {
+        txId: 'c3'.repeat(32) as Cardano.TransactionId,
+        index: 0,
+        address: ownAddress,
+      },
+      { address: ownAddress, value: { coins: 5_289_566n } },
+    ];
+
+    const build = async (coverPool: Cardano.Utxo[]) =>
+      buildNightDesignationTx(
+        {
+          network,
+          action: { kind: 'register', dustPubkey },
+          cnightUtxos: [tightCnightUtxo],
+          paymentKeyHash,
+          stakeKeyHash,
+          changeAddress: ownAddress,
+          ttlSlot,
+          protocolParameters: plutusProtocolParameters,
+        },
+        {
+          networkMagic: Cardano.NetworkMagics.Preprod,
+          coverUtxos: coverPool,
+          txEvaluator: boundedExUnitsEvaluator,
+          inputResolver: createInputResolver([tightCnightUtxo, ...coverPool]),
+        },
+      );
+
+    // 236 ADA of cover, and the build still cannot fund itself: collateral
+    // reserves that single UTxO and it leaves the spendable pool.
+    await expect(build([consolidatedCover])).rejects.toThrow(
+      /UTxO pool exhausted/,
+    );
+
+    // Proof the balance was never the problem — adding a second, far smaller
+    // cover UTxO (collateral still takes the larger one) makes the same build
+    // succeed. Any fix must make the first case behave like this one.
+    const result = await build([consolidatedCover, secondCover]);
+    expect(result.ok).toBe(true);
   });
 });

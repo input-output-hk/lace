@@ -476,6 +476,50 @@ describe('useDustDesignationSheet', () => {
     });
   });
 
+  describe('live terminal states', () => {
+    it('does not dismiss a Failure reached by the flow this sheet opened', () => {
+      setupMocks({ status: 'Idle' });
+
+      const { rerender } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(mockDispatchOpenRequested).toHaveBeenCalledTimes(1);
+
+      sendFlowState.status = 'Failure';
+      rerender();
+
+      expect(mockDispatchClosed).not.toHaveBeenCalled();
+    });
+
+    it('does not dismiss a Success reached by the flow this sheet opened', () => {
+      setupMocks({ status: 'Idle' });
+
+      const { rerender } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      sendFlowState.status = 'Success';
+      rerender();
+
+      expect(mockDispatchClosed).not.toHaveBeenCalled();
+    });
+
+    it('dismisses a stale terminal state once and leaves the reopened flow intact', () => {
+      setupMocks({ status: 'Failure' });
+
+      const { rerender } = renderHook(() => useDustDesignationSheet(mockProps));
+
+      expect(mockDispatchClosed).toHaveBeenCalledTimes(1);
+
+      sendFlowState.status = 'Idle';
+      rerender();
+
+      expect(mockDispatchOpenRequested).toHaveBeenCalledTimes(1);
+
+      sendFlowState.status = 'Failure';
+      rerender();
+
+      expect(mockDispatchClosed).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('dismissal cleanup', () => {
     it('resets the flow on unmount for any dismissal path (X, swipe, backdrop)', () => {
       // Summary state does not trigger any dispatch on mount, so the only

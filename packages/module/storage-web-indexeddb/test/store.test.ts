@@ -31,7 +31,10 @@ describe('storage-web-indexeddb:store', () => {
       dependencies.createDocumentStorage!({ documentId: 'document' }),
     ).toBeInstanceOf(DocumentStore);
     expect(
-      dependencies.createCollectionStorage!({ collectionId: 'collection' }),
+      dependencies.createCollectionStorage!<{ id: string }>({
+        collectionId: 'collection',
+        computeDocId: ({ id }) => id,
+      }),
     ).toBeInstanceOf(CollectionStore);
   });
 
@@ -49,7 +52,10 @@ describe('storage-web-indexeddb:store', () => {
 
 describe('storage-web-indexeddb:module', () => {
   it('is a guest-only module', () => {
-    expect(Object.keys(moduleMap)).toEqual(['lace-extension-guest']);
+    expect(Object.keys(moduleMap)).toEqual([
+      'lace-extension-carbon',
+      'lace-extension-guest',
+    ]);
     expect(moduleMap['lace-extension-guest']?.moduleName).toBe(
       'storage-web-indexeddb',
     );

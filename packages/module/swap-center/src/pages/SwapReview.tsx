@@ -8,10 +8,12 @@ import {
   Row,
   Sheet,
   Text,
+  footerHeight,
   spacing,
+  useTheme,
 } from '@lace-lib/ui-toolkit';
 import { formatAmountToLocale } from '@lace-lib/util-render';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { StyleSheet } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
@@ -36,13 +38,13 @@ const formatSellRow = (
 
 const formatBuyRow = (
   quote: SwapQuote | undefined,
-  buyTokenData: TokenDisplayData,
+  buyDecimals: number | undefined,
   displayName: string,
 ): string =>
-  quote && buyTokenData
+  quote && buyDecimals !== undefined
     ? `${formatAmountToLocale(
         quote.expectedBuyAmount,
-        buyTokenData.decimals,
+        buyDecimals,
       )} ${displayName}`
     : '';
 
@@ -62,6 +64,41 @@ const computeQuoteRatio = (
       )
     : undefined;
 
+const truncateAddress = (address: string): string =>
+  address.length > 24
+    ? `${address.slice(0, 12)}…${address.slice(-8)}`
+    : address;
+
+/**
+ * Name and scale a decoded movement. Only the two tokens in the swap have
+ * metadata to hand, so anything else — a token the build moved that the swap
+ * never mentioned — shows its raw amount and a truncated id rather than a
+ * plausible-looking but wrong figure.
+ */
+const describeMovement = ({
+  tokenId,
+  amount,
+  adaSymbol,
+  sell,
+  buy,
+}: {
+  tokenId: string;
+  amount: string;
+  adaSymbol: string;
+  sell: { id?: string; decimals?: number; name: string };
+  buy: { id?: string; decimals?: number; name: string };
+}): string => {
+  if (tokenId === 'lovelace')
+    return `${formatAmountToLocale(amount, LOVELACE_DECIMALS)} ${adaSymbol}`;
+  if (tokenId === sell.id && sell.decimals !== undefined)
+    return `${formatAmountToLocale(amount, sell.decimals)} ${sell.name}`;
+  if (tokenId === buy.id && buy.decimals !== undefined)
+    return `${formatAmountToLocale(amount, buy.decimals)} ${buy.name}`;
+  return `${amount} ${truncateAddress(tokenId)}`;
+};
+
+const LOVELACE_DECIMALS = 6;
+
 const ReviewRow = ({
   label,
   value,
@@ -75,18 +112,52 @@ const ReviewRow = ({
 }) => (
   <Row
     justifyContent="space-between"
-    alignItems="center"
+    alignItems="flex-start"
     style={styles.reviewRow}
     testID={testID}>
     <Text.XS variant="secondary" weight="medium">
       {label}
     </Text.XS>
-    <Column alignItems="flex-end">
+    <Column alignItems="flex-end" style={styles.rowValue}>
       <Text.XS weight="medium">{value}</Text.XS>
-      {subtitle ? <Text.XS variant="secondary">{subtitle}</Text.XS> : null}
+      {subtitle ? (
+        <Text.XS variant="secondary" align="right">
+          {subtitle}
+        </Text.XS>
+      ) : null}
     </Column>
   </Row>
 );
+
+const InspectionNotice = ({
+  tone,
+  title,
+  subtitle,
+  testID,
+}: {
+  tone: 'blocked' | 'info' | 'warning';
+  title: string;
+  subtitle?: string;
+  testID?: string;
+}) => {
+  // The border carries the tone: this screen shows several at once, and a
+  // refusal to sign must not look like a heads-up, nor a plain fact like either.
+  const { theme } = useTheme();
+  const borderLeftColor = {
+    blocked: theme.data.negative,
+    info: theme.text.tertiary,
+    warning: theme.brand.orange,
+  }[tone];
+  return (
+    <Column
+      gap={spacing.XS}
+      style={[styles.notice, { borderLeftColor }]}
+      testID={testID}>
+      <Text.XS weight="medium">{title}</Text.XS>
+      {subtitle ? <Text.XS variant="secondary">{subtitle}</Text.XS> : null}
+    </Column>
+  );
+};
 
 export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
   const { t } = useTranslation();
@@ -159,6 +230,10 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
     'buyTokenId' in swapFlowState ? swapFlowState.buyTokenId : undefined;
   const sellAmount =
     'sellAmount' in swapFlowState ? swapFlowState.sellAmount : undefined;
+  // Present from Reviewing onwards: what the built bytes actually do.
+  const inspection =
+    'inspection' in swapFlowState ? swapFlowState.inspection : undefined;
+  const isBlocked = inspection?.verdict === 'blocked';
 
   const sellTokenData = useLaceSelector(
     'tokens.selectTokenById',
@@ -170,7 +245,43 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
   );
 
   const sellDisplayName = sellTokenData?.displayShortName ?? sellTokenId ?? '';
-  const buyDisplayName = buyTokenData?.displayShortName ?? buyTokenId ?? '';
+
+  // The buy token is usually one the wallet does not hold, so `selectTokenById`
+  // returns nothing and with it the decimals every figure on this screen needs.
+  // The provider's own token list is the fallback, exactly as SwapCenter does it
+  // — without this the received amount and the quote ratio both render as '-'.
+  const providerTokens = useLaceSelector('swapConfig.selectProviderTokens');
+  const buyProviderToken = useMemo(
+    () =>
+      buyTokenId && !buyTokenData && providerTokens
+        ? providerTokens.find(pt => pt.id === buyTokenId)
+        : undefined,
+    [buyTokenId, buyTokenData, providerTokens],
+  );
+
+  const buyDisplayName =
+    buyTokenData?.displayShortName ??
+    buyProviderToken?.ticker ??
+    buyProviderToken?.name ??
+    buyTokenId ??
+    '';
+  const buyDecimals = buyTokenData?.decimals ?? buyProviderToken?.decimals;
+
+  // The provider's own ADA label, so testnet reads tADA exactly as its fee
+  // rows already do.
+  const adaSymbol =
+    selectedQuote?.fees.find(fee => fee.tokenId === 'lovelace')
+      ?.displayCurrency ?? 'ADA';
+  const sellTokenDescriptor = {
+    decimals: sellTokenData?.decimals,
+    id: sellTokenId,
+    name: sellDisplayName,
+  };
+  const buyTokenDescriptor = {
+    decimals: buyDecimals,
+    id: buyTokenId,
+    name: buyDisplayName,
+  };
 
   const formattedSellAmount = formatSellRow(
     sellAmount,
@@ -179,22 +290,22 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
   );
   const formattedBuyAmount = formatBuyRow(
     selectedQuote,
-    buyTokenData,
+    buyDecimals,
     buyDisplayName,
   );
   const routeDisplay = formatRoute(selectedQuote);
   const quoteRatio = computeQuoteRatio(
     selectedQuote,
     sellTokenData?.decimals,
-    buyTokenData?.decimals,
+    buyDecimals,
   );
 
   const handleNext = useCallback(() => {
     trackEvent('swaps | review tx', {
       ...(sellTokenId && { tokenIn: sellTokenId }),
       ...(buyTokenId && { tokenOut: buyTokenId }),
-      ...(sellAmount && { quantity: sellAmount }),
       ...(selectedQuote && {
+        quantity: selectedQuote.sellAmount,
         expectedBuyAmount: selectedQuote.expectedBuyAmount,
         ...getQuoteAnalyticsContext(selectedQuote),
       }),
@@ -237,7 +348,7 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
           primaryButton={{
             label: t('v2.swap.review.next'),
             onPress: handleNext,
-            disabled: !isReviewing,
+            disabled: !isReviewing || isBlocked,
             loading: isBuilding || isAwaitingConfirmation || isProcessing,
             testID: 'swap-review-next-button',
           }}
@@ -250,13 +361,14 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
     handleClose,
     handleNext,
     isReviewing,
+    isBlocked,
     isBuilding,
     isAwaitingConfirmation,
     isProcessing,
   ]);
 
   return (
-    <Sheet.Scroll>
+    <Sheet.Scroll contentContainerStyle={styles.scrollContainer}>
       <Column style={styles.content} gap={spacing.XS}>
         {!selectedQuote ? (
           <Text.XS variant="secondary" align="center">
@@ -266,6 +378,126 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
           </Text.XS>
         ) : (
           <>
+            {isBlocked ? (
+              <InspectionNotice
+                tone="blocked"
+                title={t('v2.swap.review.blocked-title')}
+                subtitle={t('v2.swap.review.blocked-subtitle')}
+                testID="swap-review-blocked-notice"
+              />
+            ) : null}
+
+            {inspection ? (
+              <>
+                <Text.XS
+                  weight="medium"
+                  align="center"
+                  testID="swap-review-verified-title">
+                  {t('v2.swap.review.verified-title')}
+                </Text.XS>
+
+                {inspection.outflows.map(movement => (
+                  <ReviewRow
+                    key={`out-${movement.tokenId}`}
+                    label={t('v2.swap.review.leaving-wallet')}
+                    value={describeMovement({
+                      adaSymbol,
+                      amount: movement.amount,
+                      buy: buyTokenDescriptor,
+                      sell: sellTokenDescriptor,
+                      tokenId: movement.tokenId,
+                    })}
+                    testID={`swap-review-outflow-${movement.tokenId}`}
+                  />
+                ))}
+
+                {inspection.receivedAmount === undefined ? null : (
+                  <ReviewRow
+                    label={t('v2.swap.review.received-decoded')}
+                    value={describeMovement({
+                      adaSymbol,
+                      amount: inspection.receivedAmount,
+                      buy: buyTokenDescriptor,
+                      sell: sellTokenDescriptor,
+                      tokenId: selectedQuote.buyTokenId,
+                    })}
+                    testID="swap-review-received-decoded-row"
+                  />
+                )}
+
+                <ReviewRow
+                  label={t('v2.swap.review.network-fee')}
+                  value={`-${formatAmountToLocale(
+                    inspection.feeLovelace,
+                    LOVELACE_DECIMALS,
+                  )} ${adaSymbol}`}
+                  testID="swap-review-decoded-fee-row"
+                />
+
+                {inspection.destinations.map((destination, index) => (
+                  <ReviewRow
+                    // Position too: a multi-hop route pays two orders at one
+                    // script address, so the address alone is not unique.
+                    key={`dest-${index}-${destination.address}`}
+                    label={t('v2.swap.review.order-destination')}
+                    value={truncateAddress(destination.address)}
+                    // Without the amount, a destination taking
+                    // most of the sale reads like the order.
+                    subtitle={`${formatAmountToLocale(
+                      destination.coin,
+                      LOVELACE_DECIMALS,
+                    )} ${adaSymbol} · ${t(
+                      destination.isScript
+                        ? 'v2.swap.review.order-destination-script'
+                        : 'v2.swap.review.order-destination-address',
+                    )}`}
+                    testID="swap-review-destination-row"
+                  />
+                ))}
+
+                {inspection.collateralLovelace === '0' ? null : (
+                  <ReviewRow
+                    label={t('v2.swap.review.collateral')}
+                    value={`${formatAmountToLocale(
+                      inspection.collateralLovelace,
+                      LOVELACE_DECIMALS,
+                    )} ${adaSymbol}`}
+                    testID="swap-review-collateral-row"
+                  />
+                )}
+
+                {inspection.ttl === undefined ? null : (
+                  <ReviewRow
+                    label={t('v2.swap.review.expires')}
+                    value={String(inspection.ttl)}
+                    testID="swap-review-ttl-row"
+                  />
+                )}
+
+                {inspection.warnings.map(warning => (
+                  <InspectionNotice
+                    key={warning}
+                    tone="warning"
+                    title={t(
+                      warning === 'beneficiaryUnverified'
+                        ? 'v2.swap.review.warning-beneficiary'
+                        : 'v2.swap.review.warning-non-script',
+                    )}
+                    testID={`swap-review-warning-${warning}`}
+                  />
+                ))}
+
+                <Divider />
+
+                <Text.XS
+                  weight="medium"
+                  align="center"
+                  testID="swap-review-quoted-title">
+                  {t('v2.swap.review.quoted-title')}
+                </Text.XS>
+              </>
+            ) : null}
+
             <ReviewRow
               label={t('v2.swap.review.selling')}
               value={formattedSellAmount}
@@ -276,6 +508,26 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
               value={formattedBuyAmount}
               testID="swap-review-buy-row"
             />
+            {inspection && inspection.receivedAmount === undefined ? (
+              <InspectionNotice
+                tone="info"
+                title={t('v2.swap.review.received-later')}
+                testID="swap-review-received-later-notice"
+              />
+            ) : null}
+            {inspection ? (
+              <ReviewRow
+                label={t('v2.swap.review.minimum-received')}
+                value={describeMovement({
+                  adaSymbol,
+                  amount: inspection.minimumReceived,
+                  buy: buyTokenDescriptor,
+                  sell: sellTokenDescriptor,
+                  tokenId: selectedQuote.buyTokenId,
+                })}
+                testID="swap-review-min-received-row"
+              />
+            ) : null}
             <ReviewRow
               label={t('v2.swap.review.slippage-tolerance')}
               value={`${slippage}%`}
@@ -337,7 +589,19 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.M,
   },
+  scrollContainer: {
+    paddingBottom: footerHeight.horizontal,
+  },
+  notice: {
+    borderLeftWidth: 3,
+    paddingHorizontal: spacing.S,
+    paddingVertical: spacing.XS,
+  },
   reviewRow: {
     paddingVertical: spacing.XS,
+  },
+  rowValue: {
+    flexShrink: 1,
+    paddingLeft: spacing.S,
   },
 });

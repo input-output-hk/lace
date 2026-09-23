@@ -1,5 +1,5 @@
 import { DappId } from '@lace-contract/dapp-connector';
-import { of } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -57,7 +57,9 @@ vi.mock('@lace-lib/extension-messaging', async () => {
     ...actual,
     exposeApi: (...arguments_: unknown[]) => {
       mockExposeApi(...arguments_);
-      return { shutdown: mockShutdown };
+      // The connector relays messenger.disconnect$ into the confirmation
+      // callback; a never-emitting stub satisfies that subscription in tests.
+      return { shutdown: mockShutdown, messenger: { disconnect$: NEVER } };
     },
   };
 });
@@ -183,6 +185,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$: of({ Cardano: [] }),
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -223,6 +226,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$: of({ Cardano: [] }),
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -270,6 +274,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$,
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -323,6 +328,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$: of({ Cardano: [] }),
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -365,6 +371,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$: of({ Cardano: [] }),
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -408,6 +415,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$: of({ Cardano: [] }),
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),
@@ -493,6 +501,7 @@ describe('dapp-connector-extension', () => {
         authorizedDapps$,
         handleRequests,
         accountUtxos$: of({}),
+        ownershipUtxos$: of({}),
         accountUnspendableUtxos$: of({}),
         rewardAccountDetails$: of({}),
         addresses$: of([]),

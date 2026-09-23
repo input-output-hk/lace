@@ -46,12 +46,14 @@ describe('addresses slice', () => {
   let initialState: AddressesSliceState = {
     addresses: [],
     aliases: {},
+    nextUnusedAddresses: {},
   };
 
   beforeEach(() => {
     initialState = {
       addresses: [],
       aliases: {},
+      nextUnusedAddresses: {},
     };
   });
 
@@ -86,6 +88,7 @@ describe('addresses slice', () => {
               { ...cardanoAddress1, accountId, blockchainName: 'Cardano' },
             ],
             aliases: {},
+            nextUnusedAddresses: {},
           },
           action,
         );
@@ -106,6 +109,7 @@ describe('addresses slice', () => {
             },
           ],
           aliases: {},
+          nextUnusedAddresses: {},
         };
         const backfilledData = {
           network: 'mainnet',
@@ -145,6 +149,7 @@ describe('addresses slice', () => {
             },
           ],
           aliases: {},
+          nextUnusedAddresses: {},
         };
         const action = actions.addresses.upsertAddresses({
           blockchainName: 'Bitcoin',
@@ -164,6 +169,7 @@ describe('addresses slice', () => {
             { ...cardanoAddress1, accountId, blockchainName: 'Bitcoin', data },
           ],
           aliases: {},
+          nextUnusedAddresses: {},
         };
         const action = actions.addresses.upsertAddresses({
           blockchainName: 'Bitcoin',
@@ -191,6 +197,7 @@ describe('addresses slice', () => {
               { ...cardanoAddress1, accountId, blockchainName: 'Cardano' },
             ],
             aliases: {},
+            nextUnusedAddresses: {},
           },
           action,
         );
@@ -222,6 +229,7 @@ describe('addresses slice', () => {
             existingCardanoAccount2Address,
           ],
           aliases: {},
+          nextUnusedAddresses: {},
         };
         const action = actions.addresses.upsertAddresses({
           blockchainName: 'Cardano',
@@ -255,6 +263,129 @@ describe('addresses slice', () => {
       });
     });
 
+    describe('setNextUnusedAddress', () => {
+      const unusedAddress = cardanoAddress3.address;
+
+      it('records the unused receive address of an account', () => {
+        const action = actions.addresses.setNextUnusedAddress({
+          accountId,
+          address: unusedAddress,
+        });
+
+        const state = addressesReducers.addresses(initialState, action);
+
+        expect(state.nextUnusedAddresses).toEqual({
+          [accountId]: unusedAddress,
+        });
+      });
+
+      it('leaves the discovered address list untouched', () => {
+        // The unused address must not become a sync fetch target: the list is
+        // what utxo, balance and history reads are driven from.
+        const withAddresses = addressesReducers.addresses(
+          initialState,
+          actions.addresses.upsertAddresses({
+            blockchainName: 'Cardano',
+            accountId,
+            addresses: [cardanoAddress1],
+          }),
+        );
+
+        const state = addressesReducers.addresses(
+          withAddresses,
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: unusedAddress,
+          }),
+        );
+
+        expect(state.addresses).toBe(withAddresses.addresses);
+      });
+
+      it('advances the address when the account moves on', () => {
+        const state = [
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: cardanoAddress1.address,
+          }),
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: unusedAddress,
+          }),
+        ].reduce(
+          (state, action) => addressesReducers.addresses(state, action),
+          initialState,
+        );
+
+        expect(state.nextUnusedAddresses[accountId]).toBe(unusedAddress);
+      });
+
+      it('keeps one address per account', () => {
+        const state = [
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: cardanoAddress1.address,
+          }),
+          actions.addresses.setNextUnusedAddress({
+            accountId: accountId2,
+            address: unusedAddress,
+          }),
+        ].reduce(
+          (state, action) => addressesReducers.addresses(state, action),
+          initialState,
+        );
+
+        expect(state.nextUnusedAddresses).toEqual({
+          [accountId]: cardanoAddress1.address,
+          [accountId2]: unusedAddress,
+        });
+      });
+
+      it('keeps the same state reference when re-set with the same address', () => {
+        const action = actions.addresses.setNextUnusedAddress({
+          accountId,
+          address: unusedAddress,
+        });
+        const recorded = addressesReducers.addresses(initialState, action);
+
+        expect(addressesReducers.addresses(recorded, action)).toBe(recorded);
+      });
+
+      it('drops the address when the account is reset', () => {
+        const recorded = addressesReducers.addresses(
+          initialState,
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: unusedAddress,
+          }),
+        );
+
+        const state = addressesReducers.addresses(
+          recorded,
+          actions.addresses.resetAddresses({ accountId }),
+        );
+
+        expect(state.nextUnusedAddresses).toEqual({});
+      });
+
+      it('drops every address when the slice is cleared', () => {
+        const recorded = addressesReducers.addresses(
+          initialState,
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: unusedAddress,
+          }),
+        );
+
+        const state = addressesReducers.addresses(
+          recorded,
+          actions.addresses.clearAddresses(),
+        );
+
+        expect(state.nextUnusedAddresses).toEqual({});
+      });
+    });
+
     describe('setAliases', () => {
       const handleAliasType = AddressAliasType('handle');
       const ensAliasType = AddressAliasType('ens');
@@ -275,6 +406,7 @@ describe('addresses slice', () => {
         const stateWithAlias: AddressesSliceState = {
           addresses: [],
           aliases: { [cardanoAddress1.address]: [entry1] },
+          nextUnusedAddresses: {},
         };
 
         const action = actions.addresses.setAliases({ aliases: [entry2] });
@@ -317,6 +449,7 @@ describe('addresses slice', () => {
         const stateWithAlias: AddressesSliceState = {
           addresses: [],
           aliases: { [cardanoAddress1.address]: [existingHandleEntry] },
+          nextUnusedAddresses: {},
         };
         const newEnsEntry = createAliasEntry(
           cardanoAddress1.address,
@@ -371,12 +504,30 @@ describe('addresses slice', () => {
       it('should remove the addresses data for the account', () => {
         const state = {
           addresses: [cardanoAddress1, cardanoAddress2],
+          nextUnusedAddresses: {},
         } as unknown as AddressesSliceState;
         const newState = addressesReducers.addresses(
           state,
           walletsActions.wallets.removeAccount(walletId, accountId),
         );
         expect(newState.addresses).toEqual([cardanoAddress2]);
+      });
+
+      it('removes the unused receive address of the account', () => {
+        const state = {
+          addresses: [],
+          nextUnusedAddresses: {
+            [accountId]: cardanoAddress1.address,
+            [accountId2]: cardanoAddress2.address,
+          },
+        } as unknown as AddressesSliceState;
+        const newState = addressesReducers.addresses(
+          state,
+          walletsActions.wallets.removeAccount(walletId, accountId),
+        );
+        expect(newState.nextUnusedAddresses).toEqual({
+          [accountId2]: cardanoAddress2.address,
+        });
       });
     });
 
@@ -400,12 +551,31 @@ describe('addresses slice', () => {
       it('should remove addresses for all accounts provided', () => {
         const state = {
           addresses: [cardanoAddress1, cardanoAddress2],
+          nextUnusedAddresses: {},
         } as unknown as AddressesSliceState;
         const newState = addressesReducers.addresses(
           state,
           walletsActions.wallets.removeWallet(walletId, [accountId]),
         );
         expect(newState.addresses).toEqual([cardanoAddress2]);
+      });
+
+      it('removes the unused receive address of every account provided', () => {
+        const state = {
+          addresses: [],
+          nextUnusedAddresses: {
+            [accountId]: cardanoAddress1.address,
+            [accountId2]: cardanoAddress2.address,
+          },
+        } as unknown as AddressesSliceState;
+        const newState = addressesReducers.addresses(
+          state,
+          walletsActions.wallets.removeWallet(walletId, [
+            accountId,
+            accountId2,
+          ]),
+        );
+        expect(newState.nextUnusedAddresses).toEqual({});
       });
     });
   });
@@ -600,6 +770,7 @@ describe('addresses slice', () => {
         const state: AddressesSliceState = {
           addresses: [],
           aliases: { [cardanoAddress1.address]: [aliasEntry] },
+          nextUnusedAddresses: {},
         };
 
         const result = selectors.addresses.selectAddressAliases(
@@ -622,6 +793,7 @@ describe('addresses slice', () => {
             [cardanoAddress1.address]: [aliasEntry],
             [cardanoAddress2.address]: [entry2],
           },
+          nextUnusedAddresses: {},
         };
 
         const result = selectors.addresses.selectAddressAliases(
@@ -652,6 +824,30 @@ describe('addresses slice', () => {
         );
 
         expect(result1).toBe(result2);
+      });
+    });
+
+    describe('selectNextUnusedAddresses', () => {
+      it('returns the unused receive address per account', () => {
+        const state = addressesReducers.addresses(
+          initialState,
+          actions.addresses.setNextUnusedAddress({
+            accountId,
+            address: cardanoAddress3.address,
+          }),
+        );
+
+        expect(
+          selectors.addresses.selectNextUnusedAddresses({ addresses: state }),
+        ).toEqual({ [accountId]: cardanoAddress3.address });
+      });
+
+      it('returns the stored map itself, so composing selectors stay stable', () => {
+        expect(
+          selectors.addresses.selectNextUnusedAddresses({
+            addresses: initialState,
+          }),
+        ).toBe(initialState.nextUnusedAddresses);
       });
     });
 

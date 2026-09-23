@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 
 import { Percent } from '@cardano-sdk/util';
 import { addressesActions } from '@lace-contract/addresses';
+import { failuresActions } from '@lace-contract/failures';
 import {
   createInitialMidnightTokenMetadata,
   createMidnightToken,
@@ -15,16 +16,15 @@ import { syncActions } from '@lace-contract/sync';
 import { TokenId, tokensActions } from '@lace-contract/tokens';
 import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
-import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
-import { TestScheduler } from 'rxjs/testing';
+import { NEVER, Observable, of, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { midnightSyncActions } from '../../../src/store/actions';
 import {
-  resetIdleTimerOnDustActivity,
   updateDustBalance,
   updateDustGenerationDetails,
   updateSetPublicKeys,
@@ -33,10 +33,10 @@ import {
   upsertAddresses,
   watchMidnightAccounts,
 } from '../../../src/store/side-effects/watch';
+import { MidnightSyncFailureId } from '../../../src/value-objects/midnight-sync-failure-id.vo';
 
 import type { watchMidnightAccount } from '../../../src/store/side-effects/watch';
 import type {
-  AccountKeyManager,
   MidnightNetworkConfig,
   SerializedMidnightWallet,
 } from '@lace-contract/midnight-context';
@@ -84,6 +84,7 @@ const networkId = MidnightSDKNetworkIds.Preview;
 
 const actions = {
   ...addressesActions,
+  ...failuresActions,
   ...midnightContextActions,
   ...midnightSyncActions,
   ...syncActions,
@@ -217,11 +218,11 @@ describe('updateSyncProgress', () => {
     midnightWallets$.next({});
   });
 
-  it('emits addSyncOperation when syncProgress$ first emits', () => {
+  it('emits addSyncOperation on first emit and ignores unshielded when disabled', () => {
     const syncProgress: SyncProgress = {
       shielded: Percent(0.5),
-      unshielded: Percent(0),
-      dust: Percent(0),
+      unshielded: Percent(0.2),
+      dust: Percent(0.5),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
 
@@ -253,7 +254,7 @@ describe('updateSyncProgress', () => {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(0.5), // shielded only (dust=0 excluded from display)
+                  progress: Percent(0.5), // min(shielded=0.5, dust=0.5)
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
@@ -266,11 +267,12 @@ describe('updateSyncProgress', () => {
   });
 
   it('emits completeSyncOperation when sync progress reaches 1', () => {
+    // min(shielded=1, dust=1) = 1 and both are strictly complete (unshielded disabled).
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
-      dust: Percent(0),
-      isStrictlyComplete: { dust: false, shielded: true, unshielded: true },
+      dust: Percent(1),
+      isStrictlyComplete: { dust: true, shielded: true, unshielded: true },
     };
 
     testSideEffect(
@@ -322,13 +324,13 @@ describe('updateSyncProgress', () => {
     const inProgress: SyncProgress = {
       shielded: Percent(0.5),
       unshielded: Percent(0),
-      dust: Percent(0),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
     const complete: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
-      dust: Percent(0),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: true, unshielded: true },
     };
 
@@ -382,13 +384,13 @@ describe('updateSyncProgress', () => {
     const inProgress: SyncProgress = {
       shielded: Percent(0.5),
       unshielded: Percent(0),
-      dust: Percent(0),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
     const complete: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
-      dust: Percent(0),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: true, unshielded: true },
     };
 
@@ -442,8 +444,8 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('emits updateSyncProgress when progress changes after sync already started (uses shielded+dust average when unshielded disabled)', () => {
-    // When unshielded is disabled: progress = (shielded + dust) / 2
+  it('emits updateSyncProgress when progress changes after sync already started (uses min of shielded+dust when unshielded disabled)', () => {
+    // When unshielded is disabled: progress = min(shielded, dust)
     const syncProgressPartial: SyncProgress = {
       shielded: Percent(0.5),
       unshielded: Percent(0),
@@ -531,9 +533,7 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('completes sync when shielded is 1 but dust is 0 and unshielded is disabled (dust wallet unavailable)', () => {
-    // When dust is 0 but shielded is 1, dust is excluded from calculation
-    // So shielded=1, dust=0 should result in progress=1
+  it('reports 0 and does not complete while dust is at 0, despite shielded being complete', () => {
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
@@ -562,21 +562,17 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('(ab)', {
+            expectObservable(sideEffect$).toBe('a', {
               a: actions.sync.addSyncOperation({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(1), // Average: 1 / 1
+                  progress: Percent(0), // min(shielded=1, dust=0)
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
-              }),
-              b: actions.sync.completeSyncOperation({
-                accountId,
-                operationId: `${accountId}-midnight-sync`,
               }),
             });
           },
@@ -585,9 +581,57 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('calculates progress as average of shielded+unshielded+dust when feature flag is enabled', () => {
-    // When unshielded is enabled: progress = (shielded + unshielded + dust) / 3
-    // So shielded=1, unshielded=0, dust=1 should result in progress=0.66666666
+  it('includes unstarted dust (0) in displayed progress (unshielded enabled)', () => {
+    const syncProgress: SyncProgress = {
+      shielded: Percent(0.7),
+      unshielded: Percent(0.7),
+      dust: Percent(0),
+      isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
+    };
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            syncProgress$: cold('a', { a: syncProgress }),
+          });
+          return updateSyncProgress(wallet, cold('a', { a: true }));
+        },
+      },
+      ({ cold, expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {
+            sync: {
+              selectSyncStatusByAccount$: cold('a', { a: {} }),
+            },
+          },
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.sync.addSyncOperation({
+                accountId,
+                operation: {
+                  operationId: `${accountId}-midnight-sync`,
+                  status: 'InProgress',
+                  type: 'Determinate',
+                  progress: Percent(0), // min(shielded=0.7, unshielded=0.7, dust=0)
+                  description: 'sync.operation.midnight-wallet-sync',
+                  startedAt: expect.any(Number) as Timestamp,
+                },
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('calculates progress as min of shielded+unshielded+dust when feature flag is enabled', () => {
+    // When unshielded is enabled: progress = min(shielded, unshielded, dust).
+    // shielded=1, unshielded=0, dust=1 → unshielded is the bottleneck → min = 0.
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
@@ -616,7 +660,6 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            // Progress should be 0.6666666 (average of shielded=1, unshielded=0, and dust=1)
             expectObservable(sideEffect$).toBe('a', {
               a: actions.sync.addSyncOperation({
                 accountId,
@@ -624,7 +667,7 @@ describe('updateSyncProgress', () => {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(0.6666666666666666), // Average: (1 + 0 + 1) / 3
+                  progress: Percent(0), // min(shielded=1, unshielded=0, dust=1)
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
@@ -636,14 +679,14 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('calculates progress as average of shielded+unshielded+dust when feature flag is enabled but dust sync is 0', () => {
-    // Dust is excluded from DISPLAY when dust=0 (unstarted), to avoid halving the shown percentage.
-    // But isDustIncluded=true because other wallets are still in progress (prevents premature completion).
-    // So shielded=1, unshielded=0, dust=0 → display progress = (1 + 0) / 2 = 0.5
+  it('does not let an empty dust wallet (reported as 1) drag down the min', () => {
+    // An empty dust wallet reports Percent(1) via computeConnectedSyncRatio, so it must
+    // never lower the displayed progress below the genuinely-lagging sub-wallets.
+    // shielded=0.8, unshielded=0.8, dust=1 → min = 0.8.
     const syncProgress: SyncProgress = {
-      shielded: Percent(1),
-      unshielded: Percent(0),
-      dust: Percent(0),
+      shielded: Percent(0.8),
+      unshielded: Percent(0.8),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
 
@@ -675,7 +718,7 @@ describe('updateSyncProgress', () => {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(0.5), // Display: (shielded=1 + unshielded=0) / 2; dust excluded (unstarted)
+                  progress: Percent(0.8), // min(shielded=0.8, unshielded=0.8, dust=1)
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
@@ -687,14 +730,13 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('completes sync when shielded and unshielded are 1 but dust is 0 (dust wallet unavailable)', () => {
-    // When dust is 0 but shielded and unshielded are 1, dust is excluded from calculation
-    // So shielded=1, unshielded=1, dust=0 should result in progress=1
+  it('completes sync when all active sub-wallets are 1 and strictly complete (empty dust reported as 1)', () => {
+    // shielded=1, unshielded=1, dust=1 (empty dust reported as 1), all strictly complete → completes.
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(1),
-      dust: Percent(0),
-      isStrictlyComplete: { dust: false, shielded: true, unshielded: true },
+      dust: Percent(1),
+      isStrictlyComplete: { dust: true, shielded: true, unshielded: true },
     };
 
     testSideEffect(
@@ -725,7 +767,7 @@ describe('updateSyncProgress', () => {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(1), // Average: (1 + 1) / 2
+                  progress: Percent(1), // min(shielded=1, unshielded=1, dust=1)
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
@@ -744,10 +786,11 @@ describe('updateSyncProgress', () => {
   it('does not complete sync when ratio is 1 but isStrictlyComplete is false (false completion regression)', () => {
     // computeConnectedSyncRatio returns 1 when isConnected=true and both indices are 0.
     // Without the isStrictlyComplete guard, this would trigger premature completion.
+    // min(shielded=1, dust=1) = 1 but no sub-wallet is strictly complete.
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
       unshielded: Percent(0),
-      dust: Percent(0),
+      dust: Percent(1),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
 
@@ -792,15 +835,12 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('does not halve displayed progress when dust is unstarted (stuck at 45% regression)', () => {
-    // Before the fix, unstarted dust (dust=0) was included in the progress denominator,
-    // causing e.g. shielded=90% to display as 45% instead of 90%.
-    // With the fix: dust is excluded from DISPLAY when dust=0, but isDustIncluded=true
-    // (because other wallets are still in progress) so completion still requires dust.
+  it('reports the slowest sub-wallet as progress (min, not average)', () => {
+    // min(shielded=0.9, unshielded=0.3, dust=0.6) = 0.3 — the slowest sub-wallet is the bottleneck.
     const syncProgress: SyncProgress = {
       shielded: Percent(0.9),
-      unshielded: Percent(0),
-      dust: Percent(0),
+      unshielded: Percent(0.3),
+      dust: Percent(0.6),
       isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
     };
 
@@ -810,7 +850,7 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(wallet, cold('a', { a: true }));
         },
       },
       ({ cold, expectObservable }) => {
@@ -825,7 +865,7 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            // Progress should be shielded=0.9, not (0.9 + 0) / 2 = 0.45
+            // Progress is the slowest sub-wallet (0.3), not the average (0.6).
             expectObservable(sideEffect$).toBe('a', {
               a: actions.sync.addSyncOperation({
                 accountId,
@@ -833,7 +873,7 @@ describe('updateSyncProgress', () => {
                   operationId: `${accountId}-midnight-sync`,
                   status: 'InProgress',
                   type: 'Determinate',
-                  progress: Percent(0.9),
+                  progress: Percent(0.3),
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
@@ -1832,223 +1872,6 @@ describe('updateTokens', () => {
   });
 });
 
-describe('resetIdleTimerOnDustActivity', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type MockDustState = { dust: { availableCoins: any[] } };
-
-  const createMockKeyManager = (
-    keys$Subject: Subject<unknown>,
-    areKeysAvailable$: Observable<boolean> = of(true),
-  ): AccountKeyManager =>
-    ({
-      keys$: keys$Subject.asObservable(),
-      areKeysAvailable$,
-      destroy: vi.fn(),
-    } as unknown as AccountKeyManager);
-
-  const createMockWalletWithDustState = (
-    dustState$: Observable<MockDustState>,
-  ): MidnightWallet =>
-    ({
-      accountId,
-      networkId,
-      walletId,
-      state: () => dustState$,
-    } as unknown as MidnightWallet);
-
-  it('subscribes to keys$ when dust availableCoins count changes (after initial emission)', () => {
-    const testScheduler = new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
-
-    testScheduler.run(({ cold, flush }) => {
-      const keys$Subject = new Subject<unknown>();
-      const keyManager = createMockKeyManager(keys$Subject);
-      const keysSubscribeSpy = vi.fn();
-
-      // Create state emissions: initial (0 coins), then change (2 coins)
-      const dustState$ = cold('a-b', {
-        a: { dust: { availableCoins: [] } },
-        b: { dust: { availableCoins: [{}, {}] } }, // 2 coins
-      });
-
-      const wallet = createMockWalletWithDustState(dustState$);
-
-      // Subscribe to the observable
-      resetIdleTimerOnDustActivity(wallet, keyManager).subscribe();
-
-      // Mock keys$ to track when it's subscribed
-      const originalKeys$ = keyManager.keys$;
-      Object.defineProperty(keyManager, 'keys$', {
-        get: () => {
-          keysSubscribeSpy();
-          return originalKeys$;
-        },
-      });
-
-      // Provide keys when requested
-      keys$Subject.next({ walletKeys: {} });
-
-      flush();
-
-      // keys$ should be subscribed to after the second emission (the change)
-      // Initial emission is skipped, change triggers subscription
-      expect(keysSubscribeSpy).toHaveBeenCalled();
-    });
-  });
-
-  it('does not subscribe to keys$ when dust availableCoins count stays the same', () => {
-    const testScheduler = new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
-
-    testScheduler.run(({ cold, flush }) => {
-      const keys$Subject = new BehaviorSubject<unknown>({ walletKeys: {} });
-      const keyManager = createMockKeyManager(keys$Subject);
-      let keysAccessCount = 0;
-
-      // Create state emissions with same count: 2 coins each time
-      const dustState$ = cold('a-b-c', {
-        a: { dust: { availableCoins: [{}, {}] } },
-        b: { dust: { availableCoins: [{}, {}] } }, // Same count
-        c: { dust: { availableCoins: [{}, {}] } }, // Same count
-      });
-
-      const wallet = createMockWalletWithDustState(dustState$);
-
-      // Track keys$ access
-      const originalKeys$ = keyManager.keys$;
-      Object.defineProperty(keyManager, 'keys$', {
-        get: () => {
-          keysAccessCount++;
-          return originalKeys$;
-        },
-      });
-
-      resetIdleTimerOnDustActivity(wallet, keyManager).subscribe();
-
-      flush();
-
-      // keys$ should NOT be accessed because:
-      // - Initial emission is skipped
-      // - Subsequent emissions have same count (distinctUntilChanged filters them)
-      expect(keysAccessCount).toBe(0);
-    });
-  });
-
-  it('skips initial emission (restoration, not sync activity)', () => {
-    const testScheduler = new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
-
-    testScheduler.run(({ cold, flush }) => {
-      const keys$Subject = new BehaviorSubject<unknown>({ walletKeys: {} });
-      const keyManager = createMockKeyManager(keys$Subject);
-      let keysAccessCount = 0;
-
-      // Single emission (initial state only)
-      const dustState$ = cold('a|', {
-        a: { dust: { availableCoins: [{}, {}, {}] } }, // 3 coins
-      });
-
-      const wallet = createMockWalletWithDustState(dustState$);
-
-      // Track keys$ access
-      const originalKeys$ = keyManager.keys$;
-      Object.defineProperty(keyManager, 'keys$', {
-        get: () => {
-          keysAccessCount++;
-          return originalKeys$;
-        },
-      });
-
-      resetIdleTimerOnDustActivity(wallet, keyManager).subscribe();
-
-      flush();
-
-      // keys$ should NOT be accessed because initial emission is skipped
-      expect(keysAccessCount).toBe(0);
-    });
-  });
-
-  it('resets idle timer on each distinct change in availableCoins count', () => {
-    const testScheduler = new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
-
-    testScheduler.run(({ cold, flush }) => {
-      const keys$Subject = new BehaviorSubject<unknown>({ walletKeys: {} });
-      const keyManager = createMockKeyManager(keys$Subject);
-      let keysAccessCount = 0;
-
-      // Multiple distinct changes: 0 -> 1 -> 2 -> 1 coins
-      const dustState$ = cold('a-b-c-d', {
-        a: { dust: { availableCoins: [] } }, // Initial: 0 (skipped)
-        b: { dust: { availableCoins: [{}] } }, // Change: 0 -> 1
-        c: { dust: { availableCoins: [{}, {}] } }, // Change: 1 -> 2
-        d: { dust: { availableCoins: [{}] } }, // Change: 2 -> 1
-      });
-
-      const wallet = createMockWalletWithDustState(dustState$);
-
-      // Track keys$ access
-      const originalKeys$ = keyManager.keys$;
-      Object.defineProperty(keyManager, 'keys$', {
-        get: () => {
-          keysAccessCount++;
-          return originalKeys$;
-        },
-      });
-
-      resetIdleTimerOnDustActivity(wallet, keyManager).subscribe();
-
-      flush();
-
-      // keys$ should be accessed 3 times (one for each change after initial)
-      expect(keysAccessCount).toBe(3);
-    });
-  });
-
-  it('does not access keys$ when keys are not available (idle timeout already fired)', () => {
-    const testScheduler = new TestScheduler((actual, expected) => {
-      expect(actual).toEqual(expected);
-    });
-
-    testScheduler.run(({ cold, flush }) => {
-      const keys$Subject = new BehaviorSubject<unknown>({ walletKeys: {} });
-      // areKeysAvailable$ emits false - keys have been cleared
-      const keyManager = createMockKeyManager(keys$Subject, of(false));
-      let keysAccessCount = 0;
-
-      // Multiple distinct changes: 0 -> 1 -> 2 coins
-      const dustState$ = cold('a-b-c', {
-        a: { dust: { availableCoins: [] } }, // Initial: 0 (skipped)
-        b: { dust: { availableCoins: [{}] } }, // Change: 0 -> 1
-        c: { dust: { availableCoins: [{}, {}] } }, // Change: 1 -> 2
-      });
-
-      const wallet = createMockWalletWithDustState(dustState$);
-
-      // Track keys$ access
-      const originalKeys$ = keyManager.keys$;
-      Object.defineProperty(keyManager, 'keys$', {
-        get: () => {
-          keysAccessCount++;
-          return originalKeys$;
-        },
-      });
-
-      resetIdleTimerOnDustActivity(wallet, keyManager).subscribe();
-
-      flush();
-
-      // keys$ should NOT be accessed because keys are not available
-      // This prevents triggering an auth prompt when the idle timeout has already fired
-      expect(keysAccessCount).toBe(0);
-    });
-  });
-});
-
 describe('watchMidnightAccounts', () => {
   const previewNetworkId = NetworkId.NetworkId.Preview;
   const undeployedNetworkId = NetworkId.NetworkId.Undeployed;
@@ -2108,6 +1931,9 @@ describe('watchMidnightAccounts', () => {
       getAll: vi.fn(),
       observeAll: vi.fn(),
       setAll: vi.fn(),
+      upsert: vi.fn(() => of(void 0)),
+      removeWhere: vi.fn(() => of(void 0)),
+      clear: vi.fn(() => of(void 0)),
     } as CollectionStorage<SerializedMidnightWallet>);
 
   const logger = dummyLogger;
@@ -2660,7 +2486,10 @@ describe('watchMidnightAccounts', () => {
 
     it('continues watching other accounts when one account watcher errors', () => {
       const mockStore = createMockStore();
+      const watchedAccountIds: string[] = [];
       const mockWatchAccount = vi.fn(account => () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        watchedAccountIds.push(String(account.accountId));
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (account.accountId === midnightAccount1.accountId) {
           return throwError(() => new Error('Watcher failed'));
@@ -2697,8 +2526,140 @@ describe('watchMidnightAccounts', () => {
             assertion: sideEffect$ => {
               sideEffect$.subscribe();
               flush();
-              // Both accounts should be processed despite midnightAccount1 error
-              expect(mockWatchAccount).toHaveBeenCalledTimes(2);
+              // Both accounts processed despite midnightAccount1 erroring, and
+              // the healthy one is invoked exactly once — the retry budget is
+              // per-account, so a sibling's failure never restarts it.
+              expect(
+                watchedAccountIds.filter(
+                  id => id === String(midnightAccount2.accountId),
+                ),
+              ).toHaveLength(1);
+              // defer re-invokes the failing account per retry: 1 + maxRetries.
+              expect(
+                watchedAccountIds.filter(
+                  id => id === String(midnightAccount1.accountId),
+                ),
+              ).toHaveLength(
+                1 + (PROVIDER_REQUEST_RETRY_CONFIG.maxRetries ?? 0),
+              );
+            },
+          };
+        },
+      );
+    });
+  });
+
+  describe('surfaced sync failure', () => {
+    it('raises a retryable failure and a failed sync operation once retries are exhausted', () => {
+      const mockStore = createMockStore();
+      const mockWatchAccount = vi.fn(account => () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        if (account.accountId === midnightAccount1.accountId) {
+          return throwError(() => new Error('Watcher failed'));
+        }
+        return NEVER;
+      }) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnightSync: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount1],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              isWalletActive$: cold('a', { a: true }),
+            },
+            assertion: sideEffect$ => {
+              const emissions: unknown[] = [];
+              sideEffect$.subscribe(action => emissions.push(action));
+              flush();
+
+              expect(emissions).toStrictEqual([
+                actions.failures.addFailure({
+                  failureId: MidnightSyncFailureId(midnightAccount1.accountId),
+                  message: 'sync.error.midnight-sync-failed',
+                  retryAction: actions.midnightSync.restartWalletWatch(),
+                }),
+                actions.sync.addSyncOperation({
+                  accountId: midnightAccount1.accountId,
+                  operation: {
+                    operationId: `${midnightAccount1.accountId}-midnight-sync`,
+                    status: 'Failed',
+                    description: 'sync.operation.midnight-wallet-sync',
+                    error: 'sync.error.midnight-sync-failed',
+                    startedAt: expect.any(Number) as Timestamp,
+                    failedAt: expect.any(Number) as Timestamp,
+                  },
+                }),
+              ]);
+            },
+          };
+        },
+      );
+    });
+
+    it('abandons the retry loop for an account removed mid-failure, surfacing nothing', () => {
+      const mockStore = createMockStore();
+      let attempts = 0;
+      const mockWatchAccount = vi.fn(() => () => {
+        attempts += 1;
+        return throwError(() => new Error('Watcher failed'));
+      }) as typeof watchMidnightAccount;
+
+      testSideEffect(
+        watchMidnightAccounts(mockStore, mockWatchAccount),
+        ({ cold, flush }) => {
+          return {
+            actionObservables: {
+              midnightSync: {
+                restartWalletWatch$: cold('---'),
+              },
+            },
+            stateObservables: {
+              midnightContext: {
+                selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+              },
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                // The account is gone before the retry budget runs out.
+                selectActiveNetworkAccounts$: cold('a 1ms b', {
+                  a: [midnightAccount1],
+                  b: [],
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger,
+              isWalletActive$: cold('a', { a: true }),
+            },
+            assertion: sideEffect$ => {
+              const emissions: unknown[] = [];
+              sideEffect$.subscribe(action => emissions.push(action));
+              flush();
+
+              expect(emissions).toStrictEqual([]);
+              // Removal unsubscribes retryBackoff rather than letting it burn
+              // the whole budget on an account that is already gone.
+              expect(attempts).toBeLessThan(
+                1 + (PROVIDER_REQUEST_RETRY_CONFIG.maxRetries ?? 0),
+              );
             },
           };
         },

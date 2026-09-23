@@ -12,18 +12,17 @@ import {
   getPriceDataForDragPosition,
   getPriceDataForTimeRange,
   RANGES,
-  type TimeRange,
 } from '../../../utils/priceHistoryUtils';
 import { BlurView, LineChart, PricePill } from '../../atoms';
 import { Tabs } from '../tabs/tabs';
 
 import type { Theme } from '../../../design-tokens';
 import type {
-  PriceDataPoint,
   PriceHistoryData,
   TimeRangePriceData,
 } from '../../../utils/priceHistoryUtils';
 import type { LineChartData } from '../../atoms';
+import type { PriceDataPoint, TimeRange } from '@lace-contract/token-pricing';
 
 type ChartProps = {
   data: LineChartData | PriceHistoryData;

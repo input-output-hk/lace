@@ -3,13 +3,16 @@ import '../../src/augmentations';
 import { activitiesActions } from '@lace-contract/activities';
 import { analyticsActions } from '@lace-contract/analytics';
 import { uiActions } from '@lace-contract/app';
+import { LOVELACE_TOKEN_ID } from '@lace-contract/cardano-context';
+import { CardanoTokenPriceId } from '@lace-contract/token-pricing';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { Ok, Err } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
 import { of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
+import { inspectSwapTransaction } from '../../src/check-swap-intent';
 import {
   makeAutoQuote,
   makeAwaitConfirmation,
@@ -22,6 +25,14 @@ import {
   makeQuoteRefresh,
 } from '../../src/store/side-effects';
 import { swapContextActions } from '../../src/store/slice';
+import {
+  ORDER_SCRIPT_ADDRESS,
+  OWN_ADDRESS,
+  SELL_TOKEN,
+  beneficiaryDatum,
+  buildSwapTx,
+  ownUtxo,
+} from '../fixtures/swap-tx-fixtures';
 
 import type { SwapFlowState } from '../../src/store/types';
 import type { Cardano } from '@cardano-sdk/core';
@@ -31,7 +42,11 @@ import type {
   SwapQuote,
   SwapToken,
 } from '@lace-contract/swap-provider';
-import type { TxErrorTranslationKeys } from '@lace-contract/tx-executor';
+import type { TokenPrice, TokenPriceId } from '@lace-contract/token-pricing';
+import type {
+  ConfirmTx,
+  TxErrorTranslationKeys,
+} from '@lace-contract/tx-executor';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
 
 const logger = dummyLogger;
@@ -42,6 +57,91 @@ const actions = {
   ...uiActions,
   ...analyticsActions,
   ...activitiesActions,
+};
+
+/**
+ * An honest build of `mockQuote`: 10 ADA into a DEX order that names the
+ * account, change back, 0.2 ADA fee. Real CBOR, because the gate decodes it.
+ */
+const ownFunding = ownUtxo(0, { coins: 200_000_000n });
+const ACCOUNT_UTXOS = [ownFunding];
+const ACCOUNT_ADDRESSES = [{ address: OWN_ADDRESS as string }];
+const HONEST_ORDER_TX = buildSwapTx({
+  fee: 200_000n,
+  inputs: [ownFunding[0]],
+  outputs: [
+    {
+      address: ORDER_SCRIPT_ADDRESS,
+      datum: beneficiaryDatum(),
+      value: { coins: 10_000_000n },
+    },
+    { address: OWN_ADDRESS, value: { coins: 189_800_000n } },
+  ],
+  ttl: 12_345,
+});
+/** The same account's UTxOs spent into an order that names someone else, for
+ *  more than the account agreed to sell. */
+const REDIRECTED_TX = buildSwapTx({
+  fee: 200_000n,
+  inputs: [ownFunding[0]],
+  outputs: [
+    {
+      address: ORDER_SCRIPT_ADDRESS,
+      datum: beneficiaryDatum('de'.repeat(28)),
+      value: { coins: 199_800_000n },
+    },
+  ],
+});
+
+/**
+ * A token sale that also skims 3 ADA from each of three own UTxOs, one per set
+ * the resolution union is built from and present in no other: `withheldAda`
+ * was spent by our own pending tx (settled only — on-chain, so a builder can
+ * spend it), `inFlightChange` is that tx's change (in-flight only), and
+ * `staleCollateral` is designated collateral a fresh settled fetch has not
+ * caught up with (collateral only). Sized so the outflow passes the allowance
+ * ONLY with all three resolved: drop any one set and the skim goes uncounted.
+ */
+const tokenFunding = ownUtxo(1, {
+  assets: new Map([[SELL_TOKEN, 1000n]]),
+  coins: 2_000_000n,
+});
+const withheldAda = ownUtxo(2, { coins: 3_000_000n });
+const inFlightChange = ownUtxo(3, { coins: 3_000_000n });
+const staleCollateral = ownUtxo(4, { coins: 3_000_000n });
+const SKIMS_EVERY_UTXO_SET_TX = buildSwapTx({
+  fee: 200_000n,
+  inputs: [
+    tokenFunding[0],
+    withheldAda[0],
+    inFlightChange[0],
+    staleCollateral[0],
+  ],
+  outputs: [
+    {
+      address: ORDER_SCRIPT_ADDRESS,
+      datum: beneficiaryDatum(),
+      value: { assets: new Map([[SELL_TOKEN, 1000n]]), coins: 2_000_000n },
+    },
+    { address: ORDER_SCRIPT_ADDRESS, value: { coins: 3_800_000n } },
+    { address: OWN_ADDRESS, value: { coins: 5_000_000n } },
+  ],
+});
+
+const swapStateObservables = {
+  addresses: {
+    selectByAccountId$: of(
+      ((): Array<{ address: string }> => ACCOUNT_ADDRESSES) as (
+        id: AccountId,
+      ) => Array<{ address: string }>,
+    ) as never,
+  },
+  cardanoContext: {
+    selectAccountUnspendableUtxos$: of({}),
+    selectAccountUtxos$: of({ [testAccountId]: ACCOUNT_UTXOS }),
+    selectAccountUtxosWithInFlight$: of({ [testAccountId]: ACCOUNT_UTXOS }),
+    selectAvailableAccountUtxos$: of({ [testAccountId]: ACCOUNT_UTXOS }),
+  },
 };
 
 const mockQuote: SwapQuote = {
@@ -74,10 +174,27 @@ const mockQuote: SwapQuote = {
   quoteExpiresAt: Date.now() + 15_000,
 };
 
+// $0.50/ADA, so the quote's 600 ADA sell leg prices at $300 -> 'M'. Every
+// other amount in reach of this test (the state's display '10', the quote's
+// 500-lovelace buy leg) prices under $10 -> 'XS', so 'M' can only come from
+// the quote's lovelace sell leg.
+const ADA_PRICES: Record<TokenPriceId, TokenPrice> = {
+  [CardanoTokenPriceId(LOVELACE_TOKEN_ID)]: {
+    priceInUsd: 0.5,
+    price: 0.5,
+    lastUpdated: Date.now(),
+  } as TokenPrice,
+};
+
+const pricedQuote: SwapQuote = { ...mockQuote, sellAmount: '600000000' };
+
+// Default: nothing held, so a token-to-token trade cannot be priced.
+const noTokens = of((() => undefined) as (id: string) => unknown) as never;
+
 const mockProvider = {
   getQuote: () => of(Ok(mockQuote)),
   buildSwapTx: () =>
-    of(Ok({ unsignedTxCbor: 'deadbeef', providerId: 'steelswap' })),
+    of(Ok({ unsignedTxCbor: HONEST_ORDER_TX, providerId: 'steelswap' })),
   listTokens: () =>
     of(
       Ok([
@@ -140,6 +257,28 @@ const buildingState: SwapFlowState = {
   selectedQuote: mockQuote,
 };
 
+const tokenSellQuote: SwapQuote = {
+  ...mockQuote,
+  sellAmount: '1000',
+  sellTokenId: SELL_TOKEN,
+};
+
+const tokenSellBuildingState: SwapFlowState = {
+  ...buildingState,
+  quotes: [tokenSellQuote],
+  selectedQuote: tokenSellQuote,
+  sellTokenId: SELL_TOKEN,
+};
+
+const inspectionOf = (serializedTx: string) =>
+  inspectSwapTransaction({
+    accountAddresses: ACCOUNT_ADDRESSES.map(entry => entry.address as never),
+    accountUtxos: ACCOUNT_UTXOS,
+    intent: mockQuote,
+    serializedTx: serializedTx as never,
+    slippagePercent: 0.5,
+  });
+
 const awaitingState: SwapFlowState = {
   status: 'AwaitingConfirmation',
   accountId: testAccountId,
@@ -147,7 +286,8 @@ const awaitingState: SwapFlowState = {
   buyTokenId: 'abc123',
   sellAmount: '10',
   selectedQuote: mockQuote,
-  unsignedTxCbor: 'unsigned-cbor',
+  unsignedTxCbor: HONEST_ORDER_TX,
+  inspection: inspectionOf(HONEST_ORDER_TX),
 };
 
 const processingState: SwapFlowState = {
@@ -159,6 +299,18 @@ const processingState: SwapFlowState = {
   selectedQuote: mockQuote,
   serializedTx: 'signed-cbor',
 };
+
+const analyticsEventPayload = (
+  emissions: unknown[],
+  eventName: string,
+): Record<string, unknown> | undefined =>
+  (
+    emissions.find(
+      emission =>
+        (emission as { payload?: { eventName?: string } }).payload
+          ?.eventName === eventName,
+    ) as { payload?: { payload?: Record<string, unknown> } } | undefined
+  )?.payload?.payload;
 
 describe('swap-context side effects', () => {
   describe('makeFetchQuote', () => {
@@ -194,6 +346,10 @@ describe('swap-context side effects', () => {
               selectedQuote: mockQuote,
             }),
           );
+          // The state's amount is '10', so a regression to it fails here.
+          expect(
+            analyticsEventPayload(emissions, 'swaps | fetch estimate'),
+          ).toMatchObject({ amount: mockQuote.sellAmount });
         },
       }));
     });
@@ -417,17 +573,7 @@ describe('swap-context side effects', () => {
           swapAnalytics: {
             selectSwapSessionId$: of(undefined),
           },
-          addresses: {
-            selectByAccountId$: of(
-              ((): Array<{ address: string }> => [
-                { address: 'addr_test1...' },
-              ]) as (id: AccountId) => Array<{ address: string }>,
-            ) as never,
-          },
-          cardanoContext: {
-            selectAvailableAccountUtxos$: of({}),
-            selectAccountUnspendableUtxos$: of({}),
-          },
+          ...swapStateObservables,
         },
         dependencies: { actions, logger, swapProviders: [mockProvider] },
         assertion: sideEffect$ => {
@@ -435,8 +581,64 @@ describe('swap-context side effects', () => {
           sideEffect$.subscribe(action => emissions.push(action));
           flush();
           expect(emissions).toContainEqual(
-            actions.swapFlow.buildCompleted({ unsignedTxCbor: 'deadbeef' }),
+            actions.swapFlow.buildCompleted({
+              inspection: inspectionOf(HONEST_ORDER_TX),
+              unsignedTxCbor: HONEST_ORDER_TX,
+            }),
           );
+          // The state's amount is '10', so a regression to it fails here.
+          expect(
+            analyticsEventPayload(emissions, 'swaps | build tx'),
+          ).toMatchObject({ amount: mockQuote.sellAmount });
+        },
+      }));
+    });
+
+    it('stores a blocked verdict when the built bytes do not match the quote', () => {
+      const redirectingProvider = {
+        ...mockProvider,
+        buildSwapTx: () =>
+          of(Ok({ providerId: 'steelswap', unsignedTxCbor: REDIRECTED_TX })),
+      };
+      testSideEffect(makeBuildSwapTx, ({ hot, flush }) => ({
+        stateObservables: {
+          swapFlow: {
+            selectSwapFlowState$: hot<SwapFlowState>('-a', {
+              a: buildingState,
+            }),
+          },
+          swapConfig: {
+            selectSlippage$: of(0.5),
+            selectExcludedDexes$: of([] as string[]),
+          },
+          swapAnalytics: { selectSwapSessionId$: of(undefined) },
+          ...swapStateObservables,
+        },
+        dependencies: {
+          actions,
+          logger,
+          swapProviders: [redirectingProvider],
+        },
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          const completed = emissions.find(
+            (
+              emission,
+            ): emission is ReturnType<typeof actions.swapFlow.buildCompleted> =>
+              (emission as { type?: string }).type ===
+              actions.swapFlow.buildCompleted.type,
+          );
+          // The build still completes — the review must render the decoded
+          // effects and the reason — but the verdict travels with it, and the
+          // confirm step refuses on it.
+          expect(completed?.payload.inspection.verdict).toBe('blocked');
+          expect(
+            completed?.payload.inspection.violations.map(
+              violation => violation.code,
+            ),
+          ).toContain('adaOutflowExceeded');
         },
       }));
     });
@@ -464,8 +666,10 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
-            selectAvailableAccountUtxos$: of({}),
             selectAccountUnspendableUtxos$: of({}),
+            selectAccountUtxos$: of({}),
+            selectAccountUtxosWithInFlight$: of({}),
+            selectAvailableAccountUtxos$: of({}),
           },
         },
         dependencies: { actions, logger, swapProviders: [failingProvider] },
@@ -506,8 +710,10 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
-            selectAvailableAccountUtxos$: of({}),
             selectAccountUnspendableUtxos$: of({}),
+            selectAccountUtxos$: of({}),
+            selectAccountUtxosWithInFlight$: of({}),
+            selectAvailableAccountUtxos$: of({}),
           },
         },
         dependencies: { actions, logger, swapProviders: [] },
@@ -575,13 +781,19 @@ describe('swap-context side effects', () => {
             ) as never,
           },
           cardanoContext: {
+            selectAccountUnspendableUtxos$: of({}),
+            selectAccountUtxos$: of({
+              [testAccountId]: [utxoAt(signerAddress, 0)],
+            }),
+            selectAccountUtxosWithInFlight$: of({
+              [testAccountId]: [utxoAt(signerAddress, 0)],
+            }),
             selectAvailableAccountUtxos$: of({
               [testAccountId]: [
                 utxoAt(signerAddress, 0),
                 utxoAt(foreignAddress, 1),
               ],
             }),
-            selectAccountUnspendableUtxos$: of({}),
           },
         },
         dependencies: {
@@ -596,9 +808,82 @@ describe('swap-context side effects', () => {
           expect(captured).toHaveLength(1);
           expect(captured[0].utxos).toHaveLength(1);
           expect(captured[0].collateralUtxos).toHaveLength(0);
-          expect(emissions).toContainEqual(
-            actions.swapFlow.buildCompleted({ unsignedTxCbor: 'deadbeef' }),
+          const completed = emissions.find(
+            (
+              emission,
+            ): emission is ReturnType<typeof actions.swapFlow.buildCompleted> =>
+              (emission as { type?: string }).type ===
+              actions.swapFlow.buildCompleted.type,
           );
+          expect(completed?.payload.unsignedTxCbor).toBe(HONEST_ORDER_TX);
+        },
+      }));
+    });
+
+    it('counts ADA skimmed from own UTxOs present in only one resolution set', () => {
+      const skimmingProvider = {
+        ...mockProvider,
+        buildSwapTx: () =>
+          of(
+            Ok({
+              providerId: 'steelswap',
+              unsignedTxCbor: SKIMS_EVERY_UTXO_SET_TX,
+            }),
+          ),
+      };
+
+      testSideEffect(makeBuildSwapTx, ({ hot, flush }) => ({
+        stateObservables: {
+          swapFlow: {
+            selectSwapFlowState$: hot<SwapFlowState>('-a', {
+              a: tokenSellBuildingState,
+            }),
+          },
+          swapConfig: {
+            selectSlippage$: of(0.5),
+            selectExcludedDexes$: of([] as string[]),
+          },
+          swapAnalytics: { selectSwapSessionId$: of(undefined) },
+          addresses: {
+            selectByAccountId$: of(
+              ((): Array<{ address: string }> => ACCOUNT_ADDRESSES) as (
+                id: AccountId,
+              ) => Array<{ address: string }>,
+            ) as never,
+          },
+          cardanoContext: {
+            selectAccountUnspendableUtxos$: of({
+              [testAccountId]: [staleCollateral],
+            }),
+            selectAccountUtxos$: of({
+              [testAccountId]: [tokenFunding, withheldAda],
+            }),
+            selectAccountUtxosWithInFlight$: of({
+              [testAccountId]: [tokenFunding, inFlightChange],
+            }),
+            selectAvailableAccountUtxos$: of({
+              [testAccountId]: [tokenFunding, inFlightChange],
+            }),
+          },
+        },
+        dependencies: { actions, logger, swapProviders: [skimmingProvider] },
+        assertion: sideEffect$ => {
+          const emissions: unknown[] = [];
+          sideEffect$.subscribe(action => emissions.push(action));
+          flush();
+          const completed = emissions.find(
+            (
+              emission,
+            ): emission is ReturnType<typeof actions.swapFlow.buildCompleted> =>
+              (emission as { type?: string }).type ===
+              actions.swapFlow.buildCompleted.type,
+          );
+          expect(
+            completed?.payload.inspection.violations.map(
+              violation => violation.code,
+            ),
+          ).toContain('adaOutflowExceeded');
+          expect(completed?.payload.inspection.verdict).toBe('blocked');
         },
       }));
     });
@@ -776,6 +1061,8 @@ describe('swap-context side effects', () => {
             },
             wallets: { selectAll$: of([testWallet]) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            swapConfig: { selectSlippage$: of(0.5) },
+            ...swapStateObservables,
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {
@@ -786,6 +1073,93 @@ describe('swap-context side effects', () => {
               actions.swapFlow.confirmationCompleted({
                 serializedTx: signedTx,
               }),
+            );
+          },
+        }),
+      );
+    });
+
+    it('refuses to sign bytes that no longer match the reviewed intent', () => {
+      const confirmTx = vi.fn<ConfirmTx>((_params, mapResult) =>
+        of(mapResult({ serializedTx: 'signed', success: true })),
+      );
+      testSideEffect(
+        {
+          build: () => makeAwaitConfirmation({ confirmTx: confirmTx as never }),
+        },
+        ({ hot, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: {
+                  ...awaitingState,
+                  // The build inspected these bytes and refused them; the
+                  // confirm step must not hand them to a signer regardless.
+                  inspection: inspectionOf(REDIRECTED_TX),
+                  unsignedTxCbor: REDIRECTED_TX,
+                },
+              }),
+            },
+            wallets: { selectAll$: of([testWallet]) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            swapConfig: { selectSlippage$: of(0.5) },
+            ...swapStateObservables,
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            expect(emissions).toContainEqual(
+              actions.swapFlow.confirmationFailed({
+                errorMessage: 'v2.swap.error.intent-mismatch',
+              }),
+            );
+            // The signer is never reached, so no auth prompt is spent on it.
+            expect(confirmTx).not.toHaveBeenCalled();
+          },
+        }),
+      );
+    });
+
+    it('reports the violated clauses to analytics', () => {
+      testSideEffect(
+        {
+          build: () =>
+            makeAwaitConfirmation({
+              confirmTx: (_params, mapResult) =>
+                of(mapResult({ success: true, serializedTx: 'signed' })),
+            }),
+        },
+        ({ hot, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: {
+                  ...awaitingState,
+                  inspection: inspectionOf(REDIRECTED_TX),
+                  unsignedTxCbor: REDIRECTED_TX,
+                },
+              }),
+            },
+            wallets: { selectAll$: of([testWallet]) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            swapConfig: { selectSlippage$: of(0.5) },
+            ...swapStateObservables,
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            const tracked = emissions.find(
+              emission =>
+                (emission as { payload?: { eventName?: string } }).payload
+                  ?.eventName === 'swaps | sign failure',
+            ) as { payload: { payload: { reason: string } } } | undefined;
+            expect(tracked?.payload.payload.reason).toContain('intentMismatch');
+            expect(tracked?.payload.payload.reason).toContain(
+              'adaOutflowExceeded',
             );
           },
         }),
@@ -813,6 +1187,8 @@ describe('swap-context side effects', () => {
             },
             wallets: { selectAll$: of([testWallet]) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            swapConfig: { selectSlippage$: of(0.5) },
+            ...swapStateObservables,
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {
@@ -849,6 +1225,8 @@ describe('swap-context side effects', () => {
             },
             swapConfig: { selectSlippage$: of(0.5) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            tokens: { selectTokenById$: noTokens },
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {
@@ -893,6 +1271,8 @@ describe('swap-context side effects', () => {
             },
             swapConfig: { selectSlippage$: of(0.5) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            tokens: { selectTokenById$: noTokens },
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {
@@ -939,11 +1319,13 @@ describe('swap-context side effects', () => {
           stateObservables: {
             swapFlow: {
               selectSwapFlowState$: hot<SwapFlowState>('-a', {
-                a: processingState,
+                a: { ...processingState, selectedQuote: pricedQuote },
               }),
             },
             swapConfig: { selectSlippage$: of(0.5) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            tokens: { selectTokenById$: noTokens },
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {
@@ -956,16 +1338,222 @@ describe('swap-context side effects', () => {
                 payload: {
                   tokenIn: 'lovelace',
                   tokenOut: 'abc123',
-                  quantity: '10',
+                  quantity: '600000000',
                   expectedBuyAmount: '500',
                   quotedPrice: 0.00005,
                   targetSlippage: '0.5',
                   txId: 'tx-hash-456',
                   selectedProvider: 'steelswap',
                   routeDexes: ['Minswap'],
+                  swapValue: 'M',
+                  swapValueAda: 600,
+                  swapValueSource: 'ada-leg',
                 },
               }),
             );
+          },
+        }),
+      );
+    });
+
+    it('waits for the token lookup to emit before submitting, rather than dropping the Processing state', () => {
+      testSideEffect(
+        {
+          build: () =>
+            makeProcessing({
+              submitTx: (_params, mapResult) =>
+                of(mapResult({ success: true, txId: 'tx-hash-no-tokens' })),
+            }),
+        },
+        ({ hot, cold, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: processingState,
+              }),
+            },
+            swapConfig: { selectSlippage$: of(0.5) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            // Emits after the swap flow reaches Processing (frame 1): a plain
+            // withLatestFrom would drop that Processing state since its
+            // secondary observable hadn't emitted yet.
+            tokens: {
+              selectTokenById$: cold('--a', {
+                a: (() => undefined) as (id: string) => unknown,
+              }) as never,
+            },
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            expect(emissions).toContainEqual(
+              actions.swapFlow.submissionSucceeded({
+                txId: 'tx-hash-no-tokens',
+              }),
+            );
+          },
+        }),
+      );
+    });
+
+    it('waits for token pricing to emit before submitting, rather than dropping the Processing state', () => {
+      testSideEffect(
+        {
+          build: () =>
+            makeProcessing({
+              submitTx: (_params, mapResult) =>
+                of(mapResult({ success: true, txId: 'tx-hash-cold' })),
+            }),
+        },
+        ({ hot, cold, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: processingState,
+              }),
+            },
+            swapConfig: { selectSlippage$: of(0.5) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            // Emits after the swap flow reaches Processing (frame 1), same
+            // reasoning as the token-lookup case above.
+            tokenPricing: { selectPrices$: cold('--a', { a: {} }) },
+            tokens: { selectTokenById$: noTokens },
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            expect(emissions).toContainEqual(
+              actions.swapFlow.submissionSucceeded({ txId: 'tx-hash-cold' }),
+            );
+            const event = emissions.find(
+              (
+                emission,
+              ): emission is ReturnType<typeof actions.analytics.trackEvent> =>
+                (emission as { payload?: { eventName?: string } }).payload
+                  ?.eventName === 'swaps | sign success',
+            );
+            expect(event?.payload.payload).toMatchObject({
+              swapValue: 'UNKNOWN',
+            });
+          },
+        }),
+      );
+    });
+
+    it('omits the value bucket from sign success for a token-to-token swap', () => {
+      const tokenToTokenQuote: SwapQuote = {
+        ...mockQuote,
+        sellTokenId: 'abc123',
+        buyTokenId: 'def456',
+      };
+      testSideEffect(
+        {
+          build: () =>
+            makeProcessing({
+              submitTx: (_params, mapResult) =>
+                of(mapResult({ success: true, txId: 'tx-hash-789' })),
+            }),
+        },
+        ({ hot, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: { ...processingState, selectedQuote: tokenToTokenQuote },
+              }),
+            },
+            swapConfig: { selectSlippage$: of(0.5) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            tokens: { selectTokenById$: noTokens },
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            const event = emissions.find(
+              (
+                emission,
+              ): emission is ReturnType<typeof actions.analytics.trackEvent> =>
+                (emission as { payload?: { eventName?: string } }).payload
+                  ?.eventName === 'swaps | sign success',
+            );
+            expect(event).toBeDefined();
+            expect(event?.payload.payload).not.toHaveProperty('swapValue');
+            expect(event?.payload.payload).not.toHaveProperty('swapValueAda');
+          },
+        }),
+      );
+    });
+
+    it('values a token-to-token swap through its sell token', () => {
+      const tokenToTokenQuote: SwapQuote = {
+        ...mockQuote,
+        sellTokenId: 'abc123',
+        buyTokenId: 'def456',
+        sellAmount: '1000',
+      };
+      // ADA at $0.50, the sell token at $2.50, 2 decimals: 10 whole tokens -> 50 ADA.
+      const prices = {
+        ...ADA_PRICES,
+        [CardanoTokenPriceId('abc123')]: {
+          priceInUsd: 2.5,
+          price: 2.5,
+          lastUpdated: Date.now(),
+        } as TokenPrice,
+      };
+      testSideEffect(
+        {
+          build: () =>
+            makeProcessing({
+              submitTx: (_params, mapResult) =>
+                of(mapResult({ success: true, txId: 'tx-hash-t2t' })),
+            }),
+        },
+        ({ hot, flush }) => ({
+          stateObservables: {
+            swapFlow: {
+              selectSwapFlowState$: hot<SwapFlowState>('-a', {
+                a: { ...processingState, selectedQuote: tokenToTokenQuote },
+              }),
+            },
+            swapConfig: { selectSlippage$: of(0.5) },
+            swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(prices) },
+            tokens: {
+              // Keyed on the id, so pricing the WRONG token fails the test.
+              selectTokenById$: of(((id: string) =>
+                id === 'abc123'
+                  ? {
+                      blockchainName: 'Cardano',
+                      decimals: 2,
+                      metadata: { decimals: 2 },
+                      tokenId: 'abc123',
+                    }
+                  : undefined) as (id: string) => unknown) as never,
+            },
+          },
+          dependencies: { actions, logger },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+            const event = emissions.find(
+              (
+                emission,
+              ): emission is ReturnType<typeof actions.analytics.trackEvent> =>
+                (emission as { payload?: { eventName?: string } }).payload
+                  ?.eventName === 'swaps | sign success',
+            );
+            expect(event?.payload.payload).toMatchObject({
+              swapValueAda: 50,
+              swapValueSource: 'priced',
+            });
           },
         }),
       );
@@ -995,6 +1583,8 @@ describe('swap-context side effects', () => {
             },
             swapConfig: { selectSlippage$: of(0.5) },
             swapAnalytics: { selectSwapSessionId$: of(undefined) },
+            tokenPricing: { selectPrices$: of(ADA_PRICES) },
+            tokens: { selectTokenById$: noTokens },
           },
           dependencies: { actions, logger },
           assertion: sideEffect$ => {

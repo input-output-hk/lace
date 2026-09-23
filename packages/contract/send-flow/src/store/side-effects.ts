@@ -567,10 +567,20 @@ export const makeSendFlowProcessing =
 
                 return from([
                   analyticsAction,
-                  actions.activities.upsertActivities({
-                    accountId: state.accountId,
-                    activities: [pendingActivity],
-                  }),
+                  // awaitsFinalization ⇒ the tx is already confirmed on
+                  // success, so its row arrives via sync keyed by the chain
+                  // hash. The optimistic row is keyed by the submit txId, which
+                  // for Midnight is an SDK identifier, not that hash — dedup is
+                  // activityId-only, so it would strand a permanent duplicate
+                  // stuck on "Sending".
+                  ...(value.awaitsFinalization
+                    ? []
+                    : [
+                        actions.activities.upsertActivities({
+                          accountId: state.accountId,
+                          activities: [pendingActivity],
+                        }),
+                      ]),
                   actions.sendFlow.processingResulted({ result: value }),
                 ]);
               }

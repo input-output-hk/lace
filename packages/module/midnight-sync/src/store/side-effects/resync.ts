@@ -75,18 +75,53 @@ export const createClearWalletStateOnResync = (
 ): SideEffect =>
   withMidnightAccounts(
     midnightAccounts$ =>
-      ({ midnightSync: { resync$ } }, _, { actions, stopAllMidnightWallets }) =>
+      (
+        { midnightSync: { resync$ } },
+        _,
+        { actions, stopAllMidnightWallets, logger },
+      ) =>
         resync$.pipe(
           withLatestFrom(midnightAccounts$),
           switchMap(([_, midnightAccounts]) =>
             stopAllMidnightWallets().pipe(
-              switchMap(() => store.setAll([])),
-              switchMap(() => [
-                ...midnightAccounts.map(({ accountId }) =>
-                  actions.tokens.resetAccountTokens({
-                    accountId,
+              // Deregisters every wallet before stopping it, so a rejection
+              // leaves them unreachable AND unrestarted. Log and continue —
+              // the restart below is the only thing that brings sync back.
+              catchError(error => {
+                logger.error('Midnight resync: stop failed', error);
+                return of(void 0);
+              }),
+              switchMap(() =>
+                store.clear().pipe(
+                  defaultIfEmpty(undefined),
+                  // The wallets are already stopped, so the restart below must
+                  // run even when the wipe fails — aborting would strand them
+                  // stopped. A failed wipe leaves old state in place, which
+                  // makes the resync a no-op rather than a corruption.
+                  catchError(error => {
+                    logger.error('Midnight resync: state wipe failed', error);
+                    return of(undefined);
                   }),
                 ),
+              ),
+              switchMap(() => [
+                // Every derived store the wiped documents fed, matching
+                // createResetSyncStateSideEffect. Dust in particular is
+                // persisted and keyed on a deterministic account id, so a
+                // stale balance would otherwise outlive the state it came from.
+                //
+                // Sync status is deliberately NOT reset: requestResyncWallet
+                // registers a Pending operation immediately before dispatching
+                // resync, and clearing it here would drop the very marker that
+                // shows the resync running.
+                ...midnightAccounts.flatMap(({ accountId }) => [
+                  actions.addresses.resetAddresses({ accountId }),
+                  actions.tokens.resetAccountTokens({ accountId }),
+                  actions.activities.resetActivities({ accountId }),
+                  actions.midnightContext.resetAccountDust({
+                    accountId: accountId as MidnightAccountId,
+                  }),
+                ]),
                 actions.midnightSync.restartWalletWatch(),
               ]),
             ),
@@ -147,7 +182,7 @@ export const createDeleteWalletSideEffect =
   (
     { wallets: { removeWallet$ } },
     { wallets: { selectAll$ } },
-    { stopMidnightWallet, actions },
+    { stopMidnightWallet, actions, logger },
   ) =>
     removeWallet$.pipe(
       withLatestFrom(
@@ -175,16 +210,21 @@ export const createDeleteWalletSideEffect =
 
         return stopWallets$.pipe(
           switchMap(() =>
-            storage.getAll().pipe(
-              defaultIfEmpty([]),
-              take(1),
-              switchMap(wallets => {
-                const remainingWallets = wallets.filter(
-                  wallet => wallet.walletId !== walletId,
-                );
-                return storage.setAll(remainingWallets);
-              }),
-            ),
+            storage
+              .removeWhere(wallet => wallet.walletId === walletId)
+              .pipe(
+                defaultIfEmpty(undefined),
+                // The wallet is already gone from the repo, so the resets below
+                // must still run; and an uncaught throw here would error the
+                // merged root epic, stopping every side effect app-wide.
+                catchError(error => {
+                  logger.error(
+                    'Midnight delete wallet: state wipe failed',
+                    error,
+                  );
+                  return of(undefined);
+                }),
+              ),
           ),
           mergeMap(() =>
             allMidnightAccounts.flatMap(({ accountId }) => [
@@ -248,25 +288,26 @@ export const createResetSyncStateSideEffect = (
                 return of(void 0);
               }),
               switchMap(() =>
-                store.getAll().pipe(
-                  // getAll completes without emitting on an empty collection.
-                  defaultIfEmpty([]),
-                  // Issue order is load-bearing: an already-issued persist write
-                  // cannot be cancelled, so this wipe only wins by being issued
-                  // later. An adapter that batches or coalesces writes breaks it.
-                  switchMap(wallets =>
-                    store.setAll(
-                      wallets.filter(wallet => wallet.accountId !== accountId),
-                    ),
+                // removeWhere, not read-then-setAll: it touches only the keys it
+                // names, so it cannot delete another account's document. A read
+                // failure now propagates and is caught below, rather than
+                // reading as an empty collection.
+                //
+                // Issue order is load-bearing: an already-issued persist write
+                // cannot be cancelled, so this wipe only wins by being issued
+                // later. An adapter that batches or coalesces writes breaks it.
+                store
+                  .removeWhere(wallet => wallet.accountId === accountId)
+                  .pipe(
+                    defaultIfEmpty(undefined),
+                    catchError(error => {
+                      logger.error(
+                        'Midnight reset sync state: wipe failed',
+                        error,
+                      );
+                      return of(void 0);
+                    }),
                   ),
-                  catchError(error => {
-                    logger.error(
-                      'Midnight reset sync state: wipe failed',
-                      error,
-                    );
-                    return of(void 0);
-                  }),
-                ),
               ),
               mergeMap(() => [
                 actions.addresses.resetAddresses({ accountId }),

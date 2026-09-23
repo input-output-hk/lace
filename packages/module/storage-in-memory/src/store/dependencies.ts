@@ -18,7 +18,7 @@ export const sideEffectDependencies: KeyValueStorageDependencies &
   createKeyValueStorage: _props => new InMemoryKeyValueStore(),
   createCollectionStorage: <T extends object>({
     collectionId: _collectionId,
-    computeDocId: _computeDocId,
+    computeDocId,
   }: Readonly<CreateCollectionStorageProps<T>>) =>
-    new InMemoryCollectionStore(),
+    new InMemoryCollectionStore(computeDocId),
 };

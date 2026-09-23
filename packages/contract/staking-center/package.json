@@ -6,8 +6,12 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
+    "@lace-contract/feature": "*",
     "@lace-contract/module": "*",
-    "@lace-contract/tx-executor": "*"
+    "@lace-contract/network": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-repo": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

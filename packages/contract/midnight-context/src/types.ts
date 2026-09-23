@@ -11,6 +11,7 @@ import type {
   MidnightDustAddress,
   MidnightShieldedAddress,
   MidnightUnshieldedAddress,
+  SerialisedWalletState,
 } from './value-objects';
 import type { Percent } from '@cardano-sdk/util';
 import type { CollectionStorage } from '@lace-contract/storage';
@@ -53,11 +54,6 @@ export type DustParameters = {
   nightDustRatio: bigint;
   generationDecayRate: bigint;
 };
-export type ShouldAcknowledgeMidnightDisclaimer =
-  | 'acknowledged'
-  | 'not-shown'
-  | 'shown';
-
 export type MidnightAccountPublicKeys = {
   /** Hex-encoded ShieldedCoinPublicKey */
   coin: HexBytes;
@@ -81,14 +77,9 @@ export type MidnightContextSliceState = {
   dustGenerationDetailsByAccount: Partial<
     Record<MidnightAccountId, Serializable<DustGenerationDetails>>
   >;
-  shouldAcknowledgeMidnightDisclaimer: ShouldAcknowledgeMidnightDisclaimer;
   publicKeysByAccount: Partial<
     Record<MidnightAccountId, MidnightAccountPublicKeys>
   >;
-  networkTermsAndConditions?: {
-    url: string;
-    hash: string;
-  };
 };
 
 export type MidnightAddressKind = 'dust' | 'shielded' | 'unshielded';
@@ -128,16 +119,20 @@ export type MidnightSpecificInMemoryWalletData = {
   encryptedSeed: HexBytes;
 };
 
+/**
+ * SDK-serialised wallet state. `SerialisedWalletState` carries the encoding:
+ * verbatim SDK JSON, or legacy hex on profiles written before LW-14981.
+ */
 export type MidnightWalletSerialisedState = {
-  dust: HexBytes;
-  shielded: HexBytes;
-  unshielded: HexBytes;
+  dust: SerialisedWalletState;
+  shielded: SerialisedWalletState;
+  unshielded: SerialisedWalletState;
   /**
    * Serialized unified transaction history — the shielded, unshielded and dust
    * sections are merged into it by hash. Profiles created before the key was
    * renamed persist it under the legacy key `unshieldedTxHistory`.
    */
-  txHistory: HexBytes;
+  txHistory: SerialisedWalletState;
 };
 
 export type MidnightWalletAddress = {

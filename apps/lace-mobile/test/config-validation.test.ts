@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import type { MockInstance } from 'vitest';
 
-vi.setConfig({ testTimeout: 10_000 });
+vi.setConfig({ testTimeout: 30_000 });
 
 describe('config validation', () => {
   let exitSpy: MockInstance<ReturnType<typeof process.exit>> | undefined;

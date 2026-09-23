@@ -141,7 +141,7 @@ describe('watchMidnightWallets', () => {
           windowRefocus$: NEVER,
           // true, then false-and-complete after the single tick so `flush()`
           // terminates — the poll's `timer` is otherwise infinite; the false
-          // tears the whole chain down (whileActive, ADR 25).
+          // tears the whole chain down (whileActive, ADR 29).
           isWalletActive$: cold('a 4999ms (b|)', { a: true, b: false }),
           pullMidnightSyncStatus,
           pullMidnightState,

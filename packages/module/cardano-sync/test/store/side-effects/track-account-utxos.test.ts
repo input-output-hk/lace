@@ -222,6 +222,14 @@ const spentAddr1Outpoint: Cardano.TxIn = {
   index: legitimateUtxoForAddr1[0].index,
 };
 
+/** A second own outpoint the same anchor consumed, absent from every fetched set. */
+const alsoSpentOutpoint: Cardano.TxIn = {
+  txId: Cardano.TransactionId(
+    'cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+  ),
+  index: 2,
+};
+
 /** An output tx-2 paid to addr1 — the receive the trailing provider misses. */
 const receivedAddr1Utxo: Cardano.Utxo = [
   {
@@ -606,6 +614,92 @@ describe('trackAccountUtxos', () => {
     });
   });
 
+  // switchMap, not mergeMap: a response already in flight was not filtered
+  // against the ownership that superseded it, so it must never be written.
+  // Round 1 carries frankenUtxo to make that concrete — dropped under the
+  // frame-0 credentials the fetch captured, legitimate under the frame-2 ones
+  // — so writing it would store a set that is under-inclusive for the
+  // ownership now in force. The cost is a discarded round trip.
+  it('drops an in-flight fetch when ownership widens mid-flight and writes only the newer response', () => {
+    testSideEffect(trackAccountUtxos, ({ cold, expectObservable, flush }) => {
+      const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
+      // A manual thorough discovery adds a second address on the same stake
+      // key at frame 2, while the first fetch is still in flight. Same stake
+      // key, so the fetch stays one call per round.
+      const addresses$ = cold<AnyAddress[]>('a-b', {
+        a: [mockAddress1],
+        b: [mockAddress1, mockAddressOwningFrankenUtxo],
+      });
+      const activities$ = cold<Record<string, Activity[]>>('a', {
+        a: { [accountId]: [txActivity('tx-1')] },
+      });
+
+      // Four frames per response, so the frame-2 trigger lands with the first
+      // response still two frames out. The two rounds return different sets,
+      // so the assertion below names which one was written.
+      const supersededResponse = [legitimateUtxoForAddr1, frankenUtxo];
+      const newerResponse = [freshUtxoForAddr1];
+      let calls = 0;
+      const getAccountUtxos = vi.fn().mockImplementation(() => {
+        calls += 1;
+        return cold('----(a|)', {
+          a: Ok(calls === 1 ? supersededResponse : newerResponse),
+        });
+      });
+
+      const cacheKeyTwoAddresses = UtxoCacheKey({
+        topOnChainActivityId: 'tx-1',
+        stakeKeys: [rewardAccount1],
+        accountAddressCount: 2,
+      });
+
+      return {
+        actionObservables: {
+          cardanoContext: { retrySyncRound$: cold('-') },
+        },
+        stateObservables: {
+          wallets: { selectActiveNetworkAccounts$: accounts$ },
+          addresses: { selectAllAddresses$: addresses$ },
+          activities: { selectAllMap$: activities$ },
+          cardanoContext: {
+            selectLastFetchedUtxoCacheKeyByAccount$: cold('a', {
+              a: emptyPersisted,
+            }),
+            selectAccountUtxos$: cold('a', { a: emptyStoredUtxos }),
+            selectTip$: cold('a', { a: undefinedTip }),
+          },
+          failures: {
+            selectFailureById$: cold('a', { a: noFailureSelector }),
+            selectAllFailures$: cold('a', { a: emptyFailures }),
+          },
+        },
+        dependencies: {
+          cardanoProvider: {
+            getAccountUtxos,
+          } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          actions,
+          logger: dummyLogger,
+        },
+        assertion: sideEffect$ => {
+          // Nothing at frame 4, where the superseded response would have
+          // landed: the only write is the second one, at frame 6.
+          expectObservable(sideEffect$).toBe('------(ab)', {
+            a: actions.cardanoContext.setAccountUtxos({
+              accountId,
+              utxos: newerResponse,
+            }),
+            b: actions.cardanoContext.setLastFetchedUtxoCacheKey({
+              accountId,
+              cacheKey: cacheKeyTwoAddresses,
+            }),
+          });
+          flush();
+          expect(getAccountUtxos).toHaveBeenCalledTimes(2);
+        },
+      };
+    });
+  });
+
   it('fetches with a no-activity key while only a Pending activity is loaded, then refetches when an on-chain activity appears', () => {
     testSideEffect(trackAccountUtxos, ({ cold, flush }) => {
       const accounts$ = cold<AnyAccount[]>('a', { a: [account] });
@@ -977,6 +1071,30 @@ describe('trackAccountUtxos', () => {
     });
   });
 
+  // KNOWN GAP (LW-15466) — asserts today's behaviour, not the desired one.
+  // Rule 1 arms from the ANCHOR's consumedInputs alone, so a chained spend
+  // hides the evidence: the outpoint the fetched set still holds was consumed
+  // by tx-1, while the anchor (tx-2) consumed the change tx-1 paid us. Rule 2
+  // cannot cover for it either — a sweep-shaped anchor pays us nothing back,
+  // so its `length > 0` guard skips. The depth rule then advances on a set
+  // that loaded history already contradicts. When LW-15466 lands this fails:
+  // flip `expectKeyAdvance` to false rather than deleting the case.
+  it('advances the cache key on a chained spend, though loaded history shows the set is pre-chain', () => {
+    anchorProofScenario({
+      activities: [
+        // The anchor: spent the change tx-1 paid us, leaving no own output.
+        txActivity('tx-2', 100, { spends: [receivedAddr1Outpoint] }),
+        txActivity('tx-1', 99, {
+          spends: [spentAddr1Outpoint],
+          produced: [receivedAddr1Outpoint],
+        }),
+      ],
+      // Still the pre-chain set: tx-1 consumed this outpoint two spends ago.
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: true,
+    });
+  });
+
   // The other half: once the provider applies the spend, the outpoint is gone,
   // the set differs, and the key must advance — otherwise this refetches forever.
   it("advances the cache key once the anchor's spent outpoint is gone from the set", () => {
@@ -1039,6 +1157,37 @@ describe('trackAccountUtxos', () => {
           ).toHaveLength(1);
         },
       };
+    });
+  });
+
+  // ANY present, not all: one still-present outpoint already proves the anchor
+  // is unapplied. Both orders run so the proof cannot be satisfied by
+  // inspecting a single element of `consumedInputs`.
+  it.each([
+    ['still-present first', [spentAddr1Outpoint, alsoSpentOutpoint]],
+    ['already-gone first', [alsoSpentOutpoint, spentAddr1Outpoint]],
+  ])(
+    'withholds the cache key when only one of the anchor’s two spent outpoints is gone (%s)',
+    (_order, spends) => {
+      anchorProofScenario({
+        activities: [txActivity('tx-2', 100, { spends })],
+        fetched: [legitimateUtxoForAddr1],
+        expectKeyAdvance: false,
+      });
+    },
+  );
+
+  it('advances when the anchor spent a different index of a still-held outpoint’s tx', () => {
+    anchorProofScenario({
+      activities: [
+        txActivity('tx-2', 100, {
+          spends: [
+            { ...spentAddr1Outpoint, index: spentAddr1Outpoint.index + 1 },
+          ],
+        }),
+      ],
+      fetched: [legitimateUtxoForAddr1],
+      expectKeyAdvance: true,
     });
   });
 

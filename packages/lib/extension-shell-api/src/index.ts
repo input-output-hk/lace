@@ -598,6 +598,29 @@ export type MidnightSendParams = {
 };
 
 /**
+ * `midnight.requestDustDesignation` params (ADR 47/D6) — the account routing
+ * (`walletId` + `accountIndex` + the explicit `network`, ADR 48) plus the ONE
+ * fact the SDK's designation recipe takes from the caller: the DUST address the
+ * generated DUST accrues to.
+ *
+ * There is deliberately NO amount and NO token here, unlike `MidnightSendParams`.
+ * A designation registers the account's WHOLE native-NIGHT UTxO set (the
+ * monolith's `flowType: 'dust-designation'` build — @lace-module/midnight-sync
+ * store/tx-executor/build-tx.ts + signing/midnight-in-memory-transaction-signer.ts)
+ * and MOVES NO NIGHT, so any amount a guest named would be display copy the
+ * pipeline cannot honour. The host engine resolves the NIGHT total it will
+ * register and the sign surface renders THAT.
+ */
+export type MidnightDustDesignationParams = {
+  walletId: string;
+  accountIndex: number;
+  /** The Midnight SDK network id string (mirrors `MidnightSDKNetworkId`). */
+  network: string;
+  /** bech32m DUST address that will receive the generated DUST. */
+  dustAddress: string;
+};
+
+/**
  * `midnight.getSendResult` poll answer (ADR 47). The full sign→prove→submit
  * pipeline completes HOST-SIDE (the engine owns the state a build needs), so the
  * result is terminal for the guest: `confirmed` carries the submitted `txId`,
@@ -1073,6 +1096,26 @@ export type LaceMethodMap = {
    */
   'midnight.requestSend': {
     params: MidnightSendParams;
+    result: { ceremonyId: string };
+  };
+  /**
+   * Ask the host to DESIGNATE the account's NIGHT for DUST generation (ADR
+   * 47/D6) — the sibling of `requestSend` for the monolith's
+   * `flowType: 'dust-designation'` flow. It registers the account's NIGHT UTxOs
+   * so the DUST they generate accrues to `dustAddress`; no NIGHT moves. Same
+   * host shape as a send (the sign surface, the host-side build → sign → prove →
+   * submit, no password on the wire) and the SAME `midnight.getSendResult` poll
+   * handle, so a guest that already polls a send needs no second poll.
+   *
+   * A host that cannot designate simply OMITS this name from its advertised
+   * `capabilities` (ADR 41) — the guest feature-detects rather than
+   * version-compares, which is why this is its own method and not an additive
+   * optional field on `requestSend` (an added param is undetectable and would
+   * be silently ignored by an older host, mis-sending the designation as a
+   * plain transfer).
+   */
+  'midnight.requestDustDesignation': {
+    params: MidnightDustDesignationParams;
     result: { ceremonyId: string };
   };
   'midnight.getSendResult': {

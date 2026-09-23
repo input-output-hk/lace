@@ -29,9 +29,12 @@ import { useWindowDimensions } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
-import type { TokenPrice } from '@lace-contract/token-pricing';
+import type {
+  PriceDataPoint,
+  TimeRange,
+  TokenPrice,
+} from '@lace-contract/token-pricing';
 import type { Token, TokenDistributionItem } from '@lace-contract/tokens';
-import type { PriceDataPoint, TimeRange } from '@lace-lib/ui-toolkit';
 
 const CARDANO_TOKEN_ID_LENGTH = 56;
 

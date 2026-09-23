@@ -1,3 +1,5 @@
+import { withCollateralOwnershipGuard } from '@lace-contract/cardano-context';
+
 import { resolveSignerAccount } from '../../shared/resolve-signer-account';
 
 import { CardanoSeedSignerDataSigner } from './cardano-seed-signer-data-signer';
@@ -45,11 +47,14 @@ export class CardanoSeedSignerSignerFactory implements CardanoSignerFactory {
     context: CardanoTransactionSignerContext,
   ): CardanoTransactionSigner {
     const props = this.#extractAccountProps(context);
-    return new CardanoSeedSignerTransactionSigner({
-      ...props,
-      knownAddresses: context.knownAddresses,
-      utxo: context.utxo,
-    });
+    return withCollateralOwnershipGuard(
+      new CardanoSeedSignerTransactionSigner({
+        ...props,
+        knownAddresses: context.knownAddresses,
+        utxo: context.utxo,
+      }),
+      context,
+    );
   }
 
   public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {

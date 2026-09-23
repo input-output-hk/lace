@@ -1,5 +1,6 @@
 import { Cardano } from '@cardano-sdk/core';
 import {
+  type EvaluateTxProps,
   type GetAccountRewardsProps,
   type GetUtxosAtAddressProps,
   type CardanoProviderContext,
@@ -26,6 +27,7 @@ import {
   BlockfrostTokensProvider,
   BlockfrostUtxoProvider,
   BlockfrostTxSubmitProvider,
+  BlockfrostTxEvaluationProvider,
   LOVELACE_METADATA,
   toContractTokenMetadata,
   computeBlockfrostConfigIdentifier,
@@ -36,7 +38,7 @@ import { Bip32Account } from '@lace-lib/core';
 import { Blockchains } from '@lace-lib/ui-toolkit/src/design-system/atoms/icons/urls';
 import { Err, Ok } from '@lace-lib/util';
 import memoize from 'lodash/memoize';
-import { from, map, of } from 'rxjs';
+import { defer, from, map, of } from 'rxjs';
 
 import type {
   ProviderError,
@@ -152,6 +154,14 @@ const getTxSubmitProvider = memoize(
   computeBlockfrostConfigIdentifier,
 );
 
+const getTxEvaluationProvider = memoize(
+  (config: BlockfrostConfig, logger: Logger) => {
+    const client = getBlockfrostClient(config);
+    return new BlockfrostTxEvaluationProvider(client, logger);
+  },
+  computeBlockfrostConfigIdentifier,
+);
+
 const getGovernanceProvider = memoize(
   (config: BlockfrostConfig, logger: Logger) => {
     const client = getBlockfrostClient(config);
@@ -208,7 +218,7 @@ export const initializeDependencies: LaceInit<
           getBlockfrostConfig(context, blockfrostConfigs),
           logger,
         );
-        return from(
+        return defer(async () =>
           provider
             .protocolParameters()
             .then(Ok<Cardano.ProtocolParameters>)
@@ -220,7 +230,7 @@ export const initializeDependencies: LaceInit<
           getBlockfrostConfig(context, blockfrostConfigs),
           logger,
         );
-        return from(
+        return defer(async () =>
           provider
             .eraSummaries()
             .then(Ok<EraSummary[]>)
@@ -266,10 +276,13 @@ export const initializeDependencies: LaceInit<
           getBlockfrostConfig(context, blockfrostConfigs),
           logger,
         );
-        return from(
+        // `AssetId` throws without a `reason`, which `isRetriableError` would
+        // read as retriable — a malformed id must fail at the call, not retry.
+        const assetId = Cardano.AssetId(tokenId);
+        return defer(async () =>
           provider
             .getAsset({
-              assetId: Cardano.AssetId(tokenId),
+              assetId,
               extraData: { nftMetadata: true, tokenMetadata: true },
             })
             .then(assetInfo =>
@@ -361,7 +374,11 @@ export const initializeDependencies: LaceInit<
           getBlockfrostConfig(context, blockfrostConfigs),
           logger,
         );
-        return from(
+        // `defer`, not `from`: the caller's retry re-subscribes, and a settled
+        // promise replays instead of re-requesting. The config assertion stays
+        // OUTSIDE — it throws without a `reason`, which `isRetriableError`
+        // reads as retriable.
+        return defer(async () =>
           provider
             .resolveInput(txIn)
             .then(Ok<Cardano.TxOut | null>)
@@ -379,6 +396,13 @@ export const initializeDependencies: LaceInit<
             .then(id => Ok(Cardano.TransactionId(id)))
             .catch(Err<ProviderError>),
         );
+      },
+      evaluateTx: (props: EvaluateTxProps, context) => {
+        const provider = getTxEvaluationProvider(
+          getBlockfrostConfig(context, blockfrostConfigs),
+          logger,
+        );
+        return provider.evaluateTx(props);
       },
       getDReps: context => {
         const provider = getGovernanceProvider(

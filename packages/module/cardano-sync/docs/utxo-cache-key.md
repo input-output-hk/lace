@@ -91,6 +91,20 @@ a correct provider until the spending transaction reaches the activity feed:
   receive proof clears only when the _spending_ transaction is mapped.
 - Pending activity rows never expire.
 
+Separately, both proofs are **armed from the anchor alone**, and that scope is
+its own exposure. A chained spend hides its evidence from rule 1: with `A`
+held, `tx-1` spending `A` to own change `B`, and `tx-2` spending `B`, the anchor
+is `tx-2`, so the proof compares `{B}` against a fetched `{A}` and never fires
+even though the loaded `tx-1` proves `A` was consumed. Rule 2 cannot cover for
+it — a sweep-shaped anchor pays nothing back, so its `length > 0` guard skips —
+and control falls to the depth rule, which advances on a set the loaded history
+already contradicts. Pinned by
+`it('advances the cache key on a chained spend, though loaded history shows the
+set is pre-chain')`; widening the arming scope to the union of all non-Pending
+activities is the open decision in LW-15466. A Pending-inclusive union must be
+avoided: `derive-pending-activity-from-cbor.ts` records every `body.inputs` of
+a submitted transaction, so it would arm on every ordinary outgoing payment.
+
 ## Pipeline note
 
 The natural trigger's `distinctUntilChanged` compares the cache key and the tip

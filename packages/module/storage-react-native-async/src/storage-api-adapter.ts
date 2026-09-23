@@ -6,12 +6,8 @@ const storage = new MMKV();
 
 export const storageApi: StorageAdapter<unknown> = {
   getItem: async key => {
-    try {
-      const value = storage.getString(key);
-      return value ? (JSON.parse(value) as unknown) : null;
-    } catch {
-      return null;
-    }
+    const value = storage.getString(key);
+    return value ? (JSON.parse(value) as unknown) : null;
   },
   setItem: async (key, value) => {
     storage.set(key, JSON.stringify(value));

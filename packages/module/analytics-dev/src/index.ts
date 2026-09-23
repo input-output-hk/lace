@@ -67,6 +67,7 @@ const guestModule = inferModuleContext({
 const moduleMap: LaceModuleMap = {
   'lace-extension': extensionModule,
   'lace-mobile': extensionModule,
+  'lace-extension-carbon': guestModule,
   'lace-extension-guest': guestModule,
 };
 

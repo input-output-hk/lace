@@ -14,6 +14,10 @@ import type { Observable } from 'rxjs';
  * dependency signature share one shape. */
 export type PendingCardanoTxs = LaceMethodResult<'cardano.getPendingTxs'>;
 
+/** The `cardano.getAddresses` payload, named so the side effect and its
+ * dependency signature share one shape. */
+export type CardanoAccountAddresses = LaceMethodResult<'cardano.getAddresses'>;
+
 /**
  * Guest-side side-effect dependencies this module injects for the wallet-repo
  * hydrator and the active-network write-back. All wrap a promise/event
@@ -61,6 +65,17 @@ export interface CardanoHostPullDependencies {
     accountIndex: number;
     networkMagic: number;
   }) => Observable<LaceResult<PendingCardanoTxs>>;
+  /**
+   * Read one account's host-discovered address sets, wrapping the
+   * `cardano.getAddresses` request as an Observable (ADR 19). No
+   * `forceRediscover`: this reads the walk the host already holds, never
+   * widens it (that is the sync's thorough-discovery path).
+   */
+  getCardanoAddresses: (params: {
+    walletId: string;
+    accountIndex: number;
+    networkMagic: number;
+  }) => Observable<LaceResult<CardanoAccountAddresses>>;
 }
 
 declare module '@lace-contract/cardano-context' {

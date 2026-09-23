@@ -96,7 +96,7 @@ const slice = createSlice({
  * wallet is locked or awaiting setup. `AwaitingSetup` is treated as
  * active because first-run onboarding may need polling-driven flows.
  *
- * Consumed by the `whileActive` operator. See ADR 25.
+ * Consumed by the `whileActive` operator. See ADR 29.
  */
 const isWalletActive = createSelector(
   slice.selectors.selectLockState,

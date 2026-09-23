@@ -1,4 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { createInputResolver } from '@lace-contract/cardano-context';
+import {
+  OWN_COLLATERAL_UTXO,
+  expectCollateralGuardRefusesCaseB,
+} from '@lace-lib/util-dev-cardano';
+import { describe, expect, it, vi } from 'vitest';
 
 import { CardanoKeystoneDataSigner } from '../../../src/cardano/signing/cardano-keystone-data-signer';
 import { CardanoKeystoneSignerFactory } from '../../../src/cardano/signing/cardano-keystone-signer-factory';
@@ -37,6 +42,9 @@ const buildContext = (
     accountId,
     knownAddresses: [],
     utxo: [],
+    // Non-empty on purpose: most of this suite never triggers the guard's
+    // ownership evaluation, but an empty set would make the guard inert.
+    collateralInputResolver: createInputResolver([OWN_COLLATERAL_UTXO]),
     auth: { authenticate: () => undefined },
     ...overrides,
   } as unknown as CardanoTransactionSignerContext);
@@ -70,8 +78,24 @@ describe('CardanoKeystoneSignerFactory', () => {
 
   describe('createTransactionSigner', () => {
     it('builds a transaction signer for a supported account', () => {
-      const signer = factory.createTransactionSigner(buildContext());
-      expect(signer).toBeInstanceOf(CardanoKeystoneTransactionSigner);
+      expect(typeof factory.createTransactionSigner(buildContext()).sign).toBe(
+        'function',
+      );
+    });
+
+    it('is wrapped by the collateral-ownership guard: a case-(b) transaction is refused and never reaches the inner signer', async () => {
+      const innerSign = vi.spyOn(
+        CardanoKeystoneTransactionSigner.prototype,
+        'sign',
+      );
+      await expectCollateralGuardRefusesCaseB({
+        createSigner: ownership =>
+          factory.createTransactionSigner(buildContext(ownership)),
+        assertNotDelegated: () => {
+          expect(innerSign).not.toHaveBeenCalled();
+        },
+      });
+      innerSign.mockRestore();
     });
 
     it('throws for an account it cannot sign', () => {

@@ -15,6 +15,7 @@
     "@lace-contract/module": "*",
     "@lace-contract/network": "*",
     "@lace-contract/swap-provider": "*",
+    "@lace-contract/token-pricing": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-active-state": "*",

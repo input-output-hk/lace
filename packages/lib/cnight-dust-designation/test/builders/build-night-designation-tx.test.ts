@@ -26,7 +26,12 @@ const PLACEHOLDER_ADDRESS = getDustGeneratorPaymentAddress(
 
 const stakeKeyHash = CardanoStakeKeyHash(new Uint8Array(28).fill(0xab));
 const paymentKeyHash = CardanoPaymentKeyHash(new Uint8Array(28).fill(0xcd));
-const dustPubkey = MidnightCoinPubkey(new Uint8Array(32).fill(0xef));
+// Canonical SCALE-compact: the 0x6f header selects big-integer mode declaring
+// 31 scalar bytes and the top byte is non-zero, so this 32-byte payload is
+// minimal and in-field.
+const dustPubkey = MidnightCoinPubkey(
+  new Uint8Array([0x6f, ...Array.from({ length: 30 }, () => 0xef), 0x11]),
+);
 
 const makeUtxo = (txId: string, index: number): Cardano.Utxo =>
   [
@@ -193,6 +198,47 @@ describe('buildNightDesignationTxBlueprint — negative paths', () => {
       expect(result.error.actualBytes).toBe(64);
       expect(result.error.maxBytes).toBe(33);
     }
+  });
+
+  // Header 0xef selects big-integer mode declaring a 63-byte scalar, so a
+  // 32-byte payload is not the minimal encoding of anything.
+  const nonCanonicalDustPubkey = MidnightCoinPubkey(
+    new Uint8Array(32).fill(0xef),
+  );
+
+  it.each<[string, BuildNightDesignationTxParams['action']]>([
+    ['register', { kind: 'register', dustPubkey: nonCanonicalDustPubkey }],
+    [
+      'update',
+      {
+        kind: 'update',
+        dustPubkey: nonCanonicalDustPubkey,
+        registrationUtxo,
+        scriptWithdrawableLovelace: 0n,
+      },
+    ],
+  ])(
+    'errors with invalid-dust-payload on a non-canonical %s target',
+    (_label, action) => {
+      const result = buildNightDesignationTxBlueprint(baseParams({ action }));
+
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.error.code).toBe('invalid-dust-payload');
+    },
+  );
+
+  it('reports no-cnight before invalid-dust-payload when both are true', () => {
+    const result = buildNightDesignationTxBlueprint(
+      baseParams({
+        cnightUtxos: [],
+        action: { kind: 'register', dustPubkey: nonCanonicalDustPubkey },
+      }),
+    );
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe('no-cnight');
   });
 
   it('blueprint changes script address when network changes', () => {

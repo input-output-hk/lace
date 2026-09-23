@@ -34,6 +34,7 @@ import migrateWallet from '@lace-module/migrate-wallet';
 import notificationCenter from '@lace-module/notification-center';
 import onboarding from '@lace-module/onboarding';
 import posthogClientReactNative from '@lace-module/posthog-client-react-native';
+import realfiCardano from '@lace-module/realfi-cardano';
 import secureStore from '@lace-module/secure-store-mobile';
 import sendFlow from '@lace-module/send-flow';
 import stakingCenter from '@lace-module/staking-center';
@@ -82,6 +83,7 @@ export const allModules = [
   onboarding,
   notificationCenter,
   posthogClientReactNative,
+  realfiCardano,
   secureStore,
   airGappedQrExchangeHost,
   sendFlow,

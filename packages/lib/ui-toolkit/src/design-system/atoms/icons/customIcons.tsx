@@ -5,6 +5,9 @@ import Keystone from './Keystone';
 import Ledger from './Ledger';
 import { Banxa, BanxaFull } from './logos/banxa';
 import { Dust } from './logos/dust';
+import { RPoints } from './logos/rPoints';
+import { Susdr } from './logos/susdr';
+import { Usdr } from './logos/usdr';
 import SeedSigner from './SeedSigner';
 import Trezor from './Trezor';
 
@@ -22,6 +25,9 @@ export const Logos = {
   Trezor,
   SeedSigner,
   Dust,
+  Usdr,
+  Susdr,
+  RPoints,
 };
 
 export const Blockchains = {

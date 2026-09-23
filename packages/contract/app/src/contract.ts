@@ -45,6 +45,21 @@ export const blockchainSpecificAppCustomizationsAddonContract =
     },
   });
 
+/**
+ * Narrow seam for product modules that contribute ONLY a token-detail
+ * customisation (e.g. RealFi's USDr "Manage Stake" entry) without providing
+ * the full blockchain customisation set the
+ * blockchain-specific-app-customizations contract requires.
+ */
+export const tokenDetailsUICustomisationsAddonContract = inferContractContext({
+  name: ContractName('token-details-ui-customisations-addon'),
+  instance: 'zero-or-more',
+  contractType: 'addon',
+  provides: {
+    addons: ['loadTokenDetailsUICustomisations'],
+  },
+});
+
 export const portfolioAnnouncementsAddonContract = inferContractContext({
   name: ContractName('portfolio-announcements-addon'),
   instance: 'zero-or-more',

@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 
 import { useLaceSelector } from '../../hooks';
 
-import type { TimeRange } from '@lace-lib/ui-toolkit';
+import type { TimeRange } from '@lace-contract/token-pricing';
 
 interface UsePriceHistoryReturn {
   getPriceHistoryData: (range: TimeRange) => { data: number[] };

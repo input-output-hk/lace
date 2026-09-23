@@ -3,7 +3,7 @@ import {
   exposeApi,
   RemoteApiPropertyType,
 } from '@lace-lib/extension-messaging';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, Subject } from 'rxjs';
 import { runtime } from 'webextension-polyfill';
 
 import { APIError, APIErrorCode } from '../../../common/api-error';
@@ -40,9 +40,11 @@ import type {
   AnyAccount,
   AnyWallet,
 } from '@lace-contract/wallet-repo';
-import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
+import type {
+  DisconnectEvent,
+  RemoteApiProperties,
+} from '@lace-lib/extension-messaging';
 import type { WithLogger } from '@lace-lib/util';
-import type { Subject } from 'rxjs';
 import type { Runtime } from 'webextension-polyfill';
 
 /**
@@ -62,6 +64,12 @@ type ConnectCardanoDappConnectorParameters<T> = {
   ) => Observable<T>;
   /** Observable of UTXOs by account */
   accountUtxos$: Observable<AccountUtxoMap>;
+  /**
+   * Ownership authority for the collateral-return guard: the account's full
+   * settled UTxO set, additive to `accountUtxos$` above
+   * -- see `CardanoDappConnectorApiDependencies.ownershipUtxos$`.
+   */
+  ownershipUtxos$: Observable<AccountUtxoMap>;
   /** Observable of unspendable UTXOs by account */
   accountUnspendableUtxos$: Observable<AccountUtxoMap>;
   /** Observable of reward account details (stake key registration status) by account */
@@ -167,6 +175,7 @@ export const initializeCardanoDappConnectorDependencies = ({
     authorizedDapps$,
     handleRequests,
     accountUtxos$,
+    ownershipUtxos$,
     accountUnspendableUtxos$,
     rewardAccountDetails$,
     addresses$,
@@ -186,14 +195,20 @@ export const initializeCardanoDappConnectorDependencies = ({
     signingResult$,
   }: ConnectCardanoDappConnectorParameters<T>): Observable<T> =>
     new Observable(_subscriber => {
+      // Relay: the confirmation callback is created before exposeApi, but needs
+      // the wallet-api channel's disconnect$ that exposeApi produces. The
+      // Subject bridges that ordering gap.
+      const walletApiDisconnected$ = new Subject<DisconnectEvent>();
       const confirmationCallback = createCardanoConfirmationCallback(
         handleRequests,
         _subscriber,
+        walletApiDisconnected$,
       );
 
       const walletApi: WithSenderContext<Cip30FullWalletApi> =
         new CardanoDappConnectorApi({
           accountUtxos$,
+          ownershipUtxos$,
           accountUnspendableUtxos$,
           rewardAccountDetails$,
           addresses$,
@@ -273,8 +288,14 @@ export const initializeCardanoDappConnectorDependencies = ({
         { logger, runtime },
       );
 
+      const disconnectSubscription = api.messenger.disconnect$.subscribe(
+        walletApiDisconnected$,
+      );
+
       return () => {
         logger.debug('Shutting down Cardano dApp connector');
+        disconnectSubscription.unsubscribe();
+        walletApiDisconnected$.complete();
         confirmationCallback.shutdown();
         api.shutdown();
       };

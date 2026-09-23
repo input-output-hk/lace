@@ -1,7 +1,4 @@
-import {
-  derivePendingActivityFromCbor,
-  isCardanoAccount,
-} from '@lace-contract/cardano-context';
+import { derivePendingActivityFromCbor } from '@lace-contract/cardano-context';
 import { HexBytes } from '@lace-lib/util';
 import {
   combineLatest,
@@ -17,48 +14,15 @@ import {
   switchMap,
 } from 'rxjs';
 
+import { pullTargets, sameTargets } from './pull-targets';
+
 import type { SideEffect } from '../..';
+import type { PullTarget } from './pull-targets';
 import type { PendingCardanoTxs } from '../../augmentations';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
 import type { CardanoPaymentAddress } from '@lace-contract/cardano-context';
-import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 import type { CardanoUtxo } from '@lace-lib/extension-shell-api';
-
-/** The (walletId, accountIndex, networkMagic) triple the host method is keyed
- * on, paired with the accountId the derived activity is filed under. */
-type PullTarget = {
-  accountId: AccountId;
-  walletId: string;
-  accountIndex: number;
-  networkMagic: number;
-};
-
-/** The active-network Cardano accounts a pull covers. MultiSig is excluded: its
- * `blockchainSpecific` carries a key path rather than an accountIndex, so no
- * host account is addressable for it. */
-const pullTargets = (accounts: readonly AnyAccount[]): PullTarget[] =>
-  accounts.flatMap(account => {
-    if (!isCardanoAccount(account) || account.accountType === 'MultiSig') {
-      return [];
-    }
-    const { accountIndex, chainId } = account.blockchainSpecific;
-    return [
-      {
-        accountId: account.accountId,
-        walletId: account.walletId,
-        accountIndex,
-        networkMagic: Number(chainId.networkMagic),
-      },
-    ];
-  });
-
-const sameTargets = (
-  left: readonly PullTarget[],
-  right: readonly PullTarget[],
-): boolean =>
-  left.length === right.length &&
-  left.every((target, index) => target.accountId === right[index]?.accountId);
 
 /** Reify one served entry's own inputs as the `Cardano.Utxo` pairs the
  * derivation consumes. Lovelace and asset amounts cross the wire as decimal

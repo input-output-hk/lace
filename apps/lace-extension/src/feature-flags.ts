@@ -1,6 +1,7 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
 
 import type { FeatureFlag } from '@lace-contract/feature';
+import type { RealFiFeaturePayload } from '@lace-contract/realfi-staking';
 
 /**
  * Default feature flags for the application.
@@ -50,13 +51,6 @@ const featureFlags: FeatureFlag[] = [
   },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_PREPROD_SUPPORT') },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_PREVIEW_SUPPORT') },
-  {
-    key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER'),
-    payload: {
-      preprod: 'https://proof-server.preprod.midnight.network',
-      preview: 'https://proof-server.preview.midnight.network',
-    },
-  },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_UNSHIELDED') },
   {
     key: FeatureFlagKey('DAPP_EXPLORER'),
@@ -92,9 +86,9 @@ const featureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('INITIAL_NETWORK_TYPE'), payload: 'mainnet' },
   { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
   { key: FeatureFlagKey('MD_MIGRATION') },
+  { key: FeatureFlagKey('MIGRATE_WALLET') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SEND_FLOW') },
-  { key: FeatureFlagKey('MIDNIGHT_DISCLAIMER') },
   {
     key: FeatureFlagKey('STAKING_CENTER'),
     payload: {
@@ -137,12 +131,64 @@ const featureFlags: FeatureFlag[] = [
     key: FeatureFlagKey('GOVERNANCE_CENTER'),
     payload: {
       promotedDreps: {
-        mainnet: [],
+        mainnet: [
+          {
+            id: 'drep1yg4mxhwlct5crvnkqpqy06l6lrszn0f4cyc5k2hv0pk8xhsvluu37',
+            additional_information: {
+              en: "Lace's default DRep.",
+              es: 'El DRep predeterminado de Lace.',
+              ja: 'Lace の既定の DRep。',
+            },
+          },
+        ],
         // Testnet DReps so the earn-rewards target resolves on preprod/preview.
-        preprod: [],
-        preview: [],
+        preprod: [
+          { id: 'drep1y2v8w544v5teexvycd6zqgh2686yz7050tdv834yegpt0gsnampev' },
+        ],
+        preview: [
+          { id: 'drep1yg4mxhwlct5crvnkqpqy06l6lrszn0f4cyc5k2hv0pk8xhsvluu37' },
+        ],
       },
     },
+  },
+  {
+    key: FeatureFlagKey('EARN_REWARDS'),
+    // Enablement + advertised rate — a committed bootstrap default like the
+    // promoted pool/DRep above, wholesale-replaced by PostHog in production
+    // (mainnet treated no differently). Percent numbers: a low–high range here,
+    // but a bare number or `{ value }` resolves to a single figure too. A rate is
+    // set for preprod/preview only, so mainnet shows the generic (non-rate-led)
+    // headline until PostHog supplies one.
+    payload: {
+      rate: {
+        preprod: { min: 2, max: 4 },
+        preview: { min: 2, max: 4 },
+      },
+    },
+  },
+  {
+    // RealFi availability is per-network: a network present here is enabled;
+    // `{}` uses that network's bundled bootstrap defaults, while PostHog can send
+    // per-network overrides (endpoints, policy ids, pool idents, bootstrap UTxOs)
+    // and gate delivery by geographical region / device type. Networks absent
+    // from the payload are off.
+    //
+    // The time-boxed promotions (`genesisBoost`, `launchSeason`) are
+    // deliberately NOT declared here — PostHog owns their schedules so they
+    // can start and end without a release, and a committed default would
+    // outlive its campaign in every build. Shape per network entry:
+    //   "preprod": {
+    //     "genesisBoost": { "activeFrom": "<ISO UTC>", "activeTo": "<ISO UTC>" },
+    //     "launchSeason": {
+    //       "activeFrom": "<ISO UTC>", "activeTo": "<ISO UTC>",
+    //       "rewardsDashboardUrl": "<url>", "pointsProgramUrl": "<url>"
+    //     }
+    //   }
+    key: FeatureFlagKey('REALFI'),
+    payload: {
+      preview: {},
+      preprod: {},
+    } satisfies RealFiFeaturePayload,
   },
 ];
 

@@ -157,23 +157,32 @@ export const useDappPopupFlow = <T extends 'signData' | 'signTx'>({
   const isSigningCompleted = useLaceSelector(COMPLETION_SELECTORS[type]);
   const isSigningError = useLaceSelector(ERROR_SELECTORS[type]);
 
-  const dispatchConfirm = useDispatchLaceAction(
-    ACTION_KEYS[type].confirm,
-    true,
-  );
-  const dispatchReject = useDispatchLaceAction(ACTION_KEYS[type].reject, true);
+  const dispatchConfirm = useDispatchLaceAction(ACTION_KEYS[type].confirm);
+  const dispatchReject = useDispatchLaceAction(ACTION_KEYS[type].reject);
 
+  // A ref, not `request.requestId`: the handlers memoize on a dispatcher that
+  // never changes identity, so a closure would freeze the first request's id —
+  // and the unmount reject fires once the request has already been cleared.
+  const requestIdRef = useRef<string | undefined>(undefined);
   const hasRespondedRef = useRef(false);
+
+  // A queued request inherits this view without a remount (the popup document
+  // survives; the sheet route only gets new params), so a flag left set by the
+  // previous answer would make this request's dismissal settle nothing.
+  if (request && requestIdRef.current !== request.requestId) {
+    requestIdRef.current = request.requestId;
+    hasRespondedRef.current = false;
+  }
 
   const handleConfirm = useCallback(() => {
     hasRespondedRef.current = true;
-    dispatchConfirm();
+    dispatchConfirm({ requestId: requestIdRef.current });
     onConfirm?.();
   }, [dispatchConfirm, onConfirm]);
 
   const handleReject = useCallback(() => {
     hasRespondedRef.current = true;
-    dispatchReject();
+    dispatchReject({ requestId: requestIdRef.current });
     onReject?.();
   }, [dispatchReject, onReject]);
 
@@ -191,7 +200,7 @@ export const useDappPopupFlow = <T extends 'signData' | 'signTx'>({
   useEffect(() => {
     return () => {
       if (!hasRespondedRef.current) {
-        dispatchRejectRef.current();
+        dispatchRejectRef.current({ requestId: requestIdRef.current });
         onRejectRef.current?.();
       }
     };
@@ -207,7 +216,12 @@ export const useDappPopupFlow = <T extends 'signData' | 'signTx'>({
       request: null,
       isLoading: true,
       isComplete: hadRequest.current && isSigningCompleted,
-      isError: hadRequest.current && isSigningError,
+      // Not gated on hadRequest, unlike isComplete: a port drop can settle the
+      // request into an error before this popup has synced state even once,
+      // and gating on a request this instance never saw left it rendering the
+      // loading state forever. A stale flag cannot leak in — setting a pending
+      // request clears signTxError/signDataError in the same reducer.
+      isError: isSigningError,
       handleConfirm,
       handleReject,
     };

@@ -6,7 +6,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
-import { RANGES, type TimeRange } from '../../../utils/priceHistoryUtils';
+import { RANGES } from '../../../utils/priceHistoryUtils';
 import {
   Row,
   LineChart,
@@ -27,6 +27,7 @@ import { UltraLightCard } from './ultraLight/ultraLight';
 
 import type { Theme } from '../../../design-tokens';
 import type { LineChartData } from '../../atoms';
+import type { TimeRange } from '@lace-contract/token-pricing';
 
 // ============================================================================
 // Types

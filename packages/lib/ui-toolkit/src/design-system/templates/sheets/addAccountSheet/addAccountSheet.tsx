@@ -89,7 +89,9 @@ export const AddAccountSheet = ({
   );
 
   const selectedAccountId = useMemo(() => {
-    if (!accountIndex) return undefined;
+    // `undefined`, not falsy: account index 0 is a real selection, and treating
+    // it as "nothing chosen" left the first account of a chain unhighlighted.
+    if (accountIndex === undefined) return undefined;
     const item = accountIndexDropdownItems.find(
       item => item.value === accountIndex,
     );

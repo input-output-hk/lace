@@ -1,6 +1,6 @@
 {
   "name": "lace-mobile",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@craftzdog/react-native-buffer": "^6.0.5",
+    "@emurgo/cardano-message-signing-nodejs": "^1.1.0",
     "@hugeicons-pro/core-solid-rounded": "^3.1.0",
     "@hugeicons-pro/core-stroke-rounded": "^3.1.0",
     "@hugeicons/react-native": "^1.0.11",

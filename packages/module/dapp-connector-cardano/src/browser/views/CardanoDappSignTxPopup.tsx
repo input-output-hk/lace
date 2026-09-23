@@ -9,6 +9,11 @@ import {
   SignTxError,
   SignTxLoadingContent,
 } from '../../common/components';
+import { SignTxRefused } from '../../common/components/SignTxRefused';
+import {
+  signTxCopy,
+  useSignTxRefusal,
+} from '../../common/components/useSignTxRefusal';
 import {
   useSignTxData,
   type UseSignTxDataResult,
@@ -18,32 +23,65 @@ import { useDappPopupFlow, useDappViewClose } from '../hooks';
 
 export const CardanoDappSignTxPopup = () => {
   const { t } = useTranslation();
-  const closeDappView = useDappViewClose(CARDANO_DAPP_SIGN_TX_LOCATION);
+  // Read at close time, so the close names the request the user answered even
+  // once it has been cleared by an error or a success.
+  const requestIdRef = useRef<string | undefined>(undefined);
+  const closeDappView = useDappViewClose(
+    CARDANO_DAPP_SIGN_TX_LOCATION,
+    requestIdRef,
+  );
 
-  const { request, handleConfirm, handleReject, isLoading } = useDappPopupFlow({
-    type: 'signTx',
-    onReject: closeDappView,
+  const { request, handleConfirm, handleReject, isLoading, isError } =
+    useDappPopupFlow({
+      type: 'signTx',
+      onReject: closeDappView,
+    });
+
+  // The verdict reaches this view through the pending-request slice only.
+  const refusal = useSignTxRefusal({
+    collateralRefusal: request?.collateralRefusal,
+    dappOrigin: request?.dapp.origin,
   });
 
   const signTxData: UseSignTxDataResult = useSignTxData({
-    txHex: request?.txHex ?? '',
+    // Shape A: a refused request renders no transaction-derived value, so it
+    // is not inspected, resolved or priced either -- the CBOR is hostile.
+    txHex: refusal ? '' : request?.txHex ?? '',
     dappOrigin: request?.dappOrigin,
   });
   const hasConfirmedRef = useRef(false);
+
+  // A queued request inherits this window without a remount, so a flag meaning
+  // "this view confirmed what it is showing" must not outlive the id it refers
+  // to — the auto-close below is only otherwise blocked by its hasError gate.
+  if (request && requestIdRef.current !== request.requestId) {
+    requestIdRef.current = request.requestId;
+    hasConfirmedRef.current = false;
+  }
 
   const handleConfirmWithHwIndicator = useCallback(() => {
     hasConfirmedRef.current = true;
     handleConfirm();
   }, [handleConfirm]);
 
+  // Include isError: a port drop or a post-consent signing failure clears the
+  // request, so the transactionError branch alone would miss it.
+  const hasError = isError || Boolean(request && signTxData.transactionError);
+
+  // Auto-close on success only. The request is cleared for BOTH a completed
+  // sign and a failed one, so closing on `!request` alone dismissed the error
+  // state in the same render it appeared — the user was never told the signing
+  // failed. Errors stay on screen until the user closes them.
   useEffect(() => {
-    if (hasConfirmedRef.current && !request) {
+    if (hasConfirmedRef.current && !request && !hasError) {
       closeDappView();
     }
-  }, [closeDappView, request]);
-
-  const hasError = Boolean(request && signTxData.transactionError);
-  const isShowingLoading = isLoading || !request;
+  }, [closeDappView, request, hasError]);
+  const { titleKey, dismissLabelKey, shouldSuppressPrimary } = signTxCopy(
+    refusal,
+    hasError,
+  );
+  const isShowingLoading = refusal === null && (isLoading || !request);
 
   const contentProps =
     request && signTxData.transactionInfo
@@ -68,12 +106,17 @@ export const CardanoDappSignTxPopup = () => {
       : null;
 
   const scrollContent = useMemo(() => {
+    // Refused takes precedence over the generic error state: a blocked
+    // transaction is refused, not broken -- they are distinct states.
+    if (refusal) {
+      return <SignTxRefused refusal={refusal} style={styles.centeredContent} />;
+    }
     if (hasError) return <SignTxError style={styles.centeredContent} />;
     if (isShowingLoading || !contentProps) {
       return <SignTxLoadingContent style={styles.centeredContent} />;
     }
     return <SignTxContent {...contentProps} />;
-  }, [contentProps, hasError, isShowingLoading]);
+  }, [refusal, contentProps, hasError, isShowingLoading]);
 
   return (
     <DappConnectorLayoutV2
@@ -81,7 +124,7 @@ export const CardanoDappSignTxPopup = () => {
       showHeader={false}
       fillViewport
       primaryButton={
-        hasError
+        shouldSuppressPrimary
           ? undefined
           : {
               label: t('dapp-connector.cardano.sign-tx.confirm'),
@@ -94,15 +137,19 @@ export const CardanoDappSignTxPopup = () => {
             }
       }
       secondaryButton={{
-        label: t('dapp-connector.cardano.sign-tx.cancel'),
-        action: handleReject,
+        // Once the request is settled there is nothing left to decline, and a
+        // reject dispatched now would be consumed by whichever request has
+        // taken this window over. A refused request is not settled: its
+        // dismissal is the reject the refused flow waits for.
+        label: t(
+          hasError && !refusal
+            ? 'dapp-connector.cardano.sign-tx.result.close'
+            : dismissLabelKey,
+        ),
+        action: hasError && !refusal ? closeDappView : handleReject,
       }}>
       <View style={styles.header}>
-        <Text.S align="center">
-          {hasError
-            ? t('dapp-connector.cardano.sign-tx.error-title')
-            : t('dapp-connector.cardano.sign-tx.title')}
-        </Text.S>
+        <Text.S align="center">{t(titleKey)}</Text.S>
       </View>
       <View style={styles.content}>{scrollContent}</View>
     </DappConnectorLayoutV2>

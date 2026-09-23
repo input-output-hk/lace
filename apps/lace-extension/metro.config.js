@@ -3,6 +3,10 @@ const path = require('path');
 const { withNxMetro } = require('@nx/expo');
 const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const { mergeConfig } = require('metro-config');
+
+const {
+  rewriteRealfiEsmToCjs,
+} = require('../../configs/metro/realfi-esm-cjs-resolution');
 const defaultConfig = getSentryExpoConfig(__dirname);
 const { assetExts, sourceExts } = defaultConfig.resolver;
 const projectRoot = __dirname;
@@ -118,6 +122,43 @@ const patchNxConfig = nxConfig => {
     ) {
       return { type: 'empty' };
     }
+    // Stub the WASM-backed @emurgo/cardano-message-signing-* packages. Same root
+    // cause as the key-management cip8 stub above: the package's entry statically
+    // imports `cardano_message_signing_bg.wasm`, which Metro can't process (it
+    // dies with "Failed to get the SHA-1" during `expo export`). @blaze-cardano/wallet
+    // (pulled in transitively via @realfi-co/realfi-partner-sdk) dynamically imports it for
+    // CIP-8 data signing, which is already non-functional in the Metro build. The
+    // RealFi tx-building flow doesn't touch it, so stubbing removes the wasm from the graph.
+    if (
+      moduleName === '@emurgo/cardano-message-signing-browser' ||
+      moduleName === '@emurgo/cardano-message-signing-nodejs'
+    ) {
+      return { type: 'empty' };
+    }
+    // Stub @blaze-cardano/vm's WASM-backed local UPLC evaluator. Same root cause
+    // as the emurgo stub above: @blaze-cardano/uplc statically imports
+    // `uplc_wasm_bg.wasm`, which Metro can't process (it dies resolving the
+    // wasm during `expo export`). RealFi uses it only to evaluate execution
+    // units for the order-CANCEL transaction, and that build runs in the
+    // service worker (webpack, `asyncWebAssembly`), never in the Metro-bundled
+    // tab UI — so stubbing removes the wasm from the graph without losing
+    // function.
+    if (moduleName === '@blaze-cardano/vm') {
+      return { type: 'empty' };
+    }
+    // Stub the RealFi partner SDK's EVM subtree. Its main entry statically
+    // imports `evm/partner.js` + `evm/index.js` (SDK 2.21+), which pull in `viem`
+    // (and `viem/chains` via a dynamic import Metro resolves statically). Lace
+    // only ever uses the Cardano surface (RealfiSDK.cardano / SundaeSwap), so the
+    // EVM path is dead weight here and viem doesn't resolve cleanly in Metro —
+    // excluding the whole evm/ subtree keeps viem out of the tab bundle. Same
+    // rationale as the @blaze-cardano/vm stub above.
+    if (
+      context.originModulePath.includes('@realfi-co/realfi-partner-sdk') &&
+      /(^|\/)evm\//.test(moduleName)
+    ) {
+      return { type: 'empty' };
+    }
     // Exclude @sentry/browser's lazyLoadIntegration - it contains a hard-coded
     // "https://browser.sentry-cdn.com" string that Chrome Web Store flags as
     // remotely hosted code under MV3. Mirror of the webpack stub in
@@ -189,7 +230,11 @@ const patchNxConfig = nxConfig => {
         return { type: 'sourceFile', filePath: overridePath };
       }
     }
-    return nxResolver(context, moduleName, platform);
+    const resolution = nxResolver(context, moduleName, platform);
+    // RealFi partner-SDK graph: root-copy typebox ESM→CJS and the
+    // @blaze-cardano/data entry that must follow it — shared with the
+    // other metro config (rationale + nested-copy scoping in the helper).
+    return rewriteRealfiEsmToCjs(resolution) ?? resolution;
   };
   return nxConfig;
 };

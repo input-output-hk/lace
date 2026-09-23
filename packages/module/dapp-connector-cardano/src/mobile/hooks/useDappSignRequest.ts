@@ -27,8 +27,8 @@ export interface UseDappSignRequestConfig {
   requestId: string;
   pendingRequest: unknown;
   webViewResponseQueue: WebViewResponse[];
-  dispatchConfirm: () => void;
-  dispatchReject: () => void;
+  dispatchConfirm: (answer: { requestId: string }) => void;
+  dispatchReject: (answer: { requestId: string }) => void;
   dispatchClearPendingRequest: () => void;
   dispatchClearWebViewResponse: (requestId: string) => void;
 }
@@ -90,14 +90,14 @@ export const useDappSignRequest = ({
   const handleConfirm = useCallback(() => {
     hasRespondedRef.current = true;
     setIsSigning(true);
-    dispatchConfirm();
-  }, [dispatchConfirm]);
+    dispatchConfirm({ requestId });
+  }, [dispatchConfirm, requestId]);
 
   const handleReject = useCallback(() => {
     hasRespondedRef.current = true;
-    dispatchReject();
+    dispatchReject({ requestId });
     NavigationControls.closeSheet();
-  }, [dispatchReject]);
+  }, [dispatchReject, requestId]);
 
   const handleCloseResult = useCallback(() => {
     dispatchClearWebViewResponse(requestId);
@@ -120,10 +120,10 @@ export const useDappSignRequest = ({
   useEffect(() => {
     return () => {
       if (!hasRespondedRef.current && pendingRequest) {
-        dispatchReject();
+        dispatchReject({ requestId });
       }
     };
-  }, [dispatchReject, pendingRequest]);
+  }, [dispatchReject, pendingRequest, requestId]);
 
   const isLoading = !pendingRequest && !requestId;
 

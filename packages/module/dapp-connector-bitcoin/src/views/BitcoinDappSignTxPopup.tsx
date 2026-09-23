@@ -19,12 +19,20 @@ import {
 
 export const BitcoinDappSignTxPopup = () => {
   const { t } = useTranslation();
-  const closeDappView = useDappViewClose(BITCOIN_DAPP_SIGN_TX_LOCATION);
+  // Read at close time, so the close names the request the user answered even
+  // once it has been cleared by an error or a success.
+  const requestIdRef = useRef<string | undefined>(undefined);
+  const closeDappView = useDappViewClose(
+    BITCOIN_DAPP_SIGN_TX_LOCATION,
+    requestIdRef,
+  );
 
-  const { request, handleConfirm, handleReject } = useDappPopupFlow({
+  const { request, handleConfirm, handleReject, isError } = useDappPopupFlow({
     type: 'signPsbt',
     onReject: closeDappView,
   });
+
+  if (request) requestIdRef.current = request.requestId;
 
   const setPsbtPagerIndex = useDispatchLaceAction(
     'bitcoinDappConnector.setPsbtPagerIndex',
@@ -37,13 +45,17 @@ export const BitcoinDappSignTxPopup = () => {
     handleConfirm();
   }, [handleConfirm]);
 
+  // Include isError: a post-consent signing failure clears the request, so the
+  // psbt branch alone would miss it.
+  const hasError = isError || (Boolean(request) && psbtData.hasError);
+
+  // Success only: a failure clears the request too, so closing on `!request`
+  // alone dismissed the error in the render it appeared.
   useEffect(() => {
-    if (hasConfirmedRef.current && !request) {
+    if (hasConfirmedRef.current && !request && !hasError) {
       closeDappView();
     }
-  }, [closeDappView, request]);
-
-  const hasError = Boolean(request) && psbtData.hasError;
+  }, [closeDappView, request, hasError]);
   const isShowingLoading =
     !hasError &&
     (!request || psbtData.isResolvingInputs || !psbtData.inspection);
@@ -63,8 +75,13 @@ export const BitcoinDappSignTxPopup = () => {
             }
       }
       secondaryButton={{
-        label: t('dapp-connector.bitcoin.sign-psbt.cancel'),
-        action: handleReject,
+        // Once the request is settled there is nothing left to decline, and a
+        // reject dispatched now would be consumed by whichever request has
+        // taken this window over.
+        label: hasError
+          ? t('dapp-connector.bitcoin.result.close')
+          : t('dapp-connector.bitcoin.sign-psbt.cancel'),
+        action: hasError ? closeDappView : handleReject,
       }}>
       <View style={styles.header}>
         <Text.S align="center">

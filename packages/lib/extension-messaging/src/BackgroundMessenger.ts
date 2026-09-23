@@ -1,8 +1,6 @@
 // only tested in ../e2e tests
-import { retryBackoff } from 'backoff-rxjs';
 import {
   BehaviorSubject,
-  EmptyError,
   ReplaySubject,
   bufferCount,
   catchError,
@@ -28,6 +26,16 @@ import type {
 } from './types';
 import type { Subject } from 'rxjs';
 import type { Logger } from 'ts-log';
+
+/**
+ * Matches the throw `port.postMessage` raises for an already-closed port.
+ *
+ * Chrome says 'Attempting to use a disconnected port object', Firefox
+ * 'Attempt to postMessage on disconnected port'. Neither gives the throw a
+ * distinct type or code, so the message is the only thing that separates a
+ * dead port from a payload that would not serialize.
+ */
+const DISCONNECTED_PORT_ERROR = /disconnected port/i;
 
 export interface Channel {
   hasMethodRequestHandler?: boolean;
@@ -69,41 +77,82 @@ export const createBackgroundMessenger = ({
     if (isKeepAliveMessage(data)) {
       // Reserved transport-level ping. Mere receipt resets the SW idle timer;
       // the ack lets the consumer observe SW liveness without invoking user code.
-      try {
-        port.postMessage(KEEP_ALIVE_MESSAGE);
-      } catch (error) {
-        logger.warn(
-          `[BackgroundMessenger(${port.name})] failed to ack keepAlive ping`,
-          error,
-        );
-      }
+      // A throwing ack means the port is dead, so release it here too rather than
+      // let it linger until the next response post happens to hit the same port.
+      postToPort(port, KEEP_ALIVE_MESSAGE);
       return;
     }
     logger.debug(`[BackgroundMessenger(${port.name})] message`, data);
     const { message$ } = channels.get(ChannelName(port.name))!;
     message$.next({ data, port });
   };
-  const onPortDisconnected = (port: MessengerPort) => {
+  // Idempotent: the native onDisconnect and the postToPort fallback can both
+  // target the same port, but only the first shrinks ports$ — which is what
+  // fires the channel's disconnect$, so a double-release must not double-fire it.
+  const releasePort = (port: MessengerPort) => {
+    const channel = channels.get(ChannelName(port.name));
+    if (!channel?.ports$.value.has(port)) return;
     port.onMessage.removeListener(onPortMessage);
-    port.onDisconnect.removeListener(onPortDisconnected);
-    const { ports$ } = channels.get(ChannelName(port.name))!;
-    const newPorts = new Set(ports$.value);
+    port.onDisconnect.removeListener(releasePort);
+    const newPorts = new Set(channel.ports$.value);
     newPorts.delete(port);
-    ports$.next(newPorts);
+    channel.ports$.next(newPorts);
     logger.debug(`[BackgroundMessenger(${port.name})] disconnected`, port);
+  };
+  // Releases and disconnects a port whose post throws because the port is
+  // gone, so no caller retries into it and the peer is free to reconnect.
+  //
+  // Every other throw leaves the port alone: `postMessage` also throws for a
+  // payload it cannot serialize on a LIVE port, and this runs inside a
+  // broadcast, so tearing down on that would drop every peer on the channel
+  // over one bad message. A dead port that escapes the match is still released
+  // by the native onDisconnect.
+  //
+  // Known limitation: the caller of such a message gets no answer at all.
+  // Substituting one needs the message id, which this signature does not carry
+  // — it also serves keepAlive acks and observable emissions.
+  const postToPort = (port: MessengerPort, message: unknown) => {
+    try {
+      port.postMessage(message);
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      if (!DISCONNECTED_PORT_ERROR.test(reason)) {
+        logger.warn(
+          `[BackgroundMessenger(${port.name})] postMessage threw on a live port`,
+          error,
+        );
+        return;
+      }
+      logger.debug(
+        `[BackgroundMessenger(${port.name})] postMessage threw; releasing port`,
+        error,
+      );
+      releasePort(port);
+      try {
+        port.disconnect();
+      } catch {
+        // Already gone. Swallowed on purpose: this runs inside the broadcast
+        // loop and inside a port event listener, so an escaping throw would
+        // starve the ports after this one — the bug the release above exists
+        // to prevent.
+      }
+    }
   };
   const onConnect = (port: MessengerPort) => {
     const { ports$ } = getChannel(ChannelName(port.name));
     const newPorts = new Set(ports$.value);
     newPorts.add(port);
     port.onMessage.addListener(onPortMessage);
-    port.onDisconnect.addListener(onPortDisconnected);
+    port.onDisconnect.addListener(releasePort);
     ports$.next(newPorts);
     logger.debug(`[BackgroundMessenger(${port.name})] connected`);
   };
   runtime.onConnect.addListener(onConnect);
   return {
     getChannel,
+
+    /** Post to one port, releasing it as a disconnect if the post throws. */
+    postToPort,
 
     /** Disconnect all existing ports and stop listening for new ones. */
     shutdown() {
@@ -165,7 +214,9 @@ export const generalizeBackgroundMessenger = (
   isShutdown: false,
   message$: messenger.getChannel(channel).message$,
   /**
-   * @throws RxJS EmptyError if messenger is shutdown
+   * Posts to every port on the channel, at most once each: `postToPort`
+   * absorbs a failed post by releasing that port, so a caller never sees a
+   * delivery error and nothing is re-sent to a replacement port.
    */
   postMessage: message => {
     const { ports$ } = messenger.getChannel(channel);
@@ -175,12 +226,7 @@ export const generalizeBackgroundMessenger = (
       filter(ports => ports.size > 0),
       first(),
       tap(ports => {
-        for (const port of ports) port.postMessage(message);
-      }),
-      retryBackoff({
-        initialInterval: 10,
-        maxInterval: 1000,
-        shouldRetry: error => !(error instanceof EmptyError),
+        for (const port of ports) messenger.postToPort(port, message);
       }),
       map(() => void 0),
       catchError(() => {

@@ -26,6 +26,7 @@ export const SignTx = (props: SheetScreenProps<SheetRoutes.SignTx>) => {
     isSigning,
     signTxResult,
     handleCloseResult,
+    refusal,
     ...contentProps
   } = useSignTx(props);
 
@@ -65,6 +66,7 @@ export const SignTx = (props: SheetScreenProps<SheetRoutes.SignTx>) => {
     <SignTxLayout
       resultView={resultView}
       hasError={hasError}
+      refusal={refusal}
       showLoading={isShowingLoading}
       contentProps={layoutContentProps}
       onConfirm={contentProps.handleConfirm}

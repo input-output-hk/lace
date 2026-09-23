@@ -5,8 +5,6 @@ import { minBy } from 'lodash';
 
 import type { PriceDataPoint, TimeRange } from '@lace-contract/token-pricing';
 
-export type { PriceDataPoint, TimeRange };
-
 export const RANGES: TimeRange[] = ['24H', '7D', '1M', '1Y'];
 
 export type TimeRangePriceData = {

@@ -20,6 +20,7 @@ import { firstValueFrom, map } from 'rxjs';
 
 import { APIError } from '../../api-error';
 import { DappZkConfigProvider } from '../../dapp-zk-config-provider';
+import { applyMidnightSignedMessagePrefix } from '../../sign-message-prefix';
 import { derivePendingActivityFromMidnightTx } from '../helpers/derive-pending-activity-from-midnight-tx';
 
 import type { ConfirmationCallback } from './create-confirmation-callback';
@@ -610,7 +611,13 @@ export class MidnightDappConnectorApi
       throw new APIError(ErrorCodes.Rejected, 'User rejected data signing');
     }
 
-    const dataBytes = this.decodeSignData(data, options.encoding);
+    // Domain-separate with the connector-spec `midnight_signed_message:<size>:`
+    // prefix (LW-15403) so this signature is not a valid transaction-witness
+    // signature over the raw bytes. The response echoes the ORIGINAL `data` —
+    // the prefix is a signing-time envelope, not part of the payload.
+    const dataBytes = applyMidnightSignedMessagePrefix(
+      this.decodeSignData(data, options.encoding),
+    );
 
     const { signature, verifyingKey } = await firstValueFrom(
       wallet.signData(dataBytes),

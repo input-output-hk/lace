@@ -17,10 +17,25 @@ import {
 import { CardanoDappConnectorApi } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import { requiresForeignSignaturesFromCbor } from '../src/common/store/utils/input-resolver';
 
+import {
+  buildTx,
+  CASE_B_TX_CBOR,
+  CHAINED_COLLATERAL_INPUT,
+  CHAINED_COLLATERAL_UTXO,
+  createCollateralApi,
+  FOREIGN_ADDRESS as FOREIGN_ADDRESS_FIXTURE,
+  ORIGIN as ORIGIN_FIXTURE,
+  OWN_ADDRESS as OWN_ADDRESS_FIXTURE,
+  OWN_COLLATERAL_INPUT,
+} from './support/collateral-api-fixture';
+
 import type { Paginate, SenderContext } from '../src/browser/types';
 import type { CardanoDappConnectorApiDependencies } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { SigningResult } from '../src/common/store/dependencies/cardano-dapp-connector-api';
-import type { CardanoConfirmationCallback } from '../src/common/store/dependencies/create-confirmation-callback';
+import type {
+  CardanoConfirmationCallback,
+  CardanoConfirmationResult,
+} from '../src/common/store/dependencies/create-confirmation-callback';
 import type { Bip32PublicKeyHex, Ed25519KeyHashHex } from '@cardano-sdk/crypto';
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
@@ -111,6 +126,27 @@ const assetId = Cardano.AssetId(
   'b0d07d45fe9514f80213f4020e5a61241458be626841cde717cb38a76e7574636f696e',
 );
 
+/**
+ * A real, decodable no-collateral tx: `#validateCanSign` runs a real
+ * `Serialization.Transaction.fromCbor` decode unconditionally, so tests that
+ * don't care about the collateral guard need a genuinely-decodable
+ * placeholder instead of an opaque hex string.
+ */
+const NO_COLLATERAL_TX_CBOR = Serialization.Transaction.fromCore({
+  id: Cardano.TransactionId('3'.repeat(64)),
+  body: {
+    inputs: [{ txId: Cardano.TransactionId('4'.repeat(64)), index: 0 }],
+    outputs: [
+      {
+        address: Cardano.PaymentAddress(PAYMENT_ADDRESS_1),
+        value: { coins: 1_000_000n } as unknown as Cardano.Value,
+      },
+    ],
+    fee: 170_000n,
+  } as Cardano.TxBody,
+  witness: { signatures: new Map() },
+} as Cardano.Tx).toCbor() as string;
+
 const createMockUtxo = ({
   txIdHex,
   index,
@@ -177,12 +213,70 @@ const createMockGetAccountIdForOrigin =
   (requestedOrigin: string) =>
     requestedOrigin === origin ? accountId : undefined;
 
+/**
+ * The outcomes the confirmation reports when the user never answered the
+ * prompt, with the `info` each must carry. Both map to
+ * `APIError(InternalError)`, so the message is the whole contract a dApp can
+ * act on: both must state that nothing was signed and invite a retry, which
+ * only holds because neither outcome can be produced after the user confirmed.
+ */
+const UNANSWERED_PROMPT_CASES = [
+  [
+    'unavailable',
+    'The wallet could not display its confirmation prompt, so the request was not approved. Please try again.',
+  ],
+  [
+    'disconnected',
+    'The dApp connection was lost before the request was approved, so nothing was signed. Please try again.',
+  ],
+] as const satisfies readonly [CardanoConfirmationResult['outcome'], string][];
+
 const defaultNewDeps = {
+  ownershipUtxos$: of({} as AccountUtxoMap),
   accountUnspendableUtxos$: of({} as AccountUtxoMap),
   rewardAccountDetails$: of({} as AccountRewardAccountDetailsMap),
   accountTransactionHistory$: of({} as CardanoAccountAddressHistoryMap),
   resolveChainedInputs: (): Cardano.Utxo[] => [],
 };
+
+describe('CardanoDappConnectorApi.getCollateralRefusal (LW-15498)', () => {
+  it('test:api-get-collateral-refusal — refuses case (b) and allows the no-collateral transaction', async () => {
+    const { api } = createCollateralApi();
+    await expect(
+      api.getCollateralRefusal(CASE_B_TX_CBOR, ORIGIN_FIXTURE),
+    ).resolves.toBe('foreign-collateral-return');
+    await expect(
+      api.getCollateralRefusal(NO_COLLATERAL_TX_CBOR, ORIGIN_FIXTURE),
+    ).resolves.toBeNull();
+  });
+
+  it('test:api-get-collateral-refusal — an origin with no session account gets AccountChange before any sheet', async () => {
+    const { api } = createCollateralApi();
+    await expect(
+      api.getCollateralRefusal(CASE_B_TX_CBOR, 'https://unknown.example'),
+    ).rejects.toMatchObject({ code: APIErrorCode.AccountChange });
+  });
+
+  it('test:mobile-pre-consent-chained-union — a chained own collateral is refused pre-consent; chained own + settled own with an own return is allowed', async () => {
+    const refused = buildTx({
+      collaterals: [CHAINED_COLLATERAL_INPUT],
+      collateralReturnAddress: FOREIGN_ADDRESS_FIXTURE,
+    });
+    const allowed = buildTx({
+      collaterals: [CHAINED_COLLATERAL_INPUT, OWN_COLLATERAL_INPUT],
+      collateralReturnAddress: OWN_ADDRESS_FIXTURE,
+    });
+    const { api } = createCollateralApi({
+      resolveChainedInputs: vi.fn().mockReturnValue([CHAINED_COLLATERAL_UTXO]),
+    });
+    await expect(
+      api.getCollateralRefusal(refused, ORIGIN_FIXTURE),
+    ).resolves.toBe('foreign-collateral-return');
+    await expect(
+      api.getCollateralRefusal(allowed, ORIGIN_FIXTURE),
+    ).resolves.toBeNull();
+  });
+});
 
 describe('CardanoDappConnectorApi', () => {
   it('getNetworkId returns network id from chainId$', async () => {
@@ -655,7 +749,7 @@ describe('CardanoDappConnectorApi', () => {
       const accountId = AccountId('acc-1');
       const walletId = WalletId('wallet-1');
       const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: false,
+        outcome: 'rejected' as const,
       }) as unknown as CardanoConfirmationCallback;
 
       // Create a mock account with Cardano-specific properties
@@ -692,7 +786,7 @@ describe('CardanoDappConnectorApi', () => {
 
       try {
         // Validation functions are mocked, so we can use simple tx data
-        await api.signTx('abcd1234', false, mockSender);
+        await api.signTx(NO_COLLATERAL_TX_CBOR, false, mockSender);
         expect.fail('Should have thrown');
       } catch (error) {
         expect((error as Error).name).toBe('TxSignError');
@@ -701,6 +795,60 @@ describe('CardanoDappConnectorApi', () => {
         );
       }
     });
+
+    it.each(UNANSWERED_PROMPT_CASES)(
+      'maps the %s outcome to APIError InternalError and never signs',
+      async (outcome, expectedInfo) => {
+        const accountId = AccountId('acc-1');
+        const mockAccount = {
+          accountId,
+          walletId: WalletId('wallet-1'),
+          accountIndex: 0,
+          accountType: 'Bip32',
+          blockchainName: 'Cardano',
+          blockchainNetworkId: 'cardano-preprod',
+          blockchainSpecific: {
+            accountIndex: 0,
+            extendedAccountPublicKey: '0'.repeat(128),
+          },
+          metadata: { name: 'Test Account' },
+          networkType: 'testnet',
+        } as unknown as AnyAccount;
+        const signTransaction = vi.fn();
+
+        const api = new CardanoDappConnectorApi({
+          ...defaultNewDeps,
+          accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+          addresses$: of([]),
+          chainId$: of({
+            networkId: Cardano.NetworkId.Testnet,
+            networkMagic: Cardano.NetworkMagics.Preprod,
+          } as Cardano.ChainId),
+          allAccounts$: of([mockAccount]),
+          allWallets$: of([]),
+          getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+          userConfirmationRequest: vi.fn().mockResolvedValue({
+            outcome,
+          }) as unknown as CardanoConfirmationCallback,
+          signTransaction,
+          submitTransaction: vi.fn(),
+        });
+
+        try {
+          // Real CBOR: the pre-consent collateral check decodes the body
+          // before the prompt is ever requested.
+          await api.signTx(NO_COLLATERAL_TX_CBOR, false, mockSender);
+          expect.fail('Should have thrown');
+        } catch (error) {
+          expect((error as Error).name).toBe('APIError');
+          expect((error as { code: number }).code).toBe(
+            APIErrorCode.InternalError,
+          );
+          expect((error as { info: string }).info).toBe(expectedInfo);
+        }
+        expect(signTransaction).not.toHaveBeenCalled();
+      },
+    );
 
     it('returns witness set when user confirms', async () => {
       const accountId = AccountId('acc-1');
@@ -724,7 +872,7 @@ describe('CardanoDappConnectorApi', () => {
       } as unknown as AnyAccount;
 
       const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: true,
+        outcome: 'confirmed' as const,
       }) as unknown as CardanoConfirmationCallback;
 
       const mockSignTransaction = vi.fn().mockResolvedValue(expectedWitnessSet);
@@ -746,16 +894,16 @@ describe('CardanoDappConnectorApi', () => {
       });
 
       // Validation functions are mocked, so we can use simple tx data
-      const result = await api.signTx('abcd1234', true, mockSender);
+      const result = await api.signTx(NO_COLLATERAL_TX_CBOR, true, mockSender);
 
       expect(result).toBe(expectedWitnessSet);
       expect(mockConfirmation).toHaveBeenCalledWith(
         mockSender.sender,
         'signTx',
-        { txHex: 'abcd1234', partialSign: true },
+        { txHex: NO_COLLATERAL_TX_CBOR, partialSign: true },
       );
       expect(mockSignTransaction).toHaveBeenCalledWith(
-        'abcd1234',
+        NO_COLLATERAL_TX_CBOR,
         true,
         'https://test-dapp.com',
       );
@@ -848,7 +996,7 @@ describe('CardanoDappConnectorApi', () => {
       it('full-sign passes the pre-check when the chained input resolves to a cached own output', async () => {
         const resolveChainedInputs = vi.fn().mockReturnValue([chainedUtxo]);
         const mockConfirmation = vi.fn().mockResolvedValue({
-          isConfirmed: true,
+          outcome: 'confirmed' as const,
         }) as unknown as CardanoConfirmationCallback;
         const mockSignTransaction = vi
           .fn()
@@ -860,18 +1008,18 @@ describe('CardanoDappConnectorApi', () => {
           signTransaction: mockSignTransaction,
         });
 
-        await expect(api.signTx('abcd1234', false, mockSender)).resolves.toBe(
-          'witness-cbor-hex',
-        );
+        await expect(
+          api.signTx(NO_COLLATERAL_TX_CBOR, false, mockSender),
+        ).resolves.toBe('witness-cbor-hex');
         expect(resolveChainedInputs).toHaveBeenCalledWith(
-          'abcd1234',
+          NO_COLLATERAL_TX_CBOR,
           new Set([PAYMENT_ADDRESS_1]),
         );
       });
 
       it('full-sign still throws ProofGeneration at the pre-check when the source tx was never cached', async () => {
         const mockConfirmation = vi.fn().mockResolvedValue({
-          isConfirmed: true,
+          outcome: 'confirmed' as const,
         }) as unknown as CardanoConfirmationCallback;
 
         const api = createApi({
@@ -881,7 +1029,7 @@ describe('CardanoDappConnectorApi', () => {
         });
 
         await expect(
-          api.signTx('abcd1234', false, mockSender),
+          api.signTx(NO_COLLATERAL_TX_CBOR, false, mockSender),
         ).rejects.toMatchObject({
           code: TxSignErrorCode.ProofGeneration,
         });
@@ -969,7 +1117,7 @@ describe('CardanoDappConnectorApi', () => {
     const createApi = () => {
       const signTransaction = vi.fn().mockResolvedValue('witness-set-cbor');
       const userConfirmationRequest = vi.fn().mockResolvedValue({
-        isConfirmed: true,
+        outcome: 'confirmed' as const,
       });
       const api = new CardanoDappConnectorApi({
         ...defaultNewDeps,
@@ -1052,7 +1200,7 @@ describe('CardanoDappConnectorApi', () => {
         signData: () => Observable<unknown>;
       },
       overrides: {
-        isConfirmed?: boolean;
+        outcome?: CardanoConfirmationResult['outcome'];
         walletType?: WalletType;
       } = {},
     ) => {
@@ -1103,7 +1251,7 @@ describe('CardanoDappConnectorApi', () => {
       signingResult$.subscribe(result => signingResults.push(result));
 
       const userConfirmationRequest = vi.fn().mockResolvedValue({
-        isConfirmed: overrides.isConfirmed ?? true,
+        outcome: overrides.outcome ?? 'confirmed',
       });
 
       const api = new CardanoDappConnectorApi({
@@ -1159,7 +1307,7 @@ describe('CardanoDappConnectorApi', () => {
     it('throws DataSignError UserDeclined when user rejects', async () => {
       const { api, userConfirmationRequest } = createSignDataApi(
         { signData: () => of({ signature: 'sig', key: 'key' }) },
-        { isConfirmed: false },
+        { outcome: 'rejected' as const },
       );
 
       try {
@@ -1173,6 +1321,26 @@ describe('CardanoDappConnectorApi', () => {
       }
       expect(userConfirmationRequest).toHaveBeenCalled();
     });
+
+    it.each(UNANSWERED_PROMPT_CASES)(
+      'maps the %s outcome to APIError InternalError and never signs',
+      async (outcome, expectedInfo) => {
+        const signData = vi.fn(() => of({ signature: 'sig', key: 'key' }));
+        const { api } = createSignDataApi({ signData }, { outcome });
+
+        try {
+          await api.signData(PAYMENT_ADDRESS_1, 'deadbeef', mockSender);
+          expect.fail('Should have thrown');
+        } catch (error) {
+          expect((error as Error).name).toBe('APIError');
+          expect((error as { code: number }).code).toBe(
+            APIErrorCode.InternalError,
+          );
+          expect((error as { info: string }).info).toBe(expectedInfo);
+        }
+        expect(signData).not.toHaveBeenCalled();
+      },
+    );
 
     it('refuses an unparseable signer with AddressNotPK before prompting', async () => {
       const { api, userConfirmationRequest } = createSignDataApi({
@@ -1214,6 +1382,9 @@ describe('CardanoDappConnectorApi', () => {
       const otherAccountId = AccountId('acc-2');
       // The session rebinds at the exact moment the user is confirming.
       let sessionAccountId = accountId;
+      const signingResults: SigningResult[] = [];
+      const signingResult$ = new Subject<SigningResult>();
+      signingResult$.subscribe(result => signingResults.push(result));
       const shifting = new CardanoDappConnectorApi({
         ...defaultNewDeps,
         accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
@@ -1268,9 +1439,10 @@ describe('CardanoDappConnectorApi', () => {
         getAccountIdForOrigin: () => sessionAccountId,
         userConfirmationRequest: vi.fn().mockImplementation(async () => {
           sessionAccountId = otherAccountId;
-          return { isConfirmed: true };
+          return { outcome: 'confirmed' as const };
         }) as unknown as CardanoConfirmationCallback,
         submitTransaction: vi.fn(),
+        signingResult$,
       });
 
       try {
@@ -1282,6 +1454,10 @@ describe('CardanoDappConnectorApi', () => {
           APIErrorCode.AccountChange,
         );
       }
+      // Refusing after consent still has to report: the flow that resolved the
+      // confirmation waits on signingResult$, and requests are served one at a
+      // time, so staying silent here would wedge every request behind this one.
+      expect(signingResults).toEqual([{ type: 'error' }]);
     });
 
     it('refuses Trezor data signing with ProofGeneration before prompting', async () => {
@@ -1356,7 +1532,7 @@ describe('CardanoDappConnectorApi', () => {
       ];
 
       const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: true,
+        outcome: 'confirmed' as const,
       }) as unknown as CardanoConfirmationCallback;
 
       const mockSignerFactory = {
@@ -1453,7 +1629,7 @@ describe('CardanoDappConnectorApi', () => {
       ];
 
       const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: true,
+        outcome: 'confirmed' as const,
       }) as unknown as CardanoConfirmationCallback;
 
       const mockSignerFactory = {
@@ -1557,7 +1733,7 @@ describe('CardanoDappConnectorApi', () => {
       ];
 
       const mockConfirmation = vi.fn().mockResolvedValue({
-        isConfirmed: true,
+        outcome: 'confirmed' as const,
       }) as unknown as CardanoConfirmationCallback;
 
       const mockSignerFactory = {
@@ -1697,7 +1873,7 @@ describe('CardanoDappConnectorApi', () => {
       ];
       const userConfirmationRequest = vi
         .fn()
-        .mockResolvedValue({ isConfirmed: true });
+        .mockResolvedValue({ outcome: 'confirmed' as const });
 
       const api = new CardanoDappConnectorApi({
         ...defaultNewDeps,
@@ -1718,7 +1894,7 @@ describe('CardanoDappConnectorApi', () => {
 
       // Voting: transaction signing succeeds on the Trezor wallet.
       await expect(
-        api.signTx('abcd1234', false, createMockSenderContext()),
+        api.signTx(NO_COLLATERAL_TX_CBOR, false, createMockSenderContext()),
       ).resolves.toBe('witness-set-cbor');
 
       // Comments/rationale: CIP-95 signData with the account's own DRep key

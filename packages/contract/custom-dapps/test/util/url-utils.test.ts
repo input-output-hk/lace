@@ -89,14 +89,29 @@ describe('normalizeUrlForId', () => {
 });
 
 describe('deriveDappNameFromUrl', () => {
-  it('returns the hostname without the leading www.', () => {
+  it('returns the host without the leading www.', () => {
     expect(deriveDappNameFromUrl('https://www.example.com/foo')).toBe(
       'example.com',
     );
   });
 
-  it('returns the hostname unchanged when no www. prefix', () => {
+  it('returns the host unchanged when no www. prefix', () => {
     expect(deriveDappNameFromUrl('https://example.com')).toBe('example.com');
+  });
+
+  it('keeps a non-default port, so two dApps on one machine differ', () => {
+    expect(deriveDappNameFromUrl('https://example.com:8445/app')).toBe(
+      'example.com:8445',
+    );
+    expect(deriveDappNameFromUrl('https://example.com:8446/app')).toBe(
+      'example.com:8446',
+    );
+  });
+
+  it('drops the default port, which no address bar shows either', () => {
+    expect(deriveDappNameFromUrl('https://example.com:443')).toBe(
+      'example.com',
+    );
   });
 
   it('returns the input unchanged for invalid URLs', () => {

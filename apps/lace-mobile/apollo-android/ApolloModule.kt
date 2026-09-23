@@ -11,32 +11,42 @@ import org.hyperledger.identus.apollo.utils.KMMEdPrivateKey
 import org.bouncycastle.crypto.digests.Blake2bDigest
 import org.bouncycastle.crypto.generators.Argon2BytesGenerator
 import org.bouncycastle.crypto.params.Argon2Parameters
+import android.util.Log
 import java.lang.Exception
 
 class ApolloModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  override fun getName(): String = "ApolloModule"
+  // Catch Throwable, not Exception: the JNA bindings under Apollo's key derivation throw
+  // java.lang.Error, which is not an Exception. Escaping one of these coroutines kills the process,
+  // so the handler below is the last resort if a new call site forgets to catch.
+  private val scope = CoroutineScope(
+    SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, t ->
+      Log.e(TAG, "Unhandled failure in an ApolloModule coroutine", t)
+    }
+  )
+
+  override fun getName(): String = TAG
 
   @ReactMethod
   fun derivePublicKey(pubKeyHex: String, role: Int, index: Int, promise: Promise) {
-    CoroutineScope(Dispatchers.Default).launch {
+    scope.launch {
       try {
         val result = deriveKeyHex(pubKeyHex, role, index)
         promise.resolve(result)
-      } catch (e: Exception) {
-        promise.reject("DERIVE_ERROR", "Failed to derive public key", e)
+      } catch (e: Throwable) {
+        promise.reject("DERIVE_ERROR", "Failed to derive public key: ${e.message}", e)
       }
     }
   }
 
   @ReactMethod
   fun blake2bHash(inputHex: String, outLen: Int, promise: Promise) {
-    CoroutineScope(Dispatchers.Default).launch {
+    scope.launch {
       try {
         val hexResult = blake2bHexSync(inputHex, outLen)
         promise.resolve(hexResult)
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject("BLAKE2B_ERROR", "Failed to compute blake2b: ${e.message}", e)
       }
     }
@@ -94,7 +104,8 @@ class ApolloModule(reactContext: ReactApplicationContext) :
   fun derivePublicKeySync(pubKeyHex: String, role: Int, index: Int): String {
     return try {
       deriveKeyHex(pubKeyHex, role, index)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
+      Log.e(TAG, "derivePublicKeySync failed", e)
       ""
     }
   }
@@ -103,7 +114,8 @@ class ApolloModule(reactContext: ReactApplicationContext) :
   fun blake2bHashSync(inputHex: String, outLen: Int): String {
     return try {
       blake2bHexSync(inputHex, outLen)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
+      Log.e(TAG, "blake2bHashSync failed", e)
       ""
     }
   }
@@ -122,7 +134,7 @@ class ApolloModule(reactContext: ReactApplicationContext) :
     outLen: Int,
     promise: Promise
   ) {
-    CoroutineScope(Dispatchers.Default).launch {
+    scope.launch {
       var password: ByteArray? = null
       var out: ByteArray? = null
       try {
@@ -140,7 +152,7 @@ class ApolloModule(reactContext: ReactApplicationContext) :
         )
         generator.generateBytes(password, out, 0, outLen)
         promise.resolve(out.toHex())
-      } catch (e: Exception) {
+      } catch (e: Throwable) {
         promise.reject("ARGON2_ERROR", "Failed to compute argon2id: ${e.message}", e)
       } finally {
         password?.fill(0)
@@ -149,6 +161,9 @@ class ApolloModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  private companion object {
+    const val TAG = "ApolloModule"
+  }
 }
 
 fun String.hexToByteArray(): ByteArray {

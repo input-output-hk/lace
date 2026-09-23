@@ -4,7 +4,7 @@
  * realistic input the price chart pipeline sees. Fixed epoch + arithmetic
  * walk — no Date.now()/Math.random().
  */
-import type { PriceDataPoint } from '../../src';
+import type { PriceDataPoint } from '@lace-contract/token-pricing';
 
 const BASE_TS_UTC = Date.UTC(2025, 5, 1);
 const MS_PER_HOUR = 3_600_000;

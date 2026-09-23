@@ -125,9 +125,6 @@
           "env": "MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL"
         },
         {
-          "env": "MIDNIGHT_GLOBAL_TERMS_AND_CONDITIONS_URL"
-        },
-        {
           "env": "LACE_TERMS_OF_USE_URL"
         },
         {

@@ -8,6 +8,7 @@ import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { FEATURE_FLAG_MIDNIGHT_SHIELDED_ACTIVITY_ROWS } from '../../../src/const';
 import {
   loadActivityDetails,
   mapTxHistoryEntryToActivity,
@@ -24,27 +25,36 @@ import type { WalletEntry } from '@midnightntwrk/wallet-sdk';
 
 type UnshieldedUtxoList = NonNullable<WalletEntry['unshielded']>['spentUtxos'];
 
+type ColdFunction = Parameters<Parameters<typeof testSideEffect>[1]>[0]['cold'];
+
+/** Feature state for updateActivities; pass flags to enable the toggle. */
+const featuresState = (cold: ColdFunction, featureFlags: unknown[] = []) => ({
+  features: {
+    selectLoadedFeatures$: cold('a', {
+      a: { featureFlags, modules: [] },
+    }),
+    selectNextFeatureFlags$: cold(''),
+  },
+});
+
 const toWalletMap = (wallet: MidnightWallet): MidnightWalletsByAccountId => ({
   [wallet.accountId]: wallet,
 });
 
 const mockGetMidnightWallet = (wallet: MidnightWallet) => () => of(wallet);
 
-const {
-  mockBuildTokenBalanceChangesFromUtxos,
-  mockGetAddressFromUtxos,
-  mockFormatFee,
-} = vi.hoisted(() => ({
-  mockBuildTokenBalanceChangesFromUtxos: vi.fn(),
-  mockGetAddressFromUtxos: vi.fn(),
-  mockFormatFee: vi.fn(),
-}));
+const { mockDeriveUnshieldedActivity, mockGetAddressFromUtxos, mockFormatFee } =
+  vi.hoisted(() => ({
+    mockDeriveUnshieldedActivity: vi.fn(),
+    mockGetAddressFromUtxos: vi.fn(),
+    mockFormatFee: vi.fn(),
+  }));
 
 vi.mock('../../../src/store/utils/activities', async importOriginal => {
   const actual = await importOriginal<typeof ActivitiesUtils>();
   return {
     ...actual,
-    buildTokenBalanceChangesFromUtxos: mockBuildTokenBalanceChangesFromUtxos,
+    deriveUnshieldedActivity: mockDeriveUnshieldedActivity,
     getAddressFromUtxos: mockGetAddressFromUtxos,
     formatFee: mockFormatFee,
   };
@@ -78,17 +88,34 @@ const createMockTxHistoryEntry = (
   };
 };
 
+const unshieldedUtxo: UnshieldedUtxoList[number] = {
+  value: 1n,
+  owner: 'own-addr',
+  tokenType: 'token',
+  intentHash: 'ih',
+  outputIndex: 0,
+};
+
 describe('updateActivities', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockBuildTokenBalanceChangesFromUtxos.mockReturnValue([]);
+    mockDeriveUnshieldedActivity.mockReturnValue({
+      type: ActivityType.Receive,
+      tokenBalanceChanges: [],
+    });
   });
 
   it('dispatches upsertActivities, setHasLoadedOldestEntry, and incrementDesiredLoadedActivitiesCount', () => {
     const accountId = AccountId('accountId');
     const activities = [
-      createMockTxHistoryEntry({ hash: 'hash1' }),
-      createMockTxHistoryEntry({ hash: 'hash2' }),
+      createMockTxHistoryEntry({
+        hash: 'hash1',
+        createdUtxos: [unshieldedUtxo],
+      }),
+      createMockTxHistoryEntry({
+        hash: 'hash2',
+        createdUtxos: [unshieldedUtxo],
+      }),
     ];
     testSideEffect(updateActivities, ({ cold, expectObservable }) => ({
       dependencies: {
@@ -101,6 +128,7 @@ describe('updateActivities', () => {
           } as unknown as MidnightWallet),
         }),
       },
+      stateObservables: featuresState(cold) as never,
       assertion: sideEffect$ => {
         expectObservable(sideEffect$).toBe('(abc)', {
           a: actions.activities.upsertActivities({
@@ -131,7 +159,7 @@ describe('updateActivities', () => {
     }));
   });
 
-  it('calls buildTokenBalanceChangesFromUtxos with entry createdUtxos and spentUtxos', () => {
+  it('derives type and balance changes from the entry unshielded utxos', () => {
     const accountId = AccountId('accountId');
     const createdUtxos = [
       {
@@ -163,6 +191,7 @@ describe('updateActivities', () => {
           } as unknown as MidnightWallet),
         }),
       },
+      stateObservables: featuresState(cold) as never,
       assertion: sideEffect$ => {
         expectObservable(sideEffect$).toBe('(abc)', {
           a: actions.activities.upsertActivities({
@@ -187,16 +216,17 @@ describe('updateActivities', () => {
           }),
         });
         flush();
-        expect(mockBuildTokenBalanceChangesFromUtxos).toHaveBeenCalledWith(
+        expect(mockDeriveUnshieldedActivity).toHaveBeenCalledWith({
+          status: 'SUCCESS',
           createdUtxos,
           spentUtxos,
-          NetworkId.NetworkId.Preview,
-        );
+          networkId: NetworkId.NetworkId.Preview,
+        });
       },
     }));
   });
 
-  it('includes tokenBalanceChanges from buildTokenBalanceChangesFromUtxos', () => {
+  it('includes tokenBalanceChanges from deriveUnshieldedActivity', () => {
     const accountId = AccountId('accountId');
     const createdUtxos = [
       {
@@ -216,7 +246,10 @@ describe('updateActivities', () => {
         amount: BigNumber(100n),
       },
     ];
-    mockBuildTokenBalanceChangesFromUtxos.mockReturnValue(tokenBalanceChanges);
+    mockDeriveUnshieldedActivity.mockReturnValue({
+      type: ActivityType.Receive,
+      tokenBalanceChanges,
+    });
 
     testSideEffect(updateActivities, ({ cold, expectObservable, flush }) => ({
       dependencies: {
@@ -237,6 +270,7 @@ describe('updateActivities', () => {
           } as unknown as MidnightWallet),
         }),
       },
+      stateObservables: featuresState(cold) as never,
       assertion: sideEffect$ => {
         expectObservable(sideEffect$).toBe('(abc)', {
           a: actions.activities.upsertActivities({
@@ -261,11 +295,161 @@ describe('updateActivities', () => {
           }),
         });
         flush();
-        expect(mockBuildTokenBalanceChangesFromUtxos).toHaveBeenCalledWith(
+        expect(mockDeriveUnshieldedActivity).toHaveBeenCalledWith({
+          status: 'SUCCESS',
           createdUtxos,
           spentUtxos,
-          NetworkId.NetworkId.Preview,
-        );
+          networkId: NetworkId.NetworkId.Preview,
+        });
+      },
+    }));
+  });
+
+  it('suppresses shielded-only entries from display and purges any stored row for them', () => {
+    const accountId = AccountId('accountId');
+    testSideEffect(updateActivities, ({ cold, expectObservable }) => ({
+      dependencies: {
+        actions,
+        midnightWallets$: cold('a', {
+          a: toWalletMap({
+            accountId,
+            networkId: NetworkId.NetworkId.Preview,
+            transactionHistory$: cold('a', {
+              a: [
+                createMockTxHistoryEntry({
+                  hash: 'unshielded',
+                  createdUtxos: [unshieldedUtxo],
+                }),
+                createMockTxHistoryEntry({ hash: 'shielded-only' }),
+              ],
+            }),
+          } as unknown as MidnightWallet),
+        }),
+      },
+      stateObservables: featuresState(cold) as never,
+      assertion: sideEffect$ => {
+        expectObservable(sideEffect$).toBe('(abcd)', {
+          a: actions.activities.upsertActivities({
+            accountId,
+            activities: [
+              expect.objectContaining({ activityId: 'unshielded' }) as Activity,
+            ],
+          }),
+          b: actions.activities.removeActivities({
+            accountId,
+            activityIds: ['shielded-only'],
+          }),
+          c: actions.activities.setHasLoadedOldestEntry({
+            accountId,
+            hasLoadedOldestEntry: true,
+          }),
+          d: actions.activities.setDesiredLoadedActivitiesCount({
+            accountId,
+            desiredLoadedActivitiesCount: 1,
+          }),
+        });
+      },
+    }));
+  });
+
+  it('shows shielded-only entries, and purges nothing, when the flag is on', () => {
+    const accountId = AccountId('accountId');
+    testSideEffect(updateActivities, ({ cold, expectObservable }) => ({
+      dependencies: {
+        actions,
+        midnightWallets$: cold('a', {
+          a: toWalletMap({
+            accountId,
+            networkId: NetworkId.NetworkId.Preview,
+            transactionHistory$: cold('a', {
+              a: [
+                createMockTxHistoryEntry({
+                  hash: 'unshielded',
+                  createdUtxos: [unshieldedUtxo],
+                }),
+                createMockTxHistoryEntry({ hash: 'shielded-only' }),
+              ],
+            }),
+          } as unknown as MidnightWallet),
+        }),
+      },
+      stateObservables: featuresState(cold, [
+        { key: FEATURE_FLAG_MIDNIGHT_SHIELDED_ACTIVITY_ROWS },
+      ]) as never,
+      assertion: sideEffect$ => {
+        expectObservable(sideEffect$).toBe('(abc)', {
+          a: actions.activities.upsertActivities({
+            accountId,
+            activities: [
+              expect.objectContaining({ activityId: 'unshielded' }) as Activity,
+              expect.objectContaining({
+                activityId: 'shielded-only',
+              }) as Activity,
+            ],
+          }),
+          b: actions.activities.setHasLoadedOldestEntry({
+            accountId,
+            hasLoadedOldestEntry: true,
+          }),
+          c: actions.activities.setDesiredLoadedActivitiesCount({
+            accountId,
+            desiredLoadedActivitiesCount: 2,
+          }),
+        });
+      },
+    }));
+  });
+
+  it('keeps a net-zero self-transfer visible while the suppression is active', () => {
+    // A self-transfer has unshielded utxos that net to zero; a shielded-only
+    // entry has none at all. Gating on presence, not on the net, is what keeps
+    // the two apart.
+    const accountId = AccountId('accountId');
+    mockDeriveUnshieldedActivity.mockReturnValue({
+      type: ActivityType.Self,
+      tokenBalanceChanges: [],
+    });
+    testSideEffect(updateActivities, ({ cold, expectObservable }) => ({
+      dependencies: {
+        actions,
+        midnightWallets$: cold('a', {
+          a: toWalletMap({
+            accountId,
+            networkId: NetworkId.NetworkId.Preview,
+            transactionHistory$: cold('a', {
+              a: [
+                createMockTxHistoryEntry({
+                  hash: 'self-transfer',
+                  createdUtxos: [unshieldedUtxo],
+                  spentUtxos: [unshieldedUtxo],
+                }),
+              ],
+            }),
+          } as unknown as MidnightWallet),
+        }),
+      },
+      stateObservables: featuresState(cold) as never,
+      assertion: sideEffect$ => {
+        expectObservable(sideEffect$).toBe('(abc)', {
+          a: actions.activities.upsertActivities({
+            accountId,
+            activities: [
+              expect.objectContaining({
+                activityId: 'self-transfer',
+                type: ActivityType.Self,
+                tokenBalanceChanges: [],
+              }) as Activity,
+            ],
+          }),
+          b: actions.activities.setHasLoadedOldestEntry({
+            accountId,
+            hasLoadedOldestEntry: true,
+          }),
+          c: actions.activities.setDesiredLoadedActivitiesCount({
+            accountId,
+            desiredLoadedActivitiesCount: 1,
+          }),
+        });
       },
     }));
   });
@@ -274,7 +458,10 @@ describe('updateActivities', () => {
 describe('loadActivityDetails', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockBuildTokenBalanceChangesFromUtxos.mockReturnValue([]);
+    mockDeriveUnshieldedActivity.mockReturnValue({
+      type: ActivityType.Receive,
+      tokenBalanceChanges: [],
+    });
     mockGetAddressFromUtxos.mockReturnValue('');
     mockFormatFee.mockImplementation((f: unknown) => {
       if (f === null || f === undefined) return '0';
@@ -435,7 +622,7 @@ describe('loadActivityDetails', () => {
     });
   });
 
-  it('calls buildTokenBalanceChangesFromUtxos, getAddressFromUtxos, formatFee with entry data', () => {
+  it('derives activity, address and fee from entry data', () => {
     const accountId = AccountId('accountId');
     const activityId = 'activity1';
     const createdUtxos = [
@@ -485,11 +672,12 @@ describe('loadActivityDetails', () => {
             a: expect.any(Object),
           });
           flush();
-          expect(mockBuildTokenBalanceChangesFromUtxos).toHaveBeenCalledWith(
+          expect(mockDeriveUnshieldedActivity).toHaveBeenCalledWith({
+            status: 'SUCCESS',
             createdUtxos,
             spentUtxos,
-            NetworkId.NetworkId.Preview,
-          );
+            networkId: NetworkId.NetworkId.Preview,
+          });
           expect(mockGetAddressFromUtxos).toHaveBeenCalledWith(
             createdUtxos,
             spentUtxos,

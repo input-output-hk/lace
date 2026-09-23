@@ -99,11 +99,12 @@ export {
   type NightDesignationTxBlueprint,
 } from './builders';
 
+export { dustAddressToCoinPubkeyHex } from './dust-address-decode';
+
 export {
   CardanoDustNetwork,
   MidnightCoinPubkey,
   MidnightCoinPubkeyError,
-  MIDNIGHT_COIN_PUBKEY_LENGTH,
   MIDNIGHT_DUST_ADDRESS_MAX_BYTES,
   CardanoStakeKeyHash,
   CardanoStakeKeyHashError,

@@ -13,15 +13,19 @@ import type { ErrorObject, StateObject } from '@lace-lib/util-store';
 // Cardano blockchain module's build side-effect maps the action to
 // the local `TransactionBuilder` and reports the unsigned CBOR.
 //
-// State machine:
-//   Idle → Building → AwaitingConfirmation → Processing → Success
-//                  ↘ Error              ↘ Error          ↘ Error
+// State machine (happy path):
+//   Idle → Building → Summary → AwaitingConfirmation → Processing → Success
+// Building, AwaitingConfirmation, and Processing each fail to Error.
 //
-// `designationRequested` carries only serializable build inputs (the
-// action discriminant + dust pubkey hex + optional script-withdrawable
-// amount); the build side-effect resolves the rest from account state +
-// the provider, runs the tx-builder, and reports via `buildCompleted`.
-// The slice owns build + confirm + submit via tx-executor.
+// Signing fires when the flow reaches `AwaitingConfirmation`, so `Summary`
+// gates it behind an explicit user `confirmed` — do not route `Building`
+// straight to `AwaitingConfirmation`; the designation is irreversible.
+//
+// `designationRequested` carries only the user's intent (the action
+// discriminant + the dust pubkey hex it points at); the build side-effect
+// resolves every chain fact — registration UTxO, script reward account,
+// protocol parameters, tip — itself, runs the tx-builder, and reports via
+// `buildCompleted`. The slice owns build + confirm + submit via tx-executor.
 // =====================================================================
 
 export type NightDesignationAction = 'deregister' | 'designate' | 'update';
@@ -52,13 +56,21 @@ export type NightDesignationStateBuilding = StateObject<
     accountId: AccountId;
     action: NightDesignationAction;
     dustPubkeyHex?: string;
-    /**
-     * Lovelace withdrawable from the script reward account, as a decimal
-     * string (serializable — no BigInt in state). Set for `update` (the
-     * only action that withdraws); the build side-effect reads it to size
-     * the script withdrawal.
-     */
-    scriptWithdrawableLovelace?: string;
+  }
+>;
+
+/**
+ * Review-step payload: the built tx's fee breakdown + unsigned CBOR (same
+ * shape as `AwaitingConfirmation`) so the sheet can show the fee + target.
+ */
+export type NightDesignationStateSummary = StateObject<
+  'Summary',
+  {
+    accountId: AccountId;
+    action: NightDesignationAction;
+    dustPubkeyHex?: string;
+    fees: FeeEntry[];
+    serializedTx: string;
   }
 >;
 
@@ -68,8 +80,8 @@ export type NightDesignationStateAwaitingConfirmation = StateObject<
     accountId: AccountId;
     action: NightDesignationAction;
     /**
-     * 32-byte hex of the Midnight coin pubkey written into the new
-     * DustMappingDatum. Set for `designate` and `update`; absent for
+     * Hex of the variable-length (≤33-byte) Midnight dust-address payload
+     * written into the new DustMappingDatum. Set for `designate` and `update`; absent for
      * `deregister` (no new datum — existing one is burned). Carried
      * through to the pending activity metadata so the UI can show
      * the designation target while the tx is in flight.
@@ -119,4 +131,5 @@ export type NightDesignationFlowSliceState =
   | NightDesignationStateError
   | NightDesignationStateIdle
   | NightDesignationStateProcessing
-  | NightDesignationStateSuccess;
+  | NightDesignationStateSuccess
+  | NightDesignationStateSummary;

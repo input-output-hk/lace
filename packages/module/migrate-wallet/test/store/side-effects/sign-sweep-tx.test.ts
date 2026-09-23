@@ -41,6 +41,9 @@ const applyVkeyWitnesses = vi.hoisted(() =>
 vi.mock('@lace-contract/cardano-context', () => ({
   createCardanoKeyAgentFromEncryptedRoot: createKeyAgent,
   applyVkeyWitnesses,
+  // The collateral resolver the sweep hands its signer; nothing here signs
+  // collateral, so an inert one is enough.
+  createInputResolver: () => ({ resolveInput: async () => null }),
 }));
 
 const FAKE_SECRET = { secret: true } as never;

@@ -4,10 +4,15 @@ import { TokenId } from '@lace-contract/tokens';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
+import {
+  MidnightBech32m,
+  UnshieldedAddress,
+} from '@midnightntwrk/wallet-sdk-address-format';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  constructShieldedTransaction,
   makeBuildTx,
   buildTxDependencies,
 } from '../../../src/store/tx-executor/build-tx';
@@ -18,7 +23,10 @@ import type {
   MidnightSpecificTokenMetadata,
   MidnightSpecificSendFlowData,
 } from '@lace-contract/midnight-context';
-import type { BuildTxParams } from '@lace-contract/tx-executor/src/types';
+import type {
+  BuildTxParams,
+  TxParamsBundle,
+} from '@lace-contract/tx-executor/src/types';
 import type { Observable } from 'rxjs';
 import type { RunHelpers } from 'rxjs/testing';
 
@@ -365,5 +373,198 @@ describe('blockchain-midnight build-tx', () => {
         });
       },
     );
+  });
+});
+
+describe('multi-token transfers (LW-15154)', () => {
+  const TOKEN_A = TokenId('a'.repeat(64));
+  const TOKEN_B = TokenId('b'.repeat(64));
+
+  const transfer = (
+    tokenId: TokenId,
+    amount: bigint,
+    kind: 'shielded' | 'unshielded' = 'shielded',
+  ) => ({
+    token: {
+      address: stubData.midnightShieldedAddress,
+      accountId: stubData.accountId,
+      available: BigNumber(1_000n),
+      blockchainName: 'Midnight' as const,
+      decimals: 0,
+      displayLongName: '',
+      displayShortName: '',
+      pending: BigNumber(0n),
+      tokenId,
+      metadata: {
+        blockchainSpecific: { kind },
+        decimals: 0,
+      },
+    },
+    normalizedAmount: BigNumber(amount),
+  });
+
+  const twoTokenParams = [
+    {
+      address: stubData.midnightShieldedAddress,
+      tokenTransfers: [transfer(TOKEN_A, 5n), transfer(TOKEN_B, 7n)],
+    },
+  ] as const;
+
+  it('serialises every transfer, not only the first', () => {
+    const serialized = buildTxDependencies.serialiseTx(twoTokenParams);
+
+    const parsed = JSON.parse(
+      Buffer.from(serialized, 'hex').toString('utf8'),
+    ) as { transfers: { amount: string; type: string }[] };
+
+    expect(parsed.transfers).toEqual([
+      expect.objectContaining({ amount: '5', type: TOKEN_A }),
+      expect.objectContaining({ amount: '7', type: TOKEN_B }),
+    ]);
+  });
+
+  it('builds a shielded transaction with an output and value delta per token', () => {
+    const transaction = buildTxDependencies.buildTransaction({
+      blockchainSpecificSendFlowData: { flowType: 'send' },
+      networkId: stubData.networkId,
+      nightUtxos: [],
+      nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
+      txParams: twoTokenParams,
+    });
+
+    const offer = (
+      transaction as unknown as {
+        guaranteedOffer: {
+          outputs: unknown[];
+          deltas: Map<string, bigint>;
+        };
+      }
+    ).guaranteedOffer;
+
+    expect(offer.outputs).toHaveLength(2);
+    expect(offer.deltas.get(TOKEN_A)).toBe(-5n);
+    expect(offer.deltas.get(TOKEN_B)).toBe(-7n);
+  });
+
+  it('builds an unshielded transaction with an output per token, stripping the unshielded token prefix', () => {
+    const RAW_A = 'a'.repeat(64);
+    const RAW_B = 'b'.repeat(64);
+
+    const transaction = buildTxDependencies.buildTransaction({
+      blockchainSpecificSendFlowData: { flowType: 'send' },
+      networkId: stubData.networkId,
+      nightUtxos: [],
+      nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
+      txParams: [
+        {
+          address: stubData.midnightUnshieldedAddress,
+          tokenTransfers: [
+            transfer(
+              TokenId(`unshielded-${stubData.networkId}${RAW_A}`),
+              5n,
+              'unshielded',
+            ),
+            transfer(
+              TokenId(`unshielded-${stubData.networkId}${RAW_B}`),
+              7n,
+              'unshielded',
+            ),
+          ],
+        },
+      ] as const,
+    });
+
+    const receiver = UnshieldedAddress.codec
+      .decode(
+        stubData.networkId,
+        MidnightBech32m.parse(stubData.midnightUnshieldedAddress),
+      )
+      .data.toString('hex');
+    const offers = [
+      ...(
+        transaction as unknown as {
+          intents: Map<
+            number,
+            {
+              guaranteedUnshieldedOffer: {
+                outputs: { value: bigint; owner: string; type: string }[];
+              };
+            }
+          >;
+        }
+      ).intents.values(),
+    ].map(({ guaranteedUnshieldedOffer }) => guaranteedUnshieldedOffer);
+
+    expect(offers).toHaveLength(1);
+    expect(offers[0].outputs).toEqual([
+      { value: 5n, owner: receiver, type: RAW_A },
+      { value: 7n, owner: receiver, type: RAW_B },
+    ]);
+  });
+
+  it('rejects a bundle that contains no token transfers', () => {
+    expect(() =>
+      buildTxDependencies.buildTransaction({
+        blockchainSpecificSendFlowData: { flowType: 'send' },
+        networkId: stubData.networkId,
+        nightUtxos: [],
+        nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
+        // The tuple type forbids an empty bundle; the runtime guard covers
+        // payloads that bypass it (deserialized or externally sourced).
+        txParams: [
+          {
+            address: stubData.midnightShieldedAddress,
+            tokenTransfers: [],
+          },
+        ] as unknown as TxParamsBundle<MidnightSpecificTokenMetadata>,
+      }),
+    ).toThrow('At least one token transfer is required');
+  });
+
+  it('constructShieldedTransaction rejects an empty transfer list', () => {
+    expect(() =>
+      constructShieldedTransaction({
+        networkId: stubData.networkId,
+        transfers: [],
+      }),
+    ).toThrow('At least one token transfer is required');
+  });
+
+  it('rejects mixing shielded and unshielded transfers in one transaction', () => {
+    expect(() =>
+      buildTxDependencies.buildTransaction({
+        blockchainSpecificSendFlowData: { flowType: 'send' },
+        networkId: stubData.networkId,
+        nightUtxos: [],
+        nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
+        txParams: [
+          {
+            address: stubData.midnightShieldedAddress,
+            tokenTransfers: [
+              transfer(TOKEN_A, 5n),
+              transfer(TOKEN_B, 7n, 'unshielded'),
+            ],
+          },
+        ] as const,
+      }),
+    ).toThrow(/[Mm]ixed/);
+  });
+
+  it('rejects a transfer whose token has no metadata', () => {
+    const metadatalessTransfer = transfer(TOKEN_B, 7n);
+    expect(() =>
+      buildTxDependencies.serialiseTx([
+        {
+          address: stubData.midnightShieldedAddress,
+          tokenTransfers: [
+            transfer(TOKEN_A, 5n),
+            {
+              ...metadatalessTransfer,
+              token: { ...metadatalessTransfer.token, metadata: undefined },
+            },
+          ],
+        },
+      ] as const),
+    ).toThrow(/metadata/i);
   });
 });

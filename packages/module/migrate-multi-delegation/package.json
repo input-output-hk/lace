@@ -16,6 +16,7 @@
     "@lace-lib/ui-toolkit": "*"
   },
   "devDependencies": {
-    "@lace-lib/util-dev": "*"
+    "@lace-lib/util-dev": "*",
+    "@lace-lib/util-dev-cardano": "*"
   }
 }

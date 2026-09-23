@@ -238,12 +238,10 @@ export const makeEarnRewardsProcessing =
   ) =>
     firstStateOfStatus(selectEarnRewardsFlowState$, 'Processing').pipe(
       switchMap(state =>
-        // ADR-15 transparent retry. Each attempt must be a FRESH submitTx call:
-        // the executor entry-point shareReplay()s per call, so re-subscribing
-        // one call would replay its cached failure instead of re-submitting.
-        // defer mints a new execution per attempt; re-submitting the identical
-        // signed tx is idempotent at the node. Only retriable folded failures
-        // are thrown — non-retriable ones fall through to the Error state.
+        // defer, not a bare submitTx: the executor shareReplay()s per call, so a
+        // re-subscription replays the cached failure while still re-submitting
+        // under the same executionId. See ADR 15 §1 — re-submitting the identical
+        // signed tx is idempotent at the node.
         defer(() =>
           submitTx(
             {

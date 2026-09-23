@@ -17,11 +17,13 @@ import {
   createTransactionInspector,
   fetchAssetsMetadata,
 } from '../../../src/store/helpers/transaction-inspectors';
+import { CardanoRewardAccount } from '../../../src/types';
 
 import type { BuildCardanoTransactionParams } from '../../../src/store/helpers/map-transaction-to-activity-details';
 import type {
   CardanoTokenMetadata,
   ExtendedTxDetails,
+  RequiredProtocolParameters,
   TxOutputInput,
 } from '../../../src/types';
 import type {
@@ -154,6 +156,27 @@ describe('mapTransactionToActivityDetails', () => {
     let mockTransformedInputOutput: TxOutputInput;
     let mockSummaryInspection: TransactionSummaryInspection;
 
+    const mockRewardAccount = CardanoRewardAccount(
+      'stake_test1uqrw9tjymlm8wrwq7jk68n6v7fs9qz8z0tkdkve26dylmfc2ux2hj',
+    );
+    const mockProtocolParameters = {
+      poolDeposit: 500_000_000,
+      stakeKeyDeposit: 2_000_000,
+    } as RequiredProtocolParameters;
+
+    /**
+     * The net change is recomputed from the body, so a summary reporting a gain
+     * needs an own output that accounts for it.
+     */
+    const withOwnOutput = (address: Cardano.PaymentAddress, coins: bigint) =>
+      ({
+        ...mockTxDetailsProviderResponse,
+        body: {
+          ...mockTxDetailsProviderResponse.body,
+          outputs: [{ address, value: { coins } }] as Cardano.TxOut[],
+        },
+      } as ExtendedTxDetails);
+
     beforeEach(() => {
       // Tx details fetched by the provider that will be mapped directly to the result
       mockTxDetailsProviderResponse = {
@@ -197,6 +220,12 @@ describe('mapTransactionToActivityDetails', () => {
           ],
         },
       };
+
+      mapParams = {
+        ...mapParams,
+        rewardAccount: mockRewardAccount,
+        protocolParameters: mockProtocolParameters,
+      } as MapActivityToActivityDetailsParams;
 
       // Summary activity used to fetch the details
       mockActivity = {
@@ -434,7 +463,7 @@ describe('mapTransactionToActivityDetails', () => {
       mapParams = {
         ...mapParams,
         activity: mockActivity,
-        txDetails: mockTxDetailsProviderResponse as ExtendedTxDetails,
+        txDetails: withOwnOutput(ownAddr, 5_000_000n),
         accountAddresses: [ownAddr],
       };
 
@@ -452,6 +481,83 @@ describe('mapTransactionToActivityDetails', () => {
         expect(result.value.blockchainSpecific?.txSummary?.[0]?.type).toBe(
           ActivityType.Receive,
         );
+      }
+    });
+
+    // The per-address rows are picked by the same net change, so a wrong net
+    // change puts the wrong address in them.
+    it('credits the foreign recipient, not the foreign sender, once the net change is recomputed', async () => {
+      const ownAddr = Cardano.PaymentAddress(
+        'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+      );
+      const foreignAddr = Cardano.PaymentAddress(
+        'addr_test1qrr7pflnkppvp49sl2hjs9v255ydycp8zxuxzfjw03vev9ns6cdlwymh7v9kr8cd8cy5vx8l7h6v9da84ml2cjd90fusnjsh8d',
+      );
+      const sdkValue = (coins: bigint) => ({
+        coins,
+        assets: new Map<Cardano.AssetId, AssetInfoWithAmount>(),
+      });
+      const ownInput = {
+        txId: Cardano.TransactionId(
+          '4444444444444444444444444444444444444444444444444444444444444444',
+        ),
+        index: 0,
+        address: ownAddr,
+      };
+
+      vi.mocked(createTransactionInspector).mockReturnValue(async () =>
+        Promise.resolve({
+          summary: {
+            ...mockSummaryInspection,
+            coins: 399_000_000n,
+            resolvedInputs: [],
+            returnedDeposit: 0n,
+            unresolved: {
+              inputs: [{ txId: ownInput.txId, index: ownInput.index }],
+              value: { coins: 500_000_000n } as Cardano.Value,
+            },
+          },
+          metadata: '',
+          tokenTransfer: {
+            fromAddress: new Map([[foreignAddr, sdkValue(-50_000_000n)]]),
+            toAddress: new Map([
+              [ownAddr, sdkValue(399_000_000n)],
+              [foreignAddr, sdkValue(100_000_000n)],
+            ]),
+          },
+        }),
+      );
+
+      mapParams = {
+        ...mapParams,
+        activity: mockActivity,
+        txDetails: {
+          ...mockTxDetailsProviderResponse,
+          body: {
+            ...mockTxDetailsProviderResponse.body,
+            inputs: [ownInput],
+            outputs: [
+              { address: ownAddr, value: { coins: 399_000_000n } },
+              { address: foreignAddr, value: { coins: 100_000_000n } },
+            ] as Cardano.TxOut[],
+          },
+        } as ExtendedTxDetails,
+        accountAddresses: [ownAddr],
+      };
+
+      const result = await firstValueFrom(
+        mapTransactionToActivityDetails(mapParams),
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        expect(result.value.blockchainSpecific?.txSummary).toEqual([
+          {
+            addr: [foreignAddr],
+            amount: 100_000_000n,
+            type: ActivityType.Send,
+          },
+        ]);
       }
     });
 
@@ -484,7 +590,20 @@ describe('mapTransactionToActivityDetails', () => {
       mapParams = {
         ...mapParams,
         activity: mockActivity,
-        txDetails: mockTxDetailsProviderResponse as ExtendedTxDetails,
+        // A 5 ADA withdrawal into a 10 ADA own output: withdrawn rewards move
+        // between the account's own buckets, so the net gain is 5 ADA.
+        txDetails: {
+          ...withOwnOutput(ownAddr, 10_000_000n),
+          body: {
+            ...withOwnOutput(ownAddr, 10_000_000n).body,
+            withdrawals: [
+              {
+                stakeAddress: Cardano.RewardAccount(mockRewardAccount),
+                quantity: 5_000_000n,
+              },
+            ],
+          },
+        } as ExtendedTxDetails,
         accountAddresses: [ownAddr],
       };
 

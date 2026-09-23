@@ -1,0 +1,41 @@
+{
+  "name": "@lace-contract/realfi-staking",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/core": "*",
+    "@cardano-sdk/util": "*",
+    "@lace-contract/activities": "*",
+    "@lace-contract/addresses": "*",
+    "@lace-contract/analytics": "*",
+    "@lace-contract/authentication-prompt": "*",
+    "@lace-contract/cardano-context": "*",
+    "@lace-contract/failures": "*",
+    "@lace-contract/feature": "*",
+    "@lace-contract/i18n": "*",
+    "@lace-contract/module": "*",
+    "@lace-contract/network": "*",
+    "@lace-contract/swap-provider": "*",
+    "@lace-contract/token-pricing": "*",
+    "@lace-contract/tokens": "*",
+    "@lace-contract/tx-executor": "*",
+    "@lace-contract/wallet-repo": "*",
+    "@lace-lib/util": "*",
+    "@lace-lib/util-provider": "*",
+    "@lace-lib/util-store": "*",
+    "@realfi-co/realfi-partner-sdk": "2.23.0",
+    "@reduxjs/toolkit": "*",
+    "backoff-rxjs": "*",
+    "reselect": "*",
+    "rxjs": "*",
+    "type-fest": "*"
+  },
+  "devDependencies": {
+    "@lace-contract/app": "*",
+    "@lace-lib/util-dev": "*",
+    "redux-persist": "*"
+  }
+}

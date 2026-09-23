@@ -3,7 +3,7 @@ import { DEFAULT_CURRENCY } from '@lace-contract/token-pricing';
 import { COINGECKO_ENDPOINTS } from './const';
 
 import type { CoinGeckoCoinEntry, CoinGeckoPriceData } from './types';
-import type { TimeRange } from '@lace-lib/ui-toolkit';
+import type { TimeRange } from '@lace-contract/token-pricing';
 
 /**
  * Normalises a fiat currency code to a lowercase ISO-style string.

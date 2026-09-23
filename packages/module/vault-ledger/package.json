@@ -28,6 +28,7 @@
     "ledger-bitcoin": "^0.3.0"
   },
   "devDependencies": {
+    "@lace-lib/util-dev-cardano": "*",
     "ecpair": "^3.0.0"
   }
 }

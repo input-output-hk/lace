@@ -69,6 +69,10 @@ export const makeSubmitTx =
           ({
             success: true,
             txId,
+            // WalletFacade.submitTransaction waits for the 'Finalized' stage,
+            // so resolving here means the tx is already on chain — and txId is
+            // tx.identifiers().at(-1), not the hash the synced row is keyed by.
+            awaitsFinalization: true,
           } satisfies TxSubmissionResult),
       ),
       catchError((error: Error) => {

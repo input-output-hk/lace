@@ -9,6 +9,7 @@ import { AddressType } from '@cardano-sdk/key-management';
 import {
   CardanoInMemoryTransactionSigner,
   createCardanoKeyAgentFromEncryptedRoot,
+  withCollateralOwnershipGuard,
 } from '@lace-contract/cardano-context';
 import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { ByteArray, HexBytes, Ok } from '@lace-lib/util';
@@ -23,9 +24,11 @@ import type { SigningResult } from '../src/browser/store/util';
 import type { SenderContext } from '../src/browser/types';
 import type { CardanoDappConnectorApiDependencies } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import type { Ed25519KeyHashHex, Bip32PublicKeyHex } from '@cardano-sdk/crypto';
-import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type { HexBlob } from '@cardano-sdk/util';
-import type { WithCardanoKeyAgent$ } from '@lace-contract/cardano-context';
+import type {
+  CardanoTransactionSignerContext,
+  WithCardanoKeyAgent$,
+} from '@lace-contract/cardano-context';
 import type {
   ActionObservables,
   SideEffectDependencies,
@@ -151,18 +154,20 @@ const withKeyAgent$: WithCardanoKeyAgent$ = use =>
 // from the context the wrapper assembles, so a wrapper regression that dropped
 // knownAddresses (the only route to a witness for a script-only key) would yield
 // zero witnesses and fail these tests rather than passing silently.
+// Wrapped in the collateral-ownership guard exactly as every production
+// factory wraps its signer, so the wrapper's resolver wiring is under test too.
 const realSignerFactory = {
   canSign: () => true,
-  createTransactionSigner: (context: {
-    knownAddresses: GroupedAddress[];
-    utxo: Cardano.Utxo[];
-  }) =>
-    new CardanoInMemoryTransactionSigner({
-      withKeyAgent$,
-      knownAddresses: context.knownAddresses,
-      utxo: context.utxo,
-      auth: { authenticate: () => of(true), accessAuthSecret: vi.fn() },
-    }),
+  createTransactionSigner: (context: CardanoTransactionSignerContext) =>
+    withCollateralOwnershipGuard(
+      new CardanoInMemoryTransactionSigner({
+        withKeyAgent$,
+        knownAddresses: context.knownAddresses,
+        utxo: context.utxo,
+        auth: { authenticate: () => of(true), accessAuthSecret: vi.fn() },
+      }),
+      context,
+    ),
 };
 
 /** Records signer creation without touching a real signer or device. */
@@ -220,6 +225,10 @@ const captureSignTransaction = (
     account?: AnyAccount;
     wallet?: AnyWallet;
     signerFactory?: ReturnType<typeof stubSignerFactory>;
+    /** The collateral resolver's local layer; defaults to `localUtxos`. */
+    ownershipUtxos?: Cardano.Utxo[];
+    /** The provider behind the collateral resolver; silent by default. */
+    resolveInput?: ReturnType<typeof vi.fn>;
   } = {},
 ): {
   signTransaction: SignTransaction;
@@ -270,6 +279,9 @@ const captureSignTransaction = (
     cardanoContext: {
       selectChainId$: of(FIXTURE.chainId),
       selectAvailableAccountUtxos$: of({ [ACCOUNT_ID]: localUtxos }),
+      selectCollateralOwnershipUtxos$: of({
+        [ACCOUNT_ID]: overrides.ownershipUtxos ?? localUtxos,
+      }),
       selectAccountUnspendableUtxos$: of({}),
       selectAccountTransactionHistory$: of({}),
       selectRewardAccountDetails$: of({}),
@@ -291,7 +303,7 @@ const captureSignTransaction = (
     accessAuthSecret: vi.fn(),
     cardanoProvider: {
       submitTx: vi.fn().mockReturnValue(of(Ok('submitted-tx-hash'))),
-      resolveInput: vi.fn(),
+      resolveInput: overrides.resolveInput ?? vi.fn(),
     },
     signerFactory: overrides.signerFactory ?? realSignerFactory,
   };
@@ -311,7 +323,9 @@ const captureSignTransaction = (
     createWalletApi: () =>
       new CardanoDappConnectorApi({
         ...captured.connectorParams!,
-        userConfirmationRequest: async () => ({ isConfirmed: true }),
+        userConfirmationRequest: async () => ({
+          outcome: 'confirmed' as const,
+        }),
       }),
     signingResults,
   };
@@ -388,7 +402,10 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
       name: 'TxSignError',
       code: TxSignErrorCode.ProofGeneration,
     });
-    expect(signingResults).toEqual([]);
+    // Refusing post-consent still has to report: the flow that resolved the
+    // confirmation waits on signingResult$, and requests are served one at a
+    // time, so staying silent here would wedge every request behind this one.
+    expect(signingResults).toEqual([{ type: 'error' }]);
   });
 
   it('rejects a partial sign with ProofGeneration when the script needs a key the wallet does not own', async () => {
@@ -482,7 +499,7 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
       code: TxSignErrorCode.ProofGeneration,
     });
     expect(signerFactory.createTransactionSigner).not.toHaveBeenCalled();
-    expect(signingResults).toEqual([]);
+    expect(signingResults).toEqual([{ type: 'error' }]);
   });
 
   it('lets a Trezor full sign of an own-key-satisfiable script past the gate and creates the signer', async () => {
@@ -498,6 +515,28 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
   });
 });
 
+// Shared by the chained-transaction and collateral-resolution suites below.
+const FOREIGN_ADDRESS =
+  'addr_test1qqt3r9kd56aq9ajynjkz8hdfw3kc0pcv3tpzug8azxls62tvvz7nw9gmznn65g4ksrrfvyzhz52knc3mqxdyya47gz2qmcjmcq' as Cardano.PaymentAddress;
+
+const expectSingleOwnWitness = (witnessSetCbor: string, txCbor: string) => {
+  const signatures = Serialization.TransactionWitnessSet.fromCbor(
+    witnessSetCbor as unknown as HexBlob,
+  ).toCore().signatures;
+  expect(signatures.size).toBe(1);
+  const [[vkeyHex, signatureHex]] = signatures;
+  const publicKey = Ed25519PublicKey.fromHex(vkeyHex);
+  expect(publicKey.hash().hex()).toBe(ownPaymentKeyHash);
+  const txBodyHash = Serialization.Transaction.fromCbor(
+    Serialization.TxCBOR(txCbor),
+  )
+    .body()
+    .hash();
+  expect(
+    publicKey.verify(Ed25519Signature.fromHex(signatureHex), txBodyHash),
+  ).toBe(true);
+};
+
 describe('dApp-connector signTx - chained transactions spending own mempool outputs', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -511,9 +550,6 @@ describe('dApp-connector signTx - chained transactions spending own mempool outp
     { ...PREV_OUTPOINT, address: FIXTURE_ADDRESS },
     { address: FIXTURE_ADDRESS, value: { coins: 10_000_000n } },
   ];
-
-  const FOREIGN_ADDRESS =
-    'addr_test1qqt3r9kd56aq9ajynjkz8hdfw3kc0pcv3tpzug8azxls62tvvz7nw9gmznn65g4ksrrfvyzhz52knc3mqxdyya47gz2qmcjmcq' as Cardano.PaymentAddress;
 
   const buildPlainTxCbor = (
     inputs: Cardano.TxIn[],
@@ -533,24 +569,6 @@ describe('dApp-connector signTx - chained transactions spending own mempool outp
 
   const txIdOf = (cbor: string): Cardano.TransactionId =>
     Serialization.Transaction.fromCbor(Serialization.TxCBOR(cbor)).getId();
-
-  const expectSingleOwnWitness = (witnessSetCbor: string, txCbor: string) => {
-    const signatures = Serialization.TransactionWitnessSet.fromCbor(
-      witnessSetCbor as unknown as HexBlob,
-    ).toCore().signatures;
-    expect(signatures.size).toBe(1);
-    const [[vkeyHex, signatureHex]] = signatures;
-    const publicKey = Ed25519PublicKey.fromHex(vkeyHex);
-    expect(publicKey.hash().hex()).toBe(ownPaymentKeyHash);
-    const txBodyHash = Serialization.Transaction.fromCbor(
-      Serialization.TxCBOR(txCbor),
-    )
-      .body()
-      .hash();
-    expect(
-      publicKey.verify(Ed25519Signature.fromHex(signatureHex), txBodyHash),
-    ).toBe(true);
-  };
 
   it('rejects the chained tx when the source tx was never signed or submitted here', async () => {
     const { signTransaction } = captureSignTransaction();
@@ -649,5 +667,100 @@ describe('dApp-connector signTx - chained transactions spending own mempool outp
       name: 'TxSignError',
       code: TxSignErrorCode.ProofGeneration,
     });
+  });
+});
+
+// The wrapper hands the guard a resolver whose local layer is the ownership
+// view and whose fallback is the provider. These drive that wiring for real:
+// the same case-(b) body is refused or signed depending only on what the
+// provider says about a collateral input the wallet's own view does not hold.
+describe('collateral resolution through the real signTransaction wrapper', () => {
+  const COLLATERAL: Cardano.TxIn = {
+    txId: Cardano.TransactionId(`${'0'.repeat(63)}7`),
+    index: 0,
+  };
+  const collateralOutputAt = (
+    address: Cardano.PaymentAddress,
+  ): Cardano.TxOut => ({
+    address,
+    value: { coins: 5_000_000n },
+  });
+  // Spends an own input (so the real signer has a key path), puts COLLATERAL
+  // up as collateral, and returns it to a foreign address: case (b) iff
+  // COLLATERAL is ours.
+  const caseBTxCbor = Serialization.Transaction.fromCore({
+    id: Cardano.TransactionId(`${'0'.repeat(63)}8`),
+    body: {
+      inputs: [ownInputUtxo[0]],
+      outputs: [{ address: FIXTURE_ADDRESS, value: { coins: 1_000_000n } }],
+      fee: 170_000n,
+      collaterals: [COLLATERAL],
+      totalCollateral: 3_000_000n,
+      collateralReturn: collateralOutputAt(FOREIGN_ADDRESS),
+    },
+    witness: { signatures: new Map() },
+  } as Cardano.Tx).toCbor();
+
+  it('refuses when the ownership view lacks the collateral but the provider resolves it to a wallet address -- the UTxO the wallet has not caught up with', async () => {
+    const resolveInput = vi.fn(() =>
+      of(Ok(collateralOutputAt(FIXTURE_ADDRESS))),
+    );
+    const { signTransaction } = captureSignTransaction([ownInputUtxo], {
+      ownershipUtxos: [ownInputUtxo],
+      resolveInput,
+    });
+
+    await expect(signTransaction(caseBTxCbor, true, ORIGIN)).rejects.toThrow(
+      /an address this wallet doesn't own/,
+    );
+    expect(resolveInput).toHaveBeenCalledWith(
+      COLLATERAL,
+      expect.objectContaining({ chainId: FIXTURE.chainId }),
+    );
+  });
+
+  it('signs when the provider cannot resolve it either: an unidentifiable input is not ours (LW-15506)', async () => {
+    const resolveInput = vi.fn(() => of(Ok(null)));
+    const { signTransaction } = captureSignTransaction([ownInputUtxo], {
+      ownershipUtxos: [ownInputUtxo],
+      resolveInput,
+    });
+
+    const witnessSetCbor = await signTransaction(caseBTxCbor, true, ORIGIN);
+
+    expectSingleOwnWitness(witnessSetCbor, caseBTxCbor);
+  });
+
+  it('signs when the provider proves the collateral foreign (case c), with a real witness', async () => {
+    const resolveInput = vi.fn(() =>
+      of(Ok(collateralOutputAt(FOREIGN_ADDRESS))),
+    );
+    const { signTransaction } = captureSignTransaction([ownInputUtxo], {
+      ownershipUtxos: [ownInputUtxo],
+      resolveInput,
+    });
+
+    const witnessSetCbor = await signTransaction(caseBTxCbor, true, ORIGIN);
+
+    expectSingleOwnWitness(witnessSetCbor, caseBTxCbor);
+  });
+
+  it('never consults the provider when the ownership view holds the collateral', async () => {
+    const resolveInput = vi.fn();
+    const { signTransaction } = captureSignTransaction([ownInputUtxo], {
+      ownershipUtxos: [
+        ownInputUtxo,
+        [
+          { ...COLLATERAL, address: FIXTURE_ADDRESS },
+          collateralOutputAt(FIXTURE_ADDRESS),
+        ] as Cardano.Utxo,
+      ],
+      resolveInput,
+    });
+
+    await expect(signTransaction(caseBTxCbor, true, ORIGIN)).rejects.toThrow(
+      /an address this wallet doesn't own/,
+    );
+    expect(resolveInput).not.toHaveBeenCalled();
   });
 });

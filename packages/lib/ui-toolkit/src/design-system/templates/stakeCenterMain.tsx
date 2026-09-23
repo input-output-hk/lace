@@ -2,7 +2,7 @@ import type { RefreshControlProps } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { spacing } from '../../design-tokens';
 import {
@@ -29,10 +29,19 @@ interface StakeCenterMainProps {
   searchPlaceholder?: string;
   showSearchBar?: boolean;
   networkInfoCard?: NetworkInfoCardProps;
-  stakingStatusCard: StakingStatusCardProps;
+  /**
+   * Aggregate staking status header card. Optional: omitted on the Staking
+   * Center hub (which lists only staking-option cards), present on the Cardano
+   * staking detail page.
+   */
+  stakingStatusCard?: StakingStatusCardProps;
   stakeCards: StakeCardProps[];
   /** Pull-to-refresh control, forwarded to the card list. */
   refreshControl?: React.ReactElement<RefreshControlProps>;
+  /** Back affordance in the header — set when shown as a stack sub-page. */
+  onBack?: () => void;
+  /** Override the header title (defaults to the staking-center title). */
+  title?: string;
 }
 
 export const StakeCenterMain = ({
@@ -45,23 +54,26 @@ export const StakeCenterMain = ({
   stakingStatusCard,
   stakeCards,
   refreshControl,
+  onBack,
+  title,
 }: StakeCenterMainProps) => {
   const { t } = useTranslation();
-  const shouldShowSearch = showSearchBar ?? stakeCards.length > 1;
+  const listData = useMemo(() => stakeCards, [stakeCards]);
+  const shouldShowSearch = showSearchBar ?? listData.length > 1;
 
-  const ListHeaderComponent = useMemo(
-    () => (
+  const ListHeaderComponent = useMemo(() => {
+    if (!networkInfoCard && !stakingStatusCard) return null;
+    return (
       <View style={styles.listHeader}>
         {networkInfoCard && (
           <View style={styles.networkInfoCardWrapper}>
             <NetworkInfoCard {...networkInfoCard} />
           </View>
         )}
-        <StakingStatusCard {...stakingStatusCard} />
+        {stakingStatusCard && <StakingStatusCard {...stakingStatusCard} />}
       </View>
-    ),
-    [networkInfoCard, stakingStatusCard],
-  );
+    );
+  }, [networkInfoCard, stakingStatusCard]);
 
   const keyExtractor = useCallback(
     (item: StakeCardProps, index: number) =>
@@ -86,14 +98,21 @@ export const StakeCenterMain = ({
 
   const { collapseScrollY, onScroll } = usePageHeaderCollapseScroll();
 
+  // On web the @react-navigation/stack card wrapper grows to its content height
+  // instead of clamping to the scene, so flex:1 never gives the FlashList a
+  // bounded box and the page can't scroll (same bug as UsdrStakingDetail). Pin
+  // the body to the window height there; native keeps flex:1 (the host bounds it).
+  const { height: windowHeight } = useWindowDimensions();
+
   const headerSection = useMemo(
     () => (
       <PageHeaderSection
-        title={t('v2.generic.staking.card.title')}
+        title={title ?? t('v2.generic.staking.card.title')}
         reserveSubtitleSpace
         testID="stake-center-header-section"
         collapseScrollY={collapseScrollY}
         stickyInScrollParent
+        onBackPress={onBack}
         contentStyle={
           shouldShowSearch ? undefined : styles.headerSectionContent
         }>
@@ -114,17 +133,22 @@ export const StakeCenterMain = ({
       shouldShowSearch,
       t,
       collapseScrollY,
+      onBack,
+      title,
     ],
   );
 
   return (
     <PageContainerTemplate>
-      <View style={styles.content}>
+      <View
+        style={
+          Platform.OS === 'web' ? { height: windowHeight } : styles.content
+        }>
         <View style={styles.fillSpace}>
           {headerSection}
           <GenericFlashList<StakeCardProps>
             style={styles.list}
-            data={stakeCards}
+            data={listData}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
             ListHeaderComponent={ListHeaderComponent}
@@ -143,6 +167,8 @@ export const StakeCenterMain = ({
 };
 
 const styles = StyleSheet.create({
+  // Native only: flex fills the scene. Web pins an explicit height (inline,
+  // from windowHeight) since the stack card there won't clamp height.
   content: {
     flex: 1,
   },

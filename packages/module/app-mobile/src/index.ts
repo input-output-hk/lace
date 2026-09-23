@@ -7,6 +7,7 @@ import { addressesStoreContract } from '@lace-contract/addresses';
 import {
   appStoreContract,
   blockchainSpecificAppCustomizationsAddonContract,
+  portfolioAnnouncementsAddonContract,
   tabMenuItemsAddonContract,
 } from '@lace-contract/app';
 import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
@@ -76,6 +77,7 @@ const dependsOnContracts = combineContracts([
   featureStoreContract,
   notificationCenterStoreContract,
   onboardingStartWalletDropdownAddonContract,
+  portfolioAnnouncementsAddonContract,
   storageDependencyContract,
   syncStoreContract,
   tokenPricingStoreContract,

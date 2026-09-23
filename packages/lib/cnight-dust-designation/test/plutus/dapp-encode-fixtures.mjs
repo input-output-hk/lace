@@ -58,6 +58,12 @@ const DUST_PUBKEY_HEX_SEQUENTIAL = Array.from({ length: 32 }, (_, index) =>
   index.toString(16).padStart(2, '0'),
 ).join('');
 const SCRIPT_HASH_HEX = 'ff'.repeat(28);
+// A real 33-byte dust_address: the bech32m payload of the
+// `mn_dust_undeployed…` stub (1-byte SCALE prefix 0x73 + 32 scalar
+// bytes). This is the production shape — the synthetic 32-byte vectors
+// above never exercise the 33-byte width.
+const DUST_ADDRESS_HEX_REAL_33 =
+  '7358cbf0deff08a5228ed0203883234d4b77e3837093d5259eee0c532a8746c221';
 
 const out = {
   dustActionCreate: serialize(DustAction, 'Create').toCbor(),
@@ -76,6 +82,11 @@ const out = {
   datumVkAsymStakeAsymDust: serialize(DustMappingDatum, {
     c_wallet: { VerificationKey: ['ab'.repeat(28)] },
     dust_address: 'ef'.repeat(32),
+  }).toCbor(),
+
+  datumVkAllZeroStakeReal33Dust: serialize(DustMappingDatum, {
+    c_wallet: { VerificationKey: [STAKE_KEY_HASH_HEX] },
+    dust_address: DUST_ADDRESS_HEX_REAL_33,
   }).toCbor(),
 };
 
