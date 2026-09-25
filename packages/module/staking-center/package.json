@@ -20,7 +20,7 @@
     "rxjs": "*"
   },
   "devDependencies": {
-    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/core": "0.47.1",
     "@lace-lib/util-dev": "*"
   }
 }

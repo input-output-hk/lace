@@ -6,9 +6,9 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/core": "0.47.1",
     "@cardano-sdk/crypto": "0.4.7",
-    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/key-management": "0.29.19",
     "@lace-contract/air-gapped-qr-exchange": "*",
     "@lace-contract/bitcoin-context": "*",
     "@lace-contract/cardano-context": "*",

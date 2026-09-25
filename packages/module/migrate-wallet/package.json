@@ -10,8 +10,8 @@
     "sweep:stake": "tsx test/sweep/stake.ts"
   },
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
-    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/core": "0.47.1",
+    "@cardano-sdk/key-management": "0.29.19",
     "@lace-contract/account-management": "*",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",

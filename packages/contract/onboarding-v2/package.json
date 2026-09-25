@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "dependencies": {
     "@cardano-sdk/crypto": "0.4.7",
-    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/key-management": "0.29.19",
     "@lace-contract/i18n": "*",
     "@lace-contract/in-memory": "*",
     "@lace-contract/module": "*",
