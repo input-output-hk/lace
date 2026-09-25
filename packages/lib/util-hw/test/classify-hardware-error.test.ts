@@ -1,3 +1,4 @@
+import { DeviceStatusError } from '@cardano-foundation/ledgerjs-hw-app-cardano';
 import {
   MultisigNotSupportedError,
   WrongScriptTypeError,
@@ -111,6 +112,29 @@ describe('classifyHardwareError -- Ledger Cardano app connection errors', () => 
       'Cannot communicate with Ledger Cardano App. General error 0x5515',
     );
     expect(classifyHardwareError(error)).toBe('device-locked');
+  });
+
+  it.each([
+    ['pairing', 'Cannot communicate with Ledger Cardano App'],
+    ['signing', 'Ledger transport failed'],
+  ])(
+    'classifies a ledgerjs 8 locked device during %s as device-locked',
+    (_, wrapperMessage) => {
+      const error = Object.assign(new Error(wrapperMessage), {
+        name: 'TransportError',
+        innerError: Object.assign(new Error('Device is locked'), {
+          name: 'DeviceStatusError',
+          code: 0x55_15,
+        }),
+      });
+      expect(classifyHardwareError(error)).toBe('device-locked');
+    },
+  );
+
+  it('classifies a real Cardano app locked-device status error as device-locked', () => {
+    expect(classifyHardwareError(new DeviceStatusError(0x55_15))).toBe(
+      'device-locked',
+    );
   });
 });
 

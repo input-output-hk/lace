@@ -11,7 +11,7 @@
   },
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/core": "0.47.1",
     "@lace-contract/address-book": "*",
     "@lace-contract/addresses": "*",
     "@lace-contract/cardano-context": "*",

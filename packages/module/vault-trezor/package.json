@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/hardware-trezor": "0.7.38",
+    "@cardano-sdk/hardware-trezor": "0.7.39",
     "@lace-contract/addresses": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/bitcoin-context": "*",

@@ -9,9 +9,9 @@
     "generate:cip30-webview": "node ./scripts/generate-cip30-webview-source.mjs"
   },
   "dependencies": {
-    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/core": "0.47.1",
     "@cardano-sdk/util": "0.17.2",
-    "@cardano-sdk/util-rxjs": "0.9.36",
+    "@cardano-sdk/util-rxjs": "0.9.37",
     "@lace-contract/activities": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app": "*",

@@ -6,7 +6,7 @@
   "sideEffects": false,
   "main": "src/index.ts",
   "dependencies": {
-    "@cardano-sdk/key-management": "0.29.18",
+    "@cardano-sdk/key-management": "0.29.19",
     "@lace-contract/address-book": "*",
     "@lace-contract/analytics": "*",
     "@lace-contract/app-lock": "*",
@@ -25,7 +25,7 @@
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {
-    "@cardano-sdk/web-extension": "0.39.45",
+    "@cardano-sdk/web-extension": "0.39.46",
     "@lace-lib/util-dev": "*",
     "@types/zxcvbn": "4.4.5"
   }

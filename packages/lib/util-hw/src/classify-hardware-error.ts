@@ -21,6 +21,12 @@ const MULTISIG_NOT_SUPPORTED_CODE = 'SEED_SIGNER_MULTISIG_NOT_SUPPORTED';
  * "Ledger device: CLA_NOT_SUPPORTED (0x6e00)".
  */
 const LOCKED_DEVICE_STATUS = '0x5515';
+/**
+ * ledgerjs-hw-app-cardano 8 rewrites 0x5515 (and the app's own 0x6e11) into a
+ * DeviceStatusError reading "Device is locked", dropping both the hex code and
+ * the original LockedDeviceError from the chain.
+ */
+const LOCKED_DEVICE_MESSAGE = 'device is locked';
 const WRONG_APP_STATUS_CODES = ['0x6e00', '0x6e01', '0x6d00'];
 const SILENT_EXPORT_REFUSED_STATUS = '0x6a82';
 
@@ -111,8 +117,8 @@ export const classifyHardwareError = (
     return 'unauthorized';
   }
 
-  // Ledger Cardano app version outside the supported range (too old, e.g.
-  // below v2.2, or too new, e.g. v8.x)
+  // Ledger Cardano app version outside the range the installed ledgerjs
+  // supports, or a request (e.g. a combined certificate) the app cannot sign
   if (names.has('DeviceVersionUnsupported')) {
     return 'version-unsupported';
   }
@@ -122,7 +128,8 @@ export const classifyHardwareError = (
   // app path surfaces the same code as "General error 0x5515" in its message
   if (
     names.has('LockedDeviceError') ||
-    message.includes(LOCKED_DEVICE_STATUS)
+    message.includes(LOCKED_DEVICE_STATUS) ||
+    message.includes(LOCKED_DEVICE_MESSAGE)
   ) {
     return 'device-locked';
   }
