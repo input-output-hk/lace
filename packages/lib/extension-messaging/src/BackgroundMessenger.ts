@@ -53,6 +53,7 @@ export interface Channel {
 export const createBackgroundMessenger = ({
   logger,
   runtime,
+  isConnectionAuthorized,
 }: MessengerDependencies) => {
   const channels = new Map<ChannelName, Channel>();
   const getChannel = (channelName: ChannelName) => {
@@ -139,6 +140,14 @@ export const createBackgroundMessenger = ({
     }
   };
   const onConnect = (port: MessengerPort) => {
+    if (isConnectionAuthorized && !isConnectionAuthorized(port)) {
+      logger.warn(
+        `[BackgroundMessenger(${port.name})] rejected unauthorized connection`,
+        port.sender?.url,
+      );
+      port.disconnect();
+      return;
+    }
     const { ports$ } = getChannel(ChannelName(port.name));
     const newPorts = new Set(ports$.value);
     newPorts.add(port);

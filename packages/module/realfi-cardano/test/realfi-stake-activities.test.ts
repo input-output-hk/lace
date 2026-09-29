@@ -16,7 +16,6 @@ vi.mock('@realfi-co/realfi-partner-sdk', () => ({
 import {
   fetchCancelableRealFiOrderReferences,
   fetchCoolingDownUnstakes,
-  fetchSundaeOrderVersion,
   fetchWithdrawableUnstakes,
   getStakeActivities,
 } from '../src/realfi-stake-activities';
@@ -311,6 +310,33 @@ describe('getStakeActivities', () => {
     expect(result[0].subtitle).toBe('-5 tADA');
   });
 
+  it('treats a pending V4 intent as USDr-bound from its `minimum` when it carries no estimate', async () => {
+    getOrdersByOwner.mockResolvedValue([]);
+    stubActivityFetch([
+      sundaeSwap({
+        id: 'pending-v4',
+        outcome: null,
+        details: {
+          __typename: 'Swap',
+          offer: { quantity: '5000000', asset: { id: 'ada.lovelace' } },
+          received: null,
+          estimated: null,
+          minimum: { quantity: '4900000', asset: { id: USDR_SUNDAE_ID } },
+        },
+      }),
+    ]);
+
+    const result = await getStakeActivities({
+      config: CONFIG,
+      addressBech32: nextStakerAddr(),
+      blockfrost: BLOCKFROST,
+    });
+
+    expect(result.map(row => row.id)).toEqual(['pending-v4']);
+    // A V4 intent's quote is its floor.
+    expect(result[0].quotedUsdrBaseUnits).toBe('4900000');
+  });
+
   it('reads ADA, not tADA, on mainnet', async () => {
     const stakerAddr = nextStakerAddr();
     getOrdersByOwner.mockResolvedValue([]);
@@ -384,6 +410,7 @@ describe('getStakeActivities', () => {
           __typename: 'Swap',
           offer: { quantity: '524234000', asset: { id: 'ada.lovelace' } },
           received: { quantity: '6888336', asset: { id: USDR_SUNDAE_ID } },
+          estimated: { quantity: '6890000', asset: { id: USDR_SUNDAE_ID } },
         },
       }),
     ]);
@@ -406,6 +433,8 @@ describe('getStakeActivities', () => {
     // Detail sheet: Stake amount = the USDr actually staked (the order amount,
     // not the swap's received USDr); Swap value = the input token line.
     expect(result[0].stakedUsdrBaseUnits).toBe('6681686');
+    // Quote amount = the swap's expected output, shown beside the staked one.
+    expect(result[0].quotedUsdrBaseUnits).toBe('6890000');
     expect(result[0].swapInputLine).toBe('-524.234 tADA');
   });
 
@@ -511,6 +540,35 @@ describe('getStakeActivities — status-generation split', () => {
     expect(result.map(row => row.id)).toEqual(['stake-tx']);
   });
 
+  it('shows Rejected and Failed stake orders as failed, not in progress', async () => {
+    getOrdersByOwner.mockImplementation(
+      async (_address: unknown, statuses?: string[]) =>
+        statuses?.includes('Rejected')
+          ? (['Rejected', 'Failed'] as const).map((status, index) => ({
+              action: 'Stake',
+              status,
+              amount: '1000000',
+              slot: 130_319_758n + BigInt(index),
+              utxo: { txHash: `stake-${status}`, outputIndex: 0 },
+            }))
+          : [],
+    );
+    stubEmptySundae();
+
+    const result = await getStakeActivities({
+      config: CONFIG,
+      addressBech32: nextStakerAddr(),
+      blockfrost: BLOCKFROST,
+    });
+
+    expect(
+      result.map(row => [row.id, row.steps.map(step => step.status)]),
+    ).toEqual([
+      ['stake-Failed', ['failed', 'failed']],
+      ['stake-Rejected', ['failed', 'failed']],
+    ]);
+  });
+
   it('still throws (keep-previous-data) when the CORE status read fails', async () => {
     getOrdersByOwner.mockImplementation(
       async (_address: unknown, statuses?: string[]) => {
@@ -607,42 +665,26 @@ describe('fetchCancelableRealFiOrderReferences', () => {
     ]);
   });
 
+  it('includes Rejected orders — never processed automatically, still owner-cancellable', async () => {
+    getOrdersByOwner.mockImplementation(
+      async (_address: unknown, statuses?: string[]) =>
+        statuses?.includes('Rejected')
+          ? [pendingOrder('tx-rejected', 2)]
+          : [pendingOrder('tx-open', 0)],
+    );
+
+    expect(
+      await fetchCancelableRealFiOrderReferences(CONFIG, nextStakerAddr()),
+    ).toEqual([
+      { txHash: 'tx-open', index: 0 },
+      { txHash: 'tx-rejected', index: 2 },
+    ]);
+  });
+
   it('returns [] when the core lookup fails (no unsafe cancel)', async () => {
     getOrdersByOwner.mockRejectedValue(new Error('realfi api down'));
     expect(
       await fetchCancelableRealFiOrderReferences(CONFIG, nextStakerAddr()),
     ).toEqual([]);
-  });
-});
-
-describe('fetchSundaeOrderVersion', () => {
-  const stubOrders = (orders: { id: string; version: string }[]) => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => {
-        if (url === CONFIG.sundaeApiUrl)
-          return okJson({
-            data: { portfolio: { ordersPaginated: { orders } } },
-          });
-        throw new Error(`Unrouted fetch: ${url}`);
-      }),
-    );
-  };
-
-  it('returns the matching order’s contract version', async () => {
-    stubOrders([
-      { id: 'tx-a#0', version: 'V3' },
-      { id: 'tx-b#1', version: 'Stableswaps' },
-    ]);
-    expect(
-      await fetchSundaeOrderVersion(CONFIG, nextStakerAddr(), 'tx-b#1'),
-    ).toBe('Stableswaps');
-  });
-
-  it('is undefined when the order is not found', async () => {
-    stubOrders([{ id: 'tx-a#0', version: 'V3' }]);
-    expect(
-      await fetchSundaeOrderVersion(CONFIG, nextStakerAddr(), 'missing#0'),
-    ).toBeUndefined();
   });
 });

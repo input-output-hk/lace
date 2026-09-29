@@ -100,6 +100,15 @@ export const RealFiAddedToQueue = (
     reset();
     NavigationControls.closeSheet();
   }, [reset]);
+  // Every dismissal (swipe, backdrop, back), not only Done, must leave Queued:
+  // the Manage sheet never re-quotes over a Queued flow, so a flow left Queued
+  // blocks every later estimate. `reset` is stable, so this runs on unmount.
+  useEffect(
+    () => () => {
+      reset();
+    },
+    [reset],
+  );
 
   useEffect(() => {
     navigation.setOptions({

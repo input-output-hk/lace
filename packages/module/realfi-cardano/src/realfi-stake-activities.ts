@@ -226,14 +226,16 @@ export const fetchCancelableRealFiOrderReferences = async (
     realfiDebugLog('getOrdersByOwner (cancelable) failed', { error });
     return [];
   }
-  // `HeldForScreening` (source-of-funds screening, SDK 2.18) is also cancelable,
-  // but an older deployment (preprod) rejects the enum — query it separately and
-  // tolerate its failure, mirroring the history read's CORE/SCREENING split.
+  // `HeldForScreening` (source-of-funds screening, SDK 2.18) and `Rejected`
+  // (never processed automatically, SDK 3.2) are also cancelable, but an older
+  // deployment rejects newer enum values — query them separately and tolerate
+  // the failure, mirroring the history read's CORE/SCREENING split.
   try {
     references = references.concat(
       toReferences(
         await realfiApi(config).getOrdersByOwner(addressBech32, [
           'HeldForScreening',
+          'Rejected',
         ]),
       ),
     );
@@ -247,44 +249,6 @@ export const fetchCancelableRealFiOrderReferences = async (
     seen.add(key);
     return true;
   });
-};
-
-const SUNDAE_ORDER_VERSION_QUERY = `
-  query getOrderVersions($address: String!, $cursor: String!) {
-    portfolio(address: $address) {
-      ordersPaginated(limit: ${PAGE_LIMIT}, cursor: $cursor) {
-        orders {
-          id
-          version
-        }
-      }
-    }
-  }
-`;
-
-/**
- * The SundaeSwap contract version of the owner's order matching `orderId`
- * ("V1" | "V3" | "Stableswaps" | …), so the cancel builder targets the order's
- * actual contract instead of assuming V3. Undefined when the order isn't on the
- * newest page (a pending order being cancelled is always recent, so it is).
- */
-export const fetchSundaeOrderVersion = async (
-  config: RealFiNetworkConfig,
-  addressBech32: string,
-  orderId: string,
-): Promise<string | undefined> => {
-  const data = await graphql<{
-    portfolio: {
-      ordersPaginated: { orders: { id: string; version: string }[] };
-    } | null;
-  }>(config.sundaeApiUrl, {
-    query: SUNDAE_ORDER_VERSION_QUERY,
-    variables: { address: addressBech32, cursor: '' },
-    operationName: 'getOrderVersions',
-  });
-  return data.portfolio?.ordersPaginated.orders.find(
-    order => order.id === orderId,
-  )?.version;
 };
 
 /**
@@ -544,8 +508,9 @@ type RawRealFiOrder = {
   isDone: boolean;
   /**
    * Set when the order reached a terminal state WITHOUT executing:
-   * `canceled` (owner reclaimed it) or `failed` (`Invalidated`, or
-   * `InvalidMinReceived` — a floor no batch can clear, owner-cancellable).
+   * `canceled` (owner reclaimed it) or `failed` (`Invalidated`,
+   * `InvalidMinReceived` — a floor no batch can clear, owner-cancellable —
+   * `Rejected`, or `Failed`).
    * Unset ⇒ executed or still in flight.
    */
   terminal?: 'canceled' | 'failed';
@@ -567,7 +532,11 @@ const terminalStateOf = (
     // SDK 2.18: invalidated by source-of-funds screening — terminal without
     // executing, like the other invalidations (HeldForScreening, its
     // in-flight sibling, correctly stays non-terminal).
-    status === 'InvalidatedBlockedScreening'
+    status === 'InvalidatedBlockedScreening' ||
+    // SDK 3.1/3.2: never processed automatically (still owner-cancellable),
+    // or quarantined after repeated processing failures.
+    status === 'Rejected' ||
+    status === 'Failed'
   ) {
     return 'failed';
   }
@@ -583,7 +552,7 @@ const terminalStateOf = (
  * list poisons EVERY history read against an older schema (the whole list
  * rendered empty on preprod while the API held the full history). Query the
  * generations separately: core failures still throw (→ provider `Err` → the
- * store keeps previous data), screening failures are tolerated.
+ * store keeps previous data), later-generation failures are tolerated.
  */
 const CORE_ORDER_STATUSES: TOrderStatus[] = [
   'Open',
@@ -596,6 +565,9 @@ const CORE_ORDER_STATUSES: TOrderStatus[] = [
 const SCREENING_ORDER_STATUSES: TOrderStatus[] = [
   'HeldForScreening',
   'InvalidatedBlockedScreening',
+  // SDK 3.1 / 3.2 statuses.
+  'Failed',
+  'Rejected',
 ];
 
 const fetchRealFiOrders = async (
@@ -720,6 +692,7 @@ const SUNDAE_ORDERS_QUERY = `
               offer { quantity asset { id } }
               received { quantity asset { id } }
               estimated { quantity asset { id } }
+              minimum { quantity asset { id } }
             }
           }
         }
@@ -746,6 +719,8 @@ type SundaeOrder = {
     received?: SundaeAmount | null;
     /** Expected output — populated even while `received` is still null. */
     estimated?: SundaeAmount | null;
+    /** Guaranteed floor — the one output figure a pool-less V4 intent carries. */
+    minimum?: SundaeAmount | null;
   };
 };
 
@@ -809,7 +784,7 @@ const fetchSundaeSwaps = async (
     const decimalsOf = (id: string): number =>
       decimalsById.get(id) ?? DEFAULT_DECIMALS;
 
-    const { offer, received, estimated } = order.details;
+    const { offer, received, estimated, minimum } = order.details;
     // Staking history covers only the input→USDr swap legs. The receive asset
     // is `received` once settled, else the SDK's `estimated` output (populated
     // while the order is still pending) — an explicit per-order signal, not a
@@ -817,9 +792,14 @@ const fetchSundaeSwaps = async (
     // at the address is unrelated trading. (Replaces the old blind `?? usdrId`
     // default and the `order.assets`-membership heuristic, which mislabelled
     // pending swaps when Sundae populated `assets` from the offered side only.)
-    const receivedId = received?.asset.id ?? estimated?.asset.id;
+    const receivedId =
+      received?.asset.id ?? estimated?.asset.id ?? minimum?.asset.id;
     if (receivedId !== usdrId) return [];
     const usdrReceived = received ? Number(received.quantity) : undefined;
+    // What the swap was quoted to return; a V4 intent carries only its floor.
+    const quoted = [estimated, minimum].find(
+      amount => amount?.asset.id === usdrId,
+    );
     const offerLine = `-${formatAmountToLocale(
       offer.quantity,
       decimalsOf(offer.asset.id),
@@ -846,6 +826,7 @@ const fetchSundaeSwaps = async (
       // pending estimate) and is overwritten with the matched stake order's
       // amount — the actual staked figure — once merged below.
       ...(received ? { stakedUsdrBaseUnits: received.quantity } : {}),
+      ...(quoted ? { quotedUsdrBaseUnits: quoted.quantity } : {}),
       swapInputLine: offerLine,
       completed: isSwapDone,
       requestDate: slotToWallClockMs(config, order.createdAt.slot, {

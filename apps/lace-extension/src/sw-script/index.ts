@@ -3,8 +3,16 @@ import { runtime } from 'webextension-polyfill';
 
 import { logger } from '../util/logger';
 
-// initialize background messenger so that it starts listening for connections as soon as SW starts
-getBackgroundMessenger({ logger, runtime });
+import { createIsConnectionAuthorized } from './authorize-connection';
+
+// initialize background messenger so that it starts listening for connections as soon as SW starts.
+// MUST remain the first messenger initialization in the SW: getBackgroundMessenger is a singleton,
+// so the connection gate passed here is the one that takes effect for the whole worker.
+getBackgroundMessenger({
+  logger,
+  runtime,
+  isConnectionAuthorized: createIsConnectionAuthorized(runtime.getURL('')),
+});
 
 // https://developer.chrome.com/blog/tweeks-to-addAll-importScripts/#disallowing_asynchronous_importscripts
 // Service worker limitation: have to load all scripts in top level.

@@ -102,6 +102,49 @@ describe('balanceOrderTx', () => {
     expect(tx.body.fee).toBeGreaterThan(0n);
   });
 
+  it('pays the extra outputs (processing fee) alongside the order, each at or above min-ADA', async () => {
+    const feeOutputCbor = Serialization.TransactionOutput.fromCore({
+      address: Cardano.PaymentAddress(CHANGE_ADDR),
+      value: { coins: 1_000_000n },
+    }).toCbor();
+    const tinyFeeOutputCbor = Serialization.TransactionOutput.fromCore({
+      address: Cardano.PaymentAddress(ORDER_ADDR),
+      value: { coins: 100_000n },
+    }).toCbor();
+    const cbor = await balanceOrderTx({
+      orderOutputCbor,
+      extraOutputsCbor: [feeOutputCbor, tinyFeeOutputCbor],
+      metadata: new Map(),
+      utxos: [mkUtxo(3, 10_000_000n)].map(u =>
+        Serialization.TransactionUnspentOutput.fromCore(u).toCbor(),
+      ),
+      protocolParameters,
+      networkMagic: 2,
+      changeAddressBech32: CHANGE_ADDR,
+      ttlSeconds: 900,
+    });
+    const { outputs } = Serialization.Transaction.fromCbor(
+      cbor as never,
+    ).toCore().body;
+    expect(outputs[0]).toMatchObject({
+      address: ORDER_ADDR,
+      value: { coins: 2_000_000n },
+    });
+    expect(outputs[1]).toMatchObject({
+      address: CHANGE_ADDR,
+      value: { coins: 1_000_000n },
+    });
+    expect(outputs[2].address).toBe(ORDER_ADDR);
+    expect(outputs[2].value.coins).toBe(
+      BigInt(
+        computeMinimumCoinQuantity(COINS_PER_UTXO_BYTE)({
+          address: Cardano.PaymentAddress(ORDER_ADDR),
+          value: { coins: 100_000n },
+        }),
+      ),
+    );
+  });
+
   it('rejects when no UTxOs are supplied', async () => {
     await expect(
       balanceOrderTx({

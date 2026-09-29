@@ -9,34 +9,16 @@
  * cold-wake).
  */
 import { Core } from '@blaze-cardano/sdk';
-import {
-  EContractVersion,
-  QueryProviderSundaeSwap,
-  SundaeSDK,
-} from '@sundaeswap/core';
+import { SundaeSwap } from '@realfi-co/realfi-partner-sdk';
 
 import { createRealfiBlaze, detectAndCreateRealfiSdk } from './realfi-sdk';
-import {
-  fetchCancelableRealFiOrderReferences,
-  fetchSundaeOrderVersion,
-} from './realfi-stake-activities';
+import { fetchCancelableRealFiOrderReferences } from './realfi-stake-activities';
 
 import type { RealFiBlockfrostConfig } from './realfi-blockfrost';
 import type { RealFiNetworkConfig } from './realfi-config';
 
 /** Which leg's order the user is cancelling. */
 export type CancelStage = 'stake' | 'swap';
-
-/**
- * The SundaeSwap API's version string maps 1:1 to `EContractVersion`; cancel the
- * order on its ACTUAL contract. Falls back to V3 (Lace builds V3 swap→stake
- * orders) when the order's version can't be resolved.
- */
-const sundaeVersionFrom = (version: string | undefined): EContractVersion =>
-  version !== undefined &&
-  (Object.values(EContractVersion) as string[]).includes(version)
-    ? (version as EContractVersion)
-    : EContractVersion.V3;
 
 export type BuildCancelTxParams = {
   config: RealFiNetworkConfig;
@@ -52,8 +34,9 @@ export type BuildCancelTxParams = {
 /**
  * Builds the **unsigned** cancel transaction for a pending stake, reclaiming the
  * user's funds wherever they are in the flow:
- *  - `swap` stage → cancel the SundaeSwap V3 order by its UTxO (reclaims the
- *    ADA/USDCx input).
+ *  - `swap` stage → cancel the SundaeSwap order by its UTxO (reclaims the
+ *    ADA/USDCx input). The SDK identifies V3, Stableswaps and pool-less V4
+ *    orders by their on-chain script credential.
  *  - `stake` stage → cancel the open RealFi order(s) (reclaims the USDr).
  * Signed + submitted through Lace's tx-executor (not the SDK's submit).
  */
@@ -68,26 +51,11 @@ export const buildCancelUnsignedTx = async (
   const { blaze } = blazeContext;
 
   if (params.stage === 'swap') {
-    const [hash, indexPart] = params.orderId.split('#');
-    // Cancel on the order's own contract version, not a hardcoded V3.
-    const version = sundaeVersionFrom(
-      await fetchSundaeOrderVersion(
-        params.config,
-        params.changeAddressBech32,
-        params.orderId,
-      ),
-    );
-    const composed = await SundaeSDK.new({
-      blazeInstance: blaze,
-      customQueryProvider: new QueryProviderSundaeSwap(
-        params.config.sundaeNetwork,
-      ),
-    })
-      .builder(version)
-      .cancel({
-        utxo: { hash, index: Number(indexPart ?? '0') },
-        ownerAddress: params.changeAddressBech32,
-      });
+    const [txHash, indexPart] = params.orderId.split('#');
+    const composed = await SundaeSwap.buildCancelSwapOrderTx(blaze, {
+      orderUtxo: { txHash, index: Number(indexPart ?? '0') },
+      ownerAddress: params.changeAddressBech32,
+    });
     return (await composed.build()).cbor;
   }
 

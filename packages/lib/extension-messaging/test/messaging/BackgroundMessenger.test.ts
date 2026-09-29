@@ -58,6 +58,58 @@ const connectPort = (runtime: MinimalRuntime, port: MessengerPort) => {
 describe('createBackgroundMessenger', () => {
   const logger = dummyLogger;
 
+  describe('connection authorization', () => {
+    it('accepts every port when no isConnectionAuthorized gate is provided', () => {
+      const runtime = createMockRuntime();
+      createBackgroundMessenger({ logger, runtime });
+      const port = createMockPort('redux-store');
+
+      connectPort(runtime, port);
+
+      expect(port.disconnect).not.toHaveBeenCalled();
+      expect(port.onMessage.addListener).toHaveBeenCalledTimes(1);
+    });
+
+    it('disconnects and does not attach a port the gate rejects', () => {
+      const runtime = createMockRuntime();
+      const isConnectionAuthorized = vi.fn().mockReturnValue(false);
+      const bg = createBackgroundMessenger({
+        logger,
+        runtime,
+        isConnectionAuthorized,
+      });
+      const port = createMockPort('redux-store');
+
+      connectPort(runtime, port);
+
+      expect(isConnectionAuthorized).toHaveBeenCalledWith(port);
+      expect(port.disconnect).toHaveBeenCalledTimes(1);
+      expect(port.onMessage.addListener).not.toHaveBeenCalled();
+      expect(bg.getChannel(ChannelName('redux-store')).ports$.value.size).toBe(
+        0,
+      );
+    });
+
+    it('attaches a port the gate accepts', () => {
+      const runtime = createMockRuntime();
+      const isConnectionAuthorized = vi.fn().mockReturnValue(true);
+      const bg = createBackgroundMessenger({
+        logger,
+        runtime,
+        isConnectionAuthorized,
+      });
+      const port = createMockPort('redux-store');
+
+      connectPort(runtime, port);
+
+      expect(port.disconnect).not.toHaveBeenCalled();
+      expect(port.onMessage.addListener).toHaveBeenCalledTimes(1);
+      expect(bg.getChannel(ChannelName('redux-store')).ports$.value.size).toBe(
+        1,
+      );
+    });
+  });
+
   describe('keepAlive ping handling', () => {
     it('acks the keepAlive ping back on the same port and does NOT broadcast to message$', () => {
       const runtime = createMockRuntime();

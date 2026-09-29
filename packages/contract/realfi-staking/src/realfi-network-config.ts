@@ -31,18 +31,22 @@ export const CARDANO_NETWORK_MAGIC = {
 
 /**
  * A CMS-scheduled activation window. Active while
- * `activeFrom <= now <= activeTo`.
+ * `activeFrom <= now <= activeTo`, or from `activeFrom` onwards when
+ * `activeTo` is omitted (open-ended).
  *
- * Both bounds are optional in the type because the payload is untrusted, but
- * both are required for the window to open: a missing, non-string or
- * unparseable instant fails closed, so a malformed CMS entry hides the surface
- * rather than running an unscheduled or expired promotion.
+ * Both bounds are optional in the type because the payload is untrusted.
+ * `activeFrom` is required for the window to open; a non-string or unparseable
+ * instant in either bound fails closed, so a malformed CMS entry hides the
+ * surface rather than running an unscheduled or expired promotion.
  */
 export type RealFiActiveWindow = {
   /** UTC instant (ISO-8601) from which the surface is live. */
   activeFrom?: string;
-  /** UTC instant (ISO-8601) after which the surface stops rendering. */
-  activeTo?: string;
+  /**
+   * UTC instant (ISO-8601) after which the surface stops rendering. Omitted
+   * (or `null`) ⇒ open-ended: no end, and no end date in the copy.
+   */
+  activeTo?: string | null;
 };
 
 /**
@@ -431,20 +435,23 @@ export const getRealFiConfigFromFlags = (
 
 /**
  * Whether `nowMs` falls inside a CMS-scheduled window (inclusive of both
- * bounds). Fails closed on an absent window and on any bound that is missing,
- * not a string (untrusted CMS payload) or unparseable.
+ * bounds). An absent (`undefined`/`null`) `activeTo` leaves the window
+ * open-ended. Fails closed on an absent window, a missing `activeFrom`, and on
+ * any supplied bound that is not a string (untrusted CMS payload) or
+ * unparseable — a malformed end date must not turn into "never ends".
  */
 const isWindowActive = (
   window: RealFiActiveWindow | undefined,
   nowMs: number,
 ): boolean => {
   const { activeFrom, activeTo } = window ?? {};
-  if (typeof activeFrom !== 'string' || typeof activeTo !== 'string')
-    return false;
+  if (typeof activeFrom !== 'string') return false;
   const fromMs = Date.parse(activeFrom);
+  if (!Number.isFinite(fromMs) || nowMs < fromMs) return false;
+  if (activeTo === undefined || activeTo === null) return true;
+  if (typeof activeTo !== 'string') return false;
   const toMs = Date.parse(activeTo);
-  if (!Number.isFinite(fromMs) || !Number.isFinite(toMs)) return false;
-  return nowMs >= fromMs && nowMs <= toMs;
+  return Number.isFinite(toMs) && nowMs <= toMs;
 };
 
 /**

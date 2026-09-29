@@ -81,6 +81,8 @@ export type RealFiSorQuote = {
   exchangeRate: number;
   /** Network fee, lovelace base units. */
   networkFee: string;
+  /** RealFi's per-order processing fee, lovelace base units ("0" when none). */
+  processingFee: string;
   /** Service fee in `serviceFeeTokenId` base units (pool fee + RealFi bps fee). */
   serviceFee: string;
   /**
@@ -221,6 +223,13 @@ export type RealFiStakeActivity = {
    * `usdrBaseUnits` (persisted-withdraw localisation) so neither is affected.
    */
   stakedUsdrBaseUnits?: string;
+  /**
+   * Swap→stake rows only: the USDr the swap was quoted to return (base units)
+   * — SundaeSwap's expected output, or the guaranteed minimum for a V4 intent,
+   * which carries no estimate. Shown beside the staked amount, which can be
+   * lower. Absent when Sundae reports neither.
+   */
+  quotedUsdrBaseUnits?: string;
   /**
    * Swap→stake rows only: the input-token line (e.g. "-524.234 ADA") for the
    * detail sheet's separate "Swap value" line.

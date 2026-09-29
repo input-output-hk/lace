@@ -17,6 +17,8 @@ import type { RequiredProtocolParameters } from '@lace-contract/cardano-context'
 export type BalanceOrderTxParams = {
   /** Composed order output (address + inline datum + value), CBOR hex. */
   orderOutputCbor: string;
+  /** Outputs paid alongside the order (RealFi's processing fee), CBOR hex. */
+  extraOutputsCbor?: string[];
   /** Metadata labels to attach (RealFi provenance / unstake indexer). */
   metadata: ReadonlyMap<bigint, Cardano.Metadatum>;
   /** Available account UTxOs, `TransactionUnspentOutput` CBOR hex each. */
@@ -41,29 +43,33 @@ export const balanceOrderTx = async (
   });
   // Blaze's `.complete()` used to validate every output's min-ADA; Lace's
   // TransactionBuilder only computes min-ADA for its own change output, so the
-  // caller-supplied order output must be checked here — an order carrying an
+  // caller-supplied outputs must be checked here — an order carrying an
   // inline datum can sit just below the coinsPerUtxoByte floor and get
   // rejected at submit (`OutputTooSmallUTxO`) after a clean build + sign.
-  const orderOutput = Serialization.TransactionOutput.fromCbor(
-    HexBlob(params.orderOutputCbor),
-  ).toCore();
-  const orderOutputMinCoin = BigInt(
-    computeMinimumCoinQuantity(params.protocolParameters.coinsPerUtxoByte)(
-      orderOutput,
-    ),
+  const minCoinOf = computeMinimumCoinQuantity(
+    params.protocolParameters.coinsPerUtxoByte,
   );
-  const balancedOrderOutput: Cardano.TxOut =
-    orderOutput.value.coins < orderOutputMinCoin
-      ? {
-          ...orderOutput,
-          value: { ...orderOutput.value, coins: orderOutputMinCoin },
-        }
-      : orderOutput;
+  const withMinCoin = (cbor: string) => {
+    const output = Serialization.TransactionOutput.fromCbor(
+      HexBlob(cbor),
+    ).toCore();
+    const minCoin = BigInt(minCoinOf(output));
+    const balanced: Cardano.TxOut =
+      output.value.coins < minCoin
+        ? { ...output, value: { ...output.value, coins: minCoin } }
+        : output;
+    return { output, minCoin, balanced };
+  };
+  const order = withMinCoin(params.orderOutputCbor);
+  const extraOutputs = (params.extraOutputsCbor ?? []).map(
+    cbor => withMinCoin(cbor).balanced,
+  );
   realfiDebugLog('balance: balancing order tx', {
-    orderAddress: orderOutput.address,
-    orderCoins: orderOutput.value.coins,
-    orderMinCoin: orderOutputMinCoin,
-    minAdaBumped: orderOutput.value.coins < orderOutputMinCoin,
+    orderAddress: order.output.address,
+    orderCoins: order.output.value.coins,
+    orderMinCoin: order.minCoin,
+    minAdaBumped: order.output.value.coins < order.minCoin,
+    extraOutputCount: extraOutputs.length,
     availableUtxoCount: availableUtxos.length,
     metadataLabels: [...params.metadata.keys()],
     changeAddress: params.changeAddressBech32,
@@ -77,7 +83,10 @@ export const balanceOrderTx = async (
     .setChangeAddress(Cardano.PaymentAddress(params.changeAddressBech32))
     .setUnspentOutputs(availableUtxos)
     .expiresIn(params.ttlSeconds)
-    .addOutput(balancedOrderOutput);
+    .addOutput(order.balanced);
+  for (const output of extraOutputs) {
+    builder.addOutput(output);
+  }
   for (const [label, metadatum] of params.metadata) {
     builder.setMetadata(label, metadatum);
   }

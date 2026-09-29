@@ -892,6 +892,15 @@ const dustParams = {
 };
 
 describe('updateDustBalance', () => {
+  // Mirrors watchMidnightAccount, which registers the wallet before subscribing
+  // this effect.
+  beforeEach(() => {
+    midnightWallets$.next({ [accountId]: {} as MidnightWallet });
+  });
+  afterEach(() => {
+    midnightWallets$.next({});
+  });
+
   const makeCoin = (generatedNow: bigint) =>
     ({
       generatedNow,
@@ -1067,7 +1076,8 @@ describe('updateDustBalance', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('a-b', {
+            // 'b' is held as the throttle's trailing value until frame 500.
+            expectObservable(sideEffect$).toBe('a 499ms b', {
               a: actions.midnightContext.setDustBalance({
                 accountId,
                 dustBalance: BigNumber(1000n),
@@ -1084,9 +1094,119 @@ describe('updateDustBalance', () => {
       },
     );
   });
+
+  it('coalesces a burst of balance changes into the leading and trailing value', () => {
+    const mockState = (generatedNow: bigint) =>
+      ({
+        dust: {
+          totalCoins: [makeCoin(generatedNow)],
+          availableCoins: [makeCoin(generatedNow)],
+          state: { state: { params: dustParams } },
+        },
+      } as unknown as FacadeState);
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            state: () =>
+              cold('abcd', {
+                a: mockState(1n),
+                b: mockState(2n),
+                c: mockState(3n),
+                d: mockState(4n),
+              }),
+          });
+          return updateDustBalance(wallet);
+        },
+      },
+      ({ expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a 499ms b', {
+              a: actions.midnightContext.setDustBalance({
+                accountId,
+                dustBalance: BigNumber(1n),
+                dustAvailable: BigNumber(1n),
+              }),
+              b: actions.midnightContext.setDustBalance({
+                accountId,
+                dustBalance: BigNumber(4n),
+                dustAvailable: BigNumber(4n),
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('drops a trailing emission that was queued before the wallet was stopped', () => {
+    const mockState = (generatedNow: bigint) =>
+      ({
+        dust: {
+          totalCoins: [makeCoin(generatedNow)],
+          availableCoins: [makeCoin(generatedNow)],
+          state: { state: { params: dustParams } },
+        },
+      } as unknown as FacadeState);
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            // 'b' enters the throttle at frame 1 while the wallet is still
+            // registered, and is held as the trailing value until frame 500.
+            state: () => cold('ab|', { a: mockState(1n), b: mockState(2n) }),
+          });
+          return updateDustBalance(wallet);
+        },
+      },
+      ({ cold, expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            cold('250ms a').subscribe(() => {
+              // Another account stays registered, so this pins the gate to the
+              // stopped account rather than to the registry being empty.
+              midnightWallets$.next({
+                ['other-account' as AccountId]: {} as MidnightWallet,
+              });
+            });
+
+            expectObservable(sideEffect$).toBe('a 499ms |', {
+              a: actions.midnightContext.setDustBalance({
+                accountId,
+                dustBalance: BigNumber(1n),
+                dustAvailable: BigNumber(1n),
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
 });
 
 describe('updateDustGenerationDetails', () => {
+  // Mirrors watchMidnightAccount, which registers the wallet before subscribing
+  // this effect.
+  beforeEach(() => {
+    midnightWallets$.next({ [accountId]: {} as MidnightWallet });
+  });
+  afterEach(() => {
+    midnightWallets$.next({});
+  });
+
   it('emits setDustGenerationDetails with aggregated details when availableCoinsWithFullInfo returns coins', () => {
     const decayTime1 = new Date(1000);
     const maxCapReachedAt1 = new Date(2000);
@@ -1300,6 +1420,125 @@ describe('updateDustGenerationDetails', () => {
                   maxCap: 100n,
                   decayTime: 1000,
                   maxCapReachedAt: 2000,
+                  rate: 1n,
+                },
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('coalesces a burst of detail changes into the leading and trailing value', () => {
+    const mockState = (generatedNow: bigint) =>
+      ({
+        dust: {
+          totalCoins: [
+            {
+              generatedNow,
+              maxCap: 100n,
+              rate: 1n,
+              dtime: undefined,
+              maxCapReachedAt: undefined,
+            },
+          ],
+        },
+      } as unknown as FacadeState);
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            state: () =>
+              cold('abcd', {
+                a: mockState(1n),
+                b: mockState(2n),
+                c: mockState(3n),
+                d: mockState(4n),
+              }),
+          });
+          return updateDustGenerationDetails(wallet);
+        },
+      },
+      ({ expectObservable }) => {
+        const details = (currentValue: bigint) => ({
+          currentValue,
+          maxCap: 100n,
+          decayTime: undefined,
+          maxCapReachedAt: undefined,
+          rate: 1n,
+        });
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('a 499ms b', {
+              a: actions.midnightContext.setDustGenerationDetails({
+                accountId,
+                dustGenerationDetails: details(1n),
+              }),
+              b: actions.midnightContext.setDustGenerationDetails({
+                accountId,
+                dustGenerationDetails: details(4n),
+              }),
+            });
+          },
+        };
+      },
+    );
+  });
+
+  it('drops a trailing emission that was queued before the wallet was stopped', () => {
+    const mockState = (generatedNow: bigint) =>
+      ({
+        dust: {
+          totalCoins: [
+            {
+              generatedNow,
+              maxCap: 100n,
+              rate: 1n,
+              dtime: undefined,
+              maxCapReachedAt: undefined,
+            },
+          ],
+        },
+      } as unknown as FacadeState);
+
+    testSideEffect(
+      {
+        build: ({ cold }) => {
+          const wallet = createMockMidnightWallet(cold, {
+            state: () => cold('ab|', { a: mockState(1n), b: mockState(2n) }),
+          });
+          return updateDustGenerationDetails(wallet);
+        },
+      },
+      ({ cold, expectObservable }) => {
+        return {
+          actionObservables: {},
+          stateObservables: {},
+          dependencies: {
+            actions,
+          },
+          assertion: sideEffect$ => {
+            cold('250ms a').subscribe(() => {
+              midnightWallets$.next({
+                ['other-account' as AccountId]: {} as MidnightWallet,
+              });
+            });
+
+            expectObservable(sideEffect$).toBe('a 499ms |', {
+              a: actions.midnightContext.setDustGenerationDetails({
+                accountId,
+                dustGenerationDetails: {
+                  currentValue: 1n,
+                  maxCap: 100n,
+                  decayTime: undefined,
+                  maxCapReachedAt: undefined,
                   rate: 1n,
                 },
               }),

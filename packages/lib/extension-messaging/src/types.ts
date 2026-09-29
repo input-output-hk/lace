@@ -75,6 +75,19 @@ export interface MinimalRuntime {
 export interface MessengerDependencies {
   logger: Logger;
   runtime: MinimalRuntime;
+  /**
+   * Gate run for every incoming port in the background process before it is
+   * attached to its channel. Return false to reject the connection: the port
+   * is disconnected and never joins the channel. When omitted, every port is
+   * accepted (legacy behavior) — only `createBackgroundMessenger` reads it.
+   *
+   * Exists to keep cross-context callers off privileged channels. Chrome sets
+   * `port.sender.url` from the real connecting context, unspoofable by page or
+   * content-script code: the trusted UI connects with a `chrome-extension://`
+   * URL, whereas a content script (or code injected into one via
+   * `chrome.debugger`) connects with the web page's URL.
+   */
+  isConnectionAuthorized?: (port: MessengerPort) => boolean;
 }
 
 export type TransformRequest = (

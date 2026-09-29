@@ -18,13 +18,15 @@ import type { Token } from '@lace-contract/tokens';
 /** The review fields the fee rows price (a `RealFiReview` subset). */
 export type ReviewFeeFields = {
   networkFee: string;
+  processingFee: string;
   serviceFee: string;
   serviceFeeTokenId: string;
 };
 
 /**
  * Shared fee pricing for the Manage and Review sheets (LW-14680/14681 —
- * previously duplicated in both): the network fee (lovelace) and the service
+ * previously duplicated in both): the network and RealFi processing fees
+ * (lovelace) and the service
  * fee — charged in the swap-input token on stake, USDr on unstake — each
  * converted to ADA + fiat at live prices (USDr at the epic's $1-per-USDr
  * convention via the USD→currency rate, anything else from the token-pricing
@@ -92,6 +94,18 @@ export const useReviewFeePricing = ({
       ),
     [review?.networkFee, adaPriceInCurrency],
   );
+  const processingFee = useMemo(
+    () =>
+      convertFeeToAdaAndFiat(
+        {
+          baseUnits: review?.processingFee ?? '0',
+          isLovelace: true,
+          decimals: ADA_DECIMALS,
+        },
+        { adaPriceInCurrency, feeTokenPriceInCurrency: undefined },
+      ),
+    [review?.processingFee, adaPriceInCurrency],
+  );
   const serviceFee = useMemo(
     () =>
       convertFeeToAdaAndFiat(
@@ -120,6 +134,7 @@ export const useReviewFeePricing = ({
     serviceFeeToken,
     serviceFeeTokenPriceInCurrency,
     networkFee,
+    processingFee,
     serviceFee,
   };
 };

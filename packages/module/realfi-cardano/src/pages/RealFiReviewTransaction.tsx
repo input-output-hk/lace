@@ -128,7 +128,7 @@ export const RealFiReviewTransaction = (
   // The service fee is charged in the swap-input token (stake) or USDr
   // (unstake); useReviewFeePricing (shared with the Manage sheet) supplies its
   // charged-denomination units plus fiat legs priced live.
-  const { networkFee, serviceFee } = useReviewFeePricing({
+  const { networkFee, processingFee, serviceFee } = useReviewFeePricing({
     review,
     accountFungibleTokens,
     usdrTokenId: realfiConfig?.usdrTokenId,
@@ -142,15 +142,22 @@ export const RealFiReviewTransaction = (
     ? adaTicker
     : tickerFor(review?.serviceFeeTokenId);
   const networkFeeLine = `-${networkFee.units.toFixed(2)} ${adaTicker}`;
+  const processingFeeLine = `-${processingFee.units.toFixed(2)} ${adaTicker}`;
+  const adaFeeUnits = networkFee.units + processingFee.units;
   const serviceFeeLine = `-${serviceFee.units.toFixed(
     2,
   )} ${serviceFeeTicker}`.trim();
   // Total: one summed figure when both fees share a denomination, otherwise
   // both amounts side by side — a cross-asset sum has no single honest number.
   const totalFeeLine = isServiceFeeAda
-    ? `-${(networkFee.units + serviceFee.units).toFixed(2)} ${adaTicker}`
-    : `${networkFeeLine}, ${serviceFeeLine}`;
-  const totalFee = { fiat: sumFiat(networkFee.fiat, serviceFee.fiat) };
+    ? `-${(adaFeeUnits + serviceFee.units).toFixed(2)} ${adaTicker}`
+    : `-${adaFeeUnits.toFixed(2)} ${adaTicker}, ${serviceFeeLine}`;
+  const totalFee = {
+    fiat: sumFiat(
+      sumFiat(networkFee.fiat, processingFee.fiat),
+      serviceFee.fiat,
+    ),
+  };
   // A fee leg with no fresh rate renders no fiat line (prices are
   // mainnet-only) — a 0.00 stand-in would claim a conversion we don't have.
   const fiatLine = (fee: { fiat: number | undefined }): string | undefined =>
@@ -390,6 +397,14 @@ export const RealFiReviewTransaction = (
             fiat={fiatLine(networkFee)}
             testID="realfi-review-network-fee-row"
           />
+          {processingFee.units > 0 && (
+            <ReviewRow
+              label={t('realfi.review.processing-fee')}
+              value={processingFeeLine}
+              fiat={fiatLine(processingFee)}
+              testID="realfi-review-processing-fee-row"
+            />
+          )}
           <ReviewRow
             label={t('realfi.review.service-fee')}
             value={serviceFeeLine}

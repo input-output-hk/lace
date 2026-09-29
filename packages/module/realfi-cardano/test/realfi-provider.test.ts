@@ -11,12 +11,17 @@ vi.mock('../src/realfi-stake-tx', () => ({
   buildStakeUnsignedTx: vi.fn(async () => ({
     unsignedTxCbor: 'mock-unsigned-cbor',
     orderOutputIndex: 1,
+    processingFeeLovelace: 1_000_000n,
   })),
-  buildUnstakeUnsignedTx: vi.fn(async () => 'mock-unsigned-cbor'),
+  buildUnstakeUnsignedTx: vi.fn(async () => ({
+    unsignedTxCbor: 'mock-unsigned-cbor',
+    processingFeeLovelace: 1_000_000n,
+  })),
   quoteSwapToUsdr: vi.fn(async () => ({
     usdrOut: 4_000_000n,
     priceImpact: 0.0011,
     poolFeeFraction: 0.003,
+    venue: 'SundaeSwap V4',
   })),
   fetchOrderFeesBps: vi.fn(async () => ({ mintBps: 10, redeemBps: 10 })),
   txFeeLovelace: vi.fn(() => 185_000n),
@@ -102,6 +107,7 @@ const baseQuote: RealFiSorQuote = {
   priceImpact: 0 as never,
   exchangeRate: 1,
   networkFee: '0',
+  processingFee: '1000000',
   serviceFee: '0',
   serviceFeeTokenId: 'lovelace',
   quoteExpiresAt: 0 as never,
@@ -235,6 +241,11 @@ describe('createRealFiProvider', () => {
     if (result.isOk()) {
       // Dry-run build fee (txFeeLovelace mock).
       expect(result.value.networkFee).toBe('185000');
+      // RealFi's processing fee reported by the dry-run build, kept apart
+      // from the ledger fee.
+      expect(result.value.processingFee).toBe('1000000');
+      // The swap leg names the route the build will use.
+      expect(result.value.route[0]?.venue).toBe('SundaeSwap V4');
       // Pool fee 1_000_000 × 0.003 + RealFi mint fee 1_000_000 × 10bps.
       expect(result.value.serviceFee).toBe('4000');
       // The service fee is denominated in the swap-input token, not summed
@@ -328,7 +339,12 @@ describe('createRealFiProvider', () => {
     );
     expect(result.isOk()).toBe(true);
     if (result.isOk()) {
-      expect(result.value.orderOutputIndex).toBe(1);
+      // Exactly the serializable pair: the builder's bigint processing fee is
+      // quote-only and must not reach the store.
+      expect(result.value).toEqual({
+        unsignedTxCbor: 'mock-unsigned-cbor',
+        orderOutputIndex: 1,
+      });
     }
   });
 

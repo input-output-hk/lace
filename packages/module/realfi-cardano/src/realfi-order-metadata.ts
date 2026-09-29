@@ -32,7 +32,7 @@ const METADATA_SOURCE = 'partner-sdk';
  * the key the attribution claim posts, so it must stay Lace's own name.
  */
 export const PARTNER_ATTRIBUTION_KEY = 'lace';
-const PARTNER_SDK_VERSION = '2.23.0';
+const PARTNER_SDK_VERSION = '3.2.0';
 
 export const orderOriginMetadatum = (): Cardano.Metadatum =>
   new Map<Cardano.Metadatum, Cardano.Metadatum>([

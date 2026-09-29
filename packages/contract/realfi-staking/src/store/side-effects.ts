@@ -172,6 +172,7 @@ const toReview = (quote: RealFiSorQuote): RealFiReview => ({
   route: quote.route,
   priceImpact: quote.priceImpact,
   networkFee: quote.networkFee,
+  processingFee: quote.processingFee,
   serviceFee: quote.serviceFee,
   serviceFeeTokenId: quote.serviceFeeTokenId,
   quoteExpiresAt: quote.quoteExpiresAt,

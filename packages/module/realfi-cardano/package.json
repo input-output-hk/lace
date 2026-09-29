@@ -28,7 +28,7 @@
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/util": "*",
-    "@realfi-co/realfi-partner-sdk": "2.23.0",
+    "@realfi-co/realfi-partner-sdk": "3.2.0",
     "@sundaeswap/asset": "^1.0.11",
     "@sundaeswap/core": "^2.13.1",
     "bignumber.js": "9.0.1",

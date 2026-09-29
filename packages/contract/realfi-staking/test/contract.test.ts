@@ -140,11 +140,21 @@ describe('@lace-contract/realfi-staking public surface', () => {
       expect(isActive(window, toMs + 1)).toBe(false);
     });
 
-    it('fails closed on a missing or malformed bound', () => {
+    it('is open-ended from the start instant when no end instant is given', () => {
+      const farFutureMs = Date.parse('2999-01-01T00:00:00Z');
+      expect(isActive({ activeFrom }, fromMs)).toBe(true);
+      expect(isActive({ activeFrom }, farFutureMs)).toBe(true);
+      expect(isActive({ activeFrom, activeTo: null }, farFutureMs)).toBe(true);
+      expect(isActive({ activeFrom }, fromMs - 1)).toBe(false);
+    });
+
+    it('fails closed on a missing start or a malformed bound', () => {
       expect(isActive(undefined, fromMs)).toBe(false);
       expect(isActive({}, fromMs)).toBe(false);
-      expect(isActive({ activeFrom }, fromMs)).toBe(false);
       expect(isActive({ activeTo }, fromMs)).toBe(false);
+      expect(isActive({ activeFrom: 'not-a-date' }, fromMs)).toBe(false);
+      // A malformed end must not become "never ends".
+      expect(isActive({ activeFrom, activeTo: '' }, fromMs)).toBe(false);
       expect(isActive({ activeFrom, activeTo: 'not-a-date' }, fromMs)).toBe(
         false,
       );

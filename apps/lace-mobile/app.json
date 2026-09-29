@@ -18,6 +18,7 @@
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {
+      "version": "2.4.0",
       "icon": "./assets/Lace-ios-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "io.lace.mobilewallet",
@@ -37,6 +38,7 @@
       "appleTeamId": "89TW38X994"
     },
     "android": {
+      "version": "2.4.1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/Lace-android-adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

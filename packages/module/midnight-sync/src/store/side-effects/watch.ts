@@ -152,6 +152,9 @@ const buildAddressTokenData = ({
 // dustBalance is also persisted in Redux to show cached value on app restart
 // before the wallet observable chain is set up.
 //
+// Throttled: during dust replay generatedNow changes every block, and each
+// dispatch pushes the whole root state to every UI port.
+//
 // Sum over totalCoins (not state.dust.balance) so a pending dust spend doesn't show as 0.
 // The spendable half rides alongside: totalCoins is availableCoins ++ pendingCoins,
 // and a build moves the whole dust coin it pays with into pending, so only
@@ -160,6 +163,10 @@ export const updateDustBalance =
   (wallet: MidnightWallet): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
+      throttleTime(500, undefined, { leading: true, trailing: true }),
+      // Below the throttle: a queued trailing emission outlives the wallet and
+      // would revive persisted dust state that a reset just cleared.
+      filter(() => !!midnightWallets$.value[wallet.accountId]),
       map(state => ({
         dustBalance: BigNumber(
           state.dust.totalCoins.reduce(
@@ -397,10 +404,15 @@ export const updateSyncProgress =
 // This provides pre-computed values (currentValue, maxCap, rate, etc.)
 // directly from the SDK, eliminating the need for manual calculations.
 // totalCoins (not availableCoins) so a pending dust spend doesn't show as 0.
+// Throttled for the same reason as updateDustBalance.
 export const updateDustGenerationDetails =
   (wallet: MidnightWallet): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
+      throttleTime(500, undefined, { leading: true, trailing: true }),
+      // Below the throttle: a queued trailing emission outlives the wallet and
+      // would revive persisted dust state that a reset just cleared.
+      filter(() => !!midnightWallets$.value[wallet.accountId]),
       map((state): DustGenerationDetails | undefined => {
         const coinsWithFullInfo = state.dust.totalCoins;
         if (coinsWithFullInfo.length === 0) {
