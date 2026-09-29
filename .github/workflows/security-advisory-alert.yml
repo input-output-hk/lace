@@ -1,0 +1,157 @@
+# Posts new repository security advisories to #lace-incident.
+#
+# Why polling rather than the event: `repository_advisory` is a WEBHOOK-only
+# event — it cannot appear in an Actions `on:` block at all — and it fires only
+# on `published`/`reported`. Every advisory this repo holds is `state: triage`
+# with `published_at: null`, so an event-driven alert would have fired zero
+# times to date, including for the open critical one. Polling the API is the
+# only design that sees an advisory while it is still being triaged, which is
+# precisely when an incident channel wants to know.
+#
+# Why its own token: `repository-advisories` is not a GITHUB_TOKEN permission
+# scope (the list is actions, attestations, checks, contents, deployments,
+# id-token, issues, models, discussions, packages, pages, pull-requests,
+# security-events, statuses). `security-events` covers code scanning, not
+# repository advisories. A PAT or App token with `repository-advisories: read`
+# is required; the default token returns 404.
+name: Security advisory alert
+
+on:
+  schedule:
+    # Every 30 minutes. The ledger below makes a missed run harmless, so the
+    # interval trades only detection latency, not correctness.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+    inputs:
+      lookback_hours:
+        description: 'Treat an advisory as new if created/published within this many hours'
+        required: false
+        default: '24'
+        type: string
+      dry_run:
+        description: 'Resolve and print, but post nothing to Slack'
+        required: false
+        default: false
+        type: boolean
+
+# Nothing is read through GITHUB_TOKEN; the advisory read uses its own secret.
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  # Deliberately NOT cancel-in-progress: cancelling a run mid-delivery could
+  # drop an alert that the ledger has not yet recorded as undelivered.
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    name: Post new advisories to #lace-incident
+    runs-on: ubuntu-22.04
+
+    steps:
+      # The ledger is the dedupe. It records only advisories DELIVERED to Slack,
+      # and is written at the end of the job — so a Slack failure leaves them
+      # absent and the next run retries. Losing the cache re-alerts at most
+      # `lookback_hours` of advisories, which is noisy but bounded; the failure
+      # mode is a duplicate, never a miss.
+      - name: Restore delivered-advisory ledger
+        id: ledger
+        uses: actions/cache/restore@v4
+        with:
+          path: delivered.txt
+          key: advisory-ledger-${{ github.run_id }}
+          restore-keys: |
+            advisory-ledger-
+
+      - name: Find advisories not yet delivered
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.ADVISORY_READ_TOKEN }}
+          LOOKBACK: ${{ inputs.lookback_hours || '24' }}
+        run: |
+          set -euo pipefail
+          touch delivered.txt
+
+          if ! gh api "/repos/${GITHUB_REPOSITORY}/security-advisories" --paginate > all.json 2>err.txt; then
+            echo "::error::Could not read security advisories. ADVISORY_READ_TOKEN needs the 'repository-advisories: read' permission; the default GITHUB_TOKEN cannot do this and returns 404."
+            sed 's/^/  /' err.txt
+            exit 1
+          fi
+
+          cutoff=$(date -u -d "${LOOKBACK} hours ago" +%Y-%m-%dT%H:%M:%SZ)
+
+          # An advisory qualifies on either edge: newly filed (created_at) or
+          # newly made public (published_at). A triage advisory has a null
+          # published_at, so created_at is the one that catches it.
+          jq --arg cutoff "$cutoff" '
+            [ .[] | select((.created_at   // "") > $cutoff
+                        or (.published_at // "") > $cutoff) ]
+          ' all.json > candidates.json
+
+          jq -r '.[].ghsa_id' candidates.json | sort -u > candidate_ids.txt
+          comm -23 candidate_ids.txt <(sort -u delivered.txt) > new_ids.txt
+
+          count=$(wc -l < new_ids.txt | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Advisories in window: $(jq length candidates.json). Not yet delivered: $count"
+          [ "$count" != "0" ] && sed 's/^/  new: /' new_ids.txt || true
+
+      - name: Post to #lace-incident
+        if: ${{ steps.find.outputs.count != '0' && inputs.dry_run != true }}
+        env:
+          SLACK_WEBHOOK_LACE_INCIDENT: ${{ secrets.SLACK_WEBHOOK_LACE_INCIDENT }}
+        run: |
+          set -euo pipefail
+          while read -r id; do
+            [ -z "$id" ] && continue
+            payload=$(jq -c --arg id "$id" '
+              (.[] | select(.ghsa_id == $id)) as $a
+              | ($a.severity // "unknown") as $sev
+              | {
+                  text: ("🔒 New Lace security advisory — " + ($sev|ascii_upcase) + " — " + $a.ghsa_id),
+                  blocks: [
+                    { type: "section", text: { type: "mrkdwn", text:
+                        ("*<" + $a.html_url + "|" + $a.ghsa_id + ">*\n" + ($a.summary // "_no summary yet_")) } },
+                    { type: "context", elements: [ { type: "mrkdwn", text:
+                        ("severity *" + $sev + "*  ·  state *" + ($a.state // "?") + "*"
+                         + "  ·  filed " + ($a.created_at // "?")
+                         + (if $a.published_at then "  ·  published " + $a.published_at else "  ·  _not yet published_" end)
+                         + (if $a.cve_id then "  ·  " + $a.cve_id else "" end)) } ] }
+                  ]
+                }' candidates.json)
+
+            # Slack returns 200/"ok" on success; anything else must fail the job
+            # so the ledger is not written and the next run retries.
+            resp=$(curl -sS -X POST -H 'Content-type: application/json' \
+                     --data "$payload" "$SLACK_WEBHOOK_LACE_INCIDENT" -w '\n%{http_code}')
+            code=$(printf '%s' "$resp" | tail -n1)
+            if [ "$code" != "200" ]; then
+              echo "::error::Slack rejected the alert for $id (HTTP $code): $(printf '%s' "$resp" | head -n1)"
+              exit 1
+            fi
+            echo "delivered $id"
+            echo "$id" >> delivered.txt
+          done < new_ids.txt
+
+      - name: Record deliveries
+        # Only reached when every post above succeeded. Cache entries are
+        # immutable, so the key carries run_id and the restore-keys prefix picks
+        # up the newest on the next run.
+        if: ${{ success() && steps.find.outputs.count != '0' && inputs.dry_run != true }}
+        uses: actions/cache/save@v4
+        with:
+          path: delivered.txt
+          key: advisory-ledger-${{ github.run_id }}
+
+      # A silent alerting pipeline is worse than none: this is the same failure
+      # shape that left the storybook perf nightlies red for 174 runs unnoticed.
+      # If this job fails, say so in the channel it is supposed to protect.
+      - name: Report that the alerter itself is broken
+        if: ${{ failure() }}
+        env:
+          SLACK_WEBHOOK_LACE_INCIDENT: ${{ secrets.SLACK_WEBHOOK_LACE_INCIDENT }}
+        run: |
+          curl -sS -X POST -H 'Content-type: application/json' --data "$(jq -nc \
+            --arg url "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" \
+            '{text: ("⚠️ The Lace security-advisory alerter failed — new advisories may be going unannounced. <" + $url + "|run log>")}')" \
+            "$SLACK_WEBHOOK_LACE_INCIDENT" || true
