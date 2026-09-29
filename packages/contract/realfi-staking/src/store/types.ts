@@ -31,6 +31,8 @@ export type RealFiReview = {
   priceImpact: Percent;
   /** Network fee, lovelace base units. */
   networkFee: string;
+  /** RealFi's per-order processing fee, lovelace base units. */
+  processingFee: string;
   /** Service fee in `serviceFeeTokenId` base units — not summable with `networkFee`. */
   serviceFee: string;
   serviceFeeTokenId: string;

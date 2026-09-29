@@ -79,7 +79,6 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('INITIAL_NETWORK_TYPE'), payload: 'mainnet' },
   { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
   { key: FeatureFlagKey('MD_MIGRATION') },
-  { key: FeatureFlagKey('MIGRATE_WALLET') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   {
     // RealFi availability is per-network: a network present here is enabled;
@@ -172,21 +171,6 @@ export const defaultFeatureFlags: FeatureFlag[] = [
         preview: [
           { id: 'drep1yg4mxhwlct5crvnkqpqy06l6lrszn0f4cyc5k2hv0pk8xhsvluu37' },
         ],
-      },
-    },
-  },
-  {
-    key: FeatureFlagKey('EARN_REWARDS'),
-    // Enablement + advertised rate — a committed bootstrap default like the
-    // promoted pool/DRep above, wholesale-replaced by PostHog in production
-    // (mainnet treated no differently). Percent numbers: a low–high range here,
-    // but a bare number or `{ value }` resolves to a single figure too. A rate is
-    // set for preprod/preview only, so mainnet shows the generic (non-rate-led)
-    // headline until PostHog supplies one.
-    payload: {
-      rate: {
-        preprod: { min: 2, max: 4 },
-        preview: { min: 2, max: 4 },
       },
     },
   },

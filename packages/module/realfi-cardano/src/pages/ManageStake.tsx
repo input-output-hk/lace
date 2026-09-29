@@ -179,13 +179,22 @@ const estimatedFeeLines = (params: {
     | { displayShortName?: string; metadata?: { ticker?: string } }
     | undefined;
   networkFee: { units: number; fiat: number | undefined };
+  /** RealFi's order-processing fee — lovelace, so it joins the ADA leg. */
+  processingFee: { units: number; fiat: number | undefined };
   serviceFee: { units: number; fiat: number | undefined };
   currencyTicker: string;
   /** Network's ADA ticker — `tADA` off mainnet, as everywhere else in the app. */
   adaTicker: string;
 }): { feeDisplay: string; feeFiatDisplay: string | undefined } => {
-  const { networkFee, serviceFee, serviceFeeToken, currencyTicker, adaTicker } =
-    params;
+  const { serviceFee, serviceFeeToken, currencyTicker, adaTicker } = params;
+  const networkFee = {
+    units: params.networkFee.units + params.processingFee.units,
+    fiat:
+      params.networkFee.fiat === undefined ||
+      params.processingFee.fiat === undefined
+        ? undefined
+        : params.networkFee.fiat + params.processingFee.fiat,
+  };
   if (!params.hasReview) {
     return {
       feeDisplay: `0.00 ${adaTicker}`,
@@ -883,17 +892,19 @@ export const ManageStake = (
   // charged denomination (swap-input token on stake, USDr on unstake) so no
   // missing price can dash or mislabel a known amount — shared with the
   // Review sheet (useReviewFeePricing).
-  const { networkFee, serviceFee, serviceFeeToken } = useReviewFeePricing({
-    review,
-    accountFungibleTokens,
-    usdrTokenId,
-  });
+  const { networkFee, processingFee, serviceFee, serviceFeeToken } =
+    useReviewFeePricing({
+      review,
+      accountFungibleTokens,
+      usdrTokenId,
+    });
   const { feeDisplay, feeFiatDisplay } = estimatedFeeLines({
     hasReview: review !== undefined,
     serviceFeeTokenId: review?.serviceFeeTokenId,
     usdrTokenId,
     serviceFeeToken,
     networkFee,
+    processingFee,
     serviceFee,
     currencyTicker: currency.ticker,
     adaTicker,

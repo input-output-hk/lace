@@ -171,10 +171,18 @@ export const RealFiStakeDetail = (
     activity.usdrBaseUnits === undefined
       ? activity.subtitle
       : `+${formatAmountToLocale(activity.usdrBaseUnits, 6)} USDrf`;
-  const stakeAmountValue =
-    activity.stakedUsdrBaseUnits === undefined
-      ? fallbackAmountValue
-      : `+${formatAmountToLocale(activity.stakedUsdrBaseUnits, 6)} USDrf`;
+  const usdrLine = (baseUnits: string) =>
+    `+${formatAmountToLocale(baseUnits, 6)} USDrf`;
+  // A quoted swap→stake splits the amount in two: what the swap was quoted to
+  // return, and what was actually staked, which can be lower. Until the stake
+  // order is known, the staked amount is not shown as a figure.
+  const hasQuote = activity.quotedUsdrBaseUnits !== undefined;
+  let stakeAmountValue = fallbackAmountValue;
+  if (activity.stakedUsdrBaseUnits !== undefined) {
+    stakeAmountValue = usdrLine(activity.stakedUsdrBaseUnits);
+  } else if (hasQuote) {
+    stakeAmountValue = '—';
+  }
 
   return (
     <Sheet.Scroll>
@@ -231,9 +239,20 @@ export const RealFiStakeDetail = (
             />
           }
         />
+        {activity.quotedUsdrBaseUnits !== undefined && (
+          <StakeDetailRow
+            testID="realfi-stake-detail-quote-amount"
+            label={t('realfi.stake-detail.quote-amount')}
+            value={usdrLine(activity.quotedUsdrBaseUnits)}
+          />
+        )}
         <StakeDetailRow
           testID="realfi-stake-detail-amount"
-          label={t('realfi.stake-detail.stake-amount')}
+          label={t(
+            hasQuote
+              ? 'realfi.stake-detail.staked-amount'
+              : 'realfi.stake-detail.stake-amount',
+          )}
           // Swap→stake rows show the USDr actually staked here and the input
           // token on the separate "Swap value" row below. Persisted rows format
           // their amount in the active locale from base units (P3-h);

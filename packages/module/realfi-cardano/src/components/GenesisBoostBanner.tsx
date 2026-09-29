@@ -36,8 +36,9 @@ const formatEndDate = (activeTo: string, language: string): string =>
 
 /**
  * Genesis Boost banner for the Staking Center hub (LW-15495 AC1): no link, no
- * live data. Self-gating — renders only inside the `genesisBoost` window from
- * the REALFI flag payload (checked per render, so it appears and disappears
+ * live data. States the end date only when the window has one. Self-gating —
+ * renders only inside the `genesisBoost` window from the REALFI flag payload
+ * (checked per render, so it appears and disappears
  * with no release or manual toggle) and only where RealFi is available on the
  * active network. The promotion is scheduled separately from the launch
  * season, so this reads `genesisBoost`, never `launchSeason`.
@@ -51,8 +52,8 @@ export const GenesisBoostBanner = () => {
 
   const genesisBoost = config?.genesisBoost;
   const isActive = isGenesisBoostActive(genesisBoost, Date.now());
-  // `isActive` guarantees a parseable `activeTo`, so the copy can never show
-  // an "Invalid Date".
+  // `isActive` guarantees any supplied `activeTo` parses, so the copy can
+  // never show an "Invalid Date". No `activeTo` ⇒ open-ended, no end date.
   const endDate = useMemo(
     () =>
       isActive && genesisBoost?.activeTo
@@ -79,7 +80,9 @@ export const GenesisBoostBanner = () => {
             {t('realfi.season.genesis-boost.title')}
           </Text.M>
           <Text.M style={styles.copy}>
-            {t('realfi.season.genesis-boost.subtitle', { date: endDate })}
+            {endDate
+              ? t('realfi.season.genesis-boost.subtitle', { date: endDate })
+              : t('realfi.season.genesis-boost.subtitle-open-ended')}
           </Text.M>
         </Column>
       </Row>

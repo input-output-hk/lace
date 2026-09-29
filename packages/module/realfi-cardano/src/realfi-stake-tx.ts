@@ -5,16 +5,18 @@
  *
  * Pipeline (spec §4.7):
  *   1. discover the pair's pools with the SDK's Sundae discovery (`buildable`
- *      scope) and quote each with the version-neutral `quoteSwap`, keeping the
- *      best-executing pool the calling build path can compose
+ *      scope) and pick the swap route (realfi-swap-route.ts): a V4 candidate
+ *      set when V4 can quote the amount, else the best V3/Stableswaps pool
  *   2. compose + balance the order:
- *      - swap→stake: the SDK's `buildSwapToStakeOrderTx` builds the complete
- *        V3-or-Stableswaps order transaction, routing the swap's guaranteed
- *        USDr into the version-aware stake continuation; Blaze balances it
- *        against the staker's live on-chain UTxOs
+ *      - swap→stake: the SDK builds the complete order transaction —
+ *        `buildSwapToStakeOrderTx` (V3/Stableswaps) or
+ *        `buildV4SwapToStakeOrderTx` (V4) — routing the swap's guaranteed USDr
+ *        into the version-aware stake continuation; Blaze balances it against
+ *        the staker's live on-chain UTxOs
  *      - direct-USDr stake: `buildStakeContinuation` supplies the live request
- *        address + datum; Lace's `TransactionBuilder` balances against the
- *        request's redux-supplied UTxOs
+ *        address + datum + RealFi order-processing fee; Lace's
+ *        `TransactionBuilder` balances against the request's redux-supplied
+ *        UTxOs
  *      - unstake: the SDK's Blaze-hosted `buildUnstakeOrderTx` (version-aware,
  *        timelock + metadata + diffusion-aware floor included). The output is
  *        USDr only, by product decision — the former swap-back leg is gone,
@@ -34,7 +36,6 @@ import { Serialization } from '@cardano-sdk/core';
 import { realfiDebugLog } from '@lace-contract/realfi-staking';
 import { RealfiApi, SundaeSwap } from '@realfi-co/realfi-partner-sdk';
 import { addressToRealFiDestination } from '@realfi-co/realfi-partner-sdk/tx-builder';
-import { AssetAmount, type IAssetAmountMetadata } from '@sundaeswap/asset';
 import { type IPoolData } from '@sundaeswap/core';
 
 import { balanceOrderTx } from './realfi-balance';
@@ -54,6 +55,14 @@ import {
 } from './realfi-order-output';
 import { filterBuildableStakeInputs } from './realfi-partner-config';
 import { createRealfiBlaze, detectAndCreateRealfiSdk } from './realfi-sdk';
+import {
+  V4_MAX_POOLS,
+  poolAssetAmount,
+  routablePools,
+  routeFeeFraction,
+  routeVenue,
+  selectSwapRoute,
+} from './realfi-swap-route';
 
 import type { RealFiBlockfrostConfig } from './realfi-blockfrost';
 import type { RealFiNetworkConfig } from './realfi-config';
@@ -109,6 +118,16 @@ export const fetchOrderFeesBps = async (
 ): Promise<{ mintBps: number; redeemBps: number }> =>
   RealfiApi.forNetwork(config.realfiNetwork).getOrderFees();
 
+/**
+ * RealFi's current order-processing fee (lovelace; 0 when none) — the value
+ * the SDK's order builders pay, read from the same protocol endpoint.
+ */
+const fetchProcessingFeeLovelace = async (
+  config: RealFiNetworkConfig,
+): Promise<bigint> =>
+  (await RealfiApi.forNetwork(config.realfiNetwork).getProtocol())
+    .orderProcessingFee?.lovelace ?? 0n;
+
 /** Fee (lovelace) of a balanced unsigned tx — the dry-run quote's exact network fee. */
 export const txFeeLovelace = (unsignedTxCbor: string): bigint =>
   Serialization.Transaction.fromCbor(Serialization.TxCBOR(unsignedTxCbor))
@@ -121,36 +140,12 @@ export type SwapLegQuote = {
   /** Price impact of the swap as a decimal fraction (e.g. 0.0011 = 0.11%). */
   priceImpact: number;
   /**
-   * Total pool fee fraction from `findPoolDataByIdent` (LP `currentFee` +
-   * `protocolFee`), e.g. 0.003 = 0.3%. Applied to the swapped amount for the fee.
+   * Total pool fee fraction (LP `currentFee` + `protocolFee`), e.g. 0.003 =
+   * 0.3%. Applied to the swapped amount for the fee.
    */
   poolFeeFraction: number;
-};
-
-/** Combined pool fee fraction (LP + protocol) from a pool-by-ident response. */
-const poolFeeFractionOf = (poolData: {
-  currentFee: number;
-  protocolFee?: number;
-}): number => poolData.currentFee + (poolData.protocolFee ?? 0);
-
-// Pool versions the swap→stake build can compose: V3 and Stableswaps via the
-// SDK's `buildSwapToStakeOrderTx`. V4 pools are quotable but never composable
-// into a RealFi continuation, so the filter excludes them — a quote must
-// never price a pool no order can fill.
-const stakeSwapPoolFilter = (pool: IPoolData): boolean =>
-  SundaeSwap.isSupportedSundaeSwapVersion(pool.version);
-
-/** The pool's own metadata (decimals) for `assetId`, as a supplied amount. */
-const poolAssetAmount = (
-  pool: IPoolData,
-  assetId: string,
-  amount: bigint,
-): AssetAmount<IAssetAmountMetadata> => {
-  const side = pool.assetA.assetId === assetId ? pool.assetA : pool.assetB;
-  return new AssetAmount<IAssetAmountMetadata>(amount, {
-    assetId: side.assetId,
-    decimals: side.decimals,
-  });
+  /** Swap venue of the chosen route, e.g. "SundaeSwap V4". */
+  venue: string;
 };
 
 /**
@@ -186,81 +181,58 @@ const findUsdrPools = async (
 };
 
 /**
- * Discover the SundaeSwap pools for a USDr↔counterpart pair and quote the
- * swap against each, returning the best-executing pool with its quote.
+ * Discover the SundaeSwap pools for a USDr↔counterpart pair and pick the
+ * swap route (V4 first — see realfi-swap-route.ts).
  *
  * Discovery uses the SDK's `buildable` scope, not `curated` — the pair itself
  * is already curated upstream (runtime partner-config list with the compiled
  * `swapCounterpartAssets` fallback), so re-fetching RealFi's curation here
- * would only add a request. The version filter narrows to what the swap→stake
- * composer can build, so a pair whose only pools are un-composable fails the
- * quote here rather than building an order no scooper can execute.
+ * would only add a request.
  */
-const quoteBestPoolSwap = async (params: {
+const findSwapRoute = async (params: {
   config: RealFiNetworkConfig;
   counterpartSundaeId: string;
   /** Amount of the counterpart asset funding the swap (base units). */
   suppliedAmount: bigint;
-}): Promise<{ pool: IPoolData; quote: SundaeSwap.ISundaeSwapQuote }> => {
-  const pools = await findUsdrPools(params.config);
-  const candidates = pools.filter(
-    pool =>
-      (pool.assetA.assetId === params.counterpartSundaeId ||
-        pool.assetB.assetId === params.counterpartSundaeId) &&
-      stakeSwapPoolFilter(pool),
-  );
-  if (candidates.length === 0) {
-    throw new Error(
-      `No composable SundaeSwap pool available for USDr/${params.counterpartSundaeId}`,
-    );
-  }
-  let best: { pool: IPoolData; quote: SundaeSwap.ISundaeSwapQuote } | undefined;
-  for (const pool of candidates) {
-    const quote = SundaeSwap.quoteSwap({
-      pool,
-      suppliedAsset: poolAssetAmount(
-        pool,
-        params.counterpartSundaeId,
-        params.suppliedAmount,
-      ),
-      slippage: SUNDAE_SWAP_SLIPPAGE,
-    });
-    if (
-      !best ||
-      quote.estimatedReceived.amount > best.quote.estimatedReceived.amount
-    ) {
-      best = { pool, quote };
-    }
-  }
-  realfiDebugLog('stake-tx: pool quoted by pair', {
-    counterpart: params.counterpartSundaeId,
-    candidateCount: candidates.length,
-    ident: best?.pool.ident,
-    version: best?.pool.version,
+}) => {
+  const route = selectSwapRoute({
+    pools: await findUsdrPools(params.config),
+    counterpartSundaeId: params.counterpartSundaeId,
+    suppliedAmount: params.suppliedAmount,
+    slippage: SUNDAE_SWAP_SLIPPAGE,
   });
-  // Loop invariant: candidates is non-empty, so best is always assigned.
-  return best as { pool: IPoolData; quote: SundaeSwap.ISundaeSwapQuote };
+  realfiDebugLog('stake-tx: swap route selected', {
+    counterpart: params.counterpartSundaeId,
+    kind: route.kind,
+    idents:
+      route.kind === 'v4'
+        ? route.candidates.map(pool => pool.ident)
+        : [route.pool.ident],
+    minReceived: route.quote.minReceived.amount,
+  });
+  return route;
 };
 
 /**
  * Live quote for the input→USDr swap leg via the SDK's version-neutral
- * `quoteSwap` (V3 + Stableswaps — everything the swap→stake composer builds).
- * Used by the SOR quote so the Manage Stake screen shows a dynamic price impact.
+ * `quoteSwap` on the selected route. Used by the SOR quote so the
+ * Manage Stake screen shows a dynamic price impact.
  */
 export const quoteSwapToUsdr = async (params: {
   config: RealFiNetworkConfig;
   inputTokenId: string;
   inputAmount: bigint;
 }): Promise<SwapLegQuote> => {
-  const { pool, quote } = await quoteBestPoolSwap({
+  const route = await findSwapRoute({
     config: params.config,
     counterpartSundaeId: toSundaeAssetId(params.inputTokenId),
     suppliedAmount: params.inputAmount,
   });
   return {
-    usdrOut: quote.estimatedReceived.amount,
-    priceImpact: quote.priceImpact,
-    poolFeeFraction: poolFeeFractionOf(pool),
+    usdrOut: route.quote.estimatedReceived.amount,
+    priceImpact: route.quote.priceImpact,
+    poolFeeFraction: routeFeeFraction(route),
+    venue: routeVenue(route),
   };
 };
 
@@ -270,8 +242,8 @@ export const quoteSwapToUsdr = async (params: {
  * carries only the stablecoin counterparts, while LW-14681's AC offers "ADA or
  * coins listed in the swapCounterparts"), each verified against live Sundae
  * discovery so an asset with no composable USDr pool is never offered — it
- * would only quote-fail on selection. Uses the same `buildable` scope +
- * version filter as the quote path, so offered === quotable === buildable.
+ * would only quote-fail on selection. Uses the same `buildable` scope and
+ * route rules as the quote path, so offered === quotable === buildable.
  */
 export const fetchBuildableStakeInputs = async (
   config: RealFiNetworkConfig,
@@ -281,7 +253,7 @@ export const fetchBuildableStakeInputs = async (
   return filterBuildableStakeInputs(
     // ADA first: it is the sheet's default input selection when offered.
     [...new Set(['ada.lovelace', ...counterpartIds])],
-    pools.filter(stakeSwapPoolFilter),
+    routablePools(pools),
   );
 };
 
@@ -292,6 +264,11 @@ export const fetchBuildableStakeInputs = async (
 export type BuiltOrderTx = {
   unsignedTxCbor: string;
   orderOutputIndex: number;
+  /**
+   * RealFi's order-processing fee the order pays (lovelace; 0 when the
+   * deployment charges none). An order without it is not processed.
+   */
+  processingFeeLovelace: bigint;
 };
 
 export const buildStakeUnsignedTx = async (
@@ -361,8 +338,20 @@ export const buildStakeUnsignedTx = async (
       ]),
     );
     directOutput.setDatum(Core.Datum.newInlineData(continuation.datum));
+    // The SDK's own order builders add this output; a continuation only
+    // declares it, so this Lace-balanced path must pay it itself.
+    const fee = continuation.orderProcessingFee;
+    const feeOutputs = fee
+      ? [
+          new Core.TransactionOutput(
+            Core.Address.fromBech32(fee.address),
+            makeValue(fee.lovelace),
+          ).toCbor(),
+        ]
+      : [];
     const unsignedTxCbor = await balanceOrderTx({
       orderOutputCbor: directOutput.toCbor(),
+      extraOutputsCbor: feeOutputs,
       metadata: new Map([
         [ORDER_ORIGIN_METADATA_LABEL, orderOriginMetadatum()],
       ]),
@@ -378,43 +367,67 @@ export const buildStakeUnsignedTx = async (
         unsignedTxCbor,
         continuation.address.toBech32(),
       ),
+      processingFeeLovelace: fee?.lovelace ?? 0n,
     };
   }
 
   // Any other input first swaps to USDr on SundaeSwap. The SDK composes the
-  // complete swap→stake order transaction — V3 or Stableswaps, which the pure
-  // /tx-builder cannot compose (preview's counterpart pairs are exactly that,
-  // F1) — deriving the swap floor from the market slippage and routing the
-  // guaranteed USDr into the stake continuation. Blaze balances it against the
-  // staker's live on-chain UTxOs, so `utxos`/`protocolParameters`/`ttlSeconds`
-  // are unused on this path.
+  // complete swap→stake order transaction on the chosen route, routing the
+  // swap's guaranteed USDr into the stake continuation and the processing fee
+  // through Sundae's referral fee. Blaze balances it against the staker's live
+  // on-chain UTxOs, so `utxos`/`protocolParameters`/`ttlSeconds` are unused on
+  // this path.
   const inputSundaeId = toSundaeAssetId(params.inputTokenId);
-  const { pool } = await quoteBestPoolSwap({
+  const route = await findSwapRoute({
     config: params.config,
     counterpartSundaeId: inputSundaeId,
     suppliedAmount: params.inputAmount,
   });
-  const composed = await SundaeSwap.buildSwapToStakeOrderTx(
-    blazeContext.blaze,
-    {
-      sdk,
-      swap: {
-        pool,
-        suppliedAsset: poolAssetAmount(pool, inputSundaeId, params.inputAmount),
-        swapType: {
-          type: SundaeSwap.ESwapType.MARKET,
-          slippage: SUNDAE_SWAP_SLIPPAGE,
-        },
-        ownerAddress: params.changeAddressBech32,
-        orderAddresses: {
-          DestinationAddress: {
+  const { blaze } = blazeContext;
+  const composed =
+    route.kind === 'v4'
+      ? await SundaeSwap.buildV4SwapToStakeOrderTx(blaze, {
+          sdk,
+          swap: {
+            ownerAddress: params.changeAddressBech32,
+            offered: poolAssetAmount(
+              route.candidates[0],
+              inputSundaeId,
+              params.inputAmount,
+            ),
+            minReceived: route.quote.minReceived,
+            maxPerExecution: await SundaeSwap.resolveV4MaxPerExecution(
+              blaze,
+              V4_MAX_POOLS,
+            ),
+          },
+          finalDestination: {
             address: params.changeAddressBech32,
             datum: { type: SundaeSwap.EDatumType.NONE },
           },
-        },
-      },
-    },
-  );
+        })
+      : await SundaeSwap.buildSwapToStakeOrderTx(blaze, {
+          sdk,
+          swap: {
+            pool: route.pool,
+            suppliedAsset: poolAssetAmount(
+              route.pool,
+              inputSundaeId,
+              params.inputAmount,
+            ),
+            swapType: {
+              type: SundaeSwap.ESwapType.MARKET,
+              slippage: SUNDAE_SWAP_SLIPPAGE,
+            },
+            ownerAddress: params.changeAddressBech32,
+            orderAddresses: {
+              DestinationAddress: {
+                address: params.changeAddressBech32,
+                datum: { type: SundaeSwap.EDatumType.NONE },
+              },
+            },
+          },
+        });
   // The SDK's RealFi order builders stamp the origin label themselves; its
   // Sundae composer does not, and the indexer drops unlabelled orders.
   composed.tx.setMetadata(orderOriginBlazeMetadata());
@@ -428,16 +441,22 @@ export const buildStakeUnsignedTx = async (
     built.cbor,
     composed.datum,
   );
+  const processingFeeLovelace = await fetchProcessingFeeLovelace(params.config);
   realfiDebugLog('stake-tx: swap→stake composed', {
     path: 'swap→stake',
     ownerKeyHash: ownerHash,
-    poolIdent: pool.ident,
-    poolVersion: pool.version,
+    route: route.kind,
+    venue: routeVenue(route),
     offeredAssetId: inputSundaeId,
     offeredAmount: params.inputAmount,
     orderOutputIndex,
+    processingFeeLovelace,
   });
-  return { unsignedTxCbor: built.cbor, orderOutputIndex };
+  return {
+    unsignedTxCbor: built.cbor,
+    orderOutputIndex,
+    processingFeeLovelace,
+  };
 };
 
 /**
@@ -457,7 +476,7 @@ export const buildStakeUnsignedTx = async (
  */
 export const buildUnstakeUnsignedTx = async (
   params: BuildUnstakeTxParams,
-): Promise<string> => {
+): Promise<Omit<BuiltOrderTx, 'orderOutputIndex'>> => {
   realfiDebugLog('unstake-tx: build requested', {
     realfiNetwork: params.config.realfiNetwork,
     susdrAmount: params.susdrAmount,
@@ -481,16 +500,23 @@ export const buildUnstakeUnsignedTx = async (
     detectAndCreateRealfiSdk(params.config.realfiNetwork, blazeContext),
     RealfiApi.forNetwork(params.config.realfiNetwork).getCooldownUnlockSlot(),
   ]);
-  const txBuilder = await sdk.buildUnstakeOrderTx({
-    amount: params.susdrAmount,
-    destination: addressToRealFiDestination(staker),
-    unlockSlot,
-    owner: { Signature: { key_hash: ownerHash } },
-  });
+  const [txBuilder, processingFeeLovelace] = await Promise.all([
+    sdk.buildUnstakeOrderTx({
+      amount: params.susdrAmount,
+      destination: addressToRealFiDestination(staker),
+      unlockSlot,
+      owner: { Signature: { key_hash: ownerHash } },
+    }),
+    fetchProcessingFeeLovelace(params.config),
+  ]);
   realfiDebugLog('unstake-tx: SDK unstake order composed', {
     path: 'direct-usdr (timelock)',
     unlockSlot,
     ownerKeyHash: ownerHash,
+    processingFeeLovelace,
   });
-  return (await txBuilder.complete()).toCbor();
+  return {
+    unsignedTxCbor: (await txBuilder.complete()).toCbor(),
+    processingFeeLovelace,
+  };
 };

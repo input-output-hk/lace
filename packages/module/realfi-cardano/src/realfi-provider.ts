@@ -65,26 +65,39 @@ const routeTokenId = (walletTokenId: string): string =>
   walletTokenId === 'lovelace' ? 'ada' : walletTokenId;
 
 /**
- * Fee lines (base units): the exact network fee from the dry-run build, plus
- * the service fee — the SundaeSwap pool fee (`findPoolDataByIdent` LP
- * `currentFee` + `protocolFee`) on the swapped amount and RealFi's per-action
- * minimum fee (partner-SDK `orderFees`, bps) on the minted/redeemed amount.
- * A zero-amount leg contributes nothing.
+ * Fee lines (base units): the exact network fee and RealFi's order-processing
+ * fee from the dry-run build, plus the service fee — the SundaeSwap pool fee
+ * (LP `currentFee` + `protocolFee`) on the swapped amount and RealFi's
+ * per-action minimum fee (partner-SDK `orderFees`, bps) on the minted/redeemed
+ * amount. A zero-amount leg contributes nothing.
  */
 const feeLines = (
-  networkFeeLovelace: bigint,
+  dryRun: { networkFeeLovelace: bigint; processingFeeLovelace: bigint },
   swapFee: { baseUnits: number; poolFeeFraction: number },
   realfiFee: { baseUnits: number; bps: number; tokenId: string },
-): Pick<RealFiSorQuote, 'networkFee' | 'serviceFee' | 'serviceFeeTokenId'> => {
+): Pick<
+  RealFiSorQuote,
+  'networkFee' | 'processingFee' | 'serviceFee' | 'serviceFeeTokenId'
+> => {
   const serviceFee =
     Math.round(swapFee.baseUnits * swapFee.poolFeeFraction) +
     Math.round((realfiFee.baseUnits * realfiFee.bps) / 10_000);
   return {
-    networkFee: networkFeeLovelace.toString(),
+    networkFee: dryRun.networkFeeLovelace.toString(),
+    processingFee: dryRun.processingFeeLovelace.toString(),
     serviceFee: String(serviceFee),
     serviceFeeTokenId: realfiFee.tokenId,
   };
 };
+
+/** The dry-run build's fees: ledger fee from the tx, processing fee reported. */
+const dryRunFees = (built: {
+  unsignedTxCbor: string;
+  processingFeeLovelace: bigint;
+}) => ({
+  networkFeeLovelace: txFeeLovelace(built.unsignedTxCbor),
+  processingFeeLovelace: built.processingFeeLovelace,
+});
 
 // The dry-run build consumes the same inputs `buildBundledTx` will, so the
 // quoted network fee IS the balanced tx's fee, not an estimate.
@@ -113,7 +126,7 @@ const buildStakeQuote = async (
   config: RealFiNetworkConfig,
   blockfrost: RealFiBlockfrostConfig,
 ): Promise<RealFiSorQuote> => {
-  const [ratio, orderFees, networkFeeLovelace] = await Promise.all([
+  const [ratio, orderFees, dryRun] = await Promise.all([
     // Diffusion-aware sUSDr↔USDr vault rate (staking is not 1:1 — the vault
     // appreciates; on v1_1 pending yield diffuses in linearly).
     fetchVaultRatioScaled(config.realfiNetwork),
@@ -123,7 +136,7 @@ const buildStakeQuote = async (
       inputTokenId: request.inputTokenId,
       inputAmount: BigInt(request.inputAmount),
       blockfrost,
-    }).then(({ unsignedTxCbor }) => txFeeLovelace(unsignedTxCbor)),
+    }).then(dryRunFees),
   ]);
   if (ratio === undefined) {
     throw new Error('RealFi vault rate unavailable — cannot quote');
@@ -153,17 +166,18 @@ const buildStakeQuote = async (
       priceImpactUsd: '0',
       exchangeRate: vaultRateNumbers(ratio).usdrPerSusdr,
       ...feeLines(
-        networkFeeLovelace,
+        dryRun,
         { baseUnits: 0, poolFeeFraction: 0 },
         { ...realfiFee, tokenId: request.inputTokenId },
       ),
     };
   }
-  const { usdrOut, priceImpact, poolFeeFraction } = await quoteSwapToUsdr({
-    config,
-    inputTokenId: request.inputTokenId,
-    inputAmount: BigInt(request.inputAmount),
-  });
+  const { usdrOut, priceImpact, poolFeeFraction, venue } =
+    await quoteSwapToUsdr({
+      config,
+      inputTokenId: request.inputTokenId,
+      inputAmount: BigInt(request.inputAmount),
+    });
   const susdrOut = susdrOutForUsdr(usdrOut, ratio);
   const usdrOutUsd = Number(usdrOut) / 10 ** SWAP_DECIMALS;
   const inputDecimal = Number(request.inputAmount) / 10 ** SWAP_DECIMALS;
@@ -174,7 +188,7 @@ const buildStakeQuote = async (
     estimatedOutput: susdrOut.toString(),
     route: [
       {
-        venue: 'SundaeSwap V3',
+        venue,
         fromTokenId: routeTokenId(request.inputTokenId),
         toTokenId: 'usdr',
       },
@@ -185,7 +199,7 @@ const buildStakeQuote = async (
     // Input per sUSDr received (e.g. ADA per sUSDr); 0 when nothing is received.
     exchangeRate: susdrOutDecimal > 0 ? inputDecimal / susdrOutDecimal : 0,
     ...feeLines(
-      networkFeeLovelace,
+      dryRun,
       { baseUnits: Number(request.inputAmount), poolFeeFraction },
       { ...realfiFee, tokenId: request.inputTokenId },
     ),
@@ -208,7 +222,7 @@ const buildUnstakeQuote = async (
   if (!isUsdrTokenId(outputTokenId, config.usdrTokenId)) {
     throw new Error('Unstake output is locked to USDr');
   }
-  const [ratio, orderFees, networkFeeLovelace] = await Promise.all([
+  const [ratio, orderFees, dryRun] = await Promise.all([
     // Diffusion-aware sUSDr↔USDr vault rate (SDK `susdrExchangeRateInputs`).
     fetchVaultRatioScaled(config.realfiNetwork),
     fetchOrderFeesBps(config),
@@ -216,7 +230,7 @@ const buildUnstakeQuote = async (
       ...dryRunContext(request, config),
       susdrAmount: BigInt(request.inputAmount),
       blockfrost,
-    }).then(txFeeLovelace),
+    }).then(dryRunFees),
   ]);
   if (ratio === undefined) {
     throw new Error('RealFi vault rate unavailable — cannot quote');
@@ -236,7 +250,7 @@ const buildUnstakeQuote = async (
     priceImpactUsd: '0',
     exchangeRate: vaultRateNumbers(ratio).usdrPerSusdr,
     ...feeLines(
-      networkFeeLovelace,
+      dryRun,
       { baseUnits: 0, poolFeeFraction: 0 },
       { ...realfiFee, tokenId: config.usdrTokenId },
     ),
@@ -414,12 +428,15 @@ export const createRealFiProvider = (
             buildUnstakeUnsignedTx({
               ...context,
               susdrAmount: BigInt(request.quote.inputAmount),
-            }).then(unsignedTxCbor => ({ unsignedTxCbor }))
+            }).then(({ unsignedTxCbor }) => ({ unsignedTxCbor }))
           : buildStakeUnsignedTx({
               ...context,
               inputTokenId: request.inputTokenId,
               inputAmount: BigInt(request.quote.inputAmount),
-            }),
+            }).then(({ unsignedTxCbor, orderOutputIndex }) => ({
+              unsignedTxCbor,
+              orderOutputIndex,
+            })),
       ),
     ).pipe(
       map(built => Ok<RealFiBundledTransaction>(built)),
