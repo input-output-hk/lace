@@ -2800,6 +2800,7 @@
   "realfi.detail.staked-balance": "Staked Balance",
   "realfi.detail.available-to-stake": "Available to Stake",
   "realfi.detail.apy": "APY",
+  "realfi.detail.yield-earned": "Yield Earned",
   "realfi.detail.manage-stake": "Manage Stake",
   "realfi.detail.staking-activities": "Staking Activities",
   "realfi.detail.no-activities": "You don't have any activities",

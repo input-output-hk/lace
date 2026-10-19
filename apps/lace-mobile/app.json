@@ -38,7 +38,7 @@
       "appleTeamId": "89TW38X994"
     },
     "android": {
-      "version": "2.4.1",
+      "version": "2.4.2",
       "adaptiveIcon": {
         "foregroundImage": "./assets/Lace-android-adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

@@ -47,7 +47,10 @@ vi.mock('../src/realfi-cancel-tx', () => ({
 // The off-chain read helpers load the same ESM-incompatible SDK — mock the seam
 // so the provider stays unit-testable without loading `@realfi-co`/`@sundaeswap`.
 vi.mock('../src/realfi-stake-activities', () => ({
-  getStakeActivities: vi.fn(async () => []),
+  getStakeHistory: vi.fn(async () => ({
+    activities: [],
+    hasSwappedIntoUsdr: false,
+  })),
   fetchWithdrawableUnstakes: vi.fn(async () => []),
   fetchCoolingDownUnstakes: vi.fn(async () => []),
 }));
@@ -61,6 +64,10 @@ vi.mock('../src/realfi-attribution', () => ({
 // The R-Points read loads the SDK root too (launch season, LW-15495).
 vi.mock('../src/realfi-points', () => ({
   fetchRPoints: vi.fn(async () => ({ totalPoints: 0, fetchedAt: 0 })),
+}));
+
+vi.mock('../src/realfi-yield-earned', () => ({
+  fetchYieldEarned: vi.fn(async () => ({ yieldUsdrBaseUnits: '0' })),
 }));
 
 // Stub the live vault-ratio yield feed so the provider maps a known value
@@ -86,6 +93,7 @@ import {
   fetchBuildableStakeInputs,
 } from '../src/realfi-stake-tx';
 import { fetchStakingYield, fetchVaultRate } from '../src/realfi-yield';
+import { fetchYieldEarned } from '../src/realfi-yield-earned';
 
 import type {
   RealFiBuildRequest,
@@ -178,6 +186,50 @@ describe('createRealFiProvider', () => {
       expect(result.value.apy).toBe(0.083);
       expect(result.value.exchangeRate).toBe(1.1337);
     }
+  });
+
+  it('getYieldEarned reports an account without a payment credential as a validation error, not a retryable outage', async () => {
+    vi.mocked(fetchYieldEarned).mockResolvedValueOnce(undefined);
+    const result = await firstValueFrom(
+      provider.getYieldEarned({
+        config: PREVIEW_REALFI_CONFIG,
+        accountId: 'acc-1' as never,
+        addresses: ['addr_test1qz...'],
+      }),
+    );
+    expect(result.isErr()).toBe(true);
+    if (result.isErr()) expect(result.error.code).toBe('VALIDATION');
+  });
+
+  it('getYieldEarned passes every account address to the credential read', async () => {
+    vi.mocked(fetchYieldEarned).mockResolvedValueOnce({
+      yieldUsdrBaseUnits: '3000',
+    });
+    const result = await firstValueFrom(
+      provider.getYieldEarned({
+        config: PREVIEW_REALFI_CONFIG,
+        accountId: 'acc-1' as never,
+        addresses: ['addr-a', 'addr-b'],
+      }),
+    );
+    expect(fetchYieldEarned).toHaveBeenLastCalledWith(PREVIEW_REALFI_CONFIG, [
+      'addr-a',
+      'addr-b',
+    ]);
+    expect(result.isOk() && result.value.yieldUsdrBaseUnits).toBe('3000');
+  });
+
+  it('getYieldEarned rethrows read failures so the side-effect retries them', async () => {
+    vi.mocked(fetchYieldEarned).mockRejectedValueOnce(new Error('503'));
+    await expect(
+      firstValueFrom(
+        provider.getYieldEarned({
+          config: PREVIEW_REALFI_CONFIG,
+          accountId: 'acc-1' as never,
+          addresses: ['addr_test1qz...'],
+        }),
+      ),
+    ).rejects.toThrow('503');
   });
 
   it('getExchangeRateAndApy reports an absent APY (never 0) when only the annualization feed fails', async () => {

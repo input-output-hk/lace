@@ -1,5 +1,5 @@
 import { markParameterizedSelector } from '@lace-contract/module';
-import { AccountId } from '@lace-contract/wallet-repo';
+import { AccountId, walletsActions } from '@lace-contract/wallet-repo';
 import { createStateMachineSlice } from '@lace-lib/util-store';
 import { createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
@@ -19,6 +19,7 @@ import type {
   RealFiRPoints,
   RealFiStakeActivity,
   RealFiWithdrawableUnstake,
+  RealFiYieldEarned,
 } from '../provider-types';
 import type { RealFiSdkNetwork } from '../realfi-network-config';
 import type { RealFiStakeId } from '../value-objects';
@@ -42,6 +43,7 @@ const positionInitialState: RealFiPositionSliceState = {
   positionsByAccount: {},
   yieldInfoByNetwork: {},
   stakeActivitiesByAccount: {},
+  hasSwappedIntoUsdrByAccount: {},
   withdrawnActivitiesByAccount: {},
   withdrawableByAccount: {},
   earnBasisRateByNetwork: {},
@@ -53,6 +55,7 @@ const positionInitialState: RealFiPositionSliceState = {
   hasSeenOnboarding: false,
   rPointsByAccount: {},
   rPointsFetchStatusByAccount: {},
+  yieldEarnedByAccount: {},
   laceBonusConsumedByAccount: {},
 };
 
@@ -99,6 +102,7 @@ type StakeActivitiesRequestedPayload = { accountId: AccountId };
 type StakeActivitiesReceivedPayload = {
   accountId: AccountId;
   activities: RealFiStakeActivity[];
+  hasSwappedIntoUsdr: boolean;
 };
 type WithdrawActivitiesRecordedPayload = {
   accountId: AccountId;
@@ -129,6 +133,10 @@ type RPointsRequestedPayload = { accountId: AccountId };
 type RPointsReceivedPayload = {
   accountId: AccountId;
   rPoints: RealFiRPoints;
+};
+type YieldEarnedReceivedPayload = {
+  accountId: AccountId;
+  yieldEarned: RealFiYieldEarned;
 };
 
 /** Newest persisted withdraw-history rows kept per account (unbounded growth
@@ -295,12 +303,19 @@ const realfiPositionSlice = createSlice({
       { payload }: PayloadAction<StakeActivitiesReceivedPayload>,
     ) => {
       state.stakeActivitiesByAccount[payload.accountId] = payload.activities;
-      // Feed rows are keyed by the order tx hash, so a watched submit the feed
-      // now returns (any status) is reconciled — stop watching it.
+      state.hasSwappedIntoUsdrByAccount[payload.accountId] =
+        payload.hasSwappedIntoUsdr;
+      // Any identity of a row proves the feed knows the submitted order: its
+      // id, the tx a swap row's `txHash#index` id was created in (a swap-routed
+      // submit), or the RealFi order hash a merged swap row retains.
       const watched = state.submittedOrderTxsByAccount[payload.accountId];
       if (!watched) return;
       const feedTxHashes = new Set(
-        payload.activities.map(activity => activity.id),
+        payload.activities.flatMap(activity => [
+          activity.id,
+          activity.id.split('#')[0],
+          ...(activity.stakeOrderTxHash ? [activity.stakeOrderTxHash] : []),
+        ]),
       );
       const unresolved = watched.filter(
         orderTx => !feedTxHashes.has(orderTx.txHash),
@@ -426,6 +441,12 @@ const realfiPositionSlice = createSlice({
     ) => {
       state.rPointsFetchStatusByAccount[payload.accountId] = 'failure';
     },
+    yieldEarnedReceived: (
+      state,
+      { payload }: PayloadAction<YieldEarnedReceivedPayload>,
+    ) => {
+      state.yieldEarnedByAccount[payload.accountId] = payload.yieldEarned;
+    },
     // Marked when the account's first qualifying swap into USDr is queued:
     // RealFi's engine applies the bonus automatically, and the order-history
     // read won't return the new swap until the backend indexes it — without
@@ -547,6 +568,30 @@ const realfiPositionSlice = createSlice({
       );
     },
   },
+  // Per-account reads are persisted; drop them with the account so removed
+  // wallets don't keep growing persisted state. The history rows go with the
+  // swap evidence read alongside them: a restored account (same id) must read
+  // as unread, which withholds the first-swap bonus, not as an empty history
+  // that offers it. The locally consumed bonus flag is kept for the same
+  // reason.
+  extraReducers: builder => {
+    const dropAccountReads = (
+      state: RealFiPositionSliceState,
+      accountId: AccountId,
+    ) => {
+      delete state.yieldEarnedByAccount[accountId];
+      delete state.stakeActivitiesByAccount[accountId];
+      delete state.hasSwappedIntoUsdrByAccount[accountId];
+    };
+    builder.addCase(walletsActions.wallets.removeAccount, (state, action) => {
+      dropAccountReads(state, action.payload.accountId);
+    });
+    builder.addCase(walletsActions.wallets.removeWallet, (state, action) => {
+      for (const accountId of action.payload.accountIds) {
+        dropAccountReads(state, accountId);
+      }
+    });
+  },
   selectors: {
     selectAllPositions: state => state.positionsByAccount,
     selectYieldInfoByNetwork: state => state.yieldInfoByNetwork,
@@ -554,6 +599,8 @@ const realfiPositionSlice = createSlice({
     selectCooldownUnlockAtMsByNetwork: state =>
       state.cooldownUnlockAtMsByNetwork,
     selectAllStakeActivities: state => state.stakeActivitiesByAccount,
+    selectHasSwappedIntoUsdrByAccount: state =>
+      state.hasSwappedIntoUsdrByAccount,
     selectAllWithdrawnActivities: state => state.withdrawnActivitiesByAccount,
     selectAllWithdrawable: state => state.withdrawableByAccount,
     selectEarnBasisRateByNetwork: state => state.earnBasisRateByNetwork,
@@ -569,6 +616,7 @@ const realfiPositionSlice = createSlice({
     selectAllRPoints: state => state.rPointsByAccount,
     selectRPointsFetchStatusByAccount: state =>
       state.rPointsFetchStatusByAccount,
+    selectAllYieldEarned: state => state.yieldEarnedByAccount,
     selectLaceBonusConsumedByAccount: state => state.laceBonusConsumedByAccount,
   },
 });
@@ -646,16 +694,28 @@ const selectWithdrawableByAccountId = markParameterizedSelector(
  * derives from the engine's own order history: any prior swap(-into-USDr)
  * order — whatever surface placed it — means the first-swap bonus is no longer
  * available (conservative: never promises a bonus the engine may not grant).
- * The local consumed flag covers the window before the history read returns a
- * just-queued first swap.
+ * The history read reports that directly, as plain swaps are not history
+ * rows. The local consumed flag covers the window before the history read
+ * returns a just-queued first swap.
  */
 const selectIsLaceSwapBonusAvailableByAccountId = markParameterizedSelector(
   createSelector(
     realfiPositionSlice.selectors.selectAllStakeActivities,
+    realfiPositionSlice.selectors.selectHasSwappedIntoUsdrByAccount,
     realfiPositionSlice.selectors.selectLaceBonusConsumedByAccount,
     (_: unknown, accountId: AccountId) => accountId,
-    (activitiesByAccount, consumedByAccount, accountId): boolean => {
+    (
+      activitiesByAccount,
+      hasSwappedIntoUsdrByAccount,
+      consumedByAccount,
+      accountId,
+      // eslint-disable-next-line max-params
+    ): boolean => {
       if (consumedByAccount[accountId]) return false;
+      const hasSwappedIntoUsdr = hasSwappedIntoUsdrByAccount[accountId];
+      if (hasSwappedIntoUsdr !== undefined) return !hasSwappedIntoUsdr;
+      // History persisted before the read reported this: its swap rows are
+      // the only evidence until the next read lands.
       const activities = activitiesByAccount[accountId];
       // Unread history is NOT an empty history: a restored or second-device
       // wallet has no rows until the read lands. The engine applies the bonus

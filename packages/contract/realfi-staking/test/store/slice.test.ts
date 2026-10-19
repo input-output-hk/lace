@@ -1,4 +1,8 @@
-import { AccountId } from '@lace-contract/wallet-repo';
+import {
+  AccountId,
+  WalletId,
+  walletsActions,
+} from '@lace-contract/wallet-repo';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -56,6 +60,7 @@ describe('realfiPosition slice', () => {
       stakeInputAssetsByNetwork: {},
       cooldownUnlockAtMsByNetwork: {},
       stakeActivitiesByAccount: {},
+      hasSwappedIntoUsdrByAccount: {},
       withdrawnActivitiesByAccount: {},
       withdrawableByAccount: {},
       coolingDownByAccount: {},
@@ -64,6 +69,7 @@ describe('realfiPosition slice', () => {
       hasSeenOnboarding: false,
       rPointsByAccount: {},
       rPointsFetchStatusByAccount: {},
+      yieldEarnedByAccount: {},
       laceBonusConsumedByAccount: {},
     });
   });
@@ -80,6 +86,56 @@ describe('realfiPosition slice', () => {
     expect(selectors.selectHasSeenOnboarding({ realfiPosition: seen })).toBe(
       true,
     );
+  });
+
+  it('yieldEarnedReceived replaces the account figure; selectAllYieldEarned exposes the map', () => {
+    const selectors = realfiStakingSelectors.realfiPosition;
+    const first = reducer(
+      initial,
+      realfiStakingActions.realfiPosition.yieldEarnedReceived({
+        accountId,
+        yieldEarned: { yieldUsdrBaseUnits: '3000' },
+      }),
+    );
+    const refreshed = reducer(
+      first,
+      realfiStakingActions.realfiPosition.yieldEarnedReceived({
+        accountId,
+        yieldEarned: { yieldUsdrBaseUnits: '3565' },
+      }),
+    );
+    expect(
+      selectors.selectAllYieldEarned({ realfiPosition: refreshed } as never),
+    ).toEqual({ [accountId]: { yieldUsdrBaseUnits: '3565' } });
+  });
+
+  it('drops an account yield figure when its account or wallet is removed', () => {
+    const otherAccountId = AccountId('acc-other');
+    const seeded = [accountId, otherAccountId].reduce(
+      (state, id) =>
+        reducer(
+          state,
+          realfiStakingActions.realfiPosition.yieldEarnedReceived({
+            accountId: id,
+            yieldEarned: { yieldUsdrBaseUnits: '1' },
+          }),
+        ),
+      initial,
+    );
+    const afterAccount = reducer(
+      seeded,
+      walletsActions.wallets.removeAccount(WalletId('wallet-1'), accountId),
+    );
+    expect(Object.keys(afterAccount.yieldEarnedByAccount)).toEqual([
+      otherAccountId,
+    ]);
+    const afterWallet = reducer(
+      afterAccount,
+      walletsActions.wallets.removeWallet(WalletId('wallet-2'), [
+        otherAccountId,
+      ]),
+    );
+    expect(afterWallet.yieldEarnedByAccount).toEqual({});
   });
 
   it('rPointsReceived stores the snapshot per account; selectAllRPoints exposes the map', () => {
@@ -164,15 +220,15 @@ describe('realfiPosition slice', () => {
     ).toEqual({});
   });
 
-  it('the Lace swap bonus is available until the history shows a swap order', () => {
+  it("the Lace swap bonus follows the read's swap-into-USDr evidence, not the rows", () => {
     const selectors = realfiStakingSelectors.realfiPosition;
-    const isAvailable = (state: typeof initial) =>
+    const isAvailable = (state: typeof initial, id = accountId) =>
       selectors.selectIsLaceSwapBonusAvailableByAccountId(
         { realfiPosition: state },
-        accountId,
+        id,
       );
 
-    // Non-swap history (a direct stake, an unstake) keeps the bonus available.
+    // Direct stakes and unstakes never spend the first-swap bonus.
     const directStakeOnly = reducer(
       initial,
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
@@ -181,33 +237,51 @@ describe('realfiPosition slice', () => {
           { kind: 'stake' },
           { kind: 'unstake' },
         ] as RealFiStakeActivity[],
+        hasSwappedIntoUsdr: false,
       }),
     );
     expect(isAvailable(directStakeOnly)).toBe(true);
 
-    // Any swap(-into-USDr) order in the engine's history consumes it.
-    const withSwap = reducer(
+    // A plain swap into USDr is not a history row, yet it spends the bonus.
+    const plainSwapOnly = reducer(
       initial,
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId,
-        activities: [{ kind: 'swap' }] as RealFiStakeActivity[],
+        activities: [],
+        hasSwappedIntoUsdr: true,
       }),
     );
-    expect(isAvailable(withSwap)).toBe(false);
+    expect(isAvailable(plainSwapOnly)).toBe(false);
 
-    // Each account is judged on its own history.
+    // Each account is judged on its own read.
     const otherAccount = AccountId('acc-other');
     const bothAccounts = reducer(
-      withSwap,
+      plainSwapOnly,
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId: otherAccount,
         activities: [{ kind: 'stake' }] as RealFiStakeActivity[],
+        hasSwappedIntoUsdr: false,
       }),
     );
+    expect(isAvailable(bothAccounts, otherAccount)).toBe(true);
+  });
+
+  it('the Lace swap bonus falls back to swap rows for history persisted before the evidence existed', () => {
+    const selectors = realfiStakingSelectors.realfiPosition;
+    const persisted = (activities: RealFiStakeActivity[]) => ({
+      ...initial,
+      stakeActivitiesByAccount: { [accountId]: activities },
+    });
     expect(
       selectors.selectIsLaceSwapBonusAvailableByAccountId(
-        { realfiPosition: bothAccounts },
-        otherAccount,
+        { realfiPosition: persisted([{ kind: 'swap' }] as never) },
+        accountId,
+      ),
+    ).toBe(false);
+    expect(
+      selectors.selectIsLaceSwapBonusAvailableByAccountId(
+        { realfiPosition: persisted([{ kind: 'stake' }] as never) },
+        accountId,
       ),
     ).toBe(true);
   });
@@ -231,6 +305,7 @@ describe('realfiPosition slice', () => {
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId,
         activities: [],
+        hasSwappedIntoUsdr: false,
       }),
     );
     expect(
@@ -239,6 +314,65 @@ describe('realfiPosition slice', () => {
         accountId,
       ),
     ).toBe(true);
+  });
+
+  it('withholds the bonus from a restored account until its history is read again', () => {
+    const selectors = realfiStakingSelectors.realfiPosition;
+    const isAvailable = (state: typeof initial) =>
+      selectors.selectIsLaceSwapBonusAvailableByAccountId(
+        { realfiPosition: state },
+        accountId,
+      );
+    // A plain swap into USDr: no rows, but the read says the bonus is spent.
+    const read = reducer(
+      initial,
+      realfiStakingActions.realfiPosition.stakeActivitiesReceived({
+        accountId,
+        activities: [],
+        hasSwappedIntoUsdr: true,
+      }),
+    );
+    expect(isAvailable(read)).toBe(false);
+
+    for (const removal of [
+      walletsActions.wallets.removeAccount(WalletId('wallet-1'), accountId),
+      walletsActions.wallets.removeWallet(WalletId('wallet-1'), [accountId]),
+    ]) {
+      // Restoring the wallet brings the account back under the same id.
+      const restored = reducer(read, removal);
+      expect(restored.stakeActivitiesByAccount[accountId]).toBeUndefined();
+      expect(isAvailable(restored)).toBe(false);
+    }
+  });
+
+  it('drops the swap-into-USDr evidence with its account or wallet', () => {
+    const otherAccountId = AccountId('acc-other');
+    const seeded = [accountId, otherAccountId].reduce(
+      (state, id) =>
+        reducer(
+          state,
+          realfiStakingActions.realfiPosition.stakeActivitiesReceived({
+            accountId: id,
+            activities: [],
+            hasSwappedIntoUsdr: true,
+          }),
+        ),
+      initial,
+    );
+    const afterAccount = reducer(
+      seeded,
+      walletsActions.wallets.removeAccount(WalletId('wallet-1'), accountId),
+    );
+    expect(afterAccount.hasSwappedIntoUsdrByAccount).toEqual({
+      [otherAccountId]: true,
+    });
+    const afterWallet = reducer(
+      afterAccount,
+      walletsActions.wallets.removeWallet(WalletId('wallet-2'), [
+        otherAccountId,
+      ]),
+    );
+    expect(afterWallet.hasSwappedIntoUsdrByAccount).toEqual({});
   });
 
   it('laceSwapBonusConsumed makes the bonus unavailable before the history catches up', () => {
@@ -737,6 +871,7 @@ describe('realfiPosition slice', () => {
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId,
         activities: [activity],
+        hasSwappedIntoUsdr: false,
       }),
     );
     const seeded = reducer(
@@ -804,11 +939,13 @@ describe('realfiPosition slice', () => {
         realfiStakingActions.realfiPosition.stakeActivitiesReceived({
           accountId,
           activities: [older],
+          hasSwappedIntoUsdr: false,
         }),
       ),
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId: otherAccountId,
         activities: [newer],
+        hasSwappedIntoUsdr: false,
       }),
     );
     const root = { realfiPosition: seeded };
@@ -1059,6 +1196,7 @@ describe('realfiPosition slice', () => {
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId,
         activities: [stakeRow],
+        hasSwappedIntoUsdr: false,
       }),
     );
     state = reducer(
@@ -1149,6 +1287,7 @@ describe('realfiPosition slice', () => {
       realfiStakingActions.realfiPosition.stakeActivitiesReceived({
         accountId,
         activities: [unstake],
+        hasSwappedIntoUsdr: false,
       }),
     );
     const recorded = reducer(
@@ -1272,6 +1411,7 @@ describe('realfiPosition slice', () => {
               steps: [{ key: 'unstake', status: 'active' }],
             },
           ],
+          hasSwappedIntoUsdr: false,
         }),
       );
       // The feed knows `seen` → cleared; `unseen` stays; other accounts untouched.
@@ -1304,8 +1444,85 @@ describe('realfiPosition slice', () => {
               steps: [{ key: 'unstake', status: 'completed' }],
             },
           ],
+          hasSwappedIntoUsdr: false,
         }),
       );
+      expect(received.submittedOrderTxsByAccount).toEqual({});
+    });
+
+    it('reconciles a stake represented by a merged swap row while keeping unseen orders and other accounts', () => {
+      const otherAccount = AccountId('other-acc');
+      const seen = orderTx({ kind: 'stake', inputTokenId: 'usdr-token' });
+      const unseen = orderTx({ txHash: 'still-missing' });
+      let state = initial;
+      for (const [account, tx] of [
+        [accountId, seen],
+        [accountId, unseen],
+        [otherAccount, seen],
+      ] as const) {
+        state = reducer(
+          state,
+          realfiStakingActions.realfiPosition.submittedOrderTxRecorded({
+            accountId: account,
+            orderTx: tx,
+          }),
+        );
+      }
+      const activity = {
+        id: 'swap-tx#1',
+        stakeOrderTxHash: seen.txHash,
+        kind: 'swap' as const,
+        label: 'USDCx → USDrf',
+        subtitle: '-10 USDCx',
+        completed: true,
+        requestDate: nowMs,
+        steps: [],
+      };
+
+      const received = reducer(
+        state,
+        realfiStakingActions.realfiPosition.stakeActivitiesReceived({
+          accountId,
+          activities: [activity],
+          hasSwappedIntoUsdr: false,
+        }),
+      );
+
+      expect(received.submittedOrderTxsByAccount).toEqual({
+        [accountId]: [unseen],
+        [otherAccount]: [seen],
+      });
+    });
+
+    it('reconciles a swap-routed stake by the tx that created its swap order', () => {
+      const submitted = orderTx({ txHash: 'submitted-swap-tx' });
+      const watching = reducer(
+        initial,
+        realfiStakingActions.realfiPosition.submittedOrderTxRecorded({
+          accountId,
+          orderTx: submitted,
+        }),
+      );
+
+      const received = reducer(
+        watching,
+        realfiStakingActions.realfiPosition.stakeActivitiesReceived({
+          accountId,
+          activities: [
+            {
+              id: 'submitted-swap-tx#0',
+              kind: 'swap',
+              label: 'ADA → USDrf',
+              subtitle: '-5 ADA',
+              completed: false,
+              requestDate: nowMs,
+              steps: [],
+            },
+          ],
+          hasSwappedIntoUsdr: false,
+        }),
+      );
+
       expect(received.submittedOrderTxsByAccount).toEqual({});
     });
   });

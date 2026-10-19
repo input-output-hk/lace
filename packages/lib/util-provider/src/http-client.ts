@@ -1,9 +1,28 @@
+import { getObservability } from '@lace-lib/observability';
 import { catchError, firstValueFrom, switchMap, throwError } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 
 import { HttpClientError } from './error';
 
 import type { RateLimiter } from './rate-limiter';
+
+const REPORTED_OPERATIONS = new Set([
+  'accounts',
+  'addresses',
+  'assets',
+  'blocks',
+  'epochs',
+  'genesis',
+  'governance',
+  'health',
+  'metadata',
+  'network',
+  'pools',
+  'rpc',
+  'scripts',
+  'tx',
+  'txs',
+]);
 
 /**
  * Provides a default no-op `RateLimiter` implementation that executes tasks immediately
@@ -249,6 +268,35 @@ export class HttpClient {
           catchError(error => {
             if (error instanceof HttpClientError) {
               return throwError(() => error);
+            }
+            if (
+              error instanceof TypeError &&
+              error.message === 'Failed to fetch'
+            ) {
+              try {
+                const operation =
+                  endpoint.replace(/^\/+/, '').split(/[/?]/)[0] ?? '';
+                // Report a sanitized copy: request data can be attached to the
+                // original error, and account identifiers occur in endpoint paths.
+                getObservability().captureException(
+                  new HttpClientError(undefined, 'Failed to fetch'),
+                  {
+                    tags: {
+                      component: 'HttpClient',
+                      failure: 'UNKNOWN',
+                      method: (
+                        requestInit.method ??
+                        this.requestInit?.method ??
+                        'GET'
+                      ).toUpperCase(),
+                      origin: url.origin,
+                      ...(REPORTED_OPERATIONS.has(operation) && { operation }),
+                    },
+                  },
+                );
+              } catch {
+                // Telemetry must not replace the original provider failure.
+              }
             }
             return throwError(
               () => new HttpClientError(undefined, undefined, error),

@@ -29,9 +29,11 @@ describe('realfi-staking store init', () => {
       'earnBasisRateByNetwork',
       'withdrawnActivitiesByAccount',
       'stakeActivitiesByAccount',
+      'hasSwappedIntoUsdrByAccount',
       'submittedOrderTxsByAccount',
       'hasSeenOnboarding',
       'rPointsByAccount',
+      'yieldEarnedByAccount',
       'laceBonusConsumedByAccount',
     ]);
   });

@@ -62,6 +62,8 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
         // the on-mount read refreshes it. Per-account (network-specific, ADR-11)
         // and REPLACED per fetch, so it stays bounded by the paginated read.
         'stakeActivitiesByAccount',
+        // The first-swap bonus evidence read with that history.
+        'hasSwappedIntoUsdrByAccount',
         // Watched order submits must survive reloads: the feed outage they
         // detect outlives the session, and the record can't be re-derived.
         // Bounded by max-age eviction on record.
@@ -70,6 +72,8 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
         // Cached R-Points snapshot (LW-15495): persisted so the card renders
         // the last-known balance instantly while the on-focus refetch runs.
         'rPointsByAccount',
+        // Last-known RealFi yield, shown while the history refresh re-reads it.
+        'yieldEarnedByAccount',
         // The locally-consumed bonus flag (LW-15495): persisted because the
         // backend-indexing window it covers can span a restart.
         'laceBonusConsumedByAccount',

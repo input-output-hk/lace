@@ -2800,6 +2800,7 @@
   "realfi.detail.staked-balance": "ステーキング残高",
   "realfi.detail.available-to-stake": "ステーク可能",
   "realfi.detail.apy": "APY",
+  "realfi.detail.yield-earned": "獲得した利回り",
   "realfi.detail.manage-stake": "ステークを管理",
   "realfi.detail.staking-activities": "ステーキングアクティビティ",
   "realfi.detail.no-activities": "アクティビティはありません",

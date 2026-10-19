@@ -31,7 +31,12 @@ import { UsdrStakingPortfolioCard } from '../components/UsdrStakingPortfolioCard
 import { formatCooldownRemaining } from '../cooldown-remaining';
 import { hasFeedMismatch } from '../feed-mismatch';
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
+import { displayableApy } from '../realfi-yield';
 import { useActiveRealFiConfig } from '../use-realfi-config';
+import {
+  formatYieldEarnedFiat,
+  sumYieldEarnedBaseUnits,
+} from '../yield-earned-display';
 
 import type { Token } from '@lace-contract/tokens';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -264,14 +269,31 @@ export const UsdrStakingDetail = (
     usdToCurrencyRate,
   ]);
 
-  // APY tag on the Total Balance row (LW-14652): only for a non-zero position
+  // APY tag under the balances (LW-14652): only for a non-zero position
   // with a known persisted APY — hidden at zero balance (LW-14650 empty state).
   const apyTag = useMemo(() => {
-    const apy = yieldInfo?.apy;
+    const apy = displayableApy(yieldInfo?.apy);
     if (apy === undefined || stakedBaseUnits + availableBaseUnits === 0n)
       return undefined;
     return `+${(apy * 100).toFixed(1)}% ${t('realfi.detail.apy')}`;
   }, [yieldInfo?.apy, stakedBaseUnits, availableBaseUnits, t]);
+
+  // Lifetime yield across the active-network accounts, as RealFi reports it
+  // (refreshed with the staking history), valued like Total Balance: USDr at
+  // $1, converted to the selected currency. Hidden until a read lands and
+  // unless something was earned: like a negative APY, a negative figure
+  // (unstake forfeits) would read as the position losing money.
+  const allYieldEarned = useLaceSelector('realfiPosition.selectAllYieldEarned');
+  const yieldEarned = useMemo(() => {
+    const accounts = Array.isArray(cardanoAccounts) ? cardanoAccounts : [];
+    const totalBaseUnits = sumYieldEarnedBaseUnits(
+      accounts.map(account => account.accountId),
+      allYieldEarned,
+    );
+    if (totalBaseUnits <= 0n) return undefined;
+    const yieldUsd = Number(totalBaseUnits) / STAKE_UNIT_DIVISOR;
+    return formatYieldEarnedFiat(yieldUsd * (usdToCurrencyRate ?? 1));
+  }, [cardanoAccounts, allYieldEarned, usdToCurrencyRate]);
 
   // R-Points (launch season, LW-15495 AC2): wallet-wide like every other
   // figure on this screen — RealFi's engine keys points per account address,
@@ -628,6 +650,7 @@ export const UsdrStakingDetail = (
           ticker={STAKED_TICKER}
           availableTicker={AVAILABLE_TICKER}
           apyTag={apyTag}
+          yieldEarned={yieldEarned}
           onManageStake={onManageStake}
         />
         {rPointsDisplay !== undefined && (
@@ -656,6 +679,7 @@ export const UsdrStakingDetail = (
       stakedBalance,
       availableToStake,
       apyTag,
+      yieldEarned,
       rPointsDisplay,
       onRPointsInfo,
       onRPointsByAccount,

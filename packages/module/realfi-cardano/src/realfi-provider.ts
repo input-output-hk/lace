@@ -12,7 +12,7 @@ import {
   fetchCooldownUnlockMs,
   fetchCoolingDownUnstakes,
   fetchWithdrawableUnstakes,
-  getStakeActivities,
+  getStakeHistory,
 } from './realfi-stake-activities';
 import {
   buildStakeUnsignedTx,
@@ -29,6 +29,7 @@ import {
 } from './realfi-vault-rate';
 import { buildWithdrawUnsignedTx } from './realfi-withdraw-tx';
 import { fetchStakingYield, fetchVaultRate } from './realfi-yield';
+import { fetchYieldEarned } from './realfi-yield-earned';
 
 import type { RealFiBlockfrostConfig } from './realfi-blockfrost';
 import type { RealFiNetworkConfig } from './realfi-config';
@@ -46,10 +47,12 @@ import type {
   RealFiRPoints,
   RealFiSorQuote,
   RealFiSorQuoteRequest,
-  RealFiStakeActivity,
+  RealFiStakeHistory,
   RealFiStakeInputAssetsRequest,
   RealFiWithdrawableUnstake,
   RealFiWithdrawRequest,
+  RealFiYieldEarned,
+  RealFiYieldEarnedRequest,
 } from '@lace-contract/realfi-staking';
 import type { Milliseconds, Result } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
@@ -591,7 +594,7 @@ export const createRealFiProvider = (
   getStakeActivities: (request: RealFiActivityRequest) =>
     defer(() =>
       from(
-        getStakeActivities({
+        getStakeHistory({
           config: request.config,
           addressBech32: request.userAddress,
           // Chain-tip time reference for order dates + unstake claimable-at.
@@ -599,7 +602,7 @@ export const createRealFiProvider = (
         }),
       ),
     ).pipe(
-      map(activities => Ok<RealFiStakeActivity[]>(activities)),
+      map(history => Ok<RealFiStakeHistory>(history)),
       catchError(rethrowForRetry('getStakeActivities')),
     ),
   // R-Points read (launch season, LW-15495): the partner SDK's Blaze-free
@@ -608,6 +611,20 @@ export const createRealFiProvider = (
     defer(() => from(fetchRPoints(request.config, request.userAddress))).pipe(
       map(rPoints => Ok<RealFiRPoints>(rPoints)),
       catchError(rethrowForRetry('getRPoints')),
+    ),
+  getYieldEarned: (request: RealFiYieldEarnedRequest) =>
+    defer(() => from(fetchYieldEarned(request.config, request.addresses))).pipe(
+      map(yieldEarned =>
+        yieldEarned
+          ? Ok<RealFiYieldEarned>(yieldEarned)
+          : // No payment credential to key a read: permanent for the account,
+            // so it must not be retried like an outage.
+            Err<RealFiProviderError>({
+              code: 'VALIDATION',
+              message: 'account has no payment credential',
+            }),
+      ),
+      catchError(rethrowForRetry('getYieldEarned')),
     ),
   getWithdrawableUnstakes: (request: RealFiActivityRequest) =>
     defer(() =>

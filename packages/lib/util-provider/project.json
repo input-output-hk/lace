@@ -2,6 +2,12 @@
   "projectType": "library",
   "tags": ["scope:lib"],
   "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config packages/lib/util-provider/vitest.config.js"
+      }
+    },
     "lint": {},
     "type-check-src": {},
     "type-check-test": {},

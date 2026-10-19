@@ -6,6 +6,7 @@ import type {
   RealFiSorQuote,
   RealFiStakeActivity,
   RealFiWithdrawableUnstake,
+  RealFiYieldEarned,
 } from '../provider-types';
 import type { RealFiSdkNetwork } from '../realfi-network-config';
 import type { RealFiPositionId, RealFiStakeId } from '../value-objects';
@@ -214,6 +215,12 @@ export type RealFiPositionSliceState = {
    */
   stakeActivitiesByAccount: Record<AccountId, RealFiStakeActivity[]>;
   /**
+   * Whether each account's last history read found any swap into USDr, the
+   * first-swap bonus evidence the history rows can't carry (plain swaps are
+   * not rows). Persisted with the history; unset until a read lands.
+   */
+  hasSwappedIntoUsdrByAccount: Record<AccountId, boolean>;
+  /**
    * The token the user picked to stake, set by the select-token sheet and read
    * by Manage Stake (mirrors the swap flow's token selection). Transient — not
    * persisted; Manage Stake defaults to ADA when unset.
@@ -307,6 +314,12 @@ export type RealFiPositionSliceState = {
    * delay the staking screen.
    */
   rPointsByAccount: Record<AccountId, RealFiRPoints>;
+  /**
+   * RealFi-reported lifetime yield per account, refreshed with the staking
+   * history. Persisted so the detail card shows the last-known figure while
+   * the refresh runs; a failed read keeps it.
+   */
+  yieldEarnedByAccount: Record<AccountId, RealFiYieldEarned>;
   /**
    * Outcome of each account's latest R-Points read this session (LW-15494):
    * with failed reads keeping the previous snapshot, the snapshot alone cannot

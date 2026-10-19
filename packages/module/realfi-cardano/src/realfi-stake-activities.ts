@@ -33,6 +33,7 @@ import type {
   RealFiActivityStep,
   RealFiCoolingDownUnstake,
   RealFiStakeActivity,
+  RealFiStakeHistory,
   RealFiWithdrawableUnstake,
 } from '@lace-contract/realfi-staking';
 import type { IOrderInfo, TOrderStatus } from '@realfi-co/realfi-partner-sdk';
@@ -514,7 +515,10 @@ type RawRealFiOrder = {
    * Unset ⇒ executed or still in flight.
    */
   terminal?: 'canceled' | 'failed';
+  /** Output-level identity (`txHash#outputIndex`): one tx can create several orders. */
   id: string;
+  /** The tx that created the order — what a swap's `spentTxHash` names. */
+  txHash: string;
   requestDate: number;
   /** Slot the order was created — orders the swap↔stake correlation. */
   slot: number;
@@ -609,7 +613,8 @@ const fetchRealFiOrders = async (
     amountStr: String(order.amount),
     isDone: order.status === 'Executed',
     terminal: terminalStateOf(order.status),
-    id: order.utxo.txHash,
+    id: `${order.utxo.txHash}#${order.utxo.outputIndex}`,
+    txHash: order.utxo.txHash,
     slot: Number(order.slot),
     requestDate: slotToWallClockMs(config, Number(order.slot), {
       tipSlot,
@@ -685,6 +690,8 @@ const SUNDAE_ORDERS_QUERY = `
           id
           createdAt { slot }
           outcome
+          spentTxHash
+          destination { address }
           assets { asset { id ticker decimals } }
           details {
             __typename
@@ -712,6 +719,10 @@ type SundaeOrder = {
   id: string;
   createdAt: { slot: number };
   outcome: string | null;
+  /** Tx that consumed the order — for a swap→stake, the RealFi stake order's tx. */
+  spentTxHash?: string | null;
+  /** Where the swap output is paid: the wallet itself for a plain swap. */
+  destination?: { address: string } | null;
   assets: { asset: { id: string; ticker: string; decimals: number } }[];
   details: {
     __typename: string;
@@ -721,7 +732,7 @@ type SundaeOrder = {
     estimated?: SundaeAmount | null;
     /** Guaranteed floor — the one output figure a pool-less V4 intent carries. */
     minimum?: SundaeAmount | null;
-  };
+  } | null;
 };
 
 type SwapWithReceived = {
@@ -730,13 +741,15 @@ type SwapWithReceived = {
   usdrReceived?: number;
   /** Slot the swap order was created — orders the swap↔stake correlation. */
   slot: number;
+  /** The settling tx; equals the stake order's id when the swap pays into it. */
+  spentTxHash?: string;
 };
 
 const fetchSundaeSwaps = async (
   config: RealFiNetworkConfig,
   addressBech32: string,
   tipSlot: number | undefined,
-): Promise<SwapWithReceived[]> => {
+): Promise<{ swaps: SwapWithReceived[]; hasSwappedIntoUsdr: boolean }> => {
   const nowMs = Date.now();
   const usdrId = sundaeUsdrId(config);
   const tickers = knownTickers(config);
@@ -772,8 +785,13 @@ const fetchSundaeSwaps = async (
     }
     cursor = nextCursor;
   }
-  return orders.flatMap(order => {
-    if (order.details.__typename !== 'Swap' || !order.details.offer) return [];
+  // Every order into USDr spends the first-swap bonus, including those the
+  // history leaves out (plain swaps paid back to the wallet).
+  let hasSwappedIntoUsdr = false;
+  const swaps = orders.flatMap(order => {
+    // Sundae can return cancelled, undecodable orders with null details;
+    // without a target asset they cannot be classified as staking activity.
+    if (order.details?.__typename !== 'Swap' || !order.details.offer) return [];
     const decimalsById = new Map<string, number>(
       order.assets.map(({ asset }) => [asset.id, asset.decimals]),
     );
@@ -795,10 +813,16 @@ const fetchSundaeSwaps = async (
     const receivedId =
       received?.asset.id ?? estimated?.asset.id ?? minimum?.asset.id;
     if (receivedId !== usdrId) return [];
+    hasSwappedIntoUsdr = true;
+    // A swap paid back to the wallet is a plain swap into USDr, never the
+    // first leg of a stake.
+    if (order.destination?.address === addressBech32) return [];
     const usdrReceived = received ? Number(received.quantity) : undefined;
-    // What the swap was quoted to return; a V4 intent carries only its floor.
+    // What the swap was quoted to return; a V4 intent carries only its floor,
+    // and Sundae reports its `estimated` as a zero placeholder, which would
+    // read as a "+0" quote.
     const quoted = [estimated, minimum].find(
-      amount => amount?.asset.id === usdrId,
+      amount => amount?.asset.id === usdrId && Number(amount.quantity) > 0,
     );
     const offerLine = `-${formatAmountToLocale(
       offer.quantity,
@@ -816,6 +840,8 @@ const fetchSundaeSwaps = async (
     // scooper) → stake (RealFi batcher) → received (sUSDr). getStakeActivities
     // then advances the stake/received steps from the matched RealFi order.
     const isSwapDone = order.outcome === 'Executed';
+    // A cancelled swap is final: every leg is canceled, never "in progress".
+    const isSwapCanceled = order.outcome === 'Cancelled';
     const entry: RealFiStakeActivity = {
       id: order.id,
       kind: 'swap',
@@ -833,62 +859,180 @@ const fetchSundaeSwaps = async (
         tipSlot,
         nowMs,
       }),
-      steps: [
-        { key: 'swap', status: isSwapDone ? 'completed' : 'active' },
-        { key: 'stake', status: isSwapDone ? 'active' : 'pending' },
-        { key: 'received', status: 'pending' },
-      ],
+      steps: isSwapCanceled
+        ? [
+            { key: 'swap', status: 'canceled' },
+            { key: 'stake', status: 'canceled' },
+            { key: 'received', status: 'canceled' },
+          ]
+        : [
+            { key: 'swap', status: isSwapDone ? 'completed' : 'active' },
+            { key: 'stake', status: isSwapDone ? 'active' : 'pending' },
+            { key: 'received', status: 'pending' },
+          ],
     };
-    return [{ entry, usdrReceived, slot: order.createdAt.slot }];
+    return [
+      {
+        entry,
+        usdrReceived,
+        slot: order.createdAt.slot,
+        spentTxHash: order.spentTxHash ?? undefined,
+      },
+    ];
   });
+  return { swaps, hasSwappedIntoUsdr };
+};
+
+/**
+ * The stake order a swap settled into, among the unconsumed stake orders its
+ * settlement tx created, or `undefined` when that can't be proven. Settling
+ * pays the swap's USDr into the order unchanged, so amounts match exactly;
+ * equal amounts with different outcomes are indistinguishable, and the ±band
+ * is only trusted when the tx holds a single candidate.
+ */
+const pickSettlementOrder = ({
+  orders,
+  candidates,
+  usdrReceived,
+}: {
+  orders: RawRealFiOrder[];
+  candidates: number[];
+  usdrReceived: number;
+}): number | undefined => {
+  const exact = candidates.filter(
+    index => orders[index].amountBaseUnits === usdrReceived,
+  );
+  if (exact.length > 0) {
+    const [first, ...rest] = exact;
+    const areOutcomesEqual = rest.every(
+      index =>
+        orders[index].isDone === orders[first].isDone &&
+        orders[index].terminal === orders[first].terminal,
+    );
+    return areOutcomesEqual ? first : undefined;
+  }
+  if (
+    candidates.length === 1 &&
+    amountsMatch(orders[candidates[0]].amountBaseUnits, usdrReceived)
+  ) {
+    return candidates[0];
+  }
+  return undefined;
+};
+
+/**
+ * The batcher-leg fallback for a swap with no exact `spentTxHash` link: the
+ * earliest unconsumed stake order at or after the swap's slot (an earlier
+ * order can never be its leg) whose amount matches the swap's received USDr
+ * net of the batcher haircut, or -1.
+ */
+const findLaterSameAmountStake = ({
+  orders,
+  consumed,
+  swapSlot,
+  usdrReceived,
+}: {
+  orders: RawRealFiOrder[];
+  consumed: ReadonlySet<number>;
+  swapSlot: number;
+  usdrReceived: number;
+}): number => {
+  let found = -1;
+  for (const [index, order] of orders.entries()) {
+    if (
+      consumed.has(index) ||
+      order.action !== 'stake' ||
+      order.slot < swapSlot ||
+      !amountsMatch(order.amountBaseUnits, usdrReceived)
+    ) {
+      continue;
+    }
+    if (found < 0 || order.slot < orders[found].slot) found = index;
+  }
+  return found;
 };
 
 /**
  * The merged, newest-first staking history for an account (RealFi orders +
- * SundaeSwap swaps). Called by the `RealFiProvider` in the service worker; the
- * result is stored in redux and read by the UI via a selector.
+ * SundaeSwap swaps), plus whether the account ever swapped into USDr. Called
+ * by the `RealFiProvider` in the service worker; the result is stored in redux
+ * and read by the UI via selectors.
  */
-export const getStakeActivities = async (
+export const getStakeHistory = async (
   params: GetStakeActivitiesParams,
-): Promise<RealFiStakeActivity[]> => {
+): Promise<RealFiStakeHistory> => {
   const tipSlot = params.blockfrost
     ? await fetchTipSlotShared(params.blockfrost)
     : undefined;
-  const [swaps, orders] = await Promise.all([
+  const [{ swaps, hasSwappedIntoUsdr }, orders] = await Promise.all([
     fetchSundaeSwaps(params.config, params.addressBech32, tipSlot),
     fetchRealFiOrders(params.config, params.addressBech32, tipSlot),
   ]);
 
-  // Correlate each executed swap with its downstream RealFi stake order (the
-  // batcher leg, matched by USDr amount AND slot order: the batcher creates the
-  // stake order after the swap settles, so an earlier order can never be its
-  // leg — amount alone would happily pair same-sized orders across time). The
-  // earliest qualifying order wins. A matched order is consumed → it isn't
-  // also shown as its own row.
+  // Pair each executed swap with its downstream RealFi stake order. Exact
+  // `spentTxHash` links are resolved for every swap first, so a fallback match
+  // (`findLaterSameAmountStake`) can never claim an order another swap settled
+  // into. A paired order is consumed → it isn't also shown as its own row.
   const consumed = new Set<number>();
-  const swapEntries = swaps.map(({ entry, usdrReceived, slot }) => {
-    const isSwapDone =
-      entry.steps.find(step => step.key === 'swap')?.status === 'completed';
-    if (!isSwapDone || usdrReceived === undefined) return entry;
-    let orderIndex = -1;
-    for (const [index, order] of orders.entries()) {
-      if (
-        consumed.has(index) ||
-        order.action !== 'stake' ||
-        order.slot < slot ||
-        !amountsMatch(order.amountBaseUnits, usdrReceived)
-      ) {
-        continue;
-      }
-      if (orderIndex < 0 || order.slot < orders[orderIndex].slot) {
-        orderIndex = index;
-      }
+  const orderIndexBySwap = new Map<number, number>();
+  // Swaps that settled into a RealFi tx without a provable order of their own.
+  // Their row is dropped: the stake orders still show as their own rows, which
+  // is accurate, whereas a guessed pairing would show another order's amount
+  // and status.
+  const unprovableSwaps = new Set<number>();
+  const isPairable = (
+    swap: SwapWithReceived,
+  ): swap is SwapWithReceived & {
+    usdrReceived: number;
+  } =>
+    swap.usdrReceived !== undefined &&
+    swap.entry.steps.find(step => step.key === 'swap')?.status === 'completed';
+  for (const [swapIndex, swap] of swaps.entries()) {
+    if (!isPairable(swap) || swap.spentTxHash === undefined) continue;
+    const settlementOrders = [...orders.entries()].filter(
+      ([, order]) =>
+        order.action === 'stake' && order.txHash === swap.spentTxHash,
+    );
+    if (settlementOrders.length === 0) continue; // batcher flow → fallback pass
+    const orderIndex = pickSettlementOrder({
+      orders,
+      candidates: settlementOrders
+        .map(([index]) => index)
+        .filter(index => !consumed.has(index)),
+      usdrReceived: swap.usdrReceived,
+    });
+    if (orderIndex === undefined) {
+      unprovableSwaps.add(swapIndex);
+      continue;
     }
-    if (orderIndex < 0) return entry; // batcher hasn't created the stake order yet
     consumed.add(orderIndex);
+    orderIndexBySwap.set(swapIndex, orderIndex);
+  }
+  for (const [swapIndex, swap] of swaps.entries()) {
+    if (
+      !isPairable(swap) ||
+      orderIndexBySwap.has(swapIndex) ||
+      unprovableSwaps.has(swapIndex)
+    )
+      continue;
+    const orderIndex = findLaterSameAmountStake({
+      orders,
+      consumed,
+      swapSlot: swap.slot,
+      usdrReceived: swap.usdrReceived,
+    });
+    if (orderIndex < 0) continue; // batcher hasn't created the stake order yet
+    consumed.add(orderIndex);
+    orderIndexBySwap.set(swapIndex, orderIndex);
+  }
+  const swapEntries = swaps.flatMap(({ entry }, swapIndex) => {
+    if (unprovableSwaps.has(swapIndex)) return [];
+    const orderIndex = orderIndexBySwap.get(swapIndex);
+    if (orderIndex === undefined) return [entry];
     const { isDone: isStaked, terminal, amountStr } = orders[orderIndex];
-    return {
+    const paired: RealFiStakeActivity = {
       ...entry,
+      stakeOrderTxHash: orders[orderIndex].txHash,
       // The actual USDr staked (swap output minus the batcher haircut), for the
       // detail sheet's Stake amount — the swap's received USDr was only the
       // pending estimate.
@@ -903,12 +1047,16 @@ export const getStakeActivities = async (
         },
       ] as RealFiActivityStep[],
     };
+    return [paired];
   });
   const orderEntries = orders
     .filter((_, index) => !consumed.has(index))
     .map(mapDirectOrder);
 
-  return [...swapEntries, ...orderEntries].sort(
-    (a, b) => b.requestDate - a.requestDate,
-  );
+  return {
+    activities: [...swapEntries, ...orderEntries].sort(
+      (a, b) => b.requestDate - a.requestDate,
+    ),
+    hasSwappedIntoUsdr,
+  };
 };

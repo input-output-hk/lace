@@ -27,6 +27,14 @@
  *    `Data.Type` would crash. The CJS entry copies typebox's exports at
  *    runtime instead, which Metro preserves.
  *
+ * 3. @blaze-cardano/core: CJS build → ESM build. Metro resolves a `require()`
+ *    with the `require` condition, so the CJS @blaze-cardano/data entry from (2)
+ *    would load core's CJS build beside the ESM build every other importer
+ *    gets. Two `PlutusData` classes then fail each other's `instanceof` checks,
+ *    and `Data.serialize` silently encodes datums built by the ESM copy (e.g.
+ *    SundaeSwap V4 order constraints) as the integer 1 — orders that lock
+ *    funds but can never execute. Keep exactly one copy.
+ *
  * Returns a replacement resolution, or `undefined` when the input resolution
  * should stand.
  */
@@ -49,6 +57,12 @@ const rewriteRealfiEsmToCjs = resolution => {
     return {
       type: 'sourceFile',
       filePath: resolution.filePath.replace(/\.mjs$/, '.js'),
+    };
+  }
+  if (resolution.filePath.endsWith('/@blaze-cardano/core/dist/index.js')) {
+    return {
+      type: 'sourceFile',
+      filePath: resolution.filePath.replace(/\.js$/, '.mjs'),
     };
   }
   return undefined;
