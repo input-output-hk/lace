@@ -5,6 +5,7 @@ import { Logos } from '@lace-lib/ui-toolkit';
 
 import { GenesisBoostBanner } from '../components/GenesisBoostBanner';
 import {
+  displayableApy,
   getCachedEarnedUsdPerSusdr,
   getCachedPendingUnstakeBaseUnits,
   getCachedStakingApy,
@@ -76,9 +77,9 @@ const buildCard = (): StakingCenterProductCard => {
     // shows no yield rather than an invented (or another network's) rate.
     apyDisplay: (featureFlags, activeNetworkId) => {
       const config = getRealFiConfigFromFlags(featureFlags, activeNetworkId);
-      const apy = config
-        ? getCachedStakingApy(config.realfiNetwork)
-        : undefined;
+      const apy = displayableApy(
+        config ? getCachedStakingApy(config.realfiNetwork) : undefined,
+      );
       return apy === undefined ? undefined : `${(apy * 100).toFixed(1)}%`;
     },
     // Total Earned contribution (LW-14651): staked sUSDr earns its vault-rate

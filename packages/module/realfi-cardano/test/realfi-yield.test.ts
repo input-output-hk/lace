@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  displayableApy,
+  fetchStakingYield,
   fetchVaultRate,
   setCachedEarnedUsdPerSusdr,
   setCachedPendingUnstakeBaseUnits,
@@ -122,5 +124,54 @@ describe('card-data cache subscription', () => {
     unsubscribe();
     setCachedPendingUnstakeBaseUnits('0');
     expect(onChange).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('displayableApy', () => {
+  it('passes a positive or zero APY through', () => {
+    expect(displayableApy(0.054)).toBe(0.054);
+    expect(displayableApy(0)).toBe(0);
+  });
+
+  it('hides a negative APY and an unknown one', () => {
+    expect(displayableApy(-0.314)).toBeUndefined();
+    expect(displayableApy(undefined)).toBeUndefined();
+  });
+
+  it('hides a non-finite APY, including persisted NaN read back as null', () => {
+    expect(displayableApy(Number.NaN)).toBeUndefined();
+    expect(displayableApy(Number.POSITIVE_INFINITY)).toBeUndefined();
+    expect(displayableApy(null)).toBeUndefined();
+  });
+});
+
+describe('fetchStakingYield', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('reports no yield when the ratio history is malformed', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            json: async () => ({
+              data: {
+                vaultRatioHistory: {
+                  ratioHistory: [
+                    { ratio: 'not-a-number', unixMilli: '0', partial: false },
+                    { ratio: '1001800', unixMilli: '86400000', partial: false },
+                  ],
+                },
+              },
+            }),
+          } as never),
+      ),
+    );
+
+    expect(await fetchStakingYield(API_URL)).toBeUndefined();
   });
 });

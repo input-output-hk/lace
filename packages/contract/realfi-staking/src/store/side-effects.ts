@@ -20,6 +20,7 @@ import {
   exhaustMap,
   filter,
   from,
+  groupBy,
   ignoreElements,
   map,
   merge,
@@ -29,6 +30,7 @@ import {
   skip,
   switchMap,
   take,
+  takeUntil,
   tap,
   timeout,
   withLatestFrom,
@@ -58,6 +60,7 @@ import type {
 } from '../provider-types';
 import type { RealFiFlowState, RealFiReview } from './types';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { Observable } from 'rxjs';
 
 const TX_TTL_SECONDS = 900;
 // How long a quote waits for wallet data (UTxOs, address, protocol params)
@@ -714,6 +717,20 @@ export const makeFinalize: SideEffect = (
   );
 };
 
+/** The `get usdr | success` payload for a swap-routed stake (LW-15494). */
+const swapToStakeAcquisitionPayload = (
+  context: ReturnType<typeof getFlowAnalyticsContext>,
+  txId: string,
+) => ({
+  entry_point: 'swap_to_stake',
+  source_token: context.source_token,
+  ...(context.usdr_amount !== undefined && {
+    usdr_amount: context.usdr_amount,
+  }),
+  ...(context.usd_value !== undefined && { usd_value: context.usd_value }),
+  txId,
+});
+
 /**
  * Flow lifecycle analytics (LW-15494): observes realfiFlow transitions and maps
  * them to PostHog events — `tx built` (build succeeded), `success` (queued) and
@@ -804,17 +821,7 @@ export const makeFlowAnalytics: SideEffect = (
             events.push(
               actions.analytics.trackEvent({
                 eventName: 'realfi | get usdr | success',
-                payload: {
-                  entry_point: 'swap_to_stake',
-                  source_token: context.source_token,
-                  ...(context.usdr_amount !== undefined && {
-                    usdr_amount: context.usdr_amount,
-                  }),
-                  ...(context.usd_value !== undefined && {
-                    usd_value: context.usd_value,
-                  }),
-                  txId: next.txId,
-                },
+                payload: swapToStakeAcquisitionPayload(context, next.txId),
               }),
             );
           }
@@ -1011,6 +1018,54 @@ export const makeCancel: SideEffect = (
   );
 };
 
+type AccountRemovalStreams = {
+  removeAccount$: Observable<{ payload: { accountId: AccountId } }>;
+  removeWallet$: Observable<{ payload: { accountIds: AccountId[] } }>;
+};
+
+/**
+ * Runs `read` for each request with the latest request per account winning: a
+ * newer request cancels the account's older read (and its pending retries), so
+ * an older response can never overwrite a newer one, and a read still in flight
+ * when its account or wallet is removed is dropped, so removed data is never
+ * recreated. Different accounts stay concurrent.
+ */
+const latestReadPerAccount = <Request, Result>({
+  requests$,
+  accountIdOf,
+  removeAccount$,
+  removeWallet$,
+  read,
+}: AccountRemovalStreams & {
+  requests$: Observable<Request>;
+  accountIdOf: (request: Request) => AccountId;
+  read: (request: Request) => Observable<Result>;
+}): Observable<Result> =>
+  requests$.pipe(
+    groupBy(accountIdOf),
+    mergeMap(accountRequests$ =>
+      accountRequests$.pipe(
+        switchMap(request => {
+          const accountId = accountIdOf(request);
+          return read(request).pipe(
+            takeUntil(
+              merge(
+                removeAccount$.pipe(
+                  filter(({ payload }) => payload.accountId === accountId),
+                ),
+                removeWallet$.pipe(
+                  filter(({ payload }) =>
+                    payload.accountIds.includes(accountId),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+      ),
+    ),
+  );
+
 /**
  * Read arm: `stakeActivitiesRequested` (dispatched by the USDr staking detail on
  * mount / account / network change) → provider off-chain reads → store. The
@@ -1021,57 +1076,159 @@ export const makeCancel: SideEffect = (
  * dispatch), so a transient failure never wipes the list.
  */
 export const makeStakeActivities: SideEffect = (
-  { realfiPosition: { stakeActivitiesRequested$ } },
+  {
+    realfiPosition: { stakeActivitiesRequested$ },
+    wallets: { removeAccount$, removeWallet$ },
+  },
   {
     addresses: { selectByAccountId$ },
     network: { selectActiveNetworkId$ },
     features: { selectLoadedFeatures$ },
+    wallets: { selectActiveNetworkAccounts$ },
   },
   { actions, realfiProviders },
 ) =>
-  stakeActivitiesRequested$.pipe(
-    withLatestFrom(
-      selectByAccountId$,
-      selectActiveNetworkId$,
-      selectLoadedFeatures$,
+  latestReadPerAccount({
+    requests$: stakeActivitiesRequested$.pipe(
+      withLatestFrom(
+        selectByAccountId$,
+        selectActiveNetworkId$,
+        selectLoadedFeatures$,
+        selectActiveNetworkAccounts$,
+      ),
     ),
-    mergeMap(
-      ([
-        { payload },
-        selectByAccountId,
-        selectActiveNetworkId,
-        loadedFeatures,
-      ]) => {
-        const provider = realfiProviders[0];
-        const config = getRealFiConfigFromFlags(
-          loadedFeatures.featureFlags,
-          selectActiveNetworkId('Cardano'),
+    accountIdOf: ([{ payload }]) => payload.accountId,
+    removeAccount$,
+    removeWallet$,
+    read: ([
+      { payload },
+      selectByAccountId,
+      selectActiveNetworkId,
+      loadedFeatures,
+      activeNetworkAccounts,
+    ]) => {
+      const provider = realfiProviders[0];
+      const config = getRealFiConfigFromFlags(
+        loadedFeatures.featureFlags,
+        selectActiveNetworkId('Cardano'),
+      );
+      const userAddress = selectByAccountId(payload.accountId)[0]?.address;
+      // The config is the active network's; a request for another network's
+      // account (dispatched across a switch) would read the wrong network.
+      const isActiveNetworkAccount = activeNetworkAccounts.some(
+        account => account.accountId === payload.accountId,
+      );
+      if (!provider || !config || !userAddress || !isActiveNetworkAccount)
+        return EMPTY;
+      return provider
+        .getStakeActivities({
+          config,
+          accountId: payload.accountId,
+          userAddress,
+        })
+        .pipe(
+          retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+          mergeMap(result =>
+            result.isOk()
+              ? of(
+                  actions.realfiPosition.stakeActivitiesReceived({
+                    accountId: payload.accountId,
+                    activities: result.value.activities,
+                    hasSwappedIntoUsdr: result.value.hasSwappedIntoUsdr,
+                  }),
+                )
+              : EMPTY,
+          ),
+          catchError(() => EMPTY),
         );
-        const userAddress = selectByAccountId(payload.accountId)[0]?.address;
-        if (!provider || !config || !userAddress) return EMPTY;
-        return provider
-          .getStakeActivities({
-            config,
-            accountId: payload.accountId,
-            userAddress,
-          })
-          .pipe(
-            retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
-            mergeMap(result =>
-              result.isOk()
-                ? of(
-                    actions.realfiPosition.stakeActivitiesReceived({
-                      accountId: payload.accountId,
-                      activities: result.value,
-                    }),
-                  )
-                : EMPTY,
-            ),
-            catchError(() => EMPTY),
-          );
-      },
+    },
+  });
+
+/**
+ * Yield-earned read: rides the staking-history refresh
+ * (`stakeActivitiesRequested`), since yield only changes as stakes settle and
+ * the vault rate moves. RealFi's backend owns the cost basis; Lace displays
+ * its figure. On error the previous figure is kept (no `Received` dispatch).
+ */
+export const makeYieldEarned: SideEffect = (
+  {
+    realfiPosition: { stakeActivitiesRequested$ },
+    wallets: { removeAccount$, removeWallet$ },
+  },
+  {
+    addresses: { selectByAccountId$ },
+    network: { selectActiveNetworkId$ },
+    features: { selectLoadedFeatures$ },
+    wallets: { selectActiveNetworkAccounts$ },
+  },
+  { actions, realfiProviders },
+) =>
+  latestReadPerAccount({
+    requests$: stakeActivitiesRequested$.pipe(
+      withLatestFrom(
+        selectByAccountId$,
+        selectActiveNetworkId$,
+        selectLoadedFeatures$,
+        selectActiveNetworkAccounts$,
+      ),
     ),
-  );
+    accountIdOf: ([{ payload }]) => payload.accountId,
+    removeAccount$,
+    removeWallet$,
+    read: ([
+      { payload },
+      selectByAccountId,
+      selectActiveNetworkId,
+      loadedFeatures,
+      activeNetworkAccounts,
+    ]) => {
+      const provider = realfiProviders[0];
+      const config = getRealFiConfigFromFlags(
+        loadedFeatures.featureFlags,
+        selectActiveNetworkId('Cardano'),
+      );
+      const addresses = [
+        ...new Set(
+          selectByAccountId(payload.accountId).map(({ address }) => address),
+        ),
+      ];
+      // The config is the active network's; a request for another network's
+      // account (dispatched across a switch) would read the wrong network.
+      const isActiveNetworkAccount = activeNetworkAccounts.some(
+        account => account.accountId === payload.accountId,
+      );
+      if (
+        !provider ||
+        !config ||
+        addresses.length === 0 ||
+        !isActiveNetworkAccount
+      )
+        return EMPTY;
+      return provider
+        .getYieldEarned({
+          config,
+          accountId: payload.accountId,
+          addresses,
+        })
+        .pipe(
+          retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+          mergeMap(result =>
+            result.isOk()
+              ? of(
+                  actions.realfiPosition.yieldEarnedReceived({
+                    accountId: payload.accountId,
+                    yieldEarned: result.value,
+                  }),
+                )
+              : EMPTY,
+          ),
+          catchError(error => {
+            realfiDebugLog('yield-earned: pipeline ERROR', { error });
+            return EMPTY;
+          }),
+        );
+    },
+  });
 
 /**
  * R-Points read (launch season, LW-15495): `rPointsRequested` (the USDr detail
@@ -1739,6 +1896,7 @@ export const realfiStakingSideEffects: SideEffect[] = [
   makeStakeActivities,
   makeRPoints,
   makeRPointsQueuedRefresh,
+  makeYieldEarned,
   makeYieldInfo,
   makeStakeInputAssets,
   makeCooldownUnlockTime,

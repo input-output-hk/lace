@@ -201,6 +201,8 @@ export type RealFiActivityStep = {
 export type RealFiStakeActivity = {
   /** Stable id (order id / tx hash). */
   id: string;
+  /** RealFi order tx represented by a merged swap row, for feed reconciliation. */
+  stakeOrderTxHash?: string;
   kind: RealFiActivityKind;
   /** Display label (stake/unstake are localised in the UI). */
   label: string;
@@ -272,6 +274,29 @@ export type RealFiRPoints = {
   totalPoints: number;
 };
 
+/**
+ * Lifetime sUSDr yield for a wallet as RealFi's backend reports it: current
+ * sUSDr value minus the USDr principal staked. Display-only — RealFi owns the
+ * cost basis, so a restored wallet shows its full history rather than only
+ * what this install observed.
+ */
+/** An account's staking history read. */
+export type RealFiStakeHistory = {
+  activities: RealFiStakeActivity[];
+  /**
+   * Whether any Sundae order of the account swaps into USDr, whatever its
+   * destination, pairing or outcome: what spends the first-swap bonus. The
+   * rows can't say this, as plain swaps and swaps without a provable stake
+   * order are left out of the history.
+   */
+  hasSwappedIntoUsdr: boolean;
+};
+
+export type RealFiYieldEarned = {
+  /** Earned USDr, base units (6 decimals); negative after unstake forfeits. */
+  yieldUsdrBaseUnits: string;
+};
+
 /** A matured (timelock-open) unstake whose released USDr is ready to withdraw. */
 export type RealFiWithdrawableUnstake = {
   /** Timelock output holding the released USDr (the claim input). */
@@ -307,6 +332,17 @@ export type RealFiCoolingDownUnstake = {
 export type RealFiStakeInputAssetsRequest = {
   /** Resolved RealFi config for the active network (from the REALFI flag payload). */
   config: RealFiNetworkConfig;
+};
+
+export type RealFiYieldEarnedRequest = {
+  /** Resolved RealFi config for the active network (from the REALFI flag payload). */
+  config: RealFiNetworkConfig;
+  accountId: AccountId;
+  /**
+   * Every address of the account: RealFi keys yield by payment credential,
+   * and an account can hold several.
+   */
+  addresses: readonly string[];
 };
 
 export type RealFiActivityRequest = {
@@ -395,10 +431,10 @@ export interface RealFiProvider {
     request: RealFiStakeInputAssetsRequest,
   ): Observable<Result<Milliseconds, RealFiProviderError>>;
 
-  /** Staking-history rows for an account (off-chain API — runs in the SW). */
+  /** Staking history for an account (off-chain API — runs in the SW). */
   getStakeActivities(
     request: RealFiActivityRequest,
-  ): Observable<Result<RealFiStakeActivity[], RealFiProviderError>>;
+  ): Observable<Result<RealFiStakeHistory, RealFiProviderError>>;
 
   /**
    * The wallet's R-Points balance from RealFi's points engine (launch season,
@@ -408,6 +444,11 @@ export interface RealFiProvider {
   getRPoints(
     request: RealFiActivityRequest,
   ): Observable<Result<RealFiRPoints, RealFiProviderError>>;
+
+  /** An account's lifetime sUSDr yield from RealFi's off-chain API. */
+  getYieldEarned(
+    request: RealFiYieldEarnedRequest,
+  ): Observable<Result<RealFiYieldEarned, RealFiProviderError>>;
 
   /** Matured unstakes whose released USDr is ready to withdraw/claim. */
   getWithdrawableUnstakes(

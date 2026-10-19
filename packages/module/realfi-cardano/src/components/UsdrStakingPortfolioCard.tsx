@@ -28,18 +28,20 @@ export type UsdrStakingPortfolioCardProps = {
   ticker?: string;
   /** Ticker rendered next to available-to-stake (e.g. "USDrf"); defaults to `ticker`. */
   availableTicker?: string;
-  /** Yield tag rendered top-right of the Total Balance row (e.g. "+4.7% APY"); hidden when absent. */
+  /** Yield tag centred under the balances (e.g. "+4.7% APY"); hidden when absent. */
   apyTag?: string;
+  /** Lifetime yield in fiat (e.g. "0.04"), beside Total Balance in `currency`; hidden when absent. */
+  yieldEarned?: string;
   onManageStake: () => void;
   testID?: string;
 };
 
 /**
  * Portfolio-style summary card for the USDr Staking sheet. Mirrors the home
- * portfolio card (background, shadow): left-aligned Total Balance and a
+ * portfolio card (background, shadow): Total Balance beside Yield Earned, a
  * Staked Balance / Available to Stake split styled after the stake card's
- * staked-balance row, followed by a full-width "Manage Stake" CTA. Purely
- * presentational — every value is supplied via props.
+ * staked-balance row, the APY tag centred beneath, then a full-width "Manage
+ * Stake" CTA. Purely presentational — every value is supplied via props.
  */
 export const UsdrStakingPortfolioCard = ({
   totalBalance,
@@ -49,6 +51,7 @@ export const UsdrStakingPortfolioCard = ({
   ticker = 'sUSDrf',
   availableTicker,
   apyTag,
+  yieldEarned,
   onManageStake,
   testID = 'usdr-staking-portfolio-card',
 }: UsdrStakingPortfolioCardProps) => {
@@ -78,22 +81,28 @@ export const UsdrStakingPortfolioCard = ({
 
   return (
     <Card testID={testID} cardStyle={styles.card}>
-      <Column gap={spacing.XS}>
-        <Row alignItems="center" justifyContent="space-between">
+      <Row alignItems="center">
+        <Column gap={spacing.XS} style={styles.amountSection}>
           <Text.M variant="secondary">
             {t('realfi.detail.total-balance')}
           </Text.M>
-          {apyTag !== undefined && (
-            <View style={styles.apyTag} testID={`${testID}-apy-tag`}>
-              <Text.XS style={styles.apyTagLabel}>{apyTag}</Text.XS>
-            </View>
-          )}
-        </Row>
-        <Row alignItems="center" gap={spacing.XS}>
-          <Text.L testID={`${testID}-total-balance`}>{totalBalance}</Text.L>
-          <Text.S variant="secondary">{currency}</Text.S>
-        </Row>
-      </Column>
+          <Row alignItems="center" gap={spacing.XS} style={styles.valueRow}>
+            <Text.L testID={`${testID}-total-balance`}>{totalBalance}</Text.L>
+            <Text.S variant="secondary">{currency}</Text.S>
+          </Row>
+        </Column>
+        {yieldEarned !== undefined && (
+          <Column gap={spacing.XS} style={styles.amountSection}>
+            <Text.M variant="secondary">
+              {t('realfi.detail.yield-earned')}
+            </Text.M>
+            <Row alignItems="center" gap={spacing.XS} style={styles.valueRow}>
+              <Text.L testID={`${testID}-yield-earned`}>{yieldEarned}</Text.L>
+              <Text.S variant="secondary">{currency}</Text.S>
+            </Row>
+          </Column>
+        )}
+      </Row>
       <Row alignItems="center">
         {amounts.map(amount => (
           <Column
@@ -101,13 +110,20 @@ export const UsdrStakingPortfolioCard = ({
             gap={spacing.XS}
             style={styles.amountSection}>
             <Text.XS variant="secondary">{amount.label}</Text.XS>
-            <Row alignItems="center" gap={spacing.XS}>
+            <Row alignItems="center" gap={spacing.XS} style={styles.valueRow}>
               <Text.L testID={amount.testID}>{amount.value}</Text.L>
               <Text.XS variant="secondary">{amount.ticker}</Text.XS>
             </Row>
           </Column>
         ))}
       </Row>
+      {apyTag !== undefined && (
+        <Row justifyContent="center">
+          <View style={styles.apyTag} testID={`${testID}-apy-tag`}>
+            <Text.XS style={styles.apyTagLabel}>{apyTag}</Text.XS>
+          </View>
+        </Row>
+      )}
 
       <Divider />
       <Button.Primary
@@ -139,6 +155,11 @@ const getStyles = (theme: Theme) =>
     // Total staked / Total unstaked layout in the staking-center rewards card.
     amountSection: {
       flex: 1,
+    },
+    // Half-width columns: a long fiat total (e.g. JPY) wraps its ticker onto
+    // the next line instead of overflowing into the neighbouring column.
+    valueRow: {
+      flexWrap: 'wrap',
     },
     // Positive-emphasis pill: data.positive text on a ~10%-alpha wash of the
     // same color (hex8 suffix), matching the design system's positive data color.

@@ -1,6 +1,6 @@
 import { defineConfig } from 'eslint/config';
 
-import rootConfig from '../../../eslint.config.mjs  ';
+import rootConfig from '../../../eslint.config.mjs';
 
 export default defineConfig(...rootConfig, {
   files: ['**/*.{js,jsx,ts,tsx,mts,cts,mjs,cjs}'],

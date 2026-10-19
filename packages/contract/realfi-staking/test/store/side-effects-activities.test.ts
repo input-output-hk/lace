@@ -1,19 +1,27 @@
-import { AccountId } from '@lace-contract/wallet-repo';
+import {
+  AccountId,
+  WalletId,
+  walletsActions,
+} from '@lace-contract/wallet-repo';
 import { Err, Ok } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { of, throwError } from 'rxjs';
+import { NEVER, of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FEATURE_FLAG_REALFI } from '../../src/const';
 import { CARDANO_NETWORK_MAGIC } from '../../src/realfi-network-config';
 import { makeStakeActivities } from '../../src/store/side-effects';
-import { realfiStakingActions } from '../../src/store/slice';
+import {
+  realfiStakingActions,
+  realfiStakingReducers,
+} from '../../src/store/slice';
 
 import type {
   RealFiProviderError,
   RealFiStakeActivity,
 } from '../../src/provider-types';
 import type { BlockchainNetworkId } from '@lace-contract/network';
+import type { AnyAccount } from '@lace-contract/wallet-repo';
 
 const accountId = AccountId('acct-1');
 const previewNetworkId =
@@ -46,6 +54,9 @@ const stateObservables = (address: string | null) => ({
   features: {
     selectLoadedFeatures$: of({ featureFlags: [realfiFlag], modules: [] }),
   },
+  wallets: {
+    selectActiveNetworkAccounts$: of([{ accountId }] as AnyAccount[]),
+  },
 });
 
 const runStakeActivities = (
@@ -61,6 +72,7 @@ const runStakeActivities = (
           a: actions.realfiPosition.stakeActivitiesRequested({ accountId }),
         }),
       },
+      wallets: { removeAccount$: NEVER, removeWallet$: NEVER },
     },
     stateObservables: stateObservables(address),
     dependencies: { actions, realfiProviders: [provider] },
@@ -74,8 +86,44 @@ const runStakeActivities = (
 };
 
 describe('makeStakeActivities', () => {
+  it('skips a request for an account that is not on the active network', () => {
+    const getStakeActivities = vi
+      .fn()
+      .mockReturnValue(
+        of(Ok({ activities: [activity], hasSwappedIntoUsdr: true })),
+      );
+    testSideEffect(makeStakeActivities, ({ hot, flush }) => ({
+      actionObservables: {
+        realfiPosition: {
+          stakeActivitiesRequested$: hot('-a', {
+            a: actions.realfiPosition.stakeActivitiesRequested({
+              accountId: AccountId('previous-network-account'),
+            }),
+          }),
+        },
+        wallets: { removeAccount$: NEVER, removeWallet$: NEVER },
+      },
+      stateObservables: stateObservables('addr_test1xyz'),
+      dependencies: {
+        actions,
+        realfiProviders: [{ getStakeActivities }] as never,
+      },
+      assertion: sideEffect$ => {
+        const emissions: unknown[] = [];
+        sideEffect$.subscribe(action => emissions.push(action));
+        flush();
+        expect(getStakeActivities).not.toHaveBeenCalled();
+        expect(emissions).toEqual([]);
+      },
+    }));
+  });
+
   it('emits stakeActivitiesReceived with the fetched activities', () => {
-    const getStakeActivities = vi.fn().mockReturnValue(of(Ok([activity])));
+    const getStakeActivities = vi
+      .fn()
+      .mockReturnValue(
+        of(Ok({ activities: [activity], hasSwappedIntoUsdr: true })),
+      );
 
     runStakeActivities(getStakeActivities, emissions => {
       expect(getStakeActivities).toHaveBeenCalledWith(
@@ -85,6 +133,7 @@ describe('makeStakeActivities', () => {
         actions.realfiPosition.stakeActivitiesReceived({
           accountId,
           activities: [activity],
+          hasSwappedIntoUsdr: true,
         }),
       ]);
     });
@@ -113,7 +162,11 @@ describe('makeStakeActivities', () => {
   });
 
   it('does not call the provider when the account has no address', () => {
-    const getStakeActivities = vi.fn().mockReturnValue(of(Ok([activity])));
+    const getStakeActivities = vi
+      .fn()
+      .mockReturnValue(
+        of(Ok({ activities: [activity], hasSwappedIntoUsdr: true })),
+      );
 
     runStakeActivities(
       getStakeActivities,
@@ -123,5 +176,95 @@ describe('makeStakeActivities', () => {
       },
       null,
     );
+  });
+});
+
+describe('makeStakeActivities response ownership', () => {
+  const request = actions.realfiPosition.stakeActivitiesRequested({
+    accountId,
+  });
+  const rowsWithId = (id: string) => ({
+    activities: [{ ...activity, id }] as RealFiStakeActivity[],
+    hasSwappedIntoUsdr: false,
+  });
+  const storedHistory = (
+    sources$: { subscribe: (next: (action: never) => void) => unknown }[],
+    flush: () => void,
+  ) => {
+    let state = realfiStakingReducers.realfiPosition(undefined, {
+      type: 'init',
+    });
+    for (const source$ of sources$) {
+      source$.subscribe(action => {
+        state = realfiStakingReducers.realfiPosition(state, action);
+      });
+    }
+    flush();
+    return state.stakeActivitiesByAccount;
+  };
+
+  it('keeps the newer history when an older read finishes last', () => {
+    testSideEffect(makeStakeActivities, ({ hot, cold, flush }) => {
+      const getStakeActivities = vi
+        .fn()
+        .mockReturnValueOnce(cold('------a|', { a: Ok(rowsWithId('older')) }))
+        .mockReturnValueOnce(cold('-a|', { a: Ok(rowsWithId('newer')) }));
+      return {
+        actionObservables: {
+          realfiPosition: {
+            stakeActivitiesRequested$: hot('-a-a', { a: request }),
+          },
+          wallets: { removeAccount$: NEVER, removeWallet$: NEVER },
+        },
+        stateObservables: stateObservables('addr_test1xyz'),
+        dependencies: {
+          actions,
+          realfiProviders: [{ getStakeActivities }] as never,
+        },
+        assertion: sideEffect$ => {
+          expect(
+            storedHistory([sideEffect$ as never], flush)[accountId]?.map(
+              row => row.id,
+            ),
+          ).toEqual(['newer']);
+        },
+      };
+    });
+  });
+
+  it('does not store history for an account removed while its read was in flight', () => {
+    testSideEffect(makeStakeActivities, ({ hot, cold, flush }) => {
+      const removeWallet$ = hot('---a', {
+        a: walletsActions.wallets.removeWallet(WalletId('wallet-1'), [
+          accountId,
+        ]),
+      });
+      return {
+        actionObservables: {
+          realfiPosition: {
+            stakeActivitiesRequested$: hot('-a', { a: request }),
+          },
+          wallets: { removeAccount$: NEVER, removeWallet$ },
+        },
+        stateObservables: stateObservables('addr_test1xyz'),
+        dependencies: {
+          actions,
+          realfiProviders: [
+            {
+              getStakeActivities: () =>
+                cold('------a|', { a: Ok(rowsWithId('late')) }),
+            },
+          ] as never,
+        },
+        assertion: sideEffect$ => {
+          expect(
+            storedHistory(
+              [removeWallet$ as never, sideEffect$ as never],
+              flush,
+            ),
+          ).toEqual({});
+        },
+      };
+    });
   });
 });

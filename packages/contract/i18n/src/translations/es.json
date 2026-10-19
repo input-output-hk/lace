@@ -2800,6 +2800,7 @@
   "realfi.detail.staked-balance": "Saldo en staking",
   "realfi.detail.available-to-stake": "Disponible para staking",
   "realfi.detail.apy": "APY",
+  "realfi.detail.yield-earned": "Rendimiento ganado",
   "realfi.detail.manage-stake": "Gestionar stake",
   "realfi.detail.staking-activities": "Actividades de staking",
   "realfi.detail.no-activities": "No tienes actividades",

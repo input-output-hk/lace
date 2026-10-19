@@ -26,6 +26,7 @@ export const stubRealFiProvider: RealFiProvider = {
   getCooldownUnlockTime: () => NEVER,
   getStakeActivities: () => NEVER,
   getRPoints: () => NEVER,
+  getYieldEarned: () => NEVER,
   getWithdrawableUnstakes: () => NEVER,
   getCoolingDownUnstakes: () => NEVER,
   buildWithdrawTx: () => NEVER,

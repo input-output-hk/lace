@@ -108,7 +108,7 @@ export const fetchStakingYield = async (
   const r1 = Number(last.ratio);
   const spanDays =
     (Number(last.unixMilli) - Number(first.unixMilli)) / MS_PER_DAY;
-  if (r0 <= 0 || r1 <= 0 || spanDays <= 0) return undefined;
+  if (!(r0 > 0 && r1 > 0 && spanDays > 0)) return undefined;
   return {
     apy: (r1 / r0) ** (DAYS_PER_YEAR / spanDays) - 1,
     usdrPerSusdr: r1 / VAULT_RATIO_SCALE,
@@ -273,6 +273,20 @@ export const setCachedYieldInfoByNetwork = (
 export const getCachedStakingApy = (
   network: RealFiSdkNetwork,
 ): number | undefined => yieldInfoCache[network]?.apy;
+
+/**
+ * The APY to present, or `undefined` to show no yield. A negative trailing
+ * figure means the vault ratio stepped down inside the window, and an
+ * advertised negative staking rate would read as the position losing money.
+ * A missing or non-finite figure (persisted NaN reads back as `null`) has
+ * nothing to present either.
+ */
+export const displayableApy = (
+  apy: number | null | undefined,
+): number | undefined =>
+  apy === null || apy === undefined || !Number.isFinite(apy) || apy < 0
+    ? undefined
+    : apy;
 
 /** The store's last-known vault rate (USDr per sUSDr) for a network, or 1
  * (no premium) before the first-ever successful read on it. */
