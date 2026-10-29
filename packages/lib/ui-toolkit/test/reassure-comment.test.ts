@@ -21,7 +21,7 @@ type BuildReassureComment = (input: {
 // The builder is a plain CommonJS script (ci.yml requires it from a
 // github-script step), so it is required rather than imported.
 const buildReassureComment =
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @nx/enforce-module-boundaries
   require('../../../../scripts/reassure-comment.js') as BuildReassureComment;
 
 const MERGE_SHA = '6b56cd17fb90b0d05a683f0a3e58c1556225d093';

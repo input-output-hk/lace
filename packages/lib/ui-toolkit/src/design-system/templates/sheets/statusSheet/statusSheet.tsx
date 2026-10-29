@@ -13,7 +13,7 @@ interface StatusSheetProps {
   detail?: string;
   icon?: {
     name: IconName;
-    variant?: 'solid' | 'stroke';
+    strokeWidth?: number;
     size?: number;
   };
   testID?: string;
@@ -36,7 +36,7 @@ export const StatusSheet = ({
         <Icon
           name={icon.name}
           size={icon.size || 48}
-          variant={icon.variant || 'stroke'}
+          strokeWidth={icon.strokeWidth}
           testID={`${testID}-icon`}
         />
       )}

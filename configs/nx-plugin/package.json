@@ -6,7 +6,7 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "dependencies": {
-    "@nx/devkit": "22.5.4"
+    "@nx/devkit": "22.7.10"
   },
   "generators": "./generators.json"
 }

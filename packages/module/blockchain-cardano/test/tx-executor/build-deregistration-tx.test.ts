@@ -4,7 +4,9 @@ import { BigNumber } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { CardanoCustodyAccountRefusedError } from '../../src/store/custody/custody-account-guard';
 import { makeBuildDeregistrationTx } from '../../src/tx-executor-implementation';
+import { custodyAddressEntry } from '../store/custody/custody-address-entry';
 
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type { AccountRewardAccountDetailsMap } from '@lace-contract/cardano-context';
@@ -310,5 +312,27 @@ describe('makeBuildDeregistrationTx', () => {
       );
       expect(tx.toCore().body.withdrawals).toBeUndefined();
     }
+  });
+
+  it('refuses a Cardano custody account before building', async () => {
+    const dependencies = {
+      txExecutorCardano: {
+        cardanoNetworkMagic$: of(764824073),
+        cardanoProtocolParameters$: of(mockProtocolParameters),
+        cardanoAccountUtxos$: of({ [testAccountId]: [mockUtxo] }),
+        cardanoAccountUnspendableUtxos$: of({}),
+        cardanoAddresses$: of([custodyAddressEntry(testAccountId)]),
+        cardanoRewardAccountDetails$: of(activeRewardAccountDetails),
+      },
+    } as unknown as SideEffectDependencies;
+
+    const result = await firstValueFrom(
+      makeBuildDeregistrationTx(dependencies)({ accountId: testAccountId }),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: expect.any(CardanoCustodyAccountRefusedError) as unknown,
+    });
   });
 });

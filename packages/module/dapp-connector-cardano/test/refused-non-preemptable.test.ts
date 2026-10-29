@@ -100,6 +100,10 @@ const ACCOUNT_ID = AccountId('acct-refused');
 const WALLET_ID = WalletId('wallet-refused');
 const ORIGIN = 'https://test-dapp.com';
 const CHAIN_ID = Cardano.ChainIds.Preprod;
+const COLLATERAL_VERDICT = {
+  kind: 'collateral',
+  case: 'foreign-collateral-return',
+};
 const SENDER: SenderContext = {
   sender: { url: ORIGIN, tab: { id: 1 } } as SenderContext['sender'],
 };
@@ -347,7 +351,7 @@ describe('the refused screen is non-preemptable (production-wired)', () => {
       afterFirst[0] as Parameters<typeof reducer>[1],
     );
     const refusedPending = selectPendingSignTxRequest(refusedState);
-    expect(refusedPending?.collateralRefusal).toBe('foreign-collateral-return');
+    expect(refusedPending?.refusal).toEqual(COLLATERAL_VERDICT);
     // The slot holds the verdict AND the request identity, and that slot is
     // the only thing either extension surface renders from.
     expect(refusedPending?.requestId).toContain(ORIGIN);
@@ -378,7 +382,7 @@ describe('the refused screen is non-preemptable (production-wired)', () => {
         undefined as unknown as CardanoDappConnectorState,
       ),
     );
-    expect(stillRefused?.collateralRefusal).toBe('foreign-collateral-return');
+    expect(stillRefused?.refusal).toEqual(COLLATERAL_VERDICT);
     expect(stillRefused?.requestId).toBe(refusedPending?.requestId);
 
     // 3. Only the user's dismissal releases the slot.
@@ -408,8 +412,7 @@ describe('the refused screen is non-preemptable (production-wired)', () => {
     const afterDismissal = setPendingActions(emitted);
     expect(afterDismissal).toHaveLength(2);
     expect(
-      (afterDismissal[1] as { payload: { collateralRefusal: unknown } }).payload
-        .collateralRefusal,
+      (afterDismissal[1] as { payload: { refusal: unknown } }).payload.refusal,
     ).toBeNull();
 
     subscription.unsubscribe();
@@ -433,7 +436,7 @@ describe('the refused screen is non-preemptable (production-wired)', () => {
       const source = read(view);
       expect(source).toContain('useDappPopupFlow({');
       // The verdict is read off that request, whatever the access idiom.
-      expect(source).toMatch(/request\??\.collateralRefusal/);
+      expect(source).toMatch(/request\??\.refusal/);
       expect(source).not.toContain('route.params');
     }
   });
@@ -493,9 +496,9 @@ describe('a delayed refusal is distinguishable in the logs', () => {
     expect(
       (
         setPendingActions(emitted)[0] as {
-          payload: { collateralRefusal: unknown };
+          payload: { refusal: unknown };
         }
-      ).payload.collateralRefusal,
+      ).payload.refusal,
     ).toBeNull();
 
     // ...and THAT is visible: the block was logged, the presentation was not.
@@ -512,9 +515,9 @@ describe('a delayed refusal is distinguishable in the logs', () => {
     const afterParkedSettles = setPendingActions(emitted);
     expect(afterParkedSettles).toHaveLength(2);
     expect(
-      (afterParkedSettles[1] as { payload: { collateralRefusal: unknown } })
-        .payload.collateralRefusal,
-    ).toBe('foreign-collateral-return');
+      (afterParkedSettles[1] as { payload: { refusal: unknown } }).payload
+        .refusal,
+    ).toEqual(COLLATERAL_VERDICT);
     expect(blockStages(logger)).toContain('screen-presented');
 
     subscription.unsubscribe();

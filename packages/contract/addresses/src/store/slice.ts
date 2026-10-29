@@ -13,6 +13,11 @@ import type {
   StateFromReducersMapObject,
 } from '@reduxjs/toolkit';
 
+/**
+ * Addresses to add to an account on a blockchain. Addresses the account
+ * already holds keep their entry, with their `data` replaced when the
+ * incoming `data` differs.
+ */
 export type UpsertAddressesPayload = BlockchainAssigned<{
   addresses: AnyBlockchainAddress[];
   accountId: AccountId;
@@ -22,6 +27,7 @@ export type ResetAddressesPayload = {
   accountId: AccountId;
 };
 
+/** An alias of an address, such as a name a naming service resolves to it, with its alias type. */
 export type AddressAliasEntry = {
   address: Address;
   aliasType: AddressAliasType;
@@ -37,6 +43,10 @@ export type SetNextUnusedAddressPayload = {
   address: Address;
 };
 
+/**
+ * The addresses slice: every account's known addresses, the aliases resolved
+ * for each address, and each account's next unused receive address.
+ */
 export type AddressesSliceState = {
   addresses: AnyAddress[];
   aliases: Partial<Record<Address, AddressAliasEntry[]>>;
@@ -223,6 +233,7 @@ export const addressesSelectors = {
   },
 };
 
+/** The part of the Redux store state that the addresses contract owns. */
 export type AddressesStoreState = StateFromReducersMapObject<
   typeof addressesReducers
 >;

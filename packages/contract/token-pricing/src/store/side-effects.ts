@@ -361,9 +361,9 @@ export const makePollPrices =
  *
  * Not gated on `isWalletActive$` — qualifies for ADR 29's state-cascade pattern.
  * `selectAggregatedFungibleTokensForVisibleAccounts$` is mutated only by
- * blockchain producers (Cardano `tokens` slice via `cardano-context`, Bitcoin
- * via `blockchain-bitcoin`, Midnight via `blockchain-midnight`), all of which
- * are themselves gated on `isWalletActive$`. With every producer paused while
+ * blockchain producers (Cardano's `tokens` slice via `cardano-context`, and
+ * each other blockchain's module), all of which are themselves gated on
+ * `isWalletActive$`. With every producer paused while
  * locked, this selector cannot emit during lock — so no fetch fires.
  */
 export const makeFetchPricesForNewTokens =

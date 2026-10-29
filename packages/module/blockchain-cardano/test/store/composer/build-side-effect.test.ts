@@ -5,6 +5,7 @@ import { Subject, defer, firstValueFrom, of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { makeComposerBuilding } from '../../../src/store/composer/build-side-effect';
+import { custodyAddressEntry } from '../custody/custody-address-entry';
 
 import type { EraSummary } from '@cardano-sdk/core';
 import type {
@@ -499,5 +500,23 @@ describe('makeComposerBuilding', () => {
     expect(buildCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ accountId }),
     );
+  });
+
+  it('refuses a Cardano custody account before building', async () => {
+    const action = await run(building(), {
+      addresses: [custodyAddressEntry(accountId)],
+    });
+
+    expect(action.payload.result).toEqual({
+      success: false,
+      error: {
+        name: 'CardanoCustodyAccountRefusedError',
+        message: expect.stringContaining('Cardano custody account') as unknown,
+      },
+      errorTranslationKeys: {
+        title: 'v2.composer.build.error.title',
+        subtitle: 'v2.composer.build.error.subtitle',
+      },
+    });
   });
 });

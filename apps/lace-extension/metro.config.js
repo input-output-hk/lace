@@ -199,6 +199,9 @@ const patchNxConfig = nxConfig => {
     const midnightBlackList = [
       './workaround-for-importing-midnight-ledger',
       '@midnight-ntwrk/ledger-v8',
+      // Local proving runs in the webpack-bundled service worker. Metro's
+      // tab UI must not import the engine's WebAssembly binary.
+      '@midnight-ntwrk/zkir-v2',
       '@midnightntwrk/wallet-sdk-indexer-client',
       '@midnightntwrk/wallet-sdk-node-client',
       '@midnightntwrk/wallet-sdk-runtime',
@@ -215,6 +218,16 @@ const patchNxConfig = nxConfig => {
       moduleName.endsWith('feature-flags')
     ) {
       const fs = require('fs');
+      const testFlags = path.resolve(
+        projectRoot,
+        'test/feature-flags.hermetic.ts',
+      );
+      if (context.originModulePath === testFlags) {
+        return nxResolver(context, moduleName, platform);
+      }
+      if (process.env.LACE_E2E_FEATURE_FLAGS === '1') {
+        return { type: 'sourceFile', filePath: testFlags };
+      }
 
       // Check if the actual override file exists
       const overridePath = path.resolve(

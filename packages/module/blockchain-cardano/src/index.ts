@@ -9,14 +9,11 @@ import {
 } from '@lace-contract/app';
 import {
   cardanoInMemorySigningDependencyContract,
-  cardanoProviderStoreContract,
   delegationTxBuilderAddonContract,
   deregistrationTxBuilderAddonContract,
   voteDelegationTxBuilderAddonContract,
-  earnRewardsTxBuilderAddonContract,
   FEATURE_FLAG_CARDANO,
 } from '@lace-contract/cardano-context';
-import { featureStoreContract } from '@lace-contract/feature';
 import { governanceCenterStoreContract } from '@lace-contract/governance-center';
 import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
 import {
@@ -29,61 +26,19 @@ import {
   baseTokenAddonContract,
   chainMinimumAmountTokenValidatorAddonContract,
 } from '@lace-contract/send-flow';
-import { signerFactoryAddonContract } from '@lace-contract/signer';
 import { stakingCenterStoreContract } from '@lace-contract/staking-center';
 import { syncStoreContract } from '@lace-contract/sync';
 import { tokenIdMapperAddonContract } from '@lace-contract/token-pricing';
 import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorImplementationAddonContract } from '@lace-contract/tx-executor';
-import {
-  walletIdentityAddonContract,
-  walletRepoStoreContract,
-} from '@lace-contract/wallet-repo';
+import { walletIdentityAddonContract } from '@lace-contract/wallet-repo';
 
+import { dependsOnContracts, implementsContracts } from './contracts';
 import store from './store/full';
 
-import type {
-  ContractsActionCreators,
-  ContractsSelectors,
-  LaceModuleMap,
-  LaceSideEffect,
-  ModuleAddons,
-  ModuleStoreActionCreators,
-  ModuleStoreSelectors,
-} from '@lace-contract/module';
+import type { LaceModuleMap } from '@lace-contract/module';
 
 export { FEATURE_FLAG_CARDANO } from '@lace-contract/cardano-context';
-
-const implementsContracts = combineContracts([
-  inMemoryIntegrationAddonContract,
-  accountUICustomisationAddonContract,
-  sendFlowSheetUICustomisationAddonContract,
-  tokensStoreContract,
-  addressesStoreContract,
-  signerFactoryAddonContract,
-  addressValidatorAddonContract,
-  txExecutorImplementationAddonContract,
-  activitiesItemCustomizationsAddonContract,
-  syncStoreContract,
-  baseTokenAddonContract,
-  chainMinimumAmountTokenValidatorAddonContract,
-  addressBookAddressValidatorAddonContract,
-  delegationTxBuilderAddonContract,
-  cardanoInMemorySigningDependencyContract,
-  tokenIdMapperAddonContract,
-  deregistrationTxBuilderAddonContract,
-  stakingCenterStoreContract,
-  governanceCenterStoreContract,
-  voteDelegationTxBuilderAddonContract,
-  earnRewardsTxBuilderAddonContract,
-  walletIdentityAddonContract,
-] as const);
-
-const dependsOnContracts = combineContracts([
-  featureStoreContract,
-  cardanoProviderStoreContract,
-  walletRepoStoreContract,
-] as const);
 
 const addons = {
   loadInMemoryWalletIntegration: async () =>
@@ -181,20 +136,9 @@ const moduleMap: LaceModuleMap = {
 
 export default moduleMap;
 
-// Built part-wise, NOT ModuleSelectors/ModuleActionCreators<typeof
-// extensionModule>: a `typeof extensionModule` reference makes declaration
-// emit (the lace-sdk dts build) serialize the whole inferred LaceModule as
-// ONE node, which exceeds the compiler's serialization cap (TS7056).
-export type Selectors = ContractsSelectors<typeof dependsOnContracts> &
-  ContractsSelectors<typeof implementsContracts> &
-  ModuleStoreSelectors<typeof store>;
-export type ActionCreators = ContractsActionCreators<
-  typeof dependsOnContracts
-> &
-  ContractsActionCreators<typeof implementsContracts> &
-  ModuleStoreActionCreators<typeof store>;
-export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
-export type AvailableAddons = ModuleAddons<
-  typeof implementsContracts,
-  typeof dependsOnContracts
->;
+export type {
+  ActionCreators,
+  AvailableAddons,
+  Selectors,
+  SideEffect,
+} from './contracts';

@@ -26,13 +26,13 @@ export const DEFAULT_MARKETS = {
 
 /**
  * Converts a fee rate in satoshis per vbyte to BTC per kilobyte.
- * @param satsPerVByte The fee rate in satoshis per vbyte.
+ * @param satsPerVByte - The fee rate in satoshis per vbyte.
  */
 const satsPerVByteToBtcPerKB = (satsPerVByte: number): number =>
   (satsPerVByte * 1000) / 100_000_000;
 
 /**
- * High‑level REST wrapper around Mempool.space’s Bitcoin feemarket API API.
+ * High-level REST wrapper around Mempool.space's Bitcoin feemarket API API.
  */
 export class MempoolFeeMarketProvider {
   protected logger: Logger;
@@ -41,8 +41,8 @@ export class MempoolFeeMarketProvider {
   /**
    * Creates a new instance of the Mempool FeeMarket provider.
    *
-   * @param client  Pre‑configured HTTP client.
-   * @param logger  Any ts‑log compatible logger implementation.
+   * @param client - Pre-configured HTTP client.
+   * @param logger - Any ts-log compatible logger implementation.
    */
   public constructor(client: HttpClient, logger: Logger) {
     this.#client = client;
@@ -55,7 +55,7 @@ export class MempoolFeeMarketProvider {
    * This method queries a blockchain fee estimation service to determine the appropriate fee
    * rate required for a transaction to be confirmed within the specified number of blocks.
    *
-   * @returns {Promise<number>} A promise that resolves to the estimated fee in satoshis per byte.
+   * @returns A promise that resolves to the estimated fee in satoshis per byte.
    *                            This value can be used to calculate the total transaction fee
    *                            based on the size of the transaction in bytes.
    */
@@ -101,7 +101,6 @@ export class MempoolFeeMarketProvider {
 
   /**
    * Performs a generic HTTP request to the Mempool.space API.
-   * @private
    */
   private async request<T>(
     endpoint: string,

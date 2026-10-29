@@ -7,6 +7,8 @@ import {
 import { createUICustomisation } from '@lace-lib/util-render';
 
 import { SendNotices } from '../components/send-flow';
+import { ProofServerReviewNotice } from '../components/send-flow/ProofServerReviewNotice';
+import { TeeAttestationProgressList } from '../components/send-flow/TeeAttestationProgressList';
 import { SendSheetFooterTitleRow } from '../components/SendSheetFooterTitleRow';
 
 import { computeTxRestrictions } from './computeTxRestrictions';
@@ -30,6 +32,8 @@ const sendFlowSheetUICustomisation = (): SendFlowSheetUICustomisation =>
     SheetFooterTitleRow: SendSheetFooterTitleRow,
     isProcessingResultSheetClosable: false,
     NoticeComponent: SendNotices,
+    ReviewNoticeComponent: ProofServerReviewNotice,
+    ProcessingDetail: TeeAttestationProgressList,
     computeTxRestrictions,
     canSendMoreThanOneAsset: true,
   });

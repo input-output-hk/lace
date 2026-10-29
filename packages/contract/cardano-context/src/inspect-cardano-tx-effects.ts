@@ -59,6 +59,8 @@ export type CardanoTxEffects = {
   proposalProcedureCount: number;
   /** Total lovelace withdrawn from reward accounts. */
   withdrawalTotal: bigint;
+  /** Every reward withdrawal in the body, whoever owns the reward account. */
+  withdrawals: readonly Cardano.Withdrawal[];
   /** Net mint per asset; negative quantities are burns. */
   mint: ReadonlyMap<Cardano.AssetId, bigint>;
   /**
@@ -312,5 +314,6 @@ export const inspectCardanoTxEffects = ({
       (total, withdrawal) => total + withdrawal.quantity,
       0n,
     ),
+    withdrawals: body.withdrawals ?? [],
   };
 };

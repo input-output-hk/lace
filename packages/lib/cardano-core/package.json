@@ -1,0 +1,27 @@
+{
+  "name": "@lace-lib/cardano-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Core types and libraries for Cardano",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@biglup/is-cid": "1.0.3",
+    "@foxglove/crc": "0.0.3",
+    "@lace-lib/cardano-crypto": "*",
+    "@lace-lib/util": "*",
+    "@scure/base": "1.2.6",
+    "fraction.js": "4.0.1",
+    "ip-address": "10.7.4",
+    "lodash": "^4.17.21",
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.7",
+    "web-encoding": "1.1.5"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "delay": "5.0.0",
+    "vitest": "*"
+  }
+}

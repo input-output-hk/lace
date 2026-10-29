@@ -44,7 +44,7 @@ const slice = createSlice({
   },
   selectors: {
     /**
-     * Select all failures as a record (failureId -> Failure).
+     * Select all failures as a record (failureId → Failure).
      */
     selectAllFailures: ({ byId: failures }) => failures,
   },

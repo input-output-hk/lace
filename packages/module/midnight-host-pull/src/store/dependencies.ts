@@ -1,4 +1,4 @@
-import { midnightWallets$ } from '@lace-contract/midnight-context';
+import { midnightWalletsForRuntime } from '@lace-contract/midnight-context';
 import { hasLaceCapability } from '@lace-lib/extension-shell-client';
 import {
   debounceTime,
@@ -23,6 +23,7 @@ import {
 
 import type { MidnightHostPullDependencies } from '../augmentations';
 import type { MidnightSideEffectsDependencies } from '@lace-contract/midnight-context';
+import type { ModuleInitProps } from '@lace-contract/module';
 
 /** Coalesces the focus + visibilitychange pair a single window activation
  * fires. Mirrors cardano-host-pull's WINDOW_REFOCUS_DEBOUNCE_MS (ADR 14 —
@@ -60,8 +61,8 @@ const buildWindowRefocus$ =
  * engine-coupled watch/tx-executor/signer that did are all in
  * `@lace-module/midnight-sync`, which the guest does not load — verified against
  * `@lace-module/blockchain-midnight`, the UI module the guest keeps).
- * `midnightWallets$` is the contract's own BehaviorSubject, never populated in
- * the guest (no engine handles); the lifecycle functions are inert.
+ * `midnightWallets$` is the app instance's registry, never populated in the
+ * guest (no engine handles); the lifecycle functions are inert.
  *
  * The two `pullMidnight*` members ARE consumed — by the watch poller
  * (store/side-effects/watch.ts). They wrap the host pull reads as Observables
@@ -71,9 +72,10 @@ const buildWindowRefocus$ =
  * the `*MidnightSyncState` pair by the per-account reset
  * (store/side-effects/reset-sync-state.ts).
  */
-export const initializeMidnightDependencies = (): MidnightHostPullDependencies &
-  MidnightSideEffectsDependencies => ({
-  midnightWallets$,
+export const initializeMidnightDependencies = (
+  runtime: ModuleInitProps['runtime'],
+): MidnightHostPullDependencies & MidnightSideEffectsDependencies => ({
+  midnightWallets$: midnightWalletsForRuntime(runtime),
   // No engine handles guest-side; a read never resolves a wallet.
   getMidnightWalletByAccountId: () => EMPTY,
   stopAllMidnightWallets: () => of(undefined),
@@ -85,6 +87,11 @@ export const initializeMidnightDependencies = (): MidnightHostPullDependencies &
           'midnight-host-pull: the Midnight engine is host-owned; the guest cannot start a wallet',
         ),
     ),
+  // Proving (attested or not) runs in the host engine; the guest never sees a
+  // TEE attestation run.
+  teeAttestationProgress$: EMPTY,
+  wasmProofActivities$: EMPTY,
+  dismissWasmProofActivity: () => undefined,
   pullMidnightSyncStatus: ref => from(getMidnightSyncStatus(ref)),
   pullMidnightState: ref => from(getMidnightState(ref)),
   requestMidnightSync: ref => from(requestMidnightSync(ref)),

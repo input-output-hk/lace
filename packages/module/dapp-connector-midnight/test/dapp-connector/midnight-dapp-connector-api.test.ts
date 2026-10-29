@@ -3,6 +3,7 @@ import {
   MidnightSDKNetworkId,
 } from '@lace-contract/midnight-context';
 import { networkId } from '@lace-contract/midnight-context/src/stub-data';
+import { createProverClient } from '@lace-lib/midnight-prover';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
@@ -85,7 +86,7 @@ const mockWalletState = {
 
 const mockNetworkConfig: MidnightNetworkConfig = {
   indexerAddress: 'http://test-indexer-uri',
-  proofServerAddress: 'http://test-prover-uri',
+  proofServer: { kind: 'local-host' as const, url: 'http://test-prover-uri' },
   nodeAddress: 'http://test-substrate-uri',
 };
 const mockNetwork$ = of({ config: mockNetworkConfig, networkId });
@@ -134,6 +135,10 @@ describe('MidnightDappConnectorApi', () => {
         unshielded: 'unshielded-address',
         shielded: 'shielded-address',
       }),
+      proofCircuitProvider: {
+        check: vi.fn().mockResolvedValue([42n]),
+        prove: vi.fn().mockResolvedValue(new Uint8Array([0xf0])),
+      },
     } as unknown as MidnightWallet;
 
     mockWallet$ = of({ [mockWallet.accountId]: mockWallet });
@@ -305,9 +310,34 @@ describe('MidnightDappConnectorApi', () => {
         indexerWsUri: convertHttpUrlToWebsocket(
           mockNetworkConfig.indexerAddress,
         ),
-        proverServerUri: mockNetworkConfig.proofServerAddress,
+        proverServerUri:
+          mockNetworkConfig.proofServer.kind === 'in-process'
+            ? undefined
+            : mockNetworkConfig.proofServer.url,
         substrateNodeUri: mockNetworkConfig.nodeAddress,
       });
+    });
+
+    it('publishes no prover URL for a tee-delegated proof server', async () => {
+      const api = new MidnightDappConnectorApi({
+        ...optionsWithWallet,
+        network$: of({
+          networkId,
+          config: {
+            ...mockNetworkConfig,
+            proofServer: {
+              kind: 'tee-delegated',
+              url: 'https://api.proofserver.example',
+              label: 'TEE',
+            },
+          },
+        }),
+      });
+
+      const result = await api.getConfiguration();
+
+      expect(result.proverServerUri).toBeUndefined();
+      expect(result.indexerUri).toBe(mockNetworkConfig.indexerAddress);
     });
 
     it('should throw error if wallet is not available', async () => {
@@ -328,6 +358,139 @@ describe('MidnightDappConnectorApi', () => {
           'Network configuration is unavailable',
         ),
       );
+    });
+  });
+
+  it('exposes configuration without a server URI for local WASM', async () => {
+    const api = new MidnightDappConnectorApi({
+      ...optionsWithWallet,
+      network$: of({
+        networkId,
+        config: { ...mockNetworkConfig, proofServer: { kind: 'in-process' } },
+      }),
+    });
+    expect((await api.getConfiguration()).proverServerUri).toBeUndefined();
+  });
+
+  describe('chunked proof commands', () => {
+    const sender = {
+      sender: {
+        url: testOrigin,
+        tab: { id: 7 },
+        frameId: 0,
+        documentId: 'document-a',
+      },
+    } as unknown as SenderContext;
+    it('runs through the authorized wallet while keeping the public circuit result', async () => {
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+      const provider = createProverClient({
+        ensure: async () => {},
+        release: async () => {},
+        intervalMs: 0,
+        send: async command => api.proofCommand(command, sender),
+      }).provider();
+      const payload = {
+        serializedPreimage: new Uint8Array([1, 2, 3]),
+        keyLocation: 'circuit',
+      };
+      await expect(provider.prove(payload)).resolves.toEqual(
+        new Uint8Array([0xf0]),
+      );
+      expect(mockWallet.proofCircuitProvider.prove).toHaveBeenCalledWith(
+        payload,
+        expect.any(AbortSignal),
+      );
+    });
+    it('rejects missing document identity and handles from another document', async () => {
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+      const upload = {
+        target: 'lace:prover' as const,
+        version: 2 as const,
+        id: 'request',
+        operation: 'upload' as const,
+        size: 0,
+        digest:
+          'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      };
+      await expect(api.proofCommand(upload, testSender)).rejects.toThrow(
+        'document identity',
+      );
+      await expect(
+        api.proofCommand(
+          {
+            target: 'lace:prover',
+            version: 2,
+            id: 'receiving',
+            operation: 'begin',
+            method: 'prove',
+          },
+          testSender,
+        ),
+      ).rejects.toThrow('document identity');
+      const reply = await api.proofCommand(upload, sender);
+      if (!reply.ok || !('bytes' in reply)) throw new Error('Expected upload');
+      const foreign = {
+        sender: { ...sender.sender, documentId: 'document-b' },
+      } as unknown as SenderContext;
+      expect(
+        await api.proofCommand(
+          {
+            target: 'lace:prover',
+            version: 2,
+            id: 'request',
+            operation: 'commit',
+            ref: reply.bytes.ref.id,
+          },
+          foreign,
+        ),
+      ).toMatchObject({
+        ok: false,
+        error: 'Proof material is no longer available',
+      });
+    });
+  });
+
+  describe('checkCircuit / proveCircuit', () => {
+    const payload = {
+      serializedPreimage: new Uint8Array([1, 2, 3]),
+      keyLocation: 'circuit',
+    };
+
+    it('forwards the check payload through the bound wallet transport', async () => {
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+
+      await expect(api.checkCircuit(payload, testSender)).resolves.toEqual([
+        42n,
+      ]);
+      expect(mockWallet.proofCircuitProvider.check).toHaveBeenCalledWith(
+        payload,
+      );
+    });
+
+    it('forwards the prove payload through the bound wallet transport', async () => {
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+
+      await expect(api.proveCircuit(payload, testSender)).resolves.toEqual(
+        new Uint8Array([0xf0]),
+      );
+      expect(mockWallet.proofCircuitProvider.prove).toHaveBeenCalledWith(
+        payload,
+      );
+    });
+
+    it('refuses when no account is bound to the requesting origin', async () => {
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+      const unknownSender = {
+        sender: { url: 'https://unknown.example' },
+      } as unknown as SenderContext;
+
+      await expect(api.proveCircuit(payload, unknownSender)).rejects.toThrow(
+        new APIError(
+          ErrorCodes.InternalError,
+          'No account is connected for this dApp. Please reconnect.',
+        ),
+      );
+      expect(mockWallet.proofCircuitProvider.prove).not.toHaveBeenCalled();
     });
   });
 
@@ -795,7 +958,7 @@ describe('MidnightDappConnectorApi', () => {
   });
 
   describe('checkNetworkSupport', () => {
-    const optionsWithPreviewNetwork = {
+    const optionsWithPreviewNetwork: MidnightDappConnectorApiOptions = {
       wallets$: of({} as MidnightWalletsByAccountId),
       network$: mockNetworkWithPreview$,
       userConfirmTransaction: userConfirmation,
@@ -1323,6 +1486,70 @@ describe('MidnightDappConnectorApi', () => {
       expect(mockSignData).toHaveBeenCalledWith(
         new TextEncoder().encode('midnight_signed_message:5:Hello'),
       );
+    });
+
+    it.each([
+      ['text', 'é😀', 'midnight_signed_message:6:é😀'],
+      ['hex', 'c3a9f09f9880', 'midnight_signed_message:6:é😀'],
+      ['base64', 'w6nwn5iA', 'midnight_signed_message:6:é😀'],
+      ['text', '', 'midnight_signed_message:0:'],
+      ['hex', '', 'midnight_signed_message:0:'],
+      ['base64', '', 'midnight_signed_message:0:'],
+      ['hex', '48656c6c6fzzff', 'midnight_signed_message:5:Hello'],
+      ['hex', '486', 'midnight_signed_message:1:H'],
+      ['hex', 'zz', 'midnight_signed_message:0:'],
+      ['base64', 'S G!VsbG8', 'midnight_signed_message:5:Hello'],
+      ['base64', '!!!', 'midnight_signed_message:0:'],
+      [
+        'text',
+        'midnight_signed_message:0:',
+        'midnight_signed_message:26:midnight_signed_message:0:',
+      ],
+    ] as const)(
+      'preserves connector decoding for %s %j',
+      async (encoding, data, expected) => {
+        const signData = vi.fn(() => of(mockSignResult));
+        const wallet = { ...mockWallet, signData } as unknown as MidnightWallet;
+        const api = new MidnightDappConnectorApi({
+          ...optionsWithWallet,
+          wallets$: of({ [wallet.accountId]: wallet }),
+        });
+        expect(
+          await api.signData(
+            data,
+            { encoding, keyType: 'unshielded' },
+            mockSender,
+          ),
+        ).toEqual({ data, ...mockSignResult });
+        expect(signData).toHaveBeenCalledExactlyOnceWith(
+          new TextEncoder().encode(expected),
+        );
+      },
+    );
+
+    it('preserves the connector InvalidRequest error for unsupported encodings', async () => {
+      const signData = vi.fn(() => of(mockSignResult));
+      const wallet = { ...mockWallet, signData } as unknown as MidnightWallet;
+      const api = new MidnightDappConnectorApi({
+        ...optionsWithWallet,
+        wallets$: of({ [wallet.accountId]: wallet }),
+      });
+      await expect(
+        api.signData(
+          '',
+          {
+            encoding: 'unsupported' as 'text',
+            keyType: 'unshielded',
+          },
+          mockSender,
+        ),
+      ).rejects.toThrow(
+        new APIError(
+          ErrorCodes.InvalidRequest,
+          'Unsupported encoding: unsupported',
+        ),
+      );
+      expect(signData).not.toHaveBeenCalled();
     });
 
     it('should throw if user rejects data signing', async () => {

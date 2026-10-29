@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -47,6 +48,42 @@ type MockListenerAddListener<Callback extends (...args: never[]) => unknown> = {
 
 describe('createNonBackgroundMessenger', () => {
   const logger = dummyLogger;
+
+  it.each([
+    'Message length exceeded maximum allowed length.',
+    'Could not serialize message.',
+  ])('rejects permanent send failure without retry: %s', async message => {
+    const runtime = createMockRuntime();
+    const failure = new Error(message);
+    vi.mocked(runtime.mockPort.postMessage).mockImplementation(() => {
+      throw failure;
+    });
+    const messenger = createNonBackgroundMessenger(
+      { baseChannel: ChannelName('test-channel') },
+      { logger, runtime },
+    );
+    await expect(firstValueFrom(messenger.postMessage({}))).rejects.toBe(
+      failure,
+    );
+    expect(runtime.mockPort.postMessage).toHaveBeenCalledTimes(1);
+    messenger.shutdown();
+  });
+
+  it('bounds retries for a disconnected port', async () => {
+    const runtime = createMockRuntime();
+    vi.mocked(runtime.mockPort.postMessage).mockImplementation(() => {
+      throw new Error('Attempting to use a disconnected port object');
+    });
+    const messenger = createNonBackgroundMessenger(
+      { baseChannel: ChannelName('test-channel') },
+      { logger, runtime },
+    );
+    await expect(firstValueFrom(messenger.postMessage({}))).rejects.toThrow(
+      'disconnected port',
+    );
+    expect(runtime.mockPort.postMessage).toHaveBeenCalledTimes(4);
+    messenger.shutdown();
+  });
 
   describe('lazy option', () => {
     describe('lazy: false (default)', () => {

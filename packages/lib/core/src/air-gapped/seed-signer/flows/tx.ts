@@ -100,7 +100,7 @@ const readVkeyWitnessSet = (data: Uint8Array): ParsedVkeyWitness[] => {
 /**
  * Parses a transaction signing response, decoding the tag-258 vkey witness set
  * (an array of [vkey, signature] entries) into applicable witnesses via
- * @cardano-sdk/core. The raw set bytes are also surfaced for direct assembly.
+ * `@cardano-sdk/core`. The raw set bytes are also surfaced for direct assembly.
  */
 export const parseTxSignResponse = (cbor: Uint8Array): ParsedTxSignResponse => {
   const response = decodeCardanoTxSignResponse(cbor);

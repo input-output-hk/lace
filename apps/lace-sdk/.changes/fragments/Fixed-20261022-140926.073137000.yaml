@@ -1,0 +1,6 @@
+kind: Fixed
+body: Creating a Passport account no longer fails with an expired transaction while the fee sponsor is still syncing its wallet. A `FeeSponsor` may implement an optional `ready()`, which the creation awaits before building each transaction, and `createDevSponsor` implements it, so calling `ready()` when the app loads starts its sync early.
+time: 2026-10-22T14:09:26.073137+08:00
+custom:
+  Package: sdk
+  Build: canary

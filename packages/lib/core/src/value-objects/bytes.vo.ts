@@ -11,6 +11,10 @@ import type { Tagged } from '@lace-lib/vendor';
  */
 export type HexBytes = Tagged<string, 'Bytes'>;
 // TODO: validation
+/**
+ * Types a string as hex-encoded bytes, such as transaction CBOR. It checks
+ * nothing; `HexBytes.fromByteArray`, `fromUTF8` and `toByteArray` convert.
+ */
 export const HexBytes = (value: string) => value.toString() as HexBytes;
 HexBytes.fromUTF8 = (utf8string: string) =>
   HexBytes(Buffer.from(utf8string, 'utf8').toString('hex'));
@@ -31,6 +35,10 @@ HexBytes.toUTF8 = (bytes: HexBytes) =>
  * let byteArray: ByteArray = ByteArray.fromHex(serialized);
  */
 export type ByteArray = Tagged<Uint8Array, 'Bytes'>;
+/**
+ * Types a `Uint8Array` as raw bytes. `ByteArray.fromHex`, `fromUTF8` and
+ * `toUTF8` convert, and `clone` copies.
+ */
 export const ByteArray = (value: Uint8Array) => value as ByteArray;
 ByteArray.fromUTF8 = (utf8string: string) =>
   ByteArray(Uint8Array.from(Buffer.from(utf8string, 'utf8')));

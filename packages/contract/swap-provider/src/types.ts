@@ -4,6 +4,7 @@ import type { Observable } from 'rxjs';
 
 // --- Error model ---
 
+/** Why a swap provider call failed. */
 export type SwapErrorCode =
   | 'INSUFFICIENT_LIQUIDITY'
   | 'PROVIDER_UNAVAILABLE'
@@ -12,6 +13,7 @@ export type SwapErrorCode =
   | 'UNSUPPORTED_PAIR'
   | 'VALIDATION';
 
+/** A failed swap provider call: its code and the provider's message. */
 export type SwapProviderError = {
   code: SwapErrorCode;
   message: string;
@@ -20,6 +22,7 @@ export type SwapProviderError = {
 
 // --- Token and DEX ---
 
+/** A token a swap provider can trade. */
 export type SwapToken = {
   id: string;
   ticker: string;
@@ -29,6 +32,7 @@ export type SwapToken = {
   icon?: string;
 };
 
+/** A DEX a swap provider routes through. */
 export type SwapDex = {
   id: string;
   name: string;
@@ -36,6 +40,7 @@ export type SwapDex = {
 
 // --- Quote ---
 
+/** What to quote: the tokens, the amount sold, the slippage and the DEXes to leave out. */
 export type SwapQuoteRequest = {
   networkId: string;
   sellTokenId: string;
@@ -47,6 +52,7 @@ export type SwapQuoteRequest = {
   userAddress: string;
 };
 
+/** One leg of a quote's route: the DEX and the share of the amount it takes. */
 export type SwapRouteLeg = {
   dexName: string;
   sellTokenId: string;
@@ -65,6 +71,10 @@ export type SwapDeposit = {
   displayCurrency: string;
 };
 
+/**
+ * A provider's quote for a swap: the expected amount bought, the price, the
+ * fees, any refundable deposit, the route and when the quote expires.
+ */
 export type SwapQuote = {
   routeId: string;
   providerId: string;
@@ -81,6 +91,7 @@ export type SwapQuote = {
   quoteExpiresAt: number;
 };
 
+/** A fee a quote charges, with its amount for display. */
 export type SwapFee = {
   label: TranslationKey;
   amount: string;
@@ -91,6 +102,7 @@ export type SwapFee = {
 
 // --- Build ---
 
+/** What to build a swap transaction from: a quote and the account's UTxOs and address. */
 export type SwapBuildRequest = {
   quote: SwapQuote;
   slippage: number;
@@ -100,6 +112,7 @@ export type SwapBuildRequest = {
   ttl: number;
 };
 
+/** An unsigned swap transaction, as CBOR hex, for the wallet to sign and submit. */
 export type SwapTransaction = {
   unsignedTxCbor: string;
   providerId: string;
@@ -107,23 +120,32 @@ export type SwapTransaction = {
 
 // --- Provider interface ---
 
+/**
+ * A provider-neutral swap interface: quotes, transaction builds, and the
+ * tokens and DEXes a provider serves. Every call emits one `Result`.
+ */
 export interface SwapProvider {
+  /** Quotes a swap. */
   getQuote(
     request: SwapQuoteRequest,
   ): Observable<Result<SwapQuote, SwapProviderError>>;
 
+  /** Builds the unsigned transaction for a quote. */
   buildSwapTx(
     request: SwapBuildRequest,
   ): Observable<Result<SwapTransaction, SwapProviderError>>;
 
+  /** The tokens the provider trades on a network. */
   listTokens(
     networkId: string,
   ): Observable<Result<SwapToken[], SwapProviderError>>;
 
+  /** The DEXes the provider routes through on a network. */
   listDexes(
     networkId: string,
   ): Observable<Result<SwapDex[], SwapProviderError>>;
 
+  /** Tokens matching a search query on a network. */
   searchTokens(
     networkId: string,
     query: string,

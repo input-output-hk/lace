@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createDevSponsor,
+  createDevWalletBalancer,
   createDevSponsorWalletContext,
 } from '../../src/infra/dev-sponsor';
 
@@ -36,22 +37,22 @@ const sdkMocks = vi.hoisted(() => {
   const startWithPublicKey = vi.fn(() => 'unshielded-wallet');
   const UnshieldedWallet = vi.fn(() => ({ startWithPublicKey }));
 
-  const startWithSecretKeys = vi.fn(() => 'shielded-wallet');
-  const ShieldedWallet = vi.fn(() => ({ startWithSecretKeys }));
+  const startShieldedWithSeed = vi.fn(() => 'shielded-wallet');
+  const ShieldedWallet = vi.fn(() => ({
+    startWithSeed: startShieldedWithSeed,
+  }));
 
-  const startWithSecretKey = vi.fn(() => 'dust-wallet');
-  const DustWallet = vi.fn(() => ({ startWithSecretKey }));
+  const startDustWithSeed = vi.fn(() => 'dust-wallet');
+  const DustWallet = vi.fn(() => ({ startWithSeed: startDustWithSeed }));
 
   const facade = {
     start: vi.fn(async () => undefined),
-    dust: { waitForSyncedState: vi.fn(async () => ({})) },
+    adoptTransaction: vi.fn(() => 'adopted-tx'),
+    waitForSyncedState: vi.fn(async () => ({})),
+    stop: vi.fn(async () => undefined),
   };
   const init = vi.fn(async () => facade);
 
-  const zswapFromSeed = vi.fn(() => 'zswap-secret-keys');
-  const dustFromSeed = vi.fn(() => 'dust-secret-key');
-  const initialParameters = vi.fn(() => ({ dust: 'dust-params' }));
-  const deserialize = vi.fn(() => 'deserialized-tx');
   const getNetworkId = vi.fn(() => 'testnet-02');
   const setNetworkId = vi.fn();
 
@@ -67,16 +68,12 @@ const sdkMocks = vi.hoisted(() => {
     fromKeyStore,
     startWithPublicKey,
     UnshieldedWallet,
-    startWithSecretKeys,
+    startShieldedWithSeed,
     ShieldedWallet,
-    startWithSecretKey,
+    startDustWithSeed,
     DustWallet,
     facade,
     init,
-    zswapFromSeed,
-    dustFromSeed,
-    initialParameters,
-    deserialize,
     getNetworkId,
     setNetworkId,
   };
@@ -111,13 +108,6 @@ vi.mock('@midnightntwrk/wallet-sdk-facade', () => ({
   WalletFacade: { init: sdkMocks.init },
 }));
 
-vi.mock('@midnightntwrk/ledger-v9', () => ({
-  ZswapSecretKeys: { fromSeed: sdkMocks.zswapFromSeed },
-  DustSecretKey: { fromSeed: sdkMocks.dustFromSeed },
-  LedgerParameters: { initialParameters: sdkMocks.initialParameters },
-  Transaction: { deserialize: sdkMocks.deserialize },
-}));
-
 vi.mock('@midnight-ntwrk/midnight-js-network-id', () => ({
   getNetworkId: sdkMocks.getNetworkId,
   setNetworkId: sdkMocks.setNetworkId,
@@ -147,11 +137,8 @@ const finalizedTx = (bytes: Uint8Array) => ({ serialize: () => bytes });
 type WalletOverrides = Partial<Record<keyof SponsorWallet, unknown>>;
 
 const walletContext = (overrides: WalletOverrides = {}) => {
-  const secretKeys = { shieldedSecretKeys: 'zswap', dustSecretKey: 'dust' };
   const signSegment = vi.fn(async () => 'signature');
-  const deserializeUnbalanced = vi.fn(
-    (bytes: Uint8Array) => `tx-${bytes.join('.')}`,
-  );
+  const adoptUnbalanced = vi.fn((bytes: Uint8Array) => `tx-${bytes.join('.')}`);
   const wallet = {
     estimateTransactionFee: vi.fn(async () => 1n),
     balanceUnboundTransaction: vi.fn(async () => 'recipe'),
@@ -162,11 +149,10 @@ const walletContext = (overrides: WalletOverrides = {}) => {
   } as unknown as SponsorWallet;
   const context: SponsorWalletContext = {
     wallet,
-    secretKeys,
     signSegment,
-    deserializeUnbalanced,
+    adoptUnbalanced,
   };
-  return { context, wallet, secretKeys, signSegment, deserializeUnbalanced };
+  return { context, wallet, signSegment, adoptUnbalanced };
 };
 
 const sponsorConfig = (
@@ -196,8 +182,7 @@ const virtualClock = () => {
 describe('createDevSponsor', () => {
   it('checks the fee budget, balances only dust, signs, finalizes, and returns the finalized bytes', async () => {
     const now = () => new Date(1_000_000);
-    const { context, wallet, secretKeys, signSegment, deserializeUnbalanced } =
-      walletContext();
+    const { context, wallet, signSegment, adoptUnbalanced } = walletContext();
     const { config } = sponsorConfig(context, { now });
     const sponsor = createDevSponsor(config);
     const unbalanced = new Uint8Array([1, 2]);
@@ -205,17 +190,14 @@ describe('createDevSponsor', () => {
     const balanced = await sponsor.balanceAndSign(unbalanced);
 
     expect(balanced).toEqual(new Uint8Array([7]));
-    expect(deserializeUnbalanced).toHaveBeenCalledWith(unbalanced);
-    expect(wallet.estimateTransactionFee).toHaveBeenCalledWith(
-      'tx-1.2',
-      secretKeys.dustSecretKey,
-      { ttl: new Date(1_000_000 + 60_000) },
-    );
-    expect(wallet.balanceUnboundTransaction).toHaveBeenCalledWith(
-      'tx-1.2',
-      secretKeys,
-      { ttl: new Date(1_000_000 + 60_000), tokenKindsToBalance: ['dust'] },
-    );
+    expect(adoptUnbalanced).toHaveBeenCalledWith(unbalanced);
+    expect(wallet.estimateTransactionFee).toHaveBeenCalledWith('tx-1.2', {
+      ttl: new Date(1_000_000 + 60_000),
+    });
+    expect(wallet.balanceUnboundTransaction).toHaveBeenCalledWith('tx-1.2', {
+      ttl: new Date(1_000_000 + 60_000),
+      tokenKindsToBalance: ['dust'],
+    });
     expect(wallet.signRecipe).toHaveBeenCalledWith('recipe', signSegment);
     expect(wallet.finalizeRecipe).toHaveBeenCalledWith('signed-recipe');
   });
@@ -228,7 +210,6 @@ describe('createDevSponsor', () => {
     await createDevSponsor(config).balanceAndSign(new Uint8Array([1]));
 
     expect(wallet.balanceUnboundTransaction).toHaveBeenCalledWith(
-      expect.anything(),
       expect.anything(),
       expect.objectContaining({ ttl: new Date(5500) }),
     );
@@ -311,7 +292,6 @@ describe('createDevSponsor', () => {
     expect(wallet.balanceUnboundTransaction).toHaveBeenCalledTimes(1);
     expect(wallet.balanceUnboundTransaction).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
       expect.objectContaining({ ttl: new Date(10_000 + 60_000) }),
     );
   });
@@ -366,6 +346,40 @@ describe('createDevSponsor', () => {
       ).rejects.toThrow(SponsorExhaustedError);
     },
   );
+
+  it('fails a token balance the wallet cannot fund at once instead of waiting on it as dust', async () => {
+    const balanceUnboundTransaction = vi.fn(async () => {
+      throw new Error('Insufficient funds');
+    });
+    const { context } = walletContext({ balanceUnboundTransaction });
+    const sleep = vi.fn(async () => undefined);
+    const { config } = sponsorConfig(context, { sleep });
+
+    await expect(
+      createDevWalletBalancer(config).balanceAndSign(new Uint8Array([1]), [
+        'shielded',
+        'dust',
+      ]),
+    ).rejects.toThrow('Insufficient funds');
+    expect(sleep).not.toHaveBeenCalled();
+    expect(balanceUnboundTransaction).toHaveBeenCalledOnce();
+  });
+
+  it('still waits out a dust rejection while balancing tokens', async () => {
+    const balanceUnboundTransaction = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('DustWalletError: insufficient funds'))
+      .mockResolvedValue({});
+    const { context } = walletContext({ balanceUnboundTransaction });
+    const sleep = vi.fn(async () => undefined);
+    const { config } = sponsorConfig(context, { sleep });
+
+    await createDevWalletBalancer(config)
+      .balanceAndSign(new Uint8Array([1]), ['shielded', 'dust'])
+      .catch(() => undefined);
+    expect(sleep).toHaveBeenCalledOnce();
+    expect(balanceUnboundTransaction).toHaveBeenCalledTimes(2);
+  });
 
   it('maps a non-Error transient rejection by its string form', async () => {
     const balanceUnboundTransaction = vi
@@ -422,6 +436,66 @@ describe('createDevSponsor', () => {
     await stopped;
     expect(wallet.stop).toHaveBeenCalledTimes(1);
   });
+
+  it('ready resolves only once the wallet context is synced', async () => {
+    const synced = deferred<SponsorWalletContext>();
+    const { context } = walletContext();
+    const createWalletContext = vi.fn(async () => synced.promise);
+    const { config } = sponsorConfig(context, { createWalletContext });
+    const sponsor = createDevSponsor(config);
+    let isReady = false;
+
+    const ready = sponsor.ready().then(() => {
+      isReady = true;
+    });
+    await Promise.resolve();
+    expect(createWalletContext).toHaveBeenCalledOnce();
+    expect(isReady).toBe(false);
+
+    synced.resolve(context);
+    await ready;
+    expect(isReady).toBe(true);
+  });
+
+  it('balances with the wallet ready started, without starting another', async () => {
+    const { context, wallet } = walletContext();
+    const { config, createWalletContext } = sponsorConfig(context);
+    const sponsor = createDevSponsor(config);
+
+    await sponsor.ready();
+    await sponsor.ready();
+    await sponsor.balanceAndSign(new Uint8Array([1]));
+
+    expect(createWalletContext).toHaveBeenCalledTimes(1);
+    expect(wallet.balanceUnboundTransaction).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts the wallet afresh after a failed start', async () => {
+    const { context } = walletContext();
+    const createWalletContext = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('indexer unreachable'))
+      .mockResolvedValueOnce(context);
+    const { config } = sponsorConfig(context, { createWalletContext });
+    const sponsor = createDevSponsor(config);
+
+    await expect(sponsor.ready()).rejects.toThrow('indexer unreachable');
+    await expect(sponsor.balanceAndSign(new Uint8Array([1]))).resolves.toEqual(
+      new Uint8Array([7]),
+    );
+    expect(createWalletContext).toHaveBeenCalledTimes(2);
+  });
+
+  it('stop releases the wallet ready started', async () => {
+    const { context, wallet } = walletContext();
+    const { config } = sponsorConfig(context);
+    const sponsor = createDevSponsor(config);
+
+    await sponsor.ready();
+    await sponsor.stop();
+
+    expect(wallet.stop).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('createDevSponsorWalletContext', () => {
@@ -461,8 +535,6 @@ describe('createDevSponsorWalletContext', () => {
     expect(sdkMocks.selectRoles).toHaveBeenCalledWith([3, 0, 2]);
     expect(sdkMocks.deriveKeysAt).toHaveBeenCalledWith(0);
     expect(sdkMocks.clear).toHaveBeenCalledTimes(1);
-    expect(sdkMocks.zswapFromSeed).toHaveBeenCalledWith(sdkMocks.roleKeys[3]);
-    expect(sdkMocks.dustFromSeed).toHaveBeenCalledWith(sdkMocks.roleKeys[2]);
     expect(sdkMocks.createKeystore).toHaveBeenCalledWith(
       { kind: 'schnorr', secret: sdkMocks.roleKeys[0] },
       'testnet-02',
@@ -494,31 +566,38 @@ describe('createDevSponsorWalletContext', () => {
     );
     expect(String(params.configuration.relayURL)).toBe('ws://localhost:9944/');
 
-    expect(params.shielded('shielded-config')).toBe('shielded-wallet');
+    await expect(params.shielded('shielded-config')).resolves.toBe(
+      'shielded-wallet',
+    );
     expect(sdkMocks.ShieldedWallet).toHaveBeenCalledWith('shielded-config');
-    expect(sdkMocks.startWithSecretKeys).toHaveBeenCalledWith(
-      'zswap-secret-keys',
+    expect(sdkMocks.startShieldedWithSeed).toHaveBeenCalledWith(
+      sdkMocks.roleKeys[3],
     );
 
-    expect(params.unshielded('unshielded-config')).toBe('unshielded-wallet');
+    await expect(params.unshielded('unshielded-config')).resolves.toBe(
+      'unshielded-wallet',
+    );
     expect(sdkMocks.UnshieldedWallet).toHaveBeenCalledWith('unshielded-config');
     expect(sdkMocks.fromKeyStore).toHaveBeenCalledWith(sdkMocks.keystore);
     expect(sdkMocks.startWithPublicKey).toHaveBeenCalledWith(
       'unshielded-public-key',
     );
 
-    expect(params.dust('dust-config')).toBe('dust-wallet');
+    await expect(params.dust('dust-config')).resolves.toBe('dust-wallet');
     expect(sdkMocks.DustWallet).toHaveBeenCalledWith('dust-config');
-    expect(sdkMocks.startWithSecretKey).toHaveBeenCalledWith(
-      'dust-secret-key',
-      'dust-params',
+    expect(sdkMocks.startDustWithSeed).toHaveBeenCalledWith(
+      sdkMocks.roleKeys[2],
     );
 
-    expect(sdkMocks.facade.start).toHaveBeenCalledWith(
-      'zswap-secret-keys',
-      'dust-secret-key',
+    expect(sdkMocks.facade.start).toHaveBeenCalledWith({
+      shielded: sdkMocks.roleKeys[3],
+      unshielded: sdkMocks.roleKeys[0],
+      dust: sdkMocks.roleKeys[2],
+    });
+    expect(sdkMocks.facade.waitForSyncedState).toHaveBeenCalledTimes(1);
+    expect(sdkMocks.facade.start.mock.invocationCallOrder[0]).toBeLessThan(
+      sdkMocks.facade.waitForSyncedState.mock.invocationCallOrder[0],
     );
-    expect(sdkMocks.facade.dust.waitForSyncedState).toHaveBeenCalledTimes(1);
   });
 
   it('honours a custom fee blocks margin', async () => {
@@ -532,14 +611,10 @@ describe('createDevSponsorWalletContext', () => {
     });
   });
 
-  it('returns a context wired to the keystore signer and the ledger codec', async () => {
+  it('returns a context wired to the keystore signer and the facade transaction adoption', async () => {
     const context = await createDevSponsorWalletContext(network);
 
     expect(context.wallet).toBe(sdkMocks.facade);
-    expect(context.secretKeys).toEqual({
-      shieldedSecretKeys: 'zswap-secret-keys',
-      dustSecretKey: 'dust-secret-key',
-    });
 
     const payload = new Uint8Array([9]);
     await expect(context.signSegment(payload)).resolves.toBe(
@@ -548,12 +623,10 @@ describe('createDevSponsorWalletContext', () => {
     expect(sdkMocks.keystore.signDataAsync).toHaveBeenCalledWith(payload);
 
     const bytes = new Uint8Array([4, 2]);
-    expect(context.deserializeUnbalanced(bytes)).toBe('deserialized-tx');
-    expect(sdkMocks.deserialize).toHaveBeenCalledWith(
-      'signature',
-      'proof',
-      'pre-binding',
+    expect(context.adoptUnbalanced(bytes)).toBe('adopted-tx');
+    expect(sdkMocks.facade.adoptTransaction).toHaveBeenCalledWith(
       bytes,
+      'Unbound',
     );
   });
 
@@ -573,6 +646,28 @@ describe('createDevSponsorWalletContext', () => {
     await expect(createDevSponsorWalletContext(network)).rejects.toThrow(
       'The sponsor seed is not a valid HD wallet seed.',
     );
+  });
+
+  it('stops the started wallet when its sync fails, so a retry does not leave it running', async () => {
+    const failure = new Error('indexer unreachable');
+    sdkMocks.facade.waitForSyncedState.mockRejectedValueOnce(failure);
+
+    await expect(createDevSponsorWalletContext(network)).rejects.toBe(failure);
+    expect(sdkMocks.facade.stop).toHaveBeenCalledOnce();
+  });
+
+  it('rejects with the sync failure even when stopping the wallet also fails', async () => {
+    const failure = new Error('indexer unreachable');
+    sdkMocks.facade.waitForSyncedState.mockRejectedValueOnce(failure);
+    sdkMocks.facade.stop.mockRejectedValueOnce(new Error('already closed'));
+
+    await expect(createDevSponsorWalletContext(network)).rejects.toBe(failure);
+  });
+
+  it('does not stop a wallet that synced', async () => {
+    await createDevSponsorWalletContext(network);
+
+    expect(sdkMocks.facade.stop).not.toHaveBeenCalled();
   });
 
   it('rejects an out-of-bounds role key derivation', async () => {

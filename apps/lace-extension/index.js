@@ -1,6 +1,3 @@
-if (process.env.EXPO_PUBLIC_NODE_ENV === 'development') {
-  require('./reactScan');
-}
 import { registerRootComponent } from 'expo';
 
 import App from './src/ExpoApp';

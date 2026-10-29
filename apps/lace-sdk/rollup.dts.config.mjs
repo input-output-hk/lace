@@ -3,8 +3,20 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import dts from 'rollup-plugin-dts';
+import ts from 'typescript';
+
+import { channelEntryNames, entrySource } from './scripts/entries.mjs';
+import {
+  cardanoSubpathOf,
+  useLaceioCardano,
+} from './scripts/laceio-cardano.mjs';
+import { reachedWorkspaceFiles, compilerOptions } from './scripts/reach.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// The build channel (ADR 66): canary rolls up the entry twins that add
+// canary.ts; stable resolves each workspace file's `.stable` variant first.
+const CHANNEL = process.env.SDK_CHANNEL === 'canary' ? 'canary' : 'stable';
+const MODULE_SUFFIXES = CHANNEL === 'stable' ? ['.stable', ''] : [''];
 const repoRoot = path.resolve(__dirname, '../..');
 const dtsWork = path.resolve(__dirname, 'dist/.dts-work');
 
@@ -51,15 +63,19 @@ const resolveInternalSpecifier = specifier => {
  * Resolve a path to a .d.ts file: try directory/index.d.ts, then .d.ts extension.
  */
 const resolveDtsFile = filePath => {
+  const withSuffix = base =>
+    MODULE_SUFFIXES.map(suffix => `${base}${suffix}.d.ts`).find(file =>
+      fs.existsSync(file),
+    );
   try {
     if (fs.statSync(filePath).isDirectory()) {
-      return filePath + '/index.d.ts';
+      return withSuffix(filePath + '/index') ?? filePath + '/index.d.ts';
     }
   } catch {
     // not found as-is
   }
-  if (!fs.existsSync(filePath) && fs.existsSync(filePath + '.d.ts')) {
-    return filePath + '.d.ts';
+  if (!fs.existsSync(filePath)) {
+    return withSuffix(filePath) ?? filePath;
   }
   return filePath;
 };
@@ -168,6 +184,15 @@ const rewriteInternalImportsOnDisk = () => {
     };
 
     code = code
+      // Inferred brands expose type-fest's private Tag through an extensionless
+      // path. Tagged<unknown, ...> is the public equivalent and resolves in Node16.
+      .replace(
+        /import\(\s*["'](?:node_modules\/)?type-fest\/source\/tagged(?:\.js)?["']\s*\)\.Tag</g,
+        () => {
+          changed = true;
+          return 'import("type-fest").Tagged<unknown, ';
+        },
+      )
       .replace(laceFromPattern, rewriteLace)
       .replace(laceDynamicPattern, rewriteLace)
       .replace(repoRelativeDynamicPattern, rewriteRepoRelative)
@@ -183,50 +208,90 @@ const rewriteInternalImportsOnDisk = () => {
 };
 
 /**
- * Inject side-effect imports for all contract augmentation files into the
- * SDK entry .d.ts.
- *
- * Problem: tsc inlines complex types in module `sdk.d.ts` files, so those
- * files don't `import` from every contract they depend on. This means
- * rollup-plugin-dts never follows the dependency to the contract's
- * `augmentations.d.ts`, and the `declare module` blocks that populate
- * interfaces like `LaceAddons` and `State` are silently dropped.
- *
- * Fix: explicitly import every contract augmentations.d.ts that contains
- * `declare module` blocks, ensuring they enter the rollup bundle and get
- * flattened by `flattenModuleAugmentations`.
+ * The contract packages whose augmentations the declarations flatten: every
+ * one on canary; on stable, those whose contract the runtime bundles
+ * (tsdown.config.ts, record-bundled-contracts), so the stable types describe
+ * the state, dependencies, config and addons of the contracts the SDK loads.
+ * A contract the stable SDK names a type from but never loads, such as the
+ * authentication prompt's or the onboarding flow's, adds nothing to them.
  */
-const injectAugmentationImports = () => {
-  const entryFile = path.join(dtsWork, 'apps/lace-sdk/src/index.d.ts');
+const flattensAugmentationsOf = (() => {
+  if (CHANNEL !== 'stable') return () => true;
+  const recorded = path.join(dtsWork, 'bundled-contracts.json');
+  if (!fs.existsSync(recorded)) {
+    throw new Error(
+      `${recorded} is missing: run tsdown before the declaration rollup`,
+    );
+  }
+  const bundled = new Set(JSON.parse(fs.readFileSync(recorded, 'utf8')));
+  return packageDirectory =>
+    !packageDirectory.startsWith('packages/contract/') ||
+    bundled.has(packageDirectory);
+})();
+
+const AUGMENTATIONS_FILE =
+  /[/\\]\.dts-work[/\\](packages[/\\][^/\\]+[/\\][^/\\]+)[/\\]src[/\\]augmentations(?:\.stable)?\.d\.ts$/;
+
+/** Drops the augmentations of the contracts the build does not load. */
+const dropUnloadedAugmentations = {
+  name: 'drop-unloaded-augmentations',
+  load: id => {
+    const match = AUGMENTATIONS_FILE.exec(id);
+    return match && !flattensAugmentationsOf(match[1].replaceAll('\\', '/'))
+      ? 'export {};'
+      : null;
+  },
+};
+
+const ENTRIES = channelEntryNames(CHANNEL);
+const entries = process.env.ENTRY ? [process.env.ENTRY] : ENTRIES;
+if (entries.some(entry => !ENTRIES.includes(entry)))
+  throw new Error(`Unknown ${CHANNEL} entry: ${process.env.ENTRY}`);
+
+/** Inferred state needs explicit imports of the augmentations this entry reaches. */
+const injectAugmentationImports = entry => {
+  const source = `apps/lace-sdk/${entrySource(entry, CHANNEL).replace(
+    /\.ts$/,
+    '',
+  )}`;
+  const entryFile = path.join(dtsWork, `${source}.d.ts`);
+  const realRepoRoot = fs.realpathSync(repoRoot);
+  const reached = reachedWorkspaceFiles(
+    [path.join(repoRoot, `${source}.ts`)],
+    compilerOptions(CHANNEL),
+  )
+    .filter(file => /[/\\]augmentations(?:\.stable)?\.ts$/.test(file))
+    .map(file =>
+      path
+        .join(dtsWork, path.relative(realRepoRoot, file))
+        .replace(/\.ts$/, '.d.ts'),
+    )
+    .sort();
   const imports = [];
 
-  for (const kind of ['contract', 'module']) {
-    const kindDirectory = path.join(dtsWork, 'packages', kind);
-    if (!fs.existsSync(kindDirectory)) continue;
-    for (const packageName of fs.readdirSync(kindDirectory).sort()) {
-      const augFile = path.join(
-        kindDirectory,
-        packageName,
-        'src',
-        'augmentations.d.ts',
-      );
-      if (!fs.existsSync(augFile)) continue;
-      const content = fs.readFileSync(augFile, 'utf8');
-      if (!content.includes('declare module')) continue;
+  for (const augFile of reached) {
+    const packageDirectory = path
+      .relative(dtsWork, augFile)
+      .split(path.sep)
+      .slice(0, 3)
+      .join('/');
+    if (!flattensAugmentationsOf(packageDirectory) || !fs.existsSync(augFile))
+      continue;
+    const content = fs.readFileSync(augFile, 'utf8');
+    if (!content.includes('declare module')) continue;
 
-      let relative = path.relative(path.dirname(entryFile), augFile);
-      if (!relative.startsWith('.')) relative = './' + relative;
-      relative = relative.replace(/\.d\.ts$/, '');
-      imports.push(`import '${relative}';`);
-    }
+    let relative = path.relative(path.dirname(entryFile), augFile);
+    if (!relative.startsWith('.')) relative = './' + relative;
+    relative = relative.replace(/\.d\.ts$/, '');
+    imports.push(`import '${relative}';`);
   }
 
-  if (imports.length > 0) {
-    const code = fs.readFileSync(entryFile, 'utf8');
+  const code = fs.readFileSync(entryFile, 'utf8');
+  if (imports.length > 0 && !code.startsWith(imports[0])) {
     fs.writeFileSync(entryFile, imports.join('\n') + '\n' + code);
     // eslint-disable-next-line no-console
     console.log(
-      `[inject-augmentations] Added ${imports.length} augmentation imports to entry`,
+      `[inject-augmentations] Added ${imports.length} augmentation imports to ${entry}`,
     );
   }
 };
@@ -234,15 +299,28 @@ const injectAugmentationImports = () => {
 // Run the rewriting before rollup processes files
 rewriteInternalImportsOnDisk();
 // Then inject augmentation imports so rollup-plugin-dts includes them
-injectAugmentationImports();
+for (const entry of entries) injectAugmentationImports(entry);
 
-// Everything from npm (rxjs, @reduxjs/toolkit, @cardano-sdk/*, etc.) is external.
+// The declarations carry the types they take from these packages, so the SDK
+// does not depend on them.
+const INLINED_TYPE_PACKAGES = ['@midnight-ntwrk/dapp-connector-api'];
+
+const isInlinedTypePackage = source =>
+  INLINED_TYPE_PACKAGES.some(
+    name => source === name || source.startsWith(`${name}/`),
+  );
+
+// Every other npm package (rxjs, @reduxjs/toolkit, @laceio/cardano, etc.) is
+// external; the @cardano-sdk packages the domain layer publishes import its
+// subpaths (scripts/laceio-cardano.mjs).
 // All .dts-work/ files have been rewritten to relative paths — no internal specifiers remain.
 const external = source => {
   // Relative and absolute paths are always internal
   if (source.startsWith('.') || source.startsWith('/')) return false;
-  // Everything else is external
-  return true;
+  // dts() resolves the inlined packages only when they are not external here,
+  // and useLaceioCardano redirects the Cardano packages, which rollup asks
+  // only for a source this does not already mark external.
+  return !isInlinedTypePackage(source) && !cardanoSubpathOf(source);
 };
 
 /**
@@ -294,14 +372,45 @@ const flattenModuleAugmentations = {
      * One pass: strip all `declare module '@lace-*'` blocks, returning
      * their inner content (de-indented) and the remaining lines.
      *
-     * Uses brace counting to track block depth. This is safe because the input
-     * is rollup-plugin-dts output (.d.ts), which contains no string literals,
-     * template literals, or comments that could contain unbalanced braces.
+     * Uses brace counting to track block depth, skipping comments and
+     * string literals: the declarations keep their doc comments, whose prose
+     * and code spans may hold unbalanced braces, and a string such as a URL
+     * holds `//` that must not end the line's count.
      */
     const extractOnce = inputLines => {
       const kept = [];
       const inner = [];
       let lineIndex = 0;
+      let inComment = false;
+      const braceDelta = line => {
+        let delta = 0;
+        for (let index = 0; index < line.length; index++) {
+          const pair = line.slice(index, index + 2);
+          if (inComment) {
+            if (pair === '*/') {
+              inComment = false;
+              index++;
+            }
+          } else if (pair === '/*') {
+            inComment = true;
+            index++;
+          } else if (pair === '//') {
+            break;
+          } else if (`'"\``.includes(line[index])) {
+            const quote = line[index];
+            index++;
+            while (index < line.length && line[index] !== quote) {
+              if (line[index] === '\\') index++;
+              index++;
+            }
+          } else if (line[index] === '{') {
+            delta++;
+          } else if (line[index] === '}') {
+            delta--;
+          }
+        }
+        return delta;
+      };
 
       while (lineIndex < inputLines.length) {
         if (!laceBlockPattern.test(inputLines[lineIndex])) {
@@ -316,10 +425,7 @@ const flattenModuleAugmentations = {
 
         while (lineIndex < inputLines.length && braceDepth > 0) {
           const line = inputLines[lineIndex];
-          for (const character of line) {
-            if (character === '{') braceDepth++;
-            if (character === '}') braceDepth--;
-          }
+          braceDepth += braceDelta(line);
           if (braceDepth > 0) {
             inner.push(line.replace(/^    /, ''));
           }
@@ -379,13 +485,116 @@ const flattenModuleAugmentations = {
   },
 };
 
-export default {
-  input: 'dist/.dts-work/apps/lace-sdk/src/index.d.ts',
-  output: { file: 'dist/index.d.ts', format: 'es' },
-  plugins: [
-    resolveJsonImports,
-    dts({ tsconfig: './tsconfig.dts-bundle.json' }),
-    flattenModuleAugmentations,
-  ],
-  external,
+/**
+ * The names an entry exports as types only, by the compiler's own rule: a
+ * probe uses every value-like export of the entry as a value, and the names it
+ * refuses are the ones an `export type` brought in, directly or through
+ * `export type *`.
+ */
+const typeOnlyExports = entryFile => {
+  const options = {
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    target: ts.ScriptTarget.ES2022,
+    noEmit: true,
+    skipLibCheck: true,
+    types: [],
+    moduleSuffixes: MODULE_SUFFIXES,
+  };
+  const entryProgram = ts.createProgram([entryFile], options);
+  const checker = entryProgram.getTypeChecker();
+  const names = checker
+    .getExportsOfModule(
+      checker.getSymbolAtLocation(entryProgram.getSourceFile(entryFile)),
+    )
+    .filter(symbol => {
+      const target =
+        symbol.flags & ts.SymbolFlags.Alias
+          ? checker.getAliasedSymbol(symbol)
+          : symbol;
+      return target.flags & ts.SymbolFlags.Value;
+    })
+    .map(symbol => symbol.name);
+  const probeFile = path.join(path.dirname(entryFile), '__type-only-probe.ts');
+  fs.writeFileSync(
+    probeFile,
+    [
+      `import { ${names
+        .map((name, index) => `${name} as probe${index}`)
+        .join(', ')} } from './${path.basename(entryFile, '.d.ts')}';`,
+      ...names.map((_name, index) => `void probe${index};`),
+    ].join('\n'),
+  );
+  try {
+    const probeProgram = ts.createProgram([probeFile], options);
+    const probeSource = probeProgram.getSourceFile(probeFile);
+    const exportedAsType = new Set([1361, 1362]);
+    return new Set(
+      probeProgram
+        .getSemanticDiagnostics(probeSource)
+        .filter(({ code }) => exportedAsType.has(code))
+        .map(
+          ({ start }) =>
+            names[probeSource.getLineAndCharacterOfPosition(start).line - 1],
+        ),
+    );
+  } finally {
+    fs.rmSync(probeFile);
+  }
 };
+
+/**
+ * Keeps the type-only exports of the entry type-only in the bundle.
+ * rollup-plugin-dts lists a re-exported declaration that also declares a
+ * value, such as a class or a value object, among the value exports even when
+ * the entry exported it with `export type`. The declarations would then
+ * promise a value the runtime build does not export, which type-checks and
+ * fails when the module links.
+ */
+const keepTypeOnlyExports = typeOnly => ({
+  name: 'keep-type-only-exports',
+  renderChunk: code => ({
+    code: code.replace(
+      /^export \{ ([^}]*) \}( from '[^']+')?;$/gm,
+      (statement, specifiers, from = '') => {
+        const all = specifiers.split(', ');
+        const types = all.filter(specifier =>
+          typeOnly.has(specifier.split(' as ').at(-1)),
+        );
+        if (types.length === 0) return statement;
+        const values = all.filter(specifier => !types.includes(specifier));
+        return [
+          ...(values.length > 0
+            ? [`export { ${values.join(', ')} }${from};`]
+            : []),
+          `export type { ${types.join(', ')} }${from};`,
+        ].join('\n');
+      },
+    ),
+    map: null,
+  }),
+});
+
+export default entries.map(entry => {
+  const input = `dist/.dts-work/apps/lace-sdk/${entrySource(
+    entry,
+    CHANNEL,
+  ).replace(/\.ts$/, '.d.ts')}`;
+  return {
+    input,
+    output: { file: `dist/${entry}.d.ts`, format: 'es' },
+    plugins: [
+      useLaceioCardano,
+      dropUnloadedAugmentations,
+      resolveJsonImports,
+      dts({
+        tsconfig: './tsconfig.dts-bundle.json',
+        compilerOptions: { moduleSuffixes: MODULE_SUFFIXES },
+        includeExternal: INLINED_TYPE_PACKAGES,
+      }),
+      flattenModuleAugmentations,
+      keepTypeOnlyExports(typeOnlyExports(path.resolve(__dirname, input))),
+    ],
+    external,
+  };
+});

@@ -31,9 +31,15 @@ vi.mock('@cardano-sdk/core', () => {
 
   return {
     Serialization: {
-      Transaction: Object.assign(vi.fn().mockReturnValue(mockSignedTx), {
-        fromCbor: vi.fn().mockReturnValue(mockTransaction),
-      }),
+      Transaction: Object.assign(
+        // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+        vi.fn(function () {
+          return mockSignedTx;
+        }),
+        {
+          fromCbor: vi.fn().mockReturnValue(mockTransaction),
+        },
+      ),
       TxCBOR: vi.fn((cbor: string) => cbor),
       CborSet: {
         fromCore: vi.fn(),

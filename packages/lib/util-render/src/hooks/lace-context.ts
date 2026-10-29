@@ -88,7 +88,7 @@ export const createUseDispatchLaceAction =
     loadedActionCreators: LoadedActionCreators,
   ) =>
   /**
-   * @param ignoreArgs if true, it is safe to call it with args (e.g. use as DOM event handler directly)
+   * @param ignoreArgs - if true, it is safe to call it with args (e.g. use as DOM event handler directly)
    */
   <
     Key extends KeyCombinations<AvailableActionCreators>,

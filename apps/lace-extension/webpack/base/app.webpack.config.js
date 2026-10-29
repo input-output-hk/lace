@@ -12,6 +12,7 @@ require('dotenv-defaults').config({
 
 module.exports = {
   entry: {
+    offscreen: path.join(__dirname, '..', '..', 'src/offscreen/index.ts'),
     'isolated-script': path.join(
       __dirname,
       '..',
@@ -33,6 +34,10 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
+        {
+          from: 'assets/html/offscreen.html',
+          to: path.join(outputDirectory, 'offscreen.html'),
+        },
         { from: 'assets/img', to: path.join(outputDirectory, 'img') },
         {
           from: 'assets/html/hw-usb-picker.html',

@@ -2,12 +2,15 @@ import './augmentations';
 
 export { midnightContextActions, midnightContextSelectors } from './store';
 export * from './contract';
+export { midnightEngineAddonContract } from './midnight-engine-addon';
 export type * from './types';
 
-export { midnightWallets$ } from './midnight-wallet';
+export { midnightWalletsForRuntime } from './midnight-wallet';
 export type { MidnightWalletsByAccountId } from './midnight-wallet';
 export { midnightAccounts$ } from './midnight-accounts';
+export { registerMidnightBlockchainNetworks } from './register-midnight-blockchain-networks';
 export * from './const';
+export * from './proof-server-mode';
 export * from './utils';
 export * from './value-objects';
 export * from './address-util';

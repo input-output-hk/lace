@@ -1,6 +1,8 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
 
+/** Loads the Midnight engine. */
 export const FEATURE_FLAG_MIDNIGHT = FeatureFlagKey('BLOCKCHAIN_MIDNIGHT');
+/** Publishes the unshielded address and balances of Midnight accounts to the `addresses` and `tokens` state. */
 export const FEATURE_FLAG_MIDNIGHT_UNSHIELDED = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_UNSHIELDED',
 );

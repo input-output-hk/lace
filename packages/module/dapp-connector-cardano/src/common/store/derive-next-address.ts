@@ -1,6 +1,7 @@
 import { AddressType } from '@cardano-sdk/key-management';
 import {
   isCardanoAccount,
+  isCardanoBip32Account,
   toContractAddress,
 } from '@lace-contract/cardano-context';
 import { Bip32Account } from '@lace-lib/core';
@@ -41,10 +42,10 @@ export const createDeriveNextAddress = ({
         `Cardano account not found for ID: ${accountId}`,
       );
     }
-    if (account.accountType === 'MultiSig') {
+    if (!isCardanoBip32Account(account)) {
       throw new APIError(
         APIErrorCode.InternalError,
-        `Cannot derive address for MultiSig account: ${accountId}`,
+        `Cannot derive address for ${account.accountType} account: ${accountId}`,
       );
     }
 

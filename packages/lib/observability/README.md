@@ -2,7 +2,7 @@
 
 SDK-agnostic observability abstraction for error tracking across the Lace platform.
 
-See [ADR 22](../../docs/adr/22-sentry-observability-library-approach.md) for the design rationale.
+See [ADR 22](../../../docs/adr/22-sentry-observability-library-approach.md) for the design rationale.
 
 ## Usage
 

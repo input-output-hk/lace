@@ -1,62 +1,10 @@
-import { activitiesStoreContract } from '@lace-contract/activities';
-import { addressesStoreContract } from '@lace-contract/addresses';
-import { appStoreContract } from '@lace-contract/app';
-import { appLockStoreContract } from '@lace-contract/app-lock';
-import { authenticationPromptStoreContract } from '@lace-contract/authentication-prompt';
-import { failuresStoreContract } from '@lace-contract/failures';
-import { featureStoreContract } from '@lace-contract/feature';
-import { inMemoryIntegrationAddonContract } from '@lace-contract/in-memory';
-import {
-  midnightContextStoreContract,
-  midnightDependencyContract,
-} from '@lace-contract/midnight-context';
-import {
-  combineContracts,
-  inferModuleContext,
-  ModuleName,
-} from '@lace-contract/module';
-import { signerFactoryAddonContract } from '@lace-contract/signer';
-import { syncStoreContract } from '@lace-contract/sync';
-import { tokensStoreContract } from '@lace-contract/tokens';
-import {
-  txExecutorStoreContract,
-  txExecutorImplementationAddonContract,
-} from '@lace-contract/tx-executor';
-import { walletActiveStateDependencyContract } from '@lace-contract/wallet-active-state';
-import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
+import { inferModuleContext, ModuleName } from '@lace-contract/module';
 
 import { FEATURE_FLAG_MIDNIGHT } from './const';
+import { dependsOnContracts, implementsContracts } from './context';
 import store from './store';
 
-import type {
-  ModuleActionCreators,
-  ModuleSelectors,
-  LaceSideEffect,
-  LaceModuleMap,
-} from '@lace-contract/module';
-
-const implementsContracts = combineContracts([
-  inMemoryIntegrationAddonContract,
-  tokensStoreContract,
-  syncStoreContract,
-  addressesStoreContract,
-  midnightDependencyContract,
-  txExecutorImplementationAddonContract,
-  signerFactoryAddonContract,
-] as const);
-
-const dependsOnContracts = combineContracts([
-  activitiesStoreContract,
-  appStoreContract,
-  appLockStoreContract,
-  failuresStoreContract,
-  featureStoreContract,
-  midnightContextStoreContract,
-  walletActiveStateDependencyContract,
-  walletRepoStoreContract,
-  authenticationPromptStoreContract,
-  txExecutorStoreContract,
-] as const);
+import type { LaceModuleMap } from '@lace-contract/module';
 
 const extensionModule = inferModuleContext({
   moduleName: ModuleName('midnight-sync'),
@@ -94,6 +42,4 @@ const moduleMap: LaceModuleMap = {
 
 export default moduleMap;
 
-export type Selectors = ModuleSelectors<typeof extensionModule>;
-export type ActionCreators = ModuleActionCreators<typeof extensionModule>;
-export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
+export type { ActionCreators, Selectors, SideEffect } from './context';

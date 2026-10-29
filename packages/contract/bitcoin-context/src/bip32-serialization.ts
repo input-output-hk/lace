@@ -9,8 +9,8 @@ const TESTNET_VERSIONS = { private: 0x04_35_83_94, public: 0x04_35_87_cf };
 
 /**
  * Imports a BIP-32 extended key, tolerating either a mainnet (xpub/xprv) or a
- * testnet (tpub/tprv) version prefix. @scure/bip32 validates the version
- * against a single {private, public} pair, so try mainnet first and fall back
+ * testnet (tpub/tprv) version prefix. `@scure/bip32` validates the version
+ * against a single `{ private, public }` pair, so try mainnet first and fall back
  * to testnet. The version bytes do not affect child derivation; the account's
  * network is tracked separately.
  */
@@ -30,7 +30,7 @@ export const hdKeyFromExtendedKey = (extendedKey: string): HDKey => {
  * connectors store the device serialization ('tpub...' on testnet) -- so the
  * key must be normalized at the edge, or the wallet exports a key that
  * misidentifies its network.
- * @throws {Error} If the key is not a valid extended key.
+ * @throws `Error` If the key is not a valid extended key.
  */
 export const bitcoinExtendedPublicKeyForNetwork = (
   extendedPublicKey: string,

@@ -7,10 +7,10 @@ import {
   cardanoChainId$,
   cardanoRewardAccountDetails$,
   CollateralOwnershipError,
-  collateralRefusalMessage,
   countTransactionSignatures,
   isCardanoAccount,
   UnknownSignWithError,
+  utxoKey,
 } from '@lace-contract/cardano-context';
 import { DappId } from '@lace-contract/dapp-connector';
 import {
@@ -45,7 +45,12 @@ import {
 import { createChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
+import {
+  isVerdictOnUnfetchedOwnership,
+  ownershipNotReadyError,
+} from '../../common/store/ownership-readiness';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
+import { signTxRefusalMessage } from '../../common/store/sign-tx-refusal';
 import {
   addrToSignWith,
   transformToGroupedAddresses,
@@ -54,6 +59,16 @@ import {
   createCombinedInputResolver,
   requiresForeignSignaturesFromCbor,
 } from '../../common/store/utils/input-resolver';
+import {
+  cardanoNetworkName,
+  cborNetworkBindingRefusal,
+  cborStatedNetworkLabel,
+  networkBindingRefusalMessage,
+} from '../../common/store/utils/network-binding';
+import {
+  sanitiseSignTxError,
+  type SignTxErrorStage,
+} from '../../common/utils/sign-tx-error-details';
 import { handleCip30Message } from '../services/cip30-message-handler';
 
 import type { DappInfo, WebViewResponse } from '../../common/store/slice';
@@ -316,7 +331,7 @@ export const processWebViewMessage: SideEffect = (
                   partialSign: result.partialSign ?? false,
                   // Evaluated pre-sheet by the handler (LW-15498); the sheet
                   // renders the refused state off this slot.
-                  collateralRefusal: result.collateralRefusal ?? null,
+                  refusal: result.refusal ?? null,
                 };
 
                 NavigationControls.navigate(SheetRoutes.SignTx, {
@@ -330,15 +345,13 @@ export const processWebViewMessage: SideEffect = (
                 // extension's code and sentence; the sheet is presentation only.
                 // The bridge keeps this response queued (pending id) until the
                 // sheet clears it on dismissal -- see handleSignTxRejection.
-                if (pendingSignTxRequest.collateralRefusal) {
+                if (pendingSignTxRequest.refusal) {
                   const refusedResponse: WebViewResponse = {
                     id: requestId,
                     success: false,
                     error: {
                       code: TxSignErrorCode.ProofGeneration,
-                      info: collateralRefusalMessage(
-                        pendingSignTxRequest.collateralRefusal,
-                      ),
+                      info: signTxRefusalMessage(pendingSignTxRequest.refusal),
                     },
                     timestamp: Date.now(),
                   };
@@ -952,6 +965,7 @@ export const handleSignTxConfirmation: SideEffect = (
           ...chainedOwnUtxos,
         ];
 
+        let errorStage: SignTxErrorStage = 'signing preparation';
         return from(
           (async () => {
             const dRepKeyHash = hashEd25519PublicKey(
@@ -961,6 +975,35 @@ export const handleSignTxConfirmation: SideEffect = (
                 0,
               ),
             );
+            // Re-checked here, not only pre-consent: this handler is the
+            // last point before a witness exists, and it is reachable on its
+            // own. Reported as a refusal like every other verdict here rather
+            // than thrown -- a throw flattens to InternalError downstream and
+            // loses the CIP-30 code the dApp reads.
+            const networkRefusal = cborNetworkBindingRefusal(
+              txHex,
+              chainId.networkId,
+              new Set(ownershipUtxos.map(utxoKey)),
+            );
+            if (
+              isVerdictOnUnfetchedOwnership(
+                networkRefusal,
+                accountUtxos,
+                accountId,
+              )
+            ) {
+              // Thrown, not reported like the verdicts below: this stream's
+              // catchError answers -2, which is the retryable code wanted
+              // here, and nothing reaches the refusal screen.
+              throw ownershipNotReadyError();
+            }
+            // The gate below re-decodes the body and may
+            // resolve its inputs through the provider, and neither can change
+            // this verdict -- but on bytes that will not parse its own throw
+            // flattens to InternalError and replaces the refusal.
+            if (networkRefusal) {
+              return { hasForeignSignatures: false, networkRefusal };
+            }
             const hasForeignSignatures =
               !isPartialSign &&
               (await requiresForeignSignaturesFromCbor(
@@ -973,17 +1016,28 @@ export const handleSignTxConfirmation: SideEffect = (
                 signerWitnessesScriptKeys(wallet),
                 dRepKeyHash,
               ));
-            return { hasForeignSignatures };
+            return { hasForeignSignatures, networkRefusal };
           })(),
         ).pipe(
-          switchMap(({ hasForeignSignatures }) => {
-            if (hasForeignSignatures) {
+          switchMap(({ hasForeignSignatures, networkRefusal }) => {
+            const refusal = networkRefusal
+              ? networkBindingRefusalMessage(networkRefusal, {
+                  statedNetwork: cborStatedNetworkLabel(
+                    txHex,
+                    chainId.networkId,
+                  ),
+                  walletNetwork: cardanoNetworkName(chainId.networkMagic),
+                })
+              : hasForeignSignatures
+              ? 'The wallet does not have the secret key associated with some of the inputs or certificates.'
+              : undefined;
+            if (refusal) {
               const errorResponse: WebViewResponse = {
                 id: requestId,
                 success: false,
                 error: {
                   code: TxSignErrorCode.ProofGeneration,
-                  info: 'The wallet does not have the secret key associated with some of the inputs or certificates.',
+                  info: refusal,
                 },
                 timestamp: Date.now(),
               };
@@ -1013,8 +1067,10 @@ export const handleSignTxConfirmation: SideEffect = (
                 },
               ),
             };
+            errorStage = 'signer setup';
             const signer = signerFactory.createTransactionSigner(signerContext);
 
+            errorStage = 'signing';
             return signer.sign({ serializedTx: HexBytes(txHex) }).pipe(
               take(1),
               mergeMap(result => {
@@ -1030,6 +1086,15 @@ export const handleSignTxConfirmation: SideEffect = (
                     error: {
                       code: TxSignErrorCode.ProofGeneration,
                       info: 'The wallet does not have the secret key associated with any of the inputs and certificates.',
+                      diagnostics: sanitiseSignTxError(
+                        {
+                          name: 'TxSignError',
+                          code: TxSignErrorCode.ProofGeneration,
+                          message:
+                            'The wallet does not have the secret key associated with any of the inputs and certificates.',
+                        },
+                        errorStage,
+                      ),
                     },
                     timestamp: Date.now(),
                   };
@@ -1040,6 +1105,7 @@ export const handleSignTxConfirmation: SideEffect = (
                     actions.cardanoDappConnector.clearPendingSignTxRequest(),
                   );
                 }
+                errorStage = 'witness assembly';
                 chainedTxOutputCache.recordOwnTransaction(txHex);
                 const witnessSetCbor = buildCip30SignTxWitnessSet(
                   Serialization.TxCBOR(txHex),
@@ -1104,6 +1170,7 @@ export const handleSignTxConfirmation: SideEffect = (
                       error instanceof Error
                         ? error.message
                         : 'Transaction signing failed',
+                    diagnostics: sanitiseSignTxError(error, errorStage),
                   },
                   timestamp: Date.now(),
                 };
@@ -1126,6 +1193,7 @@ export const handleSignTxConfirmation: SideEffect = (
                   error instanceof Error
                     ? error.message
                     : 'Pre-validation failed',
+                diagnostics: sanitiseSignTxError(error, errorStage),
               },
               timestamp: Date.now(),
             };
@@ -1165,7 +1233,7 @@ export const handleSignTxRejection: SideEffect = (
       // A refused request was answered when its sheet opened; dismissing the
       // sheet settles nothing for the dApp. Retire the queued answer the bridge
       // kept for the result view instead of sending a contradicting decline.
-      if (pendingRequest!.collateralRefusal) {
+      if (pendingRequest!.refusal) {
         return of(
           actions.cardanoDappConnector.clearWebViewResponse(
             pendingRequest!.requestId,
@@ -1214,9 +1282,7 @@ export const resolveForeignTransactionInputsMobile: SideEffect = (
     triggerAction$: setPendingSignTxRequest$.pipe(
       // A refused request is never reviewed and renders no transaction value,
       // so its hostile CBOR must not drive provider input resolution either.
-      filter(
-        ({ payload }) => payload !== null && payload.collateralRefusal === null,
-      ),
+      filter(({ payload }) => payload !== null && !payload.refusal),
     ),
     getTxHex: ({ payload }) => payload!.txHex,
     selectAccountUtxos$,

@@ -25,7 +25,7 @@ export class BlockfrostDelegationsProvider extends BlockfrostProvider {
   /**
    * Fetches all delegation history for a given reward account.
    *
-   * @param rewardAccount CardanoRewardAccount to fetch the delegations for
+   * @param rewardAccount - CardanoRewardAccount to fetch the delegations for
    * @returns Observable with Result containing all delegations or an error
    */
   public getAccountDelegations({

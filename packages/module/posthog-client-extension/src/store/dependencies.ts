@@ -1,4 +1,5 @@
 import { PostHog } from 'posthog-node';
+import { runtime } from 'webextension-polyfill';
 
 import { getDefaultPosthogProperties } from './posthog-properties';
 
@@ -72,7 +73,9 @@ export const initializeSideEffectDependencies: LaceInitSync<
       },
       getFeatureFlags: async distinctId => {
         lastFlagsResponsePartialReason = undefined;
-        const result = await postHog.getAllFlagsAndPayloads(distinctId);
+        const result = await postHog.getAllFlagsAndPayloads(distinctId, {
+          personProperties: { $app_version: runtime.getManifest().version },
+        });
         if (lastFlagsResponsePartialReason) {
           throw new PostHogPartialFlagsResponseError(
             lastFlagsResponsePartialReason,

@@ -17,12 +17,14 @@ import type {
   LaceAddons,
 } from './types';
 
+/** A loadable key for an addon, written `addons.<name>`. */
 export type AddonKey = keyof {
   [k in keyof Omit<
     LaceModule['addons'],
     EmptyObjectSymbol
   > as `addons.${k}`]: true;
 };
+/** A key that a {@link ModuleLoader} can load: a module export name or an {@link AddonKey}. */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type LoadableKey = AddonKey | keyof ModuleExports;
 
@@ -33,6 +35,10 @@ type ContextualAddonKey<ProvidesAddons extends LaceModuleAddonNames> =
       ? `addons.${AddonName & string}`
       : never
     : never;
+/**
+ * A loadable key scoped to a module's context: a module export name, or an
+ * `addons.<name>` key for only the addons in `ProvidesAddons`.
+ */
 export type ContextualLoadableKey<ProvidesAddons extends LaceModuleAddonNames> =
   ContextualAddonKey<ProvidesAddons> | keyof ModuleExports;
 
@@ -52,14 +58,23 @@ type ModuleOrAddon<K> = K extends keyof LaceModule
   ? LaceAddons[K]
   : never;
 type PropertyName<K> = K extends `${infer _}.${infer T}` ? T : K;
+/**
+ * The value loading `K` yields from one module: the result of its dynamically
+ * loaded initializer, or the export itself when it is a plain value.
+ */
 export type ModuleValue<K extends LoadableKey> = _ModuleValue<
   NonNullable<ModuleOrAddon<PropertyName<K>>>
 >;
+/** The values loading `K` yields from every module that provides it. */
 export type LoadResult<K extends LoadableKey> = Promise<ModuleValue<K>[]>;
 
 const isStoreContract = (contract: Contract): contract is StoreContract =>
   contract.contractType === 'store';
 
+/**
+ * Builds the single module formed by applying, once each, the mixins of every
+ * store contract the given modules implement or depend on as `zero-or-more`.
+ */
 export const reduceMixinsModule = (modules: LaceModule[]) => {
   return uniq(
     modules.flatMap(laceModule => [
@@ -95,6 +110,11 @@ const moduleOrAddonExport = <K extends LoadableKey>(
   return moduleValue as ModuleValue<K>;
 };
 
+/**
+ * Creates a {@link ModuleLoader} over the given modules and their contract
+ * mixins. Each loaded initializer receives the shared dependencies, a logger
+ * scoped to its module and key, and a nested loader of its own.
+ */
 export const createModuleLoader = (
   props: Readonly<CreateLoaderProps>,
   { logger, ...rest }: Readonly<ModuleInitDependencies>,
@@ -143,4 +163,8 @@ export const createModuleLoader = (
   };
 };
 
+/**
+ * Loads a module export or addon by key from every module that provides it and
+ * resolves to their values; modules that do not provide it are skipped.
+ */
 export type ModuleLoader = ReturnType<typeof createModuleLoader>;

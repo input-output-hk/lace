@@ -1,21 +1,7 @@
-import {
-  defaultTxTtlLength,
-  fromUnshieldedTokenType,
-  getDustTokenIdByNetwork,
-  midnightWallets$,
-} from '@lace-contract/midnight-context';
-import { TokenId } from '@lace-contract/tokens';
+import { getDustTokenIdByNetwork } from '@lace-contract/midnight-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber, HexBytes } from '@lace-lib/util';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { nativeToken } from '@midnight-ntwrk/ledger-v8';
-import {
-  DustAddress,
-  MidnightBech32m,
-  ShieldedAddress,
-  UnshieldedAddress,
-} from '@midnightntwrk/wallet-sdk-address-format';
-import curry from 'lodash/fp/curry';
 import {
   catchError,
   map,
@@ -27,10 +13,20 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
+import {
+  constructDustDesignationTransaction,
+  constructShieldedTransaction,
+  constructUnshieldedTransaction,
+  normalizeMidnightTransfers,
+  estimatePreparedMidnightFee,
+} from '../prepare-midnight-tx';
+
 import { discardTx } from './discard-tx';
 import { mapMidnightBuildError } from './error-mapping';
 
+import type { DustDesignationDependencies } from '../prepare-midnight-tx';
 import type {
+  MidnightSideEffectsDependencies,
   MidnightWalletsByAccountId,
   MidnightSpecificTokenMetadata,
   MidnightTokenKind,
@@ -43,11 +39,6 @@ import type {
   TxParamsBundle,
 } from '@lace-contract/tx-executor';
 import type { WithLogger } from '@lace-lib/util';
-import type {
-  DustRegistration,
-  SignatureEnabled,
-  SignatureVerifyingKey,
-} from '@midnight-ntwrk/ledger-v8';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 
@@ -73,135 +64,10 @@ export type MidnightTxParameters = {
   ];
 };
 
-type TokenTransferParams = {
-  address: string;
-  amount: bigint;
-  tokenId: TokenId;
-};
-
-type ConstructTxParams = {
-  networkId: MidnightSDKNetworkId;
-  transfers: readonly TokenTransferParams[];
-};
-
 const asNonEmpty = <T>(items: readonly T[]): readonly [T, ...T[]] => {
   if (items.length === 0)
     throw new Error('At least one token transfer is required');
   return items as readonly [T, ...T[]];
-};
-
-type DustDesignationDependencies = {
-  nightUtxos: UtxoWithMeta[];
-  nightVerifyingKey: SignatureVerifyingKey;
-};
-
-type ConstructDustDesignationTxParams = DustDesignationDependencies & {
-  address: string;
-  networkId: MidnightSDKNetworkId;
-};
-
-export const constructDustDesignationTransaction = ({
-  address,
-  networkId,
-  nightUtxos,
-  nightVerifyingKey,
-}: ConstructDustDesignationTxParams) => {
-  const parsedAddress = MidnightBech32m.parse(address);
-  const receiverData = DustAddress.codec.decode(networkId, parsedAddress).data;
-  const currentTime = new Date();
-  const ttl = new Date(Date.now() + defaultTxTtlLength);
-  const intent = ledger.Intent.new(ttl);
-  const totalNightValue = nightUtxos
-    .map(({ utxo: { value } }) => BigNumber.valueOf(value))
-    .reduce((total, value) => total + value, 0n);
-
-  const inputs = nightUtxos.map(({ utxo }) => ({
-    ...utxo,
-    owner: nightVerifyingKey,
-  }));
-  const outputs = inputs.map(input => ({
-    owner: ledger.addressFromKey(nightVerifyingKey),
-    type: input.type,
-    value: input.value,
-  }));
-  intent.guaranteedUnshieldedOffer = ledger.UnshieldedOffer.new(
-    inputs,
-    outputs,
-    [],
-  );
-
-  // Eslint is wrong here. Without the type assertion here the type is more generic
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const dustRegistration = new ledger.DustRegistration(
-    'signature',
-    nightVerifyingKey,
-    receiverData,
-    totalNightValue,
-  ) as DustRegistration<SignatureEnabled>;
-  intent.dustActions = new ledger.DustActions(
-    'signature' as const,
-    'pre-proof' as const,
-    currentTime,
-    [],
-    [dustRegistration],
-  );
-
-  return ledger.Transaction.fromParts(networkId, undefined, undefined, intent);
-};
-
-export const constructUnshieldedTransaction = ({
-  networkId,
-  transfers,
-}: ConstructTxParams) => {
-  const ttl = new Date(Date.now() + defaultTxTtlLength);
-  const intent = ledger.Intent.new(ttl);
-  const outputs = transfers.map(({ address, amount, tokenId }) => ({
-    value: amount,
-    owner: UnshieldedAddress.codec
-      .decode(networkId, MidnightBech32m.parse(address))
-      .data.toString('hex'),
-    type: tokenId,
-  }));
-  intent.guaranteedUnshieldedOffer = ledger.UnshieldedOffer.new(
-    // No inputs (will be balanced later in confirm-tx)
-    [],
-    outputs,
-    // No signatures (added in confirm-tx)
-    [],
-  );
-  return ledger.Transaction.fromParts(networkId, undefined, undefined, intent);
-};
-
-export const constructShieldedTransaction = ({
-  networkId,
-  transfers,
-}: ConstructTxParams) => {
-  const toOffer = ({ address, amount, tokenId }: TokenTransferParams) => {
-    const decodedAddress = ShieldedAddress.codec.decode(
-      networkId,
-      MidnightBech32m.parse(address),
-    );
-    const output = ledger.ZswapOutput.new(
-      ledger.createShieldedCoinInfo(tokenId, amount),
-      0,
-      decodedAddress.coinPublicKey.toHexString(),
-      decodedAddress.encryptionPublicKey.toHexString(),
-    );
-    return ledger.ZswapOffer.fromOutput(output, tokenId, amount);
-  };
-
-  const [firstTransfer, ...remainingTransfers] = transfers;
-  if (!firstTransfer)
-    throw new Error('At least one token transfer is required');
-  // ZswapOffer.fromOutput is a singleton constructor by design; merge is the
-  // ledger's composition path for multi-token / multi-output offers.
-  const offer = remainingTransfers
-    .map(toOffer)
-    .reduce(
-      (merged, singleton) => merged.merge(singleton),
-      toOffer(firstTransfer),
-    );
-  return ledger.Transaction.fromParts(networkId, offer);
 };
 
 /**
@@ -240,16 +106,6 @@ const flattenTransfers = (
   return transfers;
 };
 
-const toTokenTransferParams = (
-  transfers: MidnightTxParameters['transfers'],
-  toTokenId: (type: string) => TokenId,
-): TokenTransferParams[] =>
-  transfers.map(({ amount, receiverAddress, type }) => ({
-    address: receiverAddress,
-    amount: BigNumber.valueOf(amount),
-    tokenId: toTokenId(type),
-  }));
-
 const buildTransaction = ({
   blockchainSpecificSendFlowData: { flowType },
   networkId,
@@ -272,19 +128,20 @@ const buildTransaction = ({
 
   const transfers = flattenTransfers(txParams);
 
-  if (transfers[0].tokenKind === 'shielded') {
-    return constructShieldedTransaction({
-      networkId,
-      transfers: toTokenTransferParams(transfers, TokenId),
-    });
-  }
-
-  return constructUnshieldedTransaction({
+  const normalized = normalizeMidnightTransfers(
     networkId,
-    transfers: toTokenTransferParams(transfers, type =>
-      TokenId(fromUnshieldedTokenType(type, networkId)),
-    ),
-  });
+    transfers[0].tokenKind,
+    transfers.map(({ amount, receiverAddress, type }) => ({
+      to: receiverAddress,
+      tokenId: type,
+      amount: BigNumber.valueOf(amount),
+    })),
+  );
+  const construct =
+    transfers[0].tokenKind === 'shielded'
+      ? constructShieldedTransaction
+      : constructUnshieldedTransaction;
+  return construct({ networkId, transfers: normalized });
 };
 
 const serialiseTx = (
@@ -359,18 +216,12 @@ export const makeBuildTx =
             midnightWallet.areKeysAvailable$.pipe(take(1)),
           ),
           switchMap(([tx, dustBalance, areKeysAvailable]) => {
-            if (
-              blockchainSpecificSendFlowData.flowType === 'dust-designation' &&
-              dustBalance === 0n
-            ) {
-              return of({ fee: 0n, dustBalance });
-            }
-
-            const fee$ = areKeysAvailable
-              ? midnightWallet.estimateTransactionFee(tx, {
-                  currentTime: new Date(),
-                })
-              : midnightWallet.calculateTransactionFee(tx);
+            const fee$ = estimatePreparedMidnightFee(midnightWallet, tx, {
+              isDustDesignation:
+                blockchainSpecificSendFlowData.flowType === 'dust-designation',
+              dustBalance,
+              areKeysAvailable,
+            });
 
             return fee$.pipe(map(fee => ({ fee, dustBalance })));
           }),
@@ -405,10 +256,12 @@ export const makeBuildTx =
     );
   };
 
-export const buildTx = curry(makeBuildTx)(
-  midnightWallets$,
-  buildTxDependencies,
-);
+/** Builds with the engine wallets of the app instance the dependencies belong to. */
+export const buildTx = (
+  dependencies: Pick<MidnightSideEffectsDependencies, 'midnightWallets$'> &
+    WithLogger,
+) =>
+  makeBuildTx(dependencies.midnightWallets$, buildTxDependencies, dependencies);
 
 // TODO LW-14770
 export const makePreviewTx =

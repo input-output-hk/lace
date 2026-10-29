@@ -16,6 +16,11 @@ const USB_NO_SERIAL_SENTINEL = 'no-serial';
  * report app/firmware-dependent productId bits (Ledger).
  */
 export type HardwareWalletId = Tagged<WalletId, 'HardwareWalletId'>;
+/**
+ * The wallet ID of the hardware device a descriptor describes.
+ * `HardwareWalletId.parse` reads the descriptor back from a wallet ID, or
+ * returns `null` for an ID of another form.
+ */
 export const HardwareWalletId = (
   descriptor: DeviceDescriptor,
 ): HardwareWalletId => {

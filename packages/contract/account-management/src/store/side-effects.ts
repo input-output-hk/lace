@@ -191,9 +191,9 @@ const createWalletEntity = async ({
  * Finds the target in-memory wallet by `walletId`.
  *
  * @param props - Lookup arguments.
- * @param props.wallets - All wallets from state.
- * @param props.walletId - ID of the wallet to find.
- * @param props.logger - Logger used to report lookup failures.
+ *   - `wallets`: All wallets from state.
+ *   - `walletId`: ID of the wallet to find.
+ *   - `logger`: Logger used to report lookup failures.
  * @returns The matching `InMemoryWallet` or `null` if not found.
  */
 const pickWallet = ({
@@ -600,6 +600,18 @@ export const createAddAccountSideEffect =
             // no seed material to derive additional accounts from.
             logger.warn(
               'Lazy in-memory wallet account addition is not supported',
+              { walletId },
+            );
+            return conditionalFailure(
+              !!shouldSuppressAccountStatus,
+              actions.accountManagement.attemptAddAccountFailed({ walletId }),
+            );
+
+          case WalletType.CardanoCustody:
+            // A custody wallet holds exactly one on-chain script account; a
+            // further account is a separate custody account, created on chain.
+            logger.warn(
+              'Cardano custody wallet account addition is not supported',
               { walletId },
             );
             return conditionalFailure(

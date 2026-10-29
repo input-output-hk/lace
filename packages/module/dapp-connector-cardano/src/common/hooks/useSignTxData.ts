@@ -19,7 +19,10 @@ import {
 import { useLaceSelector } from './storeHooks';
 import { useDappTxInspection } from './useDappTxInspection';
 
-import type { TransactionInfo } from '../utils/transaction-inspector';
+import type {
+  TransactionInfo,
+  TransactionInspectorResult,
+} from '../utils/transaction-inspector';
 import type { Cardano } from '@cardano-sdk/core';
 import type { TokenTransferValue } from '@lace-contract/cardano-context';
 import type { TranslationKey } from '@lace-contract/i18n';
@@ -40,7 +43,7 @@ export interface UseSignTxDataParams {
 
 export interface UseSignTxDataResult {
   transactionInfo: TransactionInfo | null;
-  transactionError: string | null;
+  transactionError: TransactionInspectorResult['error'];
   ownAddresses: string[];
   addressToNameMap: Map<string, string>;
   fromAddresses: Map<Cardano.PaymentAddress, TokenTransferValue>;
@@ -100,7 +103,8 @@ export const useSignTxData = ({
 
   const [transactionInfo, setTransactionInfo] =
     useState<TransactionInfo | null>(null);
-  const [transactionError, setTransactionError] = useState<string | null>(null);
+  const [transactionError, setTransactionError] =
+    useState<TransactionInspectorResult['error']>(null);
 
   useEffect(() => {
     let isUnsubscribed = false;

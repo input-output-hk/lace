@@ -3,18 +3,30 @@ import { AddressType } from '@cardano-sdk/key-management';
 import { addressesActions } from '@lace-contract/addresses';
 import {
   CardanoPaymentAddress,
+  CardanoRewardAccount,
   cardanoContextActions,
+  toContractAddress,
 } from '@lace-contract/cardano-context';
+import {
+  cardanoCustodyAccount,
+  custodyAddress,
+  custodyRewardAccount,
+  foreignPaymentAddress,
+  observerCustodyAccount,
+} from '@lace-contract/cardano-context/test/custody-mocks';
 import {
   cardanoAccount0Addr,
   threeAccountCardanoWalletAccounts,
 } from '@lace-contract/cardano-context/test/mocks';
+import { multiSigAccount as scriptAccount } from '@lace-contract/cardano-context/test/multisig-mocks';
 import { BlockchainNetworkId } from '@lace-contract/network';
 import { syncActions } from '@lace-contract/sync';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import { Timestamp } from '@lace-lib/util';
 import { Err, Ok } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
+import { of } from 'rxjs';
+import { NEVER } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -22,16 +34,46 @@ import * as getScriptAddressModule from '../../../src/store/get-script-address';
 import { addressDiscoverySync } from '../../../src/store/side-effects/address-discovery-sync';
 
 import type { CardanoSyncAction } from '../../../src';
+import type { Selectors, ActionCreators } from '../../../src/module';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
 import type {
   CardanoProviderDependencies,
+  CardanoAddressData,
   DiscoverAddressesProps,
 } from '@lace-contract/cardano-context';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { SyncOperation } from '@lace-contract/sync';
 import type {
   AnyAccount,
   MultiSigWalletAccount,
 } from '@lace-contract/wallet-repo';
+import type { RunHelpers } from 'rxjs/testing';
+
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          failSyncOperation$: NEVER,
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          resetWalletSyncState$: NEVER,
+          refetchAccountUtxos$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 
 const actions = {
   ...syncActions,
@@ -114,72 +156,85 @@ describe('addressDiscoverySync', () => {
     });
   });
 
-  it('cancels in-flight discovery when the account leaves the active network', () => {
-    testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
-      const accountId = threeAccountCardanoWalletAccounts[0].accountId;
-      const tipHash = 'tip-hash';
-      const operationId = `${accountId}-${tipHash}-address-discovery`;
-      const operation: SyncOperation = {
-        operationId,
-        status: 'Pending',
-        description: 'sync.operation.address-discovery',
-        startedAt: Timestamp(Date.now()),
-      };
+  it.each(['network', 'reset'])(
+    'cancels discovery before it can write after %s abandonment',
+    reason => {
+      testSideEffect(addressDiscoverySync, ({ cold, hot, flush }) => {
+        const accountId = threeAccountCardanoWalletAccounts[0].accountId;
+        const tipHash = 'tip-hash';
+        const operationId = `${accountId}-${tipHash}-address-discovery`;
+        const operation: SyncOperation = {
+          operationId,
+          status: 'Pending',
+          description: 'sync.operation.address-discovery',
+          startedAt: Timestamp(Date.now()),
+        };
 
-      const addSyncOperation$ = hot('a', {
-        a: actions.sync.addSyncOperation({ accountId, operation }),
+        const addSyncOperation$ = hot('a', {
+          a: actions.sync.addSyncOperation({ accountId, operation }),
+        });
+
+        // Account is on the active network at subscribe (so discovery starts),
+        // then a network switch drops it from the active set at frame 3 — before
+        // discovery resolves at frame 6. `takeUntil` must cancel the in-flight
+        // discovery so it never reaches upsertAddresses / chained polling /
+        // completeSyncOperation.
+        const accounts$ = hot<AnyAccount[]>('a--b', {
+          a: [threeAccountCardanoWalletAccounts[0]],
+          b: reason === 'network' ? [] : [threeAccountCardanoWalletAccounts[0]],
+        });
+
+        const discoverAddresses = vi
+          .fn()
+          .mockImplementation((_props: DiscoverAddressesProps) =>
+            cold('------a|', { a: Ok(cardanoAccount0Addr) }),
+          );
+
+        return {
+          actionObservables: {
+            sync: {
+              addSyncOperation$: addSyncOperation$,
+              clearPendingSyncsForAccounts$:
+                reason === 'reset'
+                  ? hot('---a', {
+                      a: actions.sync.clearPendingSyncsForAccounts({
+                        accountIds: [accountId],
+                      }),
+                    })
+                  : NEVER,
+            },
+          },
+          stateObservables: {
+            wallets: { selectActiveNetworkAccounts$: accounts$ },
+          },
+          dependencies: {
+            cardanoProvider: {
+              discoverAddresses,
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            const emissions: CardanoSyncAction[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+
+            // Only InProgress — discovery is cancelled by takeUntil.
+            expect(emissions).toEqual([
+              actions.sync.updateSyncOperation({
+                accountId,
+                operationId,
+                update: {
+                  status: 'InProgress',
+                  type: 'Indeterminate',
+                },
+              }),
+            ]);
+          },
+        };
       });
-
-      // Account is on the active network at subscribe (so discovery starts),
-      // then a network switch drops it from the active set at frame 3 — before
-      // discovery resolves at frame 6. `takeUntil` must cancel the in-flight
-      // discovery so it never reaches upsertAddresses / chained polling /
-      // completeSyncOperation.
-      const accounts$ = hot<AnyAccount[]>('a--b', {
-        a: [threeAccountCardanoWalletAccounts[0]],
-        b: [],
-      });
-
-      const discoverAddresses = vi
-        .fn()
-        .mockImplementation((_props: DiscoverAddressesProps) =>
-          cold('------a|', { a: Ok(cardanoAccount0Addr) }),
-        );
-
-      return {
-        actionObservables: {
-          sync: { addSyncOperation$: addSyncOperation$ },
-        },
-        stateObservables: {
-          wallets: { selectActiveNetworkAccounts$: accounts$ },
-        },
-        dependencies: {
-          cardanoProvider: {
-            discoverAddresses,
-          } as unknown as CardanoProviderDependencies['cardanoProvider'],
-          actions,
-          logger: dummyLogger,
-        },
-        assertion: sideEffect$ => {
-          const emissions: CardanoSyncAction[] = [];
-          sideEffect$.subscribe(action => emissions.push(action));
-          flush();
-
-          // Only InProgress — discovery is cancelled by takeUntil.
-          expect(emissions).toEqual([
-            actions.sync.updateSyncOperation({
-              accountId,
-              operationId,
-              update: {
-                status: 'InProgress',
-                type: 'Indeterminate',
-              },
-            }),
-          ]);
-        },
-      };
-    });
-  });
+    },
+  );
 
   it('should succeed when address discovery succeeds immediately', () => {
     // Note: Full retry behavior (exponential backoff timing) is tested in integration tests
@@ -731,6 +786,166 @@ describe('addressDiscoverySync', () => {
     });
   });
 
+  describe('custody accounts', () => {
+    const custodyAccountId = cardanoCustodyAccount.accountId;
+    const operationId = `${custodyAccountId}-tip-hash-address-discovery`;
+    const operation: SyncOperation = {
+      operationId,
+      status: 'Pending',
+      description: 'sync.operation.address-discovery',
+      startedAt: Timestamp(Date.now()),
+    };
+
+    const custodyDiscovery = (hot: RunHelpers['hot'], account: AnyAccount) => {
+      const discoverAddresses = vi.fn();
+      const logger = { ...dummyLogger, error: vi.fn() };
+      return {
+        discoverAddresses,
+        logger,
+        setup: {
+          actionObservables: {
+            sync: {
+              addSyncOperation$: hot('a', {
+                a: actions.sync.addSyncOperation({
+                  accountId: custodyAccountId,
+                  operation,
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectActiveNetworkAccounts$: hot<AnyAccount[]>('a', {
+                a: [account],
+              }),
+            },
+          },
+          dependencies: {
+            cardanoProvider: {
+              discoverAddresses,
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+            actions,
+            logger,
+          },
+        },
+      };
+    };
+
+    const discoveredActions = (accountId: AccountId) => ({
+      a: actions.sync.updateSyncOperation({
+        accountId,
+        operationId,
+        update: { status: 'InProgress', type: 'Indeterminate' },
+      }),
+      b: actions.addresses.upsertAddresses({
+        blockchainName: 'Cardano',
+        accountId,
+        addresses: [
+          {
+            address: CardanoPaymentAddress(custodyAddress),
+            name: '0/0',
+            data: {
+              accountIndex: 0,
+              index: 0,
+              networkId: Cardano.NetworkId.Testnet,
+              networkMagic: Cardano.NetworkMagics.Preprod,
+              rewardAccount: CardanoRewardAccount(custodyRewardAccount),
+              type: AddressType.External,
+              stakeKeyDerivationPath: undefined,
+            },
+          },
+        ],
+      }),
+      c: actions.sync.addSyncOperation({
+        accountId,
+        operation: {
+          operationId: `${accountId}-tip-hash-transaction-polling`,
+          status: 'Pending',
+          description: 'sync.operation.transaction-polling',
+          startedAt: expect.any(Number) as unknown as Timestamp,
+        },
+      }),
+      d: actions.sync.completeSyncOperation({ accountId, operationId }),
+    });
+
+    it('emits the one custody address entry, with the network magic and the script reward account, and chains polling', () => {
+      testSideEffect(
+        addressDiscoverySync,
+        ({ hot, expectObservable, flush }) => {
+          const { discoverAddresses, setup } = custodyDiscovery(
+            hot,
+            cardanoCustodyAccount,
+          );
+          return {
+            ...setup,
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe(
+                '(abcd)',
+                discoveredActions(custodyAccountId),
+              );
+              flush();
+              expect(discoverAddresses).not.toHaveBeenCalled();
+            },
+          };
+        },
+      );
+    });
+
+    it('discovers an observer account, which has no device binding, the same way', () => {
+      testSideEffect(addressDiscoverySync, ({ hot, expectObservable }) => {
+        const { setup } = custodyDiscovery(hot, observerCustodyAccount);
+        return {
+          ...setup,
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe(
+              '(abcd)',
+              discoveredActions(custodyAccountId),
+            );
+          },
+        };
+      });
+    });
+
+    it('fails the sync without storing an address when the stored address is not the one the identity derives', () => {
+      testSideEffect(
+        addressDiscoverySync,
+        ({ hot, expectObservable, flush }) => {
+          const tampered: AnyAccount = {
+            ...cardanoCustodyAccount,
+            blockchainSpecific: {
+              ...cardanoCustodyAccount.blockchainSpecific,
+              address: foreignPaymentAddress,
+            },
+          };
+          const { logger, setup } = custodyDiscovery(hot, tampered);
+          return {
+            ...setup,
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe('a', {
+                a: actions.sync.failSyncOperation({
+                  accountId: custodyAccountId,
+                  operationId,
+                  error:
+                    'sync.error.address-discovery-failed' as TranslationKey,
+                }),
+              });
+              flush();
+              expect(logger.error).toHaveBeenCalledWith(
+                expect.stringContaining('identity-mismatch'),
+                {
+                  code: 'identity-mismatch',
+                  field: 'address',
+                  stored: foreignPaymentAddress,
+                  derived: custodyAddress,
+                },
+              );
+            },
+          };
+        },
+      );
+    });
+  });
+
   it('should handle MultiSig accounts with script address', () => {
     testSideEffect(addressDiscoverySync, ({ hot, expectObservable }) => {
       const multiSigAccountId = AccountId('multisig-account-1');
@@ -820,10 +1035,11 @@ describe('addressDiscoverySync', () => {
               blockchainName: 'Cardano',
               accountId: multiSigAccountId,
               addresses: [
-                {
-                  ...mockScriptAddress,
-                  address: CardanoPaymentAddress(mockScriptAddress.address),
-                },
+                toContractAddress(
+                  mockScriptAddress,
+                  threeAccountCardanoWalletAccounts[0].blockchainSpecific
+                    .chainId.networkMagic,
+                ),
               ],
             }),
             c: actions.sync.addSyncOperation({
@@ -844,4 +1060,98 @@ describe('addressDiscoverySync', () => {
       };
     });
   });
+
+  it.each([
+    Cardano.ChainIds.Mainnet,
+    Cardano.ChainIds.Preprod,
+    Cardano.ChainIds.Preview,
+  ])(
+    'discovers a multisig address with network and reward metadata on $networkMagic',
+    chainId => {
+      vi.restoreAllMocks();
+      const account = {
+        ...scriptAccount,
+        blockchainSpecific: { ...scriptAccount.blockchainSpecific, chainId },
+      };
+      const operationId = `${account.accountId}-tip-address-discovery-thorough`;
+      testSideEffect(addressDiscoverySync, ({ hot, flush }) => {
+        const emitted: CardanoSyncAction[] = [];
+        return {
+          actionObservables: {
+            sync: {
+              addSyncOperation$: hot('-a', {
+                a: actions.sync.addSyncOperation({
+                  accountId: account.accountId,
+                  operation: {
+                    operationId,
+                    status: 'Pending',
+                    description: 'sync.operation.address-discovery',
+                    startedAt: Timestamp(0),
+                  },
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectActiveNetworkAccounts$: of([account]),
+            },
+          },
+          dependencies: {
+            actions,
+            logger: dummyLogger,
+            cardanoProvider: {
+              discoverAddresses: vi.fn(),
+              getAccountUtxos: vi.fn(),
+              getUtxosAtAddress: vi.fn(),
+              getTip: vi.fn(),
+              getTokens: vi.fn(),
+              getTokenMetadata: vi.fn(),
+              getAddressTransactionHistory: vi.fn(),
+              getAccountRewards: vi.fn(),
+              getAccountDelegations: vi.fn(),
+              getAccountRegistrations: vi.fn(),
+              getAccountWithdrawals: vi.fn(),
+              getRewardAccountInfo: vi.fn(),
+              getTransactionDetails: vi.fn(),
+              getProtocolParameters: vi.fn(),
+              getEraSummaries: vi.fn(),
+              resolveInput: vi.fn(),
+              submitTx: vi.fn(),
+              evaluateTx: vi.fn(),
+              getDReps: vi.fn(),
+            },
+          },
+          assertion: source => {
+            source.subscribe(action => emitted.push(action));
+            flush();
+            const upsert = emitted.find(
+              actions.addresses.upsertAddresses.match,
+            )!;
+            const address = upsert.payload.addresses[0];
+            expect(
+              Cardano.Address.fromBech32(address.address).getNetworkId(),
+            ).toBe(chainId.networkId);
+            expect(address.data).toMatchObject({
+              networkId: chainId.networkId,
+              networkMagic: chainId.networkMagic,
+            });
+            const data = address.data as CardanoAddressData;
+            expect(data.rewardAccount).toEqual(expect.any(String));
+            expect(
+              Cardano.Address.fromBech32(data.rewardAccount)
+                .asReward()!
+                .getPaymentCredential().type,
+            ).toBe(Cardano.CredentialType.ScriptHash);
+            expect(emitted.at(-1)).toEqual(
+              actions.sync.completeSyncOperation({
+                accountId: account.accountId,
+                operationId,
+              }),
+            );
+          },
+        };
+      });
+    },
+  );
 });

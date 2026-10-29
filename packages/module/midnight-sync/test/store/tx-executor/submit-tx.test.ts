@@ -35,7 +35,10 @@ type MockWallet = MidnightWallet & {
   submitTransaction: Mock<MidnightWallet['submitTransaction']>;
 };
 
-type Results = Record<'deserialize' | 'submitTransaction', string>;
+type Results = {
+  deserialize: { identifiers: () => string[] };
+  submitTransaction: string;
+};
 
 const prepare = (
   callback: (
@@ -52,7 +55,7 @@ const prepare = (
 ) => {
   createTestScheduler().run(helpers => {
     const results: Results = {
-      deserialize: 'UnprovenTx',
+      deserialize: { identifiers: () => ['txId'] },
       submitTransaction: 'txId',
     };
 

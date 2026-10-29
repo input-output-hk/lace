@@ -1,0 +1,22 @@
+import type { Origin } from './types';
+import type { Storage } from 'webextension-polyfill';
+
+export type PersistentAuthenticatorStorage = {
+  get(): Promise<Origin[]>;
+  set(origins: Origin[]): Promise<void>;
+};
+
+export const createPersistentAuthenticatorStorage = (
+  storageKey: string,
+  store: Storage.StorageArea,
+): PersistentAuthenticatorStorage => ({
+  async get(): Promise<Origin[]> {
+    const objects = await store.get(storageKey);
+    return (objects?.[storageKey] as Origin[] | undefined) ?? [];
+  },
+  async set(origins: Origin[]) {
+    await store.set({
+      [storageKey]: origins,
+    });
+  },
+});

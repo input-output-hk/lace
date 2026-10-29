@@ -12,6 +12,9 @@ import {
   withdrawalInspector,
 } from '@cardano-sdk/core';
 
+import { sanitiseSignTxError } from './sign-tx-error-details';
+
+import type { SanitisedSignTxError } from './sign-tx-error-details';
 import type { Cardano } from '@cardano-sdk/core';
 
 /**
@@ -147,8 +150,8 @@ export interface TransactionInfo {
 export interface TransactionInspectorResult {
   /** Parsed transaction information, null if parsing failed */
   transactionInfo: TransactionInfo | null;
-  /** Error message if parsing failed */
-  error: string | null;
+  /** Privacy-safe error details if parsing failed. */
+  error: SanitisedSignTxError | string | null;
   /** Whether the transaction is currently being parsed */
   isLoading: boolean;
 }
@@ -384,8 +387,7 @@ export const inspectTransaction = async (
   } catch (error) {
     return {
       transactionInfo: null,
-      error:
-        error instanceof Error ? error.message : 'Failed to parse transaction',
+      error: sanitiseSignTxError(error, 'transaction inspection'),
       isLoading: false,
     };
   }

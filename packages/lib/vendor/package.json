@@ -14,16 +14,31 @@
     "./trezor-connect": "./src/trezor-connect.ts",
     "./trezor-cardano": "./src/trezor-cardano.ts",
     "./qr": "./src/qr.ts",
-    "./zxcvbn": "./src/zxcvbn.ts"
+    "./zxcvbn": "./src/zxcvbn.ts",
+    "./midnight-proof-servers": "./src/midnight-proof-servers.ts",
+    "./proof-server-transport": "./src/proof-server-transport.ts",
+    "./midnight-connector-transaction": "./src/midnight-connector-transaction.ts",
+    "./midnight-sign-data": "./src/midnight-sign-data.ts",
+    "./midnight-facade-reservations": "./src/midnight-facade-reservations.ts",
+    "./attested-proving-service": "./src/attested-proving-service.ts",
+    "./temenos-attested-prover": "./src/temenos-attested-prover.ts",
+    "./temenos-trust-roots": "./src/temenos-trust-roots.ts",
+    "./wasm-proof-server": "./src/wasm-proof-server.ts",
+    "./wasm-proof-backend": "./src/wasm-proof-backend.ts",
+    "./midnight-submission-service": "./src/midnight-submission-service.ts",
+    "./wasm-proof-compute": "./src/wasm-proof-compute.ts"
   },
   "main": "src/index.ts",
   "scripts": {
     "build": "node scripts/build.mjs"
   },
+  "dependencies": {
+    "@lace-lib/midnight-prover": "*"
+  },
   "devDependencies": {
     "@bitcoinerlab/secp256k1": "1.2.0",
     "@cardano-foundation/ledgerjs-hw-app-cardano": "7.1.4",
-    "@cardano-sdk/core": "0.47.0",
+    "@cardano-sdk/core": "0.47.1",
     "@cardano-sdk/crypto": "0.4.7",
     "@cardano-sdk/hardware-ledger": "0.16.28",
     "@cardano-sdk/hardware-trezor": "0.7.38",
@@ -32,7 +47,9 @@
     "@keystonehq/bc-ur-registry": "0.8.0",
     "@keystonehq/bc-ur-registry-cardano": "0.5.0",
     "@ledgerhq/hw-transport-webhid": "6.31.0",
+    "@midnight-ntwrk/dapp-connector-api": "4.0.1",
     "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnight-ntwrk/zkir-v2": "2.1.0",
     "@midnightntwrk/wallet-sdk": "1.2.0",
     "@midnightntwrk/wallet-sdk-abstractions": "2.1.0",
     "@midnightntwrk/wallet-sdk-address-format": "3.1.2",
@@ -50,6 +67,7 @@
     "bip39": "3.0.4",
     "bitcoinjs-lib": "6.1.7",
     "buffer": "6.0.3",
+    "effect": "3.21.2",
     "esbuild": "0.25.12",
     "events": "3.3.0",
     "jsqr": "1.4.0",
@@ -60,5 +78,8 @@
     "stream-browserify": "3.0.0",
     "type-fest": "4.41.0",
     "zxcvbn": "4.4.2"
+  },
+  "optionalDependencies": {
+    "@input-output-hk/temenos-attestation-verifier": "0.3.0"
   }
 }

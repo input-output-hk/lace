@@ -39,6 +39,20 @@ describe('sealRecord/openRecord', () => {
     expect(sealed.ciphertext).toMatch(/^[0-9a-f]+$/);
   });
 
+  it('marks a pending record on the envelope, outside the ciphertext, and opens it the same', async () => {
+    const key = await sealingKey();
+    const pending = await sealRecord(key, record, { pending: true });
+    const complete = await sealRecord(key, record, { pending: false });
+
+    expect(pending.pending).toBe(true);
+    expect(complete).not.toHaveProperty('pending');
+    expect(await sealRecord(key, record)).not.toHaveProperty('pending');
+    await expect(openRecord(key, pending)).resolves.toEqual(record);
+    await expect(
+      openRecord(key, { ...complete, pending: true }),
+    ).resolves.toEqual(record);
+  });
+
   it('draws a fresh IV for every seal', async () => {
     const key = await sealingKey();
     const first = await sealRecord(key, record);
@@ -75,10 +89,12 @@ describe('sealRecord/openRecord', () => {
 });
 
 describe('isSealedRecord', () => {
-  it('recognises the sealed envelope layout', async () => {
-    expect(isSealedRecord(await sealRecord(await sealingKey(), record))).toBe(
-      true,
-    );
+  it('recognises the sealed envelope layout, pending or not', async () => {
+    const key = await sealingKey();
+    expect(isSealedRecord(await sealRecord(key, record))).toBe(true);
+    expect(
+      isSealedRecord(await sealRecord(key, record, { pending: true })),
+    ).toBe(true);
   });
 
   it.each([

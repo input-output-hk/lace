@@ -75,12 +75,15 @@ export const TabButton: React.FC<TabButtonProps> = ({
       return React.cloneElement(iconElement, {
         ...iconElement.props,
         size: 20,
-        strokeWidth: isFocused ? undefined : 2,
-        variant: isFocused ? 'solid' : 'stroke',
+        strokeWidth: 2,
+        // Focus is carried by the brand colour alone: the icon pack is
+        // stroke-only, and the focused container's tint is too faint to read
+        // on its own. Unfocused keeps whatever colour the caller passed.
+        ...(isFocused ? { color: theme.brand.ascending } : {}),
       });
     }
     return icon;
-  }, [icon, isFocused]);
+  }, [icon, isFocused, theme]);
 
   const badgeLabel = badge !== undefined ? String(badge) : undefined;
 

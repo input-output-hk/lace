@@ -2,6 +2,10 @@ import { Cardano } from '@cardano-sdk/core';
 import * as Crypto from '@cardano-sdk/crypto';
 import { ActivityType } from '@lace-contract/activities';
 import { AccountId } from '@lace-contract/wallet-repo';
+import {
+  ACCOUNT_VALIDATOR_HASH,
+  custodyGrantAssetId,
+} from '@lace-lib/cardano-custody';
 import { Timestamp } from '@lace-lib/util';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -18,6 +22,12 @@ import {
   fetchAssetsMetadata,
 } from '../../../src/store/helpers/transaction-inspectors';
 import { CardanoRewardAccount } from '../../../src/types';
+import {
+  custodyAddress,
+  custodyRewardAccount,
+  custodyStakeScriptHash as stakeScriptHash,
+  custodyStateNftId,
+} from '../../custody-mocks';
 
 import type { BuildCardanoTransactionParams } from '../../../src/store/helpers/map-transaction-to-activity-details';
 import type {
@@ -127,9 +137,12 @@ describe('mapTransactionToActivityDetails', () => {
   });
 
   it('Returns error result if fetchAssetsMetadata throws', async () => {
+    mapParams = {
+      rewardAccount: CardanoRewardAccount(custodyRewardAccount),
+    } as MapActivityToActivityDetailsParams;
     vi.mocked(createTransactionInspector).mockReturnValue(async () =>
       Promise.resolve({
-        summary: {} as TransactionSummaryInspection,
+        summary: { assets: new Map() } as TransactionSummaryInspection,
         metadata: {} as MetadataInspection,
         tokenTransfer: { fromAddress: new Map(), toAddress: new Map() },
       }),
@@ -622,6 +635,124 @@ describe('mapTransactionToActivityDetails', () => {
           ActivityType.Send,
         );
       }
+    });
+
+    describe('custody account tokens', () => {
+      const TOKEN_ID = Cardano.AssetId(`${'99'.repeat(28)}746f6b656e`);
+      const grantTokenId = custodyGrantAssetId(
+        { accountValidatorHash: ACCOUNT_VALIDATOR_HASH, stakeScriptHash },
+        7n,
+      );
+      const assetInfo = (assetId: Cardano.AssetId) =>
+        ({ amount: 1n, assetInfo: { assetId } } as AssetInfoWithAmount);
+      const controlValue: Cardano.Value = {
+        coins: 1_500_000n,
+        assets: new Map([
+          [custodyStateNftId, 1n],
+          [TOKEN_ID, 5n],
+        ]),
+      };
+      const controlInput = {
+        txId: Cardano.TransactionId('11'.repeat(32)),
+        index: 0,
+        address: custodyAddress,
+        value: controlValue,
+      };
+      const controlOutput: Cardano.TxOut = {
+        address: custodyAddress,
+        value: controlValue,
+      };
+      const grantOutput: Cardano.TxOut = {
+        address: custodyAddress,
+        value: { coins: 2_000_000n, assets: new Map([[grantTokenId, 1n]]) },
+      };
+      const tokenOnly = {
+        coins: 1_500_000n,
+        assets: new Map([[TOKEN_ID, 5n]]),
+      };
+
+      const mapCustodyTransaction = async (
+        rewardAccount: CardanoRewardAccount,
+      ) => {
+        vi.mocked(createTransactionInspector).mockReturnValue(async () =>
+          Promise.resolve({
+            summary: {
+              ...mockSummaryInspection,
+              assets: new Map([
+                [custodyStateNftId, assetInfo(custodyStateNftId)],
+                [grantTokenId, assetInfo(grantTokenId)],
+                [TOKEN_ID, assetInfo(TOKEN_ID)],
+              ]),
+              resolvedInputs: [controlInput],
+            },
+            metadata: '',
+            tokenTransfer: { fromAddress: new Map(), toAddress: new Map() },
+          }),
+        );
+        return firstValueFrom(
+          mapTransactionToActivityDetails({
+            ...mapParams,
+            activity: mockActivity,
+            txDetails: {
+              ...mockTxDetailsProviderResponse,
+              body: {
+                ...mockTxDetailsProviderResponse.body,
+                outputs: [controlOutput, grantOutput],
+              },
+            } as ExtendedTxDetails,
+            rewardAccount,
+            accountAddresses: [custodyAddress],
+          }),
+        );
+      };
+
+      it('are never looked up for the custody account that owns them', async () => {
+        const result = await mapCustodyTransaction(
+          CardanoRewardAccount(custodyRewardAccount),
+        );
+
+        expect(result.isOk()).toBe(true);
+        expect(fetchAssetsMetadata).toHaveBeenCalledWith(
+          { assets: new Map([[TOKEN_ID, assetInfo(TOKEN_ID)]]) },
+          mapParams.getTokenMetadata,
+        );
+      });
+
+      it('are left out of the inputs and outputs of the custody account that owns them', async () => {
+        await mapCustodyTransaction(CardanoRewardAccount(custodyRewardAccount));
+
+        expect(vi.mocked(inputOutputTransformer).mock.calls).toEqual([
+          [{ ...controlInput, value: tokenOnly }, expect.any(Map)],
+          [{ ...controlOutput, value: tokenOnly }, expect.any(Map)],
+          [
+            {
+              ...grantOutput,
+              value: { coins: 2_000_000n, assets: new Map() },
+            },
+            expect.any(Map),
+          ],
+        ]);
+      });
+
+      it('stay ordinary assets for a key account', async () => {
+        await mapCustodyTransaction(mockRewardAccount);
+
+        expect(fetchAssetsMetadata).toHaveBeenCalledWith(
+          {
+            assets: new Map([
+              [custodyStateNftId, assetInfo(custodyStateNftId)],
+              [grantTokenId, assetInfo(grantTokenId)],
+              [TOKEN_ID, assetInfo(TOKEN_ID)],
+            ]),
+          },
+          mapParams.getTokenMetadata,
+        );
+        expect(vi.mocked(inputOutputTransformer).mock.calls).toEqual([
+          [controlInput, expect.any(Map)],
+          [controlOutput, expect.any(Map)],
+          [grantOutput, expect.any(Map)],
+        ]);
+      });
     });
 
     it('does not compute tx summary when transaction has stake deregistration certificate', async () => {

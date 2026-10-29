@@ -25,7 +25,6 @@ import {
 } from '../../../src/const';
 import {
   handleMidnightSettingsChange,
-  registerMidnightBlockchainNetworks,
   syncSupportedNetworksWithFeatureFlags,
 } from '../../../src/store/side-effects';
 import { midnightActions } from '../../../src/store/slice';
@@ -33,7 +32,7 @@ import { midnightActions } from '../../../src/store/slice';
 import type { Features } from '@lace-contract/feature';
 import type { MidnightNetworkConfig } from '@lace-contract/midnight-context';
 
-const { midnightAccount, midnightWallet, networkId } = stubData;
+const { midnightAccount, networkId } = stubData;
 
 const actions = {
   ...midnightActions,
@@ -57,138 +56,6 @@ describe('midnight-wallet/store/side-effects', () => {
   // NOTE: unlockWallet and upsertAddresses tests moved to:
   // - account-key-manager.test.ts (unlock/key management)
   // - subscribe-to-wallet.test.ts (address upsert, sync progress, dust balance, token updates)
-
-  describe('registerMidnightBlockchainNetworks', () => {
-    it('should register Midnight networks with default testnet when no existing account', () => {
-      testSideEffect(
-        registerMidnightBlockchainNetworks,
-        ({ expectObservable, cold }) => {
-          const defaultTestNetNetworkId = MidnightSDKNetworkIds.Preview;
-
-          return {
-            actionObservables: {},
-            stateObservables: {
-              network: {
-                selectBlockchainNetworks$: cold('a', {
-                  a: {}, // Midnight not registered yet
-                }),
-              },
-              midnightContext: {
-                selectDefaultTestNetNetworkId$: cold('a', {
-                  a: defaultTestNetNetworkId,
-                }),
-              },
-              wallets: {
-                selectAll$: cold('a', { a: [] }), // No wallets
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('a', {
-                a: actions.network.setBlockchainNetworks({
-                  blockchain: 'Midnight',
-                  mainnet: MidnightNetworkId('mainnet'),
-                  testnet: MidnightNetworkId(defaultTestNetNetworkId),
-                }),
-              });
-            },
-          };
-        },
-      );
-    });
-
-    it('should use existing Midnight account network for migration', () => {
-      testSideEffect(
-        registerMidnightBlockchainNetworks,
-        ({ expectObservable, cold }) => {
-          const existingAccountNetworkId = MidnightSDKNetworkIds.PreProd;
-          const defaultTestNetNetworkId = MidnightSDKNetworkIds.Preview;
-          const existingMidnightAccount = {
-            ...stubData.midnightAccount,
-            blockchainName: 'Midnight' as const,
-            blockchainSpecific: {
-              ...stubData.midnightAccount.blockchainSpecific,
-              networkId: existingAccountNetworkId,
-            },
-          };
-
-          return {
-            actionObservables: {},
-            stateObservables: {
-              network: {
-                selectBlockchainNetworks$: cold('a', {
-                  a: {}, // Midnight not registered yet
-                }),
-              },
-              midnightContext: {
-                selectDefaultTestNetNetworkId$: cold('a', {
-                  a: defaultTestNetNetworkId,
-                }),
-              },
-              wallets: {
-                selectAll$: cold('a', {
-                  a: [
-                    { ...midnightWallet, accounts: [existingMidnightAccount] },
-                  ],
-                }),
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe('a', {
-                a: actions.network.setBlockchainNetworks({
-                  blockchain: 'Midnight',
-                  mainnet: MidnightNetworkId('mainnet'),
-                  testnet: MidnightNetworkId(existingAccountNetworkId),
-                }),
-              });
-            },
-          };
-        },
-      );
-    });
-
-    it('should not emit when Midnight is already registered', () => {
-      testSideEffect(
-        registerMidnightBlockchainNetworks,
-        ({ expectObservable, cold }) => {
-          return {
-            actionObservables: {},
-            stateObservables: {
-              network: {
-                selectBlockchainNetworks$: cold('a', {
-                  a: {
-                    Midnight: {
-                      mainnet: MidnightNetworkId('mainnet'),
-                      testnet: MidnightNetworkId('preview'),
-                    },
-                  },
-                }),
-              },
-              midnightContext: {
-                selectDefaultTestNetNetworkId$: cold('a', {
-                  a: MidnightSDKNetworkIds.Preview,
-                }),
-              },
-              wallets: {
-                selectAll$: cold('a', { a: [] }),
-              },
-            },
-            dependencies: {
-              actions,
-            },
-            assertion: sideEffect$ => {
-              expectObservable(sideEffect$).toBe(''); // No emission
-            },
-          };
-        },
-      );
-    });
-  });
 
   // NOTE: triggerUnlockFromAuthenticationPrompt tests removed - functionality
   // is now internal to watchMidnightAccount and tested in account-key-manager.test.ts

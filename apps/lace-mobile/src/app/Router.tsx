@@ -36,6 +36,7 @@ import React, {
   useState,
 } from 'react';
 import {
+  type LayoutChangeEvent,
   BackHandler,
   Platform,
   StyleSheet,
@@ -80,6 +81,10 @@ export const Router = ({
   const [isLoading, setIsLoading] = useState(true);
   const { isSideMenu, theme } = useTheme();
 
+  const [globalOverlayHeight, setGlobalOverlayHeight] = useState(0);
+  const onGlobalOverlaysLayout = useCallback((event: LayoutChangeEvent) => {
+    setGlobalOverlayHeight(event.nativeEvent.layout.height);
+  }, []);
   const toast = useLaceSelector('ui.getToast');
   const hideToast = useDispatchLaceAction('ui.hideToast');
 
@@ -295,6 +300,11 @@ export const Router = ({
     [pages.tabPages, pages.stackPages],
   );
 
+  const sheetEdgeOffset = Math.max(
+    spacing.S,
+    Platform.OS === 'web' ? globalOverlayHeight : 0,
+  );
+
   const sheetGroupScreenOptions: SheetNavigationOptions = useMemo(
     () => ({
       anchor: isSideMenu ? 'right' : 'center',
@@ -304,13 +314,24 @@ export const Router = ({
       dimmed: true,
       grabber: !isSideMenu,
       anchorOffset: spacing.S,
-      detachedOffset: spacing.S,
+      detachedOffset: sheetEdgeOffset,
       dismissible: true,
-      detached: isSideMenu,
-      maxContentHeight: isSideMenu ? windowHeight - spacing.S * 2 : undefined,
+      detached:
+        isSideMenu || (Platform.OS === 'web' && globalOverlayHeight > 0),
+      maxContentHeight:
+        isSideMenu || (Platform.OS === 'web' && globalOverlayHeight > 0)
+          ? windowHeight - sheetEdgeOffset * 2
+          : undefined,
       maxContentWidth: isSideMenu ? windowWidth * 0.5 : undefined,
     }),
-    [isSideMenu, theme.background.page, windowHeight, windowWidth],
+    [
+      isSideMenu,
+      theme.background.page,
+      windowHeight,
+      windowWidth,
+      globalOverlayHeight,
+      sheetEdgeOffset,
+    ],
   );
 
   if (isLoading) return <Splash />;
@@ -348,7 +369,12 @@ export const Router = ({
               </View>
             </BaseTemplate>
           </TrueSheetProvider>
-          {pages.globalOverlays}
+          {/* Full-screen overlays must stay anchored to the app root. */}
+          <View
+            onLayout={onGlobalOverlaysLayout}
+            style={{ flexShrink: 0, position: 'static' }}>
+            {pages.globalOverlays}
+          </View>
           <GlobalToast toast={toast} onHide={hideToast} />
         </SheetPositionContext.Provider>
       </ConfigProvider>

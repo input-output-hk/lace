@@ -9,6 +9,7 @@ import defaultFeatureFlags from '../feature-flags';
 
 import type { MidnightSDKTestNetworkId } from '@lace-contract/midnight-context';
 import type { AppConfig } from '@lace-contract/module';
+import type {} from '@lace-module/blockchain-midnight/src/augmentations';
 import '@lace-contract/bitcoin-context';
 import '@lace-contract/cardano-context';
 import '@lace-contract/posthog';
@@ -67,6 +68,10 @@ const validateEnvironment = (): AppConfig | null => {
           .EXPO_PUBLIC_PRIVACY_POLICY_URL as string,
         TERMS_AND_CONDITIONS_URL: process.env
           .EXPO_PUBLIC_TERMS_AND_CONDITIONS_URL as string,
+        MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL: process.env
+          .EXPO_PUBLIC_MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL as string,
+        LACE_TERMS_OF_USE_URL: process.env
+          .EXPO_PUBLIC_LACE_TERMS_OF_USE_URL as string,
         FAQ_URL: process.env.EXPO_PUBLIC_FAQ_URL as string,
         FAQ_RECOVERY_PHRASE_URL: process.env
           .EXPO_PUBLIC_FAQ_RECOVERY_PHRASE_URL as string,
@@ -94,8 +99,6 @@ const validateEnvironment = (): AppConfig | null => {
           .EXPO_PUBLIC_BITCOIN_BLOCKCHAIN_EXPLORER_URL_MAINNET as string,
         BITCOIN_BLOCKCHAIN_EXPLORER_URL_TESTNET: process.env
           .EXPO_PUBLIC_BITCOIN_BLOCKCHAIN_EXPLORER_URL_TESTNET as string,
-        BLOCKFROST_IPFS_URL: process.env
-          .EXPO_PUBLIC_BLOCKFROST_IPFS_URL as string,
         CEXPLORER_URL_MAINNET: process.env
           .EXPO_PUBLIC_CEXPLORER_URL_MAINNET as string,
         CEXPLORER_URL_PREVIEW: process.env
@@ -133,6 +136,15 @@ const validateEnvironment = (): AppConfig | null => {
         COOKIE_POLICY_URL: str({ desc: 'URL to Cookie Policy' }),
         PRIVACY_POLICY_URL: str({ desc: 'URL to Privacy Policy' }),
         TERMS_AND_CONDITIONS_URL: str({ desc: 'URL to Terms and Conditions' }),
+        MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL: str({
+          desc: 'URL to Midnight Foundation Terms and Conditions',
+          default:
+            'https://www.lace.io/legal/midnight-network-third-party-notice',
+        }),
+        LACE_TERMS_OF_USE_URL: str({
+          desc: 'URL to Lace Terms of Use',
+          default: 'https://www.lace.io/legal/lace-terms-of-use',
+        }),
         FAQ_URL: str({ desc: 'URL to FAQ' }),
         FAQ_RECOVERY_PHRASE_URL: str({
           desc: 'URL to FAQ about recovery phrase',
@@ -175,10 +187,6 @@ const validateEnvironment = (): AppConfig | null => {
         BITCOIN_BLOCKCHAIN_EXPLORER_URL_TESTNET: str({
           desc: 'Bitcoin blockchain explorer base URL (public website, used for transaction/address links)',
           default: 'https://mempool.space/testnet4',
-        }),
-        BLOCKFROST_IPFS_URL: str({
-          desc: 'Blockfrost IPFS base URL',
-          default: 'https://ipfs.blockfrost.dev',
         }),
         CEXPLORER_URL_MAINNET: str({
           desc: 'Explorer base URL',
@@ -236,6 +244,9 @@ const validateEnvironment = (): AppConfig | null => {
       cookiePolicyUrl: validatedEnvironment.COOKIE_POLICY_URL,
       privacyPolicyUrl: validatedEnvironment.PRIVACY_POLICY_URL,
       termsAndConditionsUrl: validatedEnvironment.TERMS_AND_CONDITIONS_URL,
+      midnightFoundationTermsAndConditionsUrl:
+        validatedEnvironment.MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL,
+      laceTermsOfUseUrl: validatedEnvironment.LACE_TERMS_OF_USE_URL,
       faqUrl: validatedEnvironment.FAQ_URL,
       faqRecoveryPhraseUrl: validatedEnvironment.FAQ_RECOVERY_PHRASE_URL,
       faqCopyPasteRecoveryPhraseUrl:

@@ -26,6 +26,7 @@ import {
   cardanoContextSelectors as selectors,
 } from '../../src/store/slice';
 import {
+  threeAccountCardanoWalletAccounts,
   cardanoAccount1Addr,
   cardanoAccount2Addr1,
   cardanoAccount2Addr2,
@@ -4208,5 +4209,179 @@ describe('cardanoContext slice', () => {
         ),
       ).toBe(false);
     });
+  });
+});
+
+describe('wallet sync reset', () => {
+  const accountId = AccountId('reset-target');
+  const otherId = AccountId('other-account');
+
+  it.each(['Pending', 'InProgress', 'Completed', 'Failed'] as const)(
+    'selects reset operations and suppresses discovery outcomes (%s)',
+    status => {
+      const operation = {
+        operationId: 'tip-wallet-reset',
+        status,
+        startedAt: Timestamp(0),
+        description: 'sync.operation.address-discovery' as const,
+      };
+      const statuses = {
+        [accountId]: {
+          pendingSync: {
+            startedAt: Timestamp(0),
+            operations: { reset: operation },
+          },
+        },
+      } as Parameters<
+        typeof selectors.cardanoContext.selectWalletSyncResetOperation.resultFunc
+      >[0];
+      expect(
+        selectors.cardanoContext.selectWalletSyncResetOperation.resultFunc(
+          statuses,
+          accountId,
+        ),
+      ).toBe(operation);
+      expect(
+        selectors.cardanoContext.selectWalletSyncResetOperation.resultFunc(
+          statuses,
+          otherId,
+        ),
+      ).toBeUndefined();
+      expect(
+        selectors.cardanoContext.selectAccountIdInManualHdSync.resultFunc(
+          statuses,
+        ),
+      ).toBe(accountId);
+      expect(
+        selectors.cardanoContext.selectIsManualHdSyncInProgress.resultFunc(
+          statuses,
+          accountId,
+        ),
+      ).toBe(status === 'Pending' || status === 'InProgress');
+      expect(
+        selectors.cardanoContext.selectIsManualHdSyncInProgress.resultFunc(
+          statuses,
+          otherId,
+        ),
+      ).toBe(false);
+      expect(
+        selectors.cardanoContext.selectManualHdSyncTerminalStatus.resultFunc(
+          statuses,
+          accountId,
+        ),
+      ).toBeUndefined();
+    },
+  );
+
+  it('does not select an ordinary operation as a reset', () => {
+    const statuses = {
+      [accountId]: {
+        pendingSync: {
+          startedAt: Timestamp(0),
+          operations: {
+            polling: {
+              operationId: 'tip-transaction-polling',
+              status: 'Pending' as const,
+              startedAt: Timestamp(0),
+              description: 'sync.operation.address-discovery' as const,
+            },
+          },
+        },
+      },
+    };
+    expect(
+      selectors.cardanoContext.selectWalletSyncResetOperation.resultFunc(
+        statuses,
+        accountId,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('guards unavailable accounts and pending transactions only for the requested account', () => {
+    const account = threeAccountCardanoWalletAccounts[0];
+    const guard =
+      selectors.cardanoContext.selectWalletSyncResetBlockedReason.resultFunc;
+    expect(guard(undefined, {}, {})).toBe('unavailable');
+    expect(
+      guard({ ...account, blockchainName: 'Bitcoin' } as AnyAccount, {}, {}),
+    ).toBe('unavailable');
+    const pending = { [account.accountId]: [{}] } as Parameters<
+      typeof guard
+    >[1];
+    expect(guard(account, pending, {})).toBe('pending-transactions');
+    expect(
+      guard(threeAccountCardanoWalletAccounts[1], pending, {}),
+    ).toBeUndefined();
+  });
+
+  it.each(['Pending', 'InProgress', 'Completed', 'Failed'] as const)(
+    'guards only active operations for the requested account (%s)',
+    status => {
+      const account = threeAccountCardanoWalletAccounts[0];
+      const guard =
+        selectors.cardanoContext.selectWalletSyncResetBlockedReason.resultFunc;
+      const statuses = {
+        [account.accountId]: {
+          pendingSync: {
+            startedAt: Timestamp(0),
+            operations: {
+              operation: {
+                operationId: 'round-wallet-reset',
+                status,
+                startedAt: Timestamp(0),
+                description: 'sync.operation.address-discovery' as const,
+              },
+            },
+          },
+        },
+      } as Parameters<typeof guard>[2];
+      expect(guard(account, {}, statuses)).toBe(
+        status === 'Pending' || status === 'InProgress' ? 'syncing' : undefined,
+      );
+      expect(
+        guard(threeAccountCardanoWalletAccounts[1], {}, statuses),
+      ).toBeUndefined();
+    },
+  );
+
+  it('preserves the stable SDK selectors resultFunc calling conventions', () => {
+    expect(
+      selectors.cardanoContext.selectAccountIdInManualHdSync.resultFunc({}),
+    ).toBeUndefined();
+    expect(
+      selectors.cardanoContext.selectManualHdSyncTerminalStatus.resultFunc(
+        {},
+        accountId,
+      ),
+    ).toBeUndefined();
+  });
+
+  it('clears derived state only for the requested account and preserves security and network state', () => {
+    const initial = reducers.cardanoContext(undefined, { type: 'init' });
+    const utxos = {
+      [accountId]: { utxos: Serializable.to([] as Cardano.Utxo[]) },
+      [otherId]: { utxos: Serializable.to([] as Cardano.Utxo[]) },
+    };
+    const state = {
+      ...initial,
+      accountUtxos: utxos,
+      accountTransactionHistory: { [accountId]: {}, [otherId]: {} },
+      accountRewardsHistory: { [accountId]: {}, [otherId]: {} },
+      securityScanByAccount: { [accountId]: { scannedAt: 1, exploits: [] } },
+    };
+    const next = reducers.cardanoContext(
+      state,
+      actions.cardanoContext.resetWalletSyncState({ accountId }),
+    );
+    expect(next.accountUtxos[accountId]).toBe(state.accountUtxos[accountId]);
+    expect(next.accountUnspendableUtxos).toBe(state.accountUnspendableUtxos);
+    expect(next.accountTransactionHistory[accountId]).toBeUndefined();
+    expect(next.accountRewardsHistory[accountId]).toBeUndefined();
+    expect(next.accountUtxos[otherId]).toBe(state.accountUtxos[otherId]);
+    expect(next.accountTransactionHistory[otherId]).toBe(
+      state.accountTransactionHistory[otherId],
+    );
+    expect(next.securityScanByAccount).toBe(state.securityScanByAccount);
+    expect(next.networkInfo).toBe(state.networkInfo);
   });
 });

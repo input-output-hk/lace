@@ -32,7 +32,7 @@ const REPORTED_OPERATIONS = new Set([
 const NULL_RATE_LIMITER: RateLimiter = {
   /**
    * Executes the provided task immediately without any rate limiting.
-   * @param task The asynchronous task to execute.
+   * @param task - The asynchronous task to execute.
    */
   schedule: async <T>(task: () => Promise<T>) => {
     return task();
@@ -60,7 +60,7 @@ export type HttpClientConfig = {
 /**
  * External services the client relies on. Injected for easier testing.
  *
- * @property rateLimiter Instance of {@link RateLimiter} used to respect per‑project call quotas. If
+ * - `rateLimiter`: Instance of {@link RateLimiter} used to respect per‑project call quotas. If
  * not provided, the client will not apply any rate limiting.
  */
 export type HttpClientDependencies = {
@@ -98,8 +98,10 @@ export type HttpRequestOptions = RequestInit & {
    * of `undefined` is omitted from the final URL.
    *
    * @example
+   * ```ts
    * // Given the endpoint 'users' and params { role: 'admin', page: 1 }
    * // The final URL becomes '.../users?role=admin&page=1'
+   * ```
    */
   params?: Record<string, boolean | number | string | undefined>;
 };
@@ -107,7 +109,7 @@ export type HttpRequestOptions = RequestInit & {
 /**
  * Encapsulates a successful response from an HTTP request made by the client.
  *
- * @template T The expected type of the response body data.
+ * @typeParam T - The expected type of the response body data.
  */
 export type HttpRequestResponse<T> = {
   /**
@@ -128,9 +130,9 @@ export type HttpRequestResponse<T> = {
  * common formatting issues, such as missing or extra slashes in the base URL
  * and segments, preventing errors that can arise from simple string concatenation.
  *
- * @param segments An array of path segments to append. Each segment is sanitized
+ * @param segments - An array of path segments to append. Each segment is sanitized
  * to remove leading/trailing slashes, and empty segments are ignored.
- * @param baseUrl The base URL string. The function ensures it's treated as a
+ * @param baseUrl - The base URL string. The function ensures it's treated as a
  * directory path for correct resolution.
  * @returns A new `URL` object representing the final, correctly formatted URL.
  */
@@ -179,9 +181,9 @@ export class HttpClient {
   /**
    * Initializes a new instance of the `HttpClient`.
    *
-   * @param config The configuration object that defines the client's base URL
+   * @param config - The configuration object that defines the client's base URL
    * and default request options. See {@link HttpClientConfig}.
-   * @param dependencies An object containing external services the client relies
+   * @param dependencies - An object containing external services the client relies
    * on, such as a rate limiter. See {@link HttpClientDependencies}.
    */
   public constructor(
@@ -202,18 +204,18 @@ export class HttpClient {
   /**
    * Performs an HTTP request to a specified endpoint.
    *
-   * @template T The expected type of the data in the response body.
+   * @typeParam T - The expected type of the data in the response body.
    *
-   * @param endpoint The relative path of the API endpoint, which is resolved
+   * @param endpoint - The relative path of the API endpoint, which is resolved
    * against the `baseUrl`. For example, `'users/latest'`.
-   * @param options Optional settings for this specific request, including URL
+   * @param options - Optional settings for this specific request, including URL
    * query parameters (`params`) and `fetch` options. These settings are merged
    * with any defaults provided in the constructor. See {@link HttpRequestOptions}.
    *
    * @returns A `Promise` that resolves with an {@link HttpRequestResponse} object,
    * containing the parsed response data and the HTTP status code.
    *
-   * @throws {HttpClientError} The promise will reject with an `HttpClientError` if
+   * @throws `HttpClientError` The promise will reject with an `HttpClientError` if
    * the request fails due to a network issue, if the server returns a non-OK
    * (4xx/5xx) status code, or if the response body cannot be parsed as JSON.
    */

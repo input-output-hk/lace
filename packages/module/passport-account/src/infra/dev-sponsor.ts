@@ -6,20 +6,18 @@ import { applyNetworkId } from './network-id';
 import type { Sleep } from './submit';
 import type { FeeSponsor } from '@lace-contract/passport';
 
+/** A token kind the development wallet can balance a transaction in. */
+export type DevTokenKind = 'dust' | 'shielded' | 'unshielded';
+
 /**
- * Options of one dust-only balancing pass. `tokenKindsToBalance` is fixed
- * to dust: the sponsor pays fees and must never move the user's shielded
- * or unshielded funds.
+ * Options of one balancing pass. The fee sponsor fixes
+ * `tokenKindsToBalance` to dust: it pays fees and must never move the
+ * user's shielded or unshielded funds. A development deposit also
+ * balances the kind it sends, from the wallet's own funds.
  */
 export type SponsorBalanceOptions = {
   ttl: Date;
-  tokenKindsToBalance: ['dust'];
-};
-
-/** Secret keys the facade's balancing takes; opaque to the sponsor. */
-export type SponsorSecretKeys = {
-  shieldedSecretKeys: unknown;
-  dustSecretKey: unknown;
+  tokenKindsToBalance: DevTokenKind[];
 };
 
 /**
@@ -27,14 +25,9 @@ export type SponsorSecretKeys = {
  * tests inject a mock and the default context wraps the real facade.
  */
 export type SponsorWallet = {
-  estimateTransactionFee(
-    tx: unknown,
-    dustSecretKey: unknown,
-    options: { ttl: Date },
-  ): Promise<bigint>;
+  estimateTransactionFee(tx: unknown, options: { ttl: Date }): Promise<bigint>;
   balanceUnboundTransaction(
     tx: unknown,
-    secretKeys: SponsorSecretKeys,
     options: SponsorBalanceOptions,
   ): Promise<unknown>;
   signRecipe(
@@ -46,17 +39,17 @@ export type SponsorWallet = {
 };
 
 /**
- * Everything one sponsoring pass needs: the wallet, its secret keys, the
- * segment signer, and the codec that turns the seam's transaction bytes
- * back into the facade's unbound transaction.
+ * Everything one sponsoring pass needs: the wallet, the segment signer,
+ * and the adoption that turns the seam's transaction bytes into the
+ * facade's unbound transaction handle.
  */
 export type SponsorWalletContext = {
   wallet: SponsorWallet;
-  secretKeys: SponsorSecretKeys;
   signSegment(payload: Uint8Array): Promise<unknown>;
-  deserializeUnbalanced(bytes: Uint8Array): unknown;
+  adoptUnbalanced(bytes: Uint8Array): unknown;
 };
 
+/** How `createDevSponsor` reaches the network and the wallet that pays the fees. */
 export type DevSponsorConfig = {
   /** Hex seed of the funded development wallet paying the dust fees. */
   seedHex: string;
@@ -91,8 +84,24 @@ export type DevSponsorConfig = {
 
 /**
  * A {@link FeeSponsor} that can also release the wallet it lazily started.
+ * `ready` starts the wallet and resolves once it is synced.
  */
 export type DevSponsor = FeeSponsor & {
+  ready(): Promise<void>;
+  stop(): Promise<void>;
+};
+
+/**
+ * The development wallet's balancing seam: balances a transaction in the
+ * given token kinds, signs and finalizes it, starts and syncs the wallet
+ * on ready, and releases the wallet it lazily started on stop.
+ */
+export type DevWalletBalancer = {
+  balanceAndSign(
+    unbalancedTx: Uint8Array,
+    tokenKinds: DevTokenKind[],
+  ): Promise<Uint8Array>;
+  ready(): Promise<void>;
   stop(): Promise<void>;
 };
 
@@ -107,6 +116,22 @@ const FEE_BLOCKS_MARGIN = 100;
  * (or before enough dust generated) cannot cover the fee yet.
  */
 const DUST_BUDGET_PATTERN = /could not balance dust|insufficient funds/i;
+
+/**
+ * The dust rejections alone. When a pass also balances shielded or
+ * unshielded tokens, an insufficient funds error that names no dust is
+ * the wallet lacking those tokens, which waiting does not cure.
+ */
+const DUST_ONLY_PATTERN = /dust/i;
+
+const isTransientDustRejection = (
+  error: unknown,
+  tokenKinds: DevTokenKind[],
+): boolean =>
+  (tokenKinds.every(kind => kind === 'dust')
+    ? DUST_BUDGET_PATTERN
+    : DUST_ONLY_PATTERN
+  ).test(errorText(error));
 
 const errorText = (error: unknown): string =>
   error instanceof Error ? `${error.name}: ${error.message}` : String(error);
@@ -137,15 +162,20 @@ const noopTxHistoryStorage = {
  * Builds the default sponsor wallet over the Midnight wallet-sdk facade,
  * mirroring the reference node wiring: HD role keys derived from the seed
  * at account 0 index 0, a Schnorr keystore over the Night external key,
- * and shielded, unshielded, and dust wallets started from those keys.
- * The heavy wallet packages load lazily so platforms that inject their
- * own context never pay for them.
+ * the shielded and dust wallets started from their role seeds and the
+ * unshielded one from the keystore's public key. The facade derives each
+ * ledger version's key objects from the seeds itself, so the sponsor holds
+ * none of its own. The context is handed out only once all three wallets
+ * are synced, so the facade has settled on the chain's protocol version
+ * before it adopts the first transaction. A start or sync that fails
+ * stops the facade before rejecting, so a retry never leaves an earlier
+ * one syncing beside it. The heavy wallet packages load
+ * lazily so platforms that inject their own context never pay for them.
  */
 export const createDevSponsorWalletContext = async (
   config: DevSponsorConfig,
 ): Promise<SponsorWalletContext> => {
   const [
-    ledger,
     facadeModule,
     dustModule,
     shieldedModule,
@@ -153,7 +183,6 @@ export const createDevSponsorWalletContext = async (
     hdModule,
     networkIdModule,
   ] = await Promise.all([
-    import('@midnightntwrk/ledger-v9'),
     import('@midnightntwrk/wallet-sdk-facade'),
     import('@midnightntwrk/wallet-sdk-dust-wallet'),
     import('@midnightntwrk/wallet-sdk-shielded'),
@@ -180,13 +209,16 @@ export const createDevSponsorWalletContext = async (
   }
   seedResult.hdWallet.clear();
   const { keys } = derived;
+  const seeds = {
+    shielded: keys[Roles.Zswap],
+    unshielded: keys[Roles.NightExternal],
+    dust: keys[Roles.Dust],
+  };
 
   await applyNetworkId(config.networkId);
   const networkId = networkIdModule.getNetworkId();
-  const shieldedSecretKeys = ledger.ZswapSecretKeys.fromSeed(keys[Roles.Zswap]);
-  const dustSecretKey = ledger.DustSecretKey.fromSeed(keys[Roles.Dust]);
   const unshieldedKeystore = createKeystore(
-    { kind: 'schnorr', secret: keys[Roles.NightExternal] },
+    { kind: 'schnorr', secret: seeds.unshielded },
     networkId,
   );
 
@@ -207,51 +239,50 @@ export const createDevSponsorWalletContext = async (
   type FacadeInitParams = Parameters<(typeof WalletFacade)['init']>[0];
   const wallet = await WalletFacade.init({
     configuration,
-    shielded: (shieldedConfiguration: unknown) =>
+    shielded: async (shieldedConfiguration: unknown) =>
       ShieldedWallet(
         shieldedConfiguration as Parameters<typeof ShieldedWallet>[0],
-      ).startWithSecretKeys(shieldedSecretKeys),
-    unshielded: (unshieldedConfiguration: unknown) =>
+      ).startWithSeed(seeds.shielded),
+    unshielded: async (unshieldedConfiguration: unknown) =>
       UnshieldedWallet(
         unshieldedConfiguration as Parameters<typeof UnshieldedWallet>[0],
       ).startWithPublicKey(PublicKey.fromKeyStore(unshieldedKeystore)),
-    dust: (dustConfiguration: unknown) =>
+    dust: async (dustConfiguration: unknown) =>
       DustWallet(
         dustConfiguration as Parameters<typeof DustWallet>[0],
-      ).startWithSecretKey(
-        dustSecretKey,
-        ledger.LedgerParameters.initialParameters().dust,
-      ),
+      ).startWithSeed(seeds.dust),
   } as unknown as FacadeInitParams);
 
-  await wallet.start(shieldedSecretKeys, dustSecretKey);
-  await wallet.dust.waitForSyncedState();
+  try {
+    await wallet.start(seeds);
+    await wallet.waitForSyncedState();
+  } catch (error) {
+    await wallet.stop().catch(() => undefined);
+    throw error;
+  }
 
   return {
     wallet,
-    secretKeys: { shieldedSecretKeys, dustSecretKey },
     signSegment: async payload => unshieldedKeystore.signDataAsync(payload),
-    deserializeUnbalanced: bytes =>
-      ledger.Transaction.deserialize(
-        'signature',
-        'proof',
-        'pre-binding',
-        bytes,
-      ),
+    adoptUnbalanced: bytes => wallet.adoptTransaction(bytes, 'Unbound'),
   };
 };
 
 /**
- * A development {@link FeeSponsor} over a funded Midnight wallet. Balances
- * ONLY dust into the transaction (the user's tokens are never touched),
- * signs, finalizes, and returns the finalized transaction bytes.
+ * Balances transactions from a funded development wallet in the token
+ * kinds each call names, signs, finalizes, and returns the finalized
+ * transaction bytes. The wallet starts lazily on the first call, or on
+ * `ready`, which resolves once it is synced. A start that fails is not
+ * kept, so the next call starts the wallet afresh.
  *
  * A transient dust rejection is retried until the wallet's dust view
  * catches up: each pass first polls the fee estimate, then balances, and
  * waits {@link DUST_FEE_POLL_MS} between attempts. Only a rejection that
  * outlives `dustFeeTimeoutMs` becomes a {@link SponsorExhaustedError}.
  */
-export const createDevSponsor = (config: DevSponsorConfig): DevSponsor => {
+export const createDevWalletBalancer = (
+  config: DevSponsorConfig,
+): DevWalletBalancer => {
   const {
     txTtlMs = TX_TTL_MS,
     dustFeeTimeoutMs = DUST_FEE_TIMEOUT_MS,
@@ -269,23 +300,32 @@ export const createDevSponsor = (config: DevSponsorConfig): DevSponsor => {
     return result;
   };
 
+  const walletContext = async (): Promise<SponsorWalletContext> => {
+    if (contextPromise) return contextPromise;
+    const started = createWalletContext(config).catch((error: unknown) => {
+      if (contextPromise === started) contextPromise = undefined;
+      throw error;
+    });
+    contextPromise = started;
+    return started;
+  };
+
   const balanceWithDustBudget = async (
-    { wallet, secretKeys }: SponsorWalletContext,
+    { wallet }: SponsorWalletContext,
     tx: unknown,
+    tokenKinds: DevTokenKind[],
   ): Promise<unknown> => {
     const deadline = now().getTime() + dustFeeTimeoutMs;
     for (;;) {
       const ttl = new Date(now().getTime() + txTtlMs);
       try {
-        await wallet.estimateTransactionFee(tx, secretKeys.dustSecretKey, {
+        await wallet.estimateTransactionFee(tx, { ttl });
+        return await wallet.balanceUnboundTransaction(tx, {
           ttl,
-        });
-        return await wallet.balanceUnboundTransaction(tx, secretKeys, {
-          ttl,
-          tokenKindsToBalance: ['dust'],
+          tokenKindsToBalance: tokenKinds,
         });
       } catch (error) {
-        if (!DUST_BUDGET_PATTERN.test(errorText(error))) throw error;
+        if (!isTransientDustRejection(error, tokenKinds)) throw error;
         const remaining = deadline - now().getTime();
         if (remaining <= 0) throw new SponsorExhaustedError();
         await sleep(Math.min(DUST_FEE_POLL_MS, remaining));
@@ -295,22 +335,25 @@ export const createDevSponsor = (config: DevSponsorConfig): DevSponsor => {
 
   const balanceAndSignOnce = async (
     unbalancedTx: Uint8Array,
+    tokenKinds: DevTokenKind[],
   ): Promise<Uint8Array> => {
-    contextPromise ??= createWalletContext(config);
-    const context = await contextPromise;
-    const tx = context.deserializeUnbalanced(unbalancedTx);
-    const recipe = await balanceWithDustBudget(context, tx);
+    const context = await walletContext();
+    const tx = context.adoptUnbalanced(unbalancedTx);
+    const recipe = await balanceWithDustBudget(context, tx, tokenKinds);
     const signed = await context.wallet.signRecipe(recipe, context.signSegment);
     const finalized = await context.wallet.finalizeRecipe(signed);
     return finalized.serialize();
   };
 
   return {
-    balanceAndSign: async unbalancedTx =>
+    balanceAndSign: async (unbalancedTx, tokenKinds) =>
       // Serialised on purpose: concurrent balancing double-spends the
-      // sponsor's own dust because the wallet's dust view only advances
+      // wallet's own dust because the wallet's dust view only advances
       // after the previous transaction lands.
-      enqueue(async () => balanceAndSignOnce(unbalancedTx)),
+      enqueue(async () => balanceAndSignOnce(unbalancedTx, tokenKinds)),
+    ready: async () => {
+      await walletContext();
+    },
     stop: async () =>
       enqueue(async () => {
         if (!contextPromise) return;
@@ -319,5 +362,23 @@ export const createDevSponsor = (config: DevSponsorConfig): DevSponsor => {
         const { wallet } = await pending;
         await wallet.stop();
       }),
+  };
+};
+
+/**
+ * A development {@link FeeSponsor} over a funded Midnight wallet. Balances
+ * ONLY dust into the transaction (the user's tokens are never touched),
+ * signs, finalizes, and returns the finalized transaction bytes, with the
+ * dust retry of {@link createDevWalletBalancer}. Its first sync can take
+ * minutes on a public network, so `ready` may be called when the host
+ * loads to start it before the first flow needs it.
+ */
+export const createDevSponsor = (config: DevSponsorConfig): DevSponsor => {
+  const balancer = createDevWalletBalancer(config);
+  return {
+    balanceAndSign: async unbalancedTx =>
+      balancer.balanceAndSign(unbalancedTx, ['dust']),
+    ready: async () => balancer.ready(),
+    stop: async () => balancer.stop(),
   };
 };

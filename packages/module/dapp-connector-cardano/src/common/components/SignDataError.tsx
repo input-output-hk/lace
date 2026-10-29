@@ -17,7 +17,7 @@ export const SignDataError = ({
       gap={spacing.L}
       style={style}
       testID="sign-data-error">
-      <Icon name="Sad" size={43} variant="solid" />
+      <Icon name="Sad" size={43} strokeWidth={2} />
       <Text.M>{t('dapp-connector.cardano.sign-data.error-try-again')}</Text.M>
     </Column>
   );

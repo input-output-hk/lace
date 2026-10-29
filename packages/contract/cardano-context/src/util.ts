@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import { COLLATERAL_AMOUNT_LOVELACES } from './const';
 import { CardanoPaymentAddress, CardanoRewardAccount } from './types';
 
+import type { ExtensionAccountProps } from './extensions';
 import type {
   CardanoAddressData,
   CardanoBip32AccountProps,
@@ -16,7 +17,12 @@ import type {
   AnyAddress,
   AnyBlockchainAddress,
 } from '@lace-contract/addresses';
-import type { AnyAccount } from '@lace-contract/wallet-repo';
+import type {
+  AnyAccount,
+  HardwareWalletAccount,
+  InMemoryWalletAccount,
+  LazyInMemoryWalletAccount,
+} from '@lace-contract/wallet-repo';
 
 export const LOVELACE_VALUE = 1_000_000;
 export const DEFAULT_DECIMALS = 2;
@@ -24,12 +30,38 @@ export const DEFAULT_DECIMALS = 2;
 export type CardanoWalletAccount = AnyAccount<
   CardanoBip32AccountProps,
   CardanoBip32AccountProps,
-  CardanoMultiSigAccountProps
+  CardanoMultiSigAccountProps,
+  ExtensionAccountProps
 >;
+
+/** A Cardano account whose keys derive from a BIP-32 account public key. */
+type CardanoBip32WalletAccount =
+  | HardwareWalletAccount<CardanoBip32AccountProps>
+  | InMemoryWalletAccount<CardanoBip32AccountProps>
+  | LazyInMemoryWalletAccount<CardanoBip32AccountProps>;
 
 export const isCardanoAccount = (
   account: AnyAccount,
 ): account is CardanoWalletAccount => account.blockchainName === 'Cardano';
+
+const BIP32_ACCOUNT_TYPES: ReadonlySet<AnyAccount['accountType']> = new Set([
+  'InMemory',
+  'LazyInMemory',
+  'HardwareLedger',
+  'HardwareTrezor',
+  'HardwareSeedSigner',
+  'HardwareKeystone',
+]);
+
+/**
+ * Positive check for accounts that carry `accountIndex` and
+ * `extendedAccountPublicKey`. Use it instead of excluding script account
+ * types by name, so a new script account type is never read as BIP-32.
+ */
+export const isCardanoBip32Account = (
+  account: AnyAccount,
+): account is CardanoBip32WalletAccount =>
+  isCardanoAccount(account) && BIP32_ACCOUNT_TYPES.has(account.accountType);
 
 export const isCardanoAddress = (
   address: AnyAddress,

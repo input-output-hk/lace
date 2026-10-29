@@ -13,7 +13,7 @@ export type ThemePreference = 'dark' | 'light' | 'system';
 export type IconConfig = {
   name: string;
   size?: number;
-  variant?: 'solid' | 'stroke';
+  strokeWidth?: number;
   color?: string;
 };
 

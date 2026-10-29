@@ -34,7 +34,7 @@ export class HttpClientError extends CustomError {
  * - **402, 418, 425, 429**: `ProviderFailure.ServerUnavailable`
  * - Any other code or `undefined`: `ProviderFailure.Unknown`
  *
- * @param status The HTTP status code to convert. An `undefined` value
+ * @param status - The HTTP status code to convert. An `undefined` value
  * represents a network error where no response was received.
  * @returns The corresponding `ProviderFailure` enum member based on the status code.
  */
@@ -82,7 +82,7 @@ export const toProviderFailure = (
  * - Any other type of error is wrapped in a ProviderError with a failure
  * type of ProviderFailure.Unknown.
  *
- * @param error The error to be converted, which can be of any type.
+ * @param error - The error to be converted, which can be of any type.
  * @returns A `ProviderError` instance that represents the original error.
  */
 export const toProviderError = (error: unknown): ProviderError => {
@@ -102,7 +102,7 @@ export const toProviderError = (error: unknown): ProviderError => {
 
 /**
  * Checks if the error has a "reason" property.
- * @param error The error to check.
+ * @param error - The error to check.
  */
 export const errorHasReason = (
   error: unknown,
@@ -111,7 +111,7 @@ export const errorHasReason = (
 
 /**
  * Checks if the error is a "not found" error.
- * @param error The error to check.
+ * @param error - The error to check.
  */
 export const isNotFoundError = (
   error: unknown,

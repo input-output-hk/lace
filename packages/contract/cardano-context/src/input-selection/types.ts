@@ -86,8 +86,8 @@ export interface CoinSelector {
   /**
    * Performs the coin selection algorithm.
    *
-   * @param {CoinSelectorParams} params - The input parameters for the selection.
-   * @returns {CoinSelectorResult} The result of the selection.
+   * @param params - The input parameters for the selection.
+   * @returns The result of the selection.
    */
   select(params: CoinSelectorParams): CoinSelectorResult;
 }

@@ -111,19 +111,100 @@ describe('MidnightWalletApi', () => {
       );
     });
 
-    it('getProvingProvider resolves a callable provider via lazy import', async () => {
-      (authenticator.requestAccess as Mock).mockResolvedValue(true);
-      const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
-      const keyMaterialProvider = {
-        getZKIR: vi.fn(),
-        getProverKey: vi.fn(),
-        getVerifierKey: vi.fn(),
+    describe('getProvingProvider', () => {
+      const preimage = new Uint8Array([1, 2, 3]);
+      const keyMaterial = {
+        proverKey: new Uint8Array([0x0a]),
+        verifierKey: new Uint8Array([0x0b]),
+        ir: new Uint8Array([0x0c]),
       };
-      const provingProvider = await decodedApi.getProvingProvider(
-        keyMaterialProvider,
-      );
-      expect(provingProvider.check).toBeInstanceOf(Function);
-      expect(provingProvider.prove).toBeInstanceOf(Function);
+      const keyMaterialProvider = {
+        getZKIR: vi.fn().mockResolvedValue(keyMaterial.ir),
+        getProverKey: vi.fn().mockResolvedValue(keyMaterial.proverKey),
+        getVerifierKey: vi.fn().mockResolvedValue(keyMaterial.verifierKey),
+      };
+
+      beforeEach(() => {
+        vi.mocked(testWalletApi.checkCircuit).mockClear();
+        vi.mocked(testWalletApi.proveCircuit).mockClear();
+      });
+
+      it('checks then proves through the unchanged dApp prove API', async () => {
+        (authenticator.requestAccess as Mock).mockResolvedValue(true);
+        const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
+        const provider = await decodedApi.getProvingProvider(
+          keyMaterialProvider,
+        );
+
+        const proven = await provider.prove(preimage, 'circuit', 7n);
+
+        expect(testWalletApi.proveCircuit).toHaveBeenCalledWith(
+          {
+            serializedPreimage: preimage,
+            keyLocation: 'circuit',
+            overwriteBindingInput: 7n,
+            keyMaterial,
+          },
+          expect.any(AbortSignal),
+        );
+        expect(proven).toEqual(new Uint8Array([0xf0]));
+        expect(testWalletApi.checkCircuit).toHaveBeenCalledWith(
+          {
+            serializedPreimage: preimage,
+            keyLocation: 'circuit',
+            overwriteBindingInput: 7n,
+            keyMaterial,
+          },
+          expect.any(AbortSignal),
+        );
+        expect(
+          vi.mocked(testWalletApi.checkCircuit).mock.invocationCallOrder[0],
+        ).toBeLessThan(
+          vi.mocked(testWalletApi.proveCircuit).mock.invocationCallOrder[0],
+        );
+        expect(Object.keys(provider).sort()).toEqual(['check', 'prove']);
+      });
+
+      it('returns the check result from the wallet', async () => {
+        (authenticator.requestAccess as Mock).mockResolvedValue(true);
+        const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
+        const provider = await decodedApi.getProvingProvider(
+          keyMaterialProvider,
+        );
+
+        const result = await provider.check(preimage, 'circuit');
+
+        expect(testWalletApi.checkCircuit).toHaveBeenCalledWith(
+          {
+            serializedPreimage: preimage,
+            keyLocation: 'circuit',
+            keyMaterial,
+          },
+          expect.any(AbortSignal),
+        );
+        expect(result).toEqual([42n]);
+      });
+
+      it('sends no key material for circuits the dApp cannot resolve', async () => {
+        (authenticator.requestAccess as Mock).mockResolvedValue(true);
+        const decodedApi = await walletApi.connect(NetworkId.NetworkId.Preview);
+        const provider = await decodedApi.getProvingProvider({
+          ...keyMaterialProvider,
+          getProverKey: vi.fn().mockRejectedValue(new Error('unknown')),
+        });
+
+        await provider.prove(preimage, 'builtin');
+
+        expect(testWalletApi.proveCircuit).toHaveBeenCalledWith(
+          {
+            serializedPreimage: preimage,
+            keyLocation: 'builtin',
+            overwriteBindingInput: undefined,
+            keyMaterial: undefined,
+          },
+          expect.any(AbortSignal),
+        );
+      });
     });
 
     it('throws APIError with InternalError when FF is disabled', async () => {

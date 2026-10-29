@@ -1,7 +1,7 @@
 import { CardanoTxId } from '@lace-contract/cardano-context';
 import { map, mergeMap, of, withLatestFrom } from 'rxjs';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../module';
 
 export const submitTxSideEffect: SideEffect = (
   { cardanoContext: { submitTx$ } },

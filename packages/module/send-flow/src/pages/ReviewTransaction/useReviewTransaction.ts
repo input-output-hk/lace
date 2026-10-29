@@ -1,4 +1,5 @@
 import { useAnalytics } from '@lace-contract/analytics';
+import { useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   isSendFlowFormStep,
@@ -29,6 +30,10 @@ export const useReviewTransaction = (
 ) => {
   const { accountName, accountId, blockchainName } = props.route.params;
   const { t } = useTranslation();
+  const [customisation] = useUICustomisation(
+    'addons.loadSendFlowSheetUICustomisations',
+    { blockchainOfTheTransaction: blockchainName as BlockchainName },
+  );
   const { note } = useSendFlow();
   const { navigate } = useSendFlowNavigation();
   const { trackEvent } = useAnalytics();
@@ -54,15 +59,16 @@ export const useReviewTransaction = (
     estimatedFeeLabel: t('v2.send-flow.review-transaction.estimated-fee'),
     totalAndFeesLabel: t('v2.send-flow.review-transaction.total-and-fees'),
     totalBreakDownLabel: t('v2.send-flow.review-transaction.total-break-down'),
+    withdrawalsLabel: t('v2.deregister-pool.rewards-withdrawn'),
     nextButtonLabel: t('v2.send-flow.review-transaction.next'),
   };
 
-  const { fees, form } =
+  const { fees, form, withdrawals } =
     isSendFlowFormStep(sendFlowState) ||
     isSendFlowSummaryStep(sendFlowState) ||
     isSendFlowProcessingStep(sendFlowState)
       ? sendFlowState
-      : { fees: [], form: undefined };
+      : { fees: [], form: undefined, withdrawals: [] };
 
   // Extract first fee entry with zero fallback for edge cases
   const firstFeeEntry = fees[0] ?? {
@@ -93,6 +99,19 @@ export const useReviewTransaction = (
     currency: 'USD',
   };
 
+  // Rewards the built transaction withdraws to fund itself; the row is hidden
+  // when the UTxOs alone covered the send.
+  const [withdrawal] = withdrawals;
+  const withdrawalsValue = withdrawal
+    ? {
+        tickerValueAndSymbol: `${convertAmountToDenominated(
+          withdrawal.amount.toString(),
+          feeTokenForDisplay.decimals,
+        )} ${feeTokenForDisplay.displayShortName}`,
+        currencyValueAndName: '',
+      }
+    : undefined;
+
   const mainToken = form?.tokenTransfers.find(
     tokenTransfer =>
       tokenTransfer.token.value.tokenId === firstFeeEntry.tokenId,
@@ -122,6 +141,7 @@ export const useReviewTransaction = (
       currencyValueAndName: '',
     },
     estimatedFeeValue,
+    withdrawalsValue,
     // TODO: define what is total value
     totalAndFeesValue: {
       tickerValueAndSymbol: `${convertAmountToDenominated(
@@ -214,6 +234,7 @@ export const useReviewTransaction = (
   }, [isNextButtonDisabled, trackEvent, dispatchConfirm]);
 
   return {
+    ReviewNoticeComponent: customisation?.ReviewNoticeComponent,
     labels,
     values,
     backButtonPress,

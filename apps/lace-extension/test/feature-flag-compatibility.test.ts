@@ -15,12 +15,23 @@ import { MD_MIGRATION_FEATURE_FLAG } from '@lace-module/migrate-multi-delegation
 import { V1_MIGRATION_FEATURE_FLAG } from '@lace-module/migrate-v1-data';
 import { FEATURE_FLAG_LEDGER } from '@lace-module/vault-ledger';
 import { FEATURE_FLAG_TREZOR } from '@lace-module/vault-trezor';
+import { expect, it } from 'vitest';
 
 import defaultFeatureFlags from '../src/feature-flags';
 import { allModules } from '../src/util/all-modules';
 
-// Mirrors the intended CI production override (see feature-flags.ts TODO):
-// FEATURES_DEV → FEATURES_POSTHOG, TEST_API removed
+it.each([
+  'BLOCKCHAIN_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER',
+  'EARN_REWARDS',
+  'MIGRATE_WALLET',
+  'NOTIFICATION_CENTER',
+  'REALFI',
+  'SWAP_CENTER',
+])('does not enable %s by default (LW-15740)', key => {
+  expect(defaultFeatureFlags.map(flag => flag.key)).not.toContain(key);
+});
+
+// Mirrors the CI production override: FEATURES_DEV → FEATURES_POSTHOG, TEST_API removed.
 const productionFeatureFlags = defaultFeatureFlags
   .map(f =>
     f.key === FEATURES_DEV_FEATURE_FLAG
@@ -30,6 +41,9 @@ const productionFeatureFlags = defaultFeatureFlags
   .filter(f => f.key !== FeatureFlagKey('TEST_API'));
 
 const experimentalFeatureFlags: FeatureFlag[] = [
+  { key: FeatureFlagKey('MIGRATE_WALLET') },
+  { key: FeatureFlagKey('NOTIFICATION_CENTER') },
+  { key: FeatureFlagKey('SWAP_CENTER') },
   { key: V1_MIGRATION_FEATURE_FLAG },
   { key: MD_MIGRATION_FEATURE_FLAG },
   { key: ADA_HANDLE_FEATURE_FLAG },
@@ -46,6 +60,7 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('EARN_REWARDS') },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_SHIELDED_ACTIVITY_ROWS') },
   { key: FEATURE_FLAG_REALFI },
+  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER') },
 ];
 
 testFeatureFlagCompatibility(

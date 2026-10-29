@@ -1,12 +1,24 @@
-import { midnightWallets$ } from '@lace-contract/midnight-context';
 import { ByteArray, HexBytes } from '@lace-lib/util';
+import { observeSubmission } from '@lace-lib/vendor/midnight-submission-service';
 import { Transaction } from '@midnight-ntwrk/ledger-v8';
-import curry from 'lodash/fp/curry';
-import { catchError, map, of, switchMap, take, throwError } from 'rxjs';
+import {
+  catchError,
+  defer,
+  finalize,
+  map,
+  of,
+  switchMap,
+  take,
+  tap,
+  throwError,
+} from 'rxjs';
+
+import { takeSendSubmission } from '../send-proof-progress';
 
 import { mapMidnightSubmitError } from './error-mapping';
 
 import type {
+  MidnightSideEffectsDependencies,
   MidnightWalletsByAccountId,
   MidnightSpecificSendFlowData,
   MidnightSpecificTokenMetadata,
@@ -62,7 +74,36 @@ export const makeSubmitTx =
           'binding',
           ByteArray.fromHex(HexBytes(serializedTx)),
         );
-        return midnightWallet.submitTransaction(finalizedTx);
+        const report = takeSendSubmission(
+          accountId,
+          finalizedTx.identifiers().at(-1) ?? '',
+        );
+        report?.({
+          type: 'phase',
+          phase: 'transaction-submitting',
+          status: 'started',
+        });
+        const stopObserving = observeSubmission(finalizedTx, stage => {
+          report?.({
+            type: 'phase',
+            phase:
+              stage === 'Submitted'
+                ? 'transaction-inclusion'
+                : 'transaction-confirmation',
+            status: stage === 'Finalized' ? 'completed' : 'started',
+          });
+        });
+        return defer(() => midnightWallet.submitTransaction(finalizedTx)).pipe(
+          tap({
+            error: () =>
+              report?.({
+                type: 'phase',
+                phase: 'transaction-failed',
+                status: 'failed',
+              }),
+          }),
+          finalize(stopObserving),
+        );
       }),
       map(
         txId =>
@@ -85,4 +126,9 @@ export const makeSubmitTx =
     );
   };
 
-export const submitTx = curry(makeSubmitTx)(midnightWallets$);
+/** Submits through the engine wallets of the app instance the dependencies belong to. */
+export const submitTx = (
+  dependencies: Pick<MidnightSideEffectsDependencies, 'midnightWallets$'> & {
+    logger: Logger;
+  },
+) => makeSubmitTx(dependencies.midnightWallets$, dependencies);

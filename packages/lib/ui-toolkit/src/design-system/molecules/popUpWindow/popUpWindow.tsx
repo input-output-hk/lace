@@ -69,7 +69,7 @@ export const PopUpWindow = ({
 
     return (
       <Column alignItems="center">
-        <Icon name={icon} size={iconSize} variant="solid" />
+        <Icon name={icon} size={iconSize} strokeWidth={2} />
       </Column>
     );
   }, [icon, iconSize]);

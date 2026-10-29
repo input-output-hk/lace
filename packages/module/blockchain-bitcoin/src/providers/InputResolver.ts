@@ -13,10 +13,10 @@ export interface InputResolver {
    * Resolves the transaction input to a `UTxO` object providing detailed information
    * about the input, including the owning address and the amount.
    *
-   * @param {string} txId - The hexadecimal string representing the transaction ID of the input to resolve.
-   * @param {number} index - The zero-based index of the input within the transaction's list of outputs.
+   * @param txId - The hexadecimal string representing the transaction ID of the input to resolve.
+   * @param index - The zero-based index of the input within the transaction's list of outputs.
    *
-   * @returns {Promise<BitcoinUTxO>} A promise that resolves to a `UTxO` object containing the resolved input details.
+   * @returns A promise that resolves to a `UTxO` object containing the resolved input details.
    * If the input cannot be resolved, the promise should reject with an error explaining the failure.
    */
   resolve(txId: string, index: number): Promise<BitcoinUTxO>;

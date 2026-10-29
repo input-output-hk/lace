@@ -4,11 +4,12 @@ import { HexBytes } from '@lace-lib/util';
 import { assertSubmitted, submitWithDustRetry } from '../infra/submit';
 
 import { Contract } from './acc-module';
-import { accountWitnesses } from './deploy';
+import { accountWitnesses, initialAccountPrivateState } from './deploy';
 import { authArgs } from './signer';
 import { resolveUseCounter } from './use-counter';
 
 import type { AccountPrivateState, AccProviders } from './deploy';
+import type { AccProvingCircuitName } from './manifest';
 import type { DeviceLedgerState } from './use-counter';
 import type { AccAddress, PassportAuthoriser } from '@lace-contract/passport';
 
@@ -31,9 +32,10 @@ type FindDeployedAccountContract = (
 
 /**
  * Connects to a deployed Account Custody Contract and returns the handle
- * gated calls run through. The private state starts empty: the
- * device-management circuits consume no witnesses, so no coin or
- * encryption key material is needed.
+ * gated calls run through. The private state starts without the account
+ * encryption secret: the device-management and grant lifecycle circuits
+ * consume no witnesses, so no coin or encryption key material is needed.
+ * Shielded flows will seed the viewing secret when they arrive.
  */
 export const connectAccountHandle = async (
   providers: AccProviders,
@@ -54,7 +56,7 @@ export const connectAccountHandle = async (
     privateStateId: `account-${HexBytes.fromByteArray(
       crypto.getRandomValues(new Uint8Array(PRIVATE_STATE_ID_LENGTH)),
     )}`,
-    initialPrivateState: { encSecretKeyHex: null, coins: {} },
+    initialPrivateState: initialAccountPrivateState(),
   });
 };
 
@@ -72,9 +74,16 @@ export type ExecuteGatedCallProps = {
   handle: GatedContractHandle;
   /** Device key that authorises the call. */
   authoriser: PassportAuthoriser;
-  /** Fully qualified circuit name, e.g. `add_device_with_jubjub`. */
-  circuit: string;
-  /** The circuit's own arguments; the auth args are appended after them. */
+  /**
+   * Fully qualified circuit name, e.g. `add_device_with_jubjub`; only a
+   * circuit the manifest pins has key material to prove with.
+   */
+  circuit: AccProvingCircuitName;
+  /**
+   * The circuit's own arguments in declaration order, from the single
+   * entry of a device call to the grant id, scope fields and salt of an
+   * issue call; the auth args are appended after them.
+   */
   args: readonly unknown[];
   /** Address of the account the call executes against. */
   address: AccAddress;

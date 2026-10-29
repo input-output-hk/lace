@@ -224,7 +224,7 @@ export const useStakeDelegation = ({
 
   const handleDelegatePress = useCallback(() => {
     trackEvent('staking | stake | press');
-    // TODO: Implement delegate logic https://input-output.atlassian.net/browse/LW-14123
+    // TODO: Implement delegate logic (LW-14123)
     NavigationControls.navigate(SheetRoutes.BrowsePool, {
       accountId: accountId.toString(),
     });

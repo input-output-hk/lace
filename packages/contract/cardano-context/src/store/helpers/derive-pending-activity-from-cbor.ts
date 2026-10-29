@@ -1,9 +1,14 @@
 import { ActivityType } from '@lace-contract/activities';
 import { BigNumber, Timestamp } from '@lace-lib/util';
 
+import {
+  isOwnAccountToken,
+  pendingActivityExtensionMetadata,
+} from '../../extensions';
 import { inspectCardanoTxEffects } from '../../inspect-cardano-tx-effects';
 
-import type { CardanoActivityUtxoMetadata } from '../../augmentations';
+import type { CardanoActivityBlockchainSpecific } from '../../augmentations';
+import type { PendingActivityExtensionProps } from '../../extensions';
 import type { CardanoPaymentAddress } from '../../types';
 import type { Cardano } from '@cardano-sdk/core';
 import type {
@@ -13,7 +18,7 @@ import type {
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { HexBytes } from '@lace-lib/util';
 
-type DerivePendingActivityFromCborParams = {
+type DerivePendingActivityFromCborParams = PendingActivityExtensionProps & {
   serializedTx: HexBytes;
   accountId: AccountId;
   accountAddresses: readonly CardanoPaymentAddress[];
@@ -25,6 +30,7 @@ export const derivePendingActivityFromCbor = ({
   accountId,
   accountAddresses,
   accountUtxos,
+  ...extension
 }: DerivePendingActivityFromCborParams): Activity | undefined => {
   const effects = inspectCardanoTxEffects({
     accountAddresses,
@@ -37,16 +43,23 @@ export const derivePendingActivityFromCbor = ({
     effects.outputs.some(output => output.isOwn);
   if (!isAccountTouched) return undefined;
 
+  const isAccountToken = isOwnAccountToken(accountAddresses);
   const tokenBalanceChanges: Activity['tokenBalanceChanges'] = [
     ...effects.netByTokenId,
-  ].map(([tokenId, netAmount]) => ({
-    amount: BigNumber(netAmount),
-    tokenId,
-  }));
+  ]
+    .filter(([tokenId]) => !isAccountToken(tokenId))
+    .map(([tokenId, netAmount]) => ({
+      amount: BigNumber(netAmount),
+      tokenId,
+    }));
 
-  const cardanoInFlight: CardanoActivityUtxoMetadata = {
+  const cardanoInFlight: CardanoActivityBlockchainSpecific = {
     consumedInputs: [...effects.consumedInputs],
     producedOutputs: [...effects.producedOutputs],
+    ...(effects.withdrawals.length > 0 && {
+      withdrawals: [...effects.withdrawals],
+    }),
+    ...pendingActivityExtensionMetadata(extension),
   };
 
   const blockchainSpecific: BlockchainSpecificActivityMetadata = {

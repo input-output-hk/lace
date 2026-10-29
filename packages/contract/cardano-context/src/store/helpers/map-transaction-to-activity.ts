@@ -8,6 +8,7 @@ import { TokenId } from '@lace-contract/tokens';
 import { BigNumber, Err, Ok, type Result, Timestamp } from '@lace-lib/util';
 import { catchError, from, mergeMap, of } from 'rxjs';
 
+import { classifyExtensionActivity, isAccountTokenOf } from '../../extensions';
 import {
   computeOwnKeyHashes,
   filterOwnWitnesses,
@@ -16,7 +17,6 @@ import {
 
 import { computeOwnNetCoins } from './compute-own-net-coins';
 import { assetProvider } from './get-fallback-asset';
-import { classifyTxAsNightDesignation } from './night-designation-script-addresses';
 
 import type {
   CardanoPaymentAddress,
@@ -40,20 +40,20 @@ export type MapTransactionToActivityParams = {
   protocolParameters: RequiredProtocolParameters;
   resolveInput: Cardano.ResolveInput;
   logger: Logger;
-  isNightDesignationEnabled: boolean;
+  isExtensionActivityEnabled: boolean;
 };
 
 /**
  * Retrieves and processes transaction activity details for a given account.
  *
- * @param {Object} params - Parameters required to fetch and process account activity.
- * @param {Cardano.HydratedTx & { blockTime: number }} params.txDetails - Details of the transactions to analyze.
- * @param {CardanoPaymentAddress[]} params.accountAddresses - A set of account addresses to track activity for.
- * @param {CardanoRewardAccount} params.rewardAccount - The reward account to monitor for activity.
- * @param {RequiredProtocolParameters} params.protocolParameters - Current protocol parameters required for transaction validation and processing.
- * @param {Cardano.ResolveInput} params.resolveInput - A resolver function used to fetch detailed information about transaction inputs.
- * @param {Logger} params.logger - A logger instance for logging purposes during processing.
- * @returns {Observable<Result<Activity, Error>>} An observable for the account activity operation result.
+ * @param params - Parameters required to fetch and process account activity.
+ *   - `txDetails`: Details of the transactions to analyze.
+ *   - `accountAddresses`: A set of account addresses to track activity for.
+ *   - `rewardAccount`: The reward account to monitor for activity.
+ *   - `protocolParameters`: Current protocol parameters required for transaction validation and processing.
+ *   - `resolveInput`: A resolver function used to fetch detailed information about transaction inputs.
+ *   - `logger`: A logger instance for logging purposes during processing.
+ * @returns An observable for the account activity operation result.
  * Results will be encapsulated in the `Result` type, which is a success (`Ok`) or error (`Err`).
  *
  * The function inspects transaction details, resolves inputs, and identifies token balance changes and activity type (e.g., send/receive).
@@ -70,12 +70,13 @@ export const mapTransactionToActivity = ({
   protocolParameters,
   resolveInput,
   logger,
-  isNightDesignationEnabled,
+  isExtensionActivityEnabled,
 }: MapTransactionToActivityParams): Observable<Result<Activity, Error>> => {
   const ownAddresses = accountAddresses.map(address =>
     Cardano.PaymentAddress(address),
   );
   const ownRewardAccount = Cardano.RewardAccount(rewardAccount);
+  const isAccountToken = isAccountTokenOf(ownRewardAccount);
 
   const txSummaryInspector = createTxInspector({
     summary: transactionSummaryInspector({
@@ -94,20 +95,13 @@ export const mapTransactionToActivity = ({
     }),
   });
 
-  // cNIGHT DUST designation detection — script-address registry match
-  // (deterministic, read-only against the tx body). The action variant
-  // (designate / update / deregister) is inferred from the mint entry +
-  // script-UTxO presence and carried on
-  // `blockchainSpecific.Cardano.nightDesignation` so the UI doesn't need
-  // to re-parse the tx CBOR. The target dust pubkey isn't extracted
-  // on-chain (it needs inline-datum PlutusData decoding); the
-  // pending-activity side-effect supplies it from the slice state for
-  // the pre-confirmation surface.
-  const nightDesignationClassification = classifyTxAsNightDesignation(
-    txDetails.body.inputs,
-    txDetails.body.outputs,
-    txDetails.body.mint,
-  );
+  // Activities the features classify themselves, from the tx body alone: the
+  // type and the metadata the UI renders without re-parsing it. It applies
+  // only while the feature is on.
+  const classifiedActivity = classifyExtensionActivity(txDetails.body);
+  const extensionActivity = isExtensionActivityEnabled
+    ? classifiedActivity
+    : undefined;
 
   // What the chain actually consumed, unresolved: consumers that care about
   // ownership intersect this with the account's own UTxO set, which does that
@@ -155,12 +149,13 @@ export const mapTransactionToActivity = ({
       });
 
       const tokenBalanceChanges = [
-        ...Array.from(summary.assets.entries()).map(([assetId, assetInfo]) => ({
-          tokenId: TokenId(assetId),
-          amount: BigNumber(assetInfo.amount),
-        })),
-        // TODO: handle different networks and ADA token id correctly
-        // https://input-output.atlassian.net/browse/LW-13023
+        ...Array.from(summary.assets.entries())
+          .filter(([assetId]) => !isAccountToken(assetId))
+          .map(([assetId, assetInfo]) => ({
+            tokenId: TokenId(assetId),
+            amount: BigNumber(assetInfo.amount),
+          })),
+        // TODO: handle different networks and ADA token id correctly (LW-13023)
         {
           tokenId: TokenId('lovelace'),
           amount: BigNumber(ownNetCoins),
@@ -188,43 +183,21 @@ export const mapTransactionToActivity = ({
         },
       };
 
-      if (
-        isNightDesignationEnabled &&
-        nightDesignationClassification !== undefined
-      ) {
-        return Ok({
-          accountId,
-          activityId: txDetails.id,
-          timestamp: Timestamp(txDetails.blockTime * 1000),
-          tokenBalanceChanges,
-          type: ActivityType.NightDesignation,
-          blockchainSpecific: {
-            Cardano: {
-              consumedInputs: spentOutpoints,
-              producedOutputs: [],
-              producedOwnOutpoints,
-              slot: txDetails.blockHeader.slot,
-              nightDesignation: {
-                action: nightDesignationClassification.action,
-              },
-              security,
-            },
-          },
-        });
-      }
-
       return Ok({
         accountId,
         activityId: txDetails.id,
         timestamp: Timestamp(txDetails.blockTime * 1000),
         tokenBalanceChanges,
-        type: ownNetCoins > 0n ? ActivityType.Receive : ActivityType.Send,
+        type:
+          extensionActivity?.type ??
+          (ownNetCoins > 0n ? ActivityType.Receive : ActivityType.Send),
         blockchainSpecific: {
           Cardano: {
             consumedInputs: spentOutpoints,
             producedOutputs: [],
             producedOwnOutpoints,
             slot: txDetails.blockHeader.slot,
+            ...extensionActivity?.metadata,
             security,
           },
         },

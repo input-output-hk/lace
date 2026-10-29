@@ -16,7 +16,7 @@ import {
   switchMap,
 } from 'rxjs';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../module';
 import type { Milliseconds, Result } from '@lace-lib/util';
 
 const unwrapOrThrowError = <T, E extends Error>(result: Result<T, E>): T => {

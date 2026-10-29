@@ -1,0 +1,8 @@
+{
+  "extends": "../../../tsconfig.test.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals", "w3c-web-usb"]
+  },
+  "exclude": ["node_modules", "dist", "coverage"],
+  "include": ["test/**/*.ts", "vitest.config.js"]
+}

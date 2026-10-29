@@ -11,5 +11,19 @@
     "rootDir": "src",
     "sourceMap": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": [
+    "src/wasm-proof-server.ts",
+    "src/wasm-proof-backend.ts",
+    "src/wasm-proof-compute.ts",
+    "src/midnight-submission-service.ts",
+    "src/midnight-proof-servers.ts",
+    "src/proof-server-transport.ts",
+    "src/midnight-connector-transaction.ts",
+    "src/midnight-sign-data.ts",
+    "src/midnight-facade-reservations.ts",
+    "src/attested-proving-service.ts",
+    "src/temenos-attested-prover.ts",
+    "src/temenos-trust-roots.ts"
+  ]
 }

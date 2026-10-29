@@ -117,7 +117,7 @@ export const TokensList = ({
         position: 'bottom',
         leftIcon: {
           name: 'AlertSquare',
-          variant: 'solid',
+          strokeWidth: 2,
         },
       });
     }

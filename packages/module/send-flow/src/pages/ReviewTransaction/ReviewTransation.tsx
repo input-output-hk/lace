@@ -14,6 +14,7 @@ export const ReviewTransaction = (
   props: SheetScreenProps<SheetRoutes.ReviewTransaction>,
 ) => {
   const {
+    ReviewNoticeComponent,
     labels,
     values,
     backButtonPress,
@@ -56,9 +57,12 @@ export const ReviewTransaction = (
       labels={labels}
       values={values}
       belowAccountSlot={
-        accountId ? (
-          <AccountSecurityAlertInline accountId={AccountId(accountId)} />
-        ) : undefined
+        <>
+          {accountId && (
+            <AccountSecurityAlertInline accountId={AccountId(accountId)} />
+          )}
+          {ReviewNoticeComponent && <ReviewNoticeComponent />}
+        </>
       }
     />
   );

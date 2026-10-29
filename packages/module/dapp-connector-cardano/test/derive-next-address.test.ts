@@ -21,6 +21,7 @@ import type {
   CardanoRewardAccount,
 } from '@lace-contract/cardano-context';
 import type {
+  AnyAccount,
   InMemoryWalletAccount,
   MultiSigWalletAccount,
 } from '@lace-contract/wallet-repo';
@@ -32,7 +33,10 @@ const { deriveAddressMock } = vi.hoisted(() => ({
 vi.mock('@lace-lib/core', async () => {
   const actual = await vi.importActual('@lace-lib/core');
   const Bip32Account = Object.assign(
-    vi.fn().mockImplementation(() => ({ deriveAddress: deriveAddressMock })),
+    // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+    vi.fn().mockImplementation(function () {
+      return { deriveAddress: deriveAddressMock };
+    }),
     { createDefaultDependencies: vi.fn().mockResolvedValue({}) },
   );
   return { ...actual, Bip32Account };
@@ -134,6 +138,24 @@ describe('createDeriveNextAddress', () => {
     await expect(derive(accountId)).rejects.toMatchObject({
       code: APIErrorCode.InternalError,
     });
+  });
+
+  it('throws for a Cardano custody account without deriving', async () => {
+    const custodyAccount = {
+      ...cardanoAccount,
+      accountType: 'CardanoCustody',
+    } as unknown as AnyAccount;
+    const derive = createDeriveNextAddress({
+      selectAccounts$: of([custodyAccount]),
+      selectAllAddresses$: of([existingAddress]),
+      upsertAddresses: () => {},
+    });
+
+    await expect(derive(accountId)).rejects.toMatchObject({
+      code: APIErrorCode.InternalError,
+      info: `Cannot derive address for CardanoCustody account: ${accountId}`,
+    });
+    expect(deriveAddressMock).not.toHaveBeenCalled();
   });
 
   it('throws when no External addresses for the account', async () => {

@@ -42,10 +42,8 @@ module.exports = {
   // d3 (+ its d3-* sub-packages and their ESM-only deps) is transpiled, not
   // stubbed: AccountCard's LineChart calls d3 at render time, so measuring the
   // home card at production fidelity requires the real library.
-  // @hugeicons-pro is allowlisted because the per-icon modules mapped below
-  // exist only as untranspiled ESM.
   transformIgnorePatterns: [
-    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@reduxjs/toolkit|immer|redux|redux-thunk|redux-persist|reselect|react-redux|use-sync-external-store|@shopify/flash-list|@lodev09|@noble|uuid|d3|d3-.*|internmap|delaunator|robust-predicates|@hugeicons-pro))',
+    '/node_modules/(?!(.pnpm|react-native|@react-native|@react-native-community|expo|@expo|@expo-google-fonts|react-navigation|@react-navigation|@sentry/react-native|native-base|standard-navigation|@reduxjs/toolkit|immer|redux|redux-thunk|redux-persist|reselect|react-redux|use-sync-external-store|@shopify/flash-list|@lodev09|@noble|uuid|d3|d3-.*|internmap|delaunator|robust-predicates))',
     '/node_modules/react-native-reanimated/plugin/',
     '/node_modules/@react-native/babel-preset/',
   ],
@@ -76,12 +74,6 @@ module.exports = {
     // Native sheet module (initializes TurboModule bindings at import time).
     '^@lodev09/react-native-true-sheet$': '<rootDir>/perf/mocks/trueSheet.js',
     '^react-native-webview$': '<rootDir>/perf/mocks/webView.js',
-    // hugeicons-pro's per-icon modules exist only under dist/esm, but the
-    // exports map also offers a `require` target (dist/cjs/*.js) that is not
-    // shipped, and jest-expo's resolver picks it. Map straight to the real
-    // esm files so resolution never consults the exports map.
-    '^@hugeicons-pro/(core-(?:solid|stroke)-rounded)/dist/esm/(.+)$':
-      '<rootDir>/../../../node_modules/@hugeicons-pro/$1/dist/esm/$2.js',
   },
   transform: {
     ...expoPreset.transform,

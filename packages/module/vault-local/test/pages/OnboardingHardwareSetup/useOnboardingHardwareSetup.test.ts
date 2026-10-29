@@ -68,7 +68,7 @@ const keystoneSupport: HwBlockchainSupport[][] = [
       deviceOptionId: KEYSTONE_CARDANO_OPTION_ID,
       walletType: WalletType.HardwareKeystone,
       blockchainName: 'Cardano' as BlockchainName,
-      maxAccountIndex: 24,
+      maxAccountIndex: 23,
     },
     {
       deviceOptionId: KEYSTONE_BITCOIN_OPTION_ID,
@@ -248,7 +248,7 @@ describe('useOnboardingHardwareSetup', () => {
     });
 
     expect(result.current.hasAccountSetup).toBe(true);
-    expect(result.current.maxAccountIndex).toBe(24);
+    expect(result.current.maxAccountIndex).toBe(23);
   });
 
   it('leaves the max account index undefined when the device declares no limit', () => {

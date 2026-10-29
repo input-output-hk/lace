@@ -82,6 +82,11 @@ const createActionObservables = (
   );
 };
 
+/**
+ * Maps scoped selectors to observables of the state, keyed `<selectorName>$`.
+ * A parameterized selector yields a function of its parameter instead of a
+ * value. Each observable emits on change and replays its latest value.
+ */
 export const createStateObservables = (
   state$: Observable<State>,
   selectors: object,
@@ -134,18 +139,25 @@ const mergeStoreExports = <T extends object>(
   storeExports: LaceModuleStoreInit[],
   getter: (s: LaceModuleStoreInit) => T | undefined,
 ): T => merge({}, ...storeExports.map(getter).filter(isNotNil)) as T;
+/**
+ * Options for {@link createStore}, extending the module init props.
+ * `lastEnhancer` is appended after every other store enhancer; `noEpicDelay`
+ * runs side-effect output synchronously instead of on the next tick.
+ */
 export interface CreateStoreProps extends ModuleInitProps {
   devTools?: boolean;
   lastEnhancer?: StoreEnhancer;
   noEpicDelay?: boolean;
 }
 
+/** Dependencies for {@link createStore}: the module init dependencies plus the storage that persisted slices are written to. */
 export type CreateStoreDependencies = ModuleInitDependencies & {
   reduxPersistStorage: Storage;
   /** Merged last into epic middleware dependencies (e.g. Storybook integration overrides). */
   sideEffectDependenciesOverride?: Partial<SideEffectDependencies>;
 };
 
+/** The store {@link createStore} builds, with the observables its side effects run against and a teardown. */
 export type CreateStoreResult<
   Selectors extends ScopedSelectors,
   ActionCreators extends ScopedActionCreators,
@@ -154,9 +166,7 @@ export type CreateStoreResult<
   /**
    * Root state with every loaded slice at its reducer-initial value. Derived
    * from the combined reducer, so it can never drift from the registered
-   * slices and contains only slices that are actually loaded. The extension
-   * SW→UI bridge uses it to seed first-paint `getState` with empty heavy
-   * reference catalogs (see `create-remote-store`).
+   * slices and contains only slices that are actually loaded.
    */
   initialState: State;
   stateObservables: StateObservables<Selectors>;
@@ -165,6 +175,11 @@ export type CreateStoreResult<
   teardown: () => void;
 };
 
+/**
+ * Builds the app's Redux store from every loaded module store: combines their
+ * reducers, middleware and side effects, rehydrates persisted slices, and
+ * starts the side effects.
+ */
 export const createStore = async <
   Selectors extends ScopedSelectors = ScopedSelectors,
   ActionCreators extends ScopedActionCreators = ScopedActionCreators,

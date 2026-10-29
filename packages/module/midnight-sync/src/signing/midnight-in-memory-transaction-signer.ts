@@ -1,7 +1,6 @@
 import {
   defaultTxTtlLength,
   fromUnshieldedTokenType,
-  midnightWallets$,
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { BigNumber, HexBytes } from '@lace-lib/util';
@@ -12,18 +11,26 @@ import {
   ShieldedAddress,
   UnshieldedAddress,
 } from '@midnightntwrk/wallet-sdk-address-format';
-import { map, switchMap, take, throwError } from 'rxjs';
+import { defer, map, switchMap, take, tap, throwError } from 'rxjs';
+
+import {
+  beginSendProofProgress,
+  trackSendSubmission,
+} from '../store/send-proof-progress';
 
 import type { MidnightTxParameters } from '../store/tx-executor/build-tx';
 import type {
+  AttestationProgressEvent,
   MidnightSDKNetworkId,
   MidnightSignRequest,
   MidnightSignResult,
   MidnightTransactionSigner,
   MidnightWallet,
+  MidnightWalletsByAccountId,
 } from '@lace-contract/midnight-context';
 import type { SignerAuth } from '@lace-contract/signer';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type { CombinedTokenTransfer } from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 
@@ -70,7 +77,24 @@ const toOutputs = (
 const signWithWallet = (
   midnightWallet: MidnightWallet,
   request: MidnightSignRequest,
+  {
+    accountId,
+    onProgress,
+  }: {
+    accountId: AccountId;
+    onProgress: (event: AttestationProgressEvent) => void;
+  },
 ): Observable<MidnightSignResult> => {
+  onProgress({
+    type: 'phase',
+    phase: 'transaction-preparing',
+    status: 'started',
+  });
+  const serialize = (transaction: FinalizedTransaction) => {
+    const txId = transaction.identifiers().at(-1);
+    if (txId) trackSendSubmission(accountId, txId, onProgress);
+    return { serializedTx: HexBytes.fromByteArray(transaction.serialize()) };
+  };
   const txParams = JSON.parse(
     HexBytes.toUTF8(request.serializedTx),
   ) as MidnightTxParameters;
@@ -124,29 +148,29 @@ const signWithWallet = (
           dustAddress,
         );
       }),
-      switchMap(signedRecipe => midnightWallet.finalizeRecipe(signedRecipe)),
-      map(transaction => ({
-        serializedTx: HexBytes.fromByteArray(transaction.serialize()),
-      })),
+      switchMap(signedRecipe =>
+        midnightWallet.finalizeRecipe(signedRecipe, onProgress),
+      ),
+      map(serialize),
     );
   }
 
   if (hasUnshieldedTransfer) {
     return midnightWallet.transferTransaction(outputs, { ttl }).pipe(
       switchMap(recipe => midnightWallet.signRecipe(recipe)),
-      switchMap(signedRecipe => midnightWallet.finalizeRecipe(signedRecipe)),
-      map(transaction => ({
-        serializedTx: HexBytes.fromByteArray(transaction.serialize()),
-      })),
+      switchMap(signedRecipe =>
+        midnightWallet.finalizeRecipe(signedRecipe, onProgress),
+      ),
+      map(serialize),
     );
   }
 
   // shielded-only transfers
   return midnightWallet.transferTransaction(outputs, { ttl }).pipe(
-    switchMap(signedRecipe => midnightWallet.finalizeRecipe(signedRecipe)),
-    map(transaction => ({
-      serializedTx: HexBytes.fromByteArray(transaction.serialize()),
-    })),
+    switchMap(signedRecipe =>
+      midnightWallet.finalizeRecipe(signedRecipe, onProgress),
+    ),
+    map(serialize),
   );
 };
 
@@ -157,29 +181,53 @@ export class MidnightInMemoryTransactionSigner
   readonly #accountId: AccountId;
   readonly #auth: SignerAuth;
 
-  public constructor(params: { accountId: AccountId; auth: SignerAuth }) {
+  readonly #wallets$: Observable<MidnightWalletsByAccountId>;
+
+  public constructor(params: {
+    accountId: AccountId;
+    auth: SignerAuth;
+    wallets$: Observable<MidnightWalletsByAccountId>;
+  }) {
     this.#accountId = params.accountId;
     this.#auth = params.auth;
+    this.#wallets$ = params.wallets$;
   }
 
   public sign(request: MidnightSignRequest): Observable<MidnightSignResult> {
-    return this.#auth.authenticate().pipe(
-      switchMap(confirmed => {
-        if (!confirmed)
-          return throwError(() => new AuthenticationCancelledError());
-        return midnightWallets$.pipe(
-          take(1),
-          switchMap(wallets => {
-            const midnightWallet = wallets[this.#accountId];
-            if (!midnightWallet) {
-              throw new Error(
-                `Could not load midnight wallet for account ${this.#accountId}`,
-              );
-            }
-            return signWithWallet(midnightWallet, request);
-          }),
-        );
-      }),
-    );
+    return defer(() => {
+      const onProgress = beginSendProofProgress(this.#accountId);
+      return this.#auth.authenticate().pipe(
+        switchMap(confirmed => {
+          if (!confirmed)
+            return throwError(() => new AuthenticationCancelledError());
+          return this.#wallets$.pipe(
+            take(1),
+            switchMap(wallets => {
+              const midnightWallet = wallets[this.#accountId];
+              if (!midnightWallet) {
+                throw new Error(
+                  `Could not load midnight wallet for account ${
+                    this.#accountId
+                  }`,
+                );
+              }
+              return signWithWallet(midnightWallet, request, {
+                accountId: this.#accountId,
+                onProgress,
+              });
+            }),
+          );
+        }),
+        tap({
+          error: () => {
+            onProgress({
+              type: 'phase',
+              phase: 'transaction-failed',
+              status: 'failed',
+            });
+          },
+        }),
+      );
+    });
   }
 }

@@ -14,6 +14,11 @@ type MixinStore<
   ActionCreators extends object = object,
 > = NonNullable<LaceModule<Selectors, ActionCreators>['store']>;
 
+/**
+ * Combines a module's store with a contract mixin's store. Reducers,
+ * middleware, side effects, persist config, preloaded state, selectors and
+ * actions of both are merged; the mixin's entries win on a key clash.
+ */
 export const combineStore = <
   Selectors extends object = object,
   ActionCreators extends object = object,
@@ -82,6 +87,10 @@ export const combineStore = <
   };
 };
 
+/**
+ * Creates a contract mixin: a function that patches every module implementing
+ * the contract with the properties `patchModule` returns.
+ */
 export const createMixin =
   <Selectors extends object = object, ActionCreators extends object = object>(
     patchModule: (

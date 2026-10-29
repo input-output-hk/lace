@@ -13,6 +13,7 @@ export type {
   ColorScheme,
 } from './store';
 export * from './contract';
+export * from './ui-addon-contracts';
 export type * from './types';
 export * from './util';
 export * from './const';

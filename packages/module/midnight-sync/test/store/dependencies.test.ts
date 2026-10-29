@@ -1,22 +1,25 @@
 import { setImmediate } from 'node:timers/promises';
 
-import { midnightWallets$ } from '@lace-contract/midnight-context';
+import { midnightWalletsForRuntime } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { firstValueFrom, NEVER, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { initializeMidnightSideEffectDependencies } from '../../src/store/dependencies';
+import { initializeMidnightSideEffectDependencies } from '../../src/store/initialize-dependencies';
 
 import type { MidnightWallet } from '@lace-contract/midnight-context';
 import type { ModuleInitProps } from '@lace-contract/module';
 
 const { midnightAccount } = stubData;
+const props = { runtime: {} } as Readonly<ModuleInitProps>;
 const midnightSideEffectDependencies = initializeMidnightSideEffectDependencies(
-  {} as Readonly<ModuleInitProps>,
+  props,
   { logger: dummyLogger },
 );
+// The app instance's registry, which the dependencies act on.
+const midnightWallets$ = midnightWalletsForRuntime(props.runtime);
 
 describe('Midnight side effect dependencies', () => {
   beforeEach(() => {

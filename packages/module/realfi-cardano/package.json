@@ -28,7 +28,6 @@
     "@lace-contract/views": "*",
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/util": "*",
-    "@realfi-co/realfi-partner-sdk": "3.2.0",
     "@sundaeswap/asset": "^1.0.11",
     "@sundaeswap/core": "^2.13.1",
     "bignumber.js": "9.0.1",
@@ -37,5 +36,8 @@
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"
+  },
+  "optionalDependencies": {
+    "@realfi-co/realfi-partner-sdk": "3.2.0"
   }
 }

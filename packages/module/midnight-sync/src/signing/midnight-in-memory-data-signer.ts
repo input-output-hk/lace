@@ -1,8 +1,8 @@
-import { midnightWallets$ } from '@lace-contract/midnight-context';
 import { HexBytes } from '@lace-lib/util';
 import { map, switchMap, take } from 'rxjs';
 
 import type {
+  MidnightWalletsByAccountId,
   MidnightDataSigner,
   MidnightSignDataRequest,
   MidnightSignDataResult,
@@ -15,14 +15,20 @@ import type { Observable } from 'rxjs';
 export class MidnightInMemoryDataSigner implements MidnightDataSigner {
   readonly #accountId: AccountId;
 
-  public constructor(accountId: AccountId) {
+  readonly #wallets$: Observable<MidnightWalletsByAccountId>;
+
+  public constructor(
+    accountId: AccountId,
+    wallets$: Observable<MidnightWalletsByAccountId>,
+  ) {
     this.#accountId = accountId;
+    this.#wallets$ = wallets$;
   }
 
   public signData(
     request: MidnightSignDataRequest,
   ): Observable<MidnightSignDataResult> {
-    return midnightWallets$.pipe(
+    return this.#wallets$.pipe(
       take(1),
       switchMap(wallets => {
         const wallet = wallets[this.#accountId];

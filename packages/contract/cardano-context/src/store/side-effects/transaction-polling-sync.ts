@@ -36,7 +36,7 @@ import type { Observable } from 'rxjs';
  * failure tracking and auto-dismissal.
  */
 export const transactionPollingSync: SideEffect = (
-  { sync: { addSyncOperation$ } },
+  actionObservables,
   {
     wallets: { selectActiveNetworkAccounts$ },
     addresses: { selectAllAddresses$ },
@@ -44,7 +44,7 @@ export const transactionPollingSync: SideEffect = (
   },
   { actions, cardanoProvider: { getAddressTransactionHistory }, logger },
 ) =>
-  addSyncOperation$.pipe(
+  actionObservables.sync.addSyncOperation$.pipe(
     filter(
       action =>
         action.payload.operation.status === 'Pending' &&
@@ -142,7 +142,24 @@ export const transactionPollingSync: SideEffect = (
               );
             }),
           ),
-        ).pipe(takeUntil(accountLeftActiveNetwork$));
+        ).pipe(
+          takeUntil(accountLeftActiveNetwork$),
+          takeUntil(
+            actionObservables.sync.clearPendingSyncsForAccounts$.pipe(
+              filter(a => a.payload.accountIds.includes(accountId)),
+            ),
+          ),
+          takeUntil(
+            actionObservables.sync.failSyncOperation$.pipe(
+              filter(a => a.payload.operationId === operationId),
+            ),
+          ),
+          takeUntil(
+            actionObservables.cardanoContext.resetWalletSyncState$.pipe(
+              filter(a => a.payload.accountId === accountId),
+            ),
+          ),
+        );
       },
     ),
   );

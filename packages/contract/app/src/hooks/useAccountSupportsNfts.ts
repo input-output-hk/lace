@@ -24,7 +24,7 @@ export interface UseAccountSupportsNftsResult {
  * blockchains support NFTs. Blockchains like Midnight may disable NFT
  * functionality through their UI customization configuration.
  *
- * @param options.accounts - Array of accounts to check for NFT support
+ * @param options - The `accounts` to check for NFT support.
  *
  * @returns
  * - `accountSupportsNfts`: Checks if a specific account's blockchain supports NFTs.

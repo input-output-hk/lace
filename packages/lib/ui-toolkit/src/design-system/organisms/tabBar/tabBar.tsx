@@ -199,7 +199,7 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
             accessibilityLabel={item.accessibilityLabel}
             containerStyle={containerStyle}
             testID={item.testID}
-            isFocused={false}
+            isFocused={item.isFocused}
             icon={item.icon}
             onPress={onPress}
             badge={item?.badge ?? undefined}
@@ -561,8 +561,11 @@ const sharedStyles = ({
       justifyContent: 'center',
       gap: spacing.XS,
     },
-    hoveredBackground: { backgroundColor: theme.background.secondary },
-    hoveredBorder: { borderColor: theme.border.top, borderWidth: 1 },
+    // Brand-tinted, not `background.secondary`: that is also what an active
+    // item's pill uses, so a hovered item and the active one were the same
+    // grey and only the icon colour told them apart.
+    hoveredBackground: { backgroundColor: `${theme.brand.ascending}1A` },
+    hoveredBorder: { borderColor: theme.brand.ascending, borderWidth: 1 },
   });
 
 const smallStyles = StyleSheet.create({

@@ -1,0 +1,41 @@
+# Changelog fragments for the SDK family (@laceio/sdk and the Cardano
+# packages), written with changie from this directory: `npx changie new`.
+# A release's notes, private and public, carry the fragments added since the
+# release its changes count from (scripts/release-scope.ts); a release commits
+# nothing back, so `changie batch` is not part of the release, and the monthly
+# SDK changelog sweep deletes the fragments both channels have released.
+changesDir: .changes
+unreleasedDir: fragments
+# Name each fragment to the nanosecond: changie's default, to the second,
+# lets a second fragment of the same kind written within that second replace
+# the first, and two branches collide when both merge.
+fragmentFileFormat: '{{.Kind}}-{{.Time.Format "20060102-150405.000000000"}}'
+changelogPath: CHANGELOG.md
+versionExt: md
+versionFormat: '## {{.Version}}'
+kindFormat: '### {{.Kind}}'
+changeFormat: '- {{.Body}}'
+custom:
+  # Which package's users see the change: its release notes list the
+  # fragment. Each package releases on its own; `all` is for a change every
+  # package's users see, which every package's notes list.
+  - key: Package
+    label: Package (sdk, cardano, cardano-ledger, cardano-trezor, or all)
+    type: enum
+    enumOptions: [sdk, cardano, cardano-ledger, cardano-trezor, all]
+  # Which build the change is in: `stable` for one both builds ship, `canary`
+  # for one only the canary build has (a preview or experimental feature). A
+  # stable release's notes leave out `canary` fragments; a feature that
+  # graduates gets a `stable` fragment then.
+  - key: Build
+    label: Build (stable, or canary for a feature only the canary build has)
+    type: enum
+    enumOptions: [stable, canary]
+# Keep a Changelog's kinds, in the order the notes list them.
+kinds:
+  - label: Added
+  - label: Changed
+  - label: Deprecated
+  - label: Removed
+  - label: Fixed
+  - label: Security

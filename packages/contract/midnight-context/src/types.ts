@@ -28,6 +28,8 @@ import type {
   MakePropertiesObservable,
 } from '@lace-lib/util';
 import type { Serializable } from '@lace-lib/util-store';
+import type { ProofCircuitProvider } from '@lace-lib/vendor/midnight-proof-servers';
+import type { ProofActivity } from '@lace-lib/vendor/wasm-proof-backend';
 import type {
   DustSecretKey,
   RawTokenType,
@@ -39,6 +41,8 @@ import type { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
 import type { Roles } from '@midnightntwrk/wallet-sdk/hd';
 import type { UnshieldedKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import type { Observable } from 'rxjs';
+
+export type { ProofActivity } from '@lace-lib/vendor/wasm-proof-backend';
 
 export type LockStatus = 'locked' | 'unlocked' | 'unlocking';
 
@@ -62,10 +66,13 @@ export type MidnightAccountPublicKeys = {
 };
 
 export type MidnightContextSliceState = {
+  supportsWasmProver: boolean;
   defaultNetworksConfig: MidnightNetworksConfig;
   defaultTestNetNetworkId: MidnightSDKTestNetworkId;
   userNetworksConfigOverrides: PartialMidnightNetworksConfig;
   remoteProofServerAddress?: string;
+  /** Provider/version-specific acknowledgement of the remote-proving UI notice. */
+  proofServerDisclosureAcknowledgements?: Record<string, boolean>;
   isActivityPageHeaderBannerDismissed?: boolean;
   isPortfolioBannerDismissed?: boolean;
   supportedNetworksIds: MidnightSDKNetworkId[];
@@ -110,6 +117,7 @@ export type MidnightKeysData = {
   zswapKey: KeyData<'Zswap'>;
 };
 
+/** The blockchain-specific data of a Midnight account: its keys, index and network. */
 export type MidnightAccountProps = MidnightKeysData & {
   accountIndex: number;
   networkId: MidnightSDKNetworkId;
@@ -212,12 +220,16 @@ export type ObservableWalletFacade = MakePropertiesObservable<
   Pick<
     WalletFacade,
     | 'calculateTransactionFee'
-    | 'finalizeRecipe'
     | 'finalizeTransaction'
+    | 'revert'
     | 'state'
     | 'stop'
     | 'submitTransaction'
   > & {
+    finalizeRecipe: (
+      recipe: Parameters<WalletFacade['finalizeRecipe']>[0],
+      onProgress?: (event: AttestationProgressEvent) => void,
+    ) => ReturnType<WalletFacade['finalizeRecipe']>;
     balanceFinalizedTransaction: SkipSecondParameter<
       WalletFacade['balanceFinalizedTransaction']
     >;
@@ -247,6 +259,9 @@ export type ObservableWalletFacade = MakePropertiesObservable<
   }
 >;
 
+/** Both wallet and dApp circuits use the account's single selected backend. */
+export type { ProofCircuitProvider } from '@lace-lib/vendor/midnight-proof-servers';
+
 export type MidnightWallet = ObservableWalletFacade & {
   accountId: MidnightAccountId;
   address$: Observable<MidnightWalletAddress>;
@@ -257,6 +272,7 @@ export type MidnightWallet = ObservableWalletFacade & {
   ) => Observable<WalletEntry | undefined>;
   networkId: MidnightSDKNetworkId;
   nightVerifyingKey: SignatureVerifyingKey;
+  proofCircuitProvider: ProofCircuitProvider;
   signData: (
     data: Uint8Array,
   ) => Observable<{ signature: string; verifyingKey: string }>;
@@ -309,7 +325,61 @@ export type AccountKeyManager = {
   destroy: () => void;
 };
 
+/** Provider-owned phase/check IDs. Temenos keeps its existing wire values. */
+export type AttestationPhaseId = string;
+export type AttestationCheckId = string;
+
+export type AttestationCheckResult = {
+  id: AttestationCheckId;
+  /** Owning phase; absent on legacy Temenos events (verify-locally). */
+  phase?: AttestationPhaseId;
+  status: 'failed' | 'passed';
+  detail?: string;
+};
+
+/** Diagnostic progress only; these events never authorize a proof operation. */
+export type AttestationPhaseEvent = {
+  type: 'phase';
+  phase: AttestationPhaseId;
+  status: 'completed' | 'failed' | 'started';
+  detail?: string;
+};
+
+/** Diagnostic attestation/proving phases and checks; events do not authorize disclosure. */
+export type AttestationProgressEvent =
+  | AttestationPhaseEvent
+  | { type: 'check'; check: AttestationCheckResult }
+  | { type: 'reset'; steps: AttestationPhaseId[] };
+
+export type SendProofProgressEvent =
+  | { type: 'begin'; operationId: string; accountId: AccountId }
+  | { type: 'progress'; operationId: string; event: AttestationProgressEvent };
+
+export type AttestationStepStatus = 'done' | 'failed' | 'pending' | 'running';
+
+export type AttestationProgressState = {
+  operationId?: string;
+  accountId?: AccountId;
+  status: 'failed' | 'idle' | 'running' | 'succeeded';
+  steps: Array<{
+    id: AttestationPhaseId;
+    status: AttestationStepStatus;
+    detail?: string;
+  }>;
+  /** End-to-end wallet send stages, separate from provider attestation. */
+  proofMaterialRequests?: number;
+  transactionSteps?: Array<{ id: string; status: AttestationStepStatus }>;
+  checks?: AttestationCheckResult[];
+  failure?: {
+    phase: AttestationPhaseId;
+    checkId?: AttestationCheckResult['id'];
+    detail?: string;
+  };
+};
+
 export type StartMidnightAccountWalletParams = {
+  /** Reads the Temenos ledger indexer URL, resolved afresh for each attestation run. */
+  getTemenosLedgerIndexerUrl?: () => Promise<string>;
   config: MidnightNetworkConfig;
   store: CollectionStorage<SerializedMidnightWallet>;
   account: InMemoryWalletAccount<MidnightAccountProps>;
@@ -326,6 +396,13 @@ export type MidnightSideEffectsDependencies = {
   startMidnightAccountWallet: (
     params: StartMidnightAccountWalletParams,
   ) => Observable<MidnightWallet>;
+  wasmProofActivities$: Observable<ProofActivity[]>;
+  dismissWasmProofActivity: (id: string) => void;
+  /**
+   * Wallet-send progress, tagged with operation ownership. Connector proof
+   * requests never emit into this stream. Side effects only observe (ADR 19).
+   */
+  teeAttestationProgress$: Observable<SendProofProgressEvent>;
 };
 
 export type MidnightSpecificSendFlowType = 'dust-designation' | 'send';

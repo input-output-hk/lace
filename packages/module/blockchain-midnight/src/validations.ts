@@ -1,3 +1,5 @@
+import { getProofServerEndpoint } from '@lace-contract/midnight-context';
+
 import type { MidnightNetworkConfig } from '@lace-contract/midnight-context';
 
 const validateHttpURL = (url: string): boolean => {
@@ -9,18 +11,13 @@ const validateHttpURL = (url: string): boolean => {
   }
 };
 
-export const getValidationErrorsForMidnightNetworkConfig = (
-  config: MidnightNetworkConfig,
-  httpUrlError: string,
-): MidnightNetworkConfig => ({
-  nodeAddress: validateHttpURL(config.nodeAddress) ? '' : httpUrlError,
-  proofServerAddress: validateHttpURL(config.proofServerAddress)
-    ? ''
-    : httpUrlError,
-  indexerAddress: validateHttpURL(config.indexerAddress) ? '' : httpUrlError,
-});
+/** `in-process` mode has no URL — treated as valid. URL-bearing modes are checked. */
+const isValidProofServer = (config: MidnightNetworkConfig): boolean => {
+  const endpoint = getProofServerEndpoint(config.proofServer);
+  return endpoint === undefined || validateHttpURL(endpoint);
+};
 
 export const isValidMidnightNetworkConfig = (config: MidnightNetworkConfig) =>
   validateHttpURL(config.nodeAddress) &&
-  validateHttpURL(config.proofServerAddress) &&
+  isValidProofServer(config) &&
   validateHttpURL(config.indexerAddress);

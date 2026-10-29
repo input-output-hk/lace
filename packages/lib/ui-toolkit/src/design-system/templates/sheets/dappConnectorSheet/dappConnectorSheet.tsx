@@ -87,7 +87,6 @@ export const DappConnectorSheet = ({
                         name={iconName}
                         size={16}
                         color={theme.brand.white}
-                        variant="stroke"
                       />
                     }
                   />

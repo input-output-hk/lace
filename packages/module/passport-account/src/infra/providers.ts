@@ -10,8 +10,7 @@ import { applyNetworkId } from './network-id';
 
 import type { FetchBytes } from '../acc/artefact-loader';
 import type { AccCircuitAssets } from '../acc/artefact-loader';
-import type { AccProviders } from '../acc/deploy';
-import type { RandomBytes } from '../acc/enc-keys';
+import type { AccProviders, RandomBytes } from '../acc/deploy';
 import type { AccManifest, AccProvingCircuitName } from '../acc/manifest';
 import type {
   FeeSponsor,
@@ -43,6 +42,18 @@ type ProvableTx = {
 
 /** A finalized ledger transaction, as the submission seam consumes it. */
 type FinalizedTx = SerializableTx & { identifiers: () => string[] };
+
+/**
+ * The ledger era every provider seam serves. The framework reads it before
+ * an operation starts and refuses a provider set that cannot carry a
+ * transaction end to end, so a mismatch fails before any proof is paid for.
+ */
+const SERVED_ERAS = ['v9'] as const;
+
+/** A transaction tagged with the ledger era it belongs to, as the seams pass it. */
+type V9Tx<T> = { readonly version: 'v9'; readonly tx: T };
+
+const v9 = <T>(tx: T): V9Tx<T> => ({ version: 'v9', tx });
 
 /**
  * The submission surface of the wallet-sdk node client. Structural, so
@@ -135,9 +146,13 @@ const createInMemoryPrivateStateProvider = () => {
  * full wallet:
  *
  * - zkConfigProvider downloads ZK assets through {@link loadCircuitAssets},
- *   so every byte is verified against the manifest's sha256 pins. Circuits
- *   the manifest does not pin (the never-installed k256 arm and the
- *   permissionless deposits) are skipped when verifier keys are listed.
+ *   so every byte is verified against the manifest's sha256 pins. A
+ *   verifier key asked for alone is downloaded alone, so deploying an
+ *   account fetches no prover key it does not prove with. A circuit this
+ *   module never proves, such as a secp256k1 grant withdrawal, has no
+ *   manifest entry: its verifier key asked for alone is verified against
+ *   the contract's own expected pin, and it is skipped when verifier keys
+ *   are listed.
  * - proofProvider adapts the {@link PassportProver} to the ledger's
  *   circuit-level proving interface.
  * - walletProvider delegates balancing to the {@link FeeSponsor}; the user
@@ -197,16 +212,24 @@ export const createMidnightProviders = async ({
   ): circuitId is AccProvingCircuitName => circuitId in manifest.circuits;
 
   const verifierKeyCache = new Map<string, Promise<Uint8Array>>();
-  const verifierKey = async (circuitId: string): Promise<Uint8Array> => {
+  const verifierKeyPin = async (circuitId: string): Promise<string> => {
     if (isPinnedCircuit(circuitId)) {
-      return (await circuitAssets(circuitId)).verifierKey;
+      return manifest.circuits[circuitId].verifierKeySha256;
     }
+    const { expectedVk } = await import('../acc/acc-module');
+    const expectedSha256 = expectedVk[circuitId];
+    if (!expectedSha256) throw new UnknownCircuitError(circuitId);
+    return expectedSha256;
+  };
+  const verifierKey = async (circuitId: string): Promise<Uint8Array> => {
+    const cachedAssets = isPinnedCircuit(circuitId)
+      ? assetCache.get(circuitId)
+      : undefined;
+    if (cachedAssets) return (await cachedAssets).verifierKey;
     let key = verifierKeyCache.get(circuitId);
     if (!key) {
       key = (async () => {
-        const { expectedVk } = await import('../acc/acc-module');
-        const expectedSha256 = expectedVk[circuitId];
-        if (!expectedSha256) throw new UnknownCircuitError(circuitId);
+        const expectedSha256 = await verifierKeyPin(circuitId);
         return loadVerifierKey({
           artefactUrl: network.artefactUrl,
           circuit: circuitId,
@@ -231,10 +254,7 @@ export const createMidnightProviders = async ({
           .filter(circuitId => isPinnedCircuit(circuitId))
           .map(
             async circuitId =>
-              [
-                circuitId,
-                (await circuitAssets(circuitId)).verifierKey,
-              ] as const,
+              [circuitId, await verifierKey(circuitId)] as const,
           ),
       ),
     get: async (circuitId: AccProvingCircuitName) => ({
@@ -259,26 +279,29 @@ export const createMidnightProviders = async ({
     lookupKey: async (keyLocation: string) => resolveKeyMaterial(keyLocation),
   };
   const proofProvider = {
-    proveTx: async (unprovenTx: ProvableTx) => {
+    supportedEras: SERVED_ERAS,
+    proveTx: async ({ tx }: V9Tx<ProvableTx>) => {
       onStage?.('proving');
-      return unprovenTx.prove(
-        provingProvider,
-        ledger.CostModel.initialCostModel(),
+      return v9(
+        await tx.prove(provingProvider, ledger.CostModel.initialCostModel()),
       );
     },
   };
 
   const walletProvider = {
+    supportedEras: SERVED_ERAS,
     getCoinPublicKey: () => coinPublicKey,
     getEncryptionPublicKey: () => encryptionPublicKey,
-    balanceTx: async (tx: SerializableTx) => {
+    balanceTx: async ({ tx }: V9Tx<SerializableTx>) => {
       onStage?.('sponsoring');
       const balanced = await sponsor.balanceAndSign(tx.serialize());
-      return ledger.Transaction.deserialize(
-        'signature',
-        'proof',
-        'binding',
-        balanced,
+      return v9(
+        ledger.Transaction.deserialize(
+          'signature',
+          'proof',
+          'binding',
+          balanced,
+        ),
       );
     },
   };
@@ -288,7 +311,8 @@ export const createMidnightProviders = async ({
     return createNodeRelaySubmissionService(network.nodeUrl);
   };
   const midnightProvider = {
-    submitTx: async (tx: FinalizedTx) => {
+    supportedEras: SERVED_ERAS,
+    submitTx: async ({ tx }: V9Tx<FinalizedTx>) => {
       const service = await (
         createSubmissionService ?? defaultSubmissionService
       )();

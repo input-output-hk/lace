@@ -57,7 +57,6 @@ export const AdditionalInfoSection = ({
                 name="InformationCircle"
                 size={16}
                 color={theme.text.secondary}
-                variant="stroke"
               />
             </Row>
           }

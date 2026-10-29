@@ -1,0 +1,22 @@
+{
+  "name": "@lace-lib/cardano-dapp-connector",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript definitions for the dApp Connector standard CIP30",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/cardano-core": "*",
+    "@lace-lib/cardano-crypto": "*",
+    "@lace-lib/util": "*",
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "@types/webextension-polyfill": "~0.12.4",
+    "jsdom": "*",
+    "vitest": "*",
+    "webextension-polyfill": "~0.12.0"
+  }
+}

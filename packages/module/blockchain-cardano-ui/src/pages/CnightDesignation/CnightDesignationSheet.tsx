@@ -273,7 +273,7 @@ export const CnightDesignationSheet = (
     return (
       <StatusSheet
         body={t(SUCCESS_COPY[actionMode].body, { txId: txId ?? '' })}
-        icon={{ name: 'Checkmark', variant: 'solid' }}
+        icon={{ name: 'Checkmark', strokeWidth: 2 }}
         testID="cnight-designation-success"
       />
     );
@@ -288,7 +288,7 @@ export const CnightDesignationSheet = (
             : t('v2.cnight-designation.error.generic')
         }
         detail={errorDetail}
-        icon={{ name: 'Sad', variant: 'solid' }}
+        icon={{ name: 'Sad', strokeWidth: 2 }}
         testID="cnight-designation-error"
       />
     );
@@ -313,7 +313,7 @@ export const CnightDesignationSheet = (
     return (
       <StatusSheet
         body={t('v2.cnight-designation.detection.error.subtitle')}
-        icon={{ name: 'Sad', variant: 'solid' }}
+        icon={{ name: 'Sad', strokeWidth: 2 }}
         testID="cnight-designation-detection-error"
       />
     );

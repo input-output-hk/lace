@@ -18,7 +18,7 @@ export interface ExtendedPublicKeyParts {
 
 /**
  * Serializes BIP-32 extended public key parts into a Base58Check string via
- * '@scure/bip32' HDKey. The 78-byte layout (4 version, 1 depth, 4
+ * `@scure/bip32` HDKey. The 78-byte layout (4 version, 1 depth, 4
  * parent-fingerprint, 4 child-number, 32 chain-code, 33 compressed public key)
  * and the double-SHA256 Base58Check checksum are handled by HDKey.
  *

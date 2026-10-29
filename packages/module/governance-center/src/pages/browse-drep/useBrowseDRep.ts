@@ -63,6 +63,8 @@ type LandingRank = {
   effectivePower: ReadonlyMap<string, bigint>;
   tier: ReadonlyMap<string, number>;
   rotation: ReadonlyMap<string, number>;
+  /** Raw lovelace, converted once here so no comparator parses per pair. */
+  amount: ReadonlyMap<string, bigint>;
 };
 
 // Directory-wide rank inputs, computed over the WHOLE fetched list (before any
@@ -94,6 +96,7 @@ const buildLandingRank = (
   const effectivePower = new Map<string, bigint>();
   const tier = new Map<string, number>();
   const rotation = new Map<string, number>();
+  const amounts = new Map<string, bigint>();
   for (const dRep of dReps) {
     const amount = BigInt(dRep.amount);
     const capped = amount < cap ? amount : cap;
@@ -108,8 +111,26 @@ const buildLandingRank = (
     effectivePower.set(dRep.drepId, capped / BigInt(clusterSize));
     tier.set(dRep.drepId, profileTier(dRep));
     rotation.set(dRep.drepId, fnv1a(`${accountId}:${dRep.drepId}`));
+    amounts.set(dRep.drepId, amount);
   }
-  return { effectivePower, tier, rotation };
+  return { effectivePower, tier, rotation, amount: amounts };
+};
+
+// Compare as bigint: Number() on the lovelace difference loses precision past
+// 2^53 and can misorder high-voting-power DReps. The conversion happened once
+// per directory in buildLandingRank, so no pair pays for it here.
+const byVotingPowerDesc =
+  (rank: LandingRank) =>
+  (a: DRepSummary, b: DRepSummary): number => {
+    const aPower = rank.amount.get(a.drepId) ?? 0n;
+    const bPower = rank.amount.get(b.drepId) ?? 0n;
+    if (aPower === bPower) return 0;
+    return bPower > aPower ? 1 : -1;
+  };
+
+const byStatus = (a: DRepSummary, b: DRepSummary): number => {
+  if (a.isActive === b.isActive) return 0;
+  return a.isActive ? -1 : 1;
 };
 
 // The default landing order, applied until the user picks an explicit sort:
@@ -152,7 +173,9 @@ export const useBrowseDRep = (accountId: string) => {
   const activePromoted = useLaceSelector('promotedDReps.selectActivePromoted');
   const activeBlocked = useLaceSelector('promotedDReps.selectActiveBlocked');
 
-  const [searchValue, setSearchValue] = useState('');
+  // The SETTLED query only: the field owns its text and reports it once typing
+  // stops, so a keystroke never reaches this hook or the list (ADR 64).
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchDReps();
@@ -165,10 +188,21 @@ export const useBrowseDRep = (accountId: string) => {
 
   const blockedIds = useMemo(() => new Set(activeBlocked), [activeBlocked]);
 
-  const filteredDReps = useMemo(() => {
-    let result = dReps;
+  // Sorted ONCE per directory, never per query: the order is a total order
+  // whose inputs are directory-wide (buildLandingRank) and Array.sort is
+  // stable, so filtering the sorted list gives the same order as sorting the
+  // filtered one — for a fraction of the work (ADR 64).
+  const sortedDReps = useMemo(() => {
+    if (filterSortBy === 'votingPower')
+      return [...dReps].sort(byVotingPowerDesc(landingRank));
+    if (filterSortBy === 'status') return [...dReps].sort(byStatus);
+    return [...dReps].sort(byLandingRank(landingRank));
+  }, [dReps, filterSortBy, landingRank]);
 
-    const query = searchValue.trim().toLowerCase();
+  const filteredDReps = useMemo(() => {
+    let result = sortedDReps;
+
+    const query = searchQuery.trim().toLowerCase();
     // The exact DRep id (either encoding) as a query is deliberate access, not
     // discovery: it is the one way a config-blocked DRep renders, and it works
     // for any DRep so a pasted legacy id resolves too.
@@ -179,9 +213,14 @@ export const useBrowseDRep = (accountId: string) => {
     // Config-blocked DReps are hidden from the directory outright — every
     // order, filter, and partial search — so the browser cannot recommend or
     // surface them. Delegation to a pasted id is unaffected.
-    result = result.filter(
-      dRep => !blockedIds.has(dRep.drepId) || isExactIdQuery(dRep),
-    );
+    //
+    // One comparison, unlike the reveal above: that one matches raw user
+    // input, while these ids reach the store already reduced to the CIP-129
+    // form `drepId` carries.
+    const isBlocked = (dRep: DRepSummary) =>
+      blockedIds.has(dRep.drepId.toLowerCase());
+
+    result = result.filter(dRep => !isBlocked(dRep) || isExactIdQuery(dRep));
 
     if (filterStatus !== 'all') {
       result = result.filter(dRep => {
@@ -201,31 +240,16 @@ export const useBrowseDRep = (accountId: string) => {
       );
     }
 
-    if (filterSortBy === 'votingPower') {
-      // Compare as bigint: Number() on the lovelace difference loses precision
-      // past 2^53 and can misorder high-voting-power DReps.
-      result = [...result].sort((a, b) => {
-        const difference = BigInt(b.amount) - BigInt(a.amount);
-        if (difference > 0n) return 1;
-        if (difference < 0n) return -1;
-        return 0;
-      });
-    } else if (filterSortBy === 'status') {
-      result = [...result].sort((a, b) => {
-        if (a.isActive === b.isActive) return 0;
-        return a.isActive ? -1 : 1;
-      });
-    } else {
-      result = [...result].sort(byLandingRank(landingRank));
-    }
-
     return result;
-  }, [dReps, filterStatus, filterSortBy, searchValue, landingRank, blockedIds]);
+  }, [sortedDReps, filterStatus, searchQuery, blockedIds]);
 
   const promotedDReps = useMemo(
     () =>
       activePromoted
         .map((item): PromotedDRepEntry | undefined => {
+          // One comparison: the config parser reduces every promoted id to
+          // the CIP-129 form `drepId` carries, so a CIP-105 entry arrives
+          // already rewritten.
           const summary = dReps.find(dRep => dRep.drepId === item.id);
           if (!summary) return undefined;
           return {
@@ -284,8 +308,8 @@ export const useBrowseDRep = (accountId: string) => {
     [t],
   );
 
-  const onSearchChange = useCallback((value: string) => {
-    setSearchValue(value);
+  const onSearchCommit = useCallback((value: string) => {
+    setSearchQuery(value);
   }, []);
 
   // Manual retry (ADR 15): re-issues the original user-initiated fetch intent.
@@ -313,12 +337,12 @@ export const useBrowseDRep = (accountId: string) => {
   // filter other than 'all' excludes them; search matches their visible title.
   const filteredOptions = useMemo(() => {
     if (filterStatus !== 'all') return [];
-    const query = searchValue.trim().toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
     if (query.length === 0) return defaultDelegationOptions;
     return defaultDelegationOptions.filter(option =>
       option.title.toLowerCase().includes(query),
     );
-  }, [filterStatus, searchValue, defaultDelegationOptions]);
+  }, [filterStatus, searchQuery, defaultDelegationOptions]);
 
   // The abstain / no-confidence options are ordinary rows at the bottom of the
   // list. They stay hidden while the initial-load skeleton or the error/retry
@@ -341,8 +365,7 @@ export const useBrowseDRep = (accountId: string) => {
     isLoading,
     hasError,
     retry,
-    searchValue,
-    onSearchChange,
+    onSearchCommit,
     status: filterStatus,
     sortBy: filterSortBy,
     setStatus,

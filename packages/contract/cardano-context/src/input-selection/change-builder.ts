@@ -26,13 +26,13 @@ const MAX_OUTPUT_COIN = 45_000_000_000_000_000n;
 /**
  * Parameters for {@link buildChangeOutputs}.
  *
- * @property selection - The UTxOs picked by the selection phases.
- * @property remaining - The UTxOs still available; may be drawn from to fund
+ * - `selection`: The UTxOs picked by the selection phases.
+ * - `remaining`: The UTxOs still available; may be drawn from to fund
  *   the min-ADA requirement of the change outputs.
- * @property targetValue - The value the selection must cover exactly (surplus
+ * - `targetValue`: The value the selection must cover exactly (surplus
  *   becomes change).
- * @property changeAddress - Address that receives all change outputs.
- * @property protocolParameters - Drives min-ADA and change value size limits.
+ * - `changeAddress`: Address that receives all change outputs.
+ * - `protocolParameters`: Drives min-ADA and change value size limits.
  */
 type BuildChangeOutputsParams = {
   selection: Cardano.Utxo[];
@@ -72,7 +72,7 @@ const isZeroValue = (value: Cardano.Value): boolean => {
  * actually covers the target for coins and every asset.
  *
  * @param change - The computed change value (`selection - target`).
- * @throws {InputSelectionError} With `BalanceInsufficient` when any component
+ * @throws `InputSelectionError` With `BalanceInsufficient` when any component
  *   is negative.
  */
 const assertCoversTarget = (change: Cardano.Value): void => {
@@ -154,7 +154,7 @@ export const splitChangeAssets = (
  * @param selection - The selection to grow.
  * @param remaining - The pool to draw from.
  * @returns The value of the moved UTxO.
- * @throws {InputSelectionError} With `UtxoFullyDepleted` when the pool is
+ * @throws `InputSelectionError` With `UtxoFullyDepleted` when the pool is
  *   exhausted or holds no more lovelace.
  */
 const moveLargestCoinUtxo = (
@@ -200,7 +200,7 @@ const moveLargestCoinUtxo = (
  *
  * @param params - See {@link BuildChangeOutputsParams}.
  * @returns The final selection, remaining pool, and change outputs.
- * @throws {InputSelectionError} `BalanceInsufficient` when the selection does
+ * @throws `InputSelectionError` `BalanceInsufficient` when the selection does
  *   not cover the target; `UtxoFullyDepleted` when `remaining` runs out while
  *   funding min-ADA.
  */

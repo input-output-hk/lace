@@ -339,6 +339,8 @@ describe('night-designation-flow side-effects', () => {
         input: { txId: 'b'.repeat(64), index: 1 },
         output: { address: 'addr1...', value: { coins: 5n } },
       };
+      // Without them the balance would count withdrawn rewards twice.
+      const upstreamWithdrawal = { stakeAddress: 'stake_test1', quantity: 5n };
       const submitResult: TxSubmissionResult = {
         success: true,
         txId: testTxId,
@@ -346,6 +348,7 @@ describe('night-designation-flow side-effects', () => {
           Cardano: {
             consumedInputs: [upstreamConsumedInput],
             producedOutputs: [upstreamProducedOutput],
+            withdrawals: [upstreamWithdrawal],
           },
         },
       };
@@ -392,6 +395,7 @@ describe('night-designation-flow side-effects', () => {
                       Cardano: {
                         consumedInputs: [upstreamConsumedInput],
                         producedOutputs: [upstreamProducedOutput],
+                        withdrawals: [upstreamWithdrawal],
                         nightDesignation: { action: 'designate' },
                       },
                     },

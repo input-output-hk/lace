@@ -6,4 +6,8 @@
  */
 import type { Tagged } from '@lace-lib/vendor';
 
+/**
+ * An address on any blockchain, as the chain encodes it. Chain-specific
+ * address types, such as `CardanoPaymentAddress`, narrow it.
+ */
 export type Address = Tagged<string, 'Address'>;

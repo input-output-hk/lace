@@ -11,6 +11,12 @@ import { describe, expect, it } from 'vitest';
 import { UnknownCircuitError } from '../../src/acc/artefact-loader';
 import { jubjubChallenges } from '../../src/acc/challenges';
 import { devJubjubAuthoriser } from '../../src/acc/dev-authoriser';
+import {
+  ISSUE_GRANT_CIRCUIT,
+  REVOKE_ALL_GRANTS_CIRCUIT,
+  REVOKE_GRANT_CIRCUIT,
+} from '../../src/acc/grant-circuits';
+import { issueGrantBinding, scopeArgs } from '../../src/acc/grants';
 import { bytesToBigIntLE, JUBJUB_R } from '../../src/acc/signer';
 
 import type { AuthorisationRequest } from '@lace-contract/passport';
@@ -33,6 +39,31 @@ const CONTRACT_ADDRESS = Uint8Array.from(
 );
 const ACCOUNT = AccAddress(HexBytes.fromByteArray(CONTRACT_ADDRESS));
 const NEW_ENTRY = new Uint8Array(32).fill(0x5a);
+
+const GRANT_ID = new Uint8Array(32).fill(0x31);
+const SCOPE_SALT = new Uint8Array(32).fill(0x32);
+const ZERO32 = new Uint8Array(32);
+const issueArgs = [
+  GRANT_ID,
+  ...scopeArgs({
+    opWithdrawUnshielded: true,
+    opWithdrawShielded: false,
+    opWithdrawShieldedToContract: false,
+    read: false,
+    color: ZERO32,
+    recipientKind: 0n,
+    recipient: ZERO32,
+    maxCoinValue: 300n,
+    perCallCap: 300n,
+    cap: 450n,
+    expiresAt: 0n,
+    rpIdHash: ZERO32,
+    readPkHash: ZERO32,
+    windowLen: 0n,
+    windowCap: 0n,
+  }),
+  SCOPE_SALT,
+];
 
 const addDeviceRequest: AuthorisationRequest = {
   account: ACCOUNT,
@@ -120,6 +151,76 @@ describe('devJubjubAuthoriser', () => {
     expect(
       bytesToBigIntLE(builder(authorisation.sigR, authorisation.grindNonce)),
     ).toBeLessThan(JUBJUB_R);
+  });
+
+  it('authorises an issueGrant call over the grant id and the scope digest', async () => {
+    const authorisation = await authoriser.authorise({
+      ...addDeviceRequest,
+      circuit: ISSUE_GRANT_CIRCUIT,
+      args: issueArgs,
+    });
+
+    const builder = jubjubChallenges.issueGrant(
+      { contractAddress: CONTRACT_ADDRESS, authNonce: 7n },
+      authorisation.pk,
+      issueGrantBinding(issueArgs),
+    );
+    expect(
+      bytesToBigIntLE(builder(authorisation.sigR, authorisation.grindNonce)),
+    ).toBeLessThan(JUBJUB_R);
+  });
+
+  it('authorises a revokeGrant call over the grant id', async () => {
+    const authorisation = await authoriser.authorise({
+      ...addDeviceRequest,
+      circuit: REVOKE_GRANT_CIRCUIT,
+      args: [GRANT_ID],
+    });
+
+    const builder = jubjubChallenges.revokeGrant(
+      { contractAddress: CONTRACT_ADDRESS, authNonce: 7n },
+      authorisation.pk,
+      GRANT_ID,
+    );
+    expect(
+      bytesToBigIntLE(builder(authorisation.sigR, authorisation.grindNonce)),
+    ).toBeLessThan(JUBJUB_R);
+  });
+
+  it('authorises a revokeAllGrants call with no argument', async () => {
+    const authorisation = await authoriser.authorise({
+      ...addDeviceRequest,
+      circuit: REVOKE_ALL_GRANTS_CIRCUIT,
+      args: [],
+    });
+
+    const builder = jubjubChallenges.revokeAllGrants(
+      { contractAddress: CONTRACT_ADDRESS, authNonce: 7n },
+      authorisation.pk,
+    );
+    expect(
+      bytesToBigIntLE(builder(authorisation.sigR, authorisation.grindNonce)),
+    ).toBeLessThan(JUBJUB_R);
+  });
+
+  it('rejects a revokeAllGrants request carrying an argument', async () => {
+    await expect(
+      authoriser.authorise({
+        ...addDeviceRequest,
+        circuit: REVOKE_ALL_GRANTS_CIRCUIT,
+        args: [GRANT_ID],
+      }),
+    ).rejects.toThrow(/takes no argument/);
+  });
+
+  it('rejects an issueGrant request whose arguments are not a scope', async () => {
+    await expect(
+      authoriser.authorise({
+        ...addDeviceRequest,
+        circuit: ISSUE_GRANT_CIRCUIT,
+        args: issueArgs.slice(1),
+      }),
+    ).rejects.toThrow(/scope arguments/);
   });
 
   it('rejects circuits without a challenge builder', async () => {

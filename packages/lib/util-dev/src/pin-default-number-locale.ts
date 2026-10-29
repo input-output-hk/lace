@@ -17,13 +17,13 @@ const realNumberToLocaleString = Number.prototype.toLocaleString;
  * file formats anything.
  */
 export const pinDefaultNumberLocale = (locale = 'en-US'): void => {
-  vi.spyOn(Intl, 'NumberFormat').mockImplementation(
-    ((requested?: string[] | string, options?: Intl.NumberFormatOptions) =>
-      new RealNumberFormat(
-        requested ?? locale,
-        options,
-      )) as unknown as typeof Intl.NumberFormat,
-  );
+  // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+  vi.spyOn(Intl, 'NumberFormat').mockImplementation(function (
+    requested?: string[] | string,
+    options?: Intl.NumberFormatOptions,
+  ) {
+    return new RealNumberFormat(requested ?? locale, options);
+  } as unknown as typeof Intl.NumberFormat);
 
   vi.spyOn(Number.prototype, 'toLocaleString').mockImplementation(function (
     this: number,

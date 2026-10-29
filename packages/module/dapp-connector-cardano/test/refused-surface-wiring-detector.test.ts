@@ -18,6 +18,7 @@ import {
   ACCOUNT_ID,
   CASE_A_TX_CBOR,
   CASE_B_TX_CBOR,
+  MAINNET_OUTPUT_TX_CBOR,
   chainId,
   mockAccount,
   mockAddresses,
@@ -216,9 +217,36 @@ beforeEach(() => {
 });
 
 describe('the verdict reaches the surface', () => {
+  it('a cross-network body reaches the surface as a NETWORK verdict, carrying both network names', async () => {
+    const { api, emitted, requestsAtSignTxSeam, shutdown } = setUpWiring();
+
+    await expect(
+      api.signTx(MAINNET_OUTPUT_TX_CBOR, true, SENDER),
+    ).rejects.toMatchObject({ name: 'TxSignError' });
+
+    // The verdict survives the same three hops the collateral one does.
+    const expected = {
+      kind: 'network',
+      cause: 'states-other-network',
+      statedNetwork: 'mainnet',
+      walletNetwork: 'preprod',
+    };
+    expect(requestsAtSignTxSeam).toHaveLength(1);
+    expect(requestsAtSignTxSeam[0].refusal).toEqual(expected);
+
+    const pending = pendingRequestAfterReducer(emitted);
+    expect(pending?.refusal).toEqual(expected);
+    expect(pending?.dappOrigin).toBe(ORIGIN);
+
+    shutdown();
+  });
+
   it('case (b): the block verdict survives all three explicit-field hops and is readable at selectPendingSignTxRequest', async () => {
     const txCbor = CASE_B_TX_CBOR;
-    const expected = 'foreign-collateral-return';
+    const expected = {
+      kind: 'collateral',
+      case: 'foreign-collateral-return',
+    };
     const { api, emitted, requestsAtSignTxSeam, signTransaction, shutdown } =
       setUpWiring();
 
@@ -228,12 +256,12 @@ describe('the verdict reaches the surface', () => {
 
     // HOP 1: the confirmation callback carried the verdict onto the request.
     expect(requestsAtSignTxSeam).toHaveLength(1);
-    expect(requestsAtSignTxSeam[0].collateralRefusal).toBe(expected);
+    expect(requestsAtSignTxSeam[0].refusal).toEqual(expected);
     expect(requestsAtSignTxSeam[0].txHex).toBe(txCbor);
 
     // HOP 2 + HOP 3: `signTx$`'s payload, through the real reducer.
     const pending = pendingRequestAfterReducer(emitted);
-    expect(pending?.collateralRefusal).toBe(expected);
+    expect(pending?.refusal).toEqual(expected);
     expect(pending?.dappOrigin).toBe(ORIGIN);
 
     // The surface was actually asked to open, in the mode this harness
@@ -266,9 +294,9 @@ describe('the verdict reaches the surface', () => {
       expect(requestsAtSignTxSeam).toHaveLength(1);
     });
 
-    expect(requestsAtSignTxSeam[0].collateralRefusal).toBeNull();
+    expect(requestsAtSignTxSeam[0].refusal).toBeNull();
     const pending = pendingRequestAfterReducer(emitted);
-    expect(pending?.collateralRefusal).toBeNull();
+    expect(pending?.refusal).toBeNull();
     expect(pending?.txHex).toBe(CASE_A_TX_CBOR);
 
     // The allow path is a real consent round-trip: it waits for the user. An

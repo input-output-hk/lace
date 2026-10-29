@@ -1,7 +1,12 @@
-import { SerialisedWalletState } from '@lace-contract/midnight-context';
+import {
+  DEFAULT_NETWORKS_CONFIG,
+  MidnightSDKNetworkIds,
+  SerialisedWalletState,
+} from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import * as LaceSdkUtil from '@lace-lib/util';
+import { configureWasmProver } from '@lace-lib/vendor/wasm-proof-backend';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import * as WalletSdk from '@midnightntwrk/wallet-sdk';
 import * as WalletSdkDustWallet from '@midnightntwrk/wallet-sdk/dust';
@@ -13,6 +18,8 @@ import {
   defer,
   EMPTY,
   firstValueFrom,
+  ignoreElements,
+  lastValueFrom,
   mergeMap,
   of,
   Subject,
@@ -23,8 +30,13 @@ import {
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { initializeMidnightSideEffectDependencies } from '../../src/store/dependencies';
+import { createMidnightSideEffectDependencies } from '../../src/store/dependencies';
+import { initializeMidnightSideEffectDependencies } from '../../src/store/initialize-dependencies';
+import { createSdkStoreInit } from '../../src/store/sdk-init';
+import * as accountKeyManager from '../../src/store/side-effects/account-key-manager';
+import { watchMidnightAccount } from '../../src/store/side-effects/watch';
 
+import type { CreateAttestedProver } from '../../src/store/dependencies';
 import type {
   AccountKeyManager,
   AccountKeys,
@@ -129,6 +141,9 @@ const { zswapSecretKeysMock, dustSecretKeyMock } = vi.hoisted(() => ({
   dustSecretKeyMock: { clear: vi.fn() },
 }));
 vi.mock('@midnight-ntwrk/ledger-v8', () => ({
+  createProvingPayload: vi.fn((preimage: Uint8Array) => preimage),
+  createCheckPayload: vi.fn((preimage: Uint8Array) => preimage),
+  parseCheckResult: vi.fn(() => []),
   DustSecretKey: { fromSeed: vi.fn().mockReturnValue(dustSecretKeyMock) },
   ZswapSecretKeys: {
     fromSeed: vi.fn().mockReturnValue(zswapSecretKeysMock),
@@ -245,18 +260,28 @@ const unshieldedWalletMock = {
   start: vi.fn().mockResolvedValue(undefined),
   stop: vi.fn().mockResolvedValue(undefined),
   serializeState: vi.fn().mockResolvedValue('unshielded-state'),
+  balanceFinalizedTransaction: vi.fn(),
+  balanceUnboundTransaction: vi.fn(),
+  initSwap: vi.fn(),
+  transferTransaction: vi.fn(),
+  revertTransaction: vi.fn(),
 };
 
 const shieldedWalletMock = {
   start: vi.fn().mockResolvedValue(undefined),
   stop: vi.fn().mockResolvedValue(undefined),
   serializeState: vi.fn().mockResolvedValue('shielded-state'),
+  balanceTransaction: vi.fn(),
+  initSwap: vi.fn(),
+  transferTransaction: vi.fn(),
+  revertTransaction: vi.fn(),
 };
 
 const dustWalletMock = {
   start: vi.fn().mockResolvedValue(undefined),
   stop: vi.fn().mockResolvedValue(undefined),
   serializeState: vi.fn().mockResolvedValue('dust-state'),
+  balanceTransactions: vi.fn(),
 };
 
 const walletFacadeMock = {
@@ -278,6 +303,7 @@ const walletFacadeMock = {
   estimateTransactionFee: vi.fn(),
   initSwap: vi.fn(),
   deregisterFromDustGeneration: vi.fn(),
+  revert: vi.fn().mockResolvedValue(undefined),
 };
 
 WalletFacadeInitMock.mockReturnValue(
@@ -303,8 +329,11 @@ const txHistoryStorageMock = {
   serialize: vi.fn().mockResolvedValue('tx-history'),
 } as unknown as WalletSdk.InMemoryTransactionHistoryStorage;
 
-vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage).mockReturnValue(
-  txHistoryStorageMock,
+vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage).mockImplementation(
+  // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+  function () {
+    return txHistoryStorageMock;
+  },
 );
 vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage.restore).mockReturnValue(
   txHistoryStorageMock,
@@ -316,12 +345,12 @@ const { midnightAccount } = stubData;
 
 const config: MidnightNetworkConfig = {
   indexerAddress: 'http://indexer.test',
-  proofServerAddress: 'http://proof.test',
+  proofServer: { kind: 'local-host', url: 'http://proof.test' },
   nodeAddress: 'http://node.test',
 };
 
 const midnightSideEffectDependencies = initializeMidnightSideEffectDependencies(
-  {} as Readonly<ModuleInitProps>,
+  { runtime: {} } as Readonly<ModuleInitProps>,
   { logger: dummyLogger },
 );
 
@@ -352,6 +381,46 @@ describe('startMidnightAccountWallet', () => {
     };
     vi.clearAllMocks();
     walletFacadeMock.state.mockReturnValue(of(createMockFacadeState()));
+  });
+
+  describe('batch updates', () => {
+    const batchUpdatesPassedToFacade = async (
+      dependencies: typeof midnightSideEffectDependencies,
+    ) => {
+      await firstValueFrom(
+        dependencies.startMidnightAccountWallet({
+          account:
+            midnightAccount as unknown as InMemoryWalletAccount<MidnightAccountProps>,
+          config,
+          store,
+          keyManager: createMockKeyManager({
+            keys$: of(createMockAccountKeys()),
+          }),
+        }),
+      );
+      const [{ configuration }] = WalletFacadeInitMock.mock.calls[0] as [
+        { configuration: { batchUpdates: { size: number; spacing: number } } },
+      ];
+      return configuration.batchUpdates;
+    };
+
+    it('applies 12 events per chunk 4ms apart by default', async () => {
+      expect(
+        await batchUpdatesPassedToFacade(midnightSideEffectDependencies),
+      ).toEqual({ size: 12, spacing: 4 });
+    });
+
+    it('applies the configured batch tuning', async () => {
+      expect(
+        await batchUpdatesPassedToFacade(
+          createMidnightSideEffectDependencies({
+            batchUpdates: { size: 64, spacing: 0 },
+          })({ runtime: {} } as Readonly<ModuleInitProps>, {
+            logger: dummyLogger,
+          }),
+        ),
+      ).toEqual({ size: 64, spacing: 0 });
+    });
   });
 
   describe('wallet creation', () => {
@@ -414,13 +483,14 @@ describe('startMidnightAccountWallet', () => {
 
     it('wires the wallet to the tx-history storage it persists (LW-15122)', async () => {
       const createdStorages: WalletSdk.InMemoryTransactionHistoryStorage[] = [];
-      const makeStorageStub = () => {
+      // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+      function makeStorageStub() {
         const stub = {
           serialize: vi.fn().mockReturnValue('[]'),
         } as unknown as WalletSdk.InMemoryTransactionHistoryStorage;
         createdStorages.push(stub);
         return stub;
-      };
+      }
       vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage)
         .mockImplementationOnce(makeStorageStub) // config-literal default
         .mockImplementationOnce(makeStorageStub); // fresh-path instance
@@ -451,6 +521,275 @@ describe('startMidnightAccountWallet', () => {
       expect(initArgument.configuration.txHistoryStorage).not.toBe(
         createdStorages[0],
       );
+    });
+
+    it.each([
+      { kind: 'local-host', url: 'http://localhost:6300' },
+      { kind: 'in-process' },
+    ] as const)(
+      'injects the $kind service without a fallback server URL',
+      async proofServer => {
+        configureWasmProver(() => ({
+          check: async () => [],
+          prove: async () => new Uint8Array(),
+        }));
+        const keyManager = createMockKeyManager({
+          keys$: of(createMockAccountKeys()),
+        });
+
+        await firstValueFrom(
+          midnightSideEffectDependencies.startMidnightAccountWallet({
+            account:
+              midnightAccount as unknown as InMemoryWalletAccount<MidnightAccountProps>,
+            config: { ...config, proofServer },
+            store,
+            keyManager,
+          }),
+        );
+
+        const initArgument = WalletFacadeInitMock.mock.calls[0]?.[0] as {
+          configuration: Record<string, unknown>;
+          provingService?: () => unknown;
+        };
+        expect(initArgument.provingService).toBeTypeOf('function');
+        expect(initArgument.configuration).not.toHaveProperty(
+          'provingServerUrl',
+        );
+      },
+    );
+
+    describe('on a tee-delegated proof server', () => {
+      const createMockAttestedProver: CreateAttestedProver = () => ({
+        id: 'test',
+        phases: [],
+        operations: ['prove'],
+        establishAttestedSession: async () => {
+          throw new Error('Unexpected proving during wallet startup');
+        },
+      });
+      const teeConfig: MidnightNetworkConfig = {
+        ...config,
+        proofServer: {
+          kind: 'tee-delegated',
+          url: 'https://tee.test',
+          label: 'TEE',
+        },
+      };
+      const start = async (
+        dependencies: ReturnType<
+          ReturnType<typeof createMidnightSideEffectDependencies>
+        >,
+      ) =>
+        firstValueFrom(
+          dependencies.startMidnightAccountWallet({
+            account:
+              midnightAccount as unknown as InMemoryWalletAccount<MidnightAccountProps>,
+            config: teeConfig,
+            store,
+            keyManager: createMockKeyManager({
+              keys$: of(createMockAccountKeys()),
+            }),
+          }),
+        );
+
+      it.each([MidnightSDKNetworkIds.MainNet, MidnightSDKNetworkIds.Preview])(
+        'wires the preprod ledger indexer into the attested prover when watching a %s wallet',
+        async networkId => {
+          const preprodIndexerUrl =
+            'https://ledger.example/preprod/graphql?apiKey=preprod';
+          const networksConfig = {
+            ...DEFAULT_NETWORKS_CONFIG,
+            preprod: {
+              ...DEFAULT_NETWORKS_CONFIG.preprod,
+              indexerAddress: preprodIndexerUrl,
+            },
+            [networkId]: {
+              ...teeConfig,
+              indexerAddress: `https://wallet.example/${networkId}/graphql`,
+            },
+          };
+          const account = {
+            ...midnightAccount,
+            blockchainSpecific: {
+              ...midnightAccount.blockchainSpecific,
+              networkId,
+            },
+          } as unknown as InMemoryWalletAccount<MidnightAccountProps>;
+          const createAttestedProver = vi.fn(createMockAttestedProver);
+          const dependencies = createMidnightSideEffectDependencies({
+            createAttestedProver,
+          })({ runtime: {} } as Readonly<ModuleInitProps>, {
+            logger: dummyLogger,
+          });
+          const keyManagerSpy = vi
+            .spyOn(accountKeyManager, 'createAccountKeyManager')
+            .mockReturnValue(
+              createMockKeyManager({ keys$: of(createMockAccountKeys()) }),
+            );
+          const watch = watchMidnightAccount(
+            account,
+            networksConfig[networkId],
+            store,
+          );
+          const startMidnightAccountWallet = vi.fn(
+            (
+              options: Parameters<
+                typeof dependencies.startMidnightAccountWallet
+              >[0],
+            ) =>
+              dependencies.startMidnightAccountWallet(options).pipe(
+                take(1),
+                mergeMap(wallet => wallet.stop().pipe(ignoreElements())),
+              ),
+          );
+          try {
+            await lastValueFrom(
+              watch(
+                {} as Parameters<typeof watch>[0],
+                {
+                  midnightContext: {
+                    selectNetworksConfig$: of(networksConfig),
+                  },
+                } as Parameters<typeof watch>[1],
+                {
+                  ...dependencies,
+                  runtime: {},
+                  startMidnightAccountWallet,
+                } as unknown as Parameters<typeof watch>[2],
+              ),
+              { defaultValue: undefined },
+            );
+            expect(startMidnightAccountWallet).toHaveBeenCalledOnce();
+            expect(WalletFacadeInitMock).toHaveBeenCalledOnce();
+            expect(createAttestedProver).toHaveBeenCalledOnce();
+            const options = createAttestedProver.mock.calls[0][0];
+            expect(options).toMatchObject({
+              networkId,
+              proofServerApiUrl: 'https://tee.test',
+            });
+            await expect(options.getLedgerIndexerUrl()).resolves.toBe(
+              preprodIndexerUrl,
+            );
+          } finally {
+            keyManagerSpy.mockRestore();
+          }
+        },
+      );
+
+      it('starts when the loadout supplies an attested prover', async () => {
+        const createAttestedProver = vi.fn(createMockAttestedProver);
+        const dependencies = createMidnightSideEffectDependencies({
+          createAttestedProver,
+        })({ runtime: {} } as Readonly<ModuleInitProps>, {
+          logger: dummyLogger,
+        });
+
+        const wallet = await start(dependencies);
+
+        expect(wallet.accountId).toBe(midnightAccount.accountId);
+      });
+
+      it('serves SDK circuits through the injected session and closes after success and failure', async () => {
+        const prove = vi.fn().mockResolvedValue(new Uint8Array([7]));
+        const close = vi.fn().mockResolvedValue(undefined);
+        const createAttestedProver = vi.fn(() => ({
+          id: 'sdk-test',
+          phases: [],
+          operations: ['prove' as const],
+          establishAttestedSession: async () => ({ prove, close }),
+        }));
+        const loaded = await createSdkStoreInit({
+          auth: { authenticate: () => of(true), accessAuthSecret: vi.fn() },
+          createAttestedProver,
+        })(
+          {
+            runtime: { config: { defaultMidnightTestnetNetworkId: 'preview' } },
+          } as ModuleInitProps,
+          { logger: dummyLogger },
+        );
+        const wallet = await start(
+          loaded.sideEffectDependencies as ReturnType<
+            ReturnType<typeof createMidnightSideEffectDependencies>
+          >,
+        );
+        expect(createAttestedProver).toHaveBeenCalledWith({
+          networkId: midnightAccount.blockchainSpecific.networkId,
+          proofServerApiUrl:
+            teeConfig.proofServer.kind === 'tee-delegated'
+              ? teeConfig.proofServer.url
+              : '',
+          getLedgerIndexerUrl: expect.any(Function) as unknown,
+        });
+        await expect(
+          wallet.proofCircuitProvider.prove({
+            serializedPreimage: new Uint8Array([1]),
+            keyLocation: 'midnight/test',
+          }),
+        ).resolves.toEqual(new Uint8Array([7]));
+        prove.mockRejectedValueOnce(new Error('channel failed'));
+        await expect(
+          wallet.proofCircuitProvider.prove({
+            serializedPreimage: new Uint8Array([2]),
+            keyLocation: 'midnight/test',
+          }),
+        ).rejects.toThrow('channel failed');
+        expect(close).toHaveBeenCalledTimes(2);
+        await expect(
+          wallet.proofCircuitProvider.check({
+            serializedPreimage: new Uint8Array([3]),
+            keyLocation: 'midnight/test',
+          }),
+        ).rejects.toThrow('not available');
+        expect(prove).toHaveBeenCalledTimes(2);
+        await firstValueFrom(wallet.stop());
+      });
+
+      it('refuses a recognized TEE host disguised as delegated HTTP at engine startup', async () => {
+        const dependencies = createMidnightSideEffectDependencies({
+          createAttestedProver: vi.fn(),
+        })({ runtime: {} } as ModuleInitProps, { logger: dummyLogger });
+        await expect(
+          firstValueFrom(
+            dependencies.startMidnightAccountWallet({
+              account:
+                midnightAccount as unknown as InMemoryWalletAccount<MidnightAccountProps>,
+              config: {
+                ...config,
+                proofServer: {
+                  kind: 'delegated',
+                  url: 'https://api.proofserver.wastedp.io/',
+                  label: 'ordinary',
+                },
+              },
+              store,
+              keyManager: createMockKeyManager({
+                keys$: of(createMockAccountKeys()),
+              }),
+            }),
+          ),
+        ).rejects.toThrow('select tee-delegated');
+        expect(WalletFacadeInitMock).not.toHaveBeenCalled();
+      });
+
+      it("proves through the Temenos prover in the app's own dependencies", async () => {
+        // The Temenos prover only attests its baked deployments, so the test
+        // server reaching its check shows the app supplies it.
+        await expect(start(midnightSideEffectDependencies)).rejects.toThrow(
+          'No baked Temenos attestation config',
+        );
+      });
+
+      it('does not start without an attested prover', async () => {
+        const dependencies = createMidnightSideEffectDependencies()(
+          { runtime: {} } as Readonly<ModuleInitProps>,
+          { logger: dummyLogger },
+        );
+
+        await expect(start(dependencies)).rejects.toThrow(
+          'proof server mode "tee-delegated" needs an attested prover',
+        );
+        expect(WalletFacadeInitMock).not.toHaveBeenCalled();
+      });
     });
 
     it('discards unreadable persisted state and rebuilds from seed', async () => {
@@ -1217,7 +1556,7 @@ describe('startMidnightAccountWallet', () => {
     });
   });
 
-  describe('balance method wrappers forward tokenKindsToBalance to walletFacade', () => {
+  describe('balance method wrappers', () => {
     const startWallet = async () => {
       const keyManager = createMockKeyManager({
         keys$: of(createMockAccountKeys()),
@@ -1265,38 +1604,126 @@ describe('startMidnightAccountWallet', () => {
       );
     });
 
-    it('balanceFinalizedTransaction passes tokenKindsToBalance to the facade', async () => {
+    // The connector balancing steps run over the facade's sub-wallets, so
+    // that a failed step releases what the earlier ones reserved.
+    it('balanceFinalizedTransaction balances only the kinds it is given', async () => {
+      const balancing = { merge: vi.fn() };
+      shieldedWalletMock.balanceTransaction.mockResolvedValueOnce(balancing);
       const wallet = await startWallet();
 
-      await firstValueFrom(
+      const recipe = await firstValueFrom(
         wallet.balanceFinalizedTransaction(mockTx, {
           ttl,
           tokenKindsToBalance: ['shielded'],
         }),
       );
 
-      expect(walletFacadeMock.balanceFinalizedTransaction).toHaveBeenCalledWith(
+      expect(shieldedWalletMock.balanceTransaction).toHaveBeenCalledWith(
+        zswapSecretKeysMock,
         mockTx,
-        expect.any(Object),
-        { ttl, tokenKindsToBalance: ['shielded'] },
       );
+      expect(
+        unshieldedWalletMock.balanceFinalizedTransaction,
+      ).not.toHaveBeenCalled();
+      expect(dustWalletMock.balanceTransactions).not.toHaveBeenCalled();
+      expect(recipe).toEqual({
+        type: 'FINALIZED_TRANSACTION',
+        originalTransaction: mockTx,
+        balancingTransaction: balancing,
+      });
     });
 
-    it('balanceUnboundTransaction passes tokenKindsToBalance to the facade', async () => {
+    it('balanceUnboundTransaction releases its shielded balancing, not the dApp transaction, when the fee cannot be paid', async () => {
+      const shieldedBalancing = { type: 'shielded-balancing' };
+      shieldedWalletMock.balanceTransaction.mockResolvedValueOnce(
+        shieldedBalancing,
+      );
+      shieldedWalletMock.revertTransaction.mockResolvedValueOnce(undefined);
+      // Adds inputs to the dApp transaction without reserving them.
+      unshieldedWalletMock.balanceUnboundTransaction.mockResolvedValueOnce(
+        mockTx,
+      );
+      dustWalletMock.balanceTransactions.mockRejectedValueOnce(
+        new Error('Insufficient DUST'),
+      );
       const wallet = await startWallet();
 
-      await firstValueFrom(
-        wallet.balanceUnboundTransaction(mockTx, {
-          ttl,
-          tokenKindsToBalance: ['unshielded'],
+      await expect(
+        firstValueFrom(wallet.balanceUnboundTransaction(mockTx, { ttl })),
+      ).rejects.toThrow('Insufficient DUST');
+      expect(
+        shieldedWalletMock.revertTransaction,
+      ).toHaveBeenCalledExactlyOnceWith(shieldedBalancing);
+      expect(unshieldedWalletMock.revertTransaction).not.toHaveBeenCalled();
+      expect(walletFacadeMock.balanceUnboundTransaction).not.toHaveBeenCalled();
+    });
+
+    it('transferTransaction releases its reservations when the fee cannot be paid', async () => {
+      const transfer = { type: 'unshielded-transfer' };
+      unshieldedWalletMock.transferTransaction.mockResolvedValueOnce(transfer);
+      unshieldedWalletMock.revertTransaction.mockResolvedValueOnce(undefined);
+      dustWalletMock.balanceTransactions.mockRejectedValueOnce(
+        new Error('Insufficient DUST'),
+      );
+      const wallet = await startWallet();
+
+      await expect(
+        firstValueFrom(
+          wallet.transferTransaction(
+            [{ type: 'unshielded', outputs: [{}] }] as never,
+            { ttl },
+          ),
+        ),
+      ).rejects.toThrow('Insufficient DUST');
+      expect(
+        unshieldedWalletMock.revertTransaction,
+      ).toHaveBeenCalledExactlyOnceWith(transfer);
+      expect(walletFacadeMock.transferTransaction).not.toHaveBeenCalled();
+    });
+
+    it('initSwap releases its reservation when the fee cannot be paid', async () => {
+      const swap = { type: 'unshielded-swap' };
+      unshieldedWalletMock.initSwap.mockResolvedValueOnce(swap);
+      unshieldedWalletMock.revertTransaction.mockResolvedValueOnce(undefined);
+      dustWalletMock.balanceTransactions.mockRejectedValueOnce(
+        new Error('Insufficient DUST'),
+      );
+      const wallet = await startWallet();
+
+      await expect(
+        firstValueFrom(
+          wallet.initSwap({ unshielded: { aa: 1n } } as never, [], {
+            ttl,
+            payFees: true,
+          }),
+        ),
+      ).rejects.toThrow('Insufficient DUST');
+      expect(
+        unshieldedWalletMock.revertTransaction,
+      ).toHaveBeenCalledExactlyOnceWith(swap);
+      expect(walletFacadeMock.initSwap).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('revert', () => {
+    it('releases a built recipe through the facade', async () => {
+      const keyManager = createMockKeyManager({
+        keys$: of(createMockAccountKeys()),
+      });
+      const wallet = await firstValueFrom(
+        midnightSideEffectDependencies.startMidnightAccountWallet({
+          account:
+            midnightAccount as unknown as InMemoryWalletAccount<MidnightAccountProps>,
+          config,
+          store,
+          keyManager,
         }),
       );
+      const recipe = { type: 'UNPROVEN_TRANSACTION' } as never;
 
-      expect(walletFacadeMock.balanceUnboundTransaction).toHaveBeenCalledWith(
-        mockTx,
-        expect.any(Object),
-        { ttl, tokenKindsToBalance: ['unshielded'] },
-      );
+      await firstValueFrom(wallet.revert(recipe), { defaultValue: undefined });
+
+      expect(walletFacadeMock.revert).toHaveBeenCalledWith(recipe);
     });
   });
 
@@ -1330,9 +1757,15 @@ describe('startMidnightAccountWallet', () => {
       Object.assign(unshieldedWalletMock, {
         serializeState: vi.fn().mockResolvedValue('unshielded-serialized'),
       });
-      vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage).mockReturnValue({
+      const txHistoryStorage = {
         serialize: vi.fn().mockResolvedValue('txhistory-serialized'),
-      } as unknown as WalletSdk.InMemoryTransactionHistoryStorage);
+      } as unknown as WalletSdk.InMemoryTransactionHistoryStorage;
+      vi.mocked(WalletSdk.InMemoryTransactionHistoryStorage).mockImplementation(
+        // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+        function () {
+          return txHistoryStorage;
+        },
+      );
       vi.mocked(store.upsert).mockReturnValue(of(void 0));
     });
 

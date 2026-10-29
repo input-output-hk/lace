@@ -69,9 +69,10 @@ const mockBitcoinWalletInstance = {
   fetchTxHistoryUpTo: vi.fn(() => of(Ok(false))),
 };
 
-vi.mocked(BitcoinWallet).mockImplementation(
-  () => mockBitcoinWalletInstance as never,
-);
+// eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+vi.mocked(BitcoinWallet).mockImplementation(function () {
+  return mockBitcoinWalletInstance as never;
+});
 
 const actions = {
   ...addressesActions,

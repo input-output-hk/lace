@@ -17,6 +17,10 @@ import type { Theme } from '../../design-tokens';
 import type { BrowsePoolSortOption } from '../util/types';
 import type { LaceBrowsePool } from '@lace-contract/cardano-stake-pools';
 
+// The field always needs a commit target; a template rendered without a search
+// handler (stories, a caller that does not filter) simply drops the query.
+const ignoreSearch = (): void => undefined;
+
 export interface BrowsePoolProps {
   data: LaceBrowsePool[];
   cardVariant?: BrowsePoolSortOption;
@@ -28,9 +32,20 @@ export interface BrowsePoolProps {
   searchPlaceholder: string;
   theme: Theme;
   networkInfoValues: NetworkInfoCardProps;
+  /**
+   * The COMMITTED query. It seeds the field on mount and re-seeds it if the
+   * list remounts (this is a grid, which still remounts on its first real
+   * layout — see GenericFlashList), but it does not drive the input: the field
+   * owns its text and reports only the settled query (ADR 64).
+   */
   searchValue?: string;
-  onSearchChange?: (value: string) => void;
-  onFilterPress?: () => void;
+  onSearchCommit?: (value: string) => void;
+  /**
+   * Receives the text in the search field, which the field commits before
+   * calling this. Read the query from the argument, not from the state fed
+   * back through `searchValue`: that commit has not re-rendered yet.
+   */
+  onFilterPress?: (searchText: string) => void;
   onPoolPress: (poolId: string) => void;
   hasActiveFilters?: boolean;
   /**
@@ -55,7 +70,7 @@ export const BrowsePoolTemplate = ({
   theme,
   networkInfoValues,
   searchValue,
-  onSearchChange,
+  onSearchCommit,
   onFilterPress,
   onPoolPress,
   hasActiveFilters = false,
@@ -159,8 +174,8 @@ export const BrowsePoolTemplate = ({
         <NetworkInfoCard {...networkInfoValues} />
         <SearchBar
           placeholder={searchPlaceholder}
-          value={searchValue}
-          onChangeText={onSearchChange}
+          initialValue={searchValue}
+          onSearchCommit={onSearchCommit ?? ignoreSearch}
           extraStyle={defaultStyles.searchBar}
           actions={searchBarActions}
         />
@@ -173,7 +188,7 @@ export const BrowsePoolTemplate = ({
       notice,
       searchPlaceholder,
       searchValue,
-      onSearchChange,
+      onSearchCommit,
       searchBarActions,
     ],
   );

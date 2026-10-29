@@ -11,6 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { SignTxErrorBox } from './SignTxError';
+
 import type { IconName } from '@lace-lib/ui-toolkit';
 
 /**
@@ -44,6 +46,7 @@ export interface SignTxResultProps {
   titleKey?: TranslationKey;
   /** Override the default description translation key. */
   descriptionKey?: TranslationKey;
+  error?: unknown;
   /** Test identifier prefix */
   testID?: string;
 }
@@ -53,7 +56,6 @@ export interface SignTxResultProps {
  */
 interface ResultStateConfig {
   icon: IconName;
-  iconVariant: 'solid' | 'stroke';
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
   getIconColor: (theme: ReturnType<typeof useTheme>['theme']) => string;
@@ -66,21 +68,18 @@ const FAILURE_BODY_KEY = 'dapp-connector.cardano.sign-tx.result.failure.body';
 const RESULT_STATE_CONFIGS: Record<SignTxResultState, ResultStateConfig> = {
   success: {
     icon: 'RelievedFace',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-tx.result.success.title',
     descriptionKey: 'dapp-connector.cardano.sign-tx.result.success.description',
     getIconColor: theme => theme.text.primary,
   },
   failure: {
     icon: 'Sad',
-    iconVariant: 'stroke',
     titleKey: FAILURE_DRAWER_TITLE_KEY,
     descriptionKey: FAILURE_BODY_KEY,
     getIconColor: theme => theme.text.primary,
   },
   rejected: {
     icon: 'Sad',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-tx.result.rejected.title',
     descriptionKey:
       'dapp-connector.cardano.sign-tx.result.rejected.description',
@@ -88,7 +87,6 @@ const RESULT_STATE_CONFIGS: Record<SignTxResultState, ResultStateConfig> = {
   },
   signing: {
     icon: 'Clock',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-tx.result.signing.title',
     descriptionKey: 'dapp-connector.cardano.sign-tx.result.signing.description',
     getIconColor: theme => theme.text.primary,
@@ -107,6 +105,7 @@ export const SignTxResult = ({
   dappOrigin,
   titleKey,
   descriptionKey,
+  error,
   testID,
 }: SignTxResultProps): React.ReactElement => {
   const { t } = useTranslation();
@@ -163,12 +162,7 @@ export const SignTxResult = ({
           <View
             style={styles.iconContainer}
             testID={testID ? `${testID}-icon` : undefined}>
-            <Icon
-              name={config.icon}
-              size={64}
-              variant={config.iconVariant}
-              color={iconColor}
-            />
+            <Icon name={config.icon} size={64} color={iconColor} />
           </View>
 
           <Text.M
@@ -177,6 +171,9 @@ export const SignTxResult = ({
             testID={testID ? `${testID}-description` : undefined}>
             {t(resolvedDescriptionKey, descriptionInterpolation)}
           </Text.M>
+          {state === 'failure' && error != null && (
+            <SignTxErrorBox error={error} />
+          )}
         </Column>
       </Column>
     </Sheet.Scroll>

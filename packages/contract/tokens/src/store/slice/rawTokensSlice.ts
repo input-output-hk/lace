@@ -14,13 +14,21 @@ import type { Address } from '@lace-contract/addresses';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+/** Raw token balances keyed by account, then address, then token ID. */
 export type MultiAccountsTokensMap = Record<
   AccountId,
   Partial<Record<Address, Partial<Record<TokenId, RawToken>>>>
 >;
 
+/** The raw token balances slice: balances keyed by account, then address, then token ID. */
 export type RawTokensState = Partial<MultiAccountsTokensMap>;
 
+/**
+ * The complete token balances of one account at one address. They replace
+ * that address's stored balances: tokens absent from the list or with zero
+ * `available` and `pending` balances are removed, and an empty list removes
+ * the address.
+ */
 export type SetTokensPayload = {
   tokens: Omit<RawToken, 'accountId' | 'address' | 'blockchainName'>[];
   accountId: RawToken['accountId'];
@@ -28,6 +36,7 @@ export type SetTokensPayload = {
   blockchainName: RawToken['blockchainName'];
 };
 
+/** The complete token balances of one account, per address, replacing everything stored for that account. */
 export type SetAccountTokensPayload = {
   byAddress: Array<{
     /***
@@ -40,6 +49,7 @@ export type SetAccountTokensPayload = {
   blockchainName: RawToken['blockchainName'];
 };
 
+/** Identifies the account whose stored token balances are all removed. */
 export type ResetAddressTokensPayload = {
   accountId: AccountId;
 };

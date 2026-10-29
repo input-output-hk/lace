@@ -71,7 +71,6 @@ type HeaderAvatar = {
 
 interface SheetHeaderProps {
   title: string;
-  leftIcon?: IconName;
   leftIconOnPress?: () => void;
   subtitle?: string;
   testID?: string;
@@ -79,6 +78,8 @@ interface SheetHeaderProps {
   headerAvatar?: HeaderAvatar;
   showDivider?: boolean;
   handleClose?: () => void;
+  /** Defaults to web-only for legacy consumers; lace-next opts in on every platform. */
+  showCloseButton?: boolean;
 }
 
 export interface ButtonConfig {
@@ -129,9 +130,9 @@ const SheetContainer = ({ children, style, ...props }: ViewProps) => {
 
 const Header = ({
   title,
-  leftIcon = 'CaretLeft',
   leftIconOnPress,
   handleClose,
+  showCloseButton = isWeb,
   subtitle,
   headerIcon,
   headerAvatar,
@@ -168,7 +169,7 @@ const Header = ({
       <Row alignItems="center" justifyContent="center" style={styles.headerRow}>
         {leftIconOnPress && (
           <IconButton.Static
-            icon={<Icon name={leftIcon} size={24} />}
+            icon={<Icon name="CaretLeft" size={24} />}
             onPress={leftIconOnPress}
             containerStyle={styles.leftIcon}
             testID={`${testID}-left-icon`}
@@ -191,7 +192,7 @@ const Header = ({
             {title}
           </Text.S>
         </Row>
-        {isWeb && (
+        {showCloseButton && (
           <IconButton.Static
             icon={<Icon name="Cancel" size={20} />}
             onPress={onClosePress}

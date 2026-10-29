@@ -20,6 +20,9 @@ export interface QrScannerSheetProps {
    * headerless stack so the permission / Done buttons land on the real sheet
    * chrome instead of a navigator that never renders a footer.
    */
+  onFooterChange?: (
+    footer: React.ComponentProps<typeof Sheet.Footer> | null,
+  ) => void;
   footerNavigation?: {
     setOptions: (options: { footer?: React.ReactNode }) => void;
   };
@@ -31,6 +34,7 @@ export const QrScannerSheet = ({
   validateScan,
   theme,
   footerNavigation,
+  onFooterChange,
 }: QrScannerSheetProps) => {
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -44,9 +48,9 @@ export const QrScannerSheet = ({
 
   const styles = getStyles(theme);
 
-  const handleOpenSettings = () => {
+  const handleOpenSettings = useCallback(() => {
     void Linking.openSettings();
-  };
+  }, []);
 
   const handleRequestPermission = useCallback(async () => {
     setIsRequestingPermission(true);
@@ -80,11 +84,10 @@ export const QrScannerSheet = ({
   }, [getPermission]);
 
   useEffect(() => {
-    if (!permission?.granted) {
-      footerNav.setOptions({
-        footer: (
-          <Sheet.Footer
-            primaryButton={{
+    const footer: React.ComponentProps<typeof Sheet.Footer> | null =
+      !permission?.granted
+        ? {
+            primaryButton: {
               label:
                 permission?.canAskAgain === false
                   ? t('v2.send-flow.qr-scanner.open-settings')
@@ -94,38 +97,38 @@ export const QrScannerSheet = ({
                   ? handleOpenSettings
                   : handleRequestPermission,
               loading: isRequestingPermission,
-            }}
-            secondaryButton={
+            },
+            secondaryButton:
               permission?.canAskAgain === false
                 ? undefined
                 : {
                     label: t('v2.send-flow.qr-scanner.open-settings'),
                     onPress: handleOpenSettings,
-                  }
-            }
-          />
-        ),
+                  },
+          }
+        : onFooterChange
+        ? null
+        : {
+            primaryButton: {
+              label: t('v2.send-flow.qr-scanner.done'),
+              onPress: onClose,
+            },
+          };
+    if (onFooterChange) onFooterChange(footer);
+    else
+      footerNav.setOptions({
+        footer: footer ? <Sheet.Footer {...footer} /> : undefined,
       });
-      return;
-    }
-
-    navigation.setOptions({
-      footer: (
-        <Sheet.Footer
-          primaryButton={{
-            label: t('v2.send-flow.qr-scanner.done'),
-            onPress: onClose,
-          }}
-        />
-      ),
-    });
   }, [
     footerNav,
-    permission,
+    permission?.granted,
+    permission?.canAskAgain,
     t,
+    handleOpenSettings,
     handleRequestPermission,
     isRequestingPermission,
     onClose,
+    onFooterChange,
   ]);
 
   const handleBarCodeScanned = ({ data }: { type: string; data: string }) => {

@@ -6,5 +6,6 @@ import type { Tagged } from 'type-fest';
  * layout is stale relative to the account it is talking to on chain.
  */
 export type AccBindingVersion = Tagged<string, 'AccBindingVersion'>;
+/** Types a string as an Account Custody Contract binding version. It checks nothing. */
 export const AccBindingVersion = (value: string): AccBindingVersion =>
   value as AccBindingVersion;

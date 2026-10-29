@@ -1,9 +1,19 @@
+import { resolve } from 'node:path';
+
 import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 
 import { baseConfig } from '../../../vitest.base.config';
 
 export default defineConfig({
   ...baseConfig,
+  resolve: {
+    alias: {
+      '@scure/bip39/wordlists/english.js': resolve(
+        __dirname,
+        '../../../node_modules/@scure/bip39/wordlists/english.js',
+      ),
+    },
+  },
   test: {
     ...baseConfig.test,
     coverage: {

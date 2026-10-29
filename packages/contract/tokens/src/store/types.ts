@@ -4,6 +4,7 @@ import type { Address } from '@lace-contract/addresses';
 import type { WalletEntity } from '@lace-contract/wallet-repo';
 import type { BigNumber } from '@lace-lib/util';
 
+/** A user-created, named folder that groups tokens within one account. */
 export type Folder = {
   id: FolderId;
   name: string;
@@ -11,6 +12,7 @@ export type Folder = {
 };
 
 export type WalletEntitiesMap = Record<string, WalletEntity>;
+/** One account's raw token balances keyed by address, then token ID. */
 export type AccountTokensMap = Partial<
   Record<Address, Partial<Record<TokenId, RawToken>>>
 >;

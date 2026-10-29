@@ -1,5 +1,10 @@
 {
   "extends": "../../tsconfig.test.json",
+  "compilerOptions": {
+    // The checks run their scripts in Node.js, whose module loader needs
+    // relative imports to name the .ts file.
+    "allowImportingTsExtensions": true
+  },
   "exclude": ["node_modules", "dist", "coverage"],
   "include": ["test/**/*.ts", "vitest.config.js"]
 }

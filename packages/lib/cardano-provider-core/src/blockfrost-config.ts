@@ -26,8 +26,9 @@ export const computeBlockfrostConfigIdentifier = ({
  * injects the project key server-side, so no config carries a `projectId`
  * (audit LW-14499). `surface` is the proxy's per-app route prefix. This is the
  * proxy contract's single in-repo home — every workspace app derives its
- * per-network URLs here (the extension shell keeps a hand-mirrored copy: its
- * closure admits no monorepo package, ADR 37).
+ * per-network URLs here, except two hand-mirrored copies: the extension shell
+ * (its closure admits no monorepo package, ADR 37) and lace-next's
+ * `networkConfigs.ts` (framework-free, shared with its service worker).
  */
 export const blockfrostProxyConfigs = ({
   proxyBaseUrl,

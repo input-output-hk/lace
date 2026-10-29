@@ -11,6 +11,7 @@ import type {
 } from '@lace-contract/cardano-stake-pools';
 import type { StateObservables } from '@lace-contract/module';
 import type { Observable } from 'rxjs';
+import type { Mock } from 'vitest';
 
 const mockPool: LacePartialStakePool = {
   activeStake: 1_000_000,
@@ -59,7 +60,7 @@ describe('FuseSearch.connect', () => {
   // subscriber, which RxJS surfaces via `config.onUnhandledError` on the
   // next microtask (and Sentry picks up in production).
   const originalOnUnhandledError = rxjsConfig.onUnhandledError;
-  let onUnhandledError: ReturnType<typeof vi.fn>;
+  let onUnhandledError: Mock<NonNullable<typeof rxjsConfig.onUnhandledError>>;
 
   beforeEach(() => {
     onUnhandledError = vi.fn();

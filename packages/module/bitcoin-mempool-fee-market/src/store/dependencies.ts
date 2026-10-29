@@ -15,7 +15,9 @@ import type {
 import type { LaceInit } from '@lace-contract/module';
 import type { Logger } from 'ts-log';
 
+/** The mempool.space API of one Bitcoin network. */
 export type MempoolSpaceConfig = {
+  /** The base URL of the mempool.space API. */
   url: string;
 };
 
@@ -78,6 +80,7 @@ export const initializeDependencies: LaceInit<
 
 declare module '@lace-contract/bitcoin-context' {
   interface BitcoinFeeMarketProviderConfig {
+    /** The mempool.space API of each Bitcoin network the wallet uses. */
     mempoolSpaceConfig: Partial<Record<BitcoinNetwork, MempoolSpaceConfig>>;
   }
 }

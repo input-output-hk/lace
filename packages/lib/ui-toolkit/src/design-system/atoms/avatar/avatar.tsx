@@ -109,7 +109,7 @@ export const Avatar = ({
               name="Shield"
               size={shieldIconSize}
               color={theme.brand.support}
-              variant="solid"
+              strokeWidth={2}
             />
           </View>
         )}
@@ -161,7 +161,7 @@ export const Avatar = ({
               name="Shield"
               size={shieldIconSize}
               color={theme.brand.support}
-              variant="solid"
+              strokeWidth={2}
             />
           </View>
         )}

@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import eslintNxPlugin from '@nx/eslint-plugin';
 import { defineConfig } from 'eslint/config';
 import checkFile from 'eslint-plugin-check-file';
@@ -7,25 +9,98 @@ import importPlugin from 'eslint-plugin-import';
 import eslintLodashPlugin from 'eslint-plugin-lodash';
 import packageJsonPlugin from 'eslint-plugin-package-json';
 import preferArrowFunctions from 'eslint-plugin-prefer-arrow-functions';
+import tsdocPlugin from 'eslint-plugin-tsdoc';
 import eslintUnicornPlugin from 'eslint-plugin-unicorn';
 import jsoncParser from 'jsonc-eslint-parser';
 import tseslint from 'typescript-eslint';
 
+// The SDK (apps/lace-sdk) and the workspace packages its entries reach, whose
+// doc comments must be valid TSDoc. apps/lace-sdk/test/tsdoc-scope.test.ts
+// fails when this list differs from what apps/lace-sdk/scripts/reach.mjs
+// computes, and prints the list to paste here.
+export const TSDOC_SCOPE = [
+  'apps/lace-sdk',
+  'packages/contract/account-management',
+  'packages/contract/activities',
+  'packages/contract/address-book',
+  'packages/contract/addresses',
+  'packages/contract/analytics',
+  'packages/contract/app',
+  'packages/contract/app-lock',
+  'packages/contract/authentication-prompt',
+  'packages/contract/bitcoin-context',
+  'packages/contract/cardano-context',
+  'packages/contract/cardano-stake-pools',
+  'packages/contract/crypto',
+  'packages/contract/dev',
+  'packages/contract/failures',
+  'packages/contract/feature',
+  'packages/contract/governance-center',
+  'packages/contract/i18n',
+  'packages/contract/in-memory',
+  'packages/contract/midnight-context',
+  'packages/contract/module',
+  'packages/contract/network',
+  'packages/contract/onboarding-v2',
+  'packages/contract/passport',
+  'packages/contract/secure-store',
+  'packages/contract/send-flow',
+  'packages/contract/signer',
+  'packages/contract/staking-center',
+  'packages/contract/storage',
+  'packages/contract/swap-provider',
+  'packages/contract/sync',
+  'packages/contract/token-pricing',
+  'packages/contract/tokens',
+  'packages/contract/tx-executor',
+  'packages/contract/views',
+  'packages/contract/wallet-active-state',
+  'packages/contract/wallet-repo',
+  'packages/lib/bitcoin-provider-core',
+  'packages/lib/cardano-custody',
+  'packages/lib/cardano-provider-core',
+  'packages/lib/cnight-dust-designation',
+  'packages/lib/core',
+  'packages/lib/crypto',
+  'packages/lib/image-url',
+  'packages/lib/midnight-prover',
+  'packages/lib/observability',
+  'packages/lib/passkey',
+  'packages/lib/ui-toolkit',
+  'packages/lib/ur-transport',
+  'packages/lib/util',
+  'packages/lib/util-hw',
+  'packages/lib/util-provider',
+  'packages/lib/util-redacted',
+  'packages/lib/util-render',
+  'packages/lib/util-store',
+  'packages/lib/vendor',
+  'packages/module/bitcoin-mempool-fee-market',
+  'packages/module/bitcoin-provider-maestro',
+  'packages/module/blockchain-bitcoin',
+  'packages/module/blockchain-cardano',
+  'packages/module/cardano-provider-blockfrost',
+  'packages/module/cardano-sync',
+  'packages/module/crypto-cardano-sdk',
+  'packages/module/dapp-connector-midnight',
+  'packages/module/feature-dev',
+  'packages/module/midnight-sync',
+  'packages/module/passport-account',
+  'packages/module/storage-in-memory',
+  'packages/module/storage-web-indexeddb',
+  'packages/module/swap-provider-steelswap',
+];
+
 // `paths` (exact specifier), NOT `patterns`: gitignore-style group patterns
 // cannot re-include children of an excluded package, and the per-icon deep
-// imports (…/dist/esm/<Name>Icon) must stay legal. Exported so per-package
-// configs whose no-restricted-imports entry replaces the workspace-wide one
-// can re-include the ban.
+// imports (…/<Name>Icon) must stay legal. Exported so per-package configs
+// whose no-restricted-imports entry replaces the workspace-wide one can
+// re-include the ban.
 export const hugeiconsBarrelBans = [
   {
-    name: '@hugeicons-pro/core-solid-rounded',
+    name: '@hugeicons/core-free-icons',
     message:
-      'Import icons per module (…/dist/esm/<Name>Icon): Metro bundles the whole barrel (~18 MiB of unused icons).',
-  },
-  {
-    name: '@hugeicons-pro/core-stroke-rounded',
-    message:
-      'Import icons per module (…/dist/esm/<Name>Icon): Metro bundles the whole barrel (~18 MiB of unused icons).',
+      'Import icons per module (…/<Name>Icon): the barrel re-exports every icon, and Metro bundles all of them.',
   },
 ];
 
@@ -71,9 +146,19 @@ export const passportFlowBoundaryBans = [
       'The flow layer is platform neutral so it can move upstream unchanged: a flow consumes the passport seams through FlowContext, not the module contract.',
   },
   {
-    group: ['../store/*', '../../store/*', '**/store/*'],
+    group: ['../store', '../../store', '**/store', '**/store/*'],
     message:
       'The flow layer is platform neutral so it can move upstream unchanged: the store consumes the flows, never the other way round; shared types belong in flows/types.ts.',
+  },
+  {
+    regex: String.raw`^@lace-contract/passport$`,
+    importNames: [
+      'passportActions',
+      'passportSelectors',
+      'passportStoreContract',
+    ],
+    message:
+      'The flow layer is platform neutral so it can move upstream unchanged: the contract barrel re-exports the store for the module layer, a flow reports through its onProgress callback and never dispatches or reads the store.',
   },
 ];
 
@@ -356,6 +441,24 @@ export default defineConfig(
       return rest;
     })(),
   },
+  // Doc comments in the published SDK and the packages it reaches are its API
+  // reference, which TypeDoc reads as TSDoc. `basePath` is absolute, so the
+  // block applies whichever project config loads it.
+  ...TSDOC_SCOPE.map(directory => ({
+    basePath: path.join(import.meta.dirname, directory),
+    files: ['**/*.{ts,tsx,mts,cts}'],
+    ignores: [
+      '**/test/**',
+      '**/*.test.*',
+      '**/*.spec.*',
+      '**/*.stories.*',
+      '**/__mocks__/**',
+    ],
+    plugins: { tsdoc: tsdocPlugin },
+    rules: {
+      'tsdoc/syntax': 'error',
+    },
+  })),
   // Allow `@lace-contract/module` augmentation targets to be declared in
   // their source file (the only place they are valid as top-level names).
   // Matched when ESLint runs from the workspace root; the same exemption is
@@ -375,11 +478,12 @@ export default defineConfig(
       'no-restricted-syntax': 'off',
     },
   },
-  // Metro does not tree-shake: a barrel import of a hugeicons pack bundles all
-  // ~4,700 icons (~18 MiB) into every Metro consumer (guest, mobile, extension
-  // tab) — it once pushed the guest entry bundle past Cloudflare Pages' hard
-  // 25 MiB/file limit. Flat-config rule entries replace per matching file, so
-  // any later block setting no-restricted-imports must re-include these paths.
+  // Metro does not tree-shake, and the pack's barrel re-exports all ~6,000
+  // icon modules, so one barrel import pulls every icon into each Metro
+  // consumer (guest, mobile, extension tab) — with the old pro packs that
+  // pushed the guest entry bundle past Cloudflare Pages' hard 25 MiB/file
+  // limit. Flat-config rule entries replace per matching file, so any later
+  // block setting no-restricted-imports must re-include these paths.
   {
     rules: {
       'no-restricted-imports': ['error', { paths: hugeiconsBarrelBans }],
@@ -510,7 +614,9 @@ export default defineConfig(
       ],
 
       // Quality Rules
-      'package-json/no-empty-fields': 'warn',
+      // An empty nx.includedScripts keeps a package's npm scripts from
+      // becoming Nx targets, so an empty field under nx is meaningful.
+      'package-json/no-empty-fields': ['warn', { ignoreProperties: ['nx'] }],
       'package-json/no-redundant-files': 'warn',
       'package-json/repository-shorthand': 'warn',
     },
@@ -534,6 +640,7 @@ export default defineConfig(
   {
     ignores: [
       '**/dist/**/',
+      '**/dist-canary/**/',
       '**/.eas-local-debug/**/',
       'coverage/**/',
       'configs/nx-plugin/src/generators/**/files/**/*',

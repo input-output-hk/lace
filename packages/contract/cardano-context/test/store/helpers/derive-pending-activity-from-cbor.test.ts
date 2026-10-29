@@ -7,8 +7,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { derivePendingActivityFromCbor } from '../../../src/store/helpers/derive-pending-activity-from-cbor';
 import { CardanoPaymentAddress } from '../../../src/types';
+import {
+  controlUtxo,
+  custodyAddress,
+  custodyGrant,
+  custodyLovelaceScope,
+  custodyStateNftId,
+  custodyUtxo,
+  grantUtxo,
+} from '../../custody-mocks';
 
 import type { CardanoActivityUtxoMetadata } from '../../../src/augmentations';
+import type { CardanoCustodyActivityMetadata } from '../../../src/custody/pending-operation';
 import type { Activity } from '@lace-contract/activities';
 
 const getCardanoInFlight = (
@@ -343,6 +353,40 @@ describe('derivePendingActivityFromCbor', () => {
   });
 
   describe('blockchainSpecific in-flight metadata', () => {
+    it('records a custody operation bound only when asked to', () => {
+      const core = makeCoreTx({
+        inputs: [{ txId: PREV_TX_ID, index: 0 }],
+        outputs: [
+          {
+            address: Cardano.PaymentAddress(OWN_ADDRESS),
+            value: { coins: 6_800_000n },
+          },
+        ],
+        fee: 200_000n,
+      });
+      const derive = (custody?: CardanoCustodyActivityMetadata) =>
+        (
+          derivePendingActivityFromCbor({
+            serializedTx: buildTxCbor(core),
+            accountId: ACCOUNT_ID,
+            accountAddresses: [OWN_ADDRESS],
+            accountUtxos: [],
+            ...(custody && { custody }),
+          })?.blockchainSpecific as
+            | { Cardano?: { custody?: unknown } }
+            | undefined
+        )?.Cardano;
+
+      const custody: CardanoCustodyActivityMetadata = {
+        invalidHereafter: Cardano.Slot(1234),
+        operation: 'owner-spend',
+        status: 'pending',
+        reference: 'intent-1',
+      };
+      expect(derive(custody)?.custody).toEqual(custody);
+      expect(derive()).not.toHaveProperty('custody');
+    });
+
     it('records ALL inputs (own and foreign) in consumedInputs', () => {
       const ownUtxo = utxo({
         txId: PREV_TX_ID,
@@ -534,6 +578,197 @@ describe('derivePendingActivityFromCbor', () => {
         Cardano.PaymentAddress(OWN_ADDRESS),
       );
       expect(cardano!.producedOutputs[0][1].value.coins).toBe(5_000_000n);
+    });
+
+    it('records every body withdrawal, own or not, with exact quantities', () => {
+      const ownRewardAccount = Cardano.RewardAccount(
+        'stake_test1up7pvfq8zn4quy45r2g572290p9vf99mr9tn7r9xrgy2l2qdsf58d',
+      );
+      const otherRewardAccount = Cardano.RewardAccount(
+        'stake_test1upjghly04re6yrr3nh3ntp9en3p5flnxh2yf6camc3vfhwg6dhc5w',
+      );
+      const core = makeCoreTx({
+        inputs: [{ txId: PREV_TX_ID, index: 0 }],
+        outputs: [
+          {
+            address: Cardano.PaymentAddress(OWN_ADDRESS),
+            value: { coins: 5_000_000n },
+          },
+        ],
+        fee: 200_000n,
+        withdrawals: [
+          { stakeAddress: ownRewardAccount, quantity: 9_007_199_254_740_993n },
+          { stakeAddress: otherRewardAccount, quantity: 1_000_000n },
+        ],
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [OWN_ADDRESS],
+        accountUtxos: [],
+      });
+
+      expect(getCardanoInFlight(activity)?.withdrawals).toEqual(
+        expect.arrayContaining([
+          { stakeAddress: ownRewardAccount, quantity: 9_007_199_254_740_993n },
+          { stakeAddress: otherRewardAccount, quantity: 1_000_000n },
+        ]),
+      );
+      expect(getCardanoInFlight(activity)?.withdrawals).toHaveLength(2);
+    });
+
+    it('leaves withdrawals out when the body has none', () => {
+      const core = makeCoreTx({
+        inputs: [{ txId: PREV_TX_ID, index: 0 }],
+        outputs: [
+          {
+            address: Cardano.PaymentAddress(OWN_ADDRESS),
+            value: { coins: 5_000_000n },
+          },
+        ],
+        fee: 200_000n,
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [OWN_ADDRESS],
+        accountUtxos: [],
+      });
+
+      expect(getCardanoInFlight(activity)).not.toHaveProperty('withdrawals');
+    });
+  });
+
+  describe('custody accounts', () => {
+    it('leaves the state NFT a creation mints out of the balance changes', () => {
+      const core = makeCoreTx({
+        inputs: [{ txId: PREV_TX_ID, index: 0 }],
+        outputs: [
+          {
+            address: custodyAddress,
+            value: {
+              coins: 1_500_000n,
+              assets: new Map([[custodyStateNftId, 1n]]),
+            },
+          },
+        ],
+        mint: new Map([[custodyStateNftId, 1n]]),
+        fee: 200_000n,
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [CardanoPaymentAddress(custodyAddress)],
+        accountUtxos: [],
+      });
+
+      expect(activity!.tokenBalanceChanges).toEqual([
+        { tokenId: TokenId('lovelace'), amount: BigNumber(1_500_000n) },
+      ]);
+      expect(getCardanoInFlight(activity)!.producedOutputs[0][1].address).toBe(
+        custodyAddress,
+      );
+    });
+
+    it('leaves the grant token an issue mints out of the balance changes', () => {
+      const control = controlUtxo(1);
+      const fund = custodyUtxo(2, { coins: 5_000_000n });
+      const [, grantOutput] = grantUtxo(
+        3,
+        custodyGrant(0n, 'a1', custodyLovelaceScope(1_800_000_000_000n)),
+      );
+      const [grantToken] = grantOutput.value.assets!.keys();
+      const core = makeCoreTx({
+        inputs: [control[0], fund[0]].map(({ txId, index }) => ({
+          txId,
+          index,
+        })),
+        outputs: [
+          control[1],
+          grantOutput,
+          { address: custodyAddress, value: { coins: 2_700_000n } },
+        ],
+        mint: new Map([[grantToken, 1n]]),
+        fee: 300_000n,
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [CardanoPaymentAddress(custodyAddress)],
+        accountUtxos: [control, fund],
+      });
+
+      expect(activity!.tokenBalanceChanges).toEqual([
+        { tokenId: TokenId('lovelace'), amount: BigNumber(-300_000n) },
+      ]);
+    });
+
+    it('drops the spent control and fund UTxOs and reports only the account outflow', () => {
+      const control = controlUtxo(1);
+      const fund = custodyUtxo(2, { coins: 5_000_000n });
+      const core = makeCoreTx({
+        inputs: [control[0], fund[0]].map(({ txId, index }) => ({
+          txId,
+          index,
+        })),
+        outputs: [
+          control[1],
+          {
+            address: Cardano.PaymentAddress(FOREIGN_ADDRESS),
+            value: { coins: 3_000_000n },
+          },
+          { address: custodyAddress, value: { coins: 1_800_000n } },
+        ],
+        fee: 200_000n,
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [CardanoPaymentAddress(custodyAddress)],
+        accountUtxos: [control, fund],
+      });
+
+      expect(activity!.tokenBalanceChanges).toEqual([
+        { tokenId: TokenId('lovelace'), amount: BigNumber(-3_200_000n) },
+      ]);
+      expect(getCardanoInFlight(activity)!.consumedInputs).toEqual([
+        { txId: control[0].txId, index: 0 },
+        { txId: fund[0].txId, index: 0 },
+      ]);
+    });
+
+    it('reports an asset under the custody policy for a key account, which holds no control UTxO', () => {
+      const core = makeCoreTx({
+        inputs: [{ txId: PREV_TX_ID, index: 0 }],
+        outputs: [
+          {
+            address: Cardano.PaymentAddress(OWN_ADDRESS),
+            value: {
+              coins: 2_000_000n,
+              assets: new Map([[custodyStateNftId, 1n]]),
+            },
+          },
+        ],
+        fee: 200_000n,
+      });
+
+      const activity = derivePendingActivityFromCbor({
+        serializedTx: buildTxCbor(core),
+        accountId: ACCOUNT_ID,
+        accountAddresses: [OWN_ADDRESS],
+        accountUtxos: [],
+      });
+
+      expect(activity!.tokenBalanceChanges).toEqual(
+        expect.arrayContaining([
+          { tokenId: TokenId(custodyStateNftId), amount: BigNumber(1n) },
+        ]),
+      );
     });
   });
 });

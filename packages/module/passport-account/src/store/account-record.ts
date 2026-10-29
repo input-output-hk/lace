@@ -11,11 +11,15 @@ import {
 import { isSealedRecord, openRecord, sealRecord } from './envelope';
 
 import type { SealedRecord } from './envelope';
-import type { AccountRecords, PassportAccountRecord } from '../flows/types';
+import type {
+  AccountRecords,
+  PassportAccountRecord,
+  RecordPresence,
+} from '../flows/types';
 import type { KeyValueStorageFactory } from '@lace-contract/module';
 import type { Observable } from 'rxjs';
 
-export type { PassportAccountRecord } from '../flows/types';
+export type { PassportAccountRecord, RecordPresence } from '../flows/types';
 
 const COLLECTION_ID = 'passport-account';
 const ACCOUNT_RECORD_KEY = 'account';
@@ -47,10 +51,12 @@ export type AccountRecordStore = {
    */
   write: (record: PassportAccountRecord) => Observable<void>;
   /**
-   * Emits whether any record is stored, sealed or not, without opening
-   * it: presence needs no storage key and no ceremony.
+   * Emits what is stored, sealed or not, without opening it: absent,
+   * pending while a creation is unfinished, or complete. Presence needs
+   * no storage key and no ceremony; a sealed record carries the pending
+   * mark on its envelope.
    */
-  exists: () => Observable<boolean>;
+  presence: () => Observable<RecordPresence>;
 };
 
 /**
@@ -63,8 +69,10 @@ export type AccountRecordStore = {
  * RecordUnreadableError, for the flows where a missing storage key is a
  * persistence misconfiguration that must not look like an absent
  * account. Without a `keyProvider` (the dev authoriser) the record
- * persists in plaintext; it holds no secrets (see
- * {@link PassportAccountRecord}).
+ * persists in plaintext, which holds no secret once the account is
+ * complete; while a creation is unfinished it holds the contract's
+ * maintenance authority key (see {@link PassportAccountRecord}), so the
+ * dev authoriser is for development and tests only.
  */
 export const createAccountRecordStore = (
   createKeyValueStorage: KeyValueStorageFactory,
@@ -90,6 +98,19 @@ export const createAccountRecordStore = (
       defaultIfEmpty(undefined),
     );
 
+  const isPending = (record: PassportAccountRecord): boolean =>
+    record.deployment !== undefined;
+
+  const presenceOf = (
+    value: PassportAccountRecord | SealedRecord | undefined,
+  ): RecordPresence => {
+    if (value === undefined) return 'absent';
+    const isCreationPending = isSealedRecord(value)
+      ? value.pending === true
+      : isPending(value);
+    return isCreationPending ? 'pending' : 'complete';
+  };
+
   return {
     read: () =>
       keyProvider
@@ -105,11 +126,15 @@ export const createAccountRecordStore = (
           ),
     write: record =>
       keyProvider
-        ? defer(async () => sealRecord(await keyProvider(), record)).pipe(
+        ? defer(async () =>
+            sealRecord(await keyProvider(), record, {
+              pending: isPending(record),
+            }),
+          ).pipe(
             mergeMap(sealed => storage.setValue(ACCOUNT_RECORD_KEY, sealed)),
           )
         : storage.setValue(ACCOUNT_RECORD_KEY, record),
-    exists: () => stored().pipe(map(value => value !== undefined)),
+    presence: () => stored().pipe(map(presenceOf)),
   };
 };
 
@@ -125,5 +150,6 @@ export const toAccountRecords = (
   read: async () => firstValueFrom(store.read(), { defaultValue: undefined }),
   write: async record =>
     firstValueFrom(store.write(record), { defaultValue: undefined }),
-  exists: async () => firstValueFrom(store.exists(), { defaultValue: false }),
+  presence: async () =>
+    firstValueFrom(store.presence(), { defaultValue: 'absent' }),
 });

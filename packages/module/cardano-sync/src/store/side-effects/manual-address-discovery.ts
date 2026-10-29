@@ -6,7 +6,7 @@ import {
 import { Timestamp } from '@lace-lib/util';
 import { filter, map, withLatestFrom } from 'rxjs';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../module';
 import type { TranslationKey } from '@lace-contract/i18n';
 
 /**

@@ -27,11 +27,22 @@ export type WalletWithCardanoSubmit = {
   ) => void;
 };
 
+/** The options of `submitCardanoTx`. */
 export interface SubmitCardanoTxProps {
-  /** Signed transaction CBOR hex string. */
+  /** The signed transaction, as CBOR hex. */
   serializedTx: HexBytes;
 }
 
+/**
+ * Submits a signed transaction through the wallet's Cardano provider and
+ * waits up to 60 seconds for the provider's answer.
+ *
+ * @param wallet - A wallet with the Cardano modules loaded (see
+ *   {@link WalletWithCardanoSubmit}).
+ * @param props - The signed transaction.
+ * @returns `Ok` with the transaction ID once the provider accepts it, or
+ *   `Err` with the provider's refusal or a timeout. It never rejects.
+ */
 export const submitCardanoTx = async (
   wallet: WalletWithCardanoSubmit,
   props: SubmitCardanoTxProps,

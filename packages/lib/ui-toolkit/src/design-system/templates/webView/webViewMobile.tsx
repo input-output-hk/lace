@@ -9,7 +9,6 @@ import React, {
   useEffect,
 } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { WebView as RNWebView } from 'react-native-webview';
 
 import { spacing, useTheme } from '../../../design-tokens';
 import {
@@ -21,11 +20,15 @@ import {
 } from '../../atoms';
 import { isIOS } from '../../util/commons';
 
+import { NativeBridgeWebView } from './nativeBridgeWebView';
 import { isValidUrlScheme } from './webView';
 
 import type { WebViewRef, WebViewTemplateProps } from './webView';
 import type { Theme } from '../../../design-tokens';
-import type { WebViewProps as RNWebViewProps } from 'react-native-webview';
+import type {
+  WebView as RNWebView,
+  WebViewProps as RNWebViewProps,
+} from 'react-native-webview';
 import type {
   WebViewNavigationEvent,
   WebViewErrorEvent,
@@ -34,17 +37,22 @@ import type {
   ShouldStartLoadRequest,
 } from 'react-native-webview/lib/WebViewTypes';
 
-const InternalWebView = forwardRef<WebViewRef, RNWebViewProps>(
-  ({ style, ...rest }, ref) => {
-    return (
-      <RNWebView
-        ref={ref as React.Ref<React.ComponentRef<typeof RNWebView>>}
-        style={style}
-        {...rest}
-      />
-    );
-  },
-);
+const InternalWebView = forwardRef<
+  WebViewRef,
+  Pick<
+    WebViewTemplateProps,
+    'bridgeUnavailableNotice' | 'onBridgeCompatibilityClassified'
+  > &
+    RNWebViewProps
+>(({ style, ...rest }, ref) => {
+  return (
+    <NativeBridgeWebView
+      ref={ref as React.Ref<React.ComponentRef<typeof RNWebView>>}
+      style={style}
+      {...rest}
+    />
+  );
+});
 
 InternalWebView.displayName = 'InternalWebView';
 
@@ -78,8 +86,8 @@ const webViewProps = {
   thirdPartyCookiesEnabled: true,
   // Only allow http/https — blocks javascript:, file:, and other schemes.
   // Production is https-only; http is kept for dev/test (localhost dApps and the
-  // LW-15303 repro fixture are served over http). The scheme is also validated by
-  // isValidUrlScheme / onShouldStartLoadWithRequest.
+  // LW-15303 repro fixture are served over http). Navigation permission does not
+  // provide the secure-context WebCrypto required by lace-next's wallet runtime.
   // NOSONAR: http is dev-only here; production restricts the whitelist to https.
   originWhitelist: __DEV__ ? ['https://*', 'http://*'] : ['https://*'],
   mixedContentMode: 'never' as const,
@@ -123,14 +131,12 @@ const useWebViewEventHandlers = ({
 
   const handleLoadEnd = useCallback(
     (event: WebViewErrorEvent | WebViewNavigationEvent) => {
-      // Both WebViewErrorEvent and WebViewNavigationEvent have nativeEvent with url and loading
-      // On Android, navigationType may not exist, so we check for url and loading directly
       const { nativeEvent } = event;
       const loadTime = Date.now() - loadStartTimeRef.current;
       const url = nativeEvent.url;
-      const isLoading = nativeEvent.loading;
 
-      if (url && !isLoading) {
+      // The completion event is authoritative even when its loading flag lags behind.
+      if (url) {
         onLoadEnd?.(url, loadTime);
       }
     },
@@ -186,6 +192,7 @@ const consoleForwardingScript = `
       if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
         window.ReactNativeWebView.postMessage(JSON.stringify({
           source: 'webview-console',
+          origin: window.location.origin,
           level: level,
           message: args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')
         }));
@@ -216,6 +223,8 @@ export const WebViewTemplateMobile = ({
   debugMode,
   onInjectJavaScriptReady,
   navBar,
+  bridgeUnavailableNotice,
+  onBridgeCompatibilityClassified,
 }: WebViewTemplateProps) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
@@ -268,19 +277,13 @@ export const WebViewTemplateMobile = ({
     (event: ShouldStartLoadRequest): boolean => {
       const { url: requestUrl } = event;
       const isSafeInternalNavigation = requestUrl === 'about:blank';
-      // Block navigation to URLs with dangerous schemes
+      // Rejecting before a load starts leaves the live document intact, not errored.
       if (!isSafeInternalNavigation && !isValidUrlScheme(requestUrl)) {
-        onError?.({
-          code: -1,
-          description: 'Navigation blocked: Invalid URL scheme',
-          domain: 'Security',
-          url: requestUrl,
-        });
         return false;
       }
       return true;
     },
-    [onError],
+    [],
   );
 
   const handleWebViewLoadStart = useCallback(
@@ -421,8 +424,12 @@ export const WebViewTemplateMobile = ({
                   <Icon
                     name="Star"
                     size={24}
-                    variant={navBar.favorite.isSaved ? 'solid' : 'stroke'}
-                    color={theme.text.primary}
+                    strokeWidth={navBar.favorite.isSaved ? 2 : undefined}
+                    color={
+                      navBar.favorite.isSaved
+                        ? theme.brand.ascending
+                        : theme.text.primary
+                    }
                   />
                 }
                 onPress={navBar.favorite.onToggle}
@@ -447,6 +454,8 @@ export const WebViewTemplateMobile = ({
       <View style={styles.webViewContainer}>
         <InternalWebView
           key={url}
+          bridgeUnavailableNotice={bridgeUnavailableNotice}
+          onBridgeCompatibilityClassified={onBridgeCompatibilityClassified}
           ref={webViewRef}
           source={{ uri: url }}
           style={styles.webView}

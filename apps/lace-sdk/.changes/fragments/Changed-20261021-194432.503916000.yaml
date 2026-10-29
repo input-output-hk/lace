@@ -1,0 +1,6 @@
+kind: Changed
+body: Cardano Shared Custody actions and state move from `cardanoContext` to `cardanoCustody`, and a wallet that uses the custody helpers loads `m.blockchainCardanoCustody` from `@laceio/sdk/experimental`. The root and `./cardano` entries no longer carry custody.
+time: 2026-10-21T19:44:32.503916+08:00
+custom:
+  Package: sdk
+  Build: canary

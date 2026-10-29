@@ -8,6 +8,7 @@ import {
   createHttpProver,
   createManifestKeyMaterialResolver,
   ProofServerError,
+  UnresolvedContractCircuitError,
 } from '../../src/infra/http-prover';
 
 import type { AccManifest } from '../../src/acc/manifest';
@@ -357,6 +358,31 @@ describe('createManifestKeyMaterialResolver', () => {
       code: 'artefact-integrity',
       message: `verifier key pin mismatch for ${circuit}: the chain expects ${driftedPin}, the manifest pins ${manifest.circuits[circuit].verifierKeySha256}`,
     });
+    expect(fetchBytes).not.toHaveBeenCalled();
+  });
+
+  it('throws a named error for a contract location whose circuit is outside the manifest', async () => {
+    const fetchBytes = fetchFixtures();
+    const resolver = createManifestKeyMaterialResolver({
+      artefactUrl,
+      fetchBytes,
+      manifest: manifestForFixtures(),
+    });
+    const address = 'cd'.repeat(32);
+    const vk = '1'.repeat(64);
+
+    const failure = resolver(`contract:${address}/bridge_deposit?vk=${vk}`);
+
+    await expect(failure).rejects.toThrow(UnresolvedContractCircuitError);
+    await expect(failure).rejects.toMatchObject({
+      code: 'unresolved-contract-circuit',
+      contractAddress: address,
+      circuit: 'bridge_deposit',
+      verifierKeyHash: vk,
+    });
+    await expect(failure).rejects.toThrow(
+      `circuit "bridge_deposit" of contract ${address} (vk=${vk})`,
+    );
     expect(fetchBytes).not.toHaveBeenCalled();
   });
 

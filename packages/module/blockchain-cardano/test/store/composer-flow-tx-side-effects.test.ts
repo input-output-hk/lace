@@ -265,14 +265,16 @@ describe('composer-flow tx side-effects', () => {
       vi.restoreAllMocks();
     });
 
-    it('passes the upstream consumed inputs and produced outputs through', () => {
+    it('passes the upstream consumed inputs, produced outputs and withdrawals through', () => {
       const consumedInputs = [{ txId: 'aa', index: 0 }];
       const producedOutputs = [{ address: 'addr', value: { coins: '1' } }];
+      // Without them the balance would count withdrawn rewards twice.
+      const withdrawals = [{ stakeAddress: 'stake_test1', quantity: 5n }];
       const submitResult = {
         success: true,
         txId: testTxId,
         blockchainSpecificActivityMetadata: {
-          Cardano: { consumedInputs, producedOutputs },
+          Cardano: { consumedInputs, producedOutputs, withdrawals },
         },
       } as unknown as TxSubmissionResult;
       const mockTimestamp = 1_700_000_000_000;
@@ -310,7 +312,11 @@ describe('composer-flow tx side-effects', () => {
                     ],
                     type: ActivityType.Pending,
                     blockchainSpecific: {
-                      Cardano: { consumedInputs, producedOutputs },
+                      Cardano: {
+                        consumedInputs,
+                        producedOutputs,
+                        withdrawals,
+                      },
                     },
                   },
                 ],

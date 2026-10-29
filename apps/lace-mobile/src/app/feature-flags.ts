@@ -1,7 +1,6 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
 
 import type { FeatureFlag } from '@lace-contract/feature';
-import type { RealFiFeaturePayload } from '@lace-contract/realfi-staking';
 
 /**
  * Default feature flags for the mobile application.
@@ -79,33 +78,6 @@ export const defaultFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('INITIAL_NETWORK_TYPE'), payload: 'mainnet' },
   { key: FeatureFlagKey('LOG_LEVEL'), payload: 'error' },
   { key: FeatureFlagKey('MD_MIGRATION') },
-  { key: FeatureFlagKey('NOTIFICATION_CENTER') },
-  {
-    // RealFi availability is per-network: a network present here is enabled;
-    // `{}` uses that network's bundled bootstrap defaults, while PostHog can send
-    // per-network overrides (endpoints, policy ids, pool idents, bootstrap UTxOs)
-    // and gate delivery by geographical region / device type. Networks absent
-    // from the payload are off. With FEATURES_POSTHOG active this entry only
-    // serves first runs (empty flag storage); once PostHog flags persist, its
-    // REALFI flag must target mobile for the feature to stay on.
-    //
-    // The time-boxed promotions (`genesisBoost`, `launchSeason`) are
-    // deliberately NOT declared here — PostHog owns their schedules so they
-    // can start and end without a release, and a committed default would
-    // outlive its campaign in every build. Shape per network entry:
-    //   "preprod": {
-    //     "genesisBoost": { "activeFrom": "<ISO UTC>", "activeTo": "<ISO UTC>" },
-    //     "launchSeason": {
-    //       "activeFrom": "<ISO UTC>", "activeTo": "<ISO UTC>",
-    //       "rewardsDashboardUrl": "<url>", "pointsProgramUrl": "<url>"
-    //     }
-    //   }
-    key: FeatureFlagKey('REALFI'),
-    payload: {
-      preview: {},
-      preprod: {},
-    } satisfies RealFiFeaturePayload,
-  },
   { key: FeatureFlagKey('SEND_FLOW') },
   {
     key: FeatureFlagKey('STAKING_CENTER'),
@@ -136,10 +108,6 @@ export const defaultFeatureFlags: FeatureFlag[] = [
     payload: {
       currency_choice_exclusions: [] as string[],
     },
-  },
-  {
-    key: FeatureFlagKey('SWAP_CENTER'),
-    payload: {},
   },
   { key: FeatureFlagKey('TOKEN_PRICING') },
   { key: FeatureFlagKey('VAULT_LEDGER') },

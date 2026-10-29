@@ -6,14 +6,17 @@ import {
   DataSignErrorCode,
   TxSignErrorCode,
 } from '../../common/api-error';
+import { sanitiseSignTxError } from '../../common/utils/sign-tx-error-details';
 
 import type { WebViewResponse } from '../../common/store';
+import type { SanitisedSignTxError } from '../../common/utils/sign-tx-error-details';
 
 export type DappSignResultState = 'failure' | 'rejected' | 'success';
 
 export interface DappSignErrorDetails {
   message?: string;
   code?: string;
+  diagnostics?: SanitisedSignTxError;
 }
 
 export interface DappSignResult {
@@ -60,10 +63,26 @@ const mapResponse = (
     error?.code === declinedCode || error?.code === APIErrorCode.Refused
       ? 'rejected'
       : 'failure';
+  const diagnostics =
+    error && signingType === 'signTx' && state === 'failure'
+      ? error.diagnostics ??
+        sanitiseSignTxError(
+          {
+            name: error.code < 0 ? 'APIError' : 'TxSignError',
+            code: error.code,
+            message: error.info,
+          },
+          'signing preparation',
+        )
+      : undefined;
   return {
     state,
     error: error
-      ? { message: error.info, code: String(error.code) }
+      ? {
+          message: error.info,
+          code: String(error.code),
+          ...(diagnostics ? { diagnostics } : {}),
+        }
       : undefined,
   };
 };

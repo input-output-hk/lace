@@ -217,8 +217,11 @@ describe('exportAccounts', () => {
   });
 
   it('rejects an account index above the Keystone derivation cap', async () => {
-    await expect(exportAccounts([25])).rejects.toThrow(
-      'Keystone can only derive Cardano accounts #0-#24, requested #25',
+    // 24 is the boundary that matters: the firmware clamps it to 0 and answers
+    // with account 0's xpub, so letting it through files the wrong key rather
+    // than failing the export.
+    await expect(exportAccounts([24])).rejects.toThrow(
+      'Keystone can only derive Cardano accounts #0-#23, requested #24',
     );
     expect(triggerSpy).not.toHaveBeenCalled();
   });

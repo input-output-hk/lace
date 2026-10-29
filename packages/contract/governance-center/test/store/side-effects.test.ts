@@ -939,8 +939,13 @@ describe('governance-center side effects', () => {
 
   describe('syncGovernanceFeatureFlagPayload', () => {
     it('dispatches both configs from the payload', () => {
-      const promotedDreps = { mainnet: [{ id: 'drep1abc' }] };
-      const blockedDreps = { mainnet: ['drep1def'] };
+      // Real ids: the parser drops anything that is not a DRep id.
+      const promoted =
+        'drep1ygr9tuapcanc3kpeyy4dc3vmrz9cfe5q7v9wj3x9j0ap3tswtre9j';
+      const blocked =
+        'drep1ytvlwvyjmzfyn56n0zz4f6lj94wxhmsl5zky6knnzrf4jygpyahug';
+      const promotedDreps = { mainnet: [{ id: promoted }] };
+      const blockedDreps = { mainnet: [blocked] };
       testSideEffect(
         { build: () => syncGovernanceFeatureFlagPayload },
         ({ cold, expectObservable }) => ({
@@ -960,7 +965,7 @@ describe('governance-center side effects', () => {
               selectNextFeatureFlags$: cold('a', { a: null }),
             },
           },
-          dependencies: { actions: governanceCenterActions },
+          dependencies: { actions: governanceCenterActions, logger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('(ab)', {
               a: governanceCenterActions.promotedDReps.setConfig(promotedDreps),
@@ -971,6 +976,127 @@ describe('governance-center side effects', () => {
           },
         }),
       );
+    });
+
+    it('reports a misconfigured payload, still dispatching the safe configs', () => {
+      const reported = vi.spyOn(logger, 'error').mockImplementation(() => {});
+      testSideEffect(
+        { build: () => syncGovernanceFeatureFlagPayload },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a', {
+                a: {
+                  featureFlags: [
+                    {
+                      key: FEATURE_FLAG_GOVERNANCE_CENTER,
+                      // A mistyped DRep id: matches no row, so blocking it
+                      // hides nobody and nothing downstream can notice.
+                      payload: {
+                        blockedDreps: { preprod: ['drep1notarealid'] },
+                      },
+                    },
+                  ],
+                  modules: [],
+                },
+              }),
+              selectNextFeatureFlags$: cold('a', { a: null }),
+            },
+          },
+          dependencies: { actions: governanceCenterActions, logger },
+          assertion: sideEffect$ => {
+            // Still emits: a broken payload must not wedge the sync, it only
+            // has to stop being silent. The unusable id is dropped, leaving
+            // the network configured with nothing.
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: governanceCenterActions.promotedDReps.setConfig({}),
+              b: governanceCenterActions.promotedDReps.setBlockedConfig({
+                preprod: [],
+              }),
+            });
+          },
+        }),
+      );
+      expect(reported).toHaveBeenCalledOnce();
+      expect(reported.mock.calls[0][0]).toContain(
+        'blockedDreps.preprod[0] is not a DRep id',
+      );
+      reported.mockRestore();
+    });
+
+    // Frames 0 and 4, so each emission's action group is its own marble
+    // group rather than merging into the first.
+    it('reports a repeated broken payload only once', () => {
+      const reported = vi.spyOn(logger, 'error').mockImplementation(() => {});
+      const broken = () => ({
+        featureFlags: [
+          {
+            key: FEATURE_FLAG_GOVERNANCE_CENTER,
+            payload: { blockedDreps: { preprod: 'not-an-array' } },
+          },
+        ],
+        modules: [],
+      });
+      testSideEffect(
+        { build: () => syncGovernanceFeatureFlagPayload },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a---b', {
+                a: broken(),
+                b: broken(),
+              }),
+              selectNextFeatureFlags$: cold('a', { a: null }),
+            },
+          },
+          dependencies: { actions: governanceCenterActions, logger },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)', {
+              a: governanceCenterActions.promotedDReps.setConfig({}),
+              b: governanceCenterActions.promotedDReps.setBlockedConfig({}),
+            });
+          },
+        }),
+      );
+      expect(reported).toHaveBeenCalledOnce();
+      reported.mockRestore();
+    });
+
+    it('reports again when the payload breaks in a new way', () => {
+      const reported = vi.spyOn(logger, 'error').mockImplementation(() => {});
+      const blocking = (blockedDreps: unknown) => ({
+        featureFlags: [
+          { key: FEATURE_FLAG_GOVERNANCE_CENTER, payload: { blockedDreps } },
+        ],
+        modules: [],
+      });
+      testSideEffect(
+        { build: () => syncGovernanceFeatureFlagPayload },
+        ({ cold, expectObservable }) => ({
+          stateObservables: {
+            features: {
+              selectLoadedFeatures$: cold('a---b', {
+                a: blocking({ preprod: 'not-an-array' }),
+                b: blocking({ preprod: [], preview: 'not-an-array' }),
+              }),
+              selectNextFeatureFlags$: cold('a', { a: null }),
+            },
+          },
+          dependencies: { actions: governanceCenterActions, logger },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('(ab)(cd)', {
+              a: governanceCenterActions.promotedDReps.setConfig({}),
+              b: governanceCenterActions.promotedDReps.setBlockedConfig({}),
+              c: governanceCenterActions.promotedDReps.setConfig({}),
+              d: governanceCenterActions.promotedDReps.setBlockedConfig({
+                preprod: [],
+              }),
+            });
+          },
+        }),
+      );
+      expect(reported).toHaveBeenCalledTimes(2);
+      reported.mockRestore();
     });
 
     it('dispatches empty configs when the flag has no payload', () => {
@@ -988,7 +1114,7 @@ describe('governance-center side effects', () => {
               selectNextFeatureFlags$: cold('a', { a: null }),
             },
           },
-          dependencies: { actions: governanceCenterActions },
+          dependencies: { actions: governanceCenterActions, logger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('(ab)', {
               a: governanceCenterActions.promotedDReps.setConfig({}),
@@ -1264,7 +1390,7 @@ describe('governance-center side effects', () => {
               }),
             },
           },
-          dependencies: { actions: governanceCenterActions },
+          dependencies: { actions: governanceCenterActions, logger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('--a', {
               a: governanceCenterActions.dRepsList.resetDReps(),
@@ -1286,7 +1412,7 @@ describe('governance-center side effects', () => {
               }),
             },
           },
-          dependencies: { actions: governanceCenterActions },
+          dependencies: { actions: governanceCenterActions, logger },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('-----');
           },

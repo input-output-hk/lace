@@ -14,10 +14,10 @@ import type { BitcoinTransactionHistoryEntry } from '@lace-contract/bitcoin-cont
  * It uses an InputResolver to asynchronously fetch and include details about each input, such as the associated address
  * and the amount of satoshis, which are not directly available from the transaction input script.
  *
- * @param {string} raw - The raw hexadecimal string of the Bitcoin transaction.
- * @param {BitcoinNetwork} network - The Bitcoin network (Mainnet or Testnet) that the transaction pertains to.
- * @param {InputResolver} inputResolver - An instance of InputResolver to fetch additional input details.
- * @returns {Promise<BitcoinTransactionHistoryEntry>} A promise that resolves to a detailed transaction history entry.
+ * @param raw - The raw hexadecimal string of the Bitcoin transaction.
+ * @param network - The Bitcoin network (Mainnet or Testnet) that the transaction pertains to.
+ * @param inputResolver - An instance of InputResolver to fetch additional input details.
+ * @returns A promise that resolves to a detailed transaction history entry.
  */
 export const historyEntryFromRawTx = async (
   raw: string,

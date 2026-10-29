@@ -58,6 +58,9 @@ const SwapSelectToken = ({
 >) => {
   const { t } = useTranslation();
   const mode = getMode(route.name);
+  // The SETTLED query only: the field owns its text and reports it once typing
+  // stops, so a keystroke re-renders neither this screen — which would rebuild
+  // the navigation header per character — nor the token list (ADR 64).
   const [searchQuery, setSearchQuery] = useState('');
 
   const swapFlowState = useLaceSelector('swapFlow.selectSwapFlowState');
@@ -241,15 +244,16 @@ const SwapSelectToken = ({
             )}
           </Row>
           <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
+            onSearchCommit={setSearchQuery}
             placeholder={t('v2.swap.search')}
             testID="swap-token-search"
           />
         </Column>
       ),
     });
-  }, [title, searchQuery, t, navigation, theme, isWeb]);
+    // No searchQuery dependency: the field keeps its own text, so the header is
+    // rebuilt only when the title or the theme changes (cf. ADR 31).
+  }, [title, t, navigation, theme, isWeb]);
 
   const ListEmptyComponent = useMemo(
     () => (

@@ -3,8 +3,9 @@ import { addressesActions } from '@lace-contract/addresses';
 import { syncActions } from '@lace-contract/sync';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { Err, Ok, Timestamp } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
 import { defer, of } from 'rxjs';
+import { NEVER } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -17,6 +18,7 @@ import {
 } from '../../mocks';
 
 import type { CardanoContextAction } from '../../../src/contract';
+import type { Selectors, ActionCreators } from '../../../src/contract';
 import type {
   CardanoAddressTransactionHistoryMap,
   CardanoProviderDependencies,
@@ -25,6 +27,32 @@ import type {
 import type { AnyAddress } from '@lace-contract/addresses';
 import type { SyncOperation } from '@lace-contract/sync';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
+
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          failSyncOperation$: NEVER,
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          resetWalletSyncState$: NEVER,
+          refetchAccountUtxos$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 
 const actions = {
   ...syncActions,

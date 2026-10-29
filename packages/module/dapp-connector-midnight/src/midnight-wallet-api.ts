@@ -1,4 +1,5 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
+import { createProverClient } from '@lace-lib/midnight-prover';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 
 import { APIError } from './api-error';
@@ -117,26 +118,44 @@ export class MidnightWalletApi {
       getUnshieldedAddress: this.#api.getUnshieldedAddress,
       getDustAddress: this.#api.getDustAddress,
       getProvingProvider: async (keyMaterialProvider: KeyMaterialProvider) => {
-        const config = await this.#api.getConfiguration();
-        if (!config.proverServerUri) {
-          throw new APIError(
-            ErrorCodes.InternalError,
-            'Prover server URI not available in network configuration',
-          );
-        }
-        // Must stay a dynamic import: this graph reaches @midnight-ntwrk/ledger-v8
-        // (WASM). A static import compiles the WASM on every page the content
-        // scripts load on, and pages whose CSP lacks 'wasm-unsafe-eval' then
-        // abort the whole script before any wallet is injected.
-        const [{ httpClientProvingProvider }, { DappZkConfigProvider }] =
-          await Promise.all([
-            import('@midnight-ntwrk/midnight-js-http-client-proof-provider'),
-            import('./dapp-zk-config-provider'),
-          ]);
-        return httpClientProvingProvider(
-          config.proverServerUri,
-          new DappZkConfigProvider(keyMaterialProvider),
-        );
+        // Built-in circuits have no dApp key material, which surfaces as a
+        // failing lookup — the SDK's own http client treats that the same way.
+        const keyMaterial = async (keyLocation: string) => {
+          try {
+            const [proverKey, verifierKey, ir] = await Promise.all([
+              keyMaterialProvider.getProverKey(keyLocation),
+              keyMaterialProvider.getVerifierKey(keyLocation),
+              keyMaterialProvider.getZKIR(keyLocation),
+            ]);
+            return { proverKey, verifierKey, ir };
+          } catch {
+            return undefined;
+          }
+        };
+        const provider = createProverClient({
+          ensure: async () => {},
+          release: async () => {},
+          send: async command => this.#api.proofCommand(command),
+        }).provider();
+        return {
+          check: async (serializedPreimage, keyLocation) =>
+            provider.check({
+              serializedPreimage,
+              keyLocation,
+              keyMaterial: await keyMaterial(keyLocation),
+            }),
+          prove: async (
+            serializedPreimage,
+            keyLocation,
+            overwriteBindingInput,
+          ) =>
+            provider.checkAndProve({
+              serializedPreimage,
+              keyLocation,
+              overwriteBindingInput,
+              keyMaterial: await keyMaterial(keyLocation),
+            }),
+        };
       },
       getTxHistory: this.#api.getTxHistory,
       balanceUnsealedTransaction: this.#api.balanceUnsealedTransaction,

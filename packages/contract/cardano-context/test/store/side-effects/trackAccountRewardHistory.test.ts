@@ -1,9 +1,10 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { failuresActions } from '@lace-contract/failures';
+import { syncActions } from '@lace-contract/sync';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { BigNumber, Ok } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
-import { defer, of } from 'rxjs';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
+import { defer, NEVER, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { cardanoContextActions } from '../../../src';
@@ -11,15 +12,55 @@ import { CardanoRewardAccount, CardanoPaymentAddress } from '../../../src';
 import { createTrackAccountRewardsHistory } from '../../../src/store/side-effects/track-account-reward-history';
 import { CardanoRewardsHistoryFailureId } from '../../../src/value-objects';
 import { account0Context, cardanoAccount0Addr, chainId } from '../../mocks';
+import { threeAccountCardanoWalletAccounts } from '../../mocks';
 
 import type {
   CardanoAddressData,
   CardanoProvider,
   CardanoRewardAccountToRewardMap,
 } from '../../../src';
+import type { ActionCreators, Selectors } from '../../../src/contract';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type { Failure, FailureId } from '@lace-contract/failures';
 import type { TranslationKey } from '@lace-contract/i18n';
+
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      stateObservables: {
+        ...config.stateObservables,
+        wallets: {
+          selectActiveNetworkAccounts$: of([
+            threeAccountCardanoWalletAccounts[0],
+            ...['test-account-2', 'test-account-3'].map(id => ({
+              ...threeAccountCardanoWalletAccounts[0],
+              accountId: AccountId(id),
+            })),
+          ]),
+          ...config.stateObservables?.wallets,
+        },
+      },
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          completeSyncOperation$: NEVER,
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          resetWalletSyncState$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 
 const actions = {
   ...cardanoContextActions,
@@ -129,6 +170,54 @@ const mockRewards3 = [
 const retriableError = new ProviderError(ProviderFailure.Unhealthy);
 
 describe('createTrackAccountRewardsHistory', () => {
+  it('cancels pre-reset rewards before the replacement debounce expires', () => {
+    testSideEffect(
+      createTrackAccountRewardsHistory(10),
+      ({ cold, hot, flush }) => {
+        const getAccountRewards = vi
+          .fn()
+          .mockReturnValueOnce(cold('--------a|', { a: Ok(mockRewards1) }))
+          .mockReturnValue(cold('--a|', { a: Ok(mockRewards2) }));
+        return {
+          actionObservables: {
+            cardanoContext: {
+              resetWalletSyncState$: hot('15ms a', {
+                a: actions.cardanoContext.resetWalletSyncState({
+                  accountId: accountId1,
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            addresses: {
+              selectAllAddresses$: cold('a', { a: [mockAddress1] }),
+            },
+            cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+            failures: { selectFailureById$: of(noFailureSelector) },
+          },
+          dependencies: {
+            cardanoProvider: {
+              getAccountRewards,
+            } as unknown as CardanoProvider,
+            actions,
+          },
+          assertion: sideEffect$ => {
+            const results: unknown[] = [];
+            sideEffect$.subscribe(action => results.push(action));
+            flush();
+            expect(getAccountRewards).toHaveBeenCalledTimes(2);
+            expect(results).toEqual([
+              actions.cardanoContext.setAccountRewardsHistory({
+                accountId: accountId1,
+                rewardsHistory: { [rewardAccount1]: mockRewards2 },
+              }),
+            ]);
+          },
+        };
+      },
+    );
+  });
+
   const trackAccountRewardsHistory = createTrackAccountRewardsHistory(0);
 
   it('fetches and dispatches rewards history on address or chain change', () => {
@@ -388,3 +477,105 @@ describe('createTrackAccountRewardsHistory', () => {
     }));
   });
 });
+
+it.each(['reset', 'resume', 'discovery', 'failed-reset'])(
+  'refreshes only the affected account on %s and preserves another account’s in-flight rewards fetch',
+  reason => {
+    testSideEffect(
+      createTrackAccountRewardsHistory(0),
+      ({ cold, hot, flush }) => {
+        const getAccountRewards = vi
+          .fn<CardanoProvider['getAccountRewards']>()
+          .mockImplementation(() => cold('----(a|)', { a: Ok([]) }));
+        return {
+          actionObservables: {
+            sync: {
+              completeSyncOperation$:
+                reason === 'failed-reset'
+                  ? hot('------a', {
+                      a: syncActions.sync.completeSyncOperation({
+                        accountId: accountId1,
+                        operationId: 'normal-transaction-polling',
+                      }),
+                    })
+                  : NEVER,
+              clearPendingSyncsForAccounts$:
+                reason === 'resume'
+                  ? hot('--a', {
+                      a: syncActions.sync.clearPendingSyncsForAccounts({
+                        accountIds: [accountId1],
+                      }),
+                    })
+                  : NEVER,
+            },
+            cardanoContext: {
+              setWalletSyncResetResult$:
+                reason === 'failed-reset'
+                  ? hot('--a', {
+                      a: actions.cardanoContext.setWalletSyncResetResult({
+                        accountId: accountId1,
+                        status: 'Failed',
+                      }),
+                    })
+                  : NEVER,
+              resetWalletSyncState$:
+                reason === 'reset'
+                  ? hot('--a', {
+                      a: actions.cardanoContext.resetWalletSyncState({
+                        accountId: accountId1,
+                      }),
+                    })
+                  : NEVER,
+            },
+          },
+          stateObservables: {
+            addresses: {
+              selectAllAddresses$: cold(reason === 'discovery' ? 'a-b' : 'a', {
+                a: [mockAddress1, mockAddress2],
+                b: [
+                  { ...mockAddress1, name: 'Updated discovery' },
+                  mockAddress2,
+                ],
+              }),
+            },
+            cardanoContext: { selectChainId$: cold('a', { a: chainId }) },
+            failures: {
+              selectFailureById$: cold('a', { a: noFailureSelector }),
+            },
+          },
+          dependencies: {
+            actions,
+            cardanoProvider: {
+              getAccountRewards,
+            } as unknown as CardanoProvider,
+          },
+          assertion: sideEffect$ => {
+            const emitted: { type: string }[] = [];
+            sideEffect$.subscribe(action => emitted.push(action));
+            flush();
+            expect(
+              getAccountRewards.mock.calls.map(
+                ([params]) => params.rewardAccount,
+              ),
+            ).toEqual([rewardAccount1, rewardAccount2, rewardAccount1]);
+            expect(
+              emitted.filter(
+                actions.cardanoContext.setAccountRewardsHistory.match,
+              ),
+            ).toHaveLength(2);
+            expect(emitted).toEqual([
+              actions.cardanoContext.setAccountRewardsHistory({
+                accountId: accountId2,
+                rewardsHistory: { [rewardAccount2]: [] },
+              }),
+              actions.cardanoContext.setAccountRewardsHistory({
+                accountId: accountId1,
+                rewardsHistory: { [rewardAccount1]: [] },
+              }),
+            ]);
+          },
+        };
+      },
+    );
+  },
+);

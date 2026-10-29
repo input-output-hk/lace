@@ -36,6 +36,10 @@ export const createStubMidnightWallet = (
   accountId: params.account.accountId as MidnightAccountId,
   networkId: params.account.blockchainSpecific.networkId,
   nightVerifyingKey: 'stubPublicKey', // stub public key
+  proofCircuitProvider: {
+    check: async () => [],
+    prove: async () => new Uint8Array(),
+  },
   walletId: params.account.walletId,
 
   // Use BehaviorSubject for observables consumed with withLatestFrom
@@ -85,6 +89,7 @@ export const createStubMidnightWallet = (
   finalizeTransaction: () => NEVER,
   getTransactionHistoryEntryByHash: () => of(undefined),
   registerNightUtxosForDustGeneration: () => NEVER,
+  revert: () => NEVER,
   signRecipe: () => NEVER,
   signUnprovenTransaction: () => NEVER,
   signData: () => NEVER,

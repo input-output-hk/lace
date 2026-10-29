@@ -5,9 +5,9 @@ import { watchMidnightWallets } from './side-effects/watch';
 
 import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';
 
-const redux: LaceInit<LaceModuleStoreInit> = () => ({
+const redux: LaceInit<LaceModuleStoreInit> = ({ runtime }) => ({
   sideEffects: [watchMidnightWallets, pushActiveNetwork, resetSyncState],
-  sideEffectDependencies: initializeMidnightDependencies(),
+  sideEffectDependencies: initializeMidnightDependencies(runtime),
 });
 
 export default redux;

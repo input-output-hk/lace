@@ -11,6 +11,7 @@ export interface ClaimPayloadDropdownItem {
 }
 
 export interface ClaimPayloadProps {
+  showActions?: boolean;
   domain: string;
   description: string;
   cancelLabel: string;
@@ -29,6 +30,7 @@ export interface ClaimPayloadProps {
 }
 
 export const ClaimPayload = ({
+  showActions = true,
   domain,
   description,
   cancelLabel,
@@ -60,22 +62,24 @@ export const ClaimPayload = ({
       </Text.L>
       <Text.M align="center">{description}</Text.M>
     </Column>
-    <Row gap={spacing.S}>
-      <Button.Secondary
-        flex={1}
-        label={cancelLabel}
-        onPress={onCancel}
-        testID="claim-payload-cancel-btn"
-      />
-      <Button.Primary
-        label={ctaLabel}
-        flex={1}
-        onPress={onSubmit}
-        disabled={isLoading}
-        loading={isLoading}
-        testID="claim-payload-submit-btn"
-      />
-    </Row>
+    {showActions && (
+      <Row gap={spacing.S}>
+        <Button.Secondary
+          flex={1}
+          label={cancelLabel}
+          onPress={onCancel}
+          testID="claim-payload-cancel-btn"
+        />
+        <Button.Primary
+          label={ctaLabel}
+          flex={1}
+          onPress={onSubmit}
+          disabled={isLoading}
+          loading={isLoading}
+          testID="claim-payload-submit-btn"
+        />
+      </Row>
+    )}
   </Column>
 );
 

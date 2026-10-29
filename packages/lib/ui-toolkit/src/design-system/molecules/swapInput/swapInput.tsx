@@ -11,6 +11,7 @@ import {
 import { radius, spacing, useTheme } from '../../../design-tokens';
 import { Icon, Row } from '../../atoms';
 import { Text } from '../../atoms/text/text';
+import { getAssetImageUrl, getImageUri } from '../../util';
 
 import type { Theme } from '../../../design-tokens';
 import type { ImageSource } from 'expo-image';
@@ -61,11 +62,19 @@ const TokenAvatar = ({
   theme: ReturnType<typeof useTheme>['theme'];
   testID?: string;
 }) => {
+  // token.icon is metadata, so it reaches expo-image only through
+  // getAssetImageUrl (proxy + single IPFS gateway; an unsafe data: uri resolves
+  // to undefined and falls through to the Plus placeholder). iconNode is a
+  // caller-supplied element rather than remote bytes, so it bypasses that path.
+  const iconUri = token?.icon
+    ? getAssetImageUrl(getImageUri(token.icon))
+    : undefined;
+
   let content: React.ReactNode;
   if (token?.iconNode) {
     content = token.iconNode;
-  } else if (token?.icon) {
-    content = <Image source={token.icon} style={styles.avatarImage} />;
+  } else if (iconUri) {
+    content = <Image source={{ uri: iconUri }} style={styles.avatarImage} />;
   } else {
     content = (
       <Icon name="Plus" size={AVATAR_SIZE * 0.5} color={theme.text.secondary} />

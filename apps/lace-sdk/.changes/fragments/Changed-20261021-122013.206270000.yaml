@@ -1,0 +1,6 @@
+kind: Changed
+body: '`@laceio/sdk` depends on `@laceio/cardano` and takes its Cardano code and types from it, instead of carrying its own copy of the Cardano JS SDK packages. An app that depends on `@laceio/cardano` at the version the SDK names shares one copy of its classes and types with the SDK; types from `@cardano-sdk/core` are a separate copy, so pass transactions between them as CBOR.'
+time: 2026-10-21T12:20:13.206270000+01:00
+custom:
+  Package: sdk
+  Build: stable

@@ -3,10 +3,7 @@ import { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
-import {
-  CardanoDappConnectorApi,
-  COLLATERAL_BLOCK_LOG,
-} from '../../src/common/store/dependencies/cardano-dapp-connector-api';
+import { CardanoDappConnectorApi } from '../../src/common/store/dependencies/cardano-dapp-connector-api';
 
 import type { SenderContext } from '../../src/browser/types';
 import type { CardanoDappConnectorApiDependencies } from '../../src/common/store/dependencies/cardano-dapp-connector-api';
@@ -42,6 +39,20 @@ export const OWN_ADDRESS = Cardano.PaymentAddress(
 export const FOREIGN_ADDRESS = Cardano.PaymentAddress(
   'addr_test1qruygd02feqeue4hkt67vwgn03p04uuv2k34ed25n4rcwt8pa7kgfet22l6w3078tm72c62p4597urnlpw6v6278cpxs8jxykl',
 );
+
+/**
+ * The own address re-tagged for MAINNET: same credentials, one different
+ * network bit. That is precisely what lets a testnet-issued witness spend
+ * mainnet coin, and what the network-binding rule refuses.
+ */
+const ownBase = Cardano.Address.fromBech32(OWN_ADDRESS).asBase();
+const OWN_MAINNET_ADDRESS = Cardano.BaseAddress.fromCredentials(
+  Cardano.NetworkId.Mainnet,
+  ownBase!.getPaymentCredential(),
+  ownBase!.getStakeCredential(),
+)
+  .toAddress()
+  .toBech32() as Cardano.PaymentAddress;
 
 const REWARD_ACCOUNT = Cardano.RewardAccount(
   'stake_test1urpklgzqsh9yqz8pkyuxcw9dlszpe5flnxjtl55epla6ftqktdyfz',
@@ -133,9 +144,11 @@ const txSuffix = { value: 0 };
 export const buildTx = ({
   collaterals,
   collateralReturnAddress,
+  outputAddress = OWN_ADDRESS,
 }: {
   collaterals: Cardano.TxIn[];
   collateralReturnAddress?: Cardano.PaymentAddress;
+  outputAddress?: Cardano.PaymentAddress;
 }): string => {
   txSuffix.value += 1;
   const id = Cardano.TransactionId(`${txSuffix.value}`.padStart(64, '0'));
@@ -145,7 +158,7 @@ export const buildTx = ({
       inputs: [SPEND_INPUT],
       outputs: [
         {
-          address: OWN_ADDRESS,
+          address: outputAddress,
           value: { coins: 1_000_000n } as unknown as Cardano.Value,
         },
       ],
@@ -213,15 +226,28 @@ export const warnMessages = (logger: {
 }): string[] => logger.warn.mock.calls.map(call => String(call[0]));
 
 /**
+ * The two greppable log anchors, pinned as text rather than imported: whoever
+ * greps a log has only this string, so production must not be able to change
+ * it without a test saying so.
+ */
+export const COLLATERAL_ANCHOR =
+  '[dapp-connector-cardano] collateral-ownership block';
+export const NETWORK_ANCHOR = '[dapp-connector-cardano] network-binding block';
+
+/**
  * The block-path stages an instance logged, in order. A `stage` on the
  * payload rather than a distinct sentence per state, so an assertion cannot
  * drift when the message is copy-edited.
  */
-export const blockStages = (logger: {
-  warn: ReturnType<typeof vi.fn>;
-}): string[] =>
+export const blockStages = (
+  logger: { warn: ReturnType<typeof vi.fn> },
+  // Each rule logs under its own anchor, so a network refusal read through
+  // the collateral default comes back [] -- "no stages logged", not "wrong
+  // anchor". Pass the anchor whenever the refusal is not a collateral one.
+  anchor: string = COLLATERAL_ANCHOR,
+): string[] =>
   logger.warn.mock.calls
-    .filter(call => call[0] === COLLATERAL_BLOCK_LOG)
+    .filter(call => call[0] === anchor)
     .map(call => String((call[1] as { stage?: string })?.stage));
 
 /**
@@ -268,3 +294,14 @@ export const createCollateralApi = (
   });
   return { api, userConfirmationRequest, signTransaction, logger };
 };
+
+/**
+ * Own collateral, own return -- the collateral rule ALLOWS this one -- but it
+ * pays a mainnet address while the fixture wallet is on preprod. The only
+ * refusal it can draw is the network-binding one.
+ */
+export const MAINNET_OUTPUT_TX_CBOR = buildTx({
+  collaterals: [OWN_COLLATERAL_INPUT],
+  collateralReturnAddress: OWN_ADDRESS,
+  outputAddress: OWN_MAINNET_ADDRESS,
+});

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../design-tokens';
 import { Button, Text } from '../../atoms';
@@ -103,7 +103,9 @@ export const OnboardingHardwareWallet = ({
       <View style={fullScreenStyles.container}>
         <NavigationHeader title={title} onBackPress={onBackPress} />
 
-        <View style={fullScreenStyles.content}>
+        <ScrollView
+          style={fullScreenStyles.scrollView}
+          contentContainerStyle={fullScreenStyles.scrollContent}>
           <View style={fullScreenStyles.subtitleContainer}>
             <Text.S
               variant="primary"
@@ -133,7 +135,11 @@ export const OnboardingHardwareWallet = ({
               {instructionText}
             </InstructionText>
           </View>
+        </ScrollView>
 
+        {/* Outside the scroll, so a list that outgrows the viewport cannot put
+            Connect below the fold — a narrow side panel with four vendors did. */}
+        <View style={fullScreenStyles.buttonContainer}>
           <Button.Primary
             label={connectButtonLabel}
             onPress={onConnect}
@@ -303,9 +309,17 @@ const fullScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
-    padding: spacing.L,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.L,
+    paddingTop: spacing.L,
+  },
+  buttonContainer: {
+    paddingBottom: spacing.L,
+    paddingHorizontal: spacing.L,
   },
   subtitleContainer: {
     marginBottom: spacing.XL,
@@ -314,7 +328,13 @@ const fullScreenStyles = StyleSheet.create({
     textAlign: 'center',
   },
   devicesContainer: {
-    flex: 1,
+    // Grows into spare room so the list stays centred where it already fitted,
+    // but never shrinks below its own height — shrinking is what hid the tail
+    // instead of letting the scroll reach it. Spelled out because RN defaults
+    // `flexShrink` to 0 and the web CSS default is 1.
+    flexBasis: 'auto',
+    flexGrow: 1,
+    flexShrink: 0,
     gap: spacing.XXL,
     marginBottom: spacing.XL,
     justifyContent: 'center',

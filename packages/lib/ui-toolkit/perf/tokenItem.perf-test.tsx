@@ -122,7 +122,7 @@ test('TokenItem × 50 — single row balance update (×2)', async () => {
  *
  * The provider lives INSIDE the measured tree (no wrapper) on purpose:
  * Reassure's Profiler sits between the wrapper and the ui
- * (Wrapper > Profiler > ui), and updates originating in the wrapper never
+ * (Wrapper, then Profiler, then ui), and updates originating in the wrapper never
  * fire the Profiler's onRender — verified empirically: with the provider in
  * the wrapper, toggles re-rendered all consumers (probe below) yet count and
  * duration stayed at mount level. Measuring the provider too is the honest

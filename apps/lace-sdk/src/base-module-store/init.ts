@@ -9,6 +9,9 @@ const store: LaceInit<LaceModuleStoreInit> = () => ({
     // transition event, not a state) never emits.
     isWalletActive$: of(true),
     walletResumed$: NEVER,
+    // Reports nothing: no analytics event, and no analytics user id, leaves
+    // the SDK.
+    trackAnalyticsEvent: () => of(undefined),
   },
 });
 

@@ -13,6 +13,7 @@ import {
   of,
   switchMap,
   withLatestFrom,
+  takeUntil,
 } from 'rxjs';
 
 import { REWARD_ACCOUNT_DETAILS_SYNC_CONFIRMATION_DEPTH } from '../../const';
@@ -115,7 +116,15 @@ const isTipBeyondConfirmationDepth = (
  * cacheKey), so reward details load before transaction history arrives.
  */
 export const trackRewardAccountDetails: SideEffect = (
-  { cardanoContext: { retrySyncRound$ } },
+  {
+    cardanoContext: {
+      retrySyncRound$,
+      refetchRewardAccountDetails$,
+      resetWalletSyncState$,
+      setWalletSyncResetResult$,
+    },
+    sync: { clearPendingSyncsForAccounts$ },
+  },
   {
     wallets: { selectActiveNetworkAccounts$ },
     addresses: { selectAllAddresses$ },
@@ -210,16 +219,21 @@ export const trackRewardAccountDetails: SideEffect = (
             map(([params]) => params),
           );
 
-          const retryTrigger$: Observable<FetchParams> = retrySyncRound$.pipe(
+          const retryTrigger$: Observable<FetchParams> = rxMerge(
+            retrySyncRound$,
+            refetchRewardAccountDetails$,
+          ).pipe(
             withLatestFrom(
               selectAllFailures$,
               selectAllMap$,
               selectAllAddresses$,
               selectTip$,
             ),
-            filter(
-              ([, allFailures]) =>
-                CardanoRewardAccountDetailsFailureId(accountId) in allFailures,
+            filter(([action, allFailures]) =>
+              action.payload
+                ? action.payload.accountId === accountId
+                : CardanoRewardAccountDetailsFailureId(accountId) in
+                  allFailures,
             ),
             map(
               ([, , activitiesByAccount, allAddresses, tip]):
@@ -275,6 +289,23 @@ export const trackRewardAccountDetails: SideEffect = (
                     return result.unwrap();
                   }),
                   retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+                  takeUntil(
+                    rxMerge(
+                      resetWalletSyncState$.pipe(
+                        filter(a => a.payload.accountId === accountId),
+                      ),
+                      setWalletSyncResetResult$.pipe(
+                        filter(
+                          a =>
+                            a.payload.accountId === accountId &&
+                            a.payload.status === 'Failed',
+                        ),
+                      ),
+                      clearPendingSyncsForAccounts$.pipe(
+                        filter(a => a.payload.accountIds.includes(accountId)),
+                      ),
+                    ),
+                  ),
                   withLatestFrom(selectRewardAccountDetailsRaw$),
                   mergeMap(([rewardAccountInfo, storedRaw]) => {
                     const storedSerialized = storedRaw[accountId];

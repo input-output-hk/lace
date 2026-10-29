@@ -1,0 +1,44 @@
+import * as Crypto from '@lace-lib/cardano-crypto';
+import { HexBlob } from '@lace-lib/util/common';
+
+import { Cardano } from '../../../src';
+import { Credential } from '../../../src/Serialization/Common';
+
+describe('Credential', () => {
+  const cbor = HexBlob(
+    '8200581c30000000000000000000000000000000000000000000000000000000',
+  );
+  const cborArraySize3 = HexBlob(
+    '8300581c3000000000000000000000000000000000000000000000000000000000',
+  );
+  const coreCredential: Cardano.Credential = {
+    hash: Crypto.Hash28ByteBase16(
+      '30000000000000000000000000000000000000000000000000000000',
+    ),
+    type: Cardano.CredentialType.KeyHash,
+  };
+
+  it('can encode init from Core', () => {
+    const credential = Credential.fromCore(coreCredential);
+    expect(credential.toCbor()).toEqual(cbor);
+  });
+
+  it('can encode to Core', () => {
+    const credential = Credential.fromCbor(cbor);
+    expect(credential.toCore()).toEqual(coreCredential);
+  });
+
+  it('politely refuses an invalid credential cbor', () => {
+    expect(() => Credential.fromCbor(cborArraySize3)).toThrow();
+  });
+
+  it('politely refuses an unknown credential type', () => {
+    expect(() =>
+      Credential.fromCbor(
+        HexBlob(
+          '8202581c30000000000000000000000000000000000000000000000000000000',
+        ),
+      ),
+    ).toThrow('Unexpected credential type value: 2');
+  });
+});

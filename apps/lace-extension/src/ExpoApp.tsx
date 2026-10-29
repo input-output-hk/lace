@@ -30,6 +30,9 @@ globalThis.Buffer = WebBuffer;
 
 configureImageFormat({
   webIpfsGatewayUrl: process.env.EXPO_PUBLIC_WEB_IPFS_GATEWAY_URL,
+  imageProxyUrl: process.env.EXPO_PUBLIC_IMAGE_PROXY_URL,
+  imageProxyKey: process.env.EXPO_PUBLIC_IMAGE_PROXY_KEY,
+  imageProxySalt: process.env.EXPO_PUBLIC_IMAGE_PROXY_SALT,
 });
 
 // Initialize Sentry for UI context (early, before any app code)

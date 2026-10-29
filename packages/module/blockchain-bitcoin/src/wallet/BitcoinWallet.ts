@@ -50,6 +50,7 @@ import type { Logger } from 'ts-log';
 
 bitcoin.initEccLib(ecc);
 
+/** Where an account wallet is in syncing its state with the provider. */
 export enum SyncStatus {
   Pending = 'pending',
   Syncing = 'syncing',
@@ -178,7 +179,7 @@ export class BitcoinWallet {
   /**
    * Fetches the raw serialized transaction (hex) for a given transaction id.
    *
-   * @param txId 32-byte transaction ID in hexadecimal form.
+   * @param txId - 32-byte transaction ID in hexadecimal form.
    */
   public getRawTransaction(
     txId: string,
@@ -199,7 +200,7 @@ export class BitcoinWallet {
    * Fetches transaction history pages recursively until the total number of
    * transactions reaches the `desiredAmount` or the end of history is found.
    *
-   * @param desiredAmount The target number of transactions to have loaded.
+   * @param desiredAmount - The target number of transactions to have loaded.
    * @returns An observable that emits an `Ok<boolean>` on success or an `Err<ProviderError>` on failure.
    * The boolean is `true` if the end of history was reached.
    */
@@ -472,7 +473,7 @@ export class BitcoinWallet {
    *
    * 3. **Purge Invalid Local Transactions**:
    *    - Iterates over the local list of pending transactions to check each transaction's inputs against:
-   *      a. Inputs of **confirmed** transactions in the history (confirmations > 0) to detect inputs settled in a
+   *      a. Inputs of **confirmed** transactions in the history (`confirmations > 0`) to detect inputs settled in a
    *         block. Unconfirmed history entries are ignored — a transaction stays pending until it is mined.
    *      b. Inputs of other remote pending transactions to handle RBF scenarios where a transaction might be replaced
    *         by another with the same inputs but not the same hash.

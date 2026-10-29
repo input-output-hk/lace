@@ -4,7 +4,7 @@ import { filter, tap } from 'rxjs';
 
 import { setFeatureFlags } from './actions';
 
-import type { SideEffect } from '..';
+import type { SideEffect } from '../contracts';
 import type { FeatureFlagsObservableType } from './dependencies';
 
 const updateFeatureFlags: SideEffect = (

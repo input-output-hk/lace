@@ -47,6 +47,7 @@ import {
   createWalletCreationSideEffect,
 } from '../../src/store/side-effects';
 
+import type { Authenticate } from '@lace-contract/authentication-prompt';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { InMemoryWalletIntegration } from '@lace-contract/in-memory';
 import type { SecureStore } from '@lace-contract/secure-store';
@@ -58,11 +59,12 @@ import type {
   WalletIdentity,
 } from '@lace-contract/wallet-repo';
 import type { ByBlockchainName } from '@lace-lib/util-store';
+import type { Mock } from 'vitest';
 
 type BlockchainSpecific = { some: string };
 
 const createMockIntegrations = (
-  addAccountsMock: ReturnType<typeof vi.fn>,
+  addAccountsMock: Mock,
 ): InMemoryWalletIntegration[] => [
   {
     blockchainName: 'Cardano',
@@ -94,9 +96,9 @@ describe('createInMemoryWalletAddAccountSideEffect', () => {
     message: 'authentication-prompt.message.add-account' as TranslationKey,
   };
 
-  let authenticate: ReturnType<typeof vi.fn>;
-  let accessAuthSecret: ReturnType<typeof vi.fn>;
-  let addAccountMock: ReturnType<typeof vi.fn>;
+  let authenticate: Mock<Authenticate>;
+  let accessAuthSecret: Mock;
+  let addAccountMock: Mock;
 
   const baseWallet: InMemoryWallet<BlockchainSpecific> = {
     walletId,
@@ -1820,6 +1822,71 @@ describe('createAddAccountSideEffect', () => {
     );
   });
 
+  it('logs warning and dispatches attemptAddAccountFailed for Cardano custody wallet', () => {
+    const logger = { ...dummyLogger, warn: vi.fn() };
+    const custodyWallet: AnyWallet = {
+      walletId,
+      metadata: { name: 'Custody Wallet 1', order: 0 },
+      accounts: [
+        {
+          accountId: AccountId('0'),
+          walletId,
+          blockchainName: 'Cardano',
+          networkType: 'testnet',
+          blockchainNetworkId: BlockchainNetworkId('cardano-1'),
+          metadata: { name: 'Custody #0' },
+          blockchainSpecific: { some: 'context' },
+          accountType: 'CardanoCustody',
+        },
+      ],
+      blockchainSpecific: {},
+      type: WalletType.CardanoCustody,
+    };
+
+    testSideEffect(
+      createAddAccountSideEffect([]),
+      ({ cold, hot, expectObservable, flush }) => {
+        const wallets$ = hot('a', { a: [custodyWallet] });
+
+        return {
+          actionObservables: {
+            accountManagement: {
+              attemptAddAccount$: cold('-a', {
+                a: actions.accountManagement.attemptAddAccount({
+                  walletId,
+                  blockchain,
+                  accountIndex,
+                  authenticationPromptConfig,
+                  accountName: '',
+                  targetNetworks,
+                }),
+              }),
+            },
+          },
+          stateObservables: { wallets: { selectAll$: wallets$ } },
+          dependencies: {
+            actions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('-a', {
+              a: actions.accountManagement.attemptAddAccountFailed({
+                walletId,
+              }),
+            });
+
+            flush();
+
+            expect(logger.warn).toHaveBeenCalledWith(
+              'Cardano custody wallet account addition is not supported',
+              { walletId },
+            );
+          },
+        };
+      },
+    );
+  });
+
   it('logs warning and dispatches attemptAddAccountFailed when wallet is not found', () => {
     const logger = { ...dummyLogger, warn: vi.fn() };
     const otherWalletId = WalletId('different-wallet');
@@ -2136,7 +2203,7 @@ describe('createRemoveAccountSideEffect', () => {
     message: 'authentication-prompt.message.remove-account' as TranslationKey,
   };
 
-  let authenticate: ReturnType<typeof vi.fn>;
+  let authenticate: Mock<Authenticate>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -2600,7 +2667,7 @@ describe('createRemoveWalletSideEffect', () => {
     message: 'authentication-prompt.message.remove-account' as TranslationKey,
   };
 
-  let authenticate: ReturnType<typeof vi.fn>;
+  let authenticate: Mock<Authenticate>;
 
   const makeWallet = () =>
     ({
@@ -3009,9 +3076,9 @@ describe('createWalletCreationSideEffect', () => {
   const walletName = 'New Wallet';
   const blockchains = ['Cardano'] as ['Cardano'];
 
-  let authenticate: ReturnType<typeof vi.fn>;
-  let accessAuthSecret: ReturnType<typeof vi.fn>;
-  let initializeWalletMock: ReturnType<typeof vi.fn>;
+  let authenticate: Mock<Authenticate>;
+  let accessAuthSecret: Mock;
+  let initializeWalletMock: Mock;
 
   const existingWallet: InMemoryWallet<BlockchainSpecific> = {
     walletId: WalletId('existing'),

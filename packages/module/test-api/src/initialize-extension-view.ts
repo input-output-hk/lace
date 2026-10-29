@@ -66,14 +66,6 @@ const initializeExtensionView: ContextualLaceInit<
   api.store = store;
   api.waitForState = async predicate => waitForState(predicate, store);
   api.reloadExtension = () => store.dispatch(actions.app.reloadApplication());
-
-  api.toggleReactScan = () => {
-    localStorage.setItem(
-      'react-scan-enabled',
-      localStorage.getItem('react-scan-enabled') === 'true' ? 'false' : 'true',
-    );
-    window.location.reload();
-  };
 };
 
 export default initializeExtensionView;

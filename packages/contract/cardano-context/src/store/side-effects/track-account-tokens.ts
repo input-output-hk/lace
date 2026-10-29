@@ -1,17 +1,18 @@
 import { coalesceValueQuantities } from '@cardano-sdk/core';
-import { TokenId } from '@lace-contract/tokens';
 import { BigNumber } from '@lace-lib/util';
 import groupBy from 'lodash/groupBy';
 import {
   combineLatest,
   distinct,
   distinctUntilChanged,
+  filter,
   map,
   mergeAll,
   mergeMap,
 } from 'rxjs';
 
-import { LOVELACE_TOKEN_ID } from '../../const';
+import { isExtensionTokenAccount } from '../../extensions';
+import { toAccountTokens } from '../helpers/account-tokens';
 
 import type { SideEffect } from '../../contract';
 import type { Address } from '@lace-contract/addresses';
@@ -24,7 +25,7 @@ const computeAccountTokens =
     {
       cardanoContext: {
         selectAccountUtxosWithInFlight$,
-        selectRewardAccountDetails$,
+        selectRewardAccountDetailsWithInFlight$,
       },
     },
     { actions },
@@ -33,9 +34,11 @@ const computeAccountTokens =
     // (e.g. a migration sweep) must leave the source's balance the moment it
     // is submitted and credit the destination once — the raw sets double-count
     // it until both providers catch up (LW-15318).
+    // Rewards likewise: a pending withdrawal's rewards already sit in its
+    // outputs, so the in-flight view stops counting them as withdrawable.
     combineLatest([
       selectAccountUtxosWithInFlight$,
-      selectRewardAccountDetails$,
+      selectRewardAccountDetailsWithInFlight$,
     ]).pipe(
       map(([accountUtxoMap, rewardAccountDetailsMap]) => ({
         accountUtxos: accountUtxoMap[accountId],
@@ -72,30 +75,18 @@ const computeAccountTokens =
           accountId,
           byAddress: addressValues.map(([address, value], index) => ({
             address,
-            tokens: [
-              {
-                tokenId: LOVELACE_TOKEN_ID,
-                available:
-                  index === 0
-                    ? BigNumber(value.coins + BigNumber.valueOf(rewardBalance))
-                    : BigNumber(value.coins),
-                pending: BigNumber(0n),
-              },
-              ...[...(value.assets?.entries() || [])].map(
-                ([assetId, quantity]) => ({
-                  tokenId: TokenId(assetId),
-                  available: BigNumber(quantity),
-                  pending: BigNumber(0n),
-                }),
-              ),
-            ],
+            tokens: toAccountTokens(
+              value,
+              index === 0 ? BigNumber.valueOf(rewardBalance) : 0n,
+            ),
           })),
         }),
       ),
     );
 
 /**
- * Computes tokens from utxos and withdrawable reward amount for all activated Cardano accounts.
+ * Computes tokens from utxos and withdrawable reward amount for all activated
+ * Cardano accounts, except those a feature's own store tracks.
  * ADA balance is set as sum of UTXO coins and withdrawable amount (added to first address).
  */
 export const trackAccountTokens: SideEffect = (
@@ -106,8 +97,9 @@ export const trackAccountTokens: SideEffect = (
   stateObservables.cardanoContext.selectActiveCardanoAccounts$.pipe(
     mergeAll(),
     distinct(accumulator => accumulator.accountId),
-    mergeMap(({ accountId }) =>
-      computeAccountTokens(accountId)(
+    filter(account => !isExtensionTokenAccount(account)),
+    mergeMap(account =>
+      computeAccountTokens(account.accountId)(
         actionObservables,
         stateObservables,
         dependencies,

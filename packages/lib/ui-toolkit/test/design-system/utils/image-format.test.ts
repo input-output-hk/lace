@@ -7,53 +7,13 @@ const loadImageFormatModule = async (isWeb: boolean) => {
   return await import('../../../src/design-system/util/image-format');
 };
 
-describe('getWebIpfsFallbackUri', () => {
-  it('returns undefined for undefined input', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(true);
-    expect(getWebIpfsFallbackUri(undefined)).toBeUndefined();
-  });
-
-  it('returns the original uri when not running on web', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(false);
-    const uri = 'https://some.gateway/ipfs/bafybeigdyrzt';
-    expect(getWebIpfsFallbackUri(uri)).toBe(uri);
-  });
-
-  it('returns the original uri when it already uses the blockfrost gateway', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(true);
-    const uri = 'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt';
-    expect(getWebIpfsFallbackUri(uri)).toBe(uri);
-  });
-
-  it('returns the original uri when it does not contain an /ipfs/<cid> segment', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(true);
-    const uri = 'https://example.com/not-ipfs/bafybeigdyrzt';
-    expect(getWebIpfsFallbackUri(uri)).toBe(uri);
-  });
-
-  it('rewrites /ipfs/<cid> urls to the blockfrost gateway on web', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(true);
-    const uri = 'https://some.gateway/ipfs/bafybeigdyrzt';
-    expect(getWebIpfsFallbackUri(uri)).toBe(
-      'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
-    );
-  });
-
-  it('rewrites to the blockfrost gateway and keeps only the CID (drops additional path/query)', async () => {
-    const { getWebIpfsFallbackUri } = await loadImageFormatModule(true);
-    const uri =
-      'https://some.gateway/ipfs/bafybeigdyrzt/metadata.json?foo=bar#baz';
-    expect(getWebIpfsFallbackUri(uri)).toBe(
-      'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
-    );
-  });
-});
-
 describe('getWebIpfsFallbackSource', () => {
   it('returns null when not running on web', async () => {
     const { getWebIpfsFallbackSource } = await loadImageFormatModule(false);
     expect(
-      getWebIpfsFallbackSource('https://some.gateway/ipfs/bafybeigdyrzt'),
+      getWebIpfsFallbackSource(
+        'https://some.gateway/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
+      ),
     ).toBeNull();
   });
 
@@ -62,32 +22,35 @@ describe('getWebIpfsFallbackSource', () => {
     expect(getWebIpfsFallbackSource(undefined)).toBeNull();
   });
 
-  it('returns null when it already uses the blockfrost gateway', async () => {
+  it('returns null when it already uses the built-in gateway', async () => {
     const { getWebIpfsFallbackSource } = await loadImageFormatModule(true);
-    const uri = 'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt';
+    const uri =
+      'https://ipfs.blockfrost.dev/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu';
     expect(getWebIpfsFallbackSource(uri)).toBeNull();
   });
 
   it('returns null when it does not contain an /ipfs/<cid> segment', async () => {
     const { getWebIpfsFallbackSource } = await loadImageFormatModule(true);
-    const uri = 'https://example.com/not-ipfs/bafybeigdyrzt';
+    const uri =
+      'https://example.com/not-ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu';
     expect(getWebIpfsFallbackSource(uri)).toBeNull();
   });
 
-  it('returns a blockfrost ImageSource on web for /ipfs/<cid> urls', async () => {
+  it('returns a built-in-gateway ImageSource on web for /ipfs/<cid> urls', async () => {
     const { getWebIpfsFallbackSource } = await loadImageFormatModule(true);
-    const uri = 'https://some.gateway/ipfs/bafybeigdyrzt';
+    const uri =
+      'https://some.gateway/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu';
     expect(getWebIpfsFallbackSource(uri)).toEqual({
-      uri: 'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
+      uri: 'https://ipfs.blockfrost.dev/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
     });
   });
 
-  it('returns a blockfrost ImageSource and keeps only the CID (drops additional path/query)', async () => {
+  it('keeps only the CID in the retry ImageSource', async () => {
     const { getWebIpfsFallbackSource } = await loadImageFormatModule(true);
     const uri =
-      'https://some.gateway/ipfs/bafybeigdyrzt/metadata.json?foo=bar#baz';
+      'https://some.gateway/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu/metadata.json?foo=bar#baz';
     expect(getWebIpfsFallbackSource(uri)).toEqual({
-      uri: 'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
+      uri: 'https://ipfs.blockfrost.dev/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
     });
   });
 });
@@ -98,7 +61,7 @@ describe('getAssetImageUrl', () => {
     expect(getAssetImageUrl(undefined)).toBeUndefined();
   });
 
-  it('returns http(s) urls as-is', async () => {
+  it('returns http(s) urls as-is when no proxy is configured', async () => {
     const { getAssetImageUrl } = await loadImageFormatModule(true);
     expect(getAssetImageUrl('https://example.com/a.png')).toBe(
       'https://example.com/a.png',
@@ -115,15 +78,23 @@ describe('getAssetImageUrl', () => {
     const { configureImageFormat, getAssetImageUrl } =
       await loadImageFormatModule(true);
     configureImageFormat({ webIpfsGatewayUrl: 'https://ipfs.blockfrost.dev' });
-    expect(getAssetImageUrl('ipfs://bafybeigdyrzt')).toBe(
-      'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
+    expect(
+      getAssetImageUrl(
+        'ipfs://bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
+      ),
+    ).toBe(
+      'https://ipfs.blockfrost.dev/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
     );
   });
 
-  it('falls back to the blockfrost gateway when no gateway was configured', async () => {
+  it('falls back to the built-in gateway when no gateway was configured', async () => {
     const { getAssetImageUrl } = await loadImageFormatModule(false);
-    expect(getAssetImageUrl('ipfs://bafybeigdyrzt')).toBe(
-      'https://ipfs.blockfrost.dev/ipfs/bafybeigdyrzt',
+    expect(
+      getAssetImageUrl(
+        'ipfs://bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
+      ),
+    ).toBe(
+      'https://ipfs.blockfrost.dev/ipfs/bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
     );
   });
 
@@ -219,5 +190,190 @@ describe('getAssetImageUrl', () => {
       const webp = 'Data:image/webp;base64,UklGRh4AAABXRUJQ';
       expect(getAssetImageUrl(webp)).toBe(webp);
     });
+  });
+});
+
+describe('getAssetImageUrl IPFS resolution', () => {
+  // A real CIDv1, from the LW-15013 proxy example.
+  const CID = 'bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu';
+
+  it.each([
+    ['the ipfs:// scheme', `ipfs://${CID}`, CID],
+    ['a bare CID', CID, CID],
+    [
+      'a bare CID path',
+      `${CID}/no-time-to-explain.jpeg`,
+      `${CID}/no-time-to-explain.jpeg`,
+    ],
+  ])('resolves %s onto the built-in gateway', async (_name, image, cidPath) => {
+    const { getAssetImageUrl } = await loadImageFormatModule(true);
+    expect(getAssetImageUrl(image)).toBe(
+      `https://ipfs.blockfrost.dev/ipfs/${cidPath}`,
+    );
+  });
+
+  it('resolves onto the configured gateway when an app sets one', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat({ webIpfsGatewayUrl: 'https://my.gateway/ipfs/' });
+    expect(getAssetImageUrl(`ipfs://${CID}`)).toBe(
+      `https://my.gateway/ipfs/${CID}`,
+    );
+  });
+
+  // A url that already names a gateway is an ordinary http url. Rewriting it
+  // onto ours would break an image that loads today, so it is left as it is
+  // (and proxied like any other remote url when a proxy is configured).
+  it.each([
+    ['a third-party gateway url', `https://ipfs.io/ipfs/${CID}`],
+    [
+      "blockfrost's nested gateway path",
+      `https://ipfs.blockfrost.io/api/v0/ipfs/gateway/${CID}`,
+    ],
+  ])('leaves %s untouched', async (_name, image) => {
+    const { getAssetImageUrl } = await loadImageFormatModule(true);
+    expect(getAssetImageUrl(image)).toBe(image);
+  });
+
+  it('leaves a protocol-less non-CID string untouched (not treated as IPFS)', async () => {
+    const { getAssetImageUrl } = await loadImageFormatModule(true);
+    expect(getAssetImageUrl('not-a-cid', 'png')).toBe(
+      'data:image/png;base64,not-a-cid',
+    );
+  });
+
+  it('does not read a raw base64 payload as a bare CID', async () => {
+    const { getAssetImageUrl } = await loadImageFormatModule(true);
+    const payload = 'iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQ';
+    expect(getAssetImageUrl(payload, 'png')).toBe(
+      `data:image/png;base64,${payload}`,
+    );
+  });
+});
+
+describe('image proxy', () => {
+  // A configured proxy needs all three values; the url-building rules
+  // themselves are covered in @lace-lib/image-url.
+  const PROXY = {
+    imageProxyUrl: 'https://proxy.example',
+    imageProxyKey:
+      '943b421c9eb07c830af81030552c86009268de4e532ba2ee2eab8247c6da0881',
+    imageProxySalt:
+      '520f986b998545b4785e0defbc4f3c1203f22de2374a3d53cb7a7fe9fea309c5',
+  };
+  const SIGNED_A_PNG =
+    'https://proxy.example/pyUdTEB8e8f8WfMRnS5PINcfvrHrBlA1lh4CEcyx07Q/rs:fit:1024:1024/plain/https%3A%2F%2Fexample.com%2Fa.png@webp';
+
+  it('proxies remote http(s) urls', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    expect(getAssetImageUrl('https://example.com/a.png')).toBe(SIGNED_A_PNG);
+  });
+
+  it.each([
+    ['HTTPS://example.com/logo.svg', 'HTTPS://example.com/logo.svg'],
+    ['HtTp://example.com/logo.svg', 'HtTp://example.com/logo.svg'],
+    ['//example.com/logo.svg', 'https://example.com/logo.svg'],
+  ])(
+    'proxies remote URL spelling %s on web and native',
+    async (image, source) => {
+      for (const isWeb of [true, false]) {
+        const { configureImageFormat, getAssetImageUrl } =
+          await loadImageFormatModule(isWeb);
+        configureImageFormat(PROXY);
+        const resolved = getAssetImageUrl(image);
+        expect(resolved).toMatch(
+          /^https:\/\/proxy\.example\/[\w-]{43}\/rs:fit:1024:1024\/plain\//,
+        );
+        expect(resolved).toContain(`${encodeURIComponent(source)}@webp`);
+      }
+    },
+  );
+
+  it('normalizes a proxy-origin raw URL instead of passing it to the image', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    const unsafe = `https://proxy.example/${'a'.repeat(
+      43,
+    )}/raw:1/plain/https://evil.test/logo.svg`;
+    const normalized = getAssetImageUrl(unsafe);
+    expect(normalized).not.toBe(unsafe);
+    expect(normalized).toContain(`/plain/${encodeURIComponent(unsafe)}@webp`);
+    expect(getAssetImageUrl(normalized)).toBe(normalized);
+  });
+
+  it('proxies the gateway url an IPFS source normalizes to', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    expect(
+      getAssetImageUrl(
+        'ipfs://bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu',
+      ),
+    ).toBe(
+      'https://proxy.example/2P5T-RbyAy818s2lTjTRInIHZpUflDUyzmBzSz5qZjA/rs:fit:1024:1024/plain/https%3A%2F%2Fipfs.blockfrost.dev%2Fipfs%2Fbafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu@webp',
+    );
+  });
+
+  it('uses the url directly when no proxy is configured', async () => {
+    const { getAssetImageUrl } = await loadImageFormatModule(true);
+    expect(getAssetImageUrl('https://example.com/a.png')).toBe(
+      'https://example.com/a.png',
+    );
+  });
+
+  // The deployed proxy answers unsigned requests with 403, so a build carrying
+  // an origin but no credentials must load images directly.
+  it('uses the url directly when the proxy origin has no key/salt', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat({ imageProxyUrl: 'https://proxy.example' });
+    expect(getAssetImageUrl('https://example.com/a.png')).toBe(
+      'https://example.com/a.png',
+    );
+  });
+
+  // A molecule resolves the uri and Avatar resolves it again.
+  it('is idempotent over an IPFS url whose query the proxy escaped', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    const once = getAssetImageUrl(
+      'ipfs://bafybeict2kq6gt4ikgulypt7h7nwj4hmfi2kevrqvnx2osibfulyy5x3hu/art.png?w=64',
+    );
+    expect(once).toContain('%3Fw%3D64');
+    expect(getAssetImageUrl(once)).toBe(once);
+  });
+
+  it('does not proxy data: urls', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    const uri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA';
+    expect(getAssetImageUrl(uri)).toBe(uri);
+  });
+
+  it('does not proxy local asset paths', async () => {
+    const { configureImageFormat, getAssetImageUrl } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    expect(getAssetImageUrl('/expo/assets/logo.png')).toBe(
+      '/expo/assets/logo.png',
+    );
+  });
+
+  it('ignores a malformed encoded source during an IPFS retry', async () => {
+    const { configureImageFormat, getWebIpfsFallbackSource } =
+      await loadImageFormatModule(true);
+    configureImageFormat(PROXY);
+    expect(
+      getWebIpfsFallbackSource(
+        `https://proxy.example/${'a'.repeat(
+          43,
+        )}/rs:fit:1024:1024/plain/%FF@webp`,
+      ),
+    ).toBeNull();
   });
 });

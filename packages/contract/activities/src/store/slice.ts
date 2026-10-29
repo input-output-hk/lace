@@ -26,6 +26,13 @@ import type { RehydrateAction } from 'redux-persist';
 const sortActivitiesCallback = (a: Activity, b: Activity) =>
   b.timestamp - a.timestamp;
 
+/**
+ * The activities slice: each account's loaded activities (newest first), how
+ * many activities each account has asked to load, whether each account's
+ * oldest activity has been reached, and the activity open in the detail view.
+ *
+ * @typeParam BlockchainSpecificMetadata - The shape of each activity's chain-specific metadata.
+ */
 export type ActivitiesSliceState<BlockchainSpecificMetadata = unknown> = {
   activities: Record<AccountId, Activity<BlockchainSpecificMetadata>[]>;
   desiredLoadedActivitiesCountPerAccount: Record<AccountId, number>;
@@ -33,6 +40,12 @@ export type ActivitiesSliceState<BlockchainSpecificMetadata = unknown> = {
   activityDetails?: Serializable<ActivityDetail<BlockchainSpecificMetadata>>;
 };
 
+/**
+ * Each account's pending activities (submitted transactions not yet
+ * confirmed), keyed by account. Accounts with none are absent.
+ *
+ * @typeParam BlockchainSpecificMetadata - The shape of each activity's chain-specific metadata.
+ */
 export type PendingActivitiesByAccount<BlockchainSpecificMetadata = unknown> =
   Record<AccountId, Activity<BlockchainSpecificMetadata>[]>;
 
@@ -451,6 +464,7 @@ export const activitiesSelectors = {
   },
 };
 
+/** The part of the Redux store state that the activities contract owns. */
 export type ActivitiesStoreState = StateFromReducersMapObject<
   typeof activitiesReducers
 >;

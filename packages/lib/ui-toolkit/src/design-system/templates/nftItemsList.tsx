@@ -6,7 +6,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 import { spacing } from '../../design-tokens';
 import { Column } from '../atoms';
 import { NFTItem } from '../molecules';
-import { getAssetImageUrl, getWebIpfsFallbackUri } from '../util';
+import { getAssetImageUrl } from '../util';
 
 const NUM_COLUMNS = 3;
 
@@ -15,7 +15,6 @@ export interface NftItem {
   isSelected: boolean;
   metadata?: { image?: string };
   displayLongName: string;
-  uri?: string;
 }
 
 interface NftsProps {
@@ -48,9 +47,7 @@ export const NftItemsList = ({
 
   const renderNFTItem = useCallback(
     ({ item, index }: { item: NftItem; index: number }) => {
-      const thumbnailImage = item.uri
-        ? getWebIpfsFallbackUri(item.uri)
-        : getAssetImageUrl(item.metadata?.image);
+      const thumbnailImage = getAssetImageUrl(item.metadata?.image);
 
       return (
         <Column style={styles.nftItem}>

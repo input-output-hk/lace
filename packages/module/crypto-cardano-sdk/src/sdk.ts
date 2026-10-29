@@ -5,6 +5,7 @@ import {
   ModuleName,
 } from '@lace-contract/module';
 
+/** Cardano cryptography: BIP32-Ed25519 key derivation and Blake2b hashing. */
 export default inferModuleContext({
   moduleName: ModuleName('crypto-cardano-sdk'),
   implements: combineContracts([cryptoAddonContract] as const),

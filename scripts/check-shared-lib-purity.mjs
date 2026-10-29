@@ -23,7 +23,11 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const LIBS = ['packages/lib/core', 'packages/lib/extension-shell-api'];
+const LIBS = [
+  'packages/lib/extension-offscreen',
+  'packages/lib/core',
+  'packages/lib/extension-shell-api',
+];
 const FIRST_PARTY = /^@lace-lib\//;
 const RELATIVE = /^\./;
 const SHIPPED_DEP_FIELDS = [

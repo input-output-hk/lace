@@ -140,7 +140,7 @@ const flowConfigs: FlowConfig[] = [
       ({
         resolve,
         type: 'signTx',
-        collateralRefusal: null,
+        refusal: null,
         requestingDapp: mockDapp,
         txHex: 'deadbeef1234',
         partialSign: false,
@@ -172,7 +172,7 @@ const flowConfigs: FlowConfig[] = [
       ({
         resolve,
         type: 'signData',
-        collateralRefusal: null,
+        refusal: null,
         requestingDapp: mockDapp,
         signDataAddress: 'addr_test1qz...',
         signDataPayload: 'cafebabe',
@@ -334,7 +334,7 @@ describe('cardano-dapp-connector-util', () => {
           requestingDapp: mockDapp,
           txHex: 'deadbeef1234',
           partialSign: false,
-          collateralRefusal: null,
+          refusal: null,
         } as CardanoConfirmationRequest),
       invoke: ({ request, selectOpenViews$, confirm$, reject$ }) =>
         signTx$({
@@ -359,7 +359,7 @@ describe('cardano-dapp-connector-util', () => {
           requestingDapp: mockDapp,
           signDataAddress: 'addr_test1qz...',
           signDataPayload: 'cafebabe',
-          collateralRefusal: null,
+          refusal: null,
         } as CardanoConfirmationRequest),
       invoke: ({ request, selectOpenViews$, confirm$, reject$ }) =>
         signData$({
@@ -636,7 +636,7 @@ describe('cardano-dapp-connector-util', () => {
           requestingDapp: mockDapp,
           txHex: 'deadbeef',
           partialSign: false,
-          collateralRefusal: null,
+          refusal: null,
         } as CardanoConfirmationRequest,
         selectOpenViews$: of([createSidePanelView(1)]),
         actions,
@@ -668,7 +668,7 @@ describe('cardano-dapp-connector-util', () => {
     ): CardanoConfirmationRequest => ({
       resolve: resolveFunction,
       type: 'signTx',
-      collateralRefusal: null,
+      refusal: null,
       requestingDapp: mockDapp,
       txHex: 'deadbeef1234',
       partialSign: false,
@@ -714,7 +714,7 @@ describe('cardano-dapp-connector-util', () => {
               // `signTx$` is the REVIEWABLE flow, so the guard verdict it
               // carries is always null (the refused flow is `refusedSignTx$`).
               // Required field, compile-enforced.
-              collateralRefusal: null,
+              refusal: null,
             }),
           ]),
         );
@@ -1313,13 +1313,19 @@ describe('cardano-dapp-connector-util', () => {
         });
       });
 
-      it('dispatches setSignTxError on confirm → error', () => {
+      it('propagates signing error details to state on confirm → error', () => {
         testScheduler.run(({ cold }) => {
           const resolveFunction = vi.fn();
           const request = createSignTxRequest(resolveFunction);
           const sidePanel = createSidePanelView(1);
+          const error = {
+            stage: 'signing' as const,
+            name: 'TypeError',
+            message: 'Failed to fetch',
+          };
           const signingResult$ = new Subject<{
             type: 'cancelled' | 'error' | 'success';
+            error?: typeof error;
           }>();
 
           const emissions: unknown[] = [];
@@ -1334,11 +1340,11 @@ describe('cardano-dapp-connector-util', () => {
           }).subscribe(emission => emissions.push(emission));
 
           testScheduler.flush();
-          signingResult$.next({ type: 'error' });
+          signingResult$.next({ type: 'error', error });
 
           expect(emissions).toEqual(
             expect.arrayContaining([
-              actions.cardanoDappConnector.setSignTxError(true),
+              actions.cardanoDappConnector.setSignTxError(error),
               actions.cardanoDappConnector.clearPendingSignTxRequest(),
             ]),
           );
@@ -1621,7 +1627,7 @@ describe('cardano-dapp-connector-util', () => {
     ): CardanoConfirmationRequest => ({
       resolve: resolveFunction,
       type: 'signData',
-      collateralRefusal: null,
+      refusal: null,
       requestingDapp: mockDapp,
       signDataAddress: 'addr_test1qz...',
       signDataPayload: 'cafebabe',

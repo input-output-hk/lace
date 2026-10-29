@@ -61,7 +61,7 @@ const utxoKey = ([input]: Cardano.Utxo): string =>
  * - Pre-selected UTxOs (`preSelectedUtxo`) are always preserved and counted
  *   toward every requirement.
  *
- * @throws {InputSelectionError} `BalanceInsufficient` when a required asset
+ * @throws `InputSelectionError` `BalanceInsufficient` when a required asset
  *   or ADA cannot be covered; `UtxoFullyDepleted` when the pool runs out
  *   while funding the change min-ADA.
  */

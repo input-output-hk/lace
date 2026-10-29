@@ -24,6 +24,17 @@ const record: PassportAccountRecord = {
   bindingVersion: '0.1.0-lace.1',
   localUseCounter: '3',
 };
+const pendingRecord: PassportAccountRecord = {
+  ...record,
+  deployment: {
+    operations: ['deposit_unshielded'],
+    lockAccount: true,
+    saltHex: '07'.repeat(32),
+    authorityKey: { tag: 'schnorr', value: 'authority-key' },
+    handoverAuthority: { tag: 'schnorr', value: 'cd'.repeat(32) },
+    keyEntries: ['d1'.repeat(192)],
+  },
+};
 
 const importAesKey = async () =>
   crypto.subtle.importKey(
@@ -77,19 +88,22 @@ describe('createAccountRecordStore', () => {
     });
 
     it('reports presence without opening: sealed, plain, and absent', async () => {
-      const sealed = await sealRecord(await importAesKey(), record);
-      const sealedStore = createAccountRecordStore(
-        createStorageStub(sealed).createKeyValueStorage,
+      const key = await importAesKey();
+      const presenceOf = async (stored?: unknown) =>
+        firstValueFrom(
+          createAccountRecordStore(
+            createStorageStub(stored).createKeyValueStorage,
+          ).presence(),
+        );
+      await expect(presenceOf(await sealRecord(key, record))).resolves.toBe(
+        'complete',
       );
-      const plainStore = createAccountRecordStore(
-        createStorageStub(record).createKeyValueStorage,
-      );
-      const emptyStore = createAccountRecordStore(
-        createStorageStub().createKeyValueStorage,
-      );
-      await expect(firstValueFrom(sealedStore.exists())).resolves.toBe(true);
-      await expect(firstValueFrom(plainStore.exists())).resolves.toBe(true);
-      await expect(firstValueFrom(emptyStore.exists())).resolves.toBe(false);
+      await expect(
+        presenceOf(await sealRecord(key, pendingRecord, { pending: true })),
+      ).resolves.toBe('pending');
+      await expect(presenceOf(record)).resolves.toBe('complete');
+      await expect(presenceOf(pendingRecord)).resolves.toBe('pending');
+      await expect(presenceOf()).resolves.toBe('absent');
     });
 
     it('errors on a sealed record under onSealedWithoutKey error', async () => {
@@ -121,6 +135,27 @@ describe('createAccountRecordStore', () => {
       ];
       expect(isSealedRecord(sealed)).toBe(true);
       await expect(openRecord(key, sealed)).resolves.toEqual(record);
+    });
+
+    it('marks the envelope pending while the record carries a deployment, and clears it after', async () => {
+      const key = await importAesKey();
+      const { storage, createKeyValueStorage } = createStorageStub();
+      const store = createAccountRecordStore(
+        createKeyValueStorage,
+        async () => key,
+      );
+
+      await firstValueFrom(store.write(pendingRecord), {
+        defaultValue: undefined,
+      });
+      await firstValueFrom(store.write(record), { defaultValue: undefined });
+
+      const [[, pending], [, complete]] = storage.setValue.mock
+        .calls as unknown as [[string, SealedRecord], [string, SealedRecord]];
+      expect(pending.pending).toBe(true);
+      expect(complete).not.toHaveProperty('pending');
+      await expect(openRecord(key, pending)).resolves.toEqual(pendingRecord);
+      await expect(openRecord(key, complete)).resolves.toEqual(record);
     });
 
     it('draws a fresh IV for every persisted write', async () => {
@@ -204,16 +239,32 @@ describe('toAccountRecords', () => {
     await expect(empty.read()).resolves.toBeUndefined();
   });
 
-  it('reports presence as a boolean', async () => {
+  it('reports presence as one of the three words', async () => {
     const stored = toAccountRecords(
       createAccountRecordStore(createStorageStub(record).createKeyValueStorage),
+    );
+    const pending = toAccountRecords(
+      createAccountRecordStore(
+        createStorageStub(pendingRecord).createKeyValueStorage,
+      ),
     );
     const empty = toAccountRecords(
       createAccountRecordStore(createStorageStub().createKeyValueStorage),
     );
 
-    await expect(stored.exists()).resolves.toBe(true);
-    await expect(empty.exists()).resolves.toBe(false);
+    await expect(stored.presence()).resolves.toBe('complete');
+    await expect(pending.presence()).resolves.toBe('pending');
+    await expect(empty.presence()).resolves.toBe('absent');
+  });
+
+  it('reads presence as absent when the storage completes without emitting', async () => {
+    const { storage, createKeyValueStorage } = createStorageStub();
+    storage.getValues.mockReturnValue(EMPTY);
+    const records = toAccountRecords(
+      createAccountRecordStore(createKeyValueStorage),
+    );
+
+    await expect(records.presence()).resolves.toBe('absent');
   });
 
   it('writes the record and resolves undefined', async () => {

@@ -1,10 +1,15 @@
-import React from 'react';
+import type { LayoutChangeEvent } from 'react-native';
+
+import React, { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { radius, spacing } from '../../../../design-tokens';
 import { Text } from '../../../atoms';
 
 import type { Theme } from '../../../../design-tokens';
+
+/** The bracket square's intended size; also its ceiling in a smaller frame. */
+const SCAN_AREA_SIZE = 280;
 
 export interface UrScannerViewProps {
   /** Reassembly progress in the range 0..1. */
@@ -36,12 +41,38 @@ export const UrScannerView = ({
   const styles = getStyles(theme);
   const clampedProgress = Math.min(1, Math.max(0, progress));
 
+  // The frame is measured so the bracket square can never exceed it. BOUNDED by
+  // SCAN_AREA_SIZE rather than derived from it: in a full-screen host the frame
+  // is larger than 280pt, so the square stays exactly 280 and nothing moves.
+  // In a smaller host — a card-sized exchange overlay — a fixed 280 overflowed
+  // and `overflow: 'hidden'` clipped the brackets off entirely.
+  const [frame, setFrame] = useState<{ height: number; width: number }>();
+  const handleFrameLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height, width } = event.nativeEvent.layout;
+    setFrame({ height, width });
+  }, []);
+  const scanAreaSize =
+    frame === undefined
+      ? SCAN_AREA_SIZE
+      : Math.max(
+          0,
+          Math.min(
+            SCAN_AREA_SIZE,
+            frame.width - spacing.M * 2,
+            frame.height - spacing.M * 2,
+          ),
+        );
+
   return (
-    <View style={styles.cameraContainer}>
+    <View style={styles.cameraContainer} onLayout={handleFrameLayout}>
       {camera}
 
       <View style={styles.overlay}>
-        <View style={styles.scanArea}>
+        <View
+          style={[
+            styles.scanArea,
+            { height: scanAreaSize, width: scanAreaSize },
+          ]}>
           <View style={[styles.corner, styles.topLeft]} />
           <View style={[styles.corner, styles.topRight]} />
           <View style={[styles.corner, styles.bottomLeft]} />
@@ -86,8 +117,6 @@ const getStyles = (theme: Theme) =>
       alignItems: 'center',
     },
     scanArea: {
-      width: 280,
-      height: 280,
       position: 'relative',
     },
     corner: {

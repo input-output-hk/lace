@@ -163,7 +163,7 @@ export const CollateralSheet = (
         body={t('collateral.sheet.failure.subtitle')}
         icon={{
           name: 'Sad',
-          variant: 'solid',
+          strokeWidth: 2,
         }}
         testID="collateral-failure-status"
       />
@@ -227,7 +227,6 @@ export const CollateralSheet = (
         })}
         icon={{
           name: 'MoneyReceive01',
-          variant: 'stroke',
         }}
         body={t('collateral.sheet.set.warning-card')}
         testID="collateral-set-sheet"

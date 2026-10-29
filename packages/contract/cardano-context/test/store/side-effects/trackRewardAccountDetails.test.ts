@@ -2,9 +2,9 @@ import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { ActivityType } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
 import { BigNumber, Err, Ok, Timestamp } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
 import { Serializable } from '@lace-lib/util-store';
-import { defer, of } from 'rxjs';
+import { defer, of, NEVER } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import { CardanoPaymentAddress, CardanoRewardAccount } from '../../../src';
@@ -21,6 +21,7 @@ import {
   threeAccountCardanoWalletAccounts,
 } from '../../mocks';
 
+import type { Selectors, ActionCreators } from '../../../src/contract';
 import type {
   CardanoProviderDependencies,
   RewardAccountDetails,
@@ -34,6 +35,30 @@ import type { AnyAccount, AccountId } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 import type { RunHelpers } from 'rxjs/testing';
 
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          refetchRewardAccountDetails$: NEVER,
+          resetWalletSyncState$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 const actions = {
   ...cardanoContextActions,
   ...failuresActions,
@@ -207,6 +232,46 @@ const provideOk = (cold: RunHelpers['cold'], info = mockRewardAccountInfo) =>
   vi.fn().mockImplementation(() => cold('(a|)', { a: Ok(info) }));
 
 describe('trackRewardAccountDetails', () => {
+  it('forces only the requested account past a settled cache without a recorded failure', () => {
+    testSideEffect(trackRewardAccountDetails, ({ cold, flush }) => {
+      const harness = buildHarness(cold, {
+        persistedCacheKeys$: of({ [accountId]: cacheKeyFor('tx-1') }),
+      });
+      const getRewardAccountInfo = provideOk(cold);
+      return {
+        ...harness,
+        actionObservables: {
+          cardanoContext: {
+            ...harness.actionObservables.cardanoContext,
+            refetchRewardAccountDetails$: cold('-ab', {
+              a: actions.cardanoContext.refetchRewardAccountDetails({
+                accountId,
+              }),
+              b: actions.cardanoContext.refetchRewardAccountDetails({
+                accountId: threeAccountCardanoWalletAccounts[1].accountId,
+              }),
+            }),
+          },
+        },
+        dependencies: provider(getRewardAccountInfo),
+        assertion: source => {
+          const results: unknown[] = [];
+          source.subscribe(a => results.push(a));
+          flush();
+          expect(getRewardAccountInfo).toHaveBeenCalledExactlyOnceWith(
+            { rewardAccount: rewardAccount1 },
+            { chainId },
+          );
+          expect(results).toContainEqual(
+            actions.cardanoContext.setRewardAccountDetails({
+              accountId,
+              details: mockDetails,
+            }),
+          );
+        },
+      };
+    });
+  });
   it('fetches reward account info on initial emission and advances cacheKey', () => {
     testSideEffect(trackRewardAccountDetails, ({ cold, expectObservable }) => {
       const getRewardAccountInfo = provideOk(cold);

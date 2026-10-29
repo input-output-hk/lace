@@ -1,4 +1,5 @@
-import { Cardano } from '@cardano-sdk/core';
+import { Cardano, Serialization } from '@cardano-sdk/core';
+import { HexBlob } from '@cardano-sdk/util';
 import { logger } from '@cardano-sdk/util-dev';
 import {
   CardanoRewardAccount,
@@ -166,6 +167,24 @@ describe('BlockfrostUtxoProvider', () => {
     expect(result.isErr()).toBe(true);
   });
 
+  it('requests afresh on each subscription, so a retry does not replay a failure', async () => {
+    const serverError = new HttpClientError(500, 'Server Error');
+    serverError.status = 500;
+    request
+      .mockRejectedValueOnce(serverError)
+      .mockResolvedValueOnce({ data: sampleAccountUtxos, status: 200 });
+
+    const utxos$ = provider.getAccountUtxos({ rewardAccount });
+    expect(request).not.toHaveBeenCalled();
+
+    expect((await firstValueFrom(utxos$)).isErr()).toBe(true);
+    const retried = await firstValueFrom(utxos$);
+
+    expect(retried.isOk()).toBe(true);
+    if (retried.isOk()) expect(retried.value).toHaveLength(3);
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
   describe('getUtxosAtAddress', () => {
     // cNIGHT dust-generator testnet script address (enterprise, addr_test1w…).
     const scriptAddress = Cardano.PaymentAddress(
@@ -212,6 +231,361 @@ describe('BlockfrostUtxoProvider', () => {
       }
     });
 
+    describe('an output with a reference script', () => {
+      const referenceScript: Cardano.PlutusScript = {
+        __type: Cardano.ScriptType.Plutus,
+        bytes: HexBlob('4e4d01000033222220051200120011'),
+        version: Cardano.PlutusLanguageVersion.V3,
+      };
+      const referenceScriptHash =
+        Serialization.Script.fromCore(referenceScript).hash();
+      const withScript: Cardano.TxOut = {
+        address: Cardano.PaymentAddress(scriptAddress),
+        value: { coins: 5_000_000n },
+        scriptReference: referenceScript,
+      };
+      // The scripts sit on outputs 1 and 2; output 0 pays elsewhere, so a
+      // lookup that ignores the output index takes the wrong output.
+      const producingTransaction = (fee: bigint) =>
+        Serialization.Transaction.fromCore({
+          id: Cardano.TransactionId('00'.repeat(32)),
+          body: {
+            inputs: [
+              { txId: Cardano.TransactionId('11'.repeat(32)), index: 0 },
+            ],
+            outputs: [
+              {
+                address: Cardano.PaymentAddress(sampleAccountUtxos[0].address),
+                value: { coins: 1_000_000n },
+              },
+              withScript,
+              withScript,
+            ],
+            fee,
+          },
+          witness: { signatures: new Map() },
+        });
+      const producingTx = producingTransaction(200_000n);
+      const txHash = producingTx.getId();
+      const listed = (index: number, scriptHash: string | null) => ({
+        address: scriptAddress,
+        tx_hash: txHash,
+        tx_index: index,
+        output_index: index,
+        amount: [{ unit: 'lovelace', quantity: '5000000' }],
+        block: 'block',
+        data_hash: null,
+        inline_datum: null,
+        reference_script_hash: scriptHash,
+      });
+      const listing = (data: unknown[]): [string, unknown] => [
+        `addresses/${scriptAddress}/utxos?order=desc&page=1&count=100`,
+        { data, status: 200 },
+      ];
+      const txCbor: [string, unknown] = [
+        `txs/${txHash}/cbor`,
+        { data: { cbor: producingTx.toCbor() }, status: 200 },
+      ];
+
+      it('reads no producing transaction unless asked to', async () => {
+        mockResponses(request, [listing([listed(1, referenceScriptHash)])]);
+
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({ address: scriptAddress }),
+        );
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value).toHaveLength(1);
+          expect(result.value[0][1].scriptReference).toBeUndefined();
+        }
+        expect(
+          request.mock.calls.filter(([endpoint]) =>
+            String(endpoint).startsWith('txs/'),
+          ),
+        ).toHaveLength(0);
+      });
+
+      it('carries the script the listing names only by hash', async () => {
+        mockResponses(request, [
+          listing([
+            listed(1, referenceScriptHash),
+            listed(2, referenceScriptHash),
+          ]),
+          txCbor,
+        ]);
+
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value).toHaveLength(2);
+          for (const [, output] of result.value) {
+            expect(output.scriptReference).toEqual(referenceScript);
+          }
+        }
+        // Outputs of one transaction share one read of its CBOR.
+        expect(
+          request.mock.calls.filter(([endpoint]) =>
+            String(endpoint).startsWith('txs/'),
+          ),
+        ).toHaveLength(1);
+      });
+
+      it('excludes an output with the wrong script hash while retaining safe siblings', async () => {
+        mockResponses(request, [
+          listing([
+            listed(0, 'cc'.repeat(28)),
+            listed(1, referenceScriptHash),
+            listed(2, null),
+          ]),
+          txCbor,
+        ]);
+
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value.map(([input]) => input.index)).toEqual([1, 2]);
+          expect(result.value[0][1].scriptReference).toEqual(referenceScript);
+          expect(result.value[1][1].scriptReference).toBeUndefined();
+        }
+      });
+
+      it.each([404, 429, 500])(
+        'excludes unsafe outputs when the script read fails with HTTP %s',
+        async status => {
+          const error = new HttpClientError(status, 'Script unavailable');
+          error.status = status;
+          mockResponses(request, [
+            listing([
+              listed(1, referenceScriptHash),
+              listed(2, referenceScriptHash),
+              listed(0, null),
+            ]),
+            [`txs/${txHash}/cbor`, error],
+          ]);
+
+          const result = await firstValueFrom(
+            provider.getUtxosAtAddress({
+              address: scriptAddress,
+              withReferenceScripts: true,
+            }),
+          );
+
+          expect(result.isOk()).toBe(true);
+          if (result.isOk()) {
+            expect(result.value.map(([input]) => input.index)).toEqual([0]);
+            expect(result.value[0][1].scriptReference).toBeUndefined();
+          }
+          expect(
+            request.mock.calls.filter(([endpoint]) =>
+              String(endpoint).startsWith('txs/'),
+            ),
+          ).toHaveLength(1);
+        },
+      );
+
+      it('fails the listing when a reference-script output does not convert', async () => {
+        mockResponses(request, [
+          listing([
+            { ...listed(1, referenceScriptHash), inline_datum: 'not-cbor' },
+            listed(0, null),
+          ]),
+          txCbor,
+        ]);
+
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+
+        expect(result.isErr()).toBe(true);
+      });
+
+      it('excludes an unsafe output when the producing CBOR is malformed', async () => {
+        mockResponses(request, [
+          listing([listed(1, referenceScriptHash), listed(0, null)]),
+          [`txs/${txHash}/cbor`, { data: { cbor: 'invalid' }, status: 200 }],
+        ]);
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+        expect(result.isOk()).toBe(true);
+        if (result.isOk())
+          expect(result.value.map(([input]) => input.index)).toEqual([0]);
+      });
+
+      it('reads distinct producing transactions in parallel and preserves listing order', async () => {
+        const otherTx = Serialization.Transaction.fromCbor(
+          producingTx.toCbor(),
+        );
+        otherTx.body().setFee(200_001n);
+        const otherHash = otherTx.getId();
+        const otherListed = {
+          ...listed(2, referenceScriptHash),
+          tx_hash: otherHash,
+        };
+        let release = () => {};
+        const gate = new Promise<void>(resolve => {
+          release = resolve;
+        });
+        request.mockImplementation(async (endpoint: string) => {
+          if (endpoint.startsWith('addresses/'))
+            return {
+              data: [listed(1, referenceScriptHash), otherListed],
+              status: 200,
+            };
+          await gate;
+          return {
+            data: {
+              cbor:
+                endpoint === `txs/${txHash}/cbor`
+                  ? producingTx.toCbor()
+                  : otherTx.toCbor(),
+            },
+            status: 200,
+          };
+        });
+        const pending = firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+        try {
+          await vi.waitFor(() => {
+            expect(request).toHaveBeenCalledWith(
+              `txs/${txHash}/cbor`,
+              undefined,
+            );
+            expect(request).toHaveBeenCalledWith(
+              `txs/${otherHash}/cbor`,
+              undefined,
+            );
+          });
+        } finally {
+          release();
+        }
+        const result = await pending;
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value.map(([input]) => input.txId)).toEqual([
+            txHash,
+            otherHash,
+          ]);
+          expect(
+            result.value.map(([, output]) => output.scriptReference),
+          ).toEqual([referenceScript, referenceScript]);
+        }
+      });
+
+      it('reads at most four producing transactions at once', async () => {
+        const transactions = Array.from({ length: 6 }, (_, index) =>
+          producingTransaction(300_000n + BigInt(index)),
+        );
+        const cborByEndpoint = new Map(
+          transactions.map(transaction => [
+            `txs/${transaction.getId()}/cbor`,
+            transaction.toCbor(),
+          ]),
+        );
+        let inFlight = 0;
+        let maxInFlight = 0;
+        request.mockImplementation(async (endpoint: string) => {
+          if (endpoint.startsWith('addresses/'))
+            return {
+              data: transactions.map(transaction => ({
+                ...listed(1, referenceScriptHash),
+                tx_hash: transaction.getId(),
+              })),
+              status: 200,
+            };
+          inFlight += 1;
+          maxInFlight = Math.max(maxInFlight, inFlight);
+          await new Promise(resolve => setTimeout(resolve, 0));
+          inFlight -= 1;
+          return { data: { cbor: cborByEndpoint.get(endpoint) }, status: 200 };
+        });
+
+        const result = await firstValueFrom(
+          provider.getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          }),
+        );
+
+        expect(maxInFlight).toBe(4);
+        expect(
+          request.mock.calls.filter(([endpoint]) =>
+            String(endpoint).startsWith('txs/'),
+          ),
+        ).toHaveLength(6);
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(result.value.map(([input]) => input.txId)).toEqual(
+            transactions.map(transaction => transaction.getId()),
+          );
+        }
+      });
+
+      it('starts no queued producing-transaction read after unsubscription', async () => {
+        const transactions = Array.from({ length: 6 }, (_, index) =>
+          producingTransaction(400_000n + BigInt(index)),
+        );
+        let release = () => {};
+        const gate = new Promise<void>(resolve => {
+          release = resolve;
+        });
+        request.mockImplementation(async (endpoint: string) => {
+          if (endpoint.startsWith('addresses/'))
+            return {
+              data: transactions.map(transaction => ({
+                ...listed(1, referenceScriptHash),
+                tx_hash: transaction.getId(),
+              })),
+              status: 200,
+            };
+          await gate;
+          return { data: { cbor: producingTx.toCbor() }, status: 200 };
+        });
+        const transactionReads = () =>
+          request.mock.calls.filter(([endpoint]) =>
+            String(endpoint).startsWith('txs/'),
+          );
+
+        const subscription = provider
+          .getUtxosAtAddress({
+            address: scriptAddress,
+            withReferenceScripts: true,
+          })
+          .subscribe();
+        await vi.waitFor(() => {
+          expect(transactionReads()).toHaveLength(4);
+        });
+        subscription.unsubscribe();
+        release();
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        expect(transactionReads()).toHaveLength(4);
+      });
+    });
+
     it('treats a 404 (address never funded) as an empty UTxO set', async () => {
       const notFound = new HttpClientError(404, 'Not Found');
       notFound.status = 404;
@@ -245,6 +619,36 @@ describe('BlockfrostUtxoProvider', () => {
       );
 
       expect(result.isErr()).toBe(true);
+    });
+
+    it('requests afresh on each subscription, so a retry does not replay a failure', async () => {
+      const serverError = new HttpClientError(500, 'Server Error');
+      serverError.status = 500;
+      request.mockRejectedValueOnce(serverError).mockResolvedValueOnce({
+        data: [
+          {
+            address: scriptAddress,
+            tx_hash: sampleAccountUtxos[0].tx_hash,
+            output_index: 0,
+            amount: [{ unit: 'lovelace', quantity: '5000000' }],
+            block: 'block',
+            data_hash: null,
+            inline_datum: null,
+            reference_script_hash: null,
+          },
+        ],
+        status: 200,
+      });
+
+      const utxos$ = provider.getUtxosAtAddress({ address: scriptAddress });
+      expect(request).not.toHaveBeenCalled();
+
+      expect((await firstValueFrom(utxos$)).isErr()).toBe(true);
+      const retried = await firstValueFrom(utxos$);
+
+      expect(retried.isOk()).toBe(true);
+      if (retried.isOk()) expect(retried.value).toHaveLength(1);
+      expect(request).toHaveBeenCalledTimes(2);
     });
   });
 

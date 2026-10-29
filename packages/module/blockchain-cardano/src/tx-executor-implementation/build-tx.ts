@@ -6,6 +6,8 @@ import {
 } from '@cardano-sdk/tx-construction';
 import { BigIntMath } from '@cardano-sdk/util';
 import {
+  InputSelectionError,
+  InputSelectionFailure,
   TransactionBuilder,
   LOVELACE_TOKEN_ID,
 } from '@lace-contract/cardano-context';
@@ -14,9 +16,13 @@ import { BigNumber } from '@lace-lib/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+import { resolveRewardWithdrawal } from './reward-withdrawal';
+
+import type { RewardWithdrawal } from './reward-withdrawal';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
   AccountUtxoMap,
+  PendingRewardWithdrawals,
   CardanoBlockchainSpecificTxData,
   RequiredProtocolParameters,
 } from '@lace-contract/cardano-context';
@@ -56,9 +62,9 @@ export const tokenTransferToValue = ({
 /**
  * Evaluate a Cardano TxOut against protocol parameters to determine minimum ADA requirements.
  *
- * @param address The payment address of the output
- * @param value The value of the output
- * @param params The protocol parameters
+ * @param address - The payment address of the output
+ * @param value - The value of the output
+ * @param params - The protocol parameters
  */
 const evaluateOutput = (
   address: Cardano.PaymentAddress,
@@ -103,11 +109,15 @@ export const txParamsToValue = (txp: TxParams): Cardano.Value =>
 const getBuildTxData = async ({
   dependencies,
   cardanoAvailableAccountUtxos$,
+  pendingRewardWithdrawals$,
   txParams,
+  allowRewardsWithdrawal,
 }: {
   dependencies: SideEffectDependencies;
   cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>;
+  pendingRewardWithdrawals$: Observable<PendingRewardWithdrawals>;
   readonly txParams: readonly TxParams[];
+  allowRewardsWithdrawal?: boolean;
 }) => {
   // Extract accountId from the first token in the first txParams
   const firstTokenTransfer = txParams[0]?.tokenTransfers[0];
@@ -122,11 +132,15 @@ const getBuildTxData = async ({
     protocolParameters,
     availableAccountUtxos,
     cardanoAddresses,
+    rewardAccountDetails,
+    pendingRewardWithdrawals,
   ] = await Promise.all([
     firstValueFrom(dependencies.txExecutorCardano.cardanoNetworkMagic$),
     firstValueFrom(dependencies.txExecutorCardano.cardanoProtocolParameters$),
     firstValueFrom(cardanoAvailableAccountUtxos$),
     firstValueFrom(dependencies.txExecutorCardano.cardanoAddresses$),
+    firstValueFrom(dependencies.txExecutorCardano.cardanoRewardAccountDetails$),
+    firstValueFrom(pendingRewardWithdrawals$),
   ]);
 
   if (!networkMagic) throw new Error('Network magic not available');
@@ -149,12 +163,23 @@ const getBuildTxData = async ({
 
   const tokenId = LOVELACE_TOKEN_ID;
 
+  const rewardWithdrawal = allowRewardsWithdrawal
+    ? resolveRewardWithdrawal({
+        accountId,
+        accountAddresses,
+        rewardAccountDetails,
+        pendingRewardWithdrawals,
+        networkMagic,
+      })
+    : undefined;
+
   return {
     networkMagic,
     protocolParameters,
     changeAddress,
     availableUtxo,
     tokenId,
+    rewardWithdrawal,
   };
 };
 
@@ -164,17 +189,22 @@ const buildTx = async ({
   changeAddress,
   availableUtxo,
   txParams,
+  withdrawal,
 }: {
   networkMagic: Cardano.NetworkMagics;
   protocolParameters: RequiredProtocolParameters;
   changeAddress: Cardano.PaymentAddress;
   availableUtxo: Cardano.Utxo[];
   readonly txParams: readonly TxParams[];
+  withdrawal?: RewardWithdrawal;
 }) => {
   const builder = new TransactionBuilder(networkMagic, protocolParameters)
     .setChangeAddress(changeAddress)
     .expiresIn(TWO_HOURS_IN_SECONDS)
     .setUnspentOutputs(availableUtxo);
+
+  if (withdrawal)
+    builder.addRewardsWithdrawal(withdrawal.rewardAccount, withdrawal.amount);
 
   if (txParams[0].blockchainSpecific) {
     const { memo } = txParams[0]
@@ -205,12 +235,51 @@ const buildTx = async ({
   return { core, tx, success: true as const };
 };
 
+/**
+ * Funds the send from UTxOs alone first, so rewards are withdrawn only when
+ * needed. A coin-selection failure (the UTxOs cannot cover the amount, the
+ * fee or the change minimum) is retried once with the whole reward balance
+ * withdrawn; any other failure, or a second shortfall, is surfaced as is.
+ */
+const buildTxWithRewardsFallback = async ({
+  rewardWithdrawal,
+  ...params
+}: Omit<Parameters<typeof buildTx>[0], 'withdrawal'> & {
+  rewardWithdrawal?: RewardWithdrawal;
+}) => {
+  try {
+    return { ...(await buildTx(params)), withdrawal: undefined };
+  } catch (error) {
+    if (!rewardWithdrawal || !(error instanceof InputSelectionError))
+      throw error;
+    const built = await buildTx({ ...params, withdrawal: rewardWithdrawal });
+    return { ...built, withdrawal: rewardWithdrawal };
+  }
+};
+
+/**
+ * The build failure the Send form shows. Only a shortfall of the amount plus
+ * the fee (or of a token) earns the "not enough funds" message. A selection
+ * that covers both but leaves change below its minimum ADA (`UtxoFullyDepleted`,
+ * e.g. the ADA that must stay with the wallet's tokens) would contradict it, so
+ * it keeps the generic message, as does any other error.
+ */
+const buildTxFailure = (error: Error): TxBuildResult =>
+  error instanceof InputSelectionError &&
+  error.failure === InputSelectionFailure.BalanceInsufficient
+    ? {
+        errorTranslationKey: 'tx-executor.building-error.insufficient-funds',
+        success: false,
+      }
+    : genericErrorResults.buildTx({ error });
+
 export const makeBuildTx =
   (
     dependencies: SideEffectDependencies,
     cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
+    pendingRewardWithdrawals$: Observable<PendingRewardWithdrawals>,
   ): TxExecutorImplementation['buildTx'] =>
-  ({ txParams }) => {
+  ({ txParams, allowRewardsWithdrawal }) => {
     return defer(async (): Promise<TxBuildResult> => {
       const {
         networkMagic,
@@ -218,36 +287,42 @@ export const makeBuildTx =
         changeAddress,
         availableUtxo,
         tokenId,
+        rewardWithdrawal,
       } = await getBuildTxData({
         dependencies,
         cardanoAvailableAccountUtxos$,
+        pendingRewardWithdrawals$,
         txParams,
+        allowRewardsWithdrawal,
       });
 
-      const { core, tx } = await buildTx({
+      const { core, tx, withdrawal } = await buildTxWithRewardsFallback({
         networkMagic,
         protocolParameters,
         changeAddress,
         availableUtxo,
         txParams,
+        rewardWithdrawal,
       });
 
       return {
         fees: [{ amount: BigNumber(core.body.fee), tokenId }],
         success: true as const,
         serializedTx: tx.toCbor(),
+        ...(withdrawal && {
+          withdrawals: [{ amount: BigNumber(withdrawal.amount), tokenId }],
+        }),
       };
-    }).pipe(
-      catchError((error: Error) => of(genericErrorResults.buildTx({ error }))),
-    );
+    }).pipe(catchError((error: Error) => of(buildTxFailure(error))));
   };
 
 export const makePreviewTx =
   (
     dependencies: SideEffectDependencies,
     cardanoAvailableAccountUtxos$: Observable<AccountUtxoMap>,
+    pendingRewardWithdrawals$: Observable<PendingRewardWithdrawals>,
   ): TxExecutorImplementation['previewTx'] =>
-  ({ txParams }) => {
+  ({ txParams, allowRewardsWithdrawal }) => {
     return defer(async (): Promise<TxPreviewResult> => {
       const {
         networkMagic,
@@ -255,10 +330,13 @@ export const makePreviewTx =
         changeAddress,
         availableUtxo,
         tokenId,
+        rewardWithdrawal,
       } = await getBuildTxData({
         dependencies,
         cardanoAvailableAccountUtxos$,
+        pendingRewardWithdrawals$,
         txParams,
+        allowRewardsWithdrawal,
       });
 
       const [{ address, blockchainSpecific, tokenTransfers }] = txParams;
@@ -288,12 +366,13 @@ export const makePreviewTx =
         })) as [TokenTransfer, ...TokenTransfer[]],
       };
 
-      const { core } = await buildTx({
+      const { core } = await buildTxWithRewardsFallback({
         networkMagic,
         protocolParameters,
         changeAddress,
         availableUtxo,
         txParams: [parameters],
+        rewardWithdrawal,
       });
 
       return {

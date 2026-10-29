@@ -1,30 +1,40 @@
 import {
   convertHttpUrlToWebsocket,
   defaultTxTtlLength,
+  getProofServerEndpoint,
   isMidnightSDKNetworkId,
   MidnightSDKNetworkId,
   MidnightSDKNetworkIds,
 } from '@lace-contract/midnight-context';
 import { senderOrigin } from '@lace-lib/dapp-connector';
+import { createProofJobs } from '@lace-lib/midnight-prover';
+import {
+  deserializeMidnightSealedTransaction,
+  deserializeMidnightUnsealedTransaction,
+  groupMidnightConnectorInputs,
+  groupMidnightConnectorOutputs,
+} from '@lace-lib/vendor/midnight-connector-transaction';
+import {
+  applyMidnightSignedMessagePrefix,
+  decodeMidnightSignData,
+} from '@lace-lib/vendor/midnight-sign-data';
 import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
-import { httpClientProvingProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import {
-  MidnightBech32m,
-  ShieldedAddress,
   ShieldedCoinPublicKey,
   ShieldedEncryptionPublicKey,
-  UnshieldedAddress,
 } from '@midnightntwrk/wallet-sdk-address-format';
 import { firstValueFrom, map } from 'rxjs';
 
 import { APIError } from '../../api-error';
-import { DappZkConfigProvider } from '../../dapp-zk-config-provider';
-import { applyMidnightSignedMessagePrefix } from '../../sign-message-prefix';
 import { derivePendingActivityFromMidnightTx } from '../helpers/derive-pending-activity-from-midnight-tx';
 
 import type { ConfirmationCallback } from './create-confirmation-callback';
-import type { SenderContext, WithSenderContext } from '../../types';
+import type {
+  DAppConnectorWalletAPI,
+  SenderContext,
+  WithSenderContext,
+} from '../../types';
 import type { Activity } from '@lace-contract/activities';
 import type {
   MidnightWalletsByAccountId,
@@ -33,8 +43,9 @@ import type {
   MidnightNetwork,
 } from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
+import type { ProverCommand, ProverReply } from '@lace-lib/midnight-prover';
+import type { ProofCircuitRequest } from '@lace-lib/vendor/midnight-proof-servers';
 import type {
-  ConnectedAPI,
   TokenType,
   HistoryEntry,
   DesiredInput,
@@ -44,15 +55,8 @@ import type {
   Configuration,
   ConnectionStatus,
   WalletConnectedAPI,
-  KeyMaterialProvider,
-  ProvingProvider,
 } from '@midnight-ntwrk/dapp-connector-api';
-import type {
-  CombinedSwapInputs,
-  CombinedTokenTransfer,
-  TokenTransfer,
-  UtxoWithMeta,
-} from '@midnightntwrk/wallet-sdk/facade';
+import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 import type { Runtime } from 'webextension-polyfill';
@@ -75,7 +79,7 @@ const bigintReplacer = (_key: string, value: unknown): unknown =>
   typeof value === 'bigint' ? value.toString() : value;
 
 export class MidnightDappConnectorApi
-  implements WithSenderContext<ConnectedAPI>
+  implements WithSenderContext<DAppConnectorWalletAPI>
 {
   private readonly wallets$: Observable<MidnightWalletsByAccountId>;
   private readonly network$: Observable<MidnightNetwork | undefined>;
@@ -88,6 +92,11 @@ export class MidnightDappConnectorApi
   readonly #getAccountIdForOrigin: (origin: string) => AccountId | undefined;
   readonly #onPendingActivity?: (activity: Activity) => void;
   readonly #logger?: Logger;
+  // Async backends own scheduling. Forward accepted requests so WASM queued
+  // jobs are visible to the wallet, while the offscreen worker stays serial.
+  readonly #proofJobs = createProofJobs({
+    shouldForwardProvidersConcurrently: true,
+  });
 
   public constructor(options: MidnightDappConnectorApiOptions) {
     this.wallets$ = options.wallets$;
@@ -253,7 +262,7 @@ export class MidnightDappConnectorApi
     );
 
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await this.deserializeSealedTransaction(tx);
+    const deserializedTx = await deserializeMidnightSealedTransaction(tx);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
@@ -307,7 +316,7 @@ export class MidnightDappConnectorApi
     );
 
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await this.deserializeUnsealedTransaction(tx);
+    const deserializedTx = await deserializeMidnightUnsealedTransaction(tx);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
@@ -353,7 +362,7 @@ export class MidnightDappConnectorApi
   ): Promise<{ tx: string }> {
     const wallet = await this.ensureWallet(sender);
 
-    const combinedTransfers = this.groupOutputsByKind(
+    const combinedTransfers = groupMidnightConnectorOutputs(
       desiredOutputs,
       wallet.networkId,
     );
@@ -414,11 +423,23 @@ export class MidnightDappConnectorApi
       );
     }
 
+    const { proofServer } = networkConfig;
+    const proverServerUri = getProofServerEndpoint(proofServer);
+    if (!proverServerUri && proofServer.kind !== 'in-process') {
+      throw new APIError(
+        ErrorCodes.InternalError,
+        `Proof server mode "${proofServer.kind}" has no HTTP endpoint`,
+      );
+    }
     return {
       networkId: wallet.networkId.toString(),
       indexerUri: networkConfig.indexerAddress,
       indexerWsUri: convertHttpUrlToWebsocket(networkConfig.indexerAddress),
-      proverServerUri: networkConfig.proofServerAddress,
+      // A TEE proof server is reachable only through the attested channel
+      // behind `proveCircuit`; publishing its URL would invite a dApp to
+      // post its witness there unattested (the deprecated field is optional).
+      proverServerUri:
+        proofServer.kind === 'tee-delegated' ? undefined : proverServerUri,
       substrateNodeUri: networkConfig.nodeAddress,
     };
   }
@@ -442,7 +463,7 @@ export class MidnightDappConnectorApi
     { sender }: SenderContext,
   ): Promise<void> {
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await this.deserializeSealedTransaction(tx);
+    const deserializedTx = await deserializeMidnightSealedTransaction(tx);
 
     // Capture wallet state BEFORE submission. The SDK may optimistically remove
     // consumed coins from availableCoins on submit, which would make own-input
@@ -482,20 +503,46 @@ export class MidnightDappConnectorApi
     }
   }
 
-  public async getProvingProvider(
-    keyMaterialProvider: KeyMaterialProvider,
-  ): Promise<ProvingProvider> {
-    const networkConfig = await firstValueFrom(this.networkConfig$);
-    if (!networkConfig) {
+  /** Bind every upload, job and result to the authorized document and wallet. */
+  public async proofCommand(
+    command: ProverCommand,
+    { sender }: SenderContext,
+  ): Promise<ProverReply> {
+    const wallet = await this.ensureWallet(sender);
+    const documentId = (
+      sender as Runtime.MessageSender & { documentId?: string }
+    ).documentId;
+    if (!documentId || sender.tab?.id === undefined)
       throw new APIError(
-        ErrorCodes.InternalError,
-        'Network configuration is unavailable',
+        ErrorCodes.InvalidRequest,
+        'Missing dApp document identity',
       );
-    }
-    return httpClientProvingProvider(
-      networkConfig.proofServerAddress,
-      new DappZkConfigProvider(keyMaterialProvider),
-    );
+    const owner = JSON.stringify([
+      senderOrigin(sender),
+      sender.tab.id,
+      sender.frameId,
+      documentId,
+      wallet.accountId,
+      wallet.networkId,
+    ]);
+    return this.#proofJobs.handle(command, owner, wallet.proofCircuitProvider);
+  }
+
+  /** dApp circuits use the same backend as wallet transactions. */
+  public async checkCircuit(
+    request: ProofCircuitRequest,
+    { sender }: SenderContext,
+  ): Promise<(bigint | undefined)[]> {
+    const wallet = await this.ensureWallet(sender);
+    return wallet.proofCircuitProvider.check(request);
+  }
+
+  public async proveCircuit(
+    request: ProofCircuitRequest,
+    { sender }: SenderContext,
+  ): Promise<Uint8Array> {
+    const wallet = await this.ensureWallet(sender);
+    return wallet.proofCircuitProvider.prove(request);
   }
 
   public async getTxHistory(
@@ -522,22 +569,9 @@ export class MidnightDappConnectorApi
     const [options, { sender }] = optionsAndSender;
     const wallet = await this.ensureWallet(sender);
 
-    const swapInputs = desiredInputs.reduce<CombinedSwapInputs>(
-      (inputs, { kind, type, value }) => {
-        if (kind === 'shielded') {
-          inputs.shielded = inputs.shielded ?? {};
-          inputs.shielded[type] = (inputs.shielded[type] ?? 0n) + value;
-        }
-        if (kind === 'unshielded') {
-          inputs.unshielded = inputs.unshielded ?? {};
-          inputs.unshielded[type] = (inputs.unshielded[type] ?? 0n) + value;
-        }
-        return inputs;
-      },
-      {},
-    );
+    const swapInputs = groupMidnightConnectorInputs(desiredInputs);
 
-    const swapOutputs = this.groupOutputsByKind(
+    const swapOutputs = groupMidnightConnectorOutputs(
       desiredOutputs,
       wallet.networkId,
     );
@@ -626,55 +660,6 @@ export class MidnightDappConnectorApi
     return { data, signature, verifyingKey };
   }
 
-  private groupOutputsByKind(
-    desiredOutputs: DesiredOutput[],
-    networkId: MidnightWallet['networkId'],
-  ): CombinedTokenTransfer[] {
-    const grouped = desiredOutputs.reduce(
-      (outputs, output) => {
-        const { kind, type, recipient, value } = output;
-        const parsedAddress = MidnightBech32m.parse(recipient);
-
-        if (kind === 'unshielded') {
-          outputs.unshielded.push({
-            type,
-            receiverAddress: UnshieldedAddress.codec.decode(
-              networkId,
-              parsedAddress,
-            ),
-            amount: value,
-          });
-        }
-
-        if (kind === 'shielded') {
-          outputs.shielded.push({
-            type,
-            receiverAddress: ShieldedAddress.codec.decode(
-              networkId,
-              parsedAddress,
-            ),
-            amount: value,
-          });
-        }
-
-        return outputs;
-      },
-      {
-        unshielded: [] as TokenTransfer<UnshieldedAddress>[],
-        shielded: [] as TokenTransfer<ShieldedAddress>[],
-      },
-    );
-
-    const result: CombinedTokenTransfer[] = [];
-    if (grouped.unshielded.length > 0) {
-      result.push({ type: 'unshielded', outputs: grouped.unshielded });
-    }
-    if (grouped.shielded.length > 0) {
-      result.push({ type: 'shielded', outputs: grouped.shielded });
-    }
-    return result;
-  }
-
   private resolveSenderAndOptions(
     optionsOrSender?: SenderContext | { payFees?: boolean },
     senderContext?: SenderContext,
@@ -747,43 +732,15 @@ export class MidnightDappConnectorApi
     return wallet;
   }
 
-  private async deserializeSealedTransaction(
-    tx: string,
-  ): Promise<
-    ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.Binding>
-  > {
-    return ledger.Transaction.deserialize(
-      'signature',
-      'proof',
-      'binding',
-      Buffer.from(tx, 'hex'),
-    );
-  }
-
-  private async deserializeUnsealedTransaction(
-    tx: string,
-  ): Promise<
-    ledger.Transaction<ledger.SignatureEnabled, ledger.Proof, ledger.PreBinding>
-  > {
-    return ledger.Transaction.deserialize(
-      'signature',
-      'proof',
-      'pre-binding',
-      Buffer.from(tx, 'hex'),
-    );
-  }
-
   private decodeSignData(
     data: string,
     encoding: 'base64' | 'hex' | 'text',
   ): Uint8Array {
     switch (encoding) {
       case 'hex':
-        return new Uint8Array(Buffer.from(data, 'hex'));
       case 'base64':
-        return new Uint8Array(Buffer.from(data, 'base64'));
       case 'text':
-        return new TextEncoder().encode(data);
+        return decodeMidnightSignData(data, encoding);
       default: {
         throw new APIError(
           ErrorCodes.InvalidRequest,

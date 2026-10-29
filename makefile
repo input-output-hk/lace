@@ -104,6 +104,42 @@ cleanup-mobile-app-state-ios:
 		echo  "│   └── Mobile iOS app simulator state cleaned up. Restart app or use 'cmd + d' to open the developer menu in the simulator and click 'Reload'."; \
 	fi
 
+# Retry wrapper for the image pull that precedes any `compose up`.
+#
+# Three of the services come from ECR Public - midnight-test-dapp in
+# compose/midnight.yml, cip30-test-dapp and bitcoin-test-dapp in
+# compose/dapps.yml - and are pulled anonymously. AWS throttles anonymous
+# ECR Public pulls per source IP at roughly 1/sec, and GitHub-hosted runners
+# share NAT egress with every other job pulling from public.ecr.aws, so the
+# nightly failed about a quarter of the time with
+#   Error response from daemon: toomanyrequests: Rate exceeded
+# while the same pull from a laptop always worked. Authenticating would raise
+# the limit ~10x but needs AWS credentials in this repo, which we do not want.
+#
+# The retry is on `pull`, not on `up`: a pull is idempotent and already-fetched
+# layers make later attempts nearly free, whereas retrying `up --wait` would
+# also redo the build and the healthcheck wait. Once the images are local, the
+# `up` below never touches a registry, so a throttle cannot fail it.
+#
+# Default backoff is 5s doubling over 5 attempts (5+10+20+40 = 75s worst case),
+# which comfortably outlasts a per-second throttle without stretching the
+# nightly. Override with COMPOSE_PULL_ATTEMPTS / COMPOSE_PULL_DELAY.
+COMPOSE_PULL_ATTEMPTS ?= 5
+COMPOSE_PULL_DELAY ?= 5
+define compose_pull_retry
+	@n=1; d=$(COMPOSE_PULL_DELAY); \
+	until $(1) pull; do \
+		if [ $$n -ge $(COMPOSE_PULL_ATTEMPTS) ]; then \
+			echo "compose pull failed after $$n attempts" >&2; \
+			exit 1; \
+		fi; \
+		echo "compose pull failed (attempt $$n of $(COMPOSE_PULL_ATTEMPTS)), retrying in $${d}s..." >&2; \
+		sleep $$d; \
+		n=$$((n + 1)); \
+		d=$$((d * 2)); \
+	done
+endef
+
 MIDNIGHT_COMPOSE = docker compose -p midnight -f compose/midnight.yml
 midnight-start:
 	$(MIDNIGHT_COMPOSE) start
@@ -112,6 +148,7 @@ midnight-stop:
 	$(MIDNIGHT_COMPOSE) stop
 
 midnight-up:
+	$(call compose_pull_retry,$(MIDNIGHT_COMPOSE))
 	$(MIDNIGHT_COMPOSE) up --detach --build --wait
 
 midnight-down:
@@ -119,6 +156,7 @@ midnight-down:
 
 DAPPS_COMPOSE = docker compose -p test-dapps -f compose/dapps.yml
 dapps-up:
+	$(call compose_pull_retry,$(DAPPS_COMPOSE))
 	$(DAPPS_COMPOSE) up --detach --wait
 
 dapps-down:

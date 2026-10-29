@@ -50,8 +50,8 @@ export type BuildNightDesignationTxParams = {
   /**
    * Protocol's `coins_per_utxo_byte` parameter. Used to compute the
    * min-utxo floor on the script output (script address + 1
-   * mapping NFT + inline DustMappingDatum). Pass `protocolParameters.
-   * coinsPerUtxoByte` from `completeNightDesignationTx`.
+   * mapping NFT + inline DustMappingDatum). Pass
+   * `protocolParameters.coinsPerUtxoByte` from `completeNightDesignationTx`.
    */
   coinsPerUtxoByte: number;
 };

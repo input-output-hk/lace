@@ -64,15 +64,15 @@ export type MissingActivityData = MissingRewardData | MissingTransactionData;
  * transactions and reward activities that fall within the transaction history range.
  * It also validates that the account has valid Cardano addresses and a reward account.
  *
- * @param {Object} params - The parameters for finding activities to load
- * @param {AnyAddress[]} params.addresses - All loaded addresses
- * @param {CardanoAccountTransactionsHistoryMap} params.transactionHistoryByAccount - The loaded history items per account
- * @param {CardanoAccountToRewardsMap} params.accountRewardsHistoryByAccount - The loaded reward history items per account
- * @param {Record<AccountId, Activity[]>} params.loadedActivities - The already loaded activities
- * @param {Cardano.ChainId} params.chainId - The chain ID to filter addresses
- * @param {EraSummary[]} params.eraSummaries - Era summaries for reward mapping
- * @param {Record<AccountId, number>} params.desiredLoadedActivitiesCountPerAccount - The desired number of activities to load per account
- * @returns {MissingActivityData[]} The missing activities to load (transactions and rewards)
+ * @param params - The parameters for finding activities to load
+ *   - `addresses`: All loaded addresses
+ *   - `transactionHistoryByAccount`: The loaded history items per account
+ *   - `accountRewardsHistoryByAccount`: The loaded reward history items per account
+ *   - `loadedActivities`: The already loaded activities
+ *   - `chainId`: The chain ID to filter addresses
+ *   - `eraSummaries`: Era summaries for reward mapping
+ *   - `desiredLoadedActivitiesCountPerAccount`: The desired number of activities to load per account
+ * @returns The missing activities to load (transactions and rewards)
  */
 export const findMissingActivities = ({
   addresses,

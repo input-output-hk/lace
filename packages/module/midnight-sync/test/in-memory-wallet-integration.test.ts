@@ -63,8 +63,10 @@ describe('blockchain-midnight', () => {
       vi.spyOn(bip39, 'mnemonicToSeed').mockImplementation(async () =>
         Promise.resolve(Buffer.from(seed)),
       );
-      vi.spyOn(MidnightWalledSdkHd.HDWallet, 'fromSeed').mockImplementation(
-        (buf: Uint8Array) => {
+      // Re-spying returns the existing spy, so clear its calls to count only this test's.
+      vi.spyOn(MidnightWalledSdkHd.HDWallet, 'fromSeed')
+        .mockClear()
+        .mockImplementation((buf: Uint8Array) => {
           capturedSeed = Buffer.from(buf);
           return {
             type: 'seedOk',
@@ -88,8 +90,7 @@ describe('blockchain-midnight', () => {
               }),
             } as unknown as MidnightWalledSdkHd.HDWallet,
           };
-        },
-      );
+        });
 
       wallet = await initializeWallet(
         {

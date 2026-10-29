@@ -69,7 +69,7 @@ const utxoRefKey = (txIn: Cardano.TxIn): string => `${txIn.txId}#${txIn.index}`;
  * is — a bech32 the user mistyped would then read as "we couldn't build your
  * transaction" instead of "check what you entered".
  *
- * @param what names the address in the message, since a request may carry
+ * @param what - names the address in the message, since a request may carry
  * several and the failure has to say which one is unusable.
  */
 export const toPaymentAddress = (

@@ -2,14 +2,16 @@ import { CollateralOwnershipError } from '@lace-contract/cardano-context';
 import { describe, expect, it } from 'vitest';
 
 import { TxSignErrorCode } from '../src/common/api-error';
-import { COLLATERAL_BLOCK_LOG } from '../src/common/store/dependencies/cardano-dapp-connector-api';
 
 import {
   CASE_A_TX_CBOR,
   CASE_B_MESSAGE,
   CASE_B_TX_CBOR,
   blockStages,
+  COLLATERAL_ANCHOR,
+  MAINNET_OUTPUT_TX_CBOR,
   createCollateralApi as createApi,
+  NETWORK_ANCHOR,
   ORIGIN,
   senderContext as mockSenderContext,
   warnMessages,
@@ -55,7 +57,11 @@ describe('the refused consent-flow round trip', () => {
     expect(userConfirmationRequest).toHaveBeenCalledWith(
       mockSenderContext.sender,
       'signTx',
-      { txHex: CASE_B_TX_CBOR, partialSign: true, collateralRefusal },
+      {
+        txHex: CASE_B_TX_CBOR,
+        partialSign: true,
+        refusal: { kind: 'collateral', case: collateralRefusal },
+      },
     );
     expect(signTransaction).not.toHaveBeenCalled();
   });
@@ -257,12 +263,34 @@ describe('the block path is observable', () => {
 
     expect(blockStages(logger)).toContain('refused');
     const blockCall = logger.warn.mock.calls.find(
-      call => call[0] === COLLATERAL_BLOCK_LOG,
+      call => call[0] === COLLATERAL_ANCHOR,
     );
     expect(blockCall?.[1]).toMatchObject({
       stage: 'refused',
       origin: ORIGIN,
       case: 'foreign-collateral-return',
+      partialSign: true,
+    });
+  });
+
+  it('a NETWORK refusal logs under its own anchor, naming the cause -- not under the collateral one', async () => {
+    const { api, logger } = createApi();
+
+    await expect(
+      api.signTx(MAINNET_OUTPUT_TX_CBOR, true, mockSenderContext),
+    ).rejects.toMatchObject({ code: TxSignErrorCode.ProofGeneration });
+
+    // Both halves asserted: under the network anchor the stages are there,
+    // and under the collateral one there is nothing -- an anchor that fired
+    // for the wrong rule sends whoever greps it to the wrong code.
+    expect(blockStages(logger, NETWORK_ANCHOR)).toContain('refused');
+    expect(blockStages(logger, COLLATERAL_ANCHOR)).toEqual([]);
+    expect(
+      logger.warn.mock.calls.find(call => call[0] === NETWORK_ANCHOR)?.[1],
+    ).toMatchObject({
+      stage: 'refused',
+      origin: ORIGIN,
+      case: 'states-other-network',
       partialSign: true,
     });
   });

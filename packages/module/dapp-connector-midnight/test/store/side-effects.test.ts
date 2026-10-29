@@ -224,7 +224,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -327,7 +330,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -424,7 +430,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -522,7 +531,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -634,7 +646,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -733,7 +748,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -826,7 +844,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },
@@ -946,7 +967,10 @@ describe.skip('connectDappConnectorApi', () => {
               networkId: NetworkId.NetworkId.Preview,
               config: {
                 nodeAddress: 'http://localhost:8080',
-                proofServerAddress: 'http://localhost:8081',
+                proofServer: {
+                  kind: 'local-host' as const,
+                  url: 'http://localhost:8081',
+                },
                 indexerAddress: 'http://localhost:8082',
               },
             },

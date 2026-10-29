@@ -1,0 +1,6 @@
+kind: Added
+body: 'Install the operations a Passport account lacks with `passport.installOperations`. It works on an account created with `lockAccount: false`, installs only operations the SDK deploys, skips those already installed so an interrupted install can run again, and refuses with `operation-not-installable`, `authority-retired`, `maintenance-update-refused` or `maintenance-authority-mismatch`.'
+time: 2026-10-21T19:49:09.756749+08:00
+custom:
+  Package: sdk
+  Build: canary

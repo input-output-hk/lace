@@ -6,7 +6,10 @@ import { createUrDecoder, encodeToParts } from '@lace-lib/ur-transport';
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { UrReassemblyDecoder } from '@lace-lib/ui-toolkit/src/design-system/templates/sheets/urScannerSheet/useUrReassembly';
+import type {
+  UrReassemblyDecoder,
+  UseUrReassemblyProps,
+} from '@lace-lib/ui-toolkit/src/design-system/templates/sheets/urScannerSheet/useUrReassembly';
 import type { UrPartDecoder } from '@lace-lib/ur-transport';
 
 const mocks = vi.hoisted(() => ({
@@ -60,8 +63,8 @@ const typeAwareDecoder = (): UrReassemblyDecoder => {
 };
 
 const renderReassembly = (
-  onComplete: ReturnType<typeof vi.fn>,
-  onError: ReturnType<typeof vi.fn> = vi.fn(),
+  onComplete: UseUrReassemblyProps['onComplete'],
+  onError: UseUrReassemblyProps['onError'] = vi.fn(),
 ) => renderHook(() => useUrReassembly({ onComplete, onError }));
 
 const feed = (

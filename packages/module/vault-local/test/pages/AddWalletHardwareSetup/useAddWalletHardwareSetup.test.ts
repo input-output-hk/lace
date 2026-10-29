@@ -60,7 +60,7 @@ const keystoneSupport: HwBlockchainSupport[][] = [
       deviceOptionId: KEYSTONE_CARDANO_OPTION_ID,
       walletType: WalletType.HardwareKeystone,
       blockchainName: 'Cardano' as BlockchainName,
-      maxAccountIndex: 24,
+      maxAccountIndex: 23,
     },
     {
       deviceOptionId: KEYSTONE_BITCOIN_OPTION_ID,
@@ -149,7 +149,7 @@ describe('useAddWalletHardwareSetup', () => {
     });
 
     expect(result.current.hasAccountSetup).toBe(true);
-    expect(result.current.maxAccountIndex).toBe(24);
+    expect(result.current.maxAccountIndex).toBe(23);
   });
 
   it('hides the derivation type picker for an app-driven Bitcoin setup', () => {

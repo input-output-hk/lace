@@ -1,11 +1,6 @@
 import { createMigrate } from 'redux-persist';
 
-import {
-  normalizeHardwareWalletIds,
-  setBlockchainNetworkId,
-  updateMidnightAccountIds,
-} from '../migrations';
-
+import { walletsMigrations } from './persisted-migrations';
 import { repositorySlice } from './repo-slice';
 
 import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';
@@ -15,6 +10,7 @@ export const walletsReducers = {
   wallets: repositorySlice.reducer,
 };
 
+/** The slice of app state owned by the wallet repository, under the `wallets` key. */
 export type WalletsState = StateFromReducersMapObject<typeof walletsReducers>;
 
 const storeExports: LaceInit<LaceModuleStoreInit> = async () => {
@@ -23,11 +19,7 @@ const storeExports: LaceInit<LaceModuleStoreInit> = async () => {
     persistConfig: {
       wallets: {
         version: 5,
-        migrate: createMigrate({
-          3: setBlockchainNetworkId,
-          4: updateMidnightAccountIds,
-          5: normalizeHardwareWalletIds,
-        }),
+        migrate: createMigrate(walletsMigrations),
       },
     },
   };

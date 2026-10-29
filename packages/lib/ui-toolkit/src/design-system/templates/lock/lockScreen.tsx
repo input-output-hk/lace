@@ -40,6 +40,11 @@ interface LockScreenProps {
    */
   cancelButtonLabel?: string;
   onCancel?: () => void;
+  /**
+   * Shown while unlock is throttled after repeated wrong passwords, e.g.
+   * "Try again in 4s". Pair it with `isUnlockDisabled` — this only says why.
+   */
+  retryCountdownLabel?: string;
 }
 
 /**
@@ -64,6 +69,7 @@ export const LockScreen = ({
   onBiometricPress,
   cancelButtonLabel,
   onCancel,
+  retryCountdownLabel,
 }: LockScreenProps) => {
   const styles = createStyles();
   const { theme } = useTheme();
@@ -116,6 +122,14 @@ export const LockScreen = ({
                     : 'lock-screen-password-show-icon',
                 }}
               />
+
+              {!!retryCountdownLabel && (
+                <Text.XS
+                  style={styles.retryCountdownText}
+                  testID="lock-screen-retry-countdown">
+                  {retryCountdownLabel}
+                </Text.XS>
+              )}
 
               <Button.Primary
                 label={unlockButtonLabel}
@@ -171,6 +185,9 @@ const createStyles = () =>
     header: {
       gap: spacing.M,
       marginTop: spacing.XXL,
+    },
+    retryCountdownText: {
+      textAlign: 'center',
     },
     subtitleText: {
       marginVertical: spacing.M,

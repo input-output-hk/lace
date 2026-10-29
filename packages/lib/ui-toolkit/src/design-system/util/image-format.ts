@@ -1,12 +1,30 @@
+import {
+  getIpfsCidPath,
+  ipfsGatewayUrl,
+  IPFS_GATEWAY_URL,
+  isDataUri,
+  isProxiedImageUrl,
+  isSafeRasterDataUri,
+  proxyImageUrl,
+} from '@lace-lib/image-url';
+
 import { isWeb } from './commons';
 
+import type { ImageProxyConfig } from '@lace-lib/image-url';
 import type { ImageSource } from 'expo-image';
 
-const BASE_IPFS_GATEWAY_URL = 'https://ipfs.blockfrost.dev';
-
 type ImageFormatConfig = {
+  /** IPFS gateway origin (a trailing `/ipfs` is tolerated); `/ipfs/<cid>` is appended. */
   webIpfsGatewayUrl?: string;
+  /** As `webIpfsGatewayUrl`, for native. */
   ipfsGatewayUrl?: string;
+  /** Origin of the Lace normalizing image proxy (ADR 42). */
+  imageProxyUrl?: string;
+  // Hex-encoded imgproxy IMGPROXY_KEY/IMGPROXY_SALT. All three values must be
+  // present to proxy at all: the deployed proxy answers unsigned requests with
+  // 403, so a build missing any of them loads remote images directly.
+  imageProxyKey?: string;
+  imageProxySalt?: string;
 };
 
 // eslint-disable-next-line functional/no-let
@@ -16,35 +34,48 @@ export const configureImageFormat = (config: ImageFormatConfig): void => {
   imageFormatConfig = { ...imageFormatConfig, ...config };
 };
 
-// Captures the CID (and any sub-path) from an `/ipfs/<cid>` URL. Non-global,
-// so it is safe to share and use with RegExp.exec (no lastIndex state).
+const getImageProxyConfig = (): ImageProxyConfig => ({
+  url: imageFormatConfig.imageProxyUrl,
+  key: imageFormatConfig.imageProxyKey,
+  salt: imageFormatConfig.imageProxySalt,
+});
+
+const getProxiedImageUrl = (url: string): string =>
+  proxyImageUrl(url, getImageProxyConfig());
+
+const getConfiguredIpfsUrl = (cidPath: string): string =>
+  ipfsGatewayUrl(
+    cidPath,
+    isWeb
+      ? imageFormatConfig.webIpfsGatewayUrl
+      : imageFormatConfig.ipfsGatewayUrl,
+  );
+
+// Captures the CID from an `/ipfs/<cid>` URL — the CID alone: a retry of a
+// directory CID cannot know which file under it was wanted, and the sub-path
+// may already be proxy-escaped. Non-global, so it is safe to share and use with
+// RegExp.exec (no lastIndex state).
 const IPFS_CID_PATH = /\/ipfs\/([^/?#]+)/;
 
-export const getWebIpfsFallbackUri = (uri?: string): string | undefined => {
-  if (!uri) return;
-  if (!isWeb) return uri;
-
-  if (uri.includes('://ipfs.blockfrost.dev/ipfs/')) return uri;
-
-  const match = IPFS_CID_PATH.exec(uri);
-  if (!match) return uri;
-
-  const cid = match[1];
-  if (!cid) return uri;
-
-  return `${BASE_IPFS_GATEWAY_URL}/ipfs/${cid}`;
-};
-
+// Web-only error-retry: re-point an image that failed to load at the built-in
+// gateway, whatever gateway it came from. Unlike getAssetImageUrl this does
+// look inside a gateway url: by the time it runs, that url has already proven
+// it does not serve the bytes.
 export const getWebIpfsFallbackSource = (uri?: string): ImageSource | null => {
   if (!isWeb || !uri) return null;
+  if (uri.startsWith(`${IPFS_GATEWAY_URL}/ipfs/`)) return null;
 
-  const match = IPFS_CID_PATH.exec(uri);
-  if (!match) return null;
-  const cid = match[1];
-  if (!cid) return null;
-
-  if (uri.includes('://ipfs.blockfrost.dev/ipfs/')) return null;
-  return { uri: `${BASE_IPFS_GATEWAY_URL}/ipfs/${cid}` };
+  try {
+    // Proxy sources are one encoded segment; exclude the output format before
+    // decoding so a bare CID does not acquire the proxy's output suffix.
+    const source = isProxiedImageUrl(uri, getImageProxyConfig())
+      ? decodeURIComponent(uri.split('/plain/')[1].slice(0, -'@webp'.length))
+      : uri;
+    const cid = IPFS_CID_PATH.exec(source)?.[1];
+    return cid ? { uri: ipfsGatewayUrl(cid) } : null;
+  } catch {
+    return null;
+  }
 };
 
 export const formatDataUri = (params: { img: string; type: string }): string =>
@@ -61,18 +92,12 @@ export const getImageUri = (source: ImageSource): string | undefined => {
 };
 
 /**
- * Attacker-controlled token/NFT/dApp metadata must never reach an `<img src>`
- * as an inline SVG: SVG can carry scripts and — unlike raster data URIs — is a
- * code-execution surface if the browser's SVG-as-`<img>` sandbox ever fails
- * (NWL R1 audit M-301). Blocklisting SVG spellings is bypassable (casing,
- * percent-encoding, MIME aliases), so instead we *allowlist* known-safe raster
- * `data:` media types and refuse every other `data:` URI — SVG in any form,
- * and non-image data URIs, included — falling through to the icon fallback. SVG
- * *media types* are refused the same way. Remote http(s)/ipfs images are
- * unaffected. Mirrors the http(s)-only guard already live on DRep avatars in
- * @lace-contract/governance-center.
+ * Refuse an SVG *media type* the same way `@lace-lib/image-url` refuses an SVG
+ * `data:` URI (audit M-301): raw attacker bytes must not be wrappable into a
+ * scriptable `data:image/svg+xml` by the base64 fallback at the end of
+ * getAssetImageUrl. Mirrors the http(s)-only guard already live on DRep avatars
+ * in `@lace-contract/governance-center`.
  */
-const SAFE_RASTER_DATA_URI = /^data:image\/(png|jpe?g|gif|webp|avif|bmp)[;,]/i;
 const isSvgMediaType = (mediaType?: string): boolean =>
   mediaType !== undefined && /svg/i.test(mediaType);
 
@@ -81,23 +106,25 @@ export const getAssetImageUrl = (
   mediaType?: string,
 ): string | undefined => {
   if (!image) return;
-  if (image.startsWith('http')) return image;
-  // Handle every data: URI here (case-insensitive) so none can slip past to the
-  // generic-scheme passthrough below. Only known-safe raster media types are
-  // allowed through; SVG in any spelling/encoding, and non-image data: URIs,
-  // fall through to the icon fallback.
-  if (/^data:/i.test(image))
-    return SAFE_RASTER_DATA_URI.test(image) ? image : undefined;
-  if (image.startsWith('ipfs')) {
-    const ipfsGateway = isWeb
-      ? imageFormatConfig.webIpfsGatewayUrl
-      : imageFormatConfig.ipfsGatewayUrl;
+  // Every data: URI is resolved here, before anything else, so none can slip
+  // past to the generic-scheme passthrough below (audit M-301). Local bytes,
+  // so never proxied either.
+  if (isDataUri(image)) return isSafeRasterDataUri(image) ? image : undefined;
 
-    const base = (ipfsGateway || BASE_IPFS_GATEWAY_URL).replace(/\/+$/, '');
-    const path = image.replace(/^ipfs:\/\//, '').replace(/^ipfs\//, '');
+  // Molecules and Avatar can both resolve the same URI. Only URLs that enforce
+  // raster output may bypass another normalization pass.
+  if (isProxiedImageUrl(image, getImageProxyConfig())) return image;
 
-    return `${base}/ipfs/${path}`;
+  // An `ipfs` reference (the scheme, or a bare CID) names content, not a host,
+  // so it has to be resolved onto a gateway before anything can fetch it. A url
+  // that already names a gateway is left alone and taken by the http branch.
+  const ipfsCidPath = getIpfsCidPath(image);
+  if (ipfsCidPath !== undefined) {
+    return getProxiedImageUrl(getConfiguredIpfsUrl(ipfsCidPath));
   }
+
+  if (image.startsWith('//')) return getProxiedImageUrl(`https:${image}`);
+  if (/^https?:\/\//i.test(image)) return getProxiedImageUrl(image);
 
   // Any other uri scheme should be used as-is. This prevents treating platform asset urls/paths as base64 data.
   if (/^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(image)) return image;

@@ -1,0 +1,6 @@
+kind: Fixed
+body: Cardano token balances exclude rewards already withdrawn by pending transactions, and applications can observe pending withdrawals separately from on-chain reward balances.
+time: 2026-10-22T10:00:00Z
+custom:
+  Package: sdk
+  Build: stable

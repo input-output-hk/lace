@@ -16,6 +16,12 @@ import type {
 import type { HttpClient } from '@lace-lib/util-provider';
 import type { Logger } from 'ts-log';
 
+/**
+ * Reads network information through Blockfrost: protocol parameters, the
+ * chain tip, era summaries, genesis parameters, stake and lovelace supply.
+ * Takes the client `createBlockfrostHttpClient` builds; a failure throws a
+ * `ProviderError`.
+ */
 export class BlockfrostNetworkInfoProvider
   extends BlockfrostProvider
   implements NetworkInfoProvider

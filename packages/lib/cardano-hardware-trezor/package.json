@@ -1,0 +1,25 @@
+{
+  "name": "@lace-lib/cardano-hardware-trezor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mappings and integration with Trezor hardware",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/cardano-core": "*",
+    "@lace-lib/cardano-crypto": "*",
+    "@lace-lib/cardano-dapp-connector": "*",
+    "@lace-lib/cardano-key-management": "*",
+    "@lace-lib/cardano-tx-construction": "*",
+    "@lace-lib/util": "*",
+    "@trezor/connect": "9.4.0",
+    "@trezor/connect-web": "9.4.0",
+    "lodash": "^4.17.21",
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "vitest": "*"
+  }
+}

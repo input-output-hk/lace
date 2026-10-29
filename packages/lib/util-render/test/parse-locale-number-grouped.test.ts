@@ -2,20 +2,27 @@ import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import * as formatNumber from '../src/format-number';
 
-const RealNumberFormat = Intl.NumberFormat;
+// The test setup has already pinned Intl.NumberFormat with a spy, and spying on
+// it again here reuses that spy, so reach the genuine constructor through an
+// instance it built.
+const RealNumberFormat = (
+  Object.getPrototypeOf(new Intl.NumberFormat()) as {
+    constructor: typeof Intl.NumberFormat;
+  }
+).constructor;
 
 // Its own file because the derived separators are cached module-globally under
 // the 'default' key on first use, so the device locale cannot be re-pinned once
 // anything in a file has formatted. Vitest gives each file a fresh registry.
 describe('parseLocaleNumber in a locale that groups only from five digits', () => {
   beforeAll(() => {
-    vi.spyOn(Intl, 'NumberFormat').mockImplementation(
-      ((_requested?: unknown, options?: Intl.NumberFormatOptions) =>
-        new RealNumberFormat(
-          'es-ES',
-          options,
-        )) as unknown as typeof Intl.NumberFormat,
-    );
+    // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+    vi.spyOn(Intl, 'NumberFormat').mockImplementation(function (
+      _requested?: unknown,
+      options?: Intl.NumberFormatOptions,
+    ) {
+      return new RealNumberFormat('es-ES', options);
+    } as unknown as typeof Intl.NumberFormat);
   });
 
   // This is the level users were affected at. The four-digit probe came back

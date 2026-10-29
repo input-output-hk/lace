@@ -15,6 +15,7 @@ import {
 } from '../../common/store/dependencies/cardano-dapp-connector-api';
 
 import type { ChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
+import type { SignTxRefusal } from '../../common/store/sign-tx-refusal';
 import type { Cbor, Paginate, SenderContext } from '../../common/types';
 import type { Cardano } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
@@ -24,7 +25,6 @@ import type {
   CardanoAccountAddressHistoryMap,
   CardanoProvider,
 } from '@lace-contract/cardano-context';
-import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
 import type { AuthorizedDappsDataSlice } from '@lace-contract/dapp-connector';
 import type {
   AccountId,
@@ -102,10 +102,10 @@ export interface SigningRequired {
   /** For signTx - whether partial signing is allowed */
   partialSign?: boolean;
   /**
-   * For signTx - the collateral-return verdict evaluated BEFORE the sheet
+   * For signTx - the refusal evaluated BEFORE the sheet
    * (LW-15498), or `null` for a reviewable request. `null` on signData.
    */
-  collateralRefusal: CollateralOwnershipErrorCase | null;
+  refusal: SignTxRefusal | null;
 }
 
 /**
@@ -398,7 +398,7 @@ export const handleCip30Message = async (
           // Confirmation re-checks this: a rebind while the sheet is open
           // answers AccountChange instead of signing under the new account.
           accountId: deps.getAccountIdForOrigin(dappOrigin),
-          collateralRefusal: null,
+          refusal: null,
         };
       },
 
@@ -406,10 +406,7 @@ export const handleCip30Message = async (
         const [txHex, isPartialSign] = args as [string, boolean | undefined];
         // Before the sheet, like signData's pre-check above: a refused request
         // is answered at once and shown as refused, never reviewed.
-        const collateralRefusal = await walletApi.getCollateralRefusal(
-          txHex,
-          dappOrigin,
-        );
+        const refusal = await walletApi.getSignTxRefusal(txHex, dappOrigin);
         return {
           type: 'signing_required' as const,
           requestId: id,
@@ -418,7 +415,7 @@ export const handleCip30Message = async (
           signingType: 'signTx' as const,
           txHex,
           partialSign: isPartialSign ?? false,
-          collateralRefusal,
+          refusal,
         };
       },
 

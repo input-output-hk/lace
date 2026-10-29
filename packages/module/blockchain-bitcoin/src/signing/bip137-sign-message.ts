@@ -21,7 +21,7 @@ const COMPRESSED_HEADER_BASE = 31;
 
 /**
  * Computes the Bitcoin signed-message digest:
- * sha256d(varstr("Bitcoin Signed Message:\n") || varstr(message)).
+ * `sha256d(varstr("Bitcoin Signed Message:\n") || varstr(message))`.
  */
 const magicHash = (message: string): Buffer =>
   bitcoin.crypto.hash256(

@@ -25,6 +25,8 @@ export {
 export {
   applyInFlightUtxoAdjustments,
   ownPendingOutputs,
+  pendingRewardWithdrawalKey,
+  type PendingRewardWithdrawals,
 } from './apply-in-flight-utxo-adjustments';
 export {
   extractOwnedPaymentCredentials,
@@ -57,8 +59,6 @@ export * from './compute-net-flows';
 export * from './inspect-cardano-tx-effects';
 export * from './store/collateral-flow';
 export * from './store/composer-flow';
-export * from './store/night-designation-flow';
-export * from './store/night-designation-index';
 
 export type * from './store';
 export * from './types';
@@ -69,7 +69,9 @@ export type {
 
 export * from './tx-builder';
 export { InputSelectionError } from './input-selection/InputSelectionError';
+export { LargeFirstCoinSelector } from './input-selection/LargeFirstCoinSelector';
 export * from './signing';
 export * from './serialization';
+export * from './extensions/exports';
 
 export * from './hooks';

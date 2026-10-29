@@ -53,10 +53,9 @@ const artefactMocks = vi.hoisted(() => ({
 }));
 
 const accModuleMocks = vi.hoisted(() => ({
-  expectedVk: { deposit_unshielded: 'deposit-unshielded-vk-sha256' } as Record<
-    string,
-    string
-  >,
+  expectedVk: {
+    withdraw_unshielded_with_k256: 'withdraw-unshielded-k256-vk-sha256',
+  } as Record<string, string>,
 }));
 
 const networkIdMocks = vi.hoisted(() => ({
@@ -106,23 +105,34 @@ type ProvingProvider = {
   lookupKey: (keyLocation: string) => Promise<unknown>;
 };
 
+type V9Tx<T> = { version: 'v9'; tx: T };
+
 type ProofProvider = {
-  proveTx: (unprovenTx: {
-    prove: (provingProvider: unknown, costModel: unknown) => Promise<unknown>;
-  }) => Promise<unknown>;
+  supportedEras: readonly string[];
+  proveTx: (
+    unprovenTx: V9Tx<{
+      prove: (provingProvider: unknown, costModel: unknown) => Promise<unknown>;
+    }>,
+  ) => Promise<V9Tx<unknown>>;
 };
 
 type WalletProvider = {
+  supportedEras: readonly string[];
   getCoinPublicKey: () => string;
   getEncryptionPublicKey: () => string;
-  balanceTx: (tx: { serialize: () => Uint8Array }) => Promise<unknown>;
+  balanceTx: (
+    tx: V9Tx<{ serialize: () => Uint8Array }>,
+  ) => Promise<V9Tx<unknown>>;
 };
 
 type MidnightProvider = {
-  submitTx: (tx: {
-    serialize: () => Uint8Array;
-    identifiers: () => string[];
-  }) => Promise<unknown>;
+  supportedEras: readonly string[];
+  submitTx: (
+    tx: V9Tx<{
+      serialize: () => Uint8Array;
+      identifiers: () => string[];
+    }>,
+  ) => Promise<unknown>;
 };
 
 type PrivateStateProvider = {
@@ -245,17 +255,33 @@ describe('createMidnightProviders', () => {
       const zkConfigProvider = providers.zkConfigProvider as ZkConfigProvider;
 
       const verifierKey = await zkConfigProvider.getVerifierKey(
-        'deposit_unshielded',
+        'withdraw_unshielded_with_k256',
       );
 
       await expect(
-        zkConfigProvider.getVerifierKey('deposit_unshielded'),
+        zkConfigProvider.getVerifierKey('withdraw_unshielded_with_k256'),
       ).resolves.toBe(verifierKey);
       expect(artefactMocks.loadVerifierKey).toHaveBeenCalledExactlyOnceWith({
         artefactUrl: network.artefactUrl,
-        circuit: 'deposit_unshielded',
+        circuit: 'withdraw_unshielded_with_k256',
         fetchBytes: expect.any(Function) as unknown,
-        expectedSha256: 'deposit-unshielded-vk-sha256',
+        expectedSha256: 'withdraw-unshielded-k256-vk-sha256',
+      });
+      expect(artefactMocks.loadCircuitAssets).not.toHaveBeenCalled();
+    });
+
+    it('downloads only the verifier key of a proving circuit whose assets are not loaded, against the manifest pin', async () => {
+      const providers = await createProviders();
+      const zkConfigProvider = providers.zkConfigProvider as ZkConfigProvider;
+
+      await zkConfigProvider.getVerifierKey('deposit_shielded');
+
+      expect(artefactMocks.loadVerifierKey).toHaveBeenCalledExactlyOnceWith({
+        artefactUrl: network.artefactUrl,
+        circuit: 'deposit_shielded',
+        fetchBytes: expect.any(Function) as unknown,
+        expectedSha256:
+          '18caf9ffc1ea3271c340f97ee5433598b796a64fadcc1fb7bb5c65868574d328',
       });
       expect(artefactMocks.loadCircuitAssets).not.toHaveBeenCalled();
     });
@@ -273,27 +299,29 @@ describe('createMidnightProviders', () => {
       expect(artefactMocks.loadVerifierKey).not.toHaveBeenCalled();
     });
 
-    it('lists verifier keys only for circuits the manifest pins', async () => {
+    it('lists verifier keys only for circuits the manifest pins, without their prover keys', async () => {
       const providers = await createProviders();
       const zkConfigProvider = providers.zkConfigProvider as ZkConfigProvider;
 
       const verifierKeys = await zkConfigProvider.getVerifierKeys([
         'activate_initial_device_with_jubjub',
-        'deposit_unshielded',
         'withdraw_unshielded_with_k256',
       ]);
 
       expect(verifierKeys).toEqual([
         [
           'activate_initial_device_with_jubjub',
-          'verifier-key-activate_initial_device_with_jubjub',
+          await artefactMocks.loadVerifierKey({
+            circuit: 'activate_initial_device_with_jubjub',
+          }),
         ],
       ]);
-      expect(artefactMocks.loadCircuitAssets).toHaveBeenCalledExactlyOnceWith(
+      expect(artefactMocks.loadVerifierKey).toHaveBeenCalledWith(
         expect.objectContaining({
           circuit: 'activate_initial_device_with_jubjub',
         }),
       );
+      expect(artefactMocks.loadCircuitAssets).not.toHaveBeenCalled();
     });
   });
 
@@ -303,8 +331,11 @@ describe('createMidnightProviders', () => {
       const proofProvider = providers.proofProvider as ProofProvider;
       const prove = vi.fn(async () => 'proved-tx');
 
-      await expect(proofProvider.proveTx({ prove })).resolves.toBe('proved-tx');
+      await expect(
+        proofProvider.proveTx({ version: 'v9', tx: { prove } }),
+      ).resolves.toEqual({ version: 'v9', tx: 'proved-tx' });
 
+      expect(proofProvider.supportedEras).toEqual(['v9']);
       expect(onStage).toHaveBeenCalledExactlyOnceWith('proving');
       expect(prove).toHaveBeenCalledExactlyOnceWith(
         expect.any(Object),
@@ -341,7 +372,7 @@ describe('createMidnightProviders', () => {
       const providers = await createProviders();
       const proofProvider = providers.proofProvider as ProofProvider;
       const prove = vi.fn(async () => 'proved-tx');
-      await proofProvider.proveTx({ prove });
+      await proofProvider.proveTx({ version: 'v9', tx: { prove } });
       const [provingProvider] = prove.mock.calls[0] as unknown as [
         ProvingProvider,
       ];
@@ -366,9 +397,11 @@ describe('createMidnightProviders', () => {
       const serialized = new Uint8Array([4]);
 
       const balanced = await walletProvider.balanceTx({
-        serialize: () => serialized,
+        version: 'v9',
+        tx: { serialize: () => serialized },
       });
 
+      expect(walletProvider.supportedEras).toEqual(['v9']);
       expect(onStage).toHaveBeenCalledExactlyOnceWith('sponsoring');
       expect(sponsor.balanceAndSign).toHaveBeenCalledExactlyOnceWith(
         serialized,
@@ -382,7 +415,10 @@ describe('createMidnightProviders', () => {
         new Uint8Array([9]),
       );
       expect(balanced).toEqual({
-        deserialized: ['signature', 'proof', 'binding', new Uint8Array([9])],
+        version: 'v9',
+        tx: {
+          deserialized: ['signature', 'proof', 'binding', new Uint8Array([9])],
+        },
       });
     });
   });
@@ -397,9 +433,9 @@ describe('createMidnightProviders', () => {
       const providers = await createProviders();
       const midnightProvider = providers.midnightProvider as MidnightProvider;
 
-      await expect(midnightProvider.submitTx(finalizedTx)).resolves.toBe(
-        'last-id',
-      );
+      await expect(
+        midnightProvider.submitTx({ version: 'v9', tx: finalizedTx }),
+      ).resolves.toBe('last-id');
       expect(
         submissionMocks.service.submitTransaction,
       ).toHaveBeenCalledExactlyOnceWith(finalizedTx, 'InBlock');
@@ -413,9 +449,9 @@ describe('createMidnightProviders', () => {
         new Error('relay unreachable'),
       );
 
-      await expect(midnightProvider.submitTx(finalizedTx)).rejects.toThrow(
-        'relay unreachable',
-      );
+      await expect(
+        midnightProvider.submitTx({ version: 'v9', tx: finalizedTx }),
+      ).rejects.toThrow('relay unreachable');
       expect(submissionMocks.service.close).toHaveBeenCalledOnce();
     });
 
@@ -425,7 +461,7 @@ describe('createMidnightProviders', () => {
       });
       const midnightProvider = providers.midnightProvider as MidnightProvider;
 
-      await midnightProvider.submitTx(finalizedTx);
+      await midnightProvider.submitTx({ version: 'v9', tx: finalizedTx });
 
       expect(
         submissionMocks.createNodeRelaySubmissionService,

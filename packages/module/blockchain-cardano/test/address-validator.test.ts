@@ -11,20 +11,21 @@ const { mockIsValid, mockFromString } = vi.hoisted(() => ({
   mockFromString: vi.fn().mockReturnValue(null),
 }));
 
+// The real module stays in place around the mocked address parsing:
+// modules loaded alongside the validator read other Cardano values at import.
 vi.mock('@cardano-sdk/core', async () => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const { Cardano } = await vi.importActual<typeof import('@cardano-sdk/core')>(
+  const actual = await vi.importActual<typeof import('@cardano-sdk/core')>(
     '@cardano-sdk/core',
   );
   return {
+    ...actual,
     Cardano: {
+      ...actual.Cardano,
       Address: {
         isValid: mockIsValid,
         fromString: mockFromString,
       },
-      NetworkId: Cardano.NetworkId,
-      ChainIds: Cardano.ChainIds,
-      NetworkMagics: Cardano.NetworkMagics,
     },
   };
 });

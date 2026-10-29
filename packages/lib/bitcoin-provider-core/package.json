@@ -16,8 +16,5 @@
     "lodash": "^4.17.21",
     "rxjs": "^7.8.1",
     "ts-log": "^2.2.7"
-  },
-  "devDependencies": {
-    "vitest": "^3.2.6"
   }
 }

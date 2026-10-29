@@ -117,7 +117,7 @@ export const NewDRepDelegationSheet = (
       <SendResultTemplate
         transactionState={{ status: 'failure', blockchain: 'Cardano' }}
         subtitle={t(flowState.errorTranslationKeys.subtitle)}
-        icon={{ name: 'Sad', variant: 'solid', size: 64 }}
+        icon={{ name: 'Sad', strokeWidth: 2, size: 64 }}
         errorDetails={errorDetails}
       />
     );

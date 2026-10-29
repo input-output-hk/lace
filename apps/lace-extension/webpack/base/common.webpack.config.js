@@ -43,24 +43,6 @@ const baseConfig = {
       // DOM-free variant everywhere — including the SW — without forking
       // @cardano-sdk/hardware-trezor which hard-codes @trezor/connect-web.
       '@trezor/connect-web$': '@trezor/connect-webextension',
-      // hugeicons-pro ships per-icon modules only under dist/esm, but its
-      // exports map also offers them under a `require` target (dist/cjs/*.js)
-      // that does not exist in the artifact. Because `require` is in
-      // conditionNames below and precedes `import` in the map, the exports
-      // lookup resolves per-icon imports to the missing CJS path — alias the
-      // esm directories so plain file resolution bypasses the exports map.
-      '@hugeicons-pro/core-solid-rounded/dist/esm': path.join(
-        path.dirname(
-          require.resolve('@hugeicons-pro/core-solid-rounded/package.json'),
-        ),
-        'dist/esm',
-      ),
-      '@hugeicons-pro/core-stroke-rounded/dist/esm': path.join(
-        path.dirname(
-          require.resolve('@hugeicons-pro/core-stroke-rounded/package.json'),
-        ),
-        'dist/esm',
-      ),
     },
     // posthog-node v5+ uses Node.js-only modules (fs, readline) in its "node" export condition.
     // Prefer "edge" condition which is browser-compatible.
@@ -242,6 +224,16 @@ const baseConfig = {
     new NormalModuleReplacementPlugin(/feature-flags$/, resource => {
       const fs = require('fs');
       const path = require('path');
+
+      const testFlags = path.resolve(
+        __dirname,
+        '../../test/feature-flags.hermetic.ts',
+      );
+      if (resource.context === path.dirname(testFlags)) return;
+      if (process.env.LACE_E2E_FEATURE_FLAGS === '1') {
+        resource.request = testFlags;
+        return;
+      }
 
       const overridePath = path.resolve(
         __dirname,

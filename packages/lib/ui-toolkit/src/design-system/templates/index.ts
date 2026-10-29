@@ -12,6 +12,7 @@ export * from './addWalletPage/addWalletPage';
 export * from './addressBookPage/addressBookPage';
 export * from './dappExplorerPage/dappExplorerPage';
 export * from './webView/webView';
+export * from './webView/nativeBridgeWebView';
 export * from './notificationsPage/notificationsPageTemplate';
 export * from './notificationDetailsPage/notificationDetailsPageTemplate';
 export * from './pageContainerTemplate/pageContainerTemplate';

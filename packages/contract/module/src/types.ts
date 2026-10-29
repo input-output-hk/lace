@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { App } from './app';
 import type {
   ModuleLoader,
   ContextualLoadableKey,
@@ -20,16 +21,28 @@ import type {
 } from 'redux-persist';
 import type { Observable } from 'rxjs';
 
-export type App =
-  | 'lace-extension-carbon'
-  | 'lace-extension-guest'
-  | 'lace-extension'
-  | 'lace-mobile'
-  | 'lace-sdk';
+export type { App } from './app';
+
+/**
+ * The configuration the loaded modules read, passed to `createLaceWallet` as
+ * `config`. Each contract adds its own fields: with the Cardano modules these
+ * include the feature-flag defaults, `defaultTestnetChainId`, `cardanoProvider`
+ * (tip polling and Blockfrost settings keyed by network magic) and explorer
+ * URLs.
+ */
 export interface AppConfig {}
 
+/**
+ * The platform the host application runs on, available to modules as
+ * `Runtime.platform`.
+ */
 export type LacePlatform = 'android' | 'ios' | 'web-extension' | 'web';
 
+/**
+ * Describes the running application: which app it is, the configuration modules
+ * read, the build environment and the platform. Modules receive it as `runtime`
+ * in `ModuleInitProps` and in their side-effect dependencies.
+ */
 export interface Runtime {
   app: App;
   config: AppConfig;
@@ -37,9 +50,21 @@ export interface Runtime {
   platform: LacePlatform;
 }
 
+/**
+ * The root Redux state of the wallet. Each contract adds its slices to this
+ * interface through module augmentation.
+ */
 export interface State {}
+/**
+ * The Redux action type dispatched through the wallet store and observed by
+ * side effects.
+ */
 export interface Action extends ReduxAction {}
 
+/**
+ * The properties every module initializer receives: the module loader, the
+ * runtime description and, in a UI context, the id of the view it runs in.
+ */
 export interface ModuleInitProps {
   loadModules: ModuleLoader;
   runtime: Runtime;
@@ -49,8 +74,18 @@ export interface ModuleInitProps {
   viewId?: ViewId;
 }
 
+/**
+ * The services every module initializer receives alongside `ModuleInitProps`,
+ * currently a `logger`.
+ */
 export type ModuleInitDependencies = WithLogger;
 
+/**
+ * The dependencies the store always provides to side effects: key-value
+ * storage, the logger, the module init props, direct state access and
+ * persisted-state flushing. Modules add their own through
+ * `SideEffectDependencies`.
+ */
 export type DefaultSideEffectDependencies = KeyValueStorageDependencies &
   ModuleInitDependencies &
   ModuleInitProps & {
@@ -70,12 +105,29 @@ export type DefaultSideEffectDependencies = KeyValueStorageDependencies &
     flushPersistedState: () => Observable<void>;
   };
 
+/**
+ * The dependencies passed as the third argument to every `LaceSideEffect`.
+ * Contracts add their own services to this interface through module
+ * augmentation; loaded modules supply them through
+ * `LaceModuleStoreInit.sideEffectDependencies`.
+ */
 export interface SideEffectDependencies extends DefaultSideEffectDependencies {}
 
+/**
+ * The store's combined action creators and selectors, as passed to side effects
+ * alongside their dependencies.
+ *
+ * @typeParam Selectors - the scoped selectors available
+ * @typeParam ActionCreators - the scoped action creators available
+ */
 export type WithLaceContext<Selectors = unknown, ActionCreators = unknown> = {
   actions: ActionCreators;
   selectors: Selectors;
 };
+/**
+ * A redux-observable epic typed for the wallet store: the form a
+ * `LaceSideEffect` takes once the store adapts it.
+ */
 export type LaceReduxObservableEpic = Epic<
   Action,
   Action,
@@ -83,18 +135,31 @@ export type LaceReduxObservableEpic = Epic<
   SideEffectDependencies & WithLaceContext
 >;
 
+/**
+ * The element type of array type `T`, or `never` when `T` is not an array.
+ */
 export type ArrayType<T> = T extends Array<infer A> ? A : never;
+/**
+ * Any function type, used as a constraint in the module system's type helpers.
+ */
 export type AnyFunction = (...args: any[]) => any;
 type ActionName = string;
 type AnyActionCreators = Partial<
   Record<ActionName, (...args: any[]) => ReduxAction>
 >;
+/**
+ * Action creators grouped by scope (usually a slice name), then by action name.
+ * This is the shape of the `actions` a store exposes.
+ */
 export type ScopedActionCreators = Partial<Record<Scope, AnyActionCreators>>;
 type Scope = string;
 type SelectorName = string;
-// Using `any` for `argument` here to allow selectors with 0 or 1 param (state, [arg])
-// we don’t care about the type of `arg` here – the real constraint is enforced at the hook site
-// Since linter rule for no-explicit-any was turned off, I think this is ok.
+/**
+ * Selectors grouped by scope (usually a slice name), then by selector name.
+ * Each selector takes the root `State` and at most one argument; the argument
+ * is typed `any` here so selectors with and without a parameter both fit, and
+ * its real type applies where the selector is used.
+ */
 export type ScopedSelectors = Partial<
   Record<
     Scope,
@@ -102,6 +167,9 @@ export type ScopedSelectors = Partial<
   >
 >;
 
+/**
+ * The union of the property value types of `T`.
+ */
 export type Values<T> = T[keyof T];
 type OmitNever<T> = Pick<
   T,
@@ -109,6 +177,10 @@ type OmitNever<T> = Pick<
     [Property in keyof T]: [T[Property]] extends [never] ? never : Property;
   }>
 >;
+/**
+ * `T` restricted to its properties whose values are functions, dropping all
+ * others.
+ */
 export type OmitEmptyActionCreators<T> = OmitNever<{
   [k in keyof T]: T[k] extends AnyFunction ? T[k] : never;
 }>;
@@ -117,9 +189,21 @@ type _ReturnTypes<T> = Values<{
   [k in keyof T]: T[k] extends AnyFunction ? ReturnType<T[k]> : never;
 }>;
 type ReturnTypes<U> = U extends any ? _ReturnTypes<U> : never;
+/**
+ * The union of the action types produced by a scoped action-creator map, for
+ * example the actions a side effect may emit.
+ */
 export type ActionType<ActionCreators> = ReturnTypes<Values<ActionCreators>>;
 
+/**
+ * A selector that takes only the state, used to tell parameterless selectors
+ * apart when deriving `StateObservables`.
+ */
 export type AnyParameteterlessSelector = (s: State, argument: undefined) => any;
+/**
+ * A selector that takes the state and one argument, used when deriving
+ * `StateObservables`.
+ */
 export type AnyParameterizedSelector = (s: State, argument: any) => any;
 
 type _StateObservables<
@@ -134,6 +218,12 @@ type _StateObservables<
       >
     : never;
 };
+/**
+ * The state observables a side effect receives, one per selector, keyed by
+ * scope and then by the selector name with a `$` suffix. A parameterless
+ * selector becomes an observable of its result; a parameterized one becomes an
+ * observable of a function from its argument to its result.
+ */
 export type StateObservables<Selectors extends ScopedSelectors> = {
   [k in keyof Selectors]: _StateObservables<Selectors[k]>;
 };
@@ -146,10 +236,23 @@ type _ActionObservables<
     ? Observable<ReturnType<ActionCreators[k]>>
     : never;
 };
+/**
+ * The action observables a side effect receives, one per action creator, keyed
+ * by scope and then by the action creator name with a `$` suffix. Each emits
+ * only the actions that action creator produces.
+ */
 export type ActionObservables<ActionCreators extends ScopedActionCreators> = {
   [k in keyof ActionCreators]: _ActionObservables<ActionCreators[k]>;
 };
 
+/**
+ * A side effect: a function of the store's action observables, state
+ * observables and dependencies that returns an observable of actions to
+ * dispatch.
+ *
+ * @typeParam Selectors - the scoped selectors the side effect reads
+ * @typeParam ActionCreators - the scoped action creators it observes and emits
+ */
 export type LaceSideEffect<
   Selectors extends ScopedSelectors,
   ActionCreators extends ScopedActionCreators,
@@ -160,13 +263,24 @@ export type LaceSideEffect<
     WithLaceContext<Selectors, ActionCreators>,
 ) => Observable<ActionType<ActionCreators>>;
 
+/**
+ * A `LaceSideEffect` over any selectors and action creators.
+ */
 export type AnyLaceSideEffect = LaceSideEffect<any, any>;
 
+/**
+ * A synchronous module initializer: receives the module init props and
+ * dependencies and returns the initialized value `T`.
+ */
 export type LaceInitSync<T> = (
   props: Readonly<ModuleInitProps>,
   dependencies: Readonly<ModuleInitDependencies>,
 ) => T;
 
+/**
+ * A module initializer: receives the module init props and dependencies and
+ * returns the initialized value `T`, directly or as a promise.
+ */
 export type LaceInit<T> = (
   props: Readonly<ModuleInitProps>,
   dependencies: Readonly<ModuleInitDependencies>,
@@ -174,7 +288,10 @@ export type LaceInit<T> = (
   // because we are pre-loading some pieces of **all** modules in SW due to dynamic imports limitation
 ) => Promise<T> | T;
 
-// Contextual version of ModuleInitProps that restricts loadModules to available addons
+/**
+ * `ModuleInitProps` whose `loadModules` only accepts keys for the addons in
+ * `AvailableAddons`.
+ */
 export interface ContextualModuleInitProps<
   AvailableAddons extends LaceModuleAddonNames,
 > extends Omit<ModuleInitProps, 'loadModules'> {
@@ -183,7 +300,10 @@ export interface ContextualModuleInitProps<
   ) => LoadResult<K>;
 }
 
-// Contextual version of LaceInit that uses restricted ModuleInitProps
+/**
+ * A `LaceInit` that receives `ContextualModuleInitProps`, so it can only load
+ * the addons in `AvailableAddons`.
+ */
 export type ContextualLaceInit<
   T,
   AvailableAddons extends LaceModuleAddonNames,
@@ -192,23 +312,53 @@ export type ContextualLaceInit<
   dependencies: Readonly<ModuleInitDependencies>,
 ) => Promise<T> | T;
 
+/**
+ * A lazy import of a module whose default export is `T`, such as
+ * `() => import('./init')`.
+ */
 export type DynamicallyLoaded<T> = () => Promise<{ default: T }>;
 
+/**
+ * A lazy import whose default export is a `LaceInit` producing `T`.
+ */
 export type DynamicallyLoadedInit<T> = DynamicallyLoaded<LaceInit<T>>;
+/**
+ * A lazy import whose default export is a `ContextualLaceInit` producing `T`.
+ */
 export type ContextualDynamicallyLoadedInit<
   T,
   AvailableAddons extends LaceModuleAddonNames,
 > = DynamicallyLoaded<ContextualLaceInit<T, AvailableAddons>>;
 
+/**
+ * The action creators and selectors a module's store contributes, available
+ * without loading the store itself.
+ */
 export type LaceStoreContext<S extends object, A extends object> = {
   actions: A;
   selectors?: S;
 };
 
+/**
+ * The redux-persist bookkeeping added to a persisted slice, without
+ * `undefined`.
+ */
 export type NonUndefinedPersistedState = Exclude<_PersistedState, undefined>;
+/**
+ * A slice state `S` as stored by redux-persist, including its persistence
+ * bookkeeping.
+ */
 export type PersistedState<S> = NonUndefinedPersistedState & S;
+/**
+ * The type of any property of `PersistedState` for slice state `S`.
+ */
 export type PersistedStateProperty<S> =
   PersistedState<S>[keyof PersistedState<S>];
+/**
+ * The redux-persist configuration for one slice of state `S`. The store
+ * supplies the key and storage; the slice chooses what to persist with a
+ * `whitelist` of its own keys.
+ */
 export type LacePersistConfig<S> = Omit<
   PersistConfig<
     PersistedState<S>,
@@ -222,10 +372,19 @@ export type LacePersistConfig<S> = Omit<
   whitelist?: Array<keyof S>;
 };
 
+/**
+ * Persist configurations keyed by the root `State` slice they apply to. Slices
+ * without an entry are not persisted.
+ */
 export type LacePersistConfigMap = Partial<{
   [k in keyof State]: LacePersistConfig<State[k]>;
 }>;
 
+/**
+ * What a module's store initializer returns: the reducers, middleware, persist
+ * configurations, preloaded state, side-effect dependencies and side effects
+ * the module adds to the wallet store.
+ */
 export interface LaceModuleStoreInit {
   middleware?: Middleware[];
   reducers?: Partial<ReducersMapObject<State, Action>>;
@@ -236,7 +395,14 @@ export interface LaceModuleStoreInit {
   sideEffects?: LaceSideEffect<any, any>[];
 }
 
+/**
+ * A list of addon names, each a key of `LaceAddons`.
+ */
 export type LaceModuleAddonNames = Array<keyof LaceAddons>;
+/**
+ * A list of side-effect dependency names, each a key of
+ * `SideEffectDependencies`.
+ */
 export type SideEffectDependencyNames = Array<keyof SideEffectDependencies>;
 
 // Base contract type that contains common properties shared by all contract types
@@ -261,6 +427,10 @@ type BaseContract<
 };
 
 // Pure contract type definitions - each contains only their specific properties
+/**
+ * The part of a store contract specific to its type: the mixin that adds the
+ * contract's shared store functionality to the modules implementing it.
+ */
 export type StoreContractType<
   MixinSelectors extends ScopedSelectors = object,
   MixinActionCreators extends ScopedActionCreators = object,
@@ -273,6 +443,10 @@ export type StoreContractType<
   mixin: LaceModuleMixin<MixinSelectors, MixinActionCreators>;
 };
 
+/**
+ * The part of an addon contract specific to its type: the addons the contract
+ * provides and whether to preload them in the extension service worker.
+ */
 export type AddonContractType<
   ProvidesAddons extends LaceModuleAddonNames = LaceModuleAddonNames,
 > = {
@@ -287,12 +461,18 @@ export type AddonContractType<
   };
 };
 
+/**
+ * The part of a side-effect dependency contract specific to its type.
+ */
 export type SideEffectDependencyContractType = {
   contractType: 'sideEffectDependency';
   // Empty for now - LW-13087 will add provides.sideEffectDependencies
 };
 
-// Composed contract types - BaseContract + specific type
+/**
+ * A contract for state: implementing modules share the contract's store mixin,
+ * and dependent modules can use its selectors and action creators.
+ */
 export type StoreContract<
   MixinSelectors extends ScopedSelectors = object,
   MixinActionCreators extends ScopedActionCreators = object,
@@ -306,6 +486,10 @@ export type StoreContract<
 > &
   StoreContractType<MixinSelectors, MixinActionCreators>;
 
+/**
+ * A contract for addons: implementing modules provide the named addons, which
+ * other modules load through `loadModules`.
+ */
 export type AddonContract<
   ProvidesAddons extends LaceModuleAddonNames = LaceModuleAddonNames,
   DependencySelectors extends ScopedSelectors = object,
@@ -314,6 +498,9 @@ export type AddonContract<
 > = AddonContractType<ProvidesAddons> &
   BaseContract<DependencySelectors, DependencyActionCreators, DependencyAddons>;
 
+/**
+ * A contract for side-effect dependencies that implementing modules provide.
+ */
 export type SideEffectDependencyContract<
   DependencySelectors extends ScopedSelectors = object,
   DependencyActionCreators extends ScopedActionCreators = object,
@@ -325,7 +512,11 @@ export type SideEffectDependencyContract<
 > &
   SideEffectDependencyContractType;
 
-// Contract union type with the new type system
+/**
+ * A contract between modules: a named interface that modules implement or
+ * depend on, with the number of implementations it allows. It is a store, addon
+ * or side-effect dependency contract.
+ */
 export type Contract<
   MixinSelectors extends ScopedSelectors = object,
   MixinActionCreators extends ScopedActionCreators = object,
@@ -353,6 +544,10 @@ export type Contract<
       DependencyAddons
     >;
 
+/**
+ * A module's store: its action creators and selectors, plus a lazy loader for
+ * the store initializer.
+ */
 export type LaceModuleStore<
   Selectors extends ScopedSelectors = object,
   ActionCreators extends ScopedActionCreators = object,
@@ -361,6 +556,9 @@ export type LaceModuleStore<
   load: DynamicallyLoadedInit<LaceModuleStoreInit>;
 };
 
+/**
+ * A bundle of contracts, as a module lists in `implements` or `dependsOn`.
+ */
 export type Contracts<
   CombinedSelectors extends ScopedSelectors,
   CombinedActionCreators extends ScopedActionCreators,
@@ -375,10 +573,17 @@ export type Contracts<
   >[];
 };
 
+/**
+ * The addons modules can provide, keyed by addon name. Each addon contract adds
+ * its addons to this interface through module augmentation.
+ */
 export interface LaceAddons {}
 
 // https://mercury.com/blog/creating-an-emptyobject-type-in-typescript
 const emptySymbol = Symbol('EmptyObject');
+/**
+ * The marker key of the empty-object type used for a module without addons.
+ */
 export type EmptyObjectSymbol = typeof emptySymbol;
 type EmptyObject = { [emptySymbol]?: never };
 type MaybeEmptyObject<T> = keyof T extends never ? EmptyObject : T;
@@ -396,6 +601,11 @@ type DeepContextualLaceInitAddons<
 type ContextualLaceInitAddons<AvailableAddons extends LaceModuleAddonNames> =
   DeepContextualLaceInitAddons<LaceAddons, AvailableAddons>;
 
+/**
+ * A module: a named unit of wallet functionality that implements contracts,
+ * depends on others, and may provide a store and addons. Pass modules to
+ * `createLaceWallet` to compose a wallet.
+ */
 export interface LaceModule<
   Selectors extends ScopedSelectors = object,
   ActionCreators extends ScopedActionCreators = object,
@@ -428,13 +638,25 @@ export interface LaceModule<
   >;
 }
 
+/**
+ * A function that extends a module with a contract's shared store
+ * functionality.
+ */
 export type LaceModuleMixin<
   MixinSelectors extends ScopedSelectors,
   MixinActionCreators extends ScopedActionCreators,
 > = (laceModule: LaceModule) => LaceModule<MixinSelectors, MixinActionCreators>;
 
+/**
+ * Variants of a module keyed by the `App` they are built for. A module package
+ * default-exports one of these.
+ */
 export type LaceModuleMap = Partial<Record<App, LaceModule>>;
 
+/**
+ * The parts of a `LaceModule` that the module loader loads by key: its store
+ * and addons.
+ */
 export type ModuleExports<
   Selectors extends ScopedSelectors = object,
   ActionCreators extends ScopedActionCreators = object,
@@ -443,6 +665,10 @@ export type ModuleExports<
   'dependsOn' | 'feature' | 'implements' | 'moduleName'
 >;
 
+/**
+ * The selectors available to code using contract `T`: its own mixin selectors
+ * together with the selectors of the contracts it depends on.
+ */
 export type ContractSelectors<T> = [T] extends [
   Contract<
     infer MixinSelectors,
@@ -454,6 +680,10 @@ export type ContractSelectors<T> = [T] extends [
   ? DependencySelectors & MixinSelectors
   : never;
 
+/**
+ * The selectors available inside module `T`: those of its own store, of the
+ * contracts it implements and of the contracts it depends on.
+ */
 export type ModuleSelectors<T> = T extends LaceModule<
   infer Selectors,
   infer _ActionCreators,
@@ -489,6 +719,10 @@ export type ModuleStoreSelectors<T> = T extends LaceModuleStore<
   ? Selectors
   : never;
 
+/**
+ * The properties for creating a module loader: the modules to load and the
+ * module init props other than `loadModules`.
+ */
 export interface CreateLoaderProps
   extends Omit<ModuleInitProps, 'loadModules'> {
   modules: LaceModule[];

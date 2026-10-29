@@ -3,6 +3,12 @@
     "allowJs": true
   },
   "extends": "../../../tsconfig.base.json",
-  "include": ["eslint.config.mjs", "vitest.config.js", "src/**/*", "test/**/*"],
+  "include": [
+    "eslint.config.mjs",
+    "vitest.config.js",
+    "scripts/**/*.mjs",
+    "src/**/*",
+    "test/**/*"
+  ],
   "exclude": ["node_modules", "dist", "coverage", "docs/typedoc"]
 }

@@ -92,12 +92,7 @@ export const SignReviewResultContent = ({
           <View
             style={styles.iconContainer}
             testID={testID ? `${testID}-icon` : undefined}>
-            <Icon
-              name={config.icon}
-              size={64}
-              variant="stroke"
-              color={theme.text.primary}
-            />
+            <Icon name={config.icon} size={64} color={theme.text.primary} />
           </View>
 
           <Text.M

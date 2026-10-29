@@ -1,0 +1,6 @@
+kind: Fixed
+body: The `@laceio/sdk/experimental` entry exports every type its Passport API names, such as `HttpProverOptions`, `DevSponsorConfig`, `PasskeyAuthoriser` and `AccountRecordStore`, so apps can name them in their own code.
+time: 2026-10-21T19:44:31.979056+08:00
+custom:
+  Package: sdk
+  Build: canary

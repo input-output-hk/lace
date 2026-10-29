@@ -1,37 +1,18 @@
 import './augmentations';
 
-import { devContract } from '@lace-contract/dev';
+import { FEATURES_DEV_FEATURE_FLAG } from '@lace-contract/feature';
 import {
-  featureStoreContract,
-  featureDependencyContract,
-  FEATURES_DEV_FEATURE_FLAG,
-} from '@lace-contract/feature';
-import {
-  combineContracts,
   inferModuleContext,
   ModuleName,
   isProductionEnvironment,
 } from '@lace-contract/module';
-import { initializeExtensionViewAddonContract } from '@lace-contract/views';
 
+import { implementsContracts } from './contracts';
 import store from './store';
 
-import type {
-  ModuleActionCreators,
-  ModuleSelectors,
-  LaceSideEffect,
-  LaceModuleMap,
-  ModuleAddons,
-} from '@lace-contract/module';
+import type { LaceModuleMap } from '@lace-contract/module';
 
 export { FEATURES_DEV_FEATURE_FLAG } from '@lace-contract/feature';
-
-const implementsContracts = combineContracts([
-  featureStoreContract,
-  featureDependencyContract,
-  devContract,
-  initializeExtensionViewAddonContract,
-] as const);
 
 const extensionModule = inferModuleContext({
   moduleName: ModuleName('feature-dev'),
@@ -82,7 +63,9 @@ const moduleMap: LaceModuleMap = {
 
 export default moduleMap;
 
-export type Selectors = ModuleSelectors<typeof extensionModule>;
-export type ActionCreators = ModuleActionCreators<typeof extensionModule>;
-export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
-export type AvailableAddons = ModuleAddons<typeof implementsContracts>;
+export type {
+  ActionCreators,
+  AvailableAddons,
+  Selectors,
+  SideEffect,
+} from './contracts';

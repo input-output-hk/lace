@@ -6,9 +6,11 @@ import { BigNumber } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { firstValueFrom, from, map, switchMap } from 'rxjs';
 
+import { refuseExtensionAccount } from '../account-guards';
+
 import { buildComposerTx, toPaymentAddress } from './build-composer-tx';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../contracts';
 import type { Cardano } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
@@ -128,6 +130,8 @@ const buildComposition = async (
     }
     if (!tip) throw new Error('Cardano chain tip not available');
     if (!eraSummaries) throw new Error('Cardano era summaries not available');
+
+    refuseExtensionAccount(accountId, addresses);
 
     const accountAddresses = addresses.filter(
       (address: AnyAddress) =>

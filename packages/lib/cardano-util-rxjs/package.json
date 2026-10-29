@@ -1,0 +1,19 @@
+{
+  "name": "@lace-lib/cardano-util-rxjs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "RxJS extensions",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/util": "*",
+    "backoff-rxjs": "7.0.0",
+    "rxjs": "^7.8.1",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "@lace-lib/cardano-util-dev": "*",
+    "vitest": "*"
+  }
+}

@@ -1,0 +1,6 @@
+kind: Fixed
+body: '`passport.readShieldedHoldings` leaves out shielded coins the account has already spent, so `selectShieldedHoldings$` lists only coins it can still spend.'
+time: 2026-10-22T14:11:27.013092+08:00
+custom:
+  Package: sdk
+  Build: canary

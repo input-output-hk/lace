@@ -85,6 +85,7 @@ export type StatePreparing<BlockchainSpecificData = unknown> = StateObject<
   'Preparing',
   {
     accountId?: AccountId;
+    allowRewardsWithdrawal?: boolean;
     blockchainSpecificData: BlockchainSpecificData;
     initialAddress?: string;
     initialAmount?: BigNumber;
@@ -112,9 +113,13 @@ export type SendFlowOpenStatus =
 
 type StateOpenData<BlockchainSpecificData = unknown> = BlockchainAssigned<{
   accountId: AccountId;
+  /** Set by the opening UI when it shows `withdrawals` on review. */
+  allowRewardsWithdrawal: boolean;
   blockchainSpecificData: BlockchainSpecificData;
   confirmButtonEnabled: boolean;
   fees: FeeEntry[];
+  /** What the built transaction withdraws (e.g. staking rewards); [] if none. */
+  withdrawals: FeeEntry[];
   minimumAmount: BigNumber;
   txBuildErrorTranslationKey?: TranslationKey;
   form: FormData;

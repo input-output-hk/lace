@@ -13,7 +13,7 @@ const WRONG_SCRIPT_TYPE_CODE = 'SEED_SIGNER_WRONG_SCRIPT_TYPE';
 const MULTISIG_NOT_SUPPORTED_CODE = 'SEED_SIGNER_MULTISIG_NOT_SUPPORTED';
 
 /**
- * Ledger transport status codes, mirrored from @ledgerhq/errors StatusCodes
+ * Ledger transport status codes, mirrored from `@ledgerhq/errors` StatusCodes
  * as literals for the same bundle-size reason as above. LOCKED_DEVICE fires
  * regardless of which app the request targeted; the CLA/INS codes mean a
  * different app (or the dashboard) answered, i.e. the expected app is not

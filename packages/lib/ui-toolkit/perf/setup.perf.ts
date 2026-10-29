@@ -2,7 +2,7 @@
  * Shared setup for the Reassure perf tests (jest.perf.config.js).
  * Mirrors test/setup (Vitest) with Jest idioms: useTranslation backed by the
  * real English copy so t(key) renders production strings. ui-toolkit reads
- * useTranslation from @lace-contract/i18n, which re-exports react-i18next, so
+ * useTranslation from `@lace-contract/i18n`, which re-exports react-i18next, so
  * mocking react-i18next covers it transitively.
  */
 import { configure } from 'reassure';

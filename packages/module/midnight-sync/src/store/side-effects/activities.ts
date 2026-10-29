@@ -20,7 +20,7 @@ import {
   getAddressFromUtxos,
 } from '../utils/activities';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../context';
 import type { Activity, ActivityDetail } from '@lace-contract/activities';
 import type {
   MidnightSDKNetworkId,

@@ -1,10 +1,15 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
+import { defaultLocalProofServerMode } from '@lace-lib/vendor/midnight-proof-servers';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 
 import { MidnightNetworkId } from './value-objects';
 
+import type { ProofServerMode } from './proof-server-mode';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 
+export const FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER = FeatureFlagKey(
+  'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
+);
 export const FEATURE_FLAG_MIDNIGHT_INDEXER_URLS = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_INDEXER_URLS',
 );
@@ -12,13 +17,27 @@ export const FEATURE_FLAG_MIDNIGHT_NODE_URLS = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_NODE_URLS',
 );
 
+/**
+ * Gates the Temenos TEE proof-server option (LW-15081). Boolean gate with
+ * no payload by design: all Temenos configuration (endpoints, trust
+ * anchors) is baked into the build, so the remote flag system controls
+ * visibility only and can never inject or alter a TEE entry.
+ */
+export const FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER = FeatureFlagKey(
+  'BLOCKCHAIN_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER',
+);
+
 export const defaultTxTtlLength = 60 * 60 * 1000;
 
+/** The Midnight networks, keyed by name. */
 export type MidnightSDKNetworkIds = typeof NetworkId.NetworkId;
+/** The Midnight networks, keyed by name. */
 export const MidnightSDKNetworkIds = NetworkId.NetworkId;
 
+/** A Midnight network id, such as `preview`. */
 export type MidnightSDKNetworkId =
   MidnightSDKNetworkIds[keyof MidnightSDKNetworkIds];
+/** Every Midnight network id. */
 export const MidnightSDKNetworkId = Object.values(MidnightSDKNetworkIds);
 
 export const supportedNetworkIds = new Map<
@@ -30,11 +49,19 @@ export type MidnightSDKTestNetworkId = Exclude<MidnightSDKNetworkId, 'mainnet'>;
 export const MidnightSDKTestNetworkId: MidnightSDKTestNetworkId[] =
   MidnightSDKNetworkId.filter(id => id !== 'mainnet');
 
+/** The endpoints a Midnight network syncs and proves through. */
 export type MidnightNetworkConfig = {
   indexerAddress: string;
   nodeAddress: string;
-  proofServerAddress: string;
+  proofServer: ProofServerMode;
 };
+
+export {
+  TEMENOS_PROOF_SERVER_MODES,
+  REMOTE_PROOF_SERVER_MODES,
+  DEFAULT_LOCAL_PROOF_SERVER_URL,
+  defaultLocalProofServerMode,
+} from '@lace-lib/vendor/midnight-proof-servers';
 
 export type MidnightNetworksConfig = Record<
   MidnightSDKNetworkId,
@@ -49,39 +76,39 @@ export type PartialMidnightNetworksConfig = Record<
 export const DEFAULT_NETWORKS_CONFIG: MidnightNetworksConfig = {
   [NetworkId.NetworkId.Undeployed]: {
     nodeAddress: 'http://localhost:9944',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'http://localhost:8088/api/v4/graphql',
   },
   [NetworkId.NetworkId.MainNet]: {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet-rpc/',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-mainnet/',
   },
   [NetworkId.NetworkId.PreProd]: {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preprod-rpc/',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preprod/',
   },
   [NetworkId.NetworkId.Preview]: {
     nodeAddress: 'https://blockfrost.lw.iog.io/midnight-preview-rpc/',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'https://blockfrost.lw.iog.io/midnight-preview/',
   },
   [NetworkId.NetworkId.QaNet]: {
     nodeAddress: 'https://rpc.qanet.midnight.network',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'https://indexer.qanet.midnight.network/api/v4/graphql',
   },
   // Copy of NetworkId.NetworkId.Undeployed added for type safety
   [NetworkId.NetworkId.DevNet]: {
     nodeAddress: 'http://localhost:9944',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'http://localhost:8088/api/v4/graphql',
   },
   // Copy of NetworkId.NetworkId.Undeployed added for type safety
   [NetworkId.NetworkId.TestNet]: {
     nodeAddress: 'http://localhost:9944',
-    proofServerAddress: 'http://localhost:6300',
+    proofServer: defaultLocalProofServerMode,
     indexerAddress: 'http://localhost:8088/api/v4/graphql',
   },
 };
@@ -98,6 +125,7 @@ export const EMPTY_PARTIAL_NETWORKS_CONFIG: PartialMidnightNetworksConfig = {
 
 // midnight-context cannot import ledger to use ledger.nativeToken().raw;
 // othewise it breaks lace-mobile and lace-extension builds
+/** The token type of NIGHT, Midnight's native token. */
 export const NIGHT_TOKEN_ID =
   '0000000000000000000000000000000000000000000000000000000000000000';
 

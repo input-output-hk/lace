@@ -28,8 +28,8 @@ export const passportStoreContract = inferContractContext({
 
 /**
  * Platform-specific capabilities a Passport module implementation must
- * supply: the device authoriser, fee sponsor, prover, and network
- * endpoints (see PassportDependencies).
+ * supply: the device authoriser, secret deriver, fee sponsor, prover, and
+ * network endpoints (see PassportDependencies).
  */
 export const passportDependencyContract = inferContractContext({
   contractType: 'sideEffectDependency',

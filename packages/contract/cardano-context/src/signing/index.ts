@@ -11,3 +11,5 @@ export * from './collateral-ownership';
 export * from './derive-account-xpub';
 export * from './guarded-transaction-signer';
 export * from './script-only-key-paths';
+export * from './sign-with-words';
+export * from './vkey-witnesses';

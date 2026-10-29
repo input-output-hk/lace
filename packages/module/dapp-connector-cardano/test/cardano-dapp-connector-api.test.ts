@@ -14,12 +14,16 @@ import {
   TxSendErrorCode,
   TxSignErrorCode,
 } from '../src/common/api-error';
-import { CardanoDappConnectorApi } from '../src/common/store/dependencies/cardano-dapp-connector-api';
+import {
+  CardanoDappConnectorApi,
+  type SignTransactionFunction,
+} from '../src/common/store/dependencies/cardano-dapp-connector-api';
 import { requiresForeignSignaturesFromCbor } from '../src/common/store/utils/input-resolver';
 
 import {
   buildTx,
   CASE_B_TX_CBOR,
+  MAINNET_OUTPUT_TX_CBOR,
   CHAINED_COLLATERAL_INPUT,
   CHAINED_COLLATERAL_UTXO,
   createCollateralApi,
@@ -239,21 +243,49 @@ const defaultNewDeps = {
   resolveChainedInputs: (): Cardano.Utxo[] => [],
 };
 
-describe('CardanoDappConnectorApi.getCollateralRefusal (LW-15498)', () => {
+describe('CardanoDappConnectorApi.getSignTxRefusal (LW-15498)', () => {
   it('test:api-get-collateral-refusal — refuses case (b) and allows the no-collateral transaction', async () => {
     const { api } = createCollateralApi();
     await expect(
-      api.getCollateralRefusal(CASE_B_TX_CBOR, ORIGIN_FIXTURE),
-    ).resolves.toBe('foreign-collateral-return');
+      api.getSignTxRefusal(CASE_B_TX_CBOR, ORIGIN_FIXTURE),
+    ).resolves.toEqual({
+      kind: 'collateral',
+      case: 'foreign-collateral-return',
+    });
     await expect(
-      api.getCollateralRefusal(NO_COLLATERAL_TX_CBOR, ORIGIN_FIXTURE),
+      api.getSignTxRefusal(NO_COLLATERAL_TX_CBOR, ORIGIN_FIXTURE),
     ).resolves.toBeNull();
+  });
+
+  it('a cross-network body returns a NETWORK verdict here too, so mobile can open its sheet refused', async () => {
+    const { api } = createCollateralApi();
+    // The seam mobile reaches the rules through: nothing downstream can show
+    // a refusal it never receives.
+    await expect(
+      api.getSignTxRefusal(MAINNET_OUTPUT_TX_CBOR, ORIGIN_FIXTURE),
+    ).resolves.toEqual({
+      kind: 'network',
+      cause: 'states-other-network',
+      statedNetwork: 'mainnet',
+      walletNetwork: 'preprod',
+    });
+  });
+
+  it('bytes that will not parse still THROW here: nothing was read, so there is no verdict to show', async () => {
+    const { api } = createCollateralApi();
+    await expect(
+      api.getSignTxRefusal('deadbeef', ORIGIN_FIXTURE),
+    ).rejects.toMatchObject({
+      code: TxSignErrorCode.ProofGeneration,
+      info: 'The transaction could not be decoded.',
+      name: 'TxSignError',
+    });
   });
 
   it('test:api-get-collateral-refusal — an origin with no session account gets AccountChange before any sheet', async () => {
     const { api } = createCollateralApi();
     await expect(
-      api.getCollateralRefusal(CASE_B_TX_CBOR, 'https://unknown.example'),
+      api.getSignTxRefusal(CASE_B_TX_CBOR, 'https://unknown.example'),
     ).rejects.toMatchObject({ code: APIErrorCode.AccountChange });
   });
 
@@ -270,10 +302,13 @@ describe('CardanoDappConnectorApi.getCollateralRefusal (LW-15498)', () => {
       resolveChainedInputs: vi.fn().mockReturnValue([CHAINED_COLLATERAL_UTXO]),
     });
     await expect(
-      api.getCollateralRefusal(refused, ORIGIN_FIXTURE),
-    ).resolves.toBe('foreign-collateral-return');
+      api.getSignTxRefusal(refused, ORIGIN_FIXTURE),
+    ).resolves.toEqual({
+      kind: 'collateral',
+      case: 'foreign-collateral-return',
+    });
     await expect(
-      api.getCollateralRefusal(allowed, ORIGIN_FIXTURE),
+      api.getSignTxRefusal(allowed, ORIGIN_FIXTURE),
     ).resolves.toBeNull();
   });
 });
@@ -961,7 +996,7 @@ describe('CardanoDappConnectorApi', () => {
           ownAddresses: ReadonlySet<string>,
         ) => Cardano.Utxo[];
         userConfirmationRequest: CardanoConfirmationCallback;
-        signTransaction: ReturnType<typeof vi.fn>;
+        signTransaction: SignTransactionFunction;
       }) =>
         new CardanoDappConnectorApi({
           ...defaultNewDeps,
@@ -2205,7 +2240,7 @@ describe('CardanoDappConnectorApi', () => {
           {
             accountId,
             walletId: WalletId('wallet-1'),
-            accountType: 'Bip32',
+            accountType: 'InMemory',
             blockchainName: 'Cardano',
             blockchainSpecific: {
               extendedAccountPublicKey: '0'.repeat(128),
@@ -2232,6 +2267,37 @@ describe('CardanoDappConnectorApi', () => {
       expect(getRewardAccountInfo).toHaveBeenCalledTimes(2);
       expect(getRewardAccountInfo.mock.calls[0][0]).toEqual({
         rewardAccount: REWARD_ACCOUNT,
+      });
+    });
+
+    it('refuses public key retrieval for a Cardano custody account', async () => {
+      const accountId = AccountId('custody-1');
+      const api = new CardanoDappConnectorApi({
+        ...defaultNewDeps,
+        accountUtxos$: of({ [accountId]: [] } as unknown as AccountUtxoMap),
+        addresses$: of([]),
+        chainId$: of(undefined),
+        allAccounts$: of([
+          {
+            accountId,
+            walletId: WalletId('custody-wallet-1'),
+            accountType: 'CardanoCustody',
+            blockchainName: 'Cardano',
+            blockchainSpecific: {
+              device: { extendedAccountPublicKey: '0'.repeat(128) },
+            },
+          } as unknown as AnyAccount,
+        ]),
+        allWallets$: of([]),
+        getAccountIdForOrigin: createMockGetAccountIdForOrigin(accountId),
+        submitTransaction: vi.fn(),
+      });
+
+      await expect(
+        api.getPubDRepKey(createMockSenderContext()),
+      ).rejects.toMatchObject({
+        code: APIErrorCode.InternalError,
+        info: `DRep key retrieval not supported for CardanoCustody accounts: ${accountId}`,
       });
     });
 

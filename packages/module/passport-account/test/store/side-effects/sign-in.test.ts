@@ -1,5 +1,6 @@
 import {
   AccountContractMissingError,
+  GrantId,
   passportActions,
 } from '@lace-contract/passport';
 import { testSideEffect } from '@lace-lib/util-dev';
@@ -19,14 +20,19 @@ const actions = { ...passportActions };
 
 const accountAddress = 'ac'.repeat(32);
 const commitmentHex = 'ab'.repeat(32);
+const unsealedGrantId = GrantId('cd'.repeat(32));
 const recognised: RecognisedAccount = {
   account: {
     address: accountAddress,
     bindingVersion: '0.1.0-lace.1',
     status: 'ready',
+    networkId: 'undeployed',
   },
   devices: [{ commitmentHex, isLocal: true }],
   localUseCounter: '2',
+  grants: [],
+  encKey: '0b'.repeat(32),
+  unsealedGrantIds: [unsealedGrantId],
 };
 
 /** The flow events a cold marble may carry, keyed by their marble letter. */
@@ -40,6 +46,10 @@ const emitted = {
   g: actions.passport.setAccount(recognised.account),
   h: actions.passport.setDevices(recognised.devices),
   i: actions.passport.setLocalUseCounter('2'),
+  o: actions.passport.setEncKey('0b'.repeat(32)),
+  m: actions.passport.setGrants([]),
+  u: actions.passport.setUnsealedGrantIds([unsealedGrantId]),
+  q: actions.passport.setRevocationPendingGrantIds([]),
   j: actions.passport.setFlow('ready'),
 };
 
@@ -77,7 +87,12 @@ const runFlowTest = ({ signIn = 's', flows, assertion }: FlowTest) => {
         passport: {
           addDevice$: NEVER,
           createAccount$: NEVER,
+          issueGrant$: NEVER,
+          installOperations$: NEVER,
+          readShieldedHoldings$: NEVER,
           removeDevice$: NEVER,
+          revokeAllGrants$: NEVER,
+          revokeGrant$: NEVER,
           signIn$: hot(signIn, { s: actions.passport.signIn() }),
         },
       },
@@ -102,7 +117,7 @@ describe('runPassportFlow: signIn', () => {
     runFlowTest({
       flows: cold => [cold('--(f|)', events)],
       assertion: ({ sideEffect$, helpers, signInFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('a-(ghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('a-(ghiomuqj)', emitted);
         helpers.flush();
         expect(signInFlow).toHaveBeenCalledExactlyOnceWith(
           expect.objectContaining({ actions }),
@@ -115,7 +130,7 @@ describe('runPassportFlow: signIn', () => {
     runFlowTest({
       flows: cold => [cold('(f|)', events)],
       assertion: ({ sideEffect$, helpers }) => {
-        helpers.expectObservable(sideEffect$).toBe('(aghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('(aghiomuqj)', emitted);
       },
     });
   });
@@ -163,7 +178,7 @@ describe('runPassportFlow: signIn', () => {
       signIn: 's-s',
       flows: cold => [cold('----(f|)', events)],
       assertion: ({ sideEffect$, helpers, signInFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('a---(ghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('a---(ghiomuqj)', emitted);
         helpers.flush();
         expect(signInFlow).toHaveBeenCalledOnce();
       },
@@ -178,7 +193,7 @@ describe('runPassportFlow: signIn', () => {
         cold('-(f|)', events),
       ],
       assertion: ({ sideEffect$, helpers, signInFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('ak--a(ghij)', {
+        helpers.expectObservable(sideEffect$).toBe('ak--a(ghiomuqj)', {
           ...emitted,
           k: actions.passport.setFlowError({
             code: 'account-sign-in-failed',

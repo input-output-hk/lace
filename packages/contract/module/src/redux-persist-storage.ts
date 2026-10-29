@@ -5,8 +5,13 @@ import type { KeyValueStorageFactory } from './storage';
 import type { CreateLoaderProps, ModuleInitDependencies } from './types';
 import type { Storage } from 'redux-persist';
 
+/** The name of the contract a module implements to provide key-value storage. */
 export const STORAGE_CONTRACT_NAME = 'storage-dependency';
 
+/**
+ * Adapts a key-value storage factory to the redux-persist `Storage` interface,
+ * keeping persisted state in the `redux` collection.
+ */
 export const createReduxPersistStorage = (
   keyValueStorageFactory: KeyValueStorageFactory,
 ): Storage => {
@@ -26,6 +31,12 @@ export const createReduxPersistStorage = (
   };
 };
 
+/**
+ * Finds the module implementing the storage contract, initializes its store on
+ * its own and returns the key-value storage factory it provides.
+ *
+ * @throws Error when no module implements the storage contract or it provides no `createKeyValueStorage`.
+ */
 export const findStorageModule = async (
   props: Readonly<CreateLoaderProps>,
   {

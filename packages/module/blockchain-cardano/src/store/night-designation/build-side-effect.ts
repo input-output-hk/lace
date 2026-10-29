@@ -5,6 +5,8 @@ import {
   LOVELACE_TOKEN_ID,
   createInputResolver,
   filterSpendableUtxos,
+  getEligibleCollateralUtxo,
+  utxoKey,
 } from '@lace-contract/cardano-context';
 import {
   CardanoDustNetwork,
@@ -20,13 +22,15 @@ import { BigNumber } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { firstValueFrom, from, map, of, switchMap, take, timeout } from 'rxjs';
 
+import { refuseExtensionAccount } from '../account-guards';
+
 import { hexToBytes, resolveAccountKeyHashes } from './account-key-hashes';
 import { buildNightDesignationTx } from './build-night-designation-tx';
 import { createProviderExUnitsEvaluator } from './provider-ex-units-evaluator';
 import { findRegistrationUtxo } from './registration-utxo';
 import { unwrapProviderResult } from './unwrap-provider-result';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../contracts';
 import type {
   Activity,
   BlockchainSpecificActivityMetadata,
@@ -276,6 +280,7 @@ const buildDesignation = async (
       ]);
 
     if (!chainId) throw new Error('Cardano chain id not available');
+    refuseExtensionAccount(accountId, cardanoAddresses);
 
     // FULL protocol parameters (incl. V3 cost models) — not the cached
     // RequiredProtocolParameters pick on cardanoProtocolParameters$.
@@ -297,17 +302,30 @@ const buildDesignation = async (
     const { primaryAddress, paymentKeyHash, stakeKeyHash } =
       resolveAccountKeyHashes(cardanoAddresses, accountId);
 
-    const spendable = filterSpendableUtxos(
-      allAccountUtxos[accountId] ?? [],
-      unspendableUtxos[accountId] ?? [],
-    );
+    const accountUtxos = allAccountUtxos[accountId] ?? [];
+    const reservedUtxos = unspendableUtxos[accountId] ?? [];
+    const spendable = filterSpendableUtxos(accountUtxos, reservedUtxos);
     const cnightAssetId = getCnightAssetId(network);
     const cnightUtxos = spendable.filter(([, out]) =>
       out.value.assets?.has(cnightAssetId),
     );
-    // ADA cover + collateral pool: spendable, non-cNIGHT UTxOs.
+    // ADA cover pool: spendable, non-cNIGHT UTxOs.
     const coverUtxos = spendable.filter(
       ([, out]) => !out.value.assets?.has(cnightAssetId),
+    );
+
+    // Matched against the settled account UTxOs rather than the reserved list
+    // itself: that list is pruned by a side-effect reacting to UTxO changes, so
+    // until it fires it can still name a spent UTxO.
+    const reservedKeys = new Set(reservedUtxos.map(utxoKey));
+    const reservedCollateral = getEligibleCollateralUtxo(
+      accountUtxos.filter(
+        utxo =>
+          reservedKeys.has(utxoKey(utxo)) &&
+          // Keep the reservation on the payment key this builder already
+          // requires, independently of the signer's collateral resolver.
+          utxo[1].address === primaryAddress,
+      ),
     );
 
     const action = await resolveAction({
@@ -319,14 +337,14 @@ const buildDesignation = async (
       pendingActivities,
     });
 
-    // No ADA-only UTxO to fund the fee + collateral (e.g. every spendable
+    // No ADA-only UTxO to fund the fee + outputs (e.g. every spendable
     // UTxO holds cNIGHT) → surface the actionable "not enough ADA" copy
     // instead of a generic balancing failure deep in the SDK builder. Checked
     // AFTER resolveAction so an already-designated account hears that — a
     // permanent state — rather than a shortfall it could fund away.
     if (coverUtxos.length === 0) {
       return failure(
-        new Error('No ADA-only UTxO available to cover fee and collateral'),
+        new Error('No ADA-only UTxO available to cover fee and outputs'),
         'no-cardano-utxos',
       );
     }
@@ -345,6 +363,7 @@ const buildDesignation = async (
       {
         networkMagic: chainId.networkMagic as Cardano.NetworkMagics,
         coverUtxos,
+        collateralUtxos: reservedCollateral ? [reservedCollateral] : coverUtxos,
         txEvaluator: createProviderExUnitsEvaluator({
           cardanoProvider: dependencies.cardanoProvider,
           chainId,
@@ -368,9 +387,11 @@ const buildDesignation = async (
       ],
     };
   } catch (error) {
-    // A coin-selection failure (InputSelectionError) means the account can't
-    // fund fee + collateral + the re-created output's min-utxo — surface the
-    // actionable "not enough ADA" copy, not the generic error.
+    // A coin-selection failure (InputSelectionError) means the account genuinely
+    // cannot fund fee + collateral + the re-created output's min-utxo — surface
+    // the actionable "not enough ADA" copy, not the generic error. Reachable
+    // whenever the account's total sits above the collateral coverage target but
+    // below what the outputs cost; see the build-side-effect test.
     // InsufficientCollateral stays generic (see buildNightDesignationTx).
     const code =
       error instanceof InputSelectionError

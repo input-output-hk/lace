@@ -4,6 +4,8 @@ import { open } from './open';
 import { seal } from './seal';
 
 export type { Argon2idImplementation, Argon2idParams } from './kdf';
+export { createNativeArgon2id } from './native-argon2id';
+export type { NativeArgon2id } from './native-argon2id';
 
 /**
  * Password-based authenticated encryption for wallet secrets at rest.

@@ -84,7 +84,7 @@ describe('utils', () => {
       expect(
         isMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           indexerAddress: 'http://localhost:8088/api/v3/graphql',
         }),
       ).toBe(true);
@@ -92,7 +92,7 @@ describe('utils', () => {
       expect(
         isMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           indexerAddress: 'http://localhost:8088/api/v3/graphql',
           loremIpsumDolor: 'sit amet',
         }),
@@ -106,7 +106,7 @@ describe('utils', () => {
       expect(
         isMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
         }),
       ).toBe(false);
     });
@@ -118,21 +118,21 @@ describe('utils', () => {
       expect(
         isPartialMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
         }),
       ).toBe(true);
 
       expect(
         isPartialMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
         }),
       ).toBe(true);
 
       expect(
         isPartialMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           indexerAddress: 'http://localhost:8088/api/v3/graphql',
         }),
       ).toBe(true);
@@ -150,7 +150,7 @@ describe('utils', () => {
       expect(
         isPartialMidnightNetworkConfig({
           nodeAddress: 'http://localhost:9944',
-          proofServerAddress: 'http://localhost:6300',
+          proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           indexerAddress: 'http://localhost:8088/api/v3/graphql',
           loremIpsumDolor: 'sit amet',
         }),
@@ -164,7 +164,7 @@ describe('utils', () => {
         isMidnightNetworksConfig({
           [MidnightSDKNetworkIds.Preview]: {
             nodeAddress: 'https://rpc.preview.midnight.network',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
             indexerAddress:
               'https://indexer.preview.midnight.network/api/v3/graphql',
           },
@@ -175,13 +175,13 @@ describe('utils', () => {
         isMidnightNetworksConfig({
           [MidnightSDKNetworkIds.Preview]: {
             nodeAddress: 'https://rpc.preview.midnight.network',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
             indexerAddress:
               'https://indexer.preview.midnight.network/api/v3/graphql',
           },
           [MidnightSDKNetworkIds.Undeployed]: {
             nodeAddress: 'http://localhost:9944',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
             indexerAddress: 'http://localhost:8088/api/v3/graphql',
           },
         }),
@@ -196,7 +196,7 @@ describe('utils', () => {
         isMidnightNetworksConfig({
           [MidnightSDKNetworkIds.Preview]: {
             nodeAddress: 'https://rpc.preview.midnight.network',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           },
         }),
       ).toBe(false);
@@ -205,7 +205,7 @@ describe('utils', () => {
         isMidnightNetworksConfig({
           MainNet: {
             nodeAddress: 'http://localhost:9944',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
             indexerAddress: 'http://localhost:8088/api/v3/graphql',
           },
           [MidnightSDKNetworkIds.Undeployed]: {
@@ -231,7 +231,7 @@ describe('utils', () => {
         isPartialMidnightNetworksConfig({
           [MidnightSDKNetworkIds.Preview]: {
             nodeAddress: 'https://rpc.preview.midnight.network',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           },
         }),
       ).toBe(true);
@@ -240,11 +240,11 @@ describe('utils', () => {
         isPartialMidnightNetworksConfig({
           [MidnightSDKNetworkIds.Preview]: {
             nodeAddress: 'https://rpc.preview.midnight.network',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
           },
           [MidnightSDKNetworkIds.Undeployed]: {
             nodeAddress: 'http://localhost:9944',
-            proofServerAddress: 'http://localhost:6300',
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
             indexerAddress: 'http://localhost:8088/api/v3/graphql',
           },
         }),

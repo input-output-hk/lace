@@ -4,6 +4,7 @@ import { appActions } from '@lace-contract/app';
 import {
   EMPTY_PARTIAL_NETWORKS_CONFIG,
   midnightContextActions,
+  midnightWalletsForRuntime,
   MidnightAccountId,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
@@ -14,20 +15,27 @@ import { syncActions } from '@lace-contract/sync';
 import { tokensActions } from '@lace-contract/tokens';
 import { walletsActions, WalletId } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
-import { of, throwError } from 'rxjs';
+import { defer, EMPTY, of, Subject, throwError } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { midnightSyncActions } from '../../../src/store/actions';
+import { createMidnightSideEffectDependencies } from '../../../src/store/dependencies';
 import {
   createClearWalletStateOnResync,
   createDeleteWalletSideEffect,
+  createHeadlessResetSyncStateSideEffect,
   createResetSyncStateSideEffect,
   requestResyncWallet,
   resyncWalletOnConfigChangeFromFeatureFlags,
+  stopAndWipeAccountState$,
 } from '../../../src/store/side-effects/resync';
 
-import type { SerializedMidnightWallet } from '@lace-contract/midnight-context';
+import type {
+  MidnightWallet,
+  SerializedMidnightWallet,
+} from '@lace-contract/midnight-context';
+import type { ModuleInitProps } from '@lace-contract/module';
 import type { CollectionStorage } from '@lace-contract/storage';
 import type { Action } from '@reduxjs/toolkit';
 import type { Observable } from 'rxjs';
@@ -46,7 +54,524 @@ const actions = {
   ...appActions,
 };
 
+const resetActionsFor = (id: typeof accountId) => [
+  actions.addresses.resetAddresses({ accountId: id }),
+  actions.tokens.resetAccountTokens({ accountId: id }),
+  actions.activities.resetActivities({ accountId: id }),
+  actions.midnightContext.resetAccountDust({ accountId: id }),
+  actions.sync.resetAccountSyncStatus({ accountId: id }),
+];
+
+/**
+ * Two reset requests for one account while its stop() hangs. The engine's own
+ * stopMidnightWallet deregisters the wallet before stopping it, so the second
+ * attempt finds nothing to stop and the reset can proceed. `runtime` keys the
+ * app instance's wallet registry, which the engine's dependencies serve; it is
+ * emptied afterwards.
+ */
+const runHungStopRetry = (
+  sideEffect: (
+    store: CollectionStorage<SerializedMidnightWallet>,
+  ) => ReturnType<typeof createResetSyncStateSideEffect>,
+  runtime: ModuleInitProps['runtime'],
+  resetMarble: string,
+) => {
+  const siblingId = MidnightAccountId(walletId, 1, networkId);
+  const pendingStop$ = new Subject<void>();
+  const stop = vi.fn(() => pendingStop$);
+  const siblingStop = vi.fn(() => of(undefined));
+  const props = { runtime } as ModuleInitProps;
+  const registry = midnightWalletsForRuntime(props.runtime);
+  const dependencies = createMidnightSideEffectDependencies()(props, {
+    logger: dummyLogger,
+  });
+  registry.next({
+    [accountId]: { accountId, stop } as unknown as MidnightWallet,
+    [siblingId]: {
+      accountId: siblingId,
+      stop: siblingStop,
+    } as unknown as MidnightWallet,
+  });
+  const stopAccount = vi.fn(dependencies.stopMidnightWallet);
+  const removeWhere = vi.fn(() => of(undefined));
+  const emitted: Action[] = [];
+  let emittedBeforeLateStop: Action[] = [];
+  let registeredAfterReset: string[] = [];
+  testSideEffect(
+    sideEffect({
+      removeWhere,
+    } as unknown as CollectionStorage<SerializedMidnightWallet>),
+    ({ hot, cold, flush }) => {
+      removeWhere.mockImplementation(() =>
+        cold('----------(a|)', { a: undefined }),
+      );
+      return {
+        actionObservables: {
+          midnightContext: {
+            resetSyncState$: hot(resetMarble, {
+              a: actions.midnightContext.resetSyncState({ accountId }),
+            }),
+          },
+        },
+        stateObservables: {
+          wallets: {
+            selectIsWalletRepoMigrating$: of(false),
+            selectActiveNetworkAccounts$: of([
+              midnightAccount,
+              { ...midnightAccount, accountId: siblingId },
+            ]),
+          },
+          midnightContext: {
+            selectMidnightBlockchainNetworkId$: of(
+              MidnightNetworkId(networkId),
+            ),
+          },
+        },
+        dependencies: {
+          actions,
+          logger: dummyLogger,
+          stopMidnightWallet: stopAccount,
+        },
+        assertion: sideEffect$ => {
+          const subscription = sideEffect$.subscribe(action =>
+            emitted.push(action),
+          );
+          flush();
+          emittedBeforeLateStop = [...emitted];
+          registeredAfterReset = Object.keys(registry.value);
+          pendingStop$.next();
+          pendingStop$.complete();
+          subscription.unsubscribe();
+          registry.next({});
+        },
+      };
+    },
+  );
+  return {
+    dependencies,
+    emitted,
+    emittedBeforeLateStop,
+    registeredAfterReset,
+    registry,
+    removeWhere,
+    siblingId,
+    siblingStop,
+    stop,
+    stopAccount,
+  };
+};
+
 describe('midnight-sync/store/side-effects', () => {
+  describe('stopAndWipeAccountState$', () => {
+    const siblingId = MidnightAccountId(walletId, 1, networkId);
+    const continueAfter = vi.fn((_step: string, _error: unknown) => of(void 0));
+    const abortWith = vi.fn((_step: string, error: unknown) =>
+      throwError(() => error),
+    );
+
+    const run = ({
+      stop$ = of(undefined),
+      wipe$ = of(undefined),
+      onStepFailure = continueAfter,
+    }: {
+      stop$?: Observable<unknown>;
+      wipe$?: Observable<void>;
+      onStepFailure?: typeof continueAfter;
+    }) => {
+      const events: string[] = [];
+      const removeWhere = vi.fn(
+        (predicate: (wallet: SerializedMidnightWallet) => boolean) => {
+          events.push('wipe');
+          expect(
+            predicate({ accountId } as unknown as SerializedMidnightWallet),
+          ).toBe(true);
+          expect(
+            predicate({
+              accountId: siblingId,
+            } as unknown as SerializedMidnightWallet),
+          ).toBe(false);
+          expect(predicate(null as unknown as SerializedMidnightWallet)).toBe(
+            false,
+          );
+          return wipe$;
+        },
+      );
+      const emitted: Action[] = [];
+      let error: unknown;
+      stopAndWipeAccountState$({
+        accountId,
+        actions: actions as unknown as Parameters<
+          typeof stopAndWipeAccountState$
+        >[0]['actions'],
+        store: {
+          removeWhere,
+        } as unknown as CollectionStorage<SerializedMidnightWallet>,
+        stop$: defer(() => {
+          events.push('stop');
+          return stop$;
+        }),
+        onStepFailure,
+      }).subscribe({
+        next: action => emitted.push(action),
+        error: (failure: unknown) => (error = failure),
+      });
+      return { emitted, error, events };
+    };
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it("stops, then wipes only that account's state, then emits its five cache resets", () => {
+      const { emitted, error, events } = run({});
+
+      expect(events).toEqual(['stop', 'wipe']);
+      expect(emitted).toEqual(resetActionsFor(accountId));
+      expect(error).toBeUndefined();
+      expect(continueAfter).not.toHaveBeenCalled();
+    });
+
+    it('wipes once even when the stop emits more than once', () => {
+      const { emitted, events } = run({ stop$: of(undefined, undefined) });
+
+      expect(events).toEqual(['stop', 'wipe']);
+      expect(emitted).toEqual(resetActionsFor(accountId));
+    });
+
+    it.each([
+      ['stop', { stop$: throwError(() => new Error('stop failed')) }],
+      ['wipe', { wipe$: throwError(() => new Error('wipe failed')) }],
+    ] as const)(
+      'hands a failed %s to onStepFailure, which may carry on',
+      (step, failure) => {
+        const { emitted, error, events } = run(failure);
+
+        expect(continueAfter).toHaveBeenCalledExactlyOnceWith(
+          step,
+          new Error(`${step} failed`),
+        );
+        expect(events).toEqual(['stop', 'wipe']);
+        expect(emitted).toEqual(resetActionsFor(accountId));
+        expect(error).toBeUndefined();
+      },
+    );
+
+    it.each([
+      ['stop', { stop$: EMPTY }],
+      ['wipe', { wipe$: EMPTY }],
+    ] as const)(
+      'treats a %s that completes without acknowledging as failed',
+      (step, failure) => {
+        run(failure);
+
+        expect(continueAfter).toHaveBeenCalledOnce();
+        const [[failedStep, error]] = continueAfter.mock.calls;
+        expect(failedStep).toBe(step);
+        expect(String(error)).toContain('did not acknowledge');
+      },
+    );
+
+    it('aborts before the wipe when onStepFailure rethrows a stop failure', () => {
+      const { emitted, error, events } = run({
+        stop$: throwError(() => new Error('stop failed')),
+        onStepFailure: abortWith,
+      });
+
+      expect(events).toEqual(['stop']);
+      expect(emitted).toEqual([]);
+      expect(error).toEqual(new Error('stop failed'));
+    });
+
+    it('emits no resets when onStepFailure rethrows a wipe failure', () => {
+      const { emitted, error, events } = run({
+        wipe$: throwError(() => new Error('wipe failed')),
+        onStepFailure: abortWith,
+      });
+
+      expect(events).toEqual(['stop', 'wipe']);
+      expect(emitted).toEqual([]);
+      expect(error).toEqual(new Error('wipe failed'));
+    });
+  });
+
+  describe('createHeadlessResetSyncStateSideEffect', () => {
+    it('retries a hung stop on a repeat request, ignores further requests while the reset runs, and ignores the late stop result', () => {
+      const result = runHungStopRetry(
+        createHeadlessResetSyncStateSideEffect,
+        { app: 'lace-sdk' } as ModuleInitProps['runtime'],
+        '--a--a--a',
+      );
+
+      expect(result.registry).toBe(result.dependencies.midnightWallets$);
+
+      expect(result.stopAccount).toHaveBeenCalledTimes(2);
+      expect(result.stop).toHaveBeenCalledOnce();
+      expect(result.siblingStop).not.toHaveBeenCalled();
+      expect(result.removeWhere).toHaveBeenCalledOnce();
+      expect(result.registeredAfterReset).toEqual([result.siblingId]);
+      expect(result.emitted.map(({ type }) => type)).toEqual([
+        actions.sync.addSyncOperation.type,
+        ...resetActionsFor(accountId).map(({ type }) => type),
+        actions.sync.addSyncOperation.type,
+        actions.midnightSync.restartAccountWatch.type,
+      ]);
+      expect(result.emitted).toEqual(result.emittedBeforeLateStop);
+    });
+
+    it.each([
+      'success',
+      'stop failure',
+      'stop unacknowledged',
+      'storage failure',
+      'storage destroyed',
+    ] as const)(
+      '%s preserves the sibling account and never reloads',
+      scenario => {
+        const events: string[] = [];
+        const siblingId = MidnightAccountId(walletId, 1, networkId);
+        testSideEffect(
+          createHeadlessResetSyncStateSideEffect({
+            removeWhere: predicate => {
+              events.push('wipe');
+              expect(
+                predicate({
+                  accountId,
+                  serializedState: null,
+                } as unknown as SerializedMidnightWallet),
+              ).toBe(true);
+              expect(
+                predicate({
+                  accountId: siblingId,
+                  walletId,
+                  networkId,
+                  serializedState: null,
+                } as unknown as SerializedMidnightWallet),
+              ).toBe(false);
+              return scenario === 'storage destroyed'
+                ? EMPTY
+                : scenario === 'storage failure'
+                ? throwError(() => new Error('storage unavailable'))
+                : of(undefined);
+            },
+          } as CollectionStorage<SerializedMidnightWallet>),
+          ({ hot, cold, flush }) => ({
+            actionObservables: {
+              midnightContext: {
+                resetSyncState$: hot('--a', {
+                  a: actions.midnightContext.resetSyncState({ accountId }),
+                }),
+              },
+            },
+            stateObservables: {
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [
+                    midnightAccount,
+                    { ...midnightAccount, accountId: siblingId },
+                  ],
+                }),
+              },
+              midnightContext: {
+                selectMidnightBlockchainNetworkId$: cold('a', {
+                  a: MidnightNetworkId(networkId),
+                }),
+              },
+            },
+            dependencies: {
+              actions,
+              logger: dummyLogger,
+              stopMidnightWallet: id => {
+                expect(id).toBe(accountId);
+                events.push('stop');
+                return scenario === 'stop failure'
+                  ? cold('--#', {}, new Error('stop failed'))
+                  : scenario === 'stop unacknowledged'
+                  ? cold('--|')
+                  : cold('--a', { a: undefined });
+              },
+            },
+            assertion: sideEffect$ => {
+              const emitted: { type: string; payload?: unknown }[] = [];
+              const subscription = sideEffect$.subscribe(action =>
+                emitted.push(action),
+              );
+              flush();
+              subscription.unsubscribe();
+              expect(events).toEqual(
+                scenario.startsWith('stop') ? ['stop'] : ['stop', 'wipe'],
+              );
+              expect(
+                emitted.some(
+                  a => a.type === actions.app.reloadApplication.type,
+                ),
+              ).toBe(false);
+              expect(
+                emitted.every(
+                  a =>
+                    (a.payload as { accountId: string }).accountId ===
+                    accountId,
+                ),
+              ).toBe(true);
+              if (scenario === 'success') {
+                expect(emitted.map(a => a.type)).toEqual([
+                  actions.sync.addSyncOperation.type,
+                  actions.addresses.resetAddresses.type,
+                  actions.tokens.resetAccountTokens.type,
+                  actions.activities.resetActivities.type,
+                  actions.midnightContext.resetAccountDust.type,
+                  actions.sync.resetAccountSyncStatus.type,
+                  actions.sync.addSyncOperation.type,
+                  actions.midnightSync.restartAccountWatch.type,
+                ]);
+              } else {
+                expect(emitted).toHaveLength(2);
+                expect(emitted[0]).toMatchObject({
+                  payload: { operation: { status: 'Pending' } },
+                });
+                expect(emitted[1]).toMatchObject({
+                  payload: {
+                    operation: {
+                      status: 'Failed',
+                      error: 'sync.error.midnight-sync-failed',
+                    },
+                  },
+                });
+              }
+            },
+          }),
+        );
+      },
+    );
+
+    it('lets the caller retry after a failed reset', () => {
+      const storage = {
+        removeWhere: vi.fn(() => of(undefined)),
+      } as unknown as CollectionStorage<SerializedMidnightWallet>;
+      testSideEffect(
+        createHeadlessResetSyncStateSideEffect(storage),
+        ({ hot, cold, flush }) => {
+          const stopMidnightWallet = vi
+            .fn()
+            .mockReturnValueOnce(cold('-#', {}, new Error('stop failed')))
+            .mockReturnValueOnce(cold('-a', { a: undefined }));
+          return {
+            actionObservables: {
+              midnightContext: {
+                resetSyncState$: hot('--a---a', {
+                  a: actions.midnightContext.resetSyncState({ accountId }),
+                }),
+              },
+            },
+            stateObservables: {
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [midnightAccount],
+                }),
+              },
+              midnightContext: {
+                selectMidnightBlockchainNetworkId$: cold('a', {
+                  a: MidnightNetworkId(networkId),
+                }),
+              },
+            },
+            dependencies: { actions, logger: dummyLogger, stopMidnightWallet },
+            assertion: sideEffect$ => {
+              const emitted: Action[] = [];
+              const subscription = sideEffect$.subscribe(action =>
+                emitted.push(action),
+              );
+              flush();
+              subscription.unsubscribe();
+              expect(stopMidnightWallet).toHaveBeenCalledTimes(2);
+              expect(storage.removeWhere).toHaveBeenCalledOnce();
+              expect(
+                emitted.map(action =>
+                  action.type === actions.sync.addSyncOperation.type
+                    ? (
+                        action as ReturnType<
+                          typeof actions.sync.addSyncOperation
+                        >
+                      ).payload.operation.status
+                    : action.type,
+                ),
+              ).toEqual([
+                'Pending',
+                'Failed',
+                'Pending',
+                ...resetActionsFor(accountId).map(({ type }) => type),
+                'Pending',
+                actions.midnightSync.restartAccountWatch.type,
+              ]);
+            },
+          };
+        },
+      );
+    });
+
+    it('resets different accounts independently', () => {
+      const siblingId = MidnightAccountId(walletId, 1, networkId);
+      const storage = {
+        removeWhere: vi.fn(() => of(undefined)),
+      } as unknown as CollectionStorage<SerializedMidnightWallet>;
+      testSideEffect(
+        createHeadlessResetSyncStateSideEffect(storage),
+        ({ hot, cold, flush }) => {
+          const stopMidnightWallet = vi.fn((id: string) =>
+            // The first account's stop hangs; the sibling's must not wait on it.
+            id === accountId ? cold<void>('-') : cold('-a', { a: undefined }),
+          );
+          return {
+            actionObservables: {
+              midnightContext: {
+                resetSyncState$: hot('--ab', {
+                  a: actions.midnightContext.resetSyncState({ accountId }),
+                  b: actions.midnightContext.resetSyncState({
+                    accountId: siblingId,
+                  }),
+                }),
+              },
+            },
+            stateObservables: {
+              wallets: {
+                selectIsWalletRepoMigrating$: cold('a', { a: false }),
+                selectActiveNetworkAccounts$: cold('a', {
+                  a: [
+                    midnightAccount,
+                    { ...midnightAccount, accountId: siblingId },
+                  ],
+                }),
+              },
+              midnightContext: {
+                selectMidnightBlockchainNetworkId$: cold('a', {
+                  a: MidnightNetworkId(networkId),
+                }),
+              },
+            },
+            dependencies: { actions, logger: dummyLogger, stopMidnightWallet },
+            assertion: sideEffect$ => {
+              const emitted: Action[] = [];
+              const subscription = sideEffect$.subscribe(action =>
+                emitted.push(action),
+              );
+              flush();
+              subscription.unsubscribe();
+              expect(stopMidnightWallet).toHaveBeenCalledTimes(2);
+              expect(emitted).toContainEqual(
+                actions.midnightSync.restartAccountWatch({
+                  accountId: siblingId,
+                }),
+              );
+              expect(emitted).not.toContainEqual(
+                actions.midnightSync.restartAccountWatch({ accountId }),
+              );
+            },
+          };
+        },
+      );
+    });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -842,6 +1367,128 @@ describe('midnight-sync/store/side-effects', () => {
         },
       );
     });
+
+    it('lets a repeat press supersede a hung stop, then reloads once', () => {
+      const result = runHungStopRetry(
+        createResetSyncStateSideEffect,
+        { app: 'lace-extension-carbon' } as ModuleInitProps['runtime'],
+        '--a--a',
+      );
+
+      expect(result.registry).toBe(result.dependencies.midnightWallets$);
+
+      expect(result.stopAccount).toHaveBeenCalledTimes(2);
+      expect(result.stop).toHaveBeenCalledOnce();
+      expect(result.siblingStop).not.toHaveBeenCalled();
+      expect(result.removeWhere).toHaveBeenCalledOnce();
+      expect(result.registeredAfterReset).toEqual([result.siblingId]);
+      expect(result.emitted).toEqual([
+        ...resetActionsFor(accountId),
+        actions.app.reloadApplication(),
+      ]);
+      expect(result.emitted).toEqual(result.emittedBeforeLateStop);
+    });
+
+    it('logs, wipes, resets and reloads when stop() completes without emitting', () => {
+      const storage = {
+        removeWhere: vi.fn(() => of(void 0)),
+      } as unknown as CollectionStorage<SerializedMidnightWallet>;
+      const logger = { ...dummyLogger, error: vi.fn() };
+
+      testSideEffect(
+        createResetSyncStateSideEffect(storage),
+        ({ expectObservable, flush, cold }) => ({
+          actionObservables: {
+            midnightContext: {
+              resetSyncState$: cold('--b', {
+                b: actions.midnightContext.resetSyncState({ accountId }),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              selectActiveNetworkAccounts$: cold('a', {
+                a: [midnightAccount],
+              }),
+            },
+            midnightContext: {
+              selectMidnightBlockchainNetworkId$: cold('a', {
+                a: MidnightNetworkId(networkId),
+              }),
+            },
+          },
+          dependencies: {
+            stopMidnightWallet: vi.fn().mockReturnValue(EMPTY),
+            actions,
+            logger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('--(abcdef)', {
+              a: actions.addresses.resetAddresses({ accountId }),
+              b: actions.tokens.resetAccountTokens({ accountId }),
+              c: actions.activities.resetActivities({ accountId }),
+              d: actions.midnightContext.resetAccountDust({ accountId }),
+              e: actions.sync.resetAccountSyncStatus({ accountId }),
+              f: actions.app.reloadApplication(),
+            });
+            flush();
+            expect(storage.removeWhere).toHaveBeenCalledOnce();
+            expect(logger.error).toHaveBeenCalledExactlyOnceWith(
+              'Midnight reset sync state: stop failed',
+              new Error('Midnight account stop did not acknowledge completion'),
+            );
+          },
+        }),
+      );
+    });
+
+    it('still resets and reloads when the storage wipe never acknowledges', () => {
+      const storage = {
+        removeWhere: vi.fn(() => EMPTY),
+      } as unknown as CollectionStorage<SerializedMidnightWallet>;
+
+      testSideEffect(
+        createResetSyncStateSideEffect(storage),
+        ({ expectObservable, cold }) => ({
+          actionObservables: {
+            midnightContext: {
+              resetSyncState$: cold('--b', {
+                b: actions.midnightContext.resetSyncState({ accountId }),
+              }),
+            },
+          },
+          stateObservables: {
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              selectActiveNetworkAccounts$: cold('a', {
+                a: [midnightAccount],
+              }),
+            },
+            midnightContext: {
+              selectMidnightBlockchainNetworkId$: cold('a', {
+                a: MidnightNetworkId(networkId),
+              }),
+            },
+          },
+          dependencies: {
+            stopMidnightWallet: vi.fn().mockReturnValue(of(void 0)),
+            actions,
+            logger: dummyLogger,
+          },
+          assertion: sideEffect$ => {
+            expectObservable(sideEffect$).toBe('--(abcdef)', {
+              a: actions.addresses.resetAddresses({ accountId }),
+              b: actions.tokens.resetAccountTokens({ accountId }),
+              c: actions.activities.resetActivities({ accountId }),
+              d: actions.midnightContext.resetAccountDust({ accountId }),
+              e: actions.sync.resetAccountSyncStatus({ accountId }),
+              f: actions.app.reloadApplication(),
+            });
+          },
+        }),
+      );
+    });
   });
 
   describe('resyncWalletOnConfigChangeFromFeatureFlags', () => {
@@ -863,7 +1510,10 @@ describe('midnight-sync/store/side-effects', () => {
                     networkId,
                     config: {
                       nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
+                      proofServer: {
+                        kind: 'local-host' as const,
+                        url: 'http://proofServerAddress',
+                      },
                       indexerAddress: 'http://indexerAddress',
                     },
                   },
@@ -912,7 +1562,10 @@ describe('midnight-sync/store/side-effects', () => {
                     networkId,
                     config: {
                       nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
+                      proofServer: {
+                        kind: 'local-host' as const,
+                        url: 'http://proofServerAddress',
+                      },
                       indexerAddress: 'http://indexerAddress',
                     },
                   },
@@ -968,7 +1621,10 @@ describe('midnight-sync/store/side-effects', () => {
                     networkId,
                     config: {
                       nodeAddress: 'http://nodeAddress',
-                      proofServerAddress: 'http://proofServerAddress',
+                      proofServer: {
+                        kind: 'local-host' as const,
+                        url: 'http://proofServerAddress',
+                      },
                       indexerAddress: 'http://indexerAddress',
                     },
                   },

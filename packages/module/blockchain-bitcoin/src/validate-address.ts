@@ -9,7 +9,7 @@ import type { Option, Result } from '@lace-lib/util';
 
 /**
  * Returns a human-readable error message based on the address validation result.
- * @param result The result of the address validation.
+ * @param result - The result of the address validation.
  */
 const getErrorMessage = (
   result: Exclude<AddressValidationResult, AddressValidationResult.Valid>,

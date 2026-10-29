@@ -3,16 +3,13 @@ import { contextLogger, isNotNil } from '@cardano-sdk/util';
 import { retryBackoff } from 'backoff-rxjs';
 import {
   BehaviorSubject,
-  EmptyError,
   ReplaySubject,
   Subject,
-  catchError,
   debounceTime,
   defer,
   filter,
   first,
   map,
-  of,
   takeWhile,
   tap,
 } from 'rxjs';
@@ -187,13 +184,13 @@ export const createNonBackgroundMessenger = (
         retryBackoff({
           initialInterval: 10,
           maxInterval: 1000,
-          shouldRetry: error => !(error instanceof EmptyError),
+          maxRetries: 3,
+          // Only a disconnected port can recover by reconnecting. Serialization
+          // and message-size failures must reach the pending API call unchanged.
+          shouldRetry: error =>
+            error instanceof Error && /disconnected port/i.test(error.message),
         }),
         map(() => void 0),
-        catchError(() => {
-          logger.warn("Couldn't postMessage: messenger shutdown");
-          return of(void 0);
-        }),
       ),
 
     shutdown: () => {
@@ -218,7 +215,11 @@ export const createNonBackgroundMessenger = (
   };
   if (keepAlivePingPong) {
     keepAliveIntervalId = setInterval(() => {
-      messenger.postMessage(KEEP_ALIVE_MESSAGE).subscribe();
+      messenger.postMessage(KEEP_ALIVE_MESSAGE).subscribe({
+        error: error => {
+          logger.warn('Could not send keepalive', error);
+        },
+      });
     }, KEEP_ALIVE_PING_INTERVAL_MS);
   }
   return messenger;

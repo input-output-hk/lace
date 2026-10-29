@@ -1,0 +1,6 @@
+kind: Fixed
+body: If a Cardano wallet starts without cached protocol parameters and the provider is temporarily unavailable, transaction building resumes automatically when the provider recovers.
+time: 2026-10-22T12:46:13.000000Z
+custom:
+  Package: sdk
+  Build: stable

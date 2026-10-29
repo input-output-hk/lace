@@ -53,9 +53,9 @@ export enum ChainType {
 /**
  * Derives a BIP-39-compatible seed from the given mnemonic and optional passphrase.
  *
- * @param {string} mnemonic - The BIP-39 mnemonic phrase (12, 15, 18, 21, or 24 words).
- * @param {string} [passphrase=''] - An optional passphrase for seed derivation (default is an empty string).
- * @returns {Buffer} The derived 64-byte BIP-39-compatible seed.
+ * @param mnemonic - The BIP-39 mnemonic phrase (12, 15, 18, 21, or 24 words).
+ * @param passphrase - An optional passphrase for seed derivation (default is an empty string).
+ * @returns The derived 64-byte BIP-39-compatible seed.
  */
 export const deriveBip39Seed = (
   mnemonic: string,
@@ -89,8 +89,8 @@ export type KeyPair = {
  *    m/84'/0'/0'
  *
  * @param props - The properties required to derive the account-level key pair.
- * @returns {{ pair: KeyPair, path: string }} An object containing the derived account-level key pair and the derivation path.
- * @throws {Error} If the account-level private or public key cannot be derived.
+ * @returns An object containing the derived account-level key pair and the derivation path.
+ * @throws `Error` If the account-level private or public key cannot be derived.
  */
 export const deriveAccountRootKeyPair = (props: {
   seed: Buffer;
@@ -131,11 +131,11 @@ export const deriveAccountRootKeyPair = (props: {
  * and index, based on the account-level extended key. The chain is determined by using '0' for external addresses and
  * '1' for internal addresses.
  *
- * @param {string} accountKey - The account-level extended key (HDKey).
- * @param {ChainType} chain - The chain type (external for receiving, internal for change).
- * @param {number} index - The index of the child key to derive.
- * @returns {{ pair: KeyPair, path: string }} An object containing the derived child key pair and its derivation path.
- * @throws {Error} If the child private key cannot be derived.
+ * @param accountKey - The account-level extended key (HDKey).
+ * @param chain - The chain type (external for receiving, internal for change).
+ * @param index - The index of the child key to derive.
+ * @returns An object containing the derived child key pair and its derivation path.
+ * @throws `Error` If the child private key cannot be derived.
  */
 export const deriveChildKeyPair = (
   accountKey: string,
@@ -170,11 +170,11 @@ export const deriveChildKeyPair = (
  * It accepts an extended public key (as a Buffer) and a relative derivation path (e.g. "0/0")
  * for non-hardened derivation. If derivation is successful, it returns the child public key.
  *
- * @param {Buffer} extendedPublicKey - The extended public key as a Buffer.
- * @param {ChainType} chain - The chain type (external for receiving, internal for change).
- * @param {number} index - The index of the child key to derive.
- * @returns {Buffer} The derived child public key.
- * @throws {Error} If the child public key cannot be derived.
+ * @param extendedPublicKey - The extended public key as a Buffer.
+ * @param chain - The chain type (external for receiving, internal for change).
+ * @param index - The index of the child key to derive.
+ * @returns The derived child public key.
+ * @throws `Error` If the child public key cannot be derived.
  */
 export const deriveChildPublicKey = (
   extendedPublicKey: string,
@@ -200,8 +200,8 @@ export const deriveChildPublicKey = (
  * (xpub) for each address type (Legacy, SegWit, NativeSegWit, Taproot) on both Mainnet and Testnet.
  * The returned structure maps each network to its corresponding extended keys.
  *
- * @param {Buffer} seed - The master seed derived from the mnemonic.
- * @param {number} account - The account index.
+ * @param seed - The master seed derived from the mnemonic.
+ * @param account - The account index.
  * @returns An object containing the extended account public keys for mainnet and testnet.
  */
 export const getExtendedPubKeys = (

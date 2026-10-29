@@ -1,4 +1,5 @@
 import {
+  CardanoPaymentAddress,
   CardanoUtxoFetchFailureId,
   extractOwnedPaymentCredentials,
   extractUniqueStakeKeys,
@@ -24,20 +25,33 @@ import {
   of,
   switchMap,
   withLatestFrom,
+  takeUntil,
 } from 'rxjs';
 
-import type { CardanoSyncAction, SideEffect } from '../..';
+import { getScriptAddress } from '../get-script-address';
+
+import {
+  extensionAccountUtxos,
+  isExtensionAccount,
+} from './account-extensions';
+import { throwOnError } from './throw-on-error';
+
+import type { CardanoSyncAction, SideEffect } from '../../module';
 import type { Cardano } from '@cardano-sdk/core';
 import type { Activity } from '@lace-contract/activities';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
   CardanoActivityUtxoMetadata,
   CardanoAddressData,
+  CardanoMultiSigAccountProps,
   CardanoRewardAccount as CardanoRewardAccountType,
   TopOnChainActivity,
 } from '@lace-contract/cardano-context';
 import type { TranslationKey } from '@lace-contract/i18n';
-import type { AccountId } from '@lace-contract/wallet-repo';
+import type {
+  AccountId,
+  MultiSigWalletAccount,
+} from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
 type FetchParams = {
@@ -267,7 +281,15 @@ const isTipBeyondConfirmationDepth = (
  * surfaced; a subsequent successful fetch auto-dismisses it.
  */
 export const trackAccountUtxos: SideEffect = (
-  { cardanoContext: { retrySyncRound$ } },
+  {
+    sync: { clearPendingSyncsForAccounts$ },
+    cardanoContext: {
+      retrySyncRound$,
+      refetchAccountUtxos$,
+      resetWalletSyncState$,
+      setWalletSyncResetResult$,
+    },
+  },
   {
     wallets: { selectActiveNetworkAccounts$ },
     addresses: { selectAllAddresses$ },
@@ -279,7 +301,7 @@ export const trackAccountUtxos: SideEffect = (
     },
     failures: { selectFailureById$, selectAllFailures$ },
   },
-  { actions, cardanoProvider: { getAccountUtxos }, logger },
+  { actions, cardanoProvider: { getAccountUtxos, getUtxosAtAddress }, logger },
 ) =>
   selectActiveNetworkAccounts$.pipe(
     map(accounts => accounts.filter(isCardanoAccount)),
@@ -354,16 +376,20 @@ export const trackAccountUtxos: SideEffect = (
             map(([params]) => params),
           );
 
-          const retryTrigger$: Observable<FetchParams> = retrySyncRound$.pipe(
+          const retryTrigger$: Observable<FetchParams> = rxMerge(
+            retrySyncRound$,
+            refetchAccountUtxos$,
+          ).pipe(
             withLatestFrom(
               selectAllFailures$,
               selectAllMap$,
               selectAllAddresses$,
               selectTip$,
             ),
-            filter(
-              ([, allFailures]) =>
-                CardanoUtxoFetchFailureId(accountId) in allFailures,
+            filter(([action, allFailures]) =>
+              action.payload
+                ? action.payload.accountId === accountId
+                : CardanoUtxoFetchFailureId(accountId) in allFailures,
             ),
             map(
               ([, , activitiesByAccount, allAddresses, tip]):
@@ -414,25 +440,25 @@ export const trackAccountUtxos: SideEffect = (
                 unspentAnchorOwnOutpoints,
                 tip,
               } = params;
-              return forkJoin(
-                stakeKeys.map(rewardAccount =>
-                  getAccountUtxos({ rewardAccount }, { chainId }),
-                ),
+              return (
+                account.accountType === 'MultiSig'
+                  ? fetchMultiSigAccountUtxos({ account, getUtxosAtAddress })
+                  : isExtensionAccount(account)
+                  ? extensionAccountUtxos({
+                      account,
+                      accountAddresses,
+                      getUtxosAtAddress,
+                      logger,
+                    })
+                  : fetchKeyAccountUtxos({
+                      accountId,
+                      chainId,
+                      accountAddresses,
+                      stakeKeys,
+                      getAccountUtxos,
+                      logger,
+                    })
               ).pipe(
-                map(results => {
-                  const firstError = results.find(r => r.isErr());
-                  if (firstError) throw firstError.unwrapErr();
-                  return results.flatMap(r => r.unwrap());
-                }),
-                retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
-                map(utxos =>
-                  filterLegitimateUtxos({
-                    utxos,
-                    accountAddresses,
-                    logger,
-                    accountId,
-                  }),
-                ),
                 withLatestFrom(
                   selectAccountUtxos$,
                   selectLastFetchedUtxoCacheKeyByAccount$,
@@ -474,6 +500,19 @@ export const trackAccountUtxos: SideEffect = (
                   );
                   return rxMerge(...emissions);
                 }),
+                takeUntil(
+                  clearPendingSyncsForAccounts$.pipe(
+                    filter(a => a.payload.accountIds.includes(accountId)),
+                  ),
+                ),
+                takeUntil(
+                  rxMerge(
+                    resetWalletSyncState$,
+                    setWalletSyncResetResult$.pipe(
+                      filter(a => a.payload.status === 'Failed'),
+                    ),
+                  ).pipe(filter(a => a.payload.accountId === accountId)),
+                ),
                 catchError(error => {
                   logger.error(
                     `Utxo fetch failed for account ${accountId}`,
@@ -494,6 +533,65 @@ export const trackAccountUtxos: SideEffect = (
       ),
     ),
   );
+
+type Logger = Parameters<SideEffect>[2]['logger'];
+type CardanoProvider = Parameters<SideEffect>[2]['cardanoProvider'];
+
+const fetchMultiSigAccountUtxos = ({
+  account,
+  getUtxosAtAddress,
+}: {
+  account: MultiSigWalletAccount<CardanoMultiSigAccountProps>;
+  getUtxosAtAddress: CardanoProvider['getUtxosAtAddress'];
+}): Observable<Cardano.Utxo[]> => {
+  const { paymentScript, stakingScript, chainId } = account.blockchainSpecific;
+  const { address } = getScriptAddress(
+    paymentScript,
+    stakingScript,
+    chainId.networkId,
+  );
+  return getUtxosAtAddress(
+    { address: CardanoPaymentAddress(address) },
+    { chainId },
+  ).pipe(
+    map(throwOnError),
+    retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+    // A shared stake credential does not make another script's outputs ours.
+    map(utxos => utxos.filter(([, output]) => output.address === address)),
+  );
+};
+
+/**
+ * A key account's UTxOs: every UTxO under its stake keys whose payment
+ * credential is one of its own payment keys.
+ */
+const fetchKeyAccountUtxos = (params: {
+  accountId: AccountId;
+  chainId: Cardano.ChainId;
+  accountAddresses: AnyAddress<CardanoAddressData>[];
+  stakeKeys: CardanoRewardAccountType[];
+  getAccountUtxos: CardanoProvider['getAccountUtxos'];
+  logger: Logger;
+}): Observable<Cardano.Utxo[]> => {
+  const { accountId, chainId, accountAddresses, stakeKeys, getAccountUtxos } =
+    params;
+  return forkJoin(
+    stakeKeys.map(rewardAccount =>
+      getAccountUtxos({ rewardAccount }, { chainId }),
+    ),
+  ).pipe(
+    map(results => results.flatMap(throwOnError)),
+    retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+    map(utxos =>
+      filterLegitimateUtxos({
+        utxos,
+        accountAddresses,
+        logger: params.logger,
+        accountId,
+      }),
+    ),
+  );
+};
 
 const filterLegitimateUtxos = (params: {
   utxos: Cardano.Utxo[];

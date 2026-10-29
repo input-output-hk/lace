@@ -1,14 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('posthog-react-native', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    capture: vi.fn(),
-    identify: vi.fn(),
-    reloadFeatureFlagsAsync: vi.fn().mockResolvedValue(undefined),
-    getFeatureFlagsAndPayloads: vi
-      .fn()
-      .mockReturnValue({ flags: {}, payloads: {} }),
-  })),
+  // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+  default: vi.fn().mockImplementation(function () {
+    return {
+      capture: vi.fn(),
+      identify: vi.fn(),
+      reloadFeatureFlagsAsync: vi.fn().mockResolvedValue(undefined),
+      getFeatureFlagsAndPayloads: vi
+        .fn()
+        .mockReturnValue({ flags: {}, payloads: {} }),
+    };
+  }),
 }));
 
 vi.mock('react-native', () => ({

@@ -15,8 +15,11 @@
  */
 const noop = require('./emptyModule');
 
+// The perf island loads util-render's formatters by path, past the package barrel.
 const real = {
+  // eslint-disable-next-line @nx/enforce-module-boundaries
   ...require('../../../util-render/src/format-number'),
+  // eslint-disable-next-line @nx/enforce-module-boundaries
   ...require('../../../util-render/src/format-date'),
 };
 

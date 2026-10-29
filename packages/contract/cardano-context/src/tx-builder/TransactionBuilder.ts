@@ -15,6 +15,7 @@ import {
   correctFeeAfterEvaluation,
   type CollateralBodyFields,
 } from './balancing';
+import { referenceScriptFee, referenceScriptSize } from './reference-scripts';
 import { computeConwayScriptDataHash } from './script-data-hash';
 
 import type { CoinSelector } from '../input-selection/types';
@@ -27,6 +28,15 @@ export interface ScriptInputProps {
   redeemer: Cardano.PlutusData;
   /** Inline datum is read from the UTxO; supply only when the datum is provided by hash. */
   datum?: Cardano.PlutusData;
+}
+
+/**
+ * Script witness data for a certificate whose stake credential is a script
+ * hash. The script itself is attached separately with `attachScript`.
+ */
+interface ScriptCertificateProps {
+  /** Redeemer for the certificate (Conway `publish`) purpose. */
+  redeemer: Cardano.PlutusData;
 }
 
 /**
@@ -54,14 +64,29 @@ export interface PlutusContext {
    * evaluating the transaction.
    */
   inputResolver: Cardano.InputResolver;
+  /**
+   * The execution units the caller expects every redeemer together to
+   * measure. Balancing then prices the fee, and the collateral reservation,
+   * at this estimate instead of the per-transaction maximum, so the inputs
+   * need to cover little more than the real fee. The fee is linear in the
+   * total units, so one total serves every redeemer.
+   *
+   * The fee is never raised after evaluation: when the evaluated units need
+   * more fee than balancing funded, {@link TransactionBuilder.build} fails with
+   * `EvaluatedFeeShortfallError`, and the caller rebuilds at a larger
+   * estimate. Without an estimate the builder prices the per-transaction
+   * maximum, which no valid transaction exceeds.
+   */
+  executionUnitsEstimate?: Cardano.ExUnits;
 }
 
 /**
  * Per-TX ex-units budget used to SEED the witness before balancing — split
  * across redeemers by `seedRedeemers` — so the balancer's `minFee` prices
- * script execution. The injected evaluator replaces the seeds with concrete
- * budgets after balancing, before the script-data-hash is computed. A generous
- * figure (the Plutus V3 mainnet per-tx max) is safe here: it only inflates the
+ * script execution, unless the {@link PlutusContext} gives an estimate. The
+ * injected evaluator replaces the seeds with concrete budgets after
+ * balancing, before the script-data-hash is computed. A generous figure (the
+ * Plutus V3 mainnet per-tx max) is safe here: it only inflates the
  * pre-balance fee estimate, which the evaluator corrects.
  */
 const SEED_EX_UNITS: Cardano.ExUnits = {
@@ -112,15 +137,20 @@ const utxoRefKey = (utxo: Cardano.Utxo): string =>
   `${utxo[0].txId}#${utxo[0].index}`;
 
 /**
- * A builder class for constructing Cardano transactions with various components
- * like inputs, outputs, certificates, and — when a {@link PlutusContext} is
- * supplied — Plutus smart-contract spends (mint, script-spend, script-withdrawal
- * with redeemers, collateral, required signers).
+ * Builds Cardano transactions: transfers, certificates and, with a
+ * {@link PlutusContext}, Plutus script transactions. `build()` balances the
+ * transaction, evaluates the execution units of any scripts it runs and
+ * resolves with it unsigned.
+ *
+ * Its parts are inputs, reference inputs, outputs and certificates and, for
+ * Plutus smart-contract spends, mints, script spends, script certificates and
+ * script withdrawals with their redeemers, collateral and required signers.
  */
 export class TransactionBuilder {
   private readonly params: RequiredProtocolParameters;
   private readonly transaction: Serialization.Transaction;
   private readonly preSelectedUtxos: Cardano.Utxo[] = [];
+  private readonly referenceUtxos: Cardano.Utxo[] = [];
   private readonly certificates: Cardano.Certificate[] = [];
   private readonly withdrawals: Map<Cardano.RewardAccount, Cardano.Lovelace> =
     new Map();
@@ -146,6 +176,11 @@ export class TransactionBuilder {
   /** Withdrawal redeemers keyed by RewardAccount (canonical index assigned at build). */
   private readonly withdrawalRedeemers = new Map<
     Cardano.RewardAccount,
+    Cardano.PlutusData
+  >();
+  /** Certificate redeemers keyed by the certificate entry in `certificates`. */
+  private readonly certificateRedeemers = new Map<
+    Cardano.Certificate,
     Cardano.PlutusData
   >();
   private collateralUtxos: Cardano.Utxo[] = [];
@@ -261,7 +296,8 @@ export class TransactionBuilder {
    * {@link ScriptInputProps} with the spend redeemer (and, when the datum is by
    * hash, the datum).
    *
-   * @throws If the same input (same txId and index) is added more than once.
+   * @throws If the same input (same txId and index) is added more than once,
+   *   or is already a reference input.
    *
    * @param utxo - The UTxO to add as an input.
    * @param script - Optional script-unlock data for a script input.
@@ -271,6 +307,12 @@ export class TransactionBuilder {
     utxo: Cardano.Utxo,
     script?: ScriptInputProps,
   ): TransactionBuilder {
+    // The ledger refuses a transaction that spends an input it also references.
+    if (this.isReferenced(utxo)) {
+      throw new Error(
+        `Cannot spend an input the transaction references: ${utxoRefKey(utxo)}`,
+      );
+    }
     const body = this.transaction.body();
     const inputs = body.inputs();
     const values = [...inputs.values()];
@@ -300,6 +342,40 @@ export class TransactionBuilder {
   }
 
   /**
+   * Adds a reference input: a UTxO the transaction reads without spending,
+   * such as a state output a validator inspects. Balancing never selects it.
+   *
+   * The builder resolves the input from `utxo` itself, so the
+   * {@link PlutusContext} input resolver need not know it. Ex-unit evaluation
+   * receives that resolution, and the fee and the collateral reservation price
+   * any reference script it carries at `minFeeRefScriptCostPerByte`.
+   *
+   * A Plutus script the UTxO carries witnesses every redeemer that runs it,
+   * as the ledger allows, and its language joins the script data hash when
+   * a redeemer runs it. Attach only the scripts no reference input carries:
+   * the ledger refuses a script provided both ways.
+   *
+   * @throws If the UTxO is already a reference input or a spent input.
+   *
+   * @param utxo - The resolved UTxO to reference.
+   * @returns `this` for fluent chaining.
+   */
+  public addReferenceInput(utxo: Cardano.Utxo): TransactionBuilder {
+    const key = utxoRefKey(utxo);
+    if (this.isReferenced(utxo)) {
+      throw new Error(`Cannot add duplicate reference input: ${key}`);
+    }
+    // The ledger refuses a transaction that spends an input it also references.
+    if (this.preSelectedUtxos.some(spent => utxoRefKey(spent) === key)) {
+      throw new Error(
+        `Cannot reference an input the transaction spends: ${key}`,
+      );
+    }
+    this.referenceUtxos.push(utxo);
+    return this;
+  }
+
+  /**
    * Appends a new output to the transaction body.
    *
    * @param output - Core output containing destination address and `Value`
@@ -324,8 +400,8 @@ export class TransactionBuilder {
    * The transaction will be marked as invalid if it is not included in a block
    * within the specified duration.
    *
-   * @param {number} seconds - The number of seconds from now that the transaction should remain valid.
-   * @returns {TransactionBuilder} The builder instance for chaining.
+   * @param seconds - The number of seconds from now that the transaction should remain valid.
+   * @returns The builder instance for chaining.
    */
   public expiresIn(seconds: number): TransactionBuilder {
     const body = this.transaction.body();
@@ -357,9 +433,9 @@ export class TransactionBuilder {
   /**
    * Adds a transaction output to send a value (lovelace and/or other assets) to an address.
    *
-   * @param {string} address - The recipient's address as a bech32 string.
-   * @param {Value} value - The value object, containing the coins and/or other assets to send.
-   * @returns {TransactionBuilder} The builder instance for chaining.
+   * @param address - The recipient's address as a bech32 string.
+   * @param value - The value object, containing the coins and/or other assets to send.
+   * @returns The builder instance for chaining.
    */
   public transferValue(
     address: Cardano.PaymentAddress,
@@ -421,9 +497,14 @@ export class TransactionBuilder {
 
   /**
    * Sets the pool of UTxOs the builder may draw collateral from for a Plutus
-   * transaction. The builder selects largest-first, may combine several to
-   * cover the required collateral, and returns the unused portion (incl. native
-   * assets) to the collateral change address.
+   * transaction. The builder selects largest-first and may combine several to
+   * cover the required collateral. A collateral return sends the unused portion
+   * (incl. native assets) to the collateral change address on script failure;
+   * an ADA-only remainder below min-ADA may be absorbed into total collateral.
+   *
+   * The pool may overlap `setUnspentOutputs`; overlapping UTxOs may be spent as
+   * funding inputs on success. To keep a dedicated collateral UTxO unspent,
+   * supply it only here, not to `setUnspentOutputs` or `addInput`.
    *
    * @param utxos - Candidate collateral UTxOs (need not be pure ADA).
    * @returns `this` for fluent chaining.
@@ -485,19 +566,22 @@ export class TransactionBuilder {
    *
    * @param poolId - The ID of the stake pool to delegate to.
    * @param stakeCredential - The stake credential (key hash or script hash) being delegated.
+   * @param script - Certificate redeemer for a script-hash `stakeCredential`.
+   *   Its canonical index is assigned during {@link build}.
+   * @throws If `script` is given for a key-hash credential.
    * @returns `this` for fluent chaining.
    */
   public addStakeDelegationCertificate(
     poolId: Cardano.PoolId,
     stakeCredential: Cardano.Credential,
+    script?: ScriptCertificateProps,
   ): TransactionBuilder {
     const certificate: Cardano.StakeDelegationCertificate = {
       __typename: Cardano.CertificateType.StakeDelegation,
       poolId,
       stakeCredential,
     };
-    this.certificates.push(certificate);
-    return this;
+    return this.addCertificate(certificate, stakeCredential, script);
   }
 
   /**
@@ -525,24 +609,27 @@ export class TransactionBuilder {
   }
 
   /**
-   * Adds stake registration certificate.
+   * Adds a Conway-era stake registration certificate with deposit.
    * This registers the stake key.
    *
    * @param stakeCredential - The stake credential to register and delegate.
    * @param deposit - The deposit amount in lovelace.
+   * @param script - Certificate redeemer for a script-hash `stakeCredential`.
+   *   Its canonical index is assigned during {@link build}.
+   * @throws If `script` is given for a key-hash credential.
    * @returns `this` for fluent chaining.
    */
   public addNewStakeAddressCertificate(
     stakeCredential: Cardano.Credential,
     deposit: bigint,
+    script?: ScriptCertificateProps,
   ): TransactionBuilder {
     const certificate: Cardano.NewStakeAddressCertificate = {
       __typename: Cardano.CertificateType.Registration,
       stakeCredential,
       deposit,
     };
-    this.certificates.push(certificate);
-    return this;
+    return this.addCertificate(certificate, stakeCredential, script);
   }
 
   /**
@@ -649,22 +736,28 @@ export class TransactionBuilder {
    *
    * Steps:
    * 1. Validates that `availableUtxos`/`preSelectedUtxos` and `changeAddress` are set.
-   * 2. Applies the Plutus surface (scripts, datums, mint, required signers,
-   *    collateral, validity interval) and seeds the redeemers at the per-tx
-   *    max ex-units so the balancer prices script execution.
+   * 2. Applies the reference inputs and the Plutus surface (scripts, datums,
+   *    mint, required signers, collateral, validity interval) and seeds the
+   *    redeemers at the per-tx max ex-units, or at the
+   *    {@link PlutusContext} estimate, so the balancer prices script
+   *    execution.
    * 3. If auxiliary data is present, computes and sets the `auxiliaryDataHash`.
    * 4. Calls {@link balanceTransaction} to select inputs, compute fee/min-ADA,
    *    create change, and iterate until balanced; if the configured selector
    *    fails, balancing is retried with a Large-First fallback (see
    *    {@link useCoinSelector}).
    * 5. For Plutus transactions: re-indexes redeemers canonically over the
-   *    balanced tx's sorted inputs / mint policies / withdrawals, evaluates
-   *    their execution units via the injected evaluator, and computes the
-   *    `scriptIntegrityHash` over the used cost models, evaluated redeemers and
-   *    datums.
+   *    balanced tx's sorted inputs / mint policies / certificates /
+   *    withdrawals, evaluates their execution units via the injected
+   *    evaluator, and computes the `scriptIntegrityHash` over the used cost
+   *    models, evaluated redeemers and datums.
    *
    * @throws Error If no UTxOs are available, no change address is set, the tx
-   *   cannot be balanced, or a Plutus tx is missing its {@link PlutusContext}.
+   *   cannot be balanced, a Plutus tx is missing its {@link PlutusContext}, a
+   *   certificate redeemer has no Plutus script attached or referenced, or a
+   *   reference input carries an attached script.
+   * @throws `EvaluatedFeeShortfallError` When the evaluated ex-units need a
+   *   larger fee than balancing priced at the seed.
    *
    * @returns A `Serialization.Transaction` ready for signing.
    */
@@ -680,14 +773,31 @@ export class TransactionBuilder {
       throw new Error('Change address is not set');
     }
 
-    const hasPlutusScripts = this.scripts.some(
-      script => script.__type === Cardano.ScriptType.Plutus,
-    );
+    const hasRedeemers =
+      this.spendRedeemers.size > 0 ||
+      this.mintRedeemers.size > 0 ||
+      this.certificateRedeemers.size > 0 ||
+      this.withdrawalRedeemers.size > 0;
+    // A script a reference input carries runs only through a redeemer, so a
+    // transaction without one never needs the Plutus context for it.
+    const hasPlutusScripts =
+      this.scripts.some(
+        script => script.__type === Cardano.ScriptType.Plutus,
+      ) ||
+      (hasRedeemers && this.referencedPlutusScripts().length > 0);
     if (hasPlutusScripts && !this.plutusContext) {
       throw new Error(
         'Plutus context is not set — call setPlutusContext() before build()',
       );
     }
+    // Without a Plutus script the build skips reindexing, evaluation and the
+    // script-data hash, so the node would refuse the transaction only at submit.
+    if (this.certificateRedeemers.size > 0 && !hasPlutusScripts) {
+      throw new Error(
+        'Certificate redeemer requires a Plutus script — call attachScript() or reference a UTxO that carries it before build()',
+      );
+    }
+    this.assertNoAttachedScriptIsReferenced();
 
     this.applyAuxiliaryDataHash();
 
@@ -718,6 +828,11 @@ export class TransactionBuilder {
     if (this.requiredSigners.size > 0) {
       unbalancedTx.body.requiredExtraSignatures = [...this.requiredSigners];
     }
+    if (this.referenceUtxos.length > 0) {
+      unbalancedTx.body.referenceInputs = this.referenceUtxos.map(
+        ([{ txId, index }]) => ({ txId, index }),
+      );
+    }
 
     let reservedCollateral: Cardano.Utxo[] = [];
     let spendableUtxos = this.availableUtxos;
@@ -737,10 +852,11 @@ export class TransactionBuilder {
       if (seeded.collateralReturn) {
         unbalancedTx.body.collateralReturn = seeded.collateralReturn;
       }
-      const reservedKeys = new Set(reservedCollateral.map(utxoRefKey));
-      spendableUtxos = this.availableUtxos.filter(
-        utxo => !reservedKeys.has(utxoRefKey(utxo)),
-      );
+      // Inputs are consumed on success and collateral only on script failure,
+      // so collateral may also fund the transaction. Reference inputs may not.
+    }
+    if (this.referenceUtxos.length > 0) {
+      spendableUtxos = spendableUtxos.filter(utxo => !this.isReferenced(utxo));
     }
 
     if (this.scripts.length > 0) {
@@ -750,13 +866,10 @@ export class TransactionBuilder {
       unbalancedTx.witness.datums = this.datums;
     }
 
-    // Seed the witness redeemers at the per-tx max ex-units so `minFee` (called
-    // by the balancer) prices script execution. Indices are corrected after
-    // balancing; the evaluator then assigns concrete budgets.
-    const hasRedeemers =
-      this.spendRedeemers.size > 0 ||
-      this.mintRedeemers.size > 0 ||
-      this.withdrawalRedeemers.size > 0;
+    // Seed the witness redeemers at the per-tx max ex-units, or the caller's
+    // estimate, so `minFee` (called by the balancer) prices script execution.
+    // Indices are corrected after balancing; the evaluator then assigns
+    // concrete budgets.
     if (hasRedeemers) {
       unbalancedTx.witness.redeemers = this.seedRedeemers();
       unbalancedTx.body.scriptIntegrityHash = DUMMY_SCRIPT_INTEGRITY_HASH;
@@ -769,6 +882,7 @@ export class TransactionBuilder {
       preSelectedUtxo: this.preSelectedUtxos,
       collateralUtxos:
         reservedCollateral.length > 0 ? reservedCollateral : undefined,
+      referenceUtxos: this.referenceUtxos,
       coinSelector: this.coinSelector,
       fallbackCoinSelector:
         this.coinSelector instanceof LargeFirstCoinSelector
@@ -791,6 +905,108 @@ export class TransactionBuilder {
 
   // --- private: body assembly ----------------------------------------------
 
+  private addCertificate(
+    certificate: Cardano.Certificate,
+    stakeCredential: Cardano.Credential,
+    script: ScriptCertificateProps | undefined,
+  ): TransactionBuilder {
+    // A key-hash credential is witnessed by a vkey signature; a redeemer for it
+    // would make the ledger refuse the transaction for an extraneous redeemer.
+    if (script && stakeCredential.type !== Cardano.CredentialType.ScriptHash) {
+      throw new Error(
+        `Certificate redeemer requires a script-hash stake credential, got key hash ${stakeCredential.hash}`,
+      );
+    }
+    this.certificates.push(certificate);
+    if (script) this.certificateRedeemers.set(certificate, script.redeemer);
+    return this;
+  }
+
+  private isReferenced(utxo: Cardano.Utxo): boolean {
+    const key = utxoRefKey(utxo);
+    return this.referenceUtxos.some(
+      referenced => utxoRefKey(referenced) === key,
+    );
+  }
+
+  private referencedPlutusScripts(): Cardano.PlutusScript[] {
+    return this.referenceUtxos.flatMap(([, { scriptReference }]) =>
+      scriptReference?.__type === Cardano.ScriptType.Plutus
+        ? [scriptReference]
+        : [],
+    );
+  }
+
+  /**
+   * The hashes of the scripts the redeemers run: the spent inputs' payment
+   * scripts, the mint policies and the script credentials of the
+   * withdrawals and certificates.
+   */
+  private redeemedScriptHashes(spent: Cardano.Utxo[]): Set<string> {
+    const hashes = new Set<string>(this.mintRedeemers.keys());
+    for (const rewardAccount of this.withdrawalRedeemers.keys()) {
+      hashes.add(Cardano.RewardAccount.toHash(rewardAccount));
+    }
+    for (const certificate of this.certificateRedeemers.keys()) {
+      if ('stakeCredential' in certificate && certificate.stakeCredential) {
+        hashes.add(certificate.stakeCredential.hash);
+      }
+    }
+    for (const key of this.spendRedeemers.keys()) {
+      const output = spent.find(utxo => utxoRefKey(utxo) === key)?.[1];
+      const payment =
+        output &&
+        Cardano.Address.fromString(output.address)?.getProps().paymentPart;
+      if (payment?.type === Cardano.CredentialType.ScriptHash) {
+        hashes.add(payment.hash);
+      }
+    }
+    return hashes;
+  }
+
+  /**
+   * The languages the script data hash covers, as the ledger counts them:
+   * every attached script runs, and a script a reference input carries
+   * counts only when a redeemer runs it.
+   */
+  private usedLanguages(
+    spent: Cardano.Utxo[],
+  ): Cardano.PlutusLanguageVersion[] {
+    const languages = new Set(this.scriptVersions);
+    const redeemed = this.redeemedScriptHashes(spent);
+    for (const script of this.referencedPlutusScripts()) {
+      if (redeemed.has(Serialization.Script.fromCore(script).hash())) {
+        languages.add(script.version);
+      }
+    }
+    return [...languages];
+  }
+
+  /**
+   * The ledger refuses a witness-set script that a spent or reference input
+   * also provides, as an extraneous witness. Reference scripts never replace
+   * attached ones here, so such a transaction could not be submitted.
+   */
+  private assertNoAttachedScriptIsReferenced(): void {
+    const referencedScripts = this.referenceUtxos.filter(
+      ([, output]) => output.scriptReference,
+    );
+    if (referencedScripts.length === 0) return;
+    const attachedHashes = new Set(
+      this.scripts.map(script => Serialization.Script.fromCore(script).hash()),
+    );
+    for (const [txIn, output] of referencedScripts) {
+      const hash = Serialization.Script.fromCore(
+        output.scriptReference as Cardano.Script,
+      ).hash();
+      if (attachedHashes.has(hash)) {
+        throw new Error(
+          `Reference input ${txIn.txId}#${txIn.index} carries attached script ${hash}`,
+        );
+      }
+    }
+  }
+
   private applyAuxiliaryDataHash(): void {
     const auxDataHash = Cardano.computeAuxiliaryDataHash(
       this.transaction.auxiliaryData()?.toCore(),
@@ -805,59 +1021,69 @@ export class TransactionBuilder {
   // --- private: Plutus finalisation ----------------------------------------
 
   /**
-   * Flattens the accumulated redeemers, seeding each with a SHARE of the per-tx
-   * max execution units so their TOTAL stays at (just above, from rounding) the
-   * per-tx maximum — never `count × max`. The seed only prices `minFee` during
+   * The ex-units balancing prices every redeemer together at: the caller's
+   * estimate, or the per-tx maximum.
+   */
+  private seedExecutionUnits(): Cardano.ExUnits {
+    return this.plutusContext?.executionUnitsEstimate ?? SEED_EX_UNITS;
+  }
+
+  /**
+   * Flattens the accumulated redeemers, seeding each with a SHARE of the seed
+   * execution units so their TOTAL stays at (just above, from rounding) the
+   * seed — never `count × seed`. The seed only prices `minFee` during
    * balancing (the evaluator assigns concrete budgets afterwards), so it must
-   * upper-bound the tx's real ex-units, which the ledger caps at the per-tx
-   * maximum regardless of redeemer count — seeding each redeemer at the full
-   * max would over-price a multi-redeemer tx by that multiple. Indices are
-   * placeholders (0); corrected canonically after balancing in
-   * {@link reindexRedeemers}.
+   * upper-bound the tx's real ex-units. The per-tx maximum does, since the
+   * ledger caps a tx at it regardless of redeemer count — seeding each
+   * redeemer at the full max would over-price a multi-redeemer tx by that
+   * multiple. Indices are placeholders; corrected canonically after
+   * balancing in {@link reindexRedeemers}.
    */
   private seedRedeemers(): Cardano.Redeemer[] {
     const count =
       this.spendRedeemers.size +
       this.mintRedeemers.size +
+      this.certificateRedeemers.size +
       this.withdrawalRedeemers.size;
-    // ceil keeps the summed seed >= the per-tx max (a valid upper bound) while
-    // staying ~1× it rather than count×.
+    const seed = this.seedExecutionUnits();
+    // ceil keeps the summed seed >= the seed total (a valid upper bound)
+    // while staying ~1× it rather than count×.
     const perRedeemer: Cardano.ExUnits =
       count <= 1
-        ? SEED_EX_UNITS
+        ? seed
         : {
-            memory: Math.ceil(SEED_EX_UNITS.memory / count),
-            steps: Math.ceil(SEED_EX_UNITS.steps / count),
+            memory: Math.ceil(seed.memory / count),
+            steps: Math.ceil(seed.steps / count),
           };
-    const redeemers: Cardano.Redeemer[] = [];
-    for (const data of this.spendRedeemers.values()) {
-      redeemers.push(
-        this.seedRedeemer(Cardano.RedeemerPurpose.spend, data, perRedeemer),
-      );
-    }
-    for (const data of this.mintRedeemers.values()) {
-      redeemers.push(
-        this.seedRedeemer(Cardano.RedeemerPurpose.mint, data, perRedeemer),
-      );
-    }
-    for (const data of this.withdrawalRedeemers.values()) {
-      redeemers.push(
-        this.seedRedeemer(
-          Cardano.RedeemerPurpose.withdrawal,
-          data,
-          perRedeemer,
-        ),
-      );
-    }
-    return redeemers;
-  }
-
-  private seedRedeemer(
-    purpose: Cardano.RedeemerPurpose,
-    data: Cardano.PlutusData,
-    executionUnits: Cardano.ExUnits,
-  ): Cardano.Redeemer {
-    return { index: 0, purpose, data, executionUnits };
+    // Without an estimate every placeholder index is 0, which the Conway
+    // redeemer map encodes once per purpose: the per-tx maximum's fee covers
+    // the bytes of the others many times over. An estimate leaves no such
+    // room, so each redeemer gets its own placeholder and its bytes are
+    // priced.
+    const isEstimated =
+      this.plutusContext?.executionUnitsEstimate !== undefined;
+    const seeded = (
+      purpose: Cardano.RedeemerPurpose,
+      redeemerData: Iterable<Cardano.PlutusData>,
+    ): Cardano.Redeemer[] =>
+      [...redeemerData].map((data, position) => ({
+        index: isEstimated ? position : 0,
+        purpose,
+        data,
+        executionUnits: perRedeemer,
+      }));
+    return [
+      ...seeded(Cardano.RedeemerPurpose.spend, this.spendRedeemers.values()),
+      ...seeded(Cardano.RedeemerPurpose.mint, this.mintRedeemers.values()),
+      ...seeded(
+        Cardano.RedeemerPurpose.certificate,
+        this.certificateRedeemers.values(),
+      ),
+      ...seeded(
+        Cardano.RedeemerPurpose.withdrawal,
+        this.withdrawalRedeemers.values(),
+      ),
+    ];
   }
 
   /**
@@ -867,6 +1093,8 @@ export class TransactionBuilder {
    *   (`txId.localeCompare`, then numeric `index`),
    * - mint: index = position of the policy id in the deduped, hex-sorted mint
    *   policies,
+   * - certificate: index = position of the certificate in the body
+   *   certificate list, counting every certificate,
    * - withdrawal: index = position of the (script) reward account in the
    *   withdrawals sorted by payment-credential hash.
    */
@@ -907,6 +1135,20 @@ export class TransactionBuilder {
       }
       redeemers.push(
         this.seedRedeemerAt(Cardano.RedeemerPurpose.mint, index, data),
+      );
+    }
+
+    // certificate: the body keeps the order certificates were added in.
+    const bodyCertificates = body.certificates ?? [];
+    for (const [certificate, data] of this.certificateRedeemers) {
+      const index = this.certificates.indexOf(certificate);
+      if (bodyCertificates[index]?.__typename !== certificate.__typename) {
+        throw new Error(
+          `Certificate redeemer not present in transaction certificates: ${certificate.__typename}#${index}`,
+        );
+      }
+      redeemers.push(
+        this.seedRedeemerAt(Cardano.RedeemerPurpose.certificate, index, data),
       );
     }
 
@@ -959,17 +1201,18 @@ export class TransactionBuilder {
    * fee the balancer could price — `ceil(maxFee * collateralPercentage / 100)` —
    * because the fee is only corrected downward from there.
    *
-   * `maxFee = maxSizeFee + maxScriptFee`, both derivable from protocol params:
-   * the size component is `minFeeConstant + minFeeCoefficient * maxTxSize`, and
-   * the script component prices `SEED_EX_UNITS` (the per-tx max ex-units, which
-   * — post seed-cap — is exactly the TOTAL {@link seedRedeemers} seeds
-   * regardless of redeemer count, so this matches the fee the balancer prices).
+   * `maxFee = maxSizeFee + maxScriptFee + referenceScriptFee`:
+   * - the size component is `minFeeConstant + minFeeCoefficient * maxTxSize`;
+   * - the script component prices the seed execution units (the per-tx max
+   *   ex-units, or the caller's estimate, which is exactly the TOTAL
+   *   {@link seedRedeemers} seeds regardless of redeemer count, so this
+   *   matches the fee the balancer prices);
+   * - the reference-script component prices the scripts the reference inputs
+   *   carry, which are fixed before balancing.
    *
-   * This omits Conway's third fee term, `minFeeRefScriptCostPerByte * refScript
-   * size`, so the bound is exhaustive only while every script ships inline —
-   * which it does today: the builder has no reference-script API, and `minFee`
-   * charges that term only over inputs whose resolved output carries a
-   * `scriptReference`. Add it here if a reference-input API ever lands.
+   * `minFee` also charges reference scripts carried by SPENT inputs. The bound
+   * leaves those out, since balancing chooses most inputs after collateral is
+   * reserved; it holds while no spent input carries a reference script.
    *
    * A blunt 5-ADA floor here would over-reserve: on a wallet with few cover
    * UTxOs it forces a whole large UTxO to be locked as collateral (its excess
@@ -986,23 +1229,32 @@ export class TransactionBuilder {
       BigInt(this.params.minFeeCoefficient) * BigInt(this.params.maxTxSize);
     // 0 when prices are missing/zero; the target is then size-proportional,
     // which still upper-bounds the (zero-script) fee's proportional collateral.
+    const seed = this.seedExecutionUnits();
     const maxScriptFee = BigInt(
       Math.ceil(
-        (this.params.prices?.memory ?? 0) * SEED_EX_UNITS.memory +
-          (this.params.prices?.steps ?? 0) * SEED_EX_UNITS.steps,
+        (this.params.prices?.memory ?? 0) * seed.memory +
+          (this.params.prices?.steps ?? 0) * seed.steps,
       ),
     );
-    return ((maxSizeFee + maxScriptFee) * pct + 99n) / 100n;
+    const referenceFee = referenceScriptFee(
+      referenceScriptSize(
+        this.referenceUtxos.map(([txIn]) => txIn),
+        this.referenceUtxos,
+      ),
+      this.params,
+    );
+    return ((maxSizeFee + maxScriptFee + referenceFee) * pct + 99n) / 100n;
   }
 
   /**
    * Selects collateral inputs largest-first from `collateralUtxos`, combining
-   * up to `maxCollateralInputs` until they cover `coverAmount` and leave a
-   * return output (carrying any native assets) that meets the min-ADA rule.
+   * up to `maxCollateralInputs` until they cover `coverAmount`. Native assets
+   * and positive remainders under an execution estimate must fund a return
+   * output; otherwise an ADA-only pick needs nothing further.
    *
    * @param coverAmount - Lovelace the selected collateral must cover.
    * @returns The selected collateral UTxOs.
-   * @throws {InsufficientCollateralError} When the pool cannot fund a valid return.
+   * @throws `InsufficientCollateralError` When the pool cannot fund a valid return.
    */
   private selectCollateralInputs(coverAmount: bigint): Cardano.Utxo[] {
     const returnAddress = this
@@ -1025,12 +1277,20 @@ export class TransactionBuilder {
 
       const returnCoin = total.coins - coverAmount;
       const hasAssets = (total.assets?.size ?? 0) > 0;
-      if (returnCoin === 0n && !hasAssets) return selected;
+      // An estimated fee may not cover a return that appears after evaluation.
+      if (
+        !hasAssets &&
+        (this.plutusContext?.executionUnitsEstimate === undefined ||
+          returnCoin === 0n)
+      ) {
+        return selected;
+      }
 
-      const returnValue: Cardano.Value = { coins: returnCoin };
-      if (hasAssets) returnValue.assets = total.assets;
       const minReturn = minAdaRequired(
-        { address: returnAddress, value: returnValue },
+        {
+          address: returnAddress,
+          value: { coins: returnCoin, assets: total.assets },
+        },
         BigInt(this.params.coinsPerUtxoByte),
       );
       if (returnCoin >= minReturn) return selected;
@@ -1049,7 +1309,7 @@ export class TransactionBuilder {
    * the coverage target so the fee prices the collateral fields, and again in
    * finalization with the fee-derived amount.
    *
-   * @throws {InsufficientCollateralError} When the inputs cannot fund the
+   * @throws `InsufficientCollateralError` When the inputs cannot fund the
    *   amount plus a valid return output.
    */
   private buildCollateralFields(
@@ -1113,10 +1373,13 @@ export class TransactionBuilder {
       ...balancedTx,
       witness: { ...balancedTx.witness, redeemers: reindexed },
     };
-    const resolvedInputs = await this.resolveInputs(
-      balancedTx.body.inputs,
-      context.inputResolver,
-    );
+    const resolvedInputs = [
+      ...(await this.resolveInputs(
+        balancedTx.body.inputs,
+        context.inputResolver,
+      )),
+      ...this.referenceUtxos,
+    ];
     const evaluation = await context.txEvaluator.evaluate(
       txForEvaluation,
       resolvedInputs,
@@ -1138,15 +1401,15 @@ export class TransactionBuilder {
       return { ...redeemer, executionUnits: result.budget };
     });
 
-    const allResolvedInputs =
-      reservedCollateral.length > 0
-        ? [...selection, ...reservedCollateral]
-        : selection;
+    const allResolvedInputs = [
+      ...selection,
+      ...reservedCollateral,
+      ...this.referenceUtxos,
+    ];
 
-    const usedLanguages = [...this.scriptVersions];
     const scriptIntegrityHash = computeConwayScriptDataHash({
       costModels: context.costModels,
-      usedLanguages,
+      usedLanguages: this.usedLanguages(resolvedInputs),
       redeemers: evaluatedRedeemers,
       datums: this.datums.length > 0 ? this.datums : undefined,
     });

@@ -1,0 +1,6 @@
+kind: Added
+body: Added optional cancellation signals to Midnight attestation and proof requests.
+time: 2026-10-22T14:29:24.288202557+02:00
+custom:
+  Package: sdk
+  Build: canary

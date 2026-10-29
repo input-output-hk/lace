@@ -3,6 +3,10 @@ import type { Environment, LaceModule } from '@lace-contract/module';
 import type { JsonType } from '@lace-lib/util-store';
 import type { Observable } from 'rxjs';
 
+/**
+ * An enabled feature flag: its key, and a JSON `payload` when the flag
+ * carries a value, such as the network type `FEATURE_FLAG_NETWORK_TYPE` sets.
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FeatureFlag<T extends JsonType = any> = T extends undefined
   ? {

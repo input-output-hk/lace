@@ -36,6 +36,10 @@ export interface BitcoinUnsignedTxDto {
   }>;
 }
 
+/**
+ * Transaction sign result: the signed transaction and its network, as UTF-8
+ * JSON in hex, ready for submission.
+ */
 export interface BitcoinSignResult extends SignTransactionResult {}
 
 export type BitcoinTransactionSigner = TransactionSigner<

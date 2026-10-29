@@ -1,14 +1,12 @@
-/**
- * Wallet identifier — double BLAKE2b-128, via `@cardano-sdk/crypto` through the
- * `@lace-lib/vendor` seam (ADR 37). The SDK's `blake2b.hash` hex-decodes its input and
- * hex-encodes the digest; chaining two over a 16-byte digest derives the walletId. Host,
- * guest and migration agree on the id for a given key/mnemonic because they run the same
- * SDK code (ADR 37/38).
- *
- * The value object lives here, colocated with its derivation (ADR 13): the derivation
- * returns a `WalletId` directly, so callers need not re-wrap. `@lace-contract/wallet-repo`
- * re-exports `WalletId`.
- */
+// Wallet identifier — double BLAKE2b-128, via `@cardano-sdk/crypto` through the
+// `@lace-lib/vendor` seam (ADR 37). The SDK's `blake2b.hash` hex-decodes its input and
+// hex-encodes the digest; chaining two over a 16-byte digest derives the walletId. Host,
+// guest and migration agree on the id for a given key/mnemonic because they run the same
+// SDK code (ADR 37/38).
+//
+// The value object lives here, colocated with its derivation (ADR 13): the derivation
+// returns a `WalletId` directly, so callers need not re-wrap. `@lace-contract/wallet-repo`
+// re-exports `WalletId`.
 import { Buffer, Crypto, util } from '@lace-lib/vendor';
 
 import type { HexBlob, Tagged } from '@lace-lib/vendor';
@@ -27,6 +25,10 @@ const doubleBlake2b128 = (inputHex: HexBlob): WalletId => {
 
 /** For BIP-32 wallets: hash of the extended account public key or of the mnemonic. For script wallets: script hash */
 export type WalletId = Tagged<string, 'WalletId'>;
+/**
+ * Types a string as a wallet identifier. It checks nothing; the `deriveFrom…`
+ * functions derive the identifier a wallet's keys give it.
+ */
 export const WalletId = (walletId: string): WalletId => walletId as WalletId;
 
 /** Derive a walletId from an extended account public key (xpub). */

@@ -5,7 +5,16 @@ import {
   deriveDRepKeyHash,
   withCollateralOwnershipGuard,
 } from '@lace-contract/cardano-context';
-import { defer, from, switchMap } from 'rxjs';
+import {
+  defer,
+  from,
+  lastValueFrom,
+  Observable,
+  Subject,
+  takeUntil,
+} from 'rxjs';
+
+import { LazyWalletMismatchError } from './lazy-wallet-mismatch-error';
 
 import type { Cardano } from '@cardano-sdk/core';
 import type { Bip32PublicKeyHex } from '@cardano-sdk/crypto';
@@ -19,36 +28,34 @@ import type {
   WithCardanoKeyAgent$,
 } from '@lace-contract/cardano-context';
 import type {
-  AccountId,
   AnyAccount,
   LazyInMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
 
 /**
- * Resolves the BIP-39 mnemonic for a given account on demand.
- *
- * Called once per sign request. The returned words are fed into a fresh
- * in-memory key agent that the SDK discards immediately after signing,
- * keeping the seed out of any persistent Lace store.
+ * Supplies recovery words for one signature, keeping them inside a callback:
+ * pass the words to `use` and await it, and the signer uses them only until
+ * the promise settles.
  */
-export type GetMnemonicWords = (accountId: AccountId) => Promise<string[]>;
+export type WithMnemonicWords = <T>(
+  use: (words: readonly string[]) => Promise<T>,
+) => Promise<T>;
 
 export type CardanoLazyInMemorySignerFactoryProps = {
-  getMnemonicWords: GetMnemonicWords;
+  withMnemonicWords: WithMnemonicWords;
 };
 
 /**
  * Signer factory for {@link WalletType.LazyInMemory} Cardano accounts.
  *
- * The mnemonic is never persisted by Lace; instead, `getMnemonicWords` is
- * invoked on every signing request and the derived key agent lives only for
- * the duration of one sign call.
+ * The mnemonic is never persisted by Lace. Its derived account key must match
+ * the selected account before signing, regardless of the mnemonic source.
  */
 export class CardanoLazyInMemorySignerFactory implements CardanoSignerFactory {
-  readonly #getMnemonicWords: GetMnemonicWords;
+  readonly #withMnemonicWords: WithMnemonicWords;
 
   public constructor(props: CardanoLazyInMemorySignerFactoryProps) {
-    this.#getMnemonicWords = props.getMnemonicWords;
+    this.#withMnemonicWords = props.withMnemonicWords;
   }
 
   public canSign(account: AnyAccount): boolean {
@@ -62,12 +69,12 @@ export class CardanoLazyInMemorySignerFactory implements CardanoSignerFactory {
     context: CardanoTransactionSignerContext,
   ): CardanoTransactionSigner {
     this.#assertSupported(context);
-    const { knownAddresses, utxo, auth, accountId } = context;
+    const { knownAddresses, utxo, auth } = context;
     const accountProps = this.#extractAccountProps(context);
 
     return withCollateralOwnershipGuard(
       new CardanoInMemoryTransactionSigner({
-        withKeyAgent$: this.#buildWithKeyAgent$({ accountId, accountProps }),
+        withKeyAgent$: this.#buildWithKeyAgent$(accountProps),
         knownAddresses,
         utxo,
         auth,
@@ -78,37 +85,66 @@ export class CardanoLazyInMemorySignerFactory implements CardanoSignerFactory {
 
   public createDataSigner(context: CardanoSignerContext): CardanoDataSigner {
     this.#assertSupported(context);
-    const { knownAddresses, auth, accountId } = context;
+    const { knownAddresses, auth } = context;
     const accountProps = this.#extractAccountProps(context);
 
     return new CardanoInMemoryDataSigner({
-      withKeyAgent$: this.#buildWithKeyAgent$({ accountId, accountProps }),
+      withKeyAgent$: this.#buildWithKeyAgent$(accountProps),
       dRepKeyHash$: defer(() => from(deriveDRepKeyHash(accountProps))),
       knownAddresses,
       auth,
     });
   }
 
-  #buildWithKeyAgent$({
-    accountId,
-    accountProps,
-  }: {
-    accountId: AccountId;
-    accountProps: { accountIndex: number; chainId: Cardano.ChainId };
+  #buildWithKeyAgent$(accountProps: {
+    accountIndex: number;
+    chainId: Cardano.ChainId;
+    extendedAccountPublicKey: Bip32PublicKeyHex;
   }): WithCardanoKeyAgent$ {
     return use =>
-      defer(() => from(this.#getMnemonicWords(accountId))).pipe(
-        switchMap(mnemonicWords =>
-          from(
-            createCardanoKeyAgentFromMnemonic({
-              accountIndex: accountProps.accountIndex,
-              chainId: accountProps.chainId,
-              mnemonicWords,
-            }),
-          ),
-        ),
-        switchMap(use),
-      );
+      new Observable(subscriber => {
+        const cancelled$ = new Subject<void>();
+        const assertActive = () => {
+          if (subscriber.closed) throw new Error('Signing request cancelled.');
+        };
+        void this.#withMnemonicWords(async words => {
+          assertActive();
+          const mnemonicWords = [...words];
+          const keyAgent = await createCardanoKeyAgentFromMnemonic({
+            accountIndex: accountProps.accountIndex,
+            chainId: accountProps.chainId,
+            mnemonicWords,
+          });
+          try {
+            assertActive();
+            if (
+              keyAgent.extendedAccountPublicKey !==
+              accountProps.extendedAccountPublicKey
+            ) {
+              throw new LazyWalletMismatchError();
+            }
+            return await lastValueFrom(
+              use(keyAgent).pipe(takeUntil(cancelled$)),
+            );
+          } finally {
+            keyAgent.dispose?.();
+          }
+        }).then(
+          result => {
+            if (!subscriber.closed) {
+              subscriber.next(result);
+              subscriber.complete();
+            }
+          },
+          error => {
+            if (!subscriber.closed) subscriber.error(error);
+          },
+        );
+        return () => {
+          cancelled$.next();
+          cancelled$.complete();
+        };
+      });
   }
 
   #assertSupported(context: CardanoSignerContext): void {

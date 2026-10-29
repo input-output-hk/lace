@@ -1,0 +1,29 @@
+{
+  "name": "@lace-lib/cardano-key-management",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Key management types and utilities for Cardano",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/cardano-core": "*",
+    "@lace-lib/cardano-crypto": "*",
+    "@lace-lib/cardano-dapp-connector": "*",
+    "@lace-lib/util": "*",
+    "bip39": "3.1.0",
+    "chacha": "2.1.0",
+    "get-random-values": "2.1.0",
+    "lodash": "^4.17.21",
+    "pbkdf2": "3.1.7",
+    "rxjs": "^7.8.1",
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "@types/pbkdf2": "3.1.2",
+    "@types/webextension-polyfill": "~0.12.4",
+    "vitest": "*"
+  }
+}

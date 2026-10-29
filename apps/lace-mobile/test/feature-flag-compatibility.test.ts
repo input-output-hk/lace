@@ -28,11 +28,23 @@ describe('Production safety', () => {
   });
 });
 
+it.each([
+  'EARN_REWARDS',
+  'MIGRATE_WALLET',
+  'NOTIFICATION_CENTER',
+  'REALFI',
+  'SWAP_CENTER',
+])('does not enable %s by default (LW-15740)', key => {
+  expect(defaultFeatureFlags.map(flag => flag.key)).not.toContain(key);
+});
+
 const productionFeatureFlags = defaultFeatureFlags.filter(
   f => !DEBUG_FLAGS.includes(f.key),
 );
 
 const experimentalFeatureFlags = [
+  { key: FeatureFlagKey('NOTIFICATION_CENTER') },
+  { key: FeatureFlagKey('SWAP_CENTER') },
   { key: FeatureFlagKey('ACTIVITIES') },
   { key: FeatureFlagKey('IDENTITY_CENTER') },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT') },

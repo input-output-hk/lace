@@ -215,6 +215,7 @@ describe('send-flow stateMachine', () => {
 
       expect(state).toEqual({
         accountId: 'mn-acc' as AccountId,
+        allowRewardsWithdrawal: false,
         blockchainSpecificData: {},
         initialAddress: undefined,
         initialAmount: undefined,
@@ -239,6 +240,7 @@ describe('send-flow stateMachine', () => {
 
       expect(state).toEqual({
         accountId: 'mn-acc' as AccountId,
+        allowRewardsWithdrawal: false,
         blockchainSpecificData: {
           myBlockchainSpecific: 'data',
         },
@@ -277,6 +279,7 @@ describe('send-flow stateMachine', () => {
           expect(rest).toMatchInlineSnapshot(`
             {
               "accountId": "mn-acc",
+              "allowRewardsWithdrawal": false,
               "blockchainName": "Midnight",
               "blockchainSpecificData": {},
               "fees": [],
@@ -318,6 +321,7 @@ describe('send-flow stateMachine', () => {
               "minimumAmount": "-1",
               "serializedTx": "",
               "wallet": {},
+              "withdrawals": [],
             }
           `);
         });
@@ -1458,12 +1462,40 @@ describe('send-flow stateMachine', () => {
           },
         }),
         sendFlowMachine.events.confirmed(),
-      ) as StateWithStatusOf<'Form'>;
+      ) as StateWithStatusOf<'FormPendingValidation'>;
 
-      it('switches to "Form"', () => {
+      it('revalidates before rebuilding for retry', () => {
         expect(stateWithFormFilledInAndFailedTransaction.status).toEqual(
-          'Form',
+          'FormPendingValidation',
         );
+      });
+
+      it('requires a fresh build before signed bytes can reach confirmation again', () => {
+        const retry = stateWithFormFilledInAndFailedTransaction;
+        expect(retry.confirmButtonEnabled).toBe(false);
+        expect(retry.fees).toEqual([]);
+        expect(retry).toMatchObject({ errorTranslationKeys: undefined });
+        const building = execute(
+          retry,
+          sendFlowMachine.events.formValidationCompleted({ result: [] }),
+        ) as StateWithStatusOf<'FormTxBuilding'>;
+        expect(building.status).toBe('FormTxBuilding');
+        // Retained only so the builder can discard the previous transaction.
+        expect(building.serializedTx).toBe('serializedTx');
+        expect(building.confirmButtonEnabled).toBe(false);
+        const summary = execute(
+          building,
+          sendFlowMachine.events.txBuildResulted({
+            result: {
+              success: true,
+              serializedTx: 'fresh-build-parameters',
+              fees: [],
+            },
+          }),
+          sendFlowMachine.events.confirmed(),
+        ) as StateWithStatusOf<'Summary'>;
+        expect(summary.status).toBe('Summary');
+        expect(summary.serializedTx).toBe('fresh-build-parameters');
       });
 
       it('preserves form data', () => {
@@ -1706,5 +1738,169 @@ describe('send-flow stateMachine', () => {
 
       expect(backToFormNoBS.form.blockchainSpecific).toBeUndefined();
     });
+  });
+});
+
+describe('send-flow stateMachine: rewards withdrawal', () => {
+  const withdrawals = [
+    { amount: BigNumber(4_765_933n), tokenId: testToken.tokenId },
+  ];
+
+  const stateFormReadyWithWithdrawals = execute(
+    stateFormCorrect,
+    sendFlowMachine.events.txBuildResulted({
+      result: {
+        fees: [{ amount: BigNumber(10n), tokenId: testToken.tokenId }],
+        serializedTx: 'serializedTx',
+        success: true,
+        withdrawals,
+      },
+    }),
+  ) as StateWithStatusOf<'Form'>;
+
+  it('does not allow withdrawing rewards unless the opening UI asks for it', () => {
+    expect(stateAfterPrepare).toMatchObject({
+      allowRewardsWithdrawal: false,
+      withdrawals: [],
+    });
+  });
+
+  it('keeps the opening UI’s permission from Preparing into the open form', () => {
+    const state = execute(
+      stateIdle,
+      sendFlowMachine.events.openRequested({
+        accountId: 'mn-acc' as AccountId,
+        allowRewardsWithdrawal: true,
+      }),
+      sendFlowMachine.events.preparingCompleted({
+        wallet: {} as AnyWallet,
+        form: createFormInitialState({ token: testToken }),
+        blockchainName: testToken.blockchainName,
+        accountId: 'mn-acc' as AccountId,
+      }),
+    );
+
+    expect(state).toMatchObject({
+      allowRewardsWithdrawal: true,
+      status: 'FormPendingValidation',
+    });
+  });
+
+  it('stores the withdrawals of a successful build', () => {
+    expect(stateFormReadyWithWithdrawals.withdrawals).toEqual(withdrawals);
+  });
+
+  it('records no withdrawals for a build that has none', () => {
+    expect(stateFormReady.withdrawals).toEqual([]);
+  });
+
+  it('clears the withdrawals when the form changes', () => {
+    const next = execute(
+      stateFormReadyWithWithdrawals,
+      sendFlowMachine.events.formDataChanged({
+        data: {
+          fieldName: 'tokenTransfers.amount',
+          id: testToken.tokenId,
+          value: BigNumber(9n),
+        },
+      }),
+    ) as StateWithStatusOf<'FormPendingValidation'>;
+
+    expect(next.withdrawals).toEqual([]);
+  });
+
+  it('clears the withdrawals when the token changes', () => {
+    const next = execute(
+      stateFormReadyWithWithdrawals,
+      sendFlowMachine.events.selectToken(),
+      sendFlowMachine.events.handleTokenChange({ token: testToken2 }),
+    ) as StateWithStatusOf<'FormPendingValidation'>;
+
+    expect(next.withdrawals).toEqual([]);
+  });
+
+  it('clears the withdrawals when a rebuild fails', () => {
+    const rebuilding = execute(
+      stateFormReadyWithWithdrawals,
+      sendFlowMachine.events.formDataChanged({
+        data: {
+          fieldName: 'tokenTransfers.amount',
+          id: testToken.tokenId,
+          value: BigNumber(2n),
+        },
+      }),
+      sendFlowMachine.events.formValidationCompleted({
+        result: [
+          { fieldName: 'address', error: null },
+          {
+            fieldName: 'tokenTransfers.amount',
+            id: testToken.tokenId,
+            error: null,
+          },
+        ],
+      }),
+    );
+    // Seed a stale withdrawal to prove the failure branch resets it.
+    const next = execute(
+      { ...rebuilding, withdrawals } as SendFlowSliceState,
+      sendFlowMachine.events.txBuildResulted({
+        result: {
+          success: false,
+          errorTranslationKey:
+            'tx-executor.building-error.generic' satisfies TranslationKey,
+        },
+      }),
+    ) as StateWithStatusOf<'Form'>;
+
+    expect(rebuilding.status).toBe('FormTxBuilding');
+    expect(next.withdrawals).toEqual([]);
+  });
+});
+
+describe('send-flow stateMachine: rewards permission across a re-open', () => {
+  it('keeps the permission when the flow re-opens from "DiscardingTx" (account switch)', () => {
+    const discarding = execute(
+      { ...stateFormReady, allowRewardsWithdrawal: true } as SendFlowSliceState,
+      sendFlowMachine.events.closed(),
+    );
+    const reopened = execute(
+      discarding,
+      sendFlowMachine.events.openRequested({
+        accountId: 'mn-acc' as AccountId,
+        allowRewardsWithdrawal: true,
+      }),
+    );
+
+    expect(discarding.status).toBe('DiscardingTx');
+    expect(reopened).toMatchObject({
+      allowRewardsWithdrawal: true,
+      status: 'Preparing',
+    });
+  });
+});
+
+describe('send-flow stateMachine: rebuild without a withdrawal', () => {
+  it('replaces an earlier build’s withdrawals when the new build has none', () => {
+    const rebuilding = {
+      ...stateFormCorrect,
+      serializedTx: 'tx-with-withdrawal',
+      withdrawals: [
+        { amount: BigNumber(4_765_933n), tokenId: testToken.tokenId },
+      ],
+    } as SendFlowSliceState;
+
+    const next = execute(
+      rebuilding,
+      sendFlowMachine.events.txBuildResulted({
+        result: {
+          fees: [{ amount: BigNumber(10n), tokenId: testToken.tokenId }],
+          serializedTx: 'tx-without-withdrawal',
+          success: true,
+        },
+      }),
+    ) as StateWithStatusOf<'Form'>;
+
+    expect(next.serializedTx).toBe('tx-without-withdrawal');
+    expect(next.withdrawals).toEqual([]);
   });
 });

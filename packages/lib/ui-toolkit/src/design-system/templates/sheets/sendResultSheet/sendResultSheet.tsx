@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, type ComponentType } from 'react';
 import { Pressable, StyleSheet, type TextStyle, View } from 'react-native';
 
 import { spacing } from '../../../../design-tokens';
@@ -31,7 +31,7 @@ interface SendResultSheetProps {
   subtitle: string;
   icon: {
     name: IconName;
-    variant: 'solid' | 'stroke';
+    strokeWidth?: number;
     size?: number;
   };
   transactionDetails?: TransactionDetails;
@@ -48,6 +48,11 @@ interface SendResultSheetProps {
     feeLabel: string;
   };
   testID?: string;
+  /**
+   * Rendered under the subtitle while processing and kept in the failure
+   * layout (e.g. a live verification checklist). Hidden on success.
+   */
+  ProcessingDetail?: ComponentType;
 }
 
 const RecipientAddress = ({
@@ -158,6 +163,7 @@ export const SendResultTemplate = ({
   labels,
   errorDetails,
   testID,
+  ProcessingDetail,
 }: SendResultSheetProps) => {
   const isSuccess = transactionState.status === 'success';
 
@@ -175,13 +181,18 @@ export const SendResultTemplate = ({
           <Icon
             name={icon.name}
             size={icon.size || 48}
-            variant={icon.variant || 'stroke'}
+            strokeWidth={icon.strokeWidth}
             testID="send-result-icon"
           />
           <Text.M align="center" testID="send-result-subtitle">
             {subtitle}
           </Text.M>
         </Column>
+        {!!ProcessingDetail && !isSuccess && (
+          <View style={styles.processingDetail}>
+            <ProcessingDetail />
+          </View>
+        )}
         {!!transactionDetails && isSuccess && !!labels && (
           <TransactionDetailsCard
             transactionDetails={transactionDetails}
@@ -238,6 +249,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   errorDetails: {
+    marginBottom: spacing.XXXL,
+  },
+  processingDetail: {
     marginBottom: spacing.XXXL,
   },
 });

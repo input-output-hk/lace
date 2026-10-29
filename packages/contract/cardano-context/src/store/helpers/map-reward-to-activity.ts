@@ -50,8 +50,8 @@ export const isRewardActivity = (
 /**
  * Maps a reward to a reward activity.
  *
- * @param {MapRewardToActivityParams} params - The parameters for mapping the reward.
- * @returns {RewardActivity} The mapped reward activity.
+ * @param params - The parameters for mapping the reward.
+ * @returns The mapped reward activity.
  */
 export const mapRewardToActivity = ({
   reward,

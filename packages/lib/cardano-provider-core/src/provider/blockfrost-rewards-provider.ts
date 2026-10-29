@@ -49,8 +49,8 @@ export class BlockfrostRewardsProvider extends BlockfrostProvider {
   /**
    * Fetches the total rewards balance for a given reward account.
    *
-   * @param rewardAccount CardanoRewardAccount to fetch the balance for
-   * @param epochs Optional range of epochs to filter the rewards
+   * @param rewardAccount - CardanoRewardAccount to fetch the balance for
+   * @param epochs - Optional range of epochs to filter the rewards
    * @returns Observable with Result containing the rewards or an error
    */
   public getAccountRewards({
@@ -83,7 +83,7 @@ export class BlockfrostRewardsProvider extends BlockfrostProvider {
   /**
    * Fetches stake account information for a given reward account.
    *
-   * @param rewardAccount CardanoRewardAccount to fetch info for
+   * @param rewardAccount - CardanoRewardAccount to fetch info for
    * @returns Observable with Result containing RewardAccountInfo or an error
    */
   public getRewardAccountInfo({

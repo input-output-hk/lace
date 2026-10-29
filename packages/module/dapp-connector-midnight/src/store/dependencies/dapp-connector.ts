@@ -26,6 +26,7 @@ import type {
 } from './create-confirmation-callback';
 import type { SupportedNetworkIdsChannel } from '../../supported-network-ids-channel';
 import type {
+  DAppConnectorWalletAPI,
   ExtendedDAppConnectorWalletAPI,
   WithSenderContext,
 } from '../../types';
@@ -39,7 +40,6 @@ import type {
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
 import type { WithLogger } from '@lace-lib/util';
-import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
 import type { Runtime } from 'webextension-polyfill';
 
 type ConnectMidnightDappConnectorParams<T> = {
@@ -104,7 +104,7 @@ export const initializeMidnightDappConnectorSideEffectDependencies = ({
     onPendingActivity,
   }: ConnectMidnightDappConnectorParams<T>): Observable<T> =>
     new Observable(_subscriber => {
-      const walletApi: WithSenderContext<ConnectedAPI> =
+      const walletApi: WithSenderContext<DAppConnectorWalletAPI> =
         new MidnightDappConnectorApi({
           wallets$,
           network$,

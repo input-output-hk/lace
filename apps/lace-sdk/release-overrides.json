@@ -1,0 +1,132 @@
+[
+  {
+    "version": "0.1.1",
+    "export": "cardano:CardanoContextObservables",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:CardanoRemoteSignerFactory",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:CreateLaceWalletProps",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:LaceWallet",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:WalletWithCardanoContext",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:WalletWithCardanoSigning",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:createLaceWallet",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:createLazyInMemoryVaultModule",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:createPasskeyVaultModule",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:createRemoteCardanoVaultModule",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:createTxBuilder",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "cardano:m",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:BlockchainSpecificActivityMetadata",
+    "reason": "The Cardano activity metadata it carries gains an optional withdrawals field, which pending activities record so the balance stops counting their rewards twice; an added optional field breaks no code that reads or writes the metadata."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:CardanoContextObservables",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:CardanoRemoteSignerFactory",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:LaceAddons",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:PlutusContext",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:SideEffectDependencies",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:WalletWithCardanoSigning",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.1",
+    "export": "index:m",
+    "reason": "Its declaration imports the key-management and tx-construction types (KeyRole, AddressType, AccountKeyDerivationPath, GroupedAddress, Bip32AccountDependencies, TxEvaluator, TxEvaluationResult) from @laceio/cardano instead of carrying copies of them; the shapes are unchanged, and the enums are now the ones @laceio/cardano exports."
+  },
+  {
+    "version": "0.1.2",
+    "export": "cardano:CardanoContextObservables",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  },
+  {
+    "version": "0.1.2",
+    "export": "cardano:WalletWithCardanoSigning",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  },
+  {
+    "version": "0.1.2",
+    "export": "cardano:m",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  },
+  {
+    "version": "0.1.2",
+    "export": "index:CardanoContextObservables",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  },
+  {
+    "version": "0.1.2",
+    "export": "index:WalletWithCardanoSigning",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  },
+  {
+    "version": "0.1.2",
+    "export": "index:m",
+    "reason": "Referenced Cardano store types gain wallet-reset actions and reset-operation and blocked-reason selectors. Existing action payloads, selector call and resultFunc signatures, state fields, and wallet construction parameters are unchanged."
+  }
+]

@@ -4,6 +4,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Linking, StyleSheet } from 'react-native';
 
 import { PROOF_SERVER_INSTALL_GUIDE_URL } from '../const';
+import { useLaceSelector } from '../hooks/lace-context';
 
 /**
  * Shared hook for Midnight proof server banner content.
@@ -12,6 +13,8 @@ import { PROOF_SERVER_INSTALL_GUIDE_URL } from '../const';
 export const useMidnightProofServerBannerContent = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { config } = useLaceSelector('midnightContext.selectCurrentNetwork');
+  const mode = config.proofServer;
 
   const openInstallationGuide = useCallback(() => {
     void Linking.openURL(PROOF_SERVER_INSTALL_GUIDE_URL);
@@ -22,10 +25,24 @@ export const useMidnightProofServerBannerContent = () => {
       ? theme.brand.ascending
       : theme.brand.ascendingSecondary;
 
-  const description = useMemo(
-    () => (
+  const description = useMemo(() => {
+    if (mode.kind !== 'local-host') {
+      const text =
+        mode.kind === 'delegated' || mode.kind === 'tee-delegated'
+          ? t('midnight.proof-server.remote-notice')
+          : t(
+              mode.kind === 'in-process'
+                ? 'midnight.proof-server.in-process.description'
+                : 'midnight.proof-server.paired-device.description',
+              {
+                deviceName: mode.kind === 'paired-device' ? mode.pairingId : '',
+              },
+            );
+      return <Text.S variant="secondary">{text}</Text.S>;
+    }
+    return (
       <Text.S variant="secondary">
-        {t('v2.portfolio.midnight-banner.description')}
+        {t('v2.portfolio.midnight-banner.description')}{' '}
         <Text.S
           variant="secondary"
           onPress={openInstallationGuide}
@@ -33,9 +50,8 @@ export const useMidnightProofServerBannerContent = () => {
           {t('v2.portfolio.midnight-banner.description-link')}
         </Text.S>
       </Text.S>
-    ),
-    [t, openInstallationGuide, linkColor],
-  );
+    );
+  }, [t, mode, openInstallationGuide, linkColor]);
 
   return {
     description,

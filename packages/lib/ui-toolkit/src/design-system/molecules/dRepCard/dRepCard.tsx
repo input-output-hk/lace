@@ -43,7 +43,7 @@ const lovelaceToAda = (lovelace: string): string =>
     VOTING_POWER_MAX_FRACTION_DIGITS,
   )}`;
 
-export const DRepCard = ({
+const DRepCardRow = ({
   drepId,
   amount,
   isActive,
@@ -138,6 +138,14 @@ export const DRepCard = ({
     </Pressable>
   );
 };
+
+/**
+ * Memoized: the browse-DReps sheet commits above this list on every search
+ * keystroke and on every sync, and an unmemoized row re-runs the BigNumber
+ * `formatAmountToLocale` per visible card each time. Callers must keep
+ * `onPress` stable for this to hold (ADR 64).
+ */
+export const DRepCard = React.memo(DRepCardRow);
 
 const styles = StyleSheet.create({
   pressable: {

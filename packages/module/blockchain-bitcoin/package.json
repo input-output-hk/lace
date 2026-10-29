@@ -4,6 +4,11 @@
   "private": true,
   "license": "MIT",
   "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./sdk": "./src/sdk.ts",
+    "./src/state": "./src/state.ts"
+  },
   "main": "src/index.ts",
   "dependencies": {
     "@bitcoinerlab/secp256k1": "1.2.0",

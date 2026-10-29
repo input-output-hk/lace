@@ -1,7 +1,7 @@
 import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
-import { SettingsCard } from '@lace-lib/ui-toolkit';
-import React, { useCallback, useMemo } from 'react';
+import { Modal, SettingsCard } from '@lace-lib/ui-toolkit';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -13,32 +13,58 @@ interface Props {
 
 export const HdWalletSyncRow = ({ accountId }: Props) => {
   const { t } = useTranslation();
-  const requestManualAddressDiscovery = useDispatchLaceAction(
-    'cardanoContext.requestManualAddressDiscovery',
+  const requestWalletSyncReset = useDispatchLaceAction(
+    'cardanoContext.requestWalletSyncReset',
   );
   const { trackEvent } = useAnalytics();
-  const isInProgress = useLaceSelector(
-    'cardanoContext.selectIsAddressDiscoveryInProgress',
+  const [isConfirming, setIsConfirming] = useState(false);
+  const blockedReason = useLaceSelector(
+    'cardanoContext.selectWalletSyncResetBlockedReason',
     accountId,
   );
-
+  const openConfirmation = useCallback(() => {
+    setIsConfirming(true);
+  }, []);
+  const closeConfirmation = useCallback(() => {
+    setIsConfirming(false);
+  }, []);
   const handleSync = useCallback(() => {
+    setIsConfirming(false);
     trackEvent('settings | wallet | hd wallet sync | sync | click');
-    requestManualAddressDiscovery({ accountId });
-  }, [requestManualAddressDiscovery, accountId, trackEvent]);
+    requestWalletSyncReset({ accountId });
+  }, [requestWalletSyncReset, accountId, trackEvent]);
 
   const quickActions = useMemo(
-    () => ({ onCardPress: isInProgress ? undefined : handleSync }),
-    [handleSync, isInProgress],
+    () => ({
+      onCardPress: blockedReason ? undefined : openConfirmation,
+    }),
+    [openConfirmation, blockedReason],
   );
 
   return (
-    <SettingsCard
-      iconName="Reload"
-      testID="settings-wallet-wallet-sync"
-      title={t('v2.account-settings.hd-wallet-sync.title')}
-      description={t('v2.account-settings.hd-wallet-sync.description')}
-      quickActions={quickActions}
-    />
+    <>
+      <SettingsCard
+        iconName="Reload"
+        testID="settings-wallet-wallet-sync"
+        title={t('v2.account-settings.hd-wallet-sync.title')}
+        description={t(
+          blockedReason === 'pending-transactions'
+            ? 'v2.account-settings.hd-wallet-sync.pending'
+            : 'v2.account-settings.hd-wallet-sync.description',
+        )}
+        quickActions={quickActions}
+      />
+      <Modal
+        testIdPrefix="reset-wallet-sync-confirmation"
+        visible={isConfirming}
+        onClose={closeConfirmation}
+        onCancel={closeConfirmation}
+        onConfirm={handleSync}
+        title={t('v2.account-settings.hd-wallet-sync.title')}
+        description={t('v2.account-settings.hd-wallet-sync.confirmation')}
+        cancelText={t('app.cancel')}
+        confirmText={t('v2.account-settings.hd-wallet-sync.reset')}
+      />
+    </>
   );
 };

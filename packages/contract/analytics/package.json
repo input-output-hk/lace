@@ -13,6 +13,6 @@
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*",
-    "csv-parse": "^5.5.6"
+    "csv-parse": "^7.0.2"
   }
 }

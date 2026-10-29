@@ -38,7 +38,7 @@ export const BlockfrostToCardanoSDK = {
     ] as Cardano.Utxo,
 
   /**
-   * Transform Blockfrost account-based UTxOs (accounts/{stake}/utxos)
+   * Transform Blockfrost account-based UTxOs (`accounts/{stake}/utxos`)
    * into Cardano SDK UTxO tuples.
    * Note: This endpoint does not include inputs or collateral information.
    */
@@ -143,6 +143,13 @@ export const BlockfrostToCardanoSDK = {
     minCommitteeSize: 0,
     minFeeCoefficient: blockfrost.min_fee_a,
     minFeeConstant: blockfrost.min_fee_b,
+    // `minFee` charges a spent or referenced reference script only when this
+    // is set; without it the fee omits that Conway term and the node refuses
+    // the transaction.
+    minFeeRefScriptCostPerByte:
+      typeof blockfrost.min_fee_ref_script_cost_per_byte === 'number'
+        ? String(blockfrost.min_fee_ref_script_cost_per_byte)
+        : undefined,
     minPoolCost: Number(blockfrost.min_pool_cost),
     monetaryExpansion: blockfrost.rho.toString(),
     poolDeposit: Number(blockfrost.pool_deposit),
@@ -183,11 +190,14 @@ export const BlockfrostToCardanoSDK = {
       value,
     };
 
+    // Blockfrost can report an inline datum's hash as `data_hash` too, and
+    // `TransactionOutput.fromCore` lets `datumHash` replace `datum`, so the hash
+    // is kept only for outputs that carry no inline datum.
     if (blockfrost.inline_datum)
       txOut.datum = Serialization.PlutusData.fromCbor(
         HexBlob(blockfrost.inline_datum),
       ).toCore();
-    if (blockfrost.data_hash)
+    else if (blockfrost.data_hash)
       txOut.datumHash = Hash32ByteBase16(blockfrost.data_hash);
 
     if (txOutFromCbor?.scriptReference)

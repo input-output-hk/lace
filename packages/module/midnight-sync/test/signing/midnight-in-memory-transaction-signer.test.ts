@@ -4,10 +4,13 @@ import {
   signerAuthFromPrompt,
 } from '@lace-contract/signer';
 import { HexBytes } from '@lace-lib/util';
-import { firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { MidnightWallet } from '@lace-contract/midnight-context';
+import type {
+  MidnightWallet,
+  MidnightWalletsByAccountId,
+} from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
 
 const testAccountId = 'test-account-id' as AccountId;
@@ -19,6 +22,7 @@ const testSignerAuth = signerAuthFromPrompt(getTestAuthSecretDeps(), {
 });
 
 const mockTransaction = {
+  identifiers: () => ['signed-test-tx'],
   serialize: () => new Uint8Array([0x01, 0x02]),
 };
 
@@ -50,10 +54,7 @@ vi.mock('@midnightntwrk/wallet-sdk-address-format', () => ({
   },
 }));
 
-vi.mock('@lace-contract/midnight-context', async () => ({
-  ...(await vi.importActual('@lace-contract/midnight-context')),
-  midnightWallets$: of({ [testAccountId]: mockMidnightWallet }),
-}));
+const wallets$ = of({ [testAccountId]: mockMidnightWallet });
 
 const { MidnightInMemoryTransactionSigner } = await import(
   '../../src/signing/midnight-in-memory-transaction-signer'
@@ -124,6 +125,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     const result = await firstValueFrom(
       signer.sign({ serializedTx: unshieldedTx, flowType: 'send' }),
@@ -139,6 +141,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     const result = await firstValueFrom(
       signer.sign({ serializedTx: shieldedTx, flowType: 'send' }),
@@ -169,6 +172,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     await firstValueFrom(
       signer.sign({ serializedTx: multiShieldedTx, flowType: 'send' }),
@@ -208,6 +212,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     await firstValueFrom(
       signer.sign({ serializedTx: multiUnshieldedTx, flowType: 'send' }),
@@ -256,6 +261,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     const result = await firstValueFrom(
       signer.sign({ serializedTx: dustTx, flowType: 'dust-designation' }),
@@ -307,6 +313,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$,
     });
     const result = await firstValueFrom(
       signer.sign({ serializedTx: dustTx, flowType: 'dust-designation' }),
@@ -319,6 +326,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     );
     expect(mockMidnightWallet.finalizeRecipe).toHaveBeenCalledWith(
       balancedRecipe,
+      expect.any(Function),
     );
     expect(mockMidnightWallet.transferTransaction).not.toHaveBeenCalled();
   });
@@ -339,6 +347,7 @@ describe('MidnightInMemoryTransactionSigner', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: cancellingAuth,
+      wallets$,
     });
 
     await expect(
@@ -346,5 +355,55 @@ describe('MidnightInMemoryTransactionSigner', () => {
         signer.sign({ serializedTx: unshieldedTx, flowType: 'send' }),
       ),
     ).rejects.toThrow(AuthenticationCancelledError);
+  });
+});
+
+describe('instance-bound transaction signing', () => {
+  it('uses each instance prover and refuses a removed engine even with a global engine present', async () => {
+    const engine = (byte: number) =>
+      ({
+        ...mockMidnightWallet,
+        transferTransaction: vi.fn(() => of({ id: 'recipe' })),
+        signRecipe: vi.fn(() => of({ id: 'signed' })),
+        finalizeRecipe: vi.fn(() =>
+          of({
+            identifiers: () => [`tx-${byte}`],
+            serialize: () => new Uint8Array([byte]),
+          }),
+        ),
+      } as unknown as MidnightWallet);
+    const first = engine(1);
+    const second = engine(2);
+    const registryA = new BehaviorSubject<MidnightWalletsByAccountId>({
+      [testAccountId]: first,
+    });
+    const registryB = new BehaviorSubject<MidnightWalletsByAccountId>({
+      [testAccountId]: second,
+    });
+    const signerA = new MidnightInMemoryTransactionSigner({
+      accountId: testAccountId,
+      auth: testSignerAuth,
+      wallets$: registryA,
+    });
+    const signerB = new MidnightInMemoryTransactionSigner({
+      accountId: testAccountId,
+      auth: testSignerAuth,
+      wallets$: registryB,
+    });
+    const request = { serializedTx: unshieldedTx, flowType: 'send' as const };
+    expect((await firstValueFrom(signerA.sign(request))).serializedTx).toBe(
+      '01',
+    );
+    expect((await firstValueFrom(signerB.sign(request))).serializedTx).toBe(
+      '02',
+    );
+    registryA.next({});
+    await expect(firstValueFrom(signerA.sign(request))).rejects.toThrow(
+      'Could not load midnight wallet',
+    );
+    expect((await firstValueFrom(signerB.sign(request))).serializedTx).toBe(
+      '02',
+    );
+    expect(first.finalizeRecipe).toHaveBeenCalledTimes(1);
   });
 });

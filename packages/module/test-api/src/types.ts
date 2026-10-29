@@ -21,5 +21,4 @@ export type DevelopmentApi = {
   setLanguage: (language: SupportedLanguage) => Promise<void>;
   store: Store<State, Action>;
   waitForState: (predicate: (state: State) => boolean) => Promise<State>;
-  toggleReactScan: () => void;
 };

@@ -1,7 +1,12 @@
+import { midnightWalletsForRuntime } from '@lace-contract/midnight-context';
 import { NEVER } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initializeMidnightDependencies } from '../src/store/dependencies';
+
+import type { ModuleInitProps } from '@lace-contract/module';
+
+const runtime = {} as ModuleInitProps['runtime'];
 
 // `document.visibilityState` is read at event time, so the stub is mutable.
 type DocumentStub = EventTarget & { visibilityState: DocumentVisibilityState };
@@ -29,7 +34,7 @@ describe('midnight-host-pull windowRefocus$', () => {
   it('emits once for the focus + visibilitychange pair a single activation fires', async () => {
     const { window, document } = stubDom();
     const emissions: void[] = [];
-    initializeMidnightDependencies().windowRefocus$.subscribe(value =>
+    initializeMidnightDependencies(runtime).windowRefocus$.subscribe(value =>
       emissions.push(value),
     );
 
@@ -43,7 +48,7 @@ describe('midnight-host-pull windowRefocus$', () => {
   it('ignores the visibilitychange that HIDES the guest', async () => {
     const { document } = stubDom();
     const emissions: void[] = [];
-    initializeMidnightDependencies().windowRefocus$.subscribe(value =>
+    initializeMidnightDependencies(runtime).windowRefocus$.subscribe(value =>
       emissions.push(value),
     );
 
@@ -55,6 +60,19 @@ describe('midnight-host-pull windowRefocus$', () => {
   });
 
   it('is NEVER outside a DOM context, so store init never throws on RN', () => {
-    expect(initializeMidnightDependencies().windowRefocus$).toBe(NEVER);
+    expect(initializeMidnightDependencies(runtime).windowRefocus$).toBe(NEVER);
+  });
+});
+
+describe('midnight-host-pull midnightWallets$', () => {
+  it("serves the app instance's own registry", () => {
+    const other = {} as ModuleInitProps['runtime'];
+
+    expect(initializeMidnightDependencies(runtime).midnightWallets$).toBe(
+      midnightWalletsForRuntime(runtime),
+    );
+    expect(initializeMidnightDependencies(other).midnightWallets$).not.toBe(
+      midnightWalletsForRuntime(runtime),
+    );
   });
 });

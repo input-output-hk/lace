@@ -26,9 +26,12 @@ const created: CreatedAccount = {
     address: accountAddress,
     bindingVersion: accManifest.bindingVersion,
     status: 'ready',
+    networkId: 'undeployed',
   },
   devices: [{ commitmentHex, isLocal: true }],
   localUseCounter: '0',
+  grants: [],
+  encKey: '0a'.repeat(32),
 };
 
 /** The flow events a cold marble may carry, keyed by their marble letter. */
@@ -50,6 +53,8 @@ const emitted = {
   g: actions.passport.setAccount(created.account),
   h: actions.passport.setDevices(created.devices),
   i: actions.passport.setLocalUseCounter('0'),
+  o: actions.passport.setEncKey('0a'.repeat(32)),
+  m: actions.passport.setGrants([]),
   j: actions.passport.setFlow('ready'),
 };
 
@@ -88,7 +93,12 @@ const runFlowTest = ({ createAccount = 'a', flows, assertion }: FlowTest) => {
           createAccount$: hot(createAccount, {
             a: actions.passport.createAccount({ lockAccount: true }),
           }),
+          issueGrant$: NEVER,
+          installOperations$: NEVER,
+          readShieldedHoldings$: NEVER,
           removeDevice$: NEVER,
+          revokeAllGrants$: NEVER,
+          revokeGrant$: NEVER,
           signIn$: NEVER,
         },
       },
@@ -113,7 +123,9 @@ describe('runPassportFlow: createAccount', () => {
     runFlowTest({
       flows: cold => [cold('-b-c-d-e-(f|)', events)],
       assertion: ({ sideEffect$, helpers, createAccountFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('ab-c-d-e-(ghij)', emitted);
+        helpers
+          .expectObservable(sideEffect$)
+          .toBe('ab-c-d-e-(ghiomj)', emitted);
         helpers.flush();
         expect(createAccountFlow).toHaveBeenCalledExactlyOnceWith(
           { lockAccount: true },
@@ -127,7 +139,7 @@ describe('runPassportFlow: createAccount', () => {
     runFlowTest({
       flows: cold => [cold('(bf|)', events)],
       assertion: ({ sideEffect$, helpers }) => {
-        helpers.expectObservable(sideEffect$).toBe('(abghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('(abghiomj)', emitted);
       },
     });
   });
@@ -183,7 +195,7 @@ describe('runPassportFlow: createAccount', () => {
       createAccount: 'a-a',
       flows: cold => [cold('----(f|)', events)],
       assertion: ({ sideEffect$, helpers, createAccountFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('a---(ghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('a---(ghiomj)', emitted);
         helpers.flush();
         expect(createAccountFlow).toHaveBeenCalledOnce();
       },
@@ -198,7 +210,7 @@ describe('runPassportFlow: createAccount', () => {
         cold('-(f|)', events),
       ],
       assertion: ({ sideEffect$, helpers, createAccountFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('ak--a(ghij)', {
+        helpers.expectObservable(sideEffect$).toBe('ak--a(ghiomj)', {
           ...emitted,
           k: actions.passport.setFlowError({
             code: 'account-create-failed',

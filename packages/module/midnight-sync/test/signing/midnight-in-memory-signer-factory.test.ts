@@ -1,13 +1,18 @@
 import { getTestAuthSecretDeps } from '@lace-contract/authentication-prompt';
 import { signerAuthFromPrompt } from '@lace-contract/signer';
 import { WalletType } from '@lace-contract/wallet-repo';
-import { describe, expect, it } from 'vitest';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
 
 import { MidnightInMemoryDataSigner } from '../../src/signing/midnight-in-memory-data-signer';
 import { MidnightInMemorySignerFactory } from '../../src/signing/midnight-in-memory-signer-factory';
 import { MidnightInMemoryTransactionSigner } from '../../src/signing/midnight-in-memory-transaction-signer';
 
-import type { MidnightSignerContext } from '@lace-contract/midnight-context';
+import type {
+  MidnightWallet,
+  MidnightWalletsByAccountId,
+  MidnightSignerContext,
+} from '@lace-contract/midnight-context';
 import type {
   AccountId,
   AnyAccount,
@@ -44,7 +49,7 @@ const createMockContext = (walletType: WalletType): MidnightSignerContext => ({
 });
 
 describe('MidnightInMemorySignerFactory', () => {
-  const factory = new MidnightInMemorySignerFactory();
+  const factory = new MidnightInMemorySignerFactory(of({}));
 
   describe('canSign', () => {
     it('returns true for InMemory Midnight accounts', () => {
@@ -117,4 +122,24 @@ describe('MidnightInMemorySignerFactory', () => {
       );
     });
   });
+});
+
+it('passes the instance registry to data signers and rejects a removed account', async () => {
+  const engine = {
+    signData: vi.fn(() => of({ signature: 'aa', verifyingKey: 'bb' })),
+  } as unknown as MidnightWallet;
+  const registry = new BehaviorSubject<MidnightWalletsByAccountId>({
+    [mockAccountId]: engine,
+  });
+  const factory = new MidnightInMemorySignerFactory(registry);
+  const signer = factory.createDataSigner(
+    createMockContext(WalletType.InMemory),
+  );
+  const request = { data: new Uint8Array([1]) };
+  expect((await firstValueFrom(signer.signData(request))).signature).toBe('aa');
+  registry.next({});
+  await expect(firstValueFrom(signer.signData(request))).rejects.toThrow(
+    'Could not load midnight wallet',
+  );
+  expect(engine.signData).toHaveBeenCalledOnce();
 });

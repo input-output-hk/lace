@@ -42,10 +42,13 @@ export interface ExtraSigner {
  * Top-level transaction signing request.
  *
  * UR type: cardano-tx-sig-req. CDDL:
- *   {1: request_id(tstr), ?2: origin(tstr), 3: sign_data(bstr), 4: [*SigningInput],
- *    5: [*ChangeOutput], 6: [*ExtraSigner], 7: network uint,
- *    ?8: collateral_return_path(SignerPath)}
- *   SignerPath = {1: xfp(bstr .size 4), 2: path([*uint])}  ; same shape as ExtraSigner
+ *
+ * ```cddl
+ * {1: request_id(tstr), ?2: origin(tstr), 3: sign_data(bstr), 4: [*SigningInput],
+ *  5: [*ChangeOutput], 6: [*ExtraSigner], 7: network uint,
+ *  ?8: collateral_return_path(SignerPath)}
+ * SignerPath = {1: xfp(bstr .size 4), 2: path([*uint])}  ; same shape as ExtraSigner
+ * ```
  *
  * Key 8 declares that the tx body's collateral_return output pays back to this
  * wallet. The device derives the address from the path and, only if it matches,
@@ -67,7 +70,10 @@ export interface CardanoSignRequest {
  * Device reply carrying the vkey witness set.
  *
  * UR type: cardano-tx-sig-res. CDDL:
- *   {1: request_id(tstr), 2: vkey_witness_set(bstr)}
+ *
+ * ```cddl
+ * {1: request_id(tstr), 2: vkey_witness_set(bstr)}
+ * ```
  *
  * Key 2 is a serialized vkey witness set (a tag-258 set of vkey witnesses), NOT
  * a full transaction witness set map. It is carried as opaque bytes here.

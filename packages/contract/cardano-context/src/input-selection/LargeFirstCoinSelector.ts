@@ -118,7 +118,7 @@ const pickBy = (
  * - Preselected UTxOs (`preSelectedUtxo`) are always preserved and excluded from further selection.
  * - Deterministic given a fixed set of inputs.
  *
- * @throws {InputSelectionError} `BalanceInsufficient` when a required asset or ADA cannot be
+ * @throws `InputSelectionError` `BalanceInsufficient` when a required asset or ADA cannot be
  *   covered; `UtxoFullyDepleted` when the pool runs out while funding the change min-ADA.
  */
 export class LargeFirstCoinSelector implements CoinSelector {

@@ -41,7 +41,7 @@ interface CollateralSheetProps {
   /** When provided with body, rendered like StatusSheet (icon above body, centered) */
   icon?: {
     name: IconName;
-    variant?: 'solid' | 'stroke';
+    strokeWidth?: number;
     size?: number;
   };
   body?: string;
@@ -88,7 +88,7 @@ export const CollateralTemplate = ({
           <Icon
             name={icon.name}
             size={icon.size ?? 48}
-            variant={icon.variant ?? 'stroke'}
+            strokeWidth={icon.strokeWidth}
           />
           <Text.M>{body}</Text.M>
         </Column>

@@ -15,7 +15,7 @@ export const appActions = {
 export type IconConfig = {
   name: string;
   size?: number;
-  variant?: 'solid' | 'stroke';
+  strokeWidth?: number;
   color?: string;
 };
 

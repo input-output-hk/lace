@@ -1159,6 +1159,54 @@ describe('correctFeeAfterEvaluation', () => {
     };
   };
 
+  // Enough assets that the return's size pushes its required fee above any fee
+  // the correction could offer, so the shape has no fixpoint of its own.
+  const unaffordableCollateralReturn = (fee: bigint): CollateralBodyFields => {
+    const amount = (fee * 150n + 99n) / 100n;
+    const assets = new Map<Cardano.AssetId, bigint>(
+      Array.from({ length: 60 }, (_, index) => [
+        `0b0d621b5c26d0a1fd0893a4b04c19d860296a69ede1fbcfc5179882${index
+          .toString(16)
+          .padStart(8, '0')}` as unknown as Cardano.AssetId,
+        1n,
+      ]),
+    );
+    return {
+      totalCollateral: amount,
+      collateralReturn: {
+        address: createAddress(changeAddr),
+        value: { coins: 5_000_000n - amount, assets },
+      },
+    };
+  };
+
+  // Cheap at the seed fee, unaffordable below it, so the descent has no fixpoint.
+  // Guards both ways: taking the cheaper candidate under-funds it, and climbing
+  // past the seed spends coin the balancer never funded.
+  it('keeps the seeded fee when no lower fee can cover the body it would ship', () => {
+    const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
+    // Just enough over the minimum that the seed covers its own body, while the
+    // sub-seed shape's own requirement stays out of the correction's reach.
+    const overpaidTx = overpayFee(balanced, 2_000n);
+    const seedFee = overpaidTx.body.fee;
+    const bandedCollateralReturn = (fee: bigint): CollateralBodyFields =>
+      fee >= seedFee
+        ? { totalCollateral: (fee * 150n + 99n) / 100n }
+        : unaffordableCollateralReturn(fee);
+
+    const result = correctFeeAfterEvaluation({
+      balancedTx: overpaidTx,
+      evaluatedRedeemers: [],
+      resolvedInputs: selection,
+      protocolParameters: protocol,
+      changeAddress: createAddress(changeAddr),
+      deriveCollateralFields: bandedCollateralReturn,
+    });
+
+    expect(result.fee).toBe(seedFee);
+    expect(result.collateralFields.collateralReturn).toBeUndefined();
+  });
+
   it('throws when the balanced fee cannot cover the collateral fields it would ship', () => {
     const { balanced, protocol, selection } = balanceWithUnevenSplitChange();
 

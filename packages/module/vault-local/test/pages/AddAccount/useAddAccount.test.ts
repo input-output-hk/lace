@@ -41,7 +41,7 @@ const keystoneSupport: HwBlockchainSupport[][] = [
       deviceOptionId: 'keystone',
       walletType: WalletType.HardwareKeystone,
       blockchainName: 'Cardano' as BlockchainName,
-      maxAccountIndex: 24,
+      maxAccountIndex: 23,
     },
   ] as HwBlockchainSupport[],
 ];
@@ -107,8 +107,8 @@ describe('useAddAccount', () => {
       support: keystoneSupport,
     });
 
-    expect(result.current.accountIndexDropdownItems).toHaveLength(25);
-    expect(result.current.accountIndexDropdownItems.at(-1)?.value).toBe(24);
+    expect(result.current.accountIndexDropdownItems).toHaveLength(24);
+    expect(result.current.accountIndexDropdownItems.at(-1)?.value).toBe(23);
   });
 
   it('falls back to the app-wide maximum when the device declares no limit', () => {

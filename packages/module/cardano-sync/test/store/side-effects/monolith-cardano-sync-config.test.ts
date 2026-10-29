@@ -14,11 +14,13 @@ import {
 } from '@lace-contract/cardano-context/test/mocks';
 import { type Failure } from '@lace-contract/failures';
 import { syncActions } from '@lace-contract/sync';
-import { testSideEffect } from '@lace-lib/util-dev';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
+import { of, mergeMap } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 
 import { monolithCardanoSyncConfig } from '../../../src/store/side-effects/monolith-cardano-sync-config';
 
+import type { Selectors, ActionCreators } from '../../../src/module';
 import type { MonolithCardanoSyncRoundContext } from '../../../src/store/side-effects/monolith-cardano-sync-config';
 import type { CardanoWalletAccount } from '@lace-contract/cardano-context';
 import type { FailureId } from '@lace-contract/failures';
@@ -27,6 +29,24 @@ import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { Timestamp } from '@lace-lib/util';
 
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      stateObservables: {
+        ...config.stateObservables,
+        cardanoContext: {
+          selectWalletSyncResetOperation$: of(() => undefined),
+          ...config.stateObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 const actions = {
   ...syncActions,
   ...cardanoContextActions,
@@ -40,6 +60,72 @@ const coordinateCardanoSync = createCoordinateCardanoSync(
 );
 
 describe('monolithCardanoSyncConfig (coordinate engine)', () => {
+  it.each([
+    { status: 'Pending' as const },
+    { status: 'InProgress' as const, type: 'Indeterminate' as const },
+    {
+      status: 'Failed' as const,
+      error: 'sync.error.address-discovery-failed' as const,
+      failedAt: 1 as Timestamp,
+    },
+    { status: 'Completed' as const, completedAt: 1 as Timestamp },
+  ])('excludes only active resets from natural rounds ($status)', update => {
+    const { status } = update;
+    const [resetAccount, otherAccount] = threeAccountCardanoWalletAccounts;
+    testSideEffect(
+      (a, s, d) =>
+        monolithCardanoSyncConfig.trigger$(a, s, d).pipe(
+          mergeMap(context =>
+            context.accounts.map(account =>
+              actions.cardanoContext.requestWalletSyncReset({
+                accountId: account.accountId,
+              }),
+            ),
+          ),
+        ),
+      ({ hot, expectObservable }) => ({
+        actionObservables: { cardanoContext: { retrySyncRound$: hot('-') } },
+        stateObservables: {
+          wallets: {
+            selectActiveNetworkAccounts$: of([resetAccount, otherAccount]),
+          },
+          addresses: { selectAllAddresses$: of([]) },
+          failures: { selectAllFailures$: of({}) },
+          cardanoContext: {
+            selectChainId$: of(Cardano.ChainIds.Preprod),
+            selectTip$: hot('a---b', { a: undefined, b: undefined }),
+            selectWalletSyncResetOperation$: of(id =>
+              id === resetAccount.accountId
+                ? {
+                    operationId: 'failed-wallet-reset',
+                    ...update,
+                    startedAt: 0 as Timestamp,
+                    failedAt: 1 as Timestamp,
+                    description: 'sync.operation.address-discovery',
+                  }
+                : undefined,
+            ),
+          },
+        },
+        dependencies: { actions },
+        assertion: source => {
+          expectObservable(source).toBe(
+            status === 'Pending' || status === 'InProgress'
+              ? 'a---a'
+              : '(ba)(ba)',
+            {
+              b: actions.cardanoContext.requestWalletSyncReset({
+                accountId: resetAccount.accountId,
+              }),
+              a: actions.cardanoContext.requestWalletSyncReset({
+                accountId: otherAccount.accountId,
+              }),
+            },
+          );
+        },
+      }),
+    );
+  });
   it('should start sync round with address discovery for new accounts', () => {
     testSideEffect(coordinateCardanoSync, ({ hot, expectObservable }) => {
       const accounts$ = hot<AnyAccount[]>('a', {

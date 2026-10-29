@@ -5,7 +5,7 @@
     "owner": "lace_io",
     "entryPoint": "index.js",
     "newArchEnabled": true,
-    "version": "2.4.0",
+    "version": "2.5.0",
     "orientation": "portrait",
     "icon": "./assets/Lace-ios-icon.png",
     "platforms": ["ios", "android", "web"],
@@ -18,7 +18,6 @@
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "version": "2.4.0",
       "icon": "./assets/Lace-ios-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "io.lace.mobilewallet",
@@ -38,7 +37,6 @@
       "appleTeamId": "89TW38X994"
     },
     "android": {
-      "version": "2.4.2",
       "adaptiveIcon": {
         "foregroundImage": "./assets/Lace-android-adaptive-icon.png",
         "backgroundColor": "#FFFFFF"

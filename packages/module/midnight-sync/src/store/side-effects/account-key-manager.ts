@@ -66,16 +66,8 @@ export const createAccountKeyManager = (
     }
   };
 
-  /**
-   * Gets existing pending request or creates new one.
-   * Uses shareReplay to share among concurrent subscribers.
-   *
-   * IMPORTANT: pendingRequest$ must be cleared on BOTH success AND error paths.
-   * With shareReplay({ refCount: true }), if refCount goes to 0 (all subscribers unsubscribe
-   * due to error) and then back to 1, the source RESTARTS. If pendingRequest$ wasn't cleared,
-   * getOrCreateRequest() returns the same observable, causing requestKeys() to run again
-   * which triggers duplicate auth prompts and SDK retries creating duplicate WebSockets.
-   */
+  // Clear pendingRequest$ on success and error: refCount can restart a stale
+  // shared request, duplicating auth prompts and wallet WebSockets.
   const getOrCreateRequest = (): Observable<AccountKeys> => {
     if (pendingRequest$) {
       return pendingRequest$;

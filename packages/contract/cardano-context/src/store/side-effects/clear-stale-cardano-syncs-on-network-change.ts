@@ -28,8 +28,9 @@ import type { AnyAccount } from '@lace-contract/wallet-repo';
  * preserved (see `clearPendingSyncsForAccounts`), so switching back to a
  * previously-synced network does not re-show the initial-load skeleton.
  *
- * Cardano-only: Bitcoin/Midnight use stable per-account operation IDs updated in
- * place, so they must NOT be cleared (see `clearPendingSyncsForAccounts`).
+ * Cardano-only: the other blockchains use stable per-account operation IDs
+ * updated in place, so they must NOT be cleared (see
+ * `clearPendingSyncsForAccounts`).
  */
 export const clearStaleCardanoSyncsOnNetworkChange: SideEffect = (
   _,

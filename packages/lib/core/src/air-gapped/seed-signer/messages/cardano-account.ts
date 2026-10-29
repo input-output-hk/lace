@@ -27,7 +27,10 @@ export const DEFAULT_DEVICE_LABEL = 'Cardano SeedSigner';
  * Host request for one or more account extended public keys.
  *
  * UR type: cardano-account-req. CDDL:
- *   {1: request_id(tstr), ?2: origin(tstr), 3: [*account_idx uint], 4: key_purpose uint}
+ *
+ * ```cddl
+ * {1: request_id(tstr), ?2: origin(tstr), 3: [*account_idx uint], 4: key_purpose uint}
+ * ```
  */
 export interface CardanoAccountRequest {
   requestId: RequestId;
@@ -47,7 +50,10 @@ export interface AccountKey {
  * Device reply carrying account xpub(s) and the master fingerprint.
  *
  * UR type: cardano-account. CDDL:
- *   {1: request_id(tstr), 2: master_fingerprint(bstr 4), 3: [*AccountKey], ?4: device_label(tstr)}
+ *
+ * ```cddl
+ * {1: request_id(tstr), 2: master_fingerprint(bstr 4), 3: [*AccountKey], ?4: device_label(tstr)}
+ * ```
  */
 export interface CardanoAccountResponse {
   requestId: RequestId;

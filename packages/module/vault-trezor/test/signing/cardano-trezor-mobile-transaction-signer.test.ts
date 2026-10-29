@@ -55,7 +55,10 @@ const hoisted = vi.hoisted(() => {
 vi.mock('@cardano-sdk/core', () => ({
   Serialization: {
     Transaction: Object.assign(
-      vi.fn().mockImplementation(() => hoisted.mockSignedTx),
+      // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+      vi.fn(function () {
+        return hoisted.mockSignedTx;
+      }),
       {
         fromCbor: vi.fn().mockReturnValue(hoisted.mockTransaction),
       },

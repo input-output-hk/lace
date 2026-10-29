@@ -21,7 +21,7 @@ const checkPermissions = async () => {
 
 /**
  * Writes text to navigator's clipboard
- * @param text
+ * @param text - The text to write.
  */
 const write = async (text: string) => {
   await navigator.clipboard.writeText(text);

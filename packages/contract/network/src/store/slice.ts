@@ -68,6 +68,29 @@ const slice = createSlice({
         testnet: payload.testnet,
       };
     },
+    /**
+     * Sets a blockchain's networks only while it has none. A startup
+     * registration reaches the store a tick after the side effect that emits
+     * it decided, so a selection made in between keeps precedence.
+     */
+    registerBlockchainNetworks: (
+      state,
+      {
+        payload,
+      }: Readonly<
+        PayloadAction<{
+          blockchain: BlockchainName;
+          mainnet: BlockchainNetworkId;
+          testnet: BlockchainNetworkId;
+        }>
+      >,
+    ) => {
+      if (state.blockchainNetworks[payload.blockchain]) return;
+      state.blockchainNetworks[payload.blockchain] = {
+        mainnet: payload.mainnet,
+        testnet: payload.testnet,
+      };
+    },
   },
   selectors: {
     selectNetworkType: ({ networkType }) => networkType,

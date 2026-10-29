@@ -14,6 +14,7 @@ import {
   signTxCopy,
   useSignTxRefusal,
 } from '../../common/components/useSignTxRefusal';
+import { useLaceSelector } from '../../common/hooks';
 import {
   useSignTxData,
   type UseSignTxDataResult,
@@ -23,6 +24,9 @@ import { useDappPopupFlow, useDappViewClose } from '../hooks';
 
 export const CardanoDappSignTxPopup = () => {
   const { t } = useTranslation();
+  const signingError = useLaceSelector(
+    'cardanoDappConnector.selectSignTxErrorDetails',
+  );
   // Read at close time, so the close names the request the user answered even
   // once it has been cleared by an error or a success.
   const requestIdRef = useRef<string | undefined>(undefined);
@@ -39,7 +43,7 @@ export const CardanoDappSignTxPopup = () => {
 
   // The verdict reaches this view through the pending-request slice only.
   const refusal = useSignTxRefusal({
-    collateralRefusal: request?.collateralRefusal,
+    refusal: request?.refusal,
     dappOrigin: request?.dapp.origin,
   });
 
@@ -111,12 +115,27 @@ export const CardanoDappSignTxPopup = () => {
     if (refusal) {
       return <SignTxRefused refusal={refusal} style={styles.centeredContent} />;
     }
-    if (hasError) return <SignTxError style={styles.centeredContent} />;
+    if (hasError)
+      return (
+        <SignTxError
+          error={isError ? signingError : signTxData.transactionError}
+          stage={isError ? 'signing' : 'transaction inspection'}
+          style={styles.centeredContent}
+        />
+      );
     if (isShowingLoading || !contentProps) {
       return <SignTxLoadingContent style={styles.centeredContent} />;
     }
     return <SignTxContent {...contentProps} />;
-  }, [refusal, contentProps, hasError, isShowingLoading]);
+  }, [
+    refusal,
+    contentProps,
+    hasError,
+    isShowingLoading,
+    signTxData.transactionError,
+    isError,
+    signingError,
+  ]);
 
   return (
     <DappConnectorLayoutV2

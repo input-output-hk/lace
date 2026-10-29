@@ -335,6 +335,45 @@ describe('BlockfrostNetworkInfoProvider', () => {
     });
   });
 
+  test('protocolParameters maps the reference-script fee rate', async () => {
+    const base = {
+      a0: 0.3,
+      coins_per_utxo_word: '4310',
+      cost_models: {},
+      key_deposit: '2000000',
+      max_collateral_inputs: 3,
+      max_tx_size: '16384',
+      max_val_size: '5000',
+      min_fee_a: 44,
+      min_fee_b: 155_381,
+      min_pool_cost: '170000000',
+      pool_deposit: '500000000',
+      protocol_major_ver: 10,
+      protocol_minor_ver: 0,
+      rho: 0.003,
+      tau: 0.2,
+    };
+    mockResponses(request, [
+      [
+        'epochs/latest/parameters',
+        { data: { ...base, min_fee_ref_script_cost_per_byte: 15 } },
+      ],
+    ]);
+    expect(await provider.protocolParameters()).toMatchObject({
+      minFeeRefScriptCostPerByte: '15',
+    });
+
+    mockResponses(request, [
+      [
+        'epochs/latest/parameters',
+        { data: { ...base, min_fee_ref_script_cost_per_byte: null } },
+      ],
+    ]);
+    expect(
+      (await provider.protocolParameters()).minFeeRefScriptCostPerByte,
+    ).toBeUndefined();
+  });
+
   test('protocolParameters maps canonically-ordered cost_models_raw for Plutus V3', async () => {
     // Raw arrays are already in the ledger's canonical parameter order.
     const plutusV3Raw = [100_788, 420, 1, 1, 1000, 173, 0, 1];

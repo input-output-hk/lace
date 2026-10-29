@@ -3,6 +3,7 @@ import {
   midnightAccounts$,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
+  registerMidnightBlockchainNetworks,
 } from '@lace-contract/midnight-context';
 import { Milliseconds } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
@@ -36,10 +37,7 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { LaceInitSync } from '@lace-contract/module';
 import type { TestnetOption } from '@lace-contract/network';
-import type {
-  AnyAccount,
-  InMemoryWalletAccount,
-} from '@lace-contract/wallet-repo';
+import type { InMemoryWalletAccount } from '@lace-contract/wallet-repo';
 import type { Observable } from 'rxjs';
 
 const withMidnightAccounts =
@@ -54,50 +52,6 @@ const withMidnightAccounts =
       stateObservables,
       dependencies,
     );
-
-/**
- * Registers Midnight blockchain networks with the global network store.
- * Only triggers once when Midnight is not yet registered.
- *
- * For migration: If an existing Midnight account exists, uses its network
- * as the testnet selection. Otherwise uses the default testnet.
- */
-export const registerMidnightBlockchainNetworks: SideEffect = (
-  _,
-  {
-    network: { selectBlockchainNetworks$ },
-    midnightContext: { selectDefaultTestNetNetworkId$ },
-    wallets: { selectAll$ },
-  },
-  { actions },
-) =>
-  selectBlockchainNetworks$.pipe(
-    filter(blockchainNetworks => !blockchainNetworks?.Midnight),
-    withLatestFrom(
-      selectDefaultTestNetNetworkId$,
-      selectAll$.pipe(
-        map(allWallets =>
-          allWallets.flatMap((wallet): AnyAccount[] => wallet.accounts),
-        ),
-      ),
-    ),
-    map(([, defaultTestNetNetworkId, accounts]) => {
-      // Check for existing Midnight account (for migration)
-      const existingMidnightAccount = accounts.find(
-        account => account.blockchainName === 'Midnight',
-      );
-      const testnetNetworkId = existingMidnightAccount
-        ? (existingMidnightAccount.blockchainSpecific as MidnightAccountProps)
-            .networkId
-        : defaultTestNetNetworkId;
-
-      return actions.network.setBlockchainNetworks({
-        blockchain: 'Midnight',
-        mainnet: MidnightNetworkId('mainnet'),
-        testnet: MidnightNetworkId(testnetNetworkId),
-      });
-    }),
-  );
 
 const getFeatureFlagByName = (
   featureFlags: FeatureFlag[],

@@ -453,7 +453,7 @@ describe('handleCip30Message', () => {
         address: PAYMENT_ADDRESS,
         payload: 'deadbeef',
         accountId,
-        collateralRefusal: null,
+        refusal: null,
       });
     });
 
@@ -547,26 +547,29 @@ describe('handleCip30Message', () => {
     const origin = 'https://dapp.example';
 
     it('test:mobile-signtx-refused-pre-sheet — carries the API collateral verdict on the signing_required result, awaited before it is returned', async () => {
-      const getCollateralRefusal = vi
-        .spyOn(CardanoDappConnectorApi.prototype, 'getCollateralRefusal')
-        .mockResolvedValue('foreign-collateral-return');
+      const getSignTxRefusal = vi
+        .spyOn(CardanoDappConnectorApi.prototype, 'getSignTxRefusal')
+        .mockResolvedValue({
+          kind: 'collateral',
+          case: 'foreign-collateral-return',
+        });
       const result = await handleCip30Message(
         { ...createRequest('req-1', 'signTx'), args: [CASE_B_TX_CBOR, true] },
         origin,
         createMockDeps({ isSessionAuthorized: () => true }),
       );
-      expect(getCollateralRefusal).toHaveBeenCalledWith(CASE_B_TX_CBOR, origin);
+      expect(getSignTxRefusal).toHaveBeenCalledWith(CASE_B_TX_CBOR, origin);
       expect(result).toMatchObject({
         type: 'signing_required',
         signingType: 'signTx',
-        collateralRefusal: 'foreign-collateral-return',
+        refusal: { kind: 'collateral', case: 'foreign-collateral-return' },
       });
-      getCollateralRefusal.mockRestore();
+      getSignTxRefusal.mockRestore();
     });
 
-    it("test:mobile-allow-path-parity — an allowed transaction carries collateralRefusal: null and is otherwise today's result", async () => {
-      const getCollateralRefusal = vi
-        .spyOn(CardanoDappConnectorApi.prototype, 'getCollateralRefusal')
+    it("test:mobile-allow-path-parity — an allowed transaction carries refusal: null and is otherwise today's result", async () => {
+      const getSignTxRefusal = vi
+        .spyOn(CardanoDappConnectorApi.prototype, 'getSignTxRefusal')
         .mockResolvedValue(null);
       const result = await handleCip30Message(
         { ...createRequest('req-2', 'signTx'), args: ['a1b2c3d4e5f6', false] },
@@ -581,9 +584,9 @@ describe('handleCip30Message', () => {
         signingType: 'signTx',
         txHex: 'a1b2c3d4e5f6',
         partialSign: false,
-        collateralRefusal: null,
+        refusal: null,
       });
-      getCollateralRefusal.mockRestore();
+      getSignTxRefusal.mockRestore();
     });
 
     it('test:mobile-pre-consent-chained-union — the handler hands its real chained-output resolver to the API, so a chained own collateral is seen pre-sheet', async () => {
@@ -606,7 +609,7 @@ describe('handleCip30Message', () => {
       );
       expect(result).toMatchObject({
         type: 'signing_required',
-        collateralRefusal: null,
+        refusal: null,
       });
     });
   });
@@ -617,7 +620,7 @@ describe('handleCip30Message', () => {
     beforeEach(() => {
       vi.spyOn(
         CardanoDappConnectorApi.prototype,
-        'getCollateralRefusal',
+        'getSignTxRefusal',
       ).mockResolvedValue(null);
     });
 
@@ -640,7 +643,7 @@ describe('handleCip30Message', () => {
         signingType: 'signTx',
         txHex,
         partialSign: false,
-        collateralRefusal: null,
+        refusal: null,
       });
     });
 
@@ -663,7 +666,7 @@ describe('handleCip30Message', () => {
         signingType: 'signTx',
         txHex,
         partialSign: false,
-        collateralRefusal: null,
+        refusal: null,
       });
     });
 
@@ -686,7 +689,7 @@ describe('handleCip30Message', () => {
         signingType: 'signTx',
         txHex,
         partialSign: true,
-        collateralRefusal: null,
+        refusal: null,
       });
     });
   });

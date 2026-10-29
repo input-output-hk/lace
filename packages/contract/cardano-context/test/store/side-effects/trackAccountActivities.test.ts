@@ -1,10 +1,12 @@
 import { Cardano, ProviderError, ProviderFailure } from '@cardano-sdk/core';
 import { activitiesActions, ActivityType } from '@lace-contract/activities';
 import { failuresActions } from '@lace-contract/failures';
+import { syncActions } from '@lace-contract/sync';
 import { TokenId } from '@lace-contract/tokens';
-import { BigNumber, Ok, Timestamp } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
-import { defer, of } from 'rxjs';
+import { AccountId } from '@lace-contract/wallet-repo';
+import { BigNumber, Ok, Err, Timestamp } from '@lace-lib/util';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
+import { defer, NEVER, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -16,6 +18,10 @@ import {
   CardanoPaymentAddress,
 } from '../../../src';
 import { createTrackAccountActivities } from '../../../src/store/side-effects/track-account-activities';
+import {
+  cardanoContextReducers,
+  cardanoContextSelectors,
+} from '../../../src/store/slice';
 import { CardanoActivitiesProcessingFailureId } from '../../../src/value-objects';
 import {
   account0Context,
@@ -23,6 +29,7 @@ import {
   chainId,
   createTransactionHistoryItem,
 } from '../../mocks';
+import { threeAccountCardanoWalletAccounts } from '../../mocks';
 
 import type {
   CardanoAccountToRewardsMap,
@@ -32,6 +39,7 @@ import type {
   ExtendedTxDetails,
   RequiredProtocolParameters,
 } from '../../../src';
+import type { ActionCreators, Selectors } from '../../../src/contract';
 import type {
   MissingRewardData,
   MissingTransactionData,
@@ -39,6 +47,44 @@ import type {
 import type { Activity } from '@lace-contract/activities';
 import type { Failure, FailureId } from '@lace-contract/failures';
 import type { TranslationKey } from '@lace-contract/i18n';
+
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      stateObservables: {
+        ...config.stateObservables,
+        wallets: {
+          selectActiveNetworkAccounts$: of([
+            threeAccountCardanoWalletAccounts[0],
+            {
+              ...threeAccountCardanoWalletAccounts[0],
+              accountId: AccountId('other-account'),
+            },
+          ]),
+          ...config.stateObservables?.wallets,
+        },
+      },
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          completeSyncOperation$: NEVER,
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          resetWalletSyncState$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 
 const actions = {
   ...activitiesActions,
@@ -71,6 +117,179 @@ describe('cardano-context side effects', () => {
   };
 
   describe('trackAccountActivities', () => {
+    it.each(['reset', 'resume', 'failed-reset'])(
+      'preserves other account work and restarts unchanged history after %s',
+      reason => {
+        const isResume = reason === 'resume';
+        const isFailure = reason === 'failed-reset';
+        const missing: MissingTransactionData = {
+          kind: ActivityKind.Transaction,
+          timestamp: Timestamp(1),
+          txId: Cardano.TransactionId(mockTxId),
+          accountId: cardanoAccount0Addr.accountId,
+          rewardAccount: rewardAccount0,
+          accountAddresses: [
+            CardanoPaymentAddress(cardanoAccount0Addr.address),
+          ],
+        };
+        const otherId = AccountId('other-account');
+        const reducer = cardanoContextReducers.cardanoContext;
+        const reset = actions.cardanoContext.resetWalletSyncState({
+          accountId: missing.accountId,
+        });
+        let before = reducer(undefined, { type: 'init' });
+        for (const id of [missing.accountId, otherId]) {
+          before = reducer(
+            before,
+            actions.cardanoContext.setAccountTransactionHistory({
+              accountId: id,
+              addressHistories: [
+                {
+                  address: CardanoPaymentAddress(cardanoAccount0Addr.address),
+                  transactionHistory: [
+                    createTransactionHistoryItem({
+                      id: mockTxId,
+                      blockTime: 1,
+                    }),
+                  ],
+                  hasLoadedOldestEntry: true,
+                },
+              ],
+            }),
+          );
+        }
+        const history =
+          cardanoContextSelectors.cardanoContext
+            .selectTransactionHistoryGroupedByAccount;
+        const beforeHistory = history({ cardanoContext: before });
+        const afterHistory = history({
+          cardanoContext: reducer(before, reset),
+        });
+        const mapTransactionToActivity = vi
+          .fn()
+          .mockReturnValue(of(Err(new Error('Mapping failed'))));
+        testSideEffect(
+          createTrackAccountActivities({
+            findMissingActivities: ({ transactionHistoryByAccount }) =>
+              [missing, { ...missing, accountId: otherId }, missing].filter(
+                item => transactionHistoryByAccount[item.accountId]?.length,
+              ),
+            mapTransactionToActivity,
+            mapRewardToActivity: vi.fn(),
+            debounceTimeout: 10,
+          }),
+          ({ cold, hot, flush }) => {
+            const getTransactionDetails = vi.fn().mockReturnValue(
+              cold('--------a|', {
+                a: Ok({ id: mockTxId } as ExtendedTxDetails),
+              }),
+            );
+            return {
+              actionObservables: {
+                sync: {
+                  completeSyncOperation$: isFailure
+                    ? hot('25ms a', {
+                        a: syncActions.sync.completeSyncOperation({
+                          accountId: missing.accountId,
+                          operationId: 'normal-transaction-polling',
+                        }),
+                      })
+                    : NEVER,
+                  clearPendingSyncsForAccounts$: isResume
+                    ? hot('15ms a', {
+                        a: syncActions.sync.clearPendingSyncsForAccounts({
+                          accountIds: [missing.accountId],
+                        }),
+                      })
+                    : NEVER,
+                },
+                cardanoContext: {
+                  setWalletSyncResetResult$: isFailure
+                    ? hot('15ms a', {
+                        a: actions.cardanoContext.setWalletSyncResetResult({
+                          accountId: missing.accountId,
+                          status: 'Failed',
+                        }),
+                      })
+                    : NEVER,
+                  resetWalletSyncState$:
+                    isResume || isFailure
+                      ? NEVER
+                      : hot('15ms a', {
+                          a: actions.cardanoContext.resetWalletSyncState({
+                            accountId: missing.accountId,
+                          }),
+                        }),
+                },
+              },
+              stateObservables: {
+                addresses: {
+                  selectAllAddresses$: of([cardanoAccount0AddrWithData]),
+                },
+                activities: {
+                  selectAllMap$: of({}),
+                  selectDesiredLoadedActivitiesCountPerAccount$: of({}),
+                },
+                cardanoContext: {
+                  selectChainId$: cold('a', { a: chainId }),
+                  selectProtocolParameters$: of(
+                    {} as RequiredProtocolParameters,
+                  ),
+                  selectEraSummaries$: of([]),
+                  selectTransactionHistoryGroupedByAccount$:
+                    isResume || isFailure
+                      ? of(beforeHistory)
+                      : hot('a 14ms b', {
+                          a: beforeHistory,
+                          b: afterHistory,
+                        }),
+                  selectRewardsHistoryGroupedByAccount$: of({}),
+                },
+                failures: { selectFailureById$: of(noFailureSelector) },
+                features: { selectLoadedFeatures$: of(emptyLoadedFeatures) },
+              },
+              dependencies: {
+                actions,
+                logger: dummyLogger,
+                cardanoProvider: {
+                  getTransactionDetails,
+                  resolveInput: vi.fn(),
+                } as unknown as CardanoProviderDependencies['cardanoProvider'],
+              },
+              assertion: sideEffect$ => {
+                const results: unknown[] = [];
+                sideEffect$.subscribe(action => results.push(action));
+                flush();
+                expect(getTransactionDetails).toHaveBeenCalledTimes(
+                  isResume || isFailure ? 4 : 2,
+                );
+                expect(mapTransactionToActivity).toHaveBeenCalledTimes(
+                  isResume || isFailure ? 3 : 1,
+                );
+                expect(results).toEqual([
+                  actions.failures.addFailure({
+                    failureId: CardanoActivitiesProcessingFailureId(otherId),
+                    message: 'sync.error.cardano-activities-processing-failed',
+                  }),
+                  ...(isResume || isFailure
+                    ? Array.from({ length: 2 }, () =>
+                        actions.failures.addFailure({
+                          failureId: CardanoActivitiesProcessingFailureId(
+                            missing.accountId,
+                          ),
+                          message:
+                            'sync.error.cardano-activities-processing-failed',
+                        }),
+                      )
+                    : []),
+                ]);
+              },
+            };
+          },
+        );
+      },
+    );
+
     it('fetches activity details and dispatches insertActivities action', () => {
       const findMissingActivitiesMock = vi.fn();
       const mapTransactionToActivityMock = vi.fn();
@@ -243,7 +462,9 @@ describe('cardano-context side effects', () => {
                 transactionHistoryByAccount: transactionHistoryByAccountMock,
                 accountRewardsHistoryByAccount: rewardsHistoryByAccountMock,
                 mapRewardToActivity: mapRewardToActivityMock,
-                loadedActivities: {},
+                loadedActivities: {
+                  [cardanoAccount0AddrWithData.accountId]: [],
+                },
                 chainId,
                 eraSummaries: [],
                 desiredLoadedActivitiesCountPerAccount: {

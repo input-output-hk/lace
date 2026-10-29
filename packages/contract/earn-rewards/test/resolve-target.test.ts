@@ -150,6 +150,27 @@ describe('resolveEarnRewardsTarget — availability guards', () => {
     expect(target?.poolId).toBe(Cardano.PoolId(POOL));
   });
 
+  // Only the first promoted entry is read, so an unusable one ahead of a valid
+  // one would suppress the whole vote leg. The parser drops it for this
+  // reason; asserted here because the parser's own suite cannot show the
+  // consequence.
+  it('resolves the DRep behind an unusable first promoted entry', () => {
+    const target = resolveEarnRewardsTarget({
+      chainId: Cardano.ChainIds.Preprod,
+      featureFlags: [
+        {
+          key: FEATURE_FLAG_GOVERNANCE_CENTER,
+          payload: { promotedDreps: { preprod: [{ id: 42 }, { id: DREP }] } },
+        } as FeatureFlag,
+        earnRewardsFlag(3.2),
+      ],
+    });
+    expect(target?.dRep).toEqual({
+      type: 'specific',
+      drepId: Cardano.DRepID(DREP),
+    });
+  });
+
   /**
    * The four configuration combos (LW-15293). Each leg resolves independently:
    * an absent pool must not disable vote delegation — the user selects a pool

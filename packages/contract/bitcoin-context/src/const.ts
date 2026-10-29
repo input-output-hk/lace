@@ -6,7 +6,9 @@ import { BitcoinNetworkId } from './value-objects';
 import type { FeatureFlagKey } from '@lace-contract/feature';
 import type { BlockchainNetworkId } from '@lace-contract/network';
 
+/** Enables Bitcoin accounts: the Bitcoin chain and provider modules load with it. */
 export const BITCOIN_FEATURE_FLAG = 'BLOCKCHAIN_BITCOIN' as FeatureFlagKey;
+/** Enables Bitcoin fee rate estimates from mempool.space. */
 export const BITCOIN_MEMPOOL_FEE_MARKET_FEATURE_FLAG =
   'BITCOIN_MEMPOOL_FEE_MARKET' as FeatureFlagKey;
 

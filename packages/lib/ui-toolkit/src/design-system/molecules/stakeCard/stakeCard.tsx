@@ -185,11 +185,11 @@ export const StakeCard = ({
         />
         <View style={styles.headerInfo}>
           <Row alignItems="center" gap={spacing.XS}>
-            <Icon name={blockchain} size={12} variant="solid" />
+            <Icon name={blockchain} size={12} strokeWidth={2} />
             <Text.S testID={`${testID}-account-name`}>{accountName}</Text.S>
           </Row>
           <Row alignItems="center" gap={spacing.XS}>
-            {isShielded && <Icon name="Shield" size={12} variant="solid" />}
+            {isShielded && <Icon name="Shield" size={12} strokeWidth={2} />}
             <Text.XS variant="secondary" testID={`${testID}-account-type`}>
               {accountType}
             </Text.XS>

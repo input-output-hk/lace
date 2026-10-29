@@ -4,6 +4,11 @@ import type { TokenIdsByFolderId } from './tokenFolderSlice';
 
 type FolderWithTokens = Folder & { tokens: Token[] };
 
+/**
+ * Tokens split by folder: the tokens assigned to no folder, and every folder
+ * with the tokens assigned to it. A token assigned to several folders appears
+ * in each.
+ */
 export type GroupedTokens = {
   nonFolderTokens: Token[];
   folders: FolderWithTokens[];
@@ -12,9 +17,9 @@ export type GroupedTokens = {
 /**
  * Groups tokens into their respective folders using the assignment map.
  *
- * @param tokens An array of token objects to be grouped.
- * @param tokenFolders An array of available folder objects.
- * @param tokenIdsByFolderId A map of folder IDs to arrays of token IDs.
+ * @param tokens - An array of token objects to be grouped.
+ * @param tokenFolders - An array of available folder objects.
+ * @param tokenIdsByFolderId - A map of folder IDs to arrays of token IDs.
  * @returns An object containing tokens that are not in any folder and folders with their assigned tokens.
  */
 export const groupTokensIntoFolders = (

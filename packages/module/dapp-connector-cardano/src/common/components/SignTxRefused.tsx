@@ -4,7 +4,10 @@ import { useTranslation } from '@lace-contract/i18n';
 import { Column, Icon, spacing, Text } from '@lace-lib/ui-toolkit';
 import React from 'react';
 
-import { SIGN_TX_REFUSED_KEYS } from './sign-tx-refused-keys';
+import {
+  networkRefusalDescriptionKey,
+  SIGN_TX_REFUSED_KEYS,
+} from './sign-tx-refused-keys';
 
 import type { SignTxRefusalDetails } from './sign-tx-refused-keys';
 
@@ -38,9 +41,13 @@ export const SignTxRefused = ({
       style={style}>
       {/* Decorative only -- already shipping on this surface
           (`AuthorizeDappStatusTag`); the refusal is conveyed in TEXT. */}
-      <Icon name="AlertTriangle" size={43} variant="solid" />
+      <Icon name="AlertTriangle" size={43} strokeWidth={2} />
       <Text.M align="center" testID="sign-tx-refused-description">
-        {t(SIGN_TX_REFUSED_KEYS.description[refusal.case])}
+        {refusal.kind === 'network'
+          ? t(networkRefusalDescriptionKey(refusal), {
+              walletNetwork: refusal.walletNetwork,
+            })
+          : t(SIGN_TX_REFUSED_KEYS.description[refusal.case])}
       </Text.M>
       <Text.S align="center">{t(SIGN_TX_REFUSED_KEYS.reassurance)}</Text.S>
       <Text.XS align="center">{t(SIGN_TX_REFUSED_KEYS.originLabel)}</Text.XS>

@@ -84,7 +84,7 @@ export const CollapsibleSection = ({
             icon={
               <Animated.View
                 style={{ transform: [{ rotate: chevronRotation }] }}>
-                <Icon name="CaretDown" size={20} variant="stroke" />
+                <Icon name="CaretDown" size={20} />
               </Animated.View>
             }
           />

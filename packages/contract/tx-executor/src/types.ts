@@ -70,6 +70,12 @@ export type BuildTxParams<
   serializedTx: string;
   txParams: TxParamsBundle<BSTokenMetadata, BSTxParams>;
   blockchainSpecificSendFlowData: BSSendFlowData;
+  /**
+   * Lets the builder fund the transaction from the account's withdrawable
+   * staking rewards when its spendable balance alone cannot. Set it only from
+   * a flow that shows the result's `withdrawals` to the user before signing.
+   */
+  allowRewardsWithdrawal?: boolean;
 }>;
 
 export type TxBuildResult = Result<
@@ -77,6 +83,8 @@ export type TxBuildResult = Result<
     fees: FeeEntry[];
     serializedTx: string;
     warningTranslationKey?: TranslationKey;
+    /** Value drawn from outside the inputs, such as withdrawn staking rewards. */
+    withdrawals?: FeeEntry[];
   },
   { errorTranslationKey: TranslationKey }
 >;
@@ -113,11 +121,10 @@ export type TxSubmissionResult = Result<
     txId: TxId;
     blockchainSpecificActivityMetadata?: unknown;
     /**
-     * Set when submitTx resolves only after on-chain finalization (Midnight):
-     * the tx is already confirmed on success, so the send flow skips the
-     * optimistic pending activity and lets the confirmed row arrive via sync.
-     * Omitted for chains whose submit returns before confirmation — they keep
-     * the optimistic "Sending" row until the confirmed one supersedes it.
+     * Set when submitTx resolves only after on-chain finalization: the
+     * transaction is already confirmed on success, so there is no pending
+     * state to show. Omitted for blockchains whose submit returns before
+     * confirmation.
      */
     awaitsFinalization?: boolean;
   },

@@ -405,7 +405,18 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
     // Refusing post-consent still has to report: the flow that resolved the
     // confirmation waits on signingResult$, and requests are served one at a
     // time, so staying silent here would wedge every request behind this one.
-    expect(signingResults).toEqual([{ type: 'error' }]);
+    expect(signingResults).toEqual([
+      {
+        type: 'error',
+        error: {
+          stage: 'signing preparation',
+          name: 'TxSignError',
+          code: 1,
+          message:
+            'The wallet does not have the secret key associated with some of the inputs or certificates.',
+        },
+      },
+    ]);
   });
 
   it('rejects a partial sign with ProofGeneration when the script needs a key the wallet does not own', async () => {
@@ -416,7 +427,19 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
       name: 'TxSignError',
       code: TxSignErrorCode.ProofGeneration,
     });
-    expect(signingResults).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
+    expect(signingResults).toEqual([
+      {
+        type: 'error',
+        hwErrorKeys: undefined,
+        error: {
+          stage: 'signing',
+          name: 'TxSignError',
+          code: 1,
+          message:
+            'The wallet does not have the secret key associated with any of the inputs and certificates.',
+        },
+      },
+    ]);
   });
 
   it('returns only the wallet witness for a multisig tx that already carries a cosigner signature', async () => {
@@ -499,7 +522,18 @@ describe('dApp-connector signTx — native-script witness end-to-end (commit 7a2
       code: TxSignErrorCode.ProofGeneration,
     });
     expect(signerFactory.createTransactionSigner).not.toHaveBeenCalled();
-    expect(signingResults).toEqual([{ type: 'error' }]);
+    expect(signingResults).toEqual([
+      {
+        type: 'error',
+        error: {
+          stage: 'signing preparation',
+          name: 'TxSignError',
+          code: 1,
+          message:
+            'The wallet does not have the secret key associated with some of the inputs or certificates.',
+        },
+      },
+    ]);
   });
 
   it('lets a Trezor full sign of an own-key-satisfiable script past the gate and creates the signer', async () => {

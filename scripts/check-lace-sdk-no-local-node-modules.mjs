@@ -20,7 +20,7 @@ if (realPackages.length > 0) {
   console.error(
     `\n❌ apps/lace-sdk has local node_modules with non-hoisted packages:\n` +
       realPackages.map(package_ => `  - ${package_}`).join('\n') +
-      `\n\nAll dependencies of @input-output-hk/lace-sdk must be hoisted to the monorepo root.\n` +
+      `\n\nAll dependencies of @laceio/sdk must be hoisted to the monorepo root.\n` +
       `Fix: align the dependency versions in apps/lace-sdk/package.json with the root package.json.\n`,
   );
   process.exit(1);

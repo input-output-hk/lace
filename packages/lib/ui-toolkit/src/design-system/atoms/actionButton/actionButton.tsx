@@ -26,7 +26,7 @@ export type ActionButtonProps = Omit<PressableProps, 'style'> & {
   containerStyle?: ViewStyle | ViewStyle[];
   titleStyle?: TextStyle;
   iconStyle?: {
-    variant?: 'solid' | 'stroke';
+    strokeWidth?: number;
     color?: string;
     size?: number;
   };
@@ -61,7 +61,7 @@ export const ActionButton = ({
       typeof icon === 'string' ? (
         <Icon
           name={icon}
-          variant={iconStyle?.variant}
+          strokeWidth={iconStyle?.strokeWidth}
           color={iconStyle?.color}
           size={iconStyle?.size}
           testID={`${testID}-icon`}

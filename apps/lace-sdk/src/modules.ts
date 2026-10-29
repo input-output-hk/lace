@@ -1,12 +1,8 @@
-export { default as blockchainCardano } from '@lace-module/blockchain-cardano/sdk';
-export { default as cardanoProviderBlockfrost } from '@lace-module/cardano-provider-blockfrost/sdk';
-export { default as cryptoCardanoSdk } from '@lace-module/crypto-cardano-sdk/sdk';
-export { default as featureDev } from '@lace-module/feature-dev/sdk';
+// The canary root entry's `m` namespace: the Cardano modules of the stable
+// root, and the Bitcoin chain, provider and fee market.
 export {
-  createDevSponsor,
-  createHttpProver,
-  createPasskeyAuthoriser,
-  createPassportAccountModule,
-} from '@lace-module/passport-account/sdk';
-export { default as storageInMemory } from '@lace-module/storage-in-memory/sdk';
-export { default as storageWebIndexeddb } from '@lace-module/storage-web-indexeddb/sdk';
+  bitcoinMempoolFeeMarket,
+  bitcoinProviderMaestro,
+  blockchainBitcoin,
+} from './bitcoin/modules';
+export * from './modules-cardano';

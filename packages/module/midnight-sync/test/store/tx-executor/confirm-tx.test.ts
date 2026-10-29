@@ -141,7 +141,7 @@ describe('blockchain-midnight confirm-tx', () => {
             title: 'tx-executor.confirmation-error.generic.title',
             subtitle: 'tx-executor.confirmation-error.generic.subtitle',
           },
-          error: { message: 'Could not load midnight wallet' },
+          error: { message: 'Could not load midnight wallet', name: 'Error' },
         },
       });
     });

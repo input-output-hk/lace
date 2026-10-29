@@ -7,36 +7,36 @@ import { signerFactoryAddonContract } from '@lace-contract/signer';
 
 import {
   CardanoLazyInMemorySignerFactory,
-  type GetMnemonicWords,
+  type WithMnemonicWords,
 } from './cardano-lazy-in-memory-signer-factory';
 
+/** The options of `createLazyInMemoryVaultModule`. */
 export type CreateLazyInMemoryVaultModuleProps = {
   /**
-   * Resolves the BIP-39 mnemonic for the requested account on every sign call.
-   *
-   * The SDK never persists the returned words: they are fed into a fresh
-   * in-memory key agent that is discarded as soon as the sign call completes,
-   * keeping the seed exclusively in the caller's key-management service
-   * (e.g. Torus / Web3Auth).
+   * Supplies the recovery words for one signature: call `use(words)` and
+   * await it, so the words stay inside the callback until signing finishes.
    */
-  getMnemonicWords: GetMnemonicWords;
+  withMnemonicWords: WithMnemonicWords;
 };
 
 /**
- * Builds a {@link LaceModuleMap} that supplies a Cardano signer factory for
- * {@link WalletType.LazyInMemory} accounts.
+ * Builds a vault module that signs for {@link WalletType.LazyInMemory}
+ * Cardano accounts by asking `withMnemonicWords` for the recovery words at
+ * each signature. The words must derive the account's stored key, or signing
+ * fails with `LazyWalletMismatchError`.
  *
- * Pass the returned map to `createLaceWallet({ modules: [...] })`. Only the
+ * Pass the returned module to `createLaceWallet({ modules: [...] })`. Only the
  * `signer-factory-addon` contract is implemented — `vaultContract` is
  * intentionally omitted because the SDK has no encrypted vault to expose to
  * features such as account management or password verification.
+ *
+ * @param props - The source of the recovery words.
+ * @returns A module for the `modules` array of `createLaceWallet`.
  */
-export const createLazyInMemoryVaultModule = ({
-  getMnemonicWords,
-}: CreateLazyInMemoryVaultModuleProps) => {
-  const signerFactory = new CardanoLazyInMemorySignerFactory({
-    getMnemonicWords,
-  });
+export const createLazyInMemoryVaultModule = (
+  props: CreateLazyInMemoryVaultModuleProps,
+) => {
+  const signerFactory = new CardanoLazyInMemorySignerFactory(props);
 
   const implementsContracts = combineContracts([
     signerFactoryAddonContract,

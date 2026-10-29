@@ -1,0 +1,6 @@
+kind: Added
+body: Cardano wallets, including multisig accounts, can request a fresh sync that rebuilds cached balances and activity history and refreshes token metadata. Address discovery remains available separately.
+time: 2026-10-27T18:00:02Z
+custom:
+  Package: sdk
+  Build: stable

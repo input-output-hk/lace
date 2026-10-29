@@ -27,9 +27,15 @@ const hoisted = vi.hoisted(() => {
     signTransaction: vi.fn().mockResolvedValue(new Map()),
     initializeTrezorTransport: vi.fn().mockResolvedValue(true),
     dispose: vi.fn(),
-    TransactionCtor: Object.assign(vi.fn().mockReturnValue(mockSignedTx), {
-      fromCbor: vi.fn().mockReturnValue(mockTransaction),
-    }),
+    TransactionCtor: Object.assign(
+      // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+      vi.fn(function () {
+        return mockSignedTx;
+      }),
+      {
+        fromCbor: vi.fn().mockReturnValue(mockTransaction),
+      },
+    ),
   };
 });
 
@@ -51,9 +57,10 @@ vi.mock('@cardano-sdk/core', async importOriginal => {
 // spy plus the static initializeTrezorTransport awaited before construction.
 vi.mock('@cardano-sdk/hardware-trezor', () => ({
   TrezorKeyAgent: Object.assign(
-    vi.fn().mockImplementation(() => ({
-      signTransaction: hoisted.signTransaction,
-    })),
+    // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+    vi.fn(function () {
+      return { signTransaction: hoisted.signTransaction };
+    }),
     { initializeTrezorTransport: hoisted.initializeTrezorTransport },
   ),
 }));

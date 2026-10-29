@@ -91,7 +91,7 @@ const assignParts = (
  * mint-like surplus from a negative target goes to the largest map, and
  * burn-like reduction is removed from the smallest quantities first.
  *
- * @throws {InputSelectionError} With `BalanceInsufficient` when the selection
+ * @throws `InputSelectionError` With `BalanceInsufficient` when the selection
  *   does not cover the target for some asset.
  */
 const distributeAssetExcesses = (
@@ -185,7 +185,7 @@ const splitOversizedMaps = (
  * @returns The change outputs, or `undefined` when the selected ada cannot
  *   fund the min-ADA requirement of every kept change map, so that the caller
  *   can select additional ada and retry.
- * @throws {InputSelectionError} With `BalanceInsufficient` when the selection
+ * @throws `InputSelectionError` With `BalanceInsufficient` when the selection
  *   does not cover the target for ada or some asset.
  */
 const makeChange = (params: MakeChangeParams): Cardano.TxOut[] | undefined => {
@@ -292,7 +292,7 @@ const withoutEmptyValues = (outputs: Cardano.TxOut[]): Cardano.TxOut[] =>
  * @returns Min-ADA compliant change outputs, zero-value outputs excluded;
  *   possibly fewer than desired when the pool ran out while mimicking the
  *   user output shape.
- * @throws {InputSelectionError} `UtxoFullyDepleted` when the pool is
+ * @throws `InputSelectionError` `UtxoFullyDepleted` when the pool is
  *   exhausted before valid change can be constructed; `BalanceInsufficient`
  *   when the selection does not cover the target.
  */

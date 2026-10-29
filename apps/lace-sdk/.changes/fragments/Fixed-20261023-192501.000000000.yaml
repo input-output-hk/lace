@@ -1,0 +1,6 @@
+kind: Fixed
+body: Cardano script transactions avoid excess fees when reducing the execution budget changes the size of the change or collateral return output.
+time: 2026-10-23T19:25:01Z
+custom:
+  Package: sdk
+  Build: stable

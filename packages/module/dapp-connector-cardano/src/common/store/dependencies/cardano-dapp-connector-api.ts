@@ -2,16 +2,21 @@ import { Cardano, Serialization } from '@cardano-sdk/core';
 import { AddressType, KeyRole } from '@cardano-sdk/key-management';
 import {
   type AccountRewardAccountDetailsMap,
+  type AccountUtxoMap,
   type CardanoAccountAddressHistoryMap,
+  type CardanoAddressData,
   type CardanoPaymentAddress,
-  type CollateralOwnershipErrorCase,
+  type CardanoProvider,
+  type CardanoSignerContext,
   collateralOwnershipSets,
-  collateralRefusalMessage,
   collateralRefusalCase,
   isCardanoAccount,
   isCardanoAddress,
+  isCardanoBip32Account,
   resolveSignDataContext,
+  type RewardAccountDetails,
   UnknownSignWithError,
+  utxoKey,
 } from '@lace-contract/cardano-context';
 import {
   AuthenticationCancelledError,
@@ -41,10 +46,29 @@ import {
   TxSignErrorCode,
 } from '../../api-error';
 import { supportedCip30Extensions } from '../../cip30-extensions';
+import {
+  isVerdictOnUnfetchedOwnership,
+  ownershipNotReadyError,
+} from '../ownership-readiness';
+import {
+  refusalLogAnchor,
+  refusalLogCase,
+  signTxRefusalMessage,
+} from '../sign-tx-refusal';
 import { addrToSignWith, transformToGroupedAddresses } from '../util';
 import { requiresForeignSignaturesFromCbor } from '../utils/input-resolver';
+import {
+  cardanoNetworkName,
+  bodyStatesDuplicateKeys,
+  networkBindingRefusal,
+  networkBindingRefusalMessage,
+  statedNetworkLabel,
+  UNREADABLE_BYTES,
+} from '../utils/network-binding';
 
+import type { SanitisedSignTxError } from '../../utils/sign-tx-error-details';
 import type { ChainedTxOutputCache } from '../chained-tx-output-cache';
+import type { RefusalLogStage, SignTxRefusal } from '../sign-tx-refusal';
 import type { CardanoConfirmationCallback } from './create-confirmation-callback';
 import type {
   Address,
@@ -67,13 +91,6 @@ import type {
   AccessAuthSecret,
   Authenticate,
 } from '@lace-contract/authentication-prompt';
-import type {
-  AccountUtxoMap,
-  CardanoAddressData,
-  CardanoProvider,
-  CardanoSignerContext,
-  RewardAccountDetails,
-} from '@lace-contract/cardano-context';
 import type { SignerFactory } from '@lace-contract/signer';
 import type { HwSigningErrorTranslationKeys } from '@lace-lib/util-hw';
 import type { Observable, Subject } from 'rxjs';
@@ -163,17 +180,17 @@ const derivePublicKeyForAccount = async ({
     );
   }
 
-  if (account.accountType == 'MultiSig') {
-    throw new APIError(
-      APIErrorCode.InternalError,
-      `${keyLabel} key retrieval not supported for MultiSig accounts: ${accountId}`,
-    );
-  }
-
   if (!isCardanoAccount(account)) {
     throw new APIError(
       APIErrorCode.InternalError,
       `Account is not a Cardano account for ID: ${accountId}`,
+    );
+  }
+
+  if (!isCardanoBip32Account(account)) {
+    throw new APIError(
+      APIErrorCode.InternalError,
+      `${keyLabel} key retrieval not supported for ${account.accountType} accounts: ${accountId}`,
     );
   }
 
@@ -250,29 +267,13 @@ export interface CardanoDappConnectorApiDependencies {
 }
 
 export type SigningResult =
+  | {
+      type: 'error';
+      hwErrorKeys?: HwSigningErrorTranslationKeys;
+      error?: SanitisedSignTxError;
+    }
   | { type: 'cancelled' }
-  | { type: 'error'; hwErrorKeys?: HwSigningErrorTranslationKeys }
   | { type: 'success' };
-
-/**
- * Block-path observability: one greppable anchor, and a `stage` on the
- * payload so the states stay machine-distinguishable without depending on
- * four separate sentences surviving copy-editing.
- */
-export const COLLATERAL_BLOCK_LOG =
-  '[dapp-connector-cardano] collateral-ownership block';
-
-/**
- * Where a blocked request got to. `refused` always happens; the others say
- * whether the user was actually told. A blocked request with no
- * `screen-presented` was refused WITHOUT the user ever seeing why, which is
- * what a dApp parking the consent slot achieves.
- */
-export type CollateralBlockStage =
-  | 'disclosure-failed'
-  | 'disclosure-requested'
-  | 'refused'
-  | 'screen-presented';
 
 /**
  * Applies CIP-30 pagination: a page starting beyond the available items is
@@ -689,34 +690,31 @@ export class CardanoDappConnectorApi
 
     const origin = this.#extractOrigin({ sender });
 
-    const collateralRefusal = await this.#validateCanSign(
-      tx,
-      partialSign,
-      origin,
-    );
+    const refusal = await this.#validateCanSign(tx, partialSign, origin);
 
-    if (collateralRefusal) {
+    if (refusal) {
       // The screen informs, it does not authorize: the throw below is
       // unconditional and must never await a consent outcome. Not awaiting is
-      // also what keeps the consent slot held, so `exhaustMap` upstream drops
-      // the follow-up signTx an attacker would use to repaint the screen away.
-      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
-        stage: 'refused' satisfies CollateralBlockStage,
+      // also what keeps the consent slot held, so the follow-up signTx an
+      // attacker would use to repaint the screen cannot overtake it -- the
+      // upstream `concatMap` serializes it behind this one.
+      this.#logger?.warn(refusalLogAnchor(refusal), {
+        stage: 'refused' satisfies RefusalLogStage,
         origin,
-        case: collateralRefusal,
+        case: refusalLogCase(refusal),
         partialSign,
       });
-      this.#presentCollateralRefusal({
+      this.#presentRefusal({
         requestConfirmation: this.#userConfirmationRequest,
         sender,
         txHex: tx,
         partialSign,
-        collateralRefusal,
+        refusal,
         origin,
       });
       throw new TxSignError(
         TxSignErrorCode.ProofGeneration,
-        collateralRefusalMessage(collateralRefusal),
+        signTxRefusalMessage(refusal),
       );
     }
 
@@ -1216,16 +1214,22 @@ export class CardanoDappConnectorApi
   }
 
   /**
-   * The collateral-return verdict alone, for a surface that presents its own
+   * The presentable verdicts alone, for a surface that presents its own
    * consent (mobile): the same local, best-effort evaluation `signTx` runs
    * before consent, without the foreign-signature half, so nothing else moves
-   * pre-sheet. Throws the same typed errors as that half.
+   * pre-sheet.
+   *
+   * RETURNS the network-binding and collateral verdicts, so the caller can
+   * open its sheet refused. Still THROWS for the rest -- unknown origin,
+   * missing chain id, unknown account, bytes that will not parse -- because
+   * none of those describes a transaction the user could be shown.
    */
-  public async getCollateralRefusal(
+  public async getSignTxRefusal(
     txHex: Cbor,
     origin: string,
-  ): Promise<CollateralOwnershipErrorCase | null> {
-    return (await this.#collateralVerdict(txHex, origin)).collateralRefusal;
+  ): Promise<SignTxRefusal | null> {
+    const verdict = await this.#preConsentVerdict(txHex, origin);
+    return verdict.outcome === 'refused' ? verdict.refusal : null;
   }
 
   /**
@@ -1432,45 +1436,46 @@ export class CardanoDappConnectorApi
    * Takes the consent channel as a parameter rather than reading the field,
    * because the caller has already proved it exists.
    */
-  #presentCollateralRefusal({
+  #presentRefusal({
     requestConfirmation,
     sender,
     txHex,
     partialSign,
-    collateralRefusal,
+    refusal,
     origin,
   }: {
     requestConfirmation: CardanoConfirmationCallback;
     sender: SenderContext['sender'];
     txHex: Cbor;
     partialSign: boolean;
-    collateralRefusal: CollateralOwnershipErrorCase;
+    refusal: SignTxRefusal;
     origin: string;
   }): void {
-    const context = { origin, case: collateralRefusal, partialSign };
+    const log = refusalLogAnchor(refusal);
+    const context = { origin, case: refusalLogCase(refusal), partialSign };
     try {
       const disclosure = requestConfirmation(sender, 'signTx', {
         txHex,
         partialSign,
-        collateralRefusal,
+        refusal,
       });
       // "Requested", never "shown": whether a screen appears is decided
       // downstream (see `refusedSignTx$`, which logs when it does).
-      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+      this.#logger?.warn(log, {
         ...context,
-        stage: 'disclosure-requested' satisfies CollateralBlockStage,
+        stage: 'disclosure-requested' satisfies RefusalLogStage,
       });
       void disclosure.catch((error: unknown) => {
-        this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+        this.#logger?.warn(log, {
           ...context,
-          stage: 'disclosure-failed' satisfies CollateralBlockStage,
+          stage: 'disclosure-failed' satisfies RefusalLogStage,
           error,
         });
       });
     } catch (error) {
-      this.#logger?.warn(COLLATERAL_BLOCK_LOG, {
+      this.#logger?.warn(log, {
         ...context,
-        stage: 'disclosure-failed' satisfies CollateralBlockStage,
+        stage: 'disclosure-failed' satisfies RefusalLogStage,
         error,
       });
     }
@@ -1484,25 +1489,21 @@ export class CardanoDappConnectorApi
    * the signTransaction wrapper and stays authoritative.
    *
    * Throws for every pre-existing refusal (account change, missing chain id,
-   * unknown account, foreign signatures) and RETURNS the collateral refusal,
-   * so `signTx` can open the consent surface in the refused state before
-   * rejecting. `null` means the collateral rule allowed the transaction.
+   * unknown account, foreign signatures) and RETURNS a presentable one -- the
+   * network-binding and collateral verdicts -- so `signTx` can open the
+   * consent surface in the refused state before rejecting. `null` means both
+   * rules allowed the transaction.
    */
   async #validateCanSign(
     txCbor: Cbor,
     partialSign: boolean,
     origin: string,
-  ): Promise<CollateralOwnershipErrorCase | null> {
-    const {
-      collateralRefusal,
-      account,
-      wallet,
-      knownAddresses,
-      resolutionUtxos,
-    } = await this.#collateralVerdict(txCbor, origin);
-    if (collateralRefusal) {
-      return collateralRefusal;
+  ): Promise<SignTxRefusal | null> {
+    const verdict = await this.#preConsentVerdict(txCbor, origin);
+    if (verdict.outcome === 'refused') {
+      return verdict.refusal;
     }
+    const { account, wallet, knownAddresses, resolutionUtxos } = verdict;
 
     const { extendedAccountPublicKey } = account.blockchainSpecific as {
       extendedAccountPublicKey: Crypto.Bip32PublicKeyHex;
@@ -1534,11 +1535,15 @@ export class CardanoDappConnectorApi
   }
 
   /**
-   * The collateral half of the pre-consent check, computed once: the verdict
-   * plus the prelude the foreign-signature half consumes, so `#validateCanSign`
-   * never reads the store or decodes the transaction twice.
+   * The pre-consent rules, computed once: the network-binding rule first, the
+   * collateral rule second, plus the prelude the foreign-signature half
+   * consumes, so `#validateCanSign` never reads the store or decodes the
+   * transaction twice.
+   *
+   * `outcome` is the discriminant callers narrow on: `'allowed'` carries the
+   * prelude, `'refused'` carries the verdict and nothing else.
    */
-  async #collateralVerdict(txCbor: Cbor, origin: string) {
+  async #preConsentVerdict(txCbor: Cbor, origin: string) {
     const accountId = this.#getAccountIdForOrigin(origin);
     if (!accountId) {
       throw new APIError(
@@ -1570,11 +1575,22 @@ export class CardanoDappConnectorApi
       );
     }
 
-    const account = allAccounts.find(a => a.accountId === accountId);
-    if (!account || !isCardanoAccount(account)) {
+    // Bytes that will not parse get the same answer here as
+    // `cborNetworkBindingRefusal` gives, instead of a raw serialisation
+    // error: one dApp-visible code for one kind of bad input, whatever path
+    // reached it.
+    let body: Cardano.TxBody;
+    try {
+      body = Serialization.Transaction.fromCbor(
+        Serialization.TxCBOR(txCbor),
+      ).toCore().body;
+    } catch {
       throw new TxSignError(
         TxSignErrorCode.ProofGeneration,
-        `Cardano account not found for ID: ${accountId}`,
+        networkBindingRefusalMessage('undecodable', {
+          statedNetwork: null,
+          walletNetwork: cardanoNetworkName(chainId.networkMagic),
+        }),
       );
     }
 
@@ -1583,31 +1599,76 @@ export class CardanoDappConnectorApi
       txCbor,
       new Set<string>(knownAddresses.map(({ address }) => address)),
     );
+    // The OWNERSHIP authority both rules below read: `ownershipUtxos$` -- the
+    // full settled set plus own pending outputs, NOT the `accountUtxos$`
+    // available view, which subtracts exactly the collateral-reserved UTxOs
+    // the collateral rule exists to catch.
+    const ownershipUtxos = [
+      ...(ownershipAccountUtxos[accountId] ?? []),
+      ...chainedOwnUtxos,
+    ];
+
+    // Ahead of every other refusal: a transaction that is not bound to this
+    // network cannot be signed at all, so its collateral standing is moot and
+    // a refusal screen about collateral would describe the wrong problem.
+    const binding = networkBindingRefusal(
+      body,
+      chainId.networkId,
+      // Gated like the wire-format entry point: this site decodes the body
+      // itself, so it has to ask about the bytes itself too.
+      bodyStatesDuplicateKeys(txCbor)
+        ? UNREADABLE_BYTES
+        : new Set(ownershipUtxos.map(utxoKey)),
+    );
+    if (
+      isVerdictOnUnfetchedOwnership(binding, ownershipAccountUtxos, accountId)
+    ) {
+      throw ownershipNotReadyError();
+    }
+    if (binding !== null) {
+      const refusal: SignTxRefusal = {
+        kind: 'network',
+        cause: binding,
+        statedNetwork: statedNetworkLabel(body, chainId.networkId),
+        walletNetwork: cardanoNetworkName(chainId.networkMagic),
+      };
+      return { outcome: 'refused' as const, refusal };
+    }
+
+    const account = allAccounts.find(a => a.accountId === accountId);
+    if (!account || !isCardanoAccount(account)) {
+      throw new TxSignError(
+        TxSignErrorCode.ProofGeneration,
+        `Cardano account not found for ID: ${accountId}`,
+      );
+    }
+
     const localUtxos = accountUtxos[accountId] ?? [];
     const resolutionUtxos = [...localUtxos, ...chainedOwnUtxos];
 
     // Runs for BOTH partialSign values, BEFORE the review sheet/password
-    // prompt, and local-only: `ownershipUtxos$` -- the full settled set plus
-    // own pending outputs, NOT the `accountUtxos$` above, which subtracts the
-    // collateral-reserved UTxOs this rule exists to catch. A collateral input
-    // this set lacks reads as foreign HERE, so the refusal screen is
-    // best-effort; the resolver-backed guard at the signing boundary
+    // prompt, and local-only. A collateral input the ownership set lacks reads
+    // as foreign HERE, so the refusal screen is best-effort; the
+    // resolver-backed guard at the signing boundary
     // (`withCollateralOwnershipGuard`) re-runs the rule and stays authoritative.
     const collateralRefusal = collateralRefusalCase(
-      Serialization.Transaction.fromCbor(Serialization.TxCBOR(txCbor)).toCore()
-        .body,
+      body,
       collateralOwnershipSets({
-        ownershipUtxos: [
-          ...(ownershipAccountUtxos[accountId] ?? []),
-          ...chainedOwnUtxos,
-        ],
+        ownershipUtxos,
         knownAddresses,
       }),
     );
+    if (collateralRefusal) {
+      const refusal: SignTxRefusal = {
+        kind: 'collateral',
+        case: collateralRefusal,
+      };
+      return { outcome: 'refused' as const, refusal };
+    }
     const wallet = allWallets.find(w => w.walletId === account.walletId);
 
     return {
-      collateralRefusal,
+      outcome: 'allowed' as const,
       account,
       wallet,
       knownAddresses,

@@ -27,7 +27,7 @@ type MakeAuthenticationPromptVerificationParams = {
  * `../unlock-backoff` and the `selectUnlockBackoffMs` selector.
  *
  * @param params - Configuration parameters for the side effect
- * @param params.verifyAndPropagateAuthSecret - Pre-configured function that handles
+ *   - `verifyAndPropagateAuthSecret`: Pre-configured function that handles
  *   the complete authentication verification and propagation flow
  * @returns Side effect function that can be used in the authentication prompt system
  */

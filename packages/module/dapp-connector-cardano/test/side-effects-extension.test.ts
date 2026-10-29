@@ -267,7 +267,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
-        collateralRefusal: null,
+        refusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
@@ -278,7 +278,7 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signTx',
-            collateralRefusal: null,
+            refusal: null,
           }) as CardanoConfirmationRequest,
           selectOpenViews$: stateObservables.views.selectOpenViews$,
           actions: deps.actions,
@@ -313,7 +313,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
-        collateralRefusal: null,
+        refusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
@@ -324,7 +324,7 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signTx',
-            collateralRefusal: null,
+            refusal: null,
           }) as CardanoConfirmationRequest,
         }),
       );
@@ -447,7 +447,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signTx',
-        collateralRefusal: null,
+        refusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         txHex: 'deadbeef',
@@ -524,7 +524,7 @@ describe('side-effects-extension', () => {
 
       requestSubject.next({
         type: 'signData',
-        collateralRefusal: null,
+        refusal: null,
         resolve: vi.fn(),
         requestingDapp: mockDapp,
         signDataAddress: 'addr_test1...',
@@ -535,7 +535,7 @@ describe('side-effects-extension', () => {
         expect.objectContaining({
           request: expect.objectContaining({
             type: 'signData',
-            collateralRefusal: null,
+            refusal: null,
           }) as CardanoConfirmationRequest,
           selectOpenViews$: stateObservables.views.selectOpenViews$,
           actions: deps.actions,
@@ -859,6 +859,27 @@ describe('side-effects-extension', () => {
       const WALLET_ID = WalletId('wallet-1');
       const ORIGIN = 'https://test-dapp.com';
 
+      // A decodable, preprod-bound body. The signing paths refuse anything they
+      // cannot prove targets the active network, so a placeholder string never
+      // reaches the reporting behaviour these tests are about.
+      const PREPROD_TX_CBOR = Serialization.Transaction.fromCore({
+        id: Cardano.TransactionId(`${'0'.repeat(63)}1`),
+        body: {
+          inputs: [
+            { txId: Cardano.TransactionId(`${'0'.repeat(63)}2`), index: 0 },
+          ],
+          outputs: [
+            {
+              address:
+                'addr_test1qphhr294v0w0rzgk7kz4ynsp8hwt82ha6nsp8yk6h04fhzsuryus5g7pm3lq85msee5pdtqlnv2crdc83kk2tvhsefcsu2snle' as Cardano.PaymentAddress,
+              value: { coins: 1_000_000n },
+            },
+          ],
+          fee: 170_000n,
+        },
+        witness: { signatures: new Map() },
+      }).toCbor();
+
       const account = {
         accountId: ACCOUNT_ID,
         walletId: WALLET_ID,
@@ -954,9 +975,20 @@ describe('side-effects-extension', () => {
         captured.signingResult$!.subscribe(result => results.push(result));
 
         await expect(
-          captured.signTransaction!('84a400', true, ORIGIN),
+          captured.signTransaction!(PREPROD_TX_CBOR, true, ORIGIN),
         ).rejects.toThrow('No signer factory registered');
-        expect(results).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
+        expect(results).toEqual([
+          {
+            type: 'error',
+            hwErrorKeys: undefined,
+            error: {
+              stage: 'signer setup',
+              name: 'Error',
+              message:
+                'No signer factory registered for account type "InMemory"',
+            },
+          },
+        ]);
 
         sub.unsubscribe();
       });
@@ -1015,9 +1047,19 @@ describe('side-effects-extension', () => {
         captured.signingResult$!.subscribe(result => results.push(result));
 
         await expect(
-          captured.signTransaction!('84a400', true, ORIGIN),
+          captured.signTransaction!(PREPROD_TX_CBOR, true, ORIGIN),
         ).rejects.toThrow('witness set build failed');
-        expect(results).toEqual([{ type: 'error', hwErrorKeys: undefined }]);
+        expect(results).toEqual([
+          {
+            type: 'error',
+            hwErrorKeys: undefined,
+            error: {
+              stage: 'witness assembly',
+              name: 'Error',
+              message: '[Unrecognised message omitted for privacy]',
+            },
+          },
+        ]);
 
         sub.unsubscribe();
       });

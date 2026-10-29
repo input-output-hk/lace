@@ -41,7 +41,7 @@ const support: HwBlockchainSupport[][] = [
       deviceOptionId: 'keystone' as HardwareIntegrationId,
       walletType: WalletType.HardwareKeystone,
       blockchainName: 'Cardano',
-      maxAccountIndex: 24,
+      maxAccountIndex: 23,
     },
   ],
 ];
@@ -199,7 +199,7 @@ describe('getMaxHwAccountIndex', () => {
       getMaxHwAccountIndex(support, {
         optionId: 'keystone' as HardwareIntegrationId,
       }),
-    ).toBe(24);
+    ).toBe(23);
   });
 
   it('returns the device limit by walletType + blockchainName', () => {
@@ -208,7 +208,7 @@ describe('getMaxHwAccountIndex', () => {
         walletType: WalletType.HardwareKeystone,
         blockchainName: 'Cardano',
       }),
-    ).toBe(24);
+    ).toBe(23);
   });
 
   it('returns undefined when the entry declares no limit', () => {

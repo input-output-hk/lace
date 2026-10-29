@@ -9,7 +9,7 @@ import {
   type MidnightAccountProps,
   midnightContextActions,
   MidnightSDKNetworkIds,
-  midnightWallets$,
+  midnightWalletsForRuntime,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { syncActions } from '@lace-contract/sync';
@@ -19,7 +19,14 @@ import { testSideEffect } from '@lace-lib/util-dev';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
-import { NEVER, Observable, of, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  NEVER,
+  Observable,
+  of,
+  throwError,
+} from 'rxjs';
 import { dummyLogger } from 'ts-log';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -31,11 +38,11 @@ import {
   updateSyncProgress,
   updateTokens,
   upsertAddresses,
+  watchMidnightAccount,
   watchMidnightAccounts,
 } from '../../../src/store/side-effects/watch';
 import { MidnightSyncFailureId } from '../../../src/value-objects/midnight-sync-failure-id.vo';
 
-import type { watchMidnightAccount } from '../../../src/store/side-effects/watch';
 import type {
   MidnightNetworkConfig,
   SerializedMidnightWallet,
@@ -44,6 +51,7 @@ import type {
   CoinsByTokenType,
   MidnightWallet,
   MidnightWalletAddress,
+  MidnightWalletsByAccountId,
 } from '@lace-contract/midnight-context';
 import type { CollectionStorage } from '@lace-contract/storage';
 import type { AccountSyncStatus } from '@lace-contract/sync';
@@ -81,6 +89,8 @@ const {
   midnightDustAddress,
 } = stubData;
 const networkId = MidnightSDKNetworkIds.Preview;
+// The registry watchMidnightAccount hands to the per-wallet effects.
+const midnightWallets$ = new BehaviorSubject<MidnightWalletsByAccountId>({});
 
 const actions = {
   ...addressesActions,
@@ -98,6 +108,10 @@ const createMockMidnightWallet = (
   accountId,
   networkId,
   nightVerifyingKey: createKeystore(randomBytes(32), networkId).getPublicKey(),
+  proofCircuitProvider: {
+    check: async () => [],
+    prove: async () => new Uint8Array(),
+  },
   walletId,
   address$: cold(''),
   areKeysAvailable$: cold(''),
@@ -114,6 +128,7 @@ const createMockMidnightWallet = (
   finalizeRecipe: () => cold(''),
   finalizeTransaction: () => cold(''),
   registerNightUtxosForDustGeneration: () => cold(''),
+  revert: () => cold(''),
   initSwap: () => cold(''),
   state: () => cold(''),
   stop: () => cold(''),
@@ -232,7 +247,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -281,7 +300,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -340,7 +363,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a 999ms b', { a: inProgress, b: complete }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -402,7 +429,11 @@ describe('updateSyncProgress', () => {
             // registered, and is held as the trailing value until frame 500.
             syncProgress$: cold('ab|', { a: inProgress, b: complete }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -492,7 +523,11 @@ describe('updateSyncProgress', () => {
               b: syncProgressComplete,
             }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -547,7 +582,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -595,7 +634,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: true }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: true }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -645,7 +688,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: true }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: true }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -696,7 +743,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: true }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: true }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -745,7 +796,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: true }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: true }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -800,7 +855,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: false }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: false }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -850,7 +909,11 @@ describe('updateSyncProgress', () => {
           const wallet = createMockMidnightWallet(cold, {
             syncProgress$: cold('a', { a: syncProgress }),
           });
-          return updateSyncProgress(wallet, cold('a', { a: true }));
+          return updateSyncProgress(
+            wallet,
+            cold('a', { a: true }),
+            midnightWallets$,
+          );
         },
       },
       ({ cold, expectObservable }) => {
@@ -925,7 +988,7 @@ describe('updateDustBalance', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a-a', { a: mockState }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -971,7 +1034,7 @@ describe('updateDustBalance', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a----b', { a: mockState1, b: mockState2 }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ flush }) => {
@@ -1023,7 +1086,7 @@ describe('updateDustBalance', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a', { a: mockState }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1065,7 +1128,7 @@ describe('updateDustBalance', () => {
             state: () =>
               cold('a-b', { a: dustState([1000n]), b: dustState([]) }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1117,7 +1180,7 @@ describe('updateDustBalance', () => {
                 d: mockState(4n),
               }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1164,7 +1227,7 @@ describe('updateDustBalance', () => {
             // registered, and is held as the trailing value until frame 500.
             state: () => cold('ab|', { a: mockState(1n), b: mockState(2n) }),
           });
-          return updateDustBalance(wallet);
+          return updateDustBalance(wallet, midnightWallets$);
         },
       },
       ({ cold, expectObservable }) => {
@@ -1241,7 +1304,7 @@ describe('updateDustGenerationDetails', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a', { a: mockState }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ flush }) => {
@@ -1314,7 +1377,7 @@ describe('updateDustGenerationDetails', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a-a', { a: mockState }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1357,7 +1420,7 @@ describe('updateDustGenerationDetails', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a', { a: mockState }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1401,7 +1464,7 @@ describe('updateDustGenerationDetails', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('a', { a: mockState }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1458,7 +1521,7 @@ describe('updateDustGenerationDetails', () => {
                 d: mockState(4n),
               }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ expectObservable }) => {
@@ -1514,7 +1577,7 @@ describe('updateDustGenerationDetails', () => {
           const wallet = createMockMidnightWallet(cold, {
             state: () => cold('ab|', { a: mockState(1n), b: mockState(2n) }),
           });
-          return updateDustGenerationDetails(wallet);
+          return updateDustGenerationDetails(wallet, midnightWallets$);
         },
       },
       ({ cold, expectObservable }) => {
@@ -2176,6 +2239,59 @@ describe('watchMidnightAccounts', () => {
     } as CollectionStorage<SerializedMidnightWallet>);
 
   const logger = dummyLogger;
+
+  it('restarts only the requested account and leaves its sibling subscribed', () => {
+    const started: string[] = [];
+    const stopped: string[] = [];
+    const store = createMockStore();
+    const watchAccount = vi.fn(
+      (account: InMemoryWalletAccount<MidnightAccountProps>) => () =>
+        new Observable<never>(() => {
+          started.push(account.accountId);
+          return () => {
+            stopped.push(account.accountId);
+          };
+        }),
+    );
+    testSideEffect(
+      watchMidnightAccounts(store, watchAccount),
+      ({ hot, cold, flush }) => ({
+        actionObservables: {
+          midnightSync: {
+            restartWalletWatch$: cold(''),
+            restartAccountWatch$: hot('--a', {
+              a: actions.midnightSync.restartAccountWatch({
+                accountId: midnightAccount1.accountId,
+              }),
+            }),
+          },
+        },
+        stateObservables: {
+          midnightContext: {
+            selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: cold('a', {
+              a: [midnightAccount1, midnightAccount2],
+            }),
+            selectIsWalletRepoMigrating$: cold('a', { a: false }),
+          },
+        },
+        dependencies: { actions, logger, isWalletActive$: of(true) },
+        assertion: sideEffect$ => {
+          const subscription = sideEffect$.subscribe();
+          flush();
+          expect(started).toEqual([
+            midnightAccount1.accountId,
+            midnightAccount2.accountId,
+            midnightAccount1.accountId,
+          ]);
+          expect(stopped).toEqual([midnightAccount1.accountId]);
+          subscription.unsubscribe();
+        },
+      }),
+    );
+  });
 
   describe('initial setup', () => {
     it('starts watching all Midnight accounts matching the current network immediately', () => {
@@ -2906,6 +3022,159 @@ describe('watchMidnightAccounts', () => {
     });
   });
 
+  describe('watcher restart after failure or request', () => {
+    // One watchAccount call per attempt: the first plus every retry.
+    const attemptsPerWatch =
+      1 + (PROVIDER_REQUEST_RETRY_CONFIG.maxRetries ?? 0);
+
+    const failingWatchAccount = () =>
+      vi.fn(
+        () => () => throwError(() => new Error('Watcher failed')),
+      ) as typeof watchMidnightAccount;
+
+    const surfacedFailures = (emissions: unknown[]) =>
+      emissions.filter(action =>
+        actions.failures.addFailure.match(action as never),
+      );
+
+    it('restarts a failed watcher when the account list re-emits', () => {
+      const watchAccount = failingWatchAccount();
+
+      testSideEffect(
+        watchMidnightAccounts(createMockStore(), watchAccount),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            midnightSync: {
+              restartWalletWatch$: cold('---'),
+              restartAccountWatch$: cold('---'),
+            },
+          },
+          stateObservables: {
+            midnightContext: {
+              selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+            },
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              // The list re-emits after the first watcher's retries ran out.
+              selectActiveNetworkAccounts$: cold('a 3000ms b', {
+                a: [midnightAccount1],
+                b: [{ ...midnightAccount1 }],
+              }),
+            },
+          },
+          dependencies: { actions, logger, isWalletActive$: of(true) },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+
+            expect(watchAccount).toHaveBeenCalledTimes(2 * attemptsPerWatch);
+            expect(surfacedFailures(emissions)).toHaveLength(2);
+          },
+        }),
+      );
+    });
+
+    it('restarts a live watcher once per request and keeps ignoring list re-emissions', () => {
+      const started: string[] = [];
+      const stopped: string[] = [];
+      const watchAccount = vi.fn(
+        (account: InMemoryWalletAccount<MidnightAccountProps>) => () =>
+          new Observable<never>(() => {
+            started.push(account.accountId);
+            return () => {
+              stopped.push(account.accountId);
+            };
+          }),
+      );
+
+      testSideEffect(
+        watchMidnightAccounts(createMockStore(), watchAccount),
+        ({ cold, hot, flush }) => ({
+          actionObservables: {
+            midnightSync: {
+              restartWalletWatch$: cold('---'),
+              restartAccountWatch$: hot('--a', {
+                a: actions.midnightSync.restartAccountWatch({
+                  accountId: midnightAccount1.accountId,
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            midnightContext: {
+              selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+            },
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              selectActiveNetworkAccounts$: cold('a---b', {
+                a: [midnightAccount1],
+                b: [{ ...midnightAccount1 }],
+              }),
+            },
+          },
+          dependencies: { actions, logger, isWalletActive$: of(true) },
+          assertion: sideEffect$ => {
+            const subscription = sideEffect$.subscribe();
+            flush();
+
+            expect(started).toEqual([
+              midnightAccount1.accountId,
+              midnightAccount1.accountId,
+            ]);
+            expect(stopped).toEqual([midnightAccount1.accountId]);
+
+            subscription.unsubscribe();
+            // Every watcher that started has been stopped: none leaked.
+            expect(stopped).toEqual(started);
+          },
+        }),
+      );
+    });
+
+    it('restarts a failed watcher on request, but not once the account is removed', () => {
+      const watchAccount = failingWatchAccount();
+      const restart = actions.midnightSync.restartAccountWatch({
+        accountId: midnightAccount1.accountId,
+      });
+
+      testSideEffect(
+        watchMidnightAccounts(createMockStore(), watchAccount),
+        ({ cold, hot, flush }) => ({
+          actionObservables: {
+            midnightSync: {
+              restartWalletWatch$: cold('---'),
+              // The first request follows the exhausted retries; the second
+              // follows the removal.
+              restartAccountWatch$: hot('2500ms a 4499ms a', { a: restart }),
+            },
+          },
+          stateObservables: {
+            midnightContext: {
+              selectCurrentNetwork$: cold('a', { a: previewNetwork }),
+            },
+            wallets: {
+              selectIsWalletRepoMigrating$: cold('a', { a: false }),
+              selectActiveNetworkAccounts$: cold('a 6000ms b', {
+                a: [midnightAccount1],
+                b: [],
+              }),
+            },
+          },
+          dependencies: { actions, logger, isWalletActive$: of(true) },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            sideEffect$.subscribe(action => emissions.push(action));
+            flush();
+
+            expect(watchAccount).toHaveBeenCalledTimes(2 * attemptsPerWatch);
+            expect(surfacedFailures(emissions)).toHaveLength(2);
+          },
+        }),
+      );
+    });
+  });
+
   describe('selectActiveNetworkAccounts$ filtering', () => {
     it('filters out non-Midnight accounts', () => {
       const mockStore = createMockStore();
@@ -3413,5 +3682,231 @@ describe('watchMidnightAccounts', () => {
         },
       );
     });
+  });
+});
+
+describe('watchMidnightAccount instance ownership', () => {
+  const config: MidnightNetworkConfig = {
+    nodeAddress: 'https://node.example',
+    indexerAddress: 'https://indexer.example',
+    proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
+  };
+  const setup = () => {
+    const runtime = { app: 'lace-sdk' } as Parameters<
+      typeof midnightWalletsForRuntime
+    >[0];
+    const addresses$ = new Subject<MidnightWalletAddress>();
+    const engine = {
+      accountId,
+      walletId,
+      networkId,
+      address$: addresses$,
+      state: () => NEVER,
+      syncProgress$: NEVER,
+      coinsByTokenType$: NEVER,
+      stop: vi.fn(() => of(undefined)),
+    } as unknown as MidnightWallet;
+    const dependencies = {
+      runtime,
+      actions,
+      logger: dummyLogger,
+      accessAuthSecret: () => NEVER,
+      startMidnightAccountWallet: vi.fn(() => of(engine)),
+    } as unknown as Parameters<ReturnType<typeof watchMidnightAccount>>[2];
+    const state = {
+      features: { selectLoadedFeatures$: of({ featureFlags: [] }) },
+      midnightContext: { selectNetworksConfig$: NEVER },
+      sync: { selectSyncStatusByAccount$: of({}) },
+      tokens: { selectTokensMetadata$: of({}) },
+    } as unknown as Parameters<ReturnType<typeof watchMidnightAccount>>[1];
+    const emissions: unknown[] = [];
+    const network$ = new BehaviorSubject({
+      networkId: stubData.midnightAccount.blockchainSpecific.networkId,
+      config,
+    });
+    const restart$ = new Subject<unknown>();
+    const active$ = new BehaviorSubject(true);
+    const startLifecycle = () =>
+      watchMidnightAccounts(
+        {} as CollectionStorage<SerializedMidnightWallet>,
+        watchMidnightAccount,
+      )(
+        {
+          midnightSync: { restartWalletWatch$: restart$ },
+        } as unknown as Parameters<ReturnType<typeof watchMidnightAccounts>>[0],
+        {
+          ...state,
+          midnightContext: {
+            selectCurrentNetwork$: network$,
+            selectNetworksConfig$: NEVER,
+          },
+          wallets: {
+            selectActiveNetworkAccounts$: of([stubData.midnightAccount]),
+            selectIsWalletRepoMigrating$: of(false),
+          },
+        } as unknown as Parameters<ReturnType<typeof watchMidnightAccounts>>[1],
+        { ...dependencies, isWalletActive$: active$ },
+      ).subscribe({
+        next: value => emissions.push(value),
+        error: error => emissions.push(error),
+      });
+    const start = () =>
+      watchMidnightAccount(
+        stubData.midnightAccount,
+        config,
+        {} as CollectionStorage<SerializedMidnightWallet>,
+      )(
+        {} as Parameters<ReturnType<typeof watchMidnightAccount>>[0],
+        state,
+        dependencies,
+      ).subscribe({
+        next: value => emissions.push(value),
+        error: error => emissions.push(error),
+      });
+    return {
+      runtime,
+      addresses$,
+      engine,
+      dependencies,
+      emissions,
+      start,
+      startLifecycle,
+      network$,
+      restart$,
+      active$,
+    };
+  };
+
+  it('unsubscribing one same-account watcher preserves the other registry and subscription', async () => {
+    const a = setup();
+    const b = setup();
+    const subscriptionA = a.start();
+    const subscriptionB = b.start();
+    try {
+      expect(midnightWalletsForRuntime(a.runtime).value[accountId]).toBe(
+        a.engine,
+      );
+      expect(midnightWalletsForRuntime(b.runtime).value[accountId]).toBe(
+        b.engine,
+      );
+      subscriptionA.unsubscribe();
+      expect(midnightWalletsForRuntime(a.runtime).value).toEqual({});
+      expect(midnightWalletsForRuntime(b.runtime).value[accountId]).toBe(
+        b.engine,
+      );
+      b.addresses$.next({
+        shielded: midnightShieldedAddress,
+        unshielded: midnightUnshieldedAddress,
+        dust: midnightDustAddress,
+      });
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(b.emissions).toHaveLength(1);
+      expect(a.engine.stop).toHaveBeenCalledOnce();
+      expect(b.engine.stop).not.toHaveBeenCalled();
+    } finally {
+      subscriptionA.unsubscribe();
+      subscriptionB.unsubscribe();
+    }
+  });
+
+  it('network switching, restart and lock affect only their own instance', () => {
+    const a = setup();
+    const b = setup();
+    const subscriptionA = a.startLifecycle();
+    const subscriptionB = b.startLifecycle();
+    try {
+      expect(midnightWalletsForRuntime(a.runtime).value[accountId]).toBe(
+        a.engine,
+      );
+      a.restart$.next(undefined);
+      expect(a.engine.stop).toHaveBeenCalledOnce();
+      expect(midnightWalletsForRuntime(a.runtime).value[accountId]).toBe(
+        a.engine,
+      );
+      a.network$.next({ networkId: MidnightSDKNetworkIds.PreProd, config });
+      expect(midnightWalletsForRuntime(a.runtime).value).toEqual({});
+      expect(midnightWalletsForRuntime(b.runtime).value[accountId]).toBe(
+        b.engine,
+      );
+      a.active$.next(false);
+      expect(b.engine.stop).not.toHaveBeenCalled();
+    } finally {
+      subscriptionA.unsubscribe();
+      subscriptionB.unsubscribe();
+    }
+  });
+
+  it.each(['observable error', 'synchronous throw'])(
+    'logs teardown %s without removing a replacement or stopping its watcher',
+    async failureMode => {
+      const a = setup();
+      const replacement = setup();
+      const stopError = new Error('stop failed');
+      const stop$ = new Subject<void>();
+      const errorLog = vi.fn();
+      a.dependencies.logger = { ...dummyLogger, error: errorLog };
+      vi.mocked(a.engine.stop).mockImplementation(() => {
+        if (failureMode === 'synchronous throw') throw stopError;
+        return stop$;
+      });
+      const oldSubscription = a.start();
+      vi.mocked(a.dependencies.startMidnightAccountWallet).mockReturnValue(
+        of(replacement.engine),
+      );
+      const replacementSubscription = a.start();
+      try {
+        expect(() => {
+          oldSubscription.unsubscribe();
+        }).not.toThrow();
+        expect(() => {
+          oldSubscription.unsubscribe();
+        }).not.toThrow();
+        stop$.error(stopError);
+        replacement.addresses$.next({
+          shielded: midnightShieldedAddress,
+          unshielded: midnightUnshieldedAddress,
+          dust: midnightDustAddress,
+        });
+        await new Promise(resolve => setTimeout(resolve, 10));
+        expect(errorLog).toHaveBeenCalledOnce();
+        expect(errorLog).toHaveBeenCalledWith(
+          'Midnight account watch teardown: stop failed',
+          stopError,
+        );
+        expect(midnightWalletsForRuntime(a.runtime).value[accountId]).toBe(
+          replacement.engine,
+        );
+        expect(a.emissions).toHaveLength(1);
+        expect(a.engine.stop).toHaveBeenCalledOnce();
+        expect(replacement.engine.stop).not.toHaveBeenCalled();
+      } finally {
+        oldSubscription.unsubscribe();
+        replacementSubscription.unsubscribe();
+        replacementSubscription.unsubscribe();
+      }
+      expect(midnightWalletsForRuntime(a.runtime).value).toEqual({});
+      expect(replacement.engine.stop).toHaveBeenCalledOnce();
+    },
+  );
+
+  it('failed startup leaves the other instance usable and removes no engine', () => {
+    const a = setup();
+    const b = setup();
+    vi.mocked(a.dependencies.startMidnightAccountWallet).mockReturnValue(
+      throwError(() => new Error('startup failed')),
+    );
+    const subscriptionB = b.start();
+    const subscriptionA = a.start();
+    try {
+      expect(a.emissions).toEqual([new Error('startup failed')]);
+      expect(midnightWalletsForRuntime(a.runtime).value).toEqual({});
+      expect(midnightWalletsForRuntime(b.runtime).value[accountId]).toBe(
+        b.engine,
+      );
+      expect(b.engine.stop).not.toHaveBeenCalled();
+    } finally {
+      subscriptionA.unsubscribe();
+      subscriptionB.unsubscribe();
+    }
   });
 });

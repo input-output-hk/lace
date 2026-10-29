@@ -11,10 +11,12 @@ import type { Tagged } from 'type-fest';
  * this shape so analytics segmentation works without per-caller wiring.
  *
  * @example
+ * ```ts
  * // In domain package:
  * export type CardanoSyncFailureId = FailureId & Tagged<string, 'CardanoSyncFailureId'>;
  * export const CardanoSyncFailureId = (accountId: AccountId): CardanoSyncFailureId =>
  *   `cardano-sync-${accountId}` as CardanoSyncFailureId;
+ * ```
  */
 export type FailureId = Tagged<string, 'FailureId'>;
 export const FailureId = (value: string): FailureId => value as FailureId;

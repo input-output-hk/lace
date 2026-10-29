@@ -44,7 +44,7 @@ export const CardanoDappSignTx = ({ requestId }: CardanoDappSignTxProps) => {
   // The verdict reaches this view through the pending-request slice only --
   // the sheet route params are discarded by `sheetPages.tsx`.
   const refusal = useSignTxRefusal({
-    collateralRefusal: request?.collateralRefusal,
+    refusal: request?.refusal,
     dappOrigin: request?.dapp.origin,
   });
 
@@ -77,6 +77,9 @@ export const CardanoDappSignTx = ({ requestId }: CardanoDappSignTxProps) => {
 
   const hwErrorKeys = useLaceSelector(
     'cardanoDappConnector.selectSignTxHwErrorKeys',
+  );
+  const signingError = useLaceSelector(
+    'cardanoDappConnector.selectSignTxErrorDetails',
   );
 
   const sessionAccountByOrigin = useLaceSelector(
@@ -113,6 +116,7 @@ export const CardanoDappSignTx = ({ requestId }: CardanoDappSignTxProps) => {
   const resultView = resultState ? (
     <SignTxResult
       state={resultState}
+      error={hwErrorKeys ? undefined : signingError}
       onClose={closeDappView}
       dappName={persistedDapp?.name}
       dappOrigin={persistedDapp?.origin}
@@ -152,6 +156,7 @@ export const CardanoDappSignTx = ({ requestId }: CardanoDappSignTxProps) => {
     <SignTxLayout
       resultView={resultView}
       hasError={hasError}
+      transactionError={signTxData.transactionError}
       refusal={refusal}
       showLoading={isShowingLoading}
       contentProps={contentProps}

@@ -36,9 +36,9 @@ export abstract class BlockfrostProvider implements Provider {
   }
 
   /**
-   * @param endpoint e.g. 'blocks/latest'
-   * @param requestInit request options
-   * @throws {ProviderError}
+   * @param endpoint - e.g. 'blocks/latest'
+   * @param requestInit - request options
+   * @throws `ProviderError`
    */
   protected async request<T>(
     endpoint: string,
@@ -56,10 +56,10 @@ export abstract class BlockfrostProvider implements Provider {
   }
 
   /**
-   * @param endpoint e.g. 'blocks/latest'
-   * @param pageSize number of items per page
-   * @param requestInit request options
-   * @throws {ProviderError}
+   * @param endpoint - e.g. 'blocks/latest'
+   * @param pageSize - number of items per page
+   * @param requestInit - request options
+   * @throws `ProviderError`
    */
   protected async paginatedRequests<T extends unknown[]>({
     endpoint,

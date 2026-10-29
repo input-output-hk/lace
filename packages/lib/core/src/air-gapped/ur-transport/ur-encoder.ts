@@ -64,7 +64,7 @@ export const createUrEncoder = (
  * Encodes a (urType, cbor) payload into a finite ordered list of upper-cased
  * animated-QR parts. By default it emits exactly the pure fragments (no
  * redundancy). Pass
- * redundancyRatio > 1 to append extra fountain parts so a looping animated QR
+ * `redundancyRatio > 1` to append extra fountain parts so a looping animated QR
  * reassembles even when the scanner drops frames.
  */
 export const encodeToParts = (

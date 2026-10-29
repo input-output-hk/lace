@@ -11,9 +11,9 @@ import type { AccountId } from '@lace-contract/wallet-repo';
  * Filters a list of addresses, returning only Cardano addresses that
  * correspond to the specified network ID.
  *
- * @param {AnyAddress[]} addresses - The list of addresses to be filtered.
- * @param {Cardano.ChainId} chainId - The Cardano network ID to filter the addresses by.
- * @returns {AnyAddress<CardanoAddressData>[]} - A filtered list of addresses that belong to the specified network ID.
+ * @param addresses - The list of addresses to be filtered.
+ * @param chainId - The Cardano network ID to filter the addresses by.
+ * @returns A filtered list of addresses that belong to the specified network ID.
  */
 export const filterCardanoAddressesForNetwork = (
   addresses: AnyAddress[],
@@ -26,10 +26,10 @@ export const filterCardanoAddressesForNetwork = (
 /**
  * Retrieves a list of Cardano addresses filtered by account ID and chain ID.
  *
- * @param {AnyAddress[]} addresses - The list of addresses to be filtered.
- * @param {AccountId} accountId - The account identifier used to filter addresses.
- * @param {Cardano.ChainId} chainId - The chain ID specifying the target Cardano network.
- * @returns {AnyAddress<CardanoAddressData>[]} A filtered list of Cardano addresses
+ * @param addresses - The list of addresses to be filtered.
+ * @param accountId - The account identifier used to filter addresses.
+ * @param chainId - The chain ID specifying the target Cardano network.
+ * @returns A filtered list of Cardano addresses
  * matched by the specified account ID and chain ID.
  */
 export const getAccountAddresses = (
@@ -48,9 +48,9 @@ export const getAccountAddresses = (
  * the given Cardano chain ID and then groups the filtered addresses by their
  * reward account. The reward account is extracted from the address's data.
  *
- * @param {AnyAddress[]} addresses - The list of addresses to be processed.
- * @param {Cardano.ChainId} chainId - The Cardano chain ID used to filter the addresses.
- * @returns {Record<AccountId, AnyAddress<CardanoAddressData>[]>} A record where
+ * @param addresses - The list of addresses to be processed.
+ * @param chainId - The Cardano chain ID used to filter the addresses.
+ * @returns A record where
  *          the keys are account IDs and the values are arrays of addresses
  *          associated with those accounts.
  */

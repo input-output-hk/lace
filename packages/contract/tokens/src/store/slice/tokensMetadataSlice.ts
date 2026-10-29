@@ -3,6 +3,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { StoredTokenMetadata } from '../../types';
 import type { TokenId } from '../../value-objects';
 
+/** Stored token metadata keyed by token ID; tokens without known metadata are absent. */
 export type MetadataByTokenId = Partial<Record<TokenId, StoredTokenMetadata>>;
 
 export type TokensMetadataState = {

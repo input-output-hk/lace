@@ -353,6 +353,7 @@ export const makeSendFlowTxBuilding =
       switchMap(
         ({
           accountId,
+          allowRewardsWithdrawal,
           form,
           serializedTx,
           blockchainName,
@@ -381,6 +382,7 @@ export const makeSendFlowTxBuilding =
 
           const txBuilderParams: BuildTxParams = {
             accountId,
+            allowRewardsWithdrawal,
             blockchainName,
             serializedTx,
             txParams: [

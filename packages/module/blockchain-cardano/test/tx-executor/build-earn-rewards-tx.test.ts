@@ -3,7 +3,9 @@ import { AccountId } from '@lace-contract/wallet-repo';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { CardanoCustodyAccountRefusedError } from '../../src/store/custody/custody-account-guard';
 import { makeBuildEarnRewardsTx } from '../../src/tx-executor-implementation';
+import { custodyAddressEntry } from '../store/custody/custody-address-entry';
 
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
@@ -437,5 +439,18 @@ describe('makeBuildEarnRewardsTx', () => {
     }
 
     vi.restoreAllMocks();
+  });
+
+  it('refuses a Cardano custody account before building', async () => {
+    const result = await firstValueFrom(
+      makeBuildEarnRewardsTx(
+        makeDependencies({ addresses: [custodyAddressEntry(testAccountId)] }),
+      )({ accountId: testAccountId, poolId: testPoolId, dRep: specificDRep }),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: expect.any(CardanoCustodyAccountRefusedError) as unknown,
+    });
   });
 });

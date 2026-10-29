@@ -1,7 +1,13 @@
 import type { StyleProp, TextInputProps, ViewStyle } from 'react-native';
 
 import { useTranslation } from '@lace-contract/i18n';
-import React from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { StyleSheet, TextInput as RNTextInput } from 'react-native';
 
 import { useTheme, spacing, radius } from '../../../design-tokens';
@@ -12,15 +18,20 @@ import type { IconName } from '../../atoms/icons/Icon';
 
 export interface SearchBarAction {
   iconName: IconName;
-  onPress: () => void;
+  /**
+   * Receives the text currently IN the field, which in self-owned mode may not
+   * be the committed query yet. Take the query from here rather than from the
+   * consumer's own state: the field commits before calling this, but React has
+   * not re-rendered yet, so a handler closing over that state still reads the
+   * previous query.
+   */
+  onPress: (searchText: string) => void;
   testID?: string;
   hasAscendingColor?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
 
-export interface SearchBarProps {
-  value?: string;
-  onChangeText?: (text: string) => void;
+interface SearchBarBaseProps {
   placeholder?: string;
   disabled?: boolean;
   clearable?: boolean;
@@ -33,9 +44,50 @@ export interface SearchBarProps {
   actions?: SearchBarAction[];
 }
 
-export const SearchBar = ({
-  value = '',
+/** The caller owns the text, so every keystroke re-renders the caller. */
+export interface ControlledSearchBarProps extends SearchBarBaseProps {
+  value?: string;
+  onChangeText?: (text: string) => void;
+  onSearchCommit?: never;
+  initialValue?: never;
+}
+
+/**
+ * The field owns the text and the caller only hears the SETTLED query — after
+ * `COMMIT_DELAY_MS` of quiet, on blur, or on clear. Use this for a search that
+ * filters a list: a keystroke then re-renders this input and nothing above it,
+ * so neither the filtering nor the list's own render sits between the key press
+ * and the letter appearing (ADR 64).
+ *
+ * `initialValue` seeds the field on mount only — a restored route param, or the
+ * last committed query when the surrounding tree gets rebuilt. The text lives
+ * here, so a caller that mounts this inside something the list can tear down
+ * (`ListHeaderComponent`, a keyed FlashList) must pass the committed query as
+ * `initialValue` or the query is lost with the remount.
+ */
+export interface SelfOwnedSearchBarProps extends SearchBarBaseProps {
+  onSearchCommit: (text: string) => void;
+  initialValue?: string;
+  value?: never;
+  onChangeText?: never;
+}
+
+export type SearchBarProps = ControlledSearchBarProps | SelfOwnedSearchBarProps;
+
+// The delay every already-debounced search surface in the app settled on
+// (governance centre, address book, dapp explorer, and next/ui's screens).
+const COMMIT_DELAY_MS = 300;
+
+type SearchBarViewProps = SearchBarBaseProps & {
+  value: string;
+  onChangeText: ((text: string) => void) | undefined;
+  onClear: () => void;
+};
+
+const SearchBarView = ({
+  value,
   onChangeText,
+  onClear,
   placeholder,
   disabled = false,
   clearable = false,
@@ -43,7 +95,7 @@ export const SearchBar = ({
   textInputProps,
   extraStyle = {},
   actions = [],
-}: SearchBarProps) => {
+}: SearchBarViewProps) => {
   const { theme } = useTheme();
   const styles = getStyles(theme);
   const { t } = useTranslation();
@@ -54,10 +106,6 @@ export const SearchBar = ({
   const shouldShowClearButton = clearable && !disabled && value.length > 0;
   const hasTrailingContent = hasActions || shouldShowClearButton;
 
-  const handleClear = () => {
-    onChangeText?.('');
-  };
-
   const renderTrailingContent = () => {
     if (!hasTrailingContent) return null;
 
@@ -66,7 +114,7 @@ export const SearchBar = ({
         {shouldShowClearButton && (
           <IconButton.Static
             icon={<Icon name="Cancel" size={16} color={theme.text.secondary} />}
-            onPress={handleClear}
+            onPress={onClear}
             containerStyle={styles.clearButton}
             testID={`${testID}-clear-button`}
           />
@@ -83,7 +131,9 @@ export const SearchBar = ({
                   color={theme.brand.white}
                 />
               }
-              onPress={action.onPress}
+              onPress={() => {
+                action.onPress(value);
+              }}
               containerStyle={StyleSheet.flatten([
                 styles.actionButton,
                 hasAscendingColor
@@ -136,6 +186,127 @@ export const SearchBar = ({
     </Row>
   );
 };
+
+const SelfOwnedSearchBar = ({
+  initialValue = '',
+  onSearchCommit,
+  textInputProps,
+  actions,
+  ...viewProps
+}: SelfOwnedSearchBarProps) => {
+  const [text, setText] = useState(initialValue);
+  // Held in refs so the timer callback never closes over a stale consumer and
+  // a repeated query is not re-announced.
+  const commitRef = useRef(onSearchCommit);
+  commitRef.current = onSearchCommit;
+  const committedRef = useRef(initialValue);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  const cancelPending = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = undefined;
+    }
+  }, []);
+
+  useEffect(() => cancelPending, [cancelPending]);
+
+  const commit = useCallback(
+    (value: string) => {
+      cancelPending();
+      if (value === committedRef.current) return;
+      committedRef.current = value;
+      commitRef.current(value);
+    },
+    [cancelPending],
+  );
+
+  const handleChangeText = useCallback(
+    (value: string) => {
+      setText(value);
+      cancelPending();
+      timerRef.current = setTimeout(() => {
+        commit(value);
+      }, COMMIT_DELAY_MS);
+    },
+    [cancelPending, commit],
+  );
+
+  // Clearing is a deliberate act, not a pause in typing: commit it at once
+  // rather than leaving the list showing results for a query that is gone.
+  const handleClear = useCallback(() => {
+    setText('');
+    commit('');
+  }, [commit]);
+
+  // Flush whatever the keyboard's dismissal leaves pending. Only that: a tap
+  // on another control does NOT blur this field on native — gesture-handler
+  // touchables bypass the responder system and the lists above set
+  // keyboardShouldPersistTaps="handled" — so blur cannot be the flush a press
+  // handler relies on. The actions below flush explicitly for that reason.
+  const handleBlur = useCallback<NonNullable<TextInputProps['onBlur']>>(
+    event => {
+      commit(text);
+      textInputProps?.onBlur?.(event);
+    },
+    [commit, text, textInputProps],
+  );
+
+  // The actions sit INSIDE the field (browse-pool's filter button): pressing
+  // one acts on the query the user can see, so settle that query first rather
+  // than let the press race the commit delay. The handler is also handed the
+  // text, because the commit it just triggered has not re-rendered the
+  // consumer yet — a handler reading its own state would still see the
+  // previous query.
+  const flushingActions = useMemo(
+    () =>
+      actions?.map(action => ({
+        ...action,
+        onPress: (searchText: string) => {
+          commit(searchText);
+          action.onPress(searchText);
+        },
+      })),
+    [actions, commit],
+  );
+
+  return (
+    <SearchBarView
+      {...viewProps}
+      actions={flushingActions}
+      value={text}
+      onChangeText={handleChangeText}
+      onClear={handleClear}
+      textInputProps={{ ...textInputProps, onBlur: handleBlur }}
+    />
+  );
+};
+
+const ControlledSearchBar = ({
+  value = '',
+  onChangeText,
+  ...viewProps
+}: ControlledSearchBarProps) => {
+  const handleClear = useCallback(() => {
+    onChangeText?.('');
+  }, [onChangeText]);
+
+  return (
+    <SearchBarView
+      {...viewProps}
+      value={value}
+      onChangeText={onChangeText}
+      onClear={handleClear}
+    />
+  );
+};
+
+export const SearchBar = (props: SearchBarProps) =>
+  props.onSearchCommit === undefined ? (
+    <ControlledSearchBar {...props} />
+  ) : (
+    <SelfOwnedSearchBar {...props} />
+  );
 
 const getStyles = (theme: Theme) =>
   StyleSheet.create({
