@@ -23,9 +23,9 @@ export class BitcoinSigner implements Signer {
 
   /**
    * Signs a hash using tiny-secp256k1's sign function.
-   * @param {Buffer} hash - The hash to sign (must be 32 bytes).
-   * @param {boolean} _lowR - Optional flag for lowR signatures (ignored here).
-   * @returns {Buffer} The signature as a buffer.
+   * @param hash - The hash to sign (must be 32 bytes).
+   * @param _lowR - Optional flag for lowR signatures (ignored here).
+   * @returns The signature as a buffer.
    */
   public sign(hash: Buffer, _lowR = false): Buffer {
     if (hash.length !== 32) {
@@ -41,7 +41,7 @@ export class BitcoinSigner implements Signer {
 
   /**
    * Returns the public key.
-   * @returns {Buffer} The public key as a buffer.
+   * @returns The public key as a buffer.
    */
   public getPublicKey(): Buffer {
     return this.publicKey;

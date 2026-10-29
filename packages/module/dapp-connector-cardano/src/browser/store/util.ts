@@ -14,18 +14,23 @@ import {
   timer,
 } from 'rxjs';
 
-import { COLLATERAL_BLOCK_LOG } from '../../common/store/dependencies/cardano-dapp-connector-api';
+import {
+  refusalLogAnchor,
+  refusalLogCase,
+} from '../../common/store/sign-tx-refusal';
 import {
   CARDANO_DAPP_SIGN_DATA_LOCATION,
   CARDANO_DAPP_SIGN_TX_LOCATION,
 } from '../const';
 
-import type { CollateralBlockStage } from '../../common/store/dependencies/cardano-dapp-connector-api';
 import type { SigningResult } from '../../common/store/dependencies/cardano-dapp-connector-api';
 import type { CardanoConfirmationRequest } from '../../common/store/dependencies/create-confirmation-callback';
+import type {
+  RefusalLogStage,
+  SignTxRefusal,
+} from '../../common/store/sign-tx-refusal';
 import type { SignRequestAnswer } from '../../common/store/slice';
 import type { ActionCreators } from '../../index';
-import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
 import type { ViewId } from '@lace-contract/module';
 import type { View } from '@lace-contract/views';
 import type { Observable } from 'rxjs';
@@ -69,8 +74,8 @@ export type SignTxParams = SharedParams & {
 export type RefusedSignTxParams = SharedParams & {
   /** The confirmation request from the dApp */
   request: CardanoConfirmationRequest;
-  /** The collateral guard's block verdict this screen explains */
-  collateralRefusal: CollateralOwnershipErrorCase;
+  /** The guard verdict this screen explains */
+  refusal: SignTxRefusal;
   /** Diagnostics sink; records that the screen actually got presented */
   logger?: Logger;
   /** Observable that emits when the user dismisses the refused screen */
@@ -245,19 +250,19 @@ const isAnswerTo =
 /**
  * Opens the signTx surface and publishes the pending request. Shared by the
  * consent flow and the refused disclosure: the two differ in what they WAIT
- * for, never in what they open. `collateralRefusal` is the block verdict for
- * the refused surface and `null` for a reviewable request.
+ * for, never in what they open. `refusal` is the guard verdict for the
+ * refused surface and `null` for a reviewable request.
  */
 const openSignTxSurface$ = ({
   actions,
   selectOpenViews$,
   request,
   requestId,
-  collateralRefusal,
+  refusal,
 }: SharedParams & {
   request: CardanoConfirmationRequest;
   requestId: string;
-  collateralRefusal: CollateralOwnershipErrorCase | null;
+  refusal: SignTxRefusal | null;
 }) => {
   const { requestingDapp } = request;
   return merge(
@@ -291,7 +296,7 @@ const openSignTxSurface$ = ({
         // dropped on this hop is a compile error, not a live Sign button on a
         // refused transaction. BOTH render modes read it from the slice --
         // never from the sheet params above, which `sheetPages.tsx` discards.
-        collateralRefusal,
+        refusal,
       }),
     ),
   );
@@ -310,16 +315,16 @@ export const signTx$ = ({
   signingResult$,
   logger,
 }: SignTxParams) => {
-  // A request the collateral-ownership guard blocked has already been
+  // A request a pre-consent guard refused has already been
   // rejected to the dApp and is NOT consent -- it is shown to explain the
   // refusal. Dispatched here, at the single signTx surface seam, so it
   // inherits the caller's request serialisation unchanged. Truthiness, not
-  // `!== null`: the verdict is a non-empty token or null, and a request built
-  // without the field must read as reviewable, never as refused.
-  if (request.collateralRefusal) {
+  // `!== null`: the verdict is an object or null, and a request built without
+  // the field must read as reviewable, never as refused.
+  if (request.refusal) {
     return refusedSignTx$({
       request,
-      collateralRefusal: request.collateralRefusal,
+      refusal: request.refusal,
       selectOpenViews$,
       actions,
       rejectSignTx$,
@@ -364,7 +369,7 @@ export const signTx$ = ({
       selectOpenViews$,
       request,
       requestId,
-      collateralRefusal: request.collateralRefusal,
+      refusal: request.refusal,
     }),
     selectOpenViews$.pipe(
       take(1),
@@ -408,7 +413,9 @@ export const signTx$ = ({
                 }
                 if (result.type === 'error') {
                   return [
-                    actions.cardanoDappConnector.setSignTxError(true),
+                    actions.cardanoDappConnector.setSignTxError(
+                      result.error ?? true,
+                    ),
                     ...(result.hwErrorKeys
                       ? [
                           actions.cardanoDappConnector.setSignTxHwErrorKeys(
@@ -507,7 +514,9 @@ export const signTx$ = ({
                     }
                     if (result.type === 'error') {
                       return [
-                        actions.cardanoDappConnector.setSignTxError(true),
+                        actions.cardanoDappConnector.setSignTxError(
+                          result.error ?? true,
+                        ),
                         ...(result.hwErrorKeys
                           ? [
                               actions.cardanoDappConnector.setSignTxHwErrorKeys(
@@ -550,7 +559,7 @@ export const signTx$ = ({
 
 /**
  * Presents the REFUSED state of the signTx consent surface for a request the
- * collateral-ownership guard blocked.
+ * pre-consent guard refused.
  *
  * Not `signTx$` with a flag, because the two differ in what they wait for:
  *  - the CIP-30 rejection has ALREADY been sent by `signTx`, immediately and
@@ -572,7 +581,7 @@ export const signTx$ = ({
  */
 export const refusedSignTx$ = ({
   request,
-  collateralRefusal,
+  refusal,
   selectOpenViews$,
   actions,
   rejectSignTx$,
@@ -593,10 +602,10 @@ export const refusedSignTx$ = ({
       // disclosure (a dApp parks the consent slot ahead of it) visible: a
       // blocked request with no line here was refused without the user
       // being told yet.
-      logger?.warn(COLLATERAL_BLOCK_LOG, {
-        stage: 'screen-presented' satisfies CollateralBlockStage,
+      logger?.warn(refusalLogAnchor(refusal), {
+        stage: 'screen-presented' satisfies RefusalLogStage,
         origin: requestingDapp.origin,
-        case: collateralRefusal,
+        case: refusalLogCase(refusal),
         requestId,
       });
       return EMPTY;
@@ -606,7 +615,7 @@ export const refusedSignTx$ = ({
       selectOpenViews$,
       request,
       requestId,
-      collateralRefusal,
+      refusal,
     }),
     selectOpenViews$.pipe(
       take(1),

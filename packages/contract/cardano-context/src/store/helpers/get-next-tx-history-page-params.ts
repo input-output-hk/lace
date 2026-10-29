@@ -9,7 +9,7 @@ import type {
  * Takes a transaction and returns parameters needed to fetch transactions
  * older than it (excluding it) as the upper bound. The returned parameters define
  * a range where this transaction is the newest boundary.
- * @param txHistoryItem The transaction to use as the upper bound
+ * @param txHistoryItem - The transaction to use as the upper bound
  */
 export const buildStartAtParamsFromTx = (
   txHistoryItem: CardanoTransactionHistoryItem,
@@ -30,7 +30,7 @@ export const buildStartAtParamsFromTx = (
 /**
  * Takes a transaction and returns parameters needed to fetch transactions
  * newer than it (excluding it) as the lower bound.
- * @param txHistoryItem The transaction to use as the lower bound
+ * @param txHistoryItem - The transaction to use as the lower bound
  */
 export const buildEndAtParamsFromTx = (
   txHistoryItem: CardanoTransactionHistoryItem,

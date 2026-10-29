@@ -331,28 +331,86 @@ describe('useBrowseDRep', () => {
       ).not.toContain('drep1whale');
       const { result: nameSearch } = renderBrowseDRep(blocked);
       act(() => {
-        nameSearch.current.onSearchChange('Whale');
+        nameSearch.current.onSearchCommit('Whale');
       });
       expect(listedIds(nameSearch)).not.toContain('drep1whale');
       const { result: partialIdSearch } = renderBrowseDRep(blocked);
       act(() => {
-        partialIdSearch.current.onSearchChange('drep1wha');
+        partialIdSearch.current.onSearchCommit('drep1wha');
       });
       expect(listedIds(partialIdSearch)).not.toContain('drep1whale');
+    });
+
+    // The config parser hands this hook ids already reduced to the CIP-129
+    // form `drepId` carries, so that is the only match production performs.
+    it('pins a promoted DRep onto its directory row, with its localized copy', () => {
+      const { result } = renderBrowseDRep({
+        'promotedDReps.selectActivePromoted': [
+          {
+            id: 'drep1whale',
+            additional_information: { en: 'Chosen by Lace' },
+          },
+        ],
+      });
+      expect(
+        result.current.promotedDReps.map(entry => [
+          entry.summary.drepId,
+          entry.description,
+        ]),
+      ).toEqual([['drep1whale', 'Chosen by Lace']]);
+    });
+
+    it('pins nothing when the promoted id matches no directory row', () => {
+      const { result } = renderBrowseDRep({
+        'promotedDReps.selectActivePromoted': [{ id: 'drep1nosuchrow' }],
+      });
+      expect(result.current.promotedDReps).toEqual([]);
     });
 
     it('reveals a blocked DRep only on the exact pasted DRep id, either encoding', () => {
       const blocked = { 'promotedDReps.selectActiveBlocked': ['drep1whale'] };
       const { result: exactId } = renderBrowseDRep(blocked);
       act(() => {
-        exactId.current.onSearchChange('  DREP1WHALE ');
+        exactId.current.onSearchCommit('  DREP1WHALE ');
       });
       expect(listedIds(exactId)).toEqual(['drep1whale']);
       const { result: legacyId } = renderBrowseDRep(blocked);
       act(() => {
-        legacyId.current.onSearchChange('drep1whale-cip105');
+        legacyId.current.onSearchCommit('drep1whale-cip105');
       });
       expect(listedIds(legacyId)).toEqual(['drep1whale']);
+    });
+
+    it('keeps the landing order of the rows a query leaves in place', () => {
+      // The optimisation this pins: the directory is sorted ONCE and the query
+      // filters the sorted list, so a search must not reshuffle what it keeps.
+      const { result: unfiltered } = renderBrowseDRep();
+      const ranked = listedIds(unfiltered);
+      const { result: searched } = renderBrowseDRep();
+      act(() => {
+        searched.current.onSearchCommit('l');
+      });
+      const matched = listedIds(searched);
+      expect(matched.length).toBeGreaterThan(1);
+      expect(matched).toEqual(ranked.filter(id => matched.includes(id)));
+    });
+
+    it('does not sort again when only the query changes', () => {
+      const { result } = renderBrowseDRep();
+      // Cleared after the mount's own sort so the assertion covers the query
+      // change alone — the keystroke path the sheet used to pay O(n log n)
+      // BigInt comparisons on.
+      const sortSpy = vi.spyOn(Array.prototype, 'sort');
+      // finally, because the spy is on a global prototype: leaving it installed
+      // on a failure would carry into every test after this one.
+      try {
+        act(() => {
+          result.current.onSearchCommit('clone');
+        });
+        expect(sortSpy).not.toHaveBeenCalled();
+      } finally {
+        sortSpy.mockRestore();
+      }
     });
 
     it('sizes payment-address clusters over active rows only', () => {

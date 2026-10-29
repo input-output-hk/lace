@@ -382,17 +382,26 @@ describe('cardano-host-pull dependencies', () => {
       });
     });
 
-    it('fails LOUD when a host address is not re-derivable from the xpub', async () => {
-      // A MAINNET address served into a preprod context can never match.
-      // Serving the rest would silently hide its utxos and history.
-      const results = await discover([externalAddress, mainnetExternalAddress]);
-      expect(results).toHaveLength(1);
-      const [result] = results;
-      expect(result.isOk()).toBe(false);
-      if (result.isOk()) throw new Error('expected Err');
-      expect(result.error).toBeInstanceOf(ProviderError);
-      expect(result.error.message).toContain('only 1 matched');
-    });
+    // Address derivation is CPU-bound and sits right at vitest's 5 s default
+    // on a loaded CI runner (observed 5012 ms) — budget it explicitly.
+    it(
+      'fails LOUD when a host address is not re-derivable from the xpub',
+      { timeout: 20_000 },
+      async () => {
+        // A MAINNET address served into a preprod context can never match.
+        // Serving the rest would silently hide its utxos and history.
+        const results = await discover([
+          externalAddress,
+          mainnetExternalAddress,
+        ]);
+        expect(results).toHaveLength(1);
+        const [result] = results;
+        expect(result.isOk()).toBe(false);
+        if (result.isOk()) throw new Error('expected Err');
+        expect(result.error).toBeInstanceOf(ProviderError);
+        expect(result.error.message).toContain('only 1 matched');
+      },
+    );
   });
 
   describe('getAccountUtxos (two stake keys)', () => {

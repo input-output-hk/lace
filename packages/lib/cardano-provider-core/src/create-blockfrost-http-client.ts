@@ -2,6 +2,7 @@ import { HttpClient, buildUrl } from '@lace-lib/util-provider';
 
 import type { RateLimiter } from '@lace-lib/util-provider';
 
+/** Options for {@link createBlockfrostHttpClient}: the Blockfrost endpoint, project credentials and request pacing. */
 export type CreateBlockfrostHttpClientProps = {
   /** Blockfrost base URL, e.g. `https://cardano-mainnet.blockfrost.io`. */
   baseUrl: string;

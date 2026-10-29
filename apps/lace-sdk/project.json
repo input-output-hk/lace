@@ -1,12 +1,12 @@
 {
   "name": "lace-sdk",
   "projectType": "library",
-  "tags": ["scope:app"],
+  "tags": ["scope:app", "release:lace-sdk"],
   "targets": {
     "build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "npx tsdown && (trap 'rm -rf dist/.dts-work' EXIT; tsc -p tsconfig.dts-gen.json && npx rollup -c rollup.dts.config.mjs)",
+        "command": "bash scripts/build.sh",
         "cwd": "apps/lace-sdk"
       },
       "cache": true,
@@ -14,21 +14,40 @@
         "{projectRoot}/**/*",
         "{workspaceRoot}/packages/contract/*/src/**/*",
         "{workspaceRoot}/packages/lib/*/src/**/*",
-        "{workspaceRoot}/packages/sdk/*/src/**/*",
-        "{workspaceRoot}/packages/module/*/src/sdk.ts",
-        "{workspaceRoot}/packages/module/*/src/augmentations.ts",
-        "{workspaceRoot}/tsconfig.base.json"
+        "{workspaceRoot}/packages/module/*/src/**/*",
+        "{workspaceRoot}/tsconfig.base.json",
+        {
+          "dependentTasksOutputFiles": "**/*.{js,cjs,d.ts,json}",
+          "transitive": true
+        },
+        {
+          "env": "SDK_CHANNEL"
+        }
       ],
-      "outputs": ["{projectRoot}/dist"]
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/dist-canary"]
+    },
+    "check-doc-comments": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "SDK_CHANNEL=stable node test/check-doc-comments.mjs && SDK_CHANNEL=canary node test/check-doc-comments.mjs",
+        "cwd": "{projectRoot}"
+      }
     },
     "type-check-src": {},
     "type-check-test": {},
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "vitest run --config=vitest.config.js --coverage",
+        "command": "vitest run --config=vitest.config.js --coverage && node test/check-stable-variants.mjs",
         "cwd": "{projectRoot}"
-      }
+      },
+      "inputs": [
+        "default",
+        "^default",
+        "sharedGlobals",
+        "{workspaceRoot}/.github/workflows/sdk-release-version.yml",
+        "{workspaceRoot}/.github/workflows/sdk-release.yml"
+      ]
     },
     "lint": {}
   }

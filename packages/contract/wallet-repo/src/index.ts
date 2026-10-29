@@ -4,6 +4,7 @@ export * from './contract';
 export type * from './entities';
 export * from './errors';
 export * from './types';
+export type * from './wallet-kinds';
 export * from './utils';
 export * from './value-objects';
 export {

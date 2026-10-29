@@ -136,7 +136,10 @@ describe('useSignTx (mobile)', () => {
       dapp: { name: 'dapp.example', origin: 'https://dapp.example' },
       txHex: 'abcd1234',
       partialSign: true,
-      collateralRefusal: 'foreign-collateral-return' as const,
+      refusal: {
+        kind: 'collateral',
+        case: 'foreign-collateral-return',
+      } as const,
     };
     const queuedRefusal = {
       id: REQUEST_ID,
@@ -155,6 +158,7 @@ describe('useSignTx (mobile)', () => {
       });
       const { result } = renderHook(() => useSignTx(createMockProps()));
       expect(result.current.refusal).toEqual({
+        kind: 'collateral',
         case: 'foreign-collateral-return',
         dappOrigin: 'https://dapp.example',
       });
@@ -482,6 +486,12 @@ describe('useSignTx (mobile)', () => {
         error: {
           message: 'Crash',
           code: String(APIErrorCode.InternalError),
+          diagnostics: {
+            stage: 'signing preparation',
+            name: 'APIError',
+            code: APIErrorCode.InternalError,
+            message: '[Unrecognised message omitted for privacy]',
+          },
         },
       });
     });

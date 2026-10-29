@@ -5,6 +5,7 @@ import { spacing } from '../../../design-tokens';
 import { Button, Column, Icon, Row, Text } from '../../atoms';
 
 export interface ClaimErrorProps {
+  showActions?: boolean;
   title: string;
   errorMessage: string;
   errorLabel: string;
@@ -15,6 +16,7 @@ export interface ClaimErrorProps {
 }
 
 export const ClaimError = ({
+  showActions = true,
   title,
   errorMessage,
   errorLabel,
@@ -48,14 +50,16 @@ export const ClaimError = ({
         )}
       </Column>
     </Column>
-    <Row>
-      <Button.Primary
-        fullWidth
-        label={dismissLabel}
-        onPress={onDismiss}
-        testID="claim-error-dismiss-btn"
-      />
-    </Row>
+    {showActions && (
+      <Row>
+        <Button.Primary
+          fullWidth
+          label={dismissLabel}
+          onPress={onDismiss}
+          testID="claim-error-dismiss-btn"
+        />
+      </Row>
+    )}
   </Column>
 );
 

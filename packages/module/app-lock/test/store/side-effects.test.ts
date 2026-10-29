@@ -150,7 +150,7 @@ describe('module app-lock side effects', () => {
 
     afterEach(() => {
       subscription?.unsubscribe();
-      vi.restoreAllMocks();
+      vi.resetAllMocks();
     });
 
     it('returns true when decryption succeeds', async () => {

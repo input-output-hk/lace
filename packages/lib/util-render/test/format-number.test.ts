@@ -1,3 +1,4 @@
+import { pinDefaultNumberLocale } from '@lace-lib/util-dev';
 import { afterEach, describe, expect, it, test, vi } from 'vitest';
 
 import * as formatNumber from '../src/format-number';
@@ -564,23 +565,25 @@ describe('format-number', () => {
     });
 
     describe('unusable Intl output', () => {
-      // Restore only this block's own spy, in an afterEach so a failing
-      // assertion cannot skip it. restoreAllMocks would also tear down the
-      // default-locale pin installed from setupFiles, leaving every later test
-      // in the file running unpinned.
+      // Spying on Intl.NumberFormat returns the spy the default-locale pin from
+      // setupFiles already installed, so restoring it removes the pin too.
+      // Re-pin after each case, in an afterEach so a failing assertion cannot
+      // skip it, so every later test in the file still runs pinned.
       let numberFormat: MockInstance | undefined;
 
       afterEach(() => {
         numberFormat?.mockRestore();
         numberFormat = undefined;
+        pinDefaultNumberLocale();
       });
 
       const stubFormattedOutput = (formatted: string) => {
         numberFormat = vi
           .spyOn(Intl, 'NumberFormat')
-          .mockImplementation(
-            () => ({ format: () => formatted } as unknown as Intl.NumberFormat),
-          );
+          // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+          .mockImplementation(function () {
+            return { format: () => formatted } as unknown as Intl.NumberFormat;
+          });
       };
 
       // Each case uses a locale tag never used elsewhere, so the module-level

@@ -2,19 +2,24 @@ import {
   AccAddress,
   DeviceEpoch,
   DeviceEntryNotFoundError,
+  TokenColor,
   UseCounter,
 } from '@lace-contract/passport';
 import { HexBytes } from '@lace-lib/util';
+import { jubjub } from '@noble/curves/misc.js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { pureCircuits } from '../../src/acc/acc-module';
 import { devJubjubAuthoriser } from '../../src/acc/dev-authoriser';
 import {
   connectAccountHandle,
   executeGatedCall,
 } from '../../src/acc/gated-call';
+import { ISSUE_GRANT_CIRCUIT } from '../../src/acc/grant-circuits';
+import { prepareIssueGrant } from '../../src/acc/grants';
 
 import type { AccProviders } from '../../src/acc/deploy';
-import type { Authorisation } from '@lace-contract/passport';
+import type { Authorisation, GrantScopeInput } from '@lace-contract/passport';
 
 const contractsMocks = vi.hoisted(() => ({
   findDeployedContract:
@@ -35,6 +40,24 @@ const newEntry = new Uint8Array(32).fill(3);
 
 const commitmentFor = (counter: bigint): string =>
   counter.toString(16).padStart(64, '0');
+
+const spendScope: GrantScopeInput = {
+  grantee: {
+    scheme: 'jubjub-schnorr',
+    publicKey: HexBytes.fromByteArray(
+      jubjub.Point.fromAffine(
+        pureCircuits.compute_public_point_with_jubjub(55n),
+      ).toBytes(),
+    ),
+  },
+  operations: ['withdraw-unshielded'],
+  color: TokenColor('00'.repeat(32)),
+  recipient: { kind: 'any' },
+  maxCoinValue: '300',
+  perCallCap: '300',
+  cap: '450',
+  expiresAt: null,
+};
 
 /**
  * The Authorisation fields expand to the reference trailing argument
@@ -105,6 +128,44 @@ describe('executeGatedCall', () => {
       cannedAuthorisation.sigS,
       cannedAuthorisation.grindNonce,
     );
+  });
+
+  it('forwards the issue argument list ahead of the auth args with no witness value', async () => {
+    const context = createTestContext();
+    const call = vi.fn(async (): Promise<unknown> => ({ txId: 'issue-tx' }));
+    const { call: issue } = prepareIssueGrant({
+      contractAddress: new Uint8Array(32).fill(0xac),
+      scope: spendScope,
+      originHash: new Uint8Array(32).fill(0x11),
+      roster: [],
+    });
+
+    await executeGatedCall({
+      handle: { callTx: { [ISSUE_GRANT_CIRCUIT]: call } },
+      authoriser: context.authoriser as never,
+      circuit: issue.circuit,
+      args: issue.args,
+      address,
+      ledgerState: context.ledgerState,
+    });
+
+    expect(context.authoriser.authorise).toHaveBeenCalledExactlyOnceWith({
+      account: address,
+      circuit: ISSUE_GRANT_CIRCUIT,
+      args: issue.args,
+      witnessValues: [],
+      authNonce,
+      useCounter: 2n,
+    });
+    expect(call).toHaveBeenCalledExactlyOnceWith(
+      ...issue.args,
+      cannedAuthorisation.pk,
+      cannedAuthorisation.useCounter,
+      cannedAuthorisation.sigR,
+      cannedAuthorisation.sigS,
+      cannedAuthorisation.grindNonce,
+    );
+    expect(call.mock.calls[0]).toHaveLength(23);
   });
 
   it('signs over the resolved counter and the observed auth nonce', async () => {
@@ -316,7 +377,7 @@ describe('connectAccountHandle', () => {
     midnightProvider: 'midnight',
   };
 
-  it('finds the deployed contract with a fresh empty private state', async () => {
+  it('finds the deployed contract with the private state holding no encryption secret and no coins', async () => {
     const handle = { callTx: {} };
     contractsMocks.findDeployedContract.mockResolvedValue(handle);
 
@@ -332,7 +393,7 @@ describe('connectAccountHandle', () => {
         privateStateId: expect.stringMatching(
           /^account-[0-9a-f]{16}$/,
         ) as string,
-        initialPrivateState: { encSecretKeyHex: null, coins: {} },
+        initialPrivateState: { coins: {} },
       },
     );
   });

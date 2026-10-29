@@ -1,24 +1,37 @@
 import {
   DeviceCommitmentHex,
+  GrantId,
+  GrantSlot,
+  TokenColor,
   UseCounter,
   passportActions,
 } from '@lace-contract/passport';
 import { passportReducers } from '@lace-contract/passport/src/store/slice';
 import { ByteArray, HexBytes } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { jubjub } from '@noble/curves/misc.js';
 import { BehaviorSubject, map, NEVER, of, Subject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import '../../../src/augmentations';
+import { devEncryptionKey } from '../../../src/acc/dev-encryption-key';
+import { encodeDevicePublicKey } from '../../../src/acc/envelopes';
+import { GRANTEE_WITHDRAWAL_CIRCUITS } from '../../../src/acc/grant-circuits';
+import { deriveGrantId, originHash } from '../../../src/acc/grants';
 import { accManifest } from '../../../src/acc/manifest';
+import { JubjubDevice } from '../../../src/acc/signer';
 import { createDependencies } from '../../../src/store/dependencies';
 import { runPassportFlow } from '../../../src/store/side-effects/passport-flows';
 
+import type * as AccModule from '../../../src/acc/acc-module';
 import type { DeviceRoster } from '../../../src/flows/devices';
-import type { FlowAccountState } from '../../../src/flows/types';
+import type { GrantRoster, IssuedGrant } from '../../../src/flows/grants';
+import type { RecognisedAccount } from '../../../src/flows/sign-in';
 import type { FlowEvent } from '../../../src/store/dependencies';
 import type {
   ActionCreators,
+  GrantRecord,
+  GrantScopeInput,
   PassportAccountInfo,
   PassportDevice,
   PassportFlow,
@@ -30,22 +43,29 @@ import type { Observable } from 'rxjs';
 import type { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 import type { RunHelpers } from 'rxjs/testing';
 
+/** The grantee withdrawals of both schemes, as an account deployed here holds them. */
+const INSTALLED_WITHDRAWALS = Object.values(GRANTEE_WITHDRAWAL_CIRCUITS).flat();
+
 const mocks = vi.hoisted(() => ({
   createIndexerClient: vi.fn(),
   ledger: vi.fn(),
+  readGrants: vi.fn(),
   createMidnightProviders: vi.fn(),
   connectAccountHandle: vi.fn(),
   executeGatedCall: vi.fn(),
   deployAccount: vi.fn(),
-  generateEncKeyPair: vi.fn(),
   resolveUseCounter: vi.fn(),
 }));
 
 vi.mock('../../../src/infra/indexer', () => ({
   createIndexerClient: mocks.createIndexerClient,
 }));
-vi.mock('../../../src/acc/acc-module', () => ({
+vi.mock('../../../src/acc/acc-module', async importOriginal => ({
+  ...(await importOriginal<typeof AccModule>()),
   ledger: mocks.ledger,
+}));
+vi.mock('../../../src/acc/read-grants', () => ({
+  readGrants: mocks.readGrants,
 }));
 vi.mock('../../../src/infra/providers', () => ({
   createMidnightProviders: mocks.createMidnightProviders,
@@ -56,9 +76,11 @@ vi.mock('../../../src/acc/gated-call', () => ({
 }));
 vi.mock('../../../src/acc/deploy', () => ({
   deployAccount: mocks.deployAccount,
-}));
-vi.mock('../../../src/acc/enc-keys', () => ({
-  generateEncKeyPair: mocks.generateEncKeyPair,
+  readMaintenanceAuthority: async () => ({
+    committee: [],
+    threshold: 1,
+    counter: 0n,
+  }),
 }));
 vi.mock('../../../src/acc/use-counter', () => ({
   resolveUseCounter: mocks.resolveUseCounter,
@@ -73,6 +95,7 @@ const joiningCommitment = '33'.repeat(32);
 const knownUseCounter = '2';
 const advancedUseCounter = '3';
 const failureMessage = 'node unreachable';
+const devSeed = new Uint8Array(64).fill(1);
 const network = {
   networkId: 'undeployed',
   indexerUrl: 'http://indexer.example.com/api/v3/graphql',
@@ -84,6 +107,7 @@ const account: PassportAccountInfo = {
   address: accountAddress,
   bindingVersion: accManifest.bindingVersion,
   status: 'ready',
+  networkId: 'undeployed',
 };
 const localDevice: PassportDevice = {
   commitmentHex: localCommitment,
@@ -98,12 +122,73 @@ const record = {
   bindingVersion: accManifest.bindingVersion,
   localUseCounter: knownUseCounter,
 };
+const rpId = 'lace.io';
+const localKey = new JubjubDevice(77n);
+/**
+ * The live entry the key this device registered derives, so a rotation
+ * resolves this device's registration at once rather than scanning past it.
+ */
+const localRegisteredEntry = HexBytes.fromByteArray(
+  localKey.entryAt(ByteArray.fromHex(HexBytes(accountAddress)), 1n, 0n),
+);
+const grantee = new JubjubDevice(55n);
+const scope: GrantScopeInput = {
+  grantee: {
+    scheme: 'jubjub-schnorr',
+    publicKey: HexBytes.fromByteArray(
+      jubjub.Point.fromAffine(grantee.pk).toBytes(),
+    ),
+  },
+  operations: ['withdraw-unshielded'],
+  color: TokenColor('00'.repeat(32)),
+  recipient: { kind: 'any' },
+  maxCoinValue: '300',
+  perCallCap: '300',
+  cap: '450',
+  expiresAt: null,
+};
+const heldGrantId = GrantId('ab'.repeat(32));
+const grantRecord = (id: GrantId, active = true): GrantRecord => ({
+  id,
+  slot: GrantSlot(0),
+  active,
+  epoch: 0,
+  generation: 0,
+  issuedAt: 1,
+  scope: {
+    operations: ['withdraw-unshielded'],
+    read: false,
+    objectCommit: '00'.repeat(32),
+    perCallCap: '300',
+    cap: '450',
+    expiresAt: null,
+    rpCommit: '00'.repeat(32),
+    readPkHash: '00'.repeat(32),
+    window: null,
+    callerCommit: '00'.repeat(32),
+  },
+  spentWindow: { start: 0, spent: '0' },
+});
+
+/** The id the issue flow derives for the grantee's first slot under this host. */
+const issuedGrantId = deriveGrantId({
+  contractAddress: ByteArray.fromHex(HexBytes(accountAddress)),
+  granteePublicKey: { scheme: 'jubjub-schnorr', point: grantee.pk },
+  originHash: await originHash(rpId),
+  slot: GrantSlot(0),
+});
 
 type TriggerAction =
   | ReturnType<typeof actions.passport.addDevice>
   | ReturnType<typeof actions.passport.createAccount>
+  | ReturnType<typeof actions.passport.issueGrant>
   | ReturnType<typeof actions.passport.removeDevice>
+  | ReturnType<typeof actions.passport.revokeAllGrants>
+  | ReturnType<typeof actions.passport.revokeGrant>
   | ReturnType<typeof actions.passport.signIn>;
+
+/** What the chain reads as before and after the accepted gated call. */
+type ChainRoster = { before: GrantRecord[]; after: GrantRecord[] };
 
 /**
  * The state a flow starts from here: an account recognised on this
@@ -123,10 +208,18 @@ const isSettling = (action: Action): boolean =>
   actions.passport.setFlowError.match(action) ||
   (actions.passport.setFlow.match(action) && action.payload === 'ready');
 
-const createHarness = (withStoredRecord = true) => {
+const createHarness = (withStoredRecord = true, roster?: ChainRoster) => {
+  if (roster) {
+    let current = roster.before;
+    mocks.readGrants.mockImplementation(() => current);
+    mocks.executeGatedCall.mockImplementation(async () => {
+      current = roster.after;
+      return UseCounter(BigInt(advancedUseCounter));
+    });
+  }
   const authoriser = {
     scheme: 'jubjub-schnorr' as const,
-    devicePublicKey: vi.fn(async () => ({ x: 1n, y: 2n })),
+    devicePublicKey: vi.fn(async () => localKey.pk),
     deviceCommitment: vi.fn(async () => DeviceCommitmentHex(localCommitment)),
     authorise: vi.fn(),
   };
@@ -134,17 +227,29 @@ const createHarness = (withStoredRecord = true) => {
     getValues: vi.fn(() => of(withStoredRecord ? [record] : [])),
     setValue: vi.fn(() => of(void 0)),
   };
-  const queryContractState = vi.fn(async () => ({ data: 'charged-state' }));
-  mocks.createIndexerClient.mockReturnValue({ queryContractState });
+  const queryContractState = vi.fn(async () => ({
+    data: 'charged-state',
+    operations: () => INSTALLED_WITHDRAWALS,
+  }));
+  mocks.createIndexerClient.mockReturnValue({
+    queryContractState,
+    enumerateContractActions: vi.fn(async () => []),
+  });
 
   const addDevice$ = new Subject<TriggerAction>();
   const createAccount$ = new Subject<TriggerAction>();
+  const issueGrant$ = new Subject<TriggerAction>();
   const removeDevice$ = new Subject<TriggerAction>();
+  const revokeAllGrants$ = new Subject<TriggerAction>();
+  const revokeGrant$ = new Subject<TriggerAction>();
   const signIn$ = new Subject<TriggerAction>();
   const triggers: Record<string, Subject<TriggerAction>> = {
     [actions.passport.addDevice.type]: addDevice$,
     [actions.passport.createAccount.type]: createAccount$,
+    [actions.passport.issueGrant.type]: issueGrant$,
     [actions.passport.removeDevice.type]: removeDevice$,
+    [actions.passport.revokeAllGrants.type]: revokeAllGrants$,
+    [actions.passport.revokeGrant.type]: revokeGrant$,
     [actions.passport.signIn.type]: signIn$,
   };
 
@@ -159,7 +264,17 @@ const createHarness = (withStoredRecord = true) => {
 
   const subscription = runPassportFlow(
     {
-      passport: { addDevice$, createAccount$, removeDevice$, signIn$ },
+      passport: {
+        addDevice$,
+        createAccount$,
+        issueGrant$,
+        installOperations$: NEVER,
+        readShieldedHoldings$: NEVER,
+        removeDevice$,
+        revokeAllGrants$,
+        revokeGrant$,
+        signIn$,
+      },
     } as never,
     {
       passport: {
@@ -176,9 +291,11 @@ const createHarness = (withStoredRecord = true) => {
       createKeyValueStorage: vi.fn(() => storage),
       ...createDependencies({
         authoriser,
+        encryptionKey: devEncryptionKey(devSeed),
         network,
         prover: { prove: vi.fn(), check: vi.fn() },
         sponsor: { balanceAndSign: vi.fn() },
+        rpId,
       }),
     } as never,
   ).subscribe(apply);
@@ -210,6 +327,8 @@ type FlowCase = {
   code: string;
   /** createAccount refuses over a stored record, so its cases run without one. */
   withStoredRecord?: false;
+  /** What the chain reads as around a grant call, so its roster settles. */
+  roster?: () => ChainRoster;
   trigger: () => TriggerAction;
   failOnce: (harness: Harness) => void;
   /** Hangs the flow, returning the assertion that it got that far. */
@@ -276,13 +395,91 @@ const flowCases: FlowCase[] = [
       };
     },
   },
+  {
+    flow: 'issueGrant',
+    code: 'grant-issue-failed',
+    roster: () => ({ before: [], after: [grantRecord(issuedGrantId)] }),
+    trigger: () => actions.passport.issueGrant(scope),
+    failOnce: () => {
+      mocks.executeGatedCall.mockRejectedValueOnce(new Error(failureMessage));
+    },
+    holdInFlight: () => {
+      mocks.executeGatedCall.mockReturnValue(hang());
+      return () => {
+        expect(mocks.executeGatedCall).toHaveBeenCalled();
+      };
+    },
+  },
+  {
+    flow: 'revokeGrant',
+    code: 'grant-revoke-failed',
+    roster: () => ({
+      before: [grantRecord(heldGrantId)],
+      after: [grantRecord(heldGrantId, false)],
+    }),
+    trigger: () => actions.passport.revokeGrant({ grantId: heldGrantId }),
+    failOnce: () => {
+      mocks.executeGatedCall.mockRejectedValueOnce(new Error(failureMessage));
+    },
+    holdInFlight: () => {
+      mocks.executeGatedCall.mockReturnValue(hang());
+      return () => {
+        expect(mocks.executeGatedCall).toHaveBeenCalled();
+      };
+    },
+  },
+  {
+    flow: 'revokeAllGrants',
+    code: 'grant-revoke-all-failed',
+    roster: () => ({ before: [grantRecord(heldGrantId)], after: [] }),
+    trigger: () => actions.passport.revokeAllGrants(),
+    failOnce: () => {
+      mocks.executeGatedCall.mockRejectedValueOnce(new Error(failureMessage));
+    },
+    holdInFlight: () => {
+      mocks.executeGatedCall.mockReturnValue(hang());
+      return () => {
+        expect(mocks.executeGatedCall).toHaveBeenCalled();
+      };
+    },
+  },
 ];
 
-beforeEach(() => {
+/** The ledger's device set: membership by entry bytes, and every entry in order. */
+const deviceSet = (commitments: string[]) => ({
+  member: (entry: Uint8Array) =>
+    commitments.includes(HexBytes.fromByteArray(entry)),
+  [Symbol.iterator]: function* () {
+    for (const commitment of commitments) {
+      yield ByteArray.fromHex(HexBytes(commitment));
+    }
+  },
+});
+
+beforeEach(async () => {
   vi.clearAllMocks();
-  mocks.ledger.mockReturnValue({
-    devices: [ByteArray.fromHex(HexBytes(localCommitment))],
+  const keys = await devEncryptionKey(devSeed).createKeys(network.networkId, {
+    devicePublicKey: encodeDevicePublicKey(localKey.pk),
   });
+  const inbox = [...keys.envelopes, ...keys.registrations];
+  let authNonce = 0n;
+  mocks.ledger.mockImplementation(() => ({
+    enc_key: keys.encKey,
+    device_epoch: 1n,
+    auth_nonce: (authNonce += 1n),
+    booted: true,
+    devices: deviceSet([
+      localCommitment,
+      targetCommitment,
+      localRegisteredEntry,
+    ]),
+    inbox_count: BigInt(inbox.length),
+    inbox: {
+      member: (ordinal: bigint) => ordinal < BigInt(inbox.length),
+      lookup: (ordinal: bigint) => inbox[Number(ordinal)],
+    },
+  }));
+  mocks.readGrants.mockReturnValue([]);
   mocks.resolveUseCounter.mockResolvedValue({
     useCounter: UseCounter(BigInt(knownUseCounter)),
     commitmentHex: localCommitment,
@@ -292,22 +489,34 @@ beforeEach(() => {
   mocks.executeGatedCall.mockResolvedValue(
     UseCounter(BigInt(advancedUseCounter)),
   );
-  mocks.generateEncKeyPair.mockReturnValue({
-    publicKey: new Uint8Array(32).fill(1),
-    secretKey: new Uint8Array(32).fill(2),
-  });
-  mocks.deployAccount.mockResolvedValue({
-    address: accountAddress,
-    salt: new Uint8Array(32),
-    activate: vi.fn(async () => ({ txId: 'activation-tx' })),
-  });
+  mocks.deployAccount.mockImplementation(
+    async ({
+      onDeployed,
+    }: {
+      onDeployed: (address: string, pending: unknown) => Promise<void>;
+    }) => {
+      await onDeployed(accountAddress, {
+        operations: [],
+        lockAccount: false,
+        saltHex: '00'.repeat(32),
+        authorityKey: { tag: 'schnorr', value: '00'.repeat(32) },
+        handoverAuthority: { tag: 'schnorr', value: 'cd'.repeat(32) },
+      });
+      return {
+        address: accountAddress,
+        salt: new Uint8Array(32),
+        isActivated: false,
+        activate: vi.fn(async () => ({ txId: 'activation-tx' })),
+      };
+    },
+  );
 });
 
 describe.each(flowCases)(
   'the $flow flow',
-  ({ code, trigger, failOnce, holdInFlight, withStoredRecord }) => {
+  ({ code, roster, trigger, failOnce, holdInFlight, withStoredRecord }) => {
     it('leaves the flow ready with no error, from a settled start', async () => {
-      const harness = createHarness(withStoredRecord ?? true);
+      const harness = createHarness(withStoredRecord ?? true, roster?.());
 
       harness.dispatch(trigger());
       await harness.waitForSettled(1);
@@ -318,7 +527,7 @@ describe.each(flowCases)(
     });
 
     it('leaves the flow in error with the code its failure carries', async () => {
-      const harness = createHarness(withStoredRecord ?? true);
+      const harness = createHarness(withStoredRecord ?? true, roster?.());
       failOnce(harness);
 
       harness.dispatch(trigger());
@@ -333,7 +542,7 @@ describe.each(flowCases)(
     });
 
     it('leaves the flow ready with no error when retried after a failure', async () => {
-      const harness = createHarness(withStoredRecord ?? true);
+      const harness = createHarness(withStoredRecord ?? true, roster?.());
       failOnce(harness);
 
       harness.dispatch(trigger());
@@ -347,7 +556,7 @@ describe.each(flowCases)(
     });
 
     it('changes nothing when any trigger is dropped while it is in flight', async () => {
-      const harness = createHarness(withStoredRecord ?? true);
+      const harness = createHarness(withStoredRecord ?? true, roster?.());
       const inFlight = holdInFlight(harness);
 
       harness.dispatch(trigger());
@@ -363,12 +572,22 @@ describe.each(flowCases)(
   },
 );
 
-type FlowName = 'addDevice' | 'createAccount' | 'removeDevice' | 'signIn';
+type FlowName =
+  | 'addDevice'
+  | 'createAccount'
+  | 'issueGrant'
+  | 'removeDevice'
+  | 'revokeAllGrants'
+  | 'revokeGrant'
+  | 'signIn';
 
 const FLOW_NAMES: FlowName[] = [
   'addDevice',
   'createAccount',
+  'issueGrant',
   'removeDevice',
+  'revokeAllGrants',
+  'revokeGrant',
   'signIn',
 ];
 
@@ -376,9 +595,12 @@ const FLOW_NAMES: FlowName[] = [
 const triggerOf = {
   addDevice: actions.passport.addDevice({ commitmentHex: joiningCommitment }),
   createAccount: actions.passport.createAccount({ lockAccount: false }),
+  issueGrant: actions.passport.issueGrant(scope),
   removeDevice: actions.passport.removeDevice({
     commitmentHex: targetCommitment,
   }),
+  revokeAllGrants: actions.passport.revokeAllGrants(),
+  revokeGrant: actions.passport.revokeGrant({ grantId: heldGrantId }),
   signIn: actions.passport.signIn(),
 };
 
@@ -387,12 +609,27 @@ const roster: DeviceRoster = {
   devices: sampledDevices,
   localUseCounter: advancedUseCounter,
 };
-const accountState: FlowAccountState = { account, ...roster };
+const grants = [grantRecord(heldGrantId)];
+const grantRoster: GrantRoster = {
+  ...roster,
+  grants,
+  unsealedGrantIds: [],
+  revocationPendingGrantIds: [],
+};
+const issuedGrant: IssuedGrant = { ...grantRoster, grantId: heldGrantId };
+const accountState: RecognisedAccount = {
+  account,
+  ...roster,
+  grants,
+  encKey: '0a'.repeat(32),
+  unsealedGrantIds: [],
+};
 
 /**
  * The flow events a cold marble may carry, keyed by their marble letter:
- * f settles an account flow, v a device flow, over the same roster so the
- * two settle into the same published actions.
+ * f settles an account flow, v a device flow, w a revoke flow and x the
+ * issue flow, over the same rosters so each settles into the same
+ * published actions.
  */
 const events: Record<string, FlowEvent<unknown>> = {
   b: { type: 'progress', stage: 'deploying' },
@@ -401,6 +638,8 @@ const events: Record<string, FlowEvent<unknown>> = {
   e: { type: 'progress', stage: 'activating' },
   f: { type: 'done', result: accountState },
   v: { type: 'done', result: roster },
+  w: { type: 'done', result: grantRoster },
+  x: { type: 'done', result: issuedGrant },
 };
 
 /** The actions the gate and the flows publish, keyed by their marble letter. */
@@ -413,6 +652,11 @@ const emitted = {
   g: actions.passport.setAccount(account),
   h: actions.passport.setDevices(sampledDevices),
   i: actions.passport.setLocalUseCounter(advancedUseCounter),
+  o: actions.passport.setEncKey('0a'.repeat(32)),
+  m: actions.passport.setGrants(grants),
+  u: actions.passport.setUnsealedGrantIds([]),
+  q: actions.passport.setRevocationPendingGrantIds([]),
+  l: actions.passport.setLastIssuedGrantId(heldGrantId),
   j: actions.passport.setFlow('ready'),
   n: actions.passport.setFlowError({
     code: 'no-account',
@@ -474,7 +718,12 @@ const runGateTest = ({
         passport: {
           addDevice$: trigger$('addDevice'),
           createAccount$: trigger$('createAccount'),
+          issueGrant$: trigger$('issueGrant'),
+          installOperations$: NEVER,
+          readShieldedHoldings$: NEVER,
           removeDevice$: trigger$('removeDevice'),
+          revokeAllGrants$: trigger$('revokeAllGrants'),
+          revokeGrant$: trigger$('revokeGrant'),
           signIn$: trigger$('signIn'),
         },
       },
@@ -498,10 +747,12 @@ const runGateTest = ({
 };
 
 /**
- * One flow in flight from frame 1 to frame 6, the other three dispatched
- * meanwhile, then the next flow accepted at frame 12. An account flow
- * settles as (ghij) over frames 6 to 11; a device flow as (hij) over
- * frames 6 to 10.
+ * One flow in flight from frame 1 to frame 6, the others dispatched
+ * meanwhile, then the next flow accepted once the running one settled.
+ * A creation settles as (ghiomj) over frames 6 to 13, a sign-in as
+ * (ghiomuqj) over frames 6 to 15 and the issue flow as (himuqlj) over
+ * frames 6 to 13; a device flow as (hij) over frames 6 to 10 and a revoke
+ * flow as (himuqj) over frames 6 to 12.
  */
 const runningFlows: {
   running: FlowName;
@@ -515,24 +766,30 @@ const runningFlows: {
     next: 'signIn',
     triggers: {
       createAccount: '-t',
-      signIn: '--t---------t',
+      signIn: '--t-----------t',
       addDevice: '---t',
       removeDevice: '----t',
+      issueGrant: '---t',
+      revokeGrant: '----t',
+      revokeAllGrants: '-----t',
     },
     flow: '-----(f|)',
-    expected: '-a----(ghij)a',
+    expected: '-a----(ghiomj)a',
   },
   {
     running: 'signIn',
     next: 'addDevice',
     triggers: {
       signIn: '-t',
-      addDevice: '--t---------t',
+      addDevice: '--t-------------t',
       removeDevice: '---t',
       createAccount: '----t',
+      issueGrant: '---t',
+      revokeGrant: '----t',
+      revokeAllGrants: '-----t',
     },
     flow: '-----(f|)',
-    expected: '-a----(ghij)a',
+    expected: '-a----(ghiomuqj)a',
   },
   {
     running: 'addDevice',
@@ -542,21 +799,72 @@ const runningFlows: {
       removeDevice: '--t---------t',
       createAccount: '---t',
       signIn: '----t',
+      issueGrant: '---t',
+      revokeGrant: '----t',
+      revokeAllGrants: '-----t',
     },
     flow: '-----(v|)',
     expected: '-a----(hij)-a',
   },
   {
     running: 'removeDevice',
-    next: 'createAccount',
+    next: 'issueGrant',
     triggers: {
       removeDevice: '-t',
-      createAccount: '--t---------t',
+      issueGrant: '--t---------t',
       signIn: '---t',
       addDevice: '----t',
+      createAccount: '---t',
+      revokeGrant: '----t',
+      revokeAllGrants: '-----t',
     },
     flow: '-----(v|)',
     expected: '-a----(hij)-a',
+  },
+  {
+    running: 'issueGrant',
+    next: 'revokeGrant',
+    triggers: {
+      issueGrant: '-t',
+      revokeGrant: '--t------------t',
+      revokeAllGrants: '---t',
+      createAccount: '----t',
+      signIn: '---t',
+      addDevice: '----t',
+      removeDevice: '-----t',
+    },
+    flow: '-----(x|)',
+    expected: '-a----(himuqlj)a',
+  },
+  {
+    running: 'revokeGrant',
+    next: 'revokeAllGrants',
+    triggers: {
+      revokeGrant: '-t',
+      revokeAllGrants: '--t-----------t',
+      issueGrant: '---t',
+      createAccount: '----t',
+      signIn: '---t',
+      addDevice: '----t',
+      removeDevice: '-----t',
+    },
+    flow: '-----(w|)',
+    expected: '-a----(himuqj)a',
+  },
+  {
+    running: 'revokeAllGrants',
+    next: 'createAccount',
+    triggers: {
+      revokeAllGrants: '-t',
+      createAccount: '--t-----------t',
+      issueGrant: '---t',
+      revokeGrant: '----t',
+      signIn: '---t',
+      addDevice: '----t',
+      removeDevice: '-----t',
+    },
+    flow: '-----(w|)',
+    expected: '-a----(himuqj)a',
   },
 ];
 
@@ -592,8 +900,8 @@ describe('runPassportFlow: the gate', () => {
     runGateTest({
       triggers: {
         signIn: '-t',
-        createAccount: '---------t',
-        removeDevice: '-------------t',
+        createAccount: '-------------t',
+        removeDevice: '----------------t',
       },
       flows: {
         signIn: cold => [cold('--(f|)', events)],
@@ -602,7 +910,7 @@ describe('runPassportFlow: the gate', () => {
       assertion: ({ sideEffect$, helpers, flowMocks }) => {
         helpers
           .expectObservable(sideEffect$)
-          .toBe('-a-(ghij)ab-c-d-e-(ghij)', emitted);
+          .toBe('-a-(ghiomuqj)ab-c-d-e-(ghiomj)', emitted);
         helpers.flush();
         expect(flowMocks.removeDevice).not.toHaveBeenCalled();
       },
@@ -653,7 +961,7 @@ describe('runPassportFlow: the gate', () => {
       flows: { signIn: cold => [cold('---(f|)', events)] },
       account: 'u',
       assertion: ({ sideEffect$, helpers, flowMocks }) => {
-        helpers.expectObservable(sideEffect$).toBe('-a--(ghij)', emitted);
+        helpers.expectObservable(sideEffect$).toBe('-a--(ghiomuqj)', emitted);
         helpers.flush();
         expect(flowMocks.addDevice).not.toHaveBeenCalled();
       },

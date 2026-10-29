@@ -338,7 +338,6 @@ export const SwapReview = (props: SheetScreenProps<SheetRoutes.SwapReview>) => {
       header: (
         <Sheet.Header
           title={t('v2.swap.review.title')}
-          leftIcon="ArrowLeft"
           leftIconOnPress={handleClose}
           testID="swap-review-header"
         />

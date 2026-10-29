@@ -5,12 +5,11 @@ import type { Observable } from 'rxjs';
 
 /**
  * Represents basic information about a blockchain block.
- *
- * @property {number} height - The block's position in the blockchain.
- * @property {string} hash - The hash of the block.
  */
 export type BitcoinBlockInfo = {
+  /** The block's position in the blockchain. */
   readonly height: number;
+  /** The hash of the block. */
   readonly hash: string;
 };
 
@@ -78,22 +77,23 @@ export type BitcoinInscriptionRef = {
 
 /**
  * Represents an unspent transaction output (UTxO) in the Bitcoin blockchain.
- *
- * @property {string} txId - The unique identifier (transaction hash) of the transaction that created this output.
- * @property {number} index - The output index within the transaction.
- * @property {number} satoshis - The value of this output in satoshis.
- *   Represented as `number`, not `bigint`: every Bitcoin amount — and any
- *   aggregate of them, which is bounded by the 2,100,000,000,000,000-satoshi
- *   total supply — stays well under Number.MAX_SAFE_INTEGER (~9.007e15), so it
- *   is exact; and bitcoinjs-lib v6 PSBT output values are `number` at the
- *   signing boundary regardless. (NWL Mobile audit M-306 reviewed and accepted
- *   on these grounds — no reachable precision loss.)
- * @property {string} address - The address associated with this UTxO. This is the recipient of the funds in this output.
  */
 export type BitcoinUTxO = {
+  /** The unique identifier (transaction hash) of the transaction that created this output. */
   readonly txId: string;
+  /** The output index within the transaction. */
   readonly index: number;
+  /**
+   * The value of this output in satoshis.
+   * Represented as `number`, not `bigint`: every Bitcoin amount, and any
+   * aggregate of them, which is bounded by the 2,100,000,000,000,000-satoshi
+   * total supply, stays well under Number.MAX_SAFE_INTEGER (~9.007e15), so it
+   * is exact; and bitcoinjs-lib v6 PSBT output values are `number` at the
+   * signing boundary regardless. (NWL Mobile audit M-306 reviewed and accepted
+   * on these grounds: no reachable precision loss.)
+   */
   readonly satoshis: number;
+  /** The address associated with this UTxO. This is the recipient of the funds in this output. */
   readonly address: string;
   readonly script: string;
   readonly confirmations: number;
@@ -118,39 +118,43 @@ export type BitcoinInputEntry = {
 
 /**
  * Represents a single output of a transaction.
- *
- * @property {string} address - The address involved in the transaction input or output.
- * @property {number} satoshis - The amount in satoshis for this input or output
- *   (see BitcoinUTxO.satoshis for why `number` is exact and used here).
- * @property {string} opReturnData - The OP_RETURN data associated with this output, if any.
  */
 export type BitcoinOutputEntry = {
+  /** The address involved in the transaction input or output. */
   readonly address: string;
+  /**
+   * The amount in satoshis for this input or output
+   * (see BitcoinUTxO.satoshis for why `number` is exact and used here).
+   */
   readonly satoshis: number;
+  /** The OP_RETURN data associated with this output, if any. */
   readonly opReturnData?: string;
 };
 
 /**
  * Represents a single entry in the transaction history of an address.
- *
- * @property {BitcoinInputEntry[]} inputs - The inputs of the transaction, detailing the source of funds.
- * @property {BitcoinOutputEntry[]} outputs - The outputs of the transaction, detailing the destination of funds.
- * @property {string} transactionHash - The unique identifier (hash) of the transaction.
- * @property {number} confirmations - The number of confirmations for the transaction.
- *                                    More confirmations indicate higher confidence that the transaction is finalized.
- * @property {'Pending' | 'Confirmed'} status - The current status of the transaction.
- *                                              'Pending' indicates the transaction is not yet confirmed,
- *                                              while 'Confirmed' indicates it has been included in a block.
- * @property {number} blockHeight - The height of the block containing this transaction.
- * @property {number} timestamp - The timestamp of when the transaction was included in a block, represented as a Unix timestamp (milliseconds since epoch).
  */
 export type BitcoinTransactionHistoryEntry = {
+  /** The inputs of the transaction, detailing the source of funds. */
   inputs: BitcoinInputEntry[];
+  /** The outputs of the transaction, detailing the destination of funds. */
   outputs: BitcoinOutputEntry[];
+  /** The unique identifier (hash) of the transaction. */
   transactionHash: string;
+  /**
+   * The number of confirmations for the transaction.
+   * More confirmations indicate higher confidence that the transaction is finalized.
+   */
   confirmations: number;
+  /**
+   * The current status of the transaction.
+   * 'Pending' indicates the transaction is not yet confirmed,
+   * while 'Confirmed' indicates it has been included in a block.
+   */
   status: BitcoinTransactionStatus;
+  /** The height of the block containing this transaction. */
   blockHeight: number;
+  /** The timestamp of when the transaction was included in a block, represented as a Unix timestamp (milliseconds since epoch). */
   timestamp: number;
 };
 
@@ -183,12 +187,12 @@ export type BitcoinQueryParams = {
 /**
  * Paginated response returned by Bitcoin data providers.
  *
- * @template T - Type of items in the current page.
- * @property {T[]} items - The list of results for this page.
- * @property {string} cursor - Opaque cursor to request the next page (empty when no more pages).
+ * @typeParam T - Type of items in the current page.
  */
 export type BitcoinPaginatedResponse<T> = {
+  /** The list of results for this page. */
   items: T[];
+  /** Opaque cursor to request the next page (empty when no more pages). */
   cursor: string;
 };
 
@@ -251,9 +255,9 @@ export interface BitcoinFeeMarketProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @returns {Observable<Result<{ feeRate: number; blocks: number }, ProviderError>>}
+   * @returns `Observable<Result<{ feeRate: number; blocks: number }, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getFeeMarket: (
@@ -272,9 +276,9 @@ export interface BitcoinProvider {
    * If the request fails, the stream instead emits a
    * {@link ProviderError}.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @returns {Observable<Result<BitcoinBlockInfo,ProviderError>>}
+   * @returns `Observable<Result<BitcoinBlockInfo,ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getLastKnownBlock: (
@@ -287,10 +291,10 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param txHash 32‑byte transaction ID in hexadecimal form.
-   * @returns {Observable<Result<BitcoinTransactionHistoryEntry, ProviderError>>}
+   * @param txHash - 32-byte transaction ID in hexadecimal form.
+   * @returns `Observable<Result<BitcoinTransactionHistoryEntry, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getTransaction: (
@@ -307,10 +311,10 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param txHash 32-byte transaction ID in hexadecimal form.
-   * @returns {Observable<Result<string, ProviderError>>}
+   * @param txHash - 32-byte transaction ID in hexadecimal form.
+   * @returns `Observable<Result<string, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getRawTransaction: (
@@ -325,11 +329,11 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @params address The blockchain address or script pubkey to query for transactions.
-   * @param params  Query options (limit, cursor, afterHeight, …).
-   * @returns       {Observable<Result<BitcoinPaginatedResponse<BitcoinTransactionHistoryEntry>, ProviderError>>}
+   * @param address - The blockchain address or script pubkey to query for transactions.
+   * @param params - Query options (limit, cursor, afterHeight, ...).
+   * @returns `Observable<Result<BitcoinPaginatedResponse<BitcoinTransactionHistoryEntry>, ProviderError>>`
    *                Cold observable that emits exactly one {@link Result} and then completes.
    */
   getTransactions: (
@@ -353,11 +357,11 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param {string} address The Bitcoin address or script pubkey to query for pending transactions.
-   * @param params Query options (limit, cursor, afterHeight, …).
-   * @returns {Observable<Result<BitcoinPaginatedResponse<BitcoinTransactionHistoryEntry>, ProviderError>>}
+   * @param address - The Bitcoin address or script pubkey to query for pending transactions.
+   * @param params - Query options (limit, cursor, afterHeight, ...).
+   * @returns `Observable<Result<BitcoinPaginatedResponse<BitcoinTransactionHistoryEntry>, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getTransactionsInMempool: (
@@ -377,11 +381,11 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param {string} address The blockchain common whose UTxOs are to be retrieved.
-   * @param params Query options (limit, cursor, afterHeight, …).
-   * @returns {Observable<Result<BitcoinPaginatedResponse<BitcoinUTxO>, ProviderError>>}
+   * @param address - The blockchain common whose UTxOs are to be retrieved.
+   * @param params - Query options (limit, cursor, afterHeight, ...).
+   * @returns `Observable<Result<BitcoinPaginatedResponse<BitcoinUTxO>, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getUTxOs: (
@@ -396,10 +400,10 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param {string} rawTransaction - The raw transaction data to be broadcast to the network in hex.
-   * @returns {Observable<Result<string, ProviderError>>}
+   * @param rawTransaction - The raw transaction data to be broadcast to the network in hex.
+   * @returns `Observable<Result<string, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   submitTransaction: (
@@ -416,10 +420,10 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param {string} txHash - The hash of the transaction to query.
-   * @returns {Observable<Result<BitcoinTransactionStatus, ProviderError>>}
+   * @param txHash - The hash of the transaction to query.
+   * @returns `Observable<Result<BitcoinTransactionStatus, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   getTransactionStatus: (
@@ -436,16 +440,16 @@ export interface BitcoinProvider {
    * This method returns a cold observable, every new subscriber triggers one backend request;
    * the stream then emits once and completes.
    *
-   * @param {BitcoinProviderContext} context The context containing the provider specific configuration
+   * @param context - The context containing the provider specific configuration
    * such as network identifier.
-   * @param {number} blocks - The target number of blocks within which the transaction should be confirmed.
+   * @param blocks - The target number of blocks within which the transaction should be confirmed.
    *                          A smaller number indicates a higher priority and typically results in a higher fee.
    *                          For example, `blocks = 1` requests a fee estimation for the next block confirmation.
-   * @param {BitcoinFeeEstimationMode} mode - The fee estimation mode, which determines the trade-off between
+   * @param mode - The fee estimation mode, which determines the trade-off between
    *                                   reliability and cost:
    *                                   - `FeeEstimationMode.Conservative`: Prioritizes confirmation reliability.
    *                                   - `FeeEstimationMode.Economical`: Aims to minimize fees, with potentially slower confirmations.
-   * @returns {Observable<Result<{ feeRate: number; blocks: number }, ProviderError>>}
+   * @returns `Observable<Result<{ feeRate: number; blocks: number }, ProviderError>>`
    *          Cold observable that emits exactly one {@link Result} and then completes.
    */
   estimateFee: (

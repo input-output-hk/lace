@@ -1,0 +1,518 @@
+import * as Trezor from '@trezor/connect';
+
+import { mapTxOuts, toTxOut } from '../../src/transformers/txOut';
+import {
+  contextWithKnownAddresses,
+  knownAddressKeyPath,
+  knownAddressStakeKeyPath,
+  txOut,
+  txOutToOwnedAddress,
+  txOutWithAssets,
+  txOutWithAssetsToOwnedAddress,
+  txOutWithDatumHash,
+  txOutWithDatumHashAndOwnedAddress,
+  txOutWithInlineDatum,
+  txOutWithInlineDatumAndOwnedAddress,
+  txOutWithReferenceScriptAndDatumHash,
+  txOutWithReferenceScriptAndInlineDatum,
+} from '../testData';
+
+describe('txOut', () => {
+  describe('mapTxOuts', () => {
+    it('can map a set of transaction outputs to third party address', async () => {
+      const txOuts = mapTxOuts([txOut, txOut, txOut], {
+        ...contextWithKnownAddresses,
+        outputsFormat: [
+          Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        ],
+      });
+
+      expect(txOuts.length).toEqual(3);
+      for (const out of txOuts) {
+        expect(out).toEqual({
+          address:
+            'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+          amount: '10',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        });
+      }
+    });
+
+    it('can map a set of transaction outputs with assets to third party address', async () => {
+      const txOuts = mapTxOuts(
+        [txOutWithAssets, txOutWithAssets, txOutWithAssets],
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          ],
+        },
+      );
+
+      expect(txOuts.length).toEqual(3);
+
+      for (const out of txOuts) {
+        expect(out).toEqual({
+          address:
+            'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+          amount: '10',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          tokenBundle: [
+            {
+              policyId:
+                '2a286ad895d091f2b3d168a6091ad2627d30a72761a5bc36eef00740',
+              tokenAmounts: [
+                {
+                  amount: '20',
+                  assetNameBytes: '',
+                },
+              ],
+            },
+            {
+              policyId:
+                '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+              tokenAmounts: [
+                {
+                  amount: '50',
+                  assetNameBytes: '54534c41',
+                },
+              ],
+            },
+            {
+              policyId:
+                '7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373',
+              tokenAmounts: [
+                {
+                  amount: '40',
+                  assetNameBytes: '',
+                },
+                {
+                  amount: '30',
+                  assetNameBytes: '504154415445',
+                },
+              ],
+            },
+          ],
+        });
+      }
+    });
+
+    it('can map a set of transaction outputs to owned address', async () => {
+      const txOuts = mapTxOuts(
+        [txOutToOwnedAddress, txOutToOwnedAddress, txOutToOwnedAddress],
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          ],
+        },
+      );
+
+      expect(txOuts.length).toEqual(3);
+
+      for (const out of txOuts) {
+        expect(out).toEqual({
+          addressParameters: {
+            addressType: Trezor.PROTO.CardanoAddressType.BASE,
+            path: knownAddressKeyPath,
+            stakingPath: knownAddressStakeKeyPath,
+          },
+          amount: '10',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        });
+      }
+    });
+
+    it('can map a set of transaction outputs with assets to owned address', async () => {
+      const txOuts = mapTxOuts(
+        [
+          txOutWithAssetsToOwnedAddress,
+          txOutWithAssetsToOwnedAddress,
+          txOutWithAssetsToOwnedAddress,
+        ],
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          ],
+        },
+      );
+
+      expect(txOuts.length).toEqual(3);
+
+      for (const out of txOuts) {
+        expect(out).toEqual({
+          addressParameters: {
+            addressType: Trezor.PROTO.CardanoAddressType.BASE,
+            path: knownAddressKeyPath,
+            stakingPath: knownAddressStakeKeyPath,
+          },
+          amount: '10',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+          tokenBundle: [
+            {
+              policyId:
+                '2a286ad895d091f2b3d168a6091ad2627d30a72761a5bc36eef00740',
+              tokenAmounts: [
+                {
+                  amount: '20',
+                  assetNameBytes: '',
+                },
+              ],
+            },
+            {
+              policyId:
+                '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+              tokenAmounts: [
+                {
+                  amount: '50',
+                  assetNameBytes: '54534c41',
+                },
+              ],
+            },
+            {
+              policyId:
+                '7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373',
+              tokenAmounts: [
+                {
+                  amount: '40',
+                  assetNameBytes: '',
+                },
+                {
+                  amount: '30',
+                  assetNameBytes: '504154415445',
+                },
+              ],
+            },
+          ],
+        });
+      }
+    });
+
+    it('can map a set of transaction outputs with both output formats', async () => {
+      const txOuts = mapTxOuts(
+        [
+          txOutWithDatumHashAndOwnedAddress,
+          txOutWithReferenceScriptAndDatumHash,
+        ],
+        contextWithKnownAddresses,
+      );
+
+      expect(txOuts.length).toEqual(2);
+
+      expect(txOuts).toEqual([
+        {
+          addressParameters: {
+            addressType: Trezor.PROTO.CardanoAddressType.BASE,
+            path: knownAddressKeyPath,
+            stakingPath: knownAddressStakeKeyPath,
+          },
+          amount: '10',
+          datumHash:
+            '0f3abbc8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe0e78f19d9d5',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        },
+        {
+          addressParameters: {
+            addressType: Trezor.PROTO.CardanoAddressType.BASE,
+            path: knownAddressKeyPath,
+            stakingPath: knownAddressStakeKeyPath,
+          },
+          amount: '10',
+          datumHash:
+            '0f3abbc8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe0e78f19d9d5',
+          format: Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+          referenceScript:
+            '82015820b6dbf0b03c93afe5696f10d49e8a8304ebfac01deeb8f82f2af5836ebbc1b450',
+        },
+      ]);
+    });
+  });
+
+  describe('toTxOut', () => {
+    it('can map a simple transaction output to third party address', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut },
+        contextWithKnownAddresses,
+      );
+      expect(out).toEqual({
+        address:
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+      });
+    });
+
+    it('can map a simple transaction output with assets to third party address', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut: txOutWithAssets },
+        contextWithKnownAddresses,
+      );
+      expect(out).toEqual({
+        address:
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        tokenBundle: [
+          {
+            policyId:
+              '2a286ad895d091f2b3d168a6091ad2627d30a72761a5bc36eef00740',
+            tokenAmounts: [
+              {
+                amount: '20',
+                assetNameBytes: '',
+              },
+            ],
+          },
+          {
+            policyId:
+              '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+            tokenAmounts: [
+              {
+                amount: '50',
+                assetNameBytes: '54534c41',
+              },
+            ],
+          },
+          {
+            policyId:
+              '7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373',
+            tokenAmounts: [
+              {
+                amount: '40',
+                assetNameBytes: '',
+              },
+              {
+                amount: '30',
+                assetNameBytes: '504154415445',
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('can map a simple transaction output to owned address', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut: txOutToOwnedAddress },
+        contextWithKnownAddresses,
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+      });
+    });
+
+    it('can map a simple transaction output with assets to owned address', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut: txOutWithAssetsToOwnedAddress },
+        contextWithKnownAddresses,
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+        tokenBundle: [
+          {
+            policyId:
+              '2a286ad895d091f2b3d168a6091ad2627d30a72761a5bc36eef00740',
+            tokenAmounts: [
+              {
+                amount: '20',
+                assetNameBytes: '',
+              },
+            ],
+          },
+          {
+            policyId:
+              '659f2917fb63f12b33667463ee575eeac1845bbc736b9c0bbc40ba82',
+            tokenAmounts: [
+              {
+                amount: '50',
+                assetNameBytes: '54534c41',
+              },
+            ],
+          },
+          {
+            policyId:
+              '7eae28af2208be856f7a119668ae52a49b73725e326dc16579dcc373',
+            tokenAmounts: [
+              {
+                amount: '40',
+                assetNameBytes: '',
+              },
+              {
+                amount: '30',
+                assetNameBytes: '504154415445',
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('can map simple transaction output with datum hash', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut: txOutWithDatumHash },
+        contextWithKnownAddresses,
+      );
+
+      expect(out).toEqual({
+        address:
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+        amount: '10',
+        datumHash:
+          '0f3abbc8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe0e78f19d9d5',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+      });
+    });
+
+    it('can map simple transaction output with datum hash to owned address', async () => {
+      const out = toTxOut(
+        {
+          index: 0,
+          isCollateral: false,
+          txOut: txOutWithDatumHashAndOwnedAddress,
+        },
+        contextWithKnownAddresses,
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        datumHash:
+          '0f3abbc8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe0e78f19d9d5',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY,
+      });
+    });
+
+    it('can map simple transaction with inline datum', async () => {
+      const out = toTxOut(
+        { index: 0, isCollateral: false, txOut: txOutWithInlineDatum },
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+          ],
+        },
+      );
+
+      expect(out).toEqual({
+        address:
+          'addr_test1qz2fxv2umyhttkxyxp8x0dlpdt3k6cwng5pxj3jhsydzer3jcu5d8ps7zex2k2xt3uqxgjqnnj83ws8lhrn648jjxtwq2ytjqp',
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+        inlineDatum: '187b',
+      });
+    });
+
+    it('can map simple transaction with inline datum to owned address', async () => {
+      const out = toTxOut(
+        {
+          index: 0,
+          isCollateral: false,
+          txOut: txOutWithInlineDatumAndOwnedAddress,
+        },
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+          ],
+        },
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+        inlineDatum: '187b',
+      });
+    });
+
+    it('can map a simple transaction output with reference script and datum hash', async () => {
+      const out = toTxOut(
+        {
+          index: 0,
+          isCollateral: false,
+          txOut: txOutWithReferenceScriptAndDatumHash,
+        },
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+          ],
+        },
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        datumHash:
+          '0f3abbc8fc19c2e61bab6059bf8a466e6e754833a08a62a6c56fe0e78f19d9d5',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+        referenceScript:
+          '82015820b6dbf0b03c93afe5696f10d49e8a8304ebfac01deeb8f82f2af5836ebbc1b450',
+      });
+    });
+
+    it('can map a simple transaction output with reference script and inline datum', async () => {
+      const out = toTxOut(
+        {
+          index: 0,
+          isCollateral: false,
+          txOut: txOutWithReferenceScriptAndInlineDatum,
+        },
+        {
+          ...contextWithKnownAddresses,
+          outputsFormat: [
+            Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+          ],
+        },
+      );
+
+      expect(out).toEqual({
+        addressParameters: {
+          addressType: Trezor.PROTO.CardanoAddressType.BASE,
+          path: knownAddressKeyPath,
+          stakingPath: knownAddressStakeKeyPath,
+        },
+        amount: '10',
+        format: Trezor.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
+        inlineDatum: '187b',
+        referenceScript:
+          '82015820b6dbf0b03c93afe5696f10d49e8a8304ebfac01deeb8f82f2af5836ebbc1b450',
+      });
+    });
+  });
+});

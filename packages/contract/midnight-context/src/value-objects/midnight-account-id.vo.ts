@@ -13,6 +13,7 @@ import type { Tagged } from 'type-fest';
  * document.
  */
 export type MidnightAccountId = AccountId & Tagged<string, 'MidnightAccountId'>;
+/** Derives the persistent identity of a wallet account at one index and Midnight network. */
 export const MidnightAccountId = (
   walletId: WalletId,
   accountIndex: number,

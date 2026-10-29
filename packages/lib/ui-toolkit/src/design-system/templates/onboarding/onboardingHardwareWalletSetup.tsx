@@ -19,7 +19,7 @@ import type { DropdownMenuItem } from '../../molecules/dropdownMenu/dropdownMenu
 
 /**
  * App-wide ceiling for uncapped devices. Mirrors MAX_ACCOUNT_INDEX in
- * @lace-module/account-management (addAccountHelpers.ts) - kept separate
+ * `@lace-module/account-management` (addAccountHelpers.ts) - kept separate
  * because modules own business rules and ui-toolkit is presentation-only.
  * Change both together.
  */

@@ -15,6 +15,13 @@ import '@lace-contract/feature';
 
 import store from './store';
 
+/**
+ * Cardano chain data through Blockfrost: UTxOs, transactions, stake
+ * information and protocol parameters, configured by
+ * `config.cardanoProvider.blockfrostConfigs`. Loads when
+ * `FEATURE_FLAG_CARDANO` is enabled, and needs a crypto module such as
+ * `m.cryptoCardanoSdk`.
+ */
 export default inferModuleContext({
   moduleName: ModuleName('cardano-provider-blockfrost'),
   dependsOn: combineContracts([cryptoAddonContract] as const),

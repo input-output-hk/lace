@@ -5,7 +5,7 @@ import { NEVER } from 'rxjs';
 import type { Observable } from 'rxjs';
 
 /**
- * @param {Observable<T>} observable - Source observable to be used by the hook.
+ * @param observable - Source observable to be used by the hook.
  * @param defaultValueFactory - Function that returns a default value to be used if the observable
  * has not emitted any values.
  *

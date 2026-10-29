@@ -20,6 +20,10 @@ const HARDWARE_WALLET_TYPES: ReadonlySet<string> = new Set([
   WalletType.HardwareKeystone,
 ]);
 
+/**
+ * Narrows a wallet to {@link HardwareWallet}: true for Ledger, Trezor, Seed
+ * Signer and Keystone wallets.
+ */
 export const isHardwareWallet = (wallet: AnyWallet): wallet is HardwareWallet =>
   HARDWARE_WALLET_TYPES.has(wallet.type);
 
@@ -30,6 +34,10 @@ export const isHardwareWallet = (wallet: AnyWallet): wallet is HardwareWallet =>
 export const isHardwareAccountType = (accountType: string): boolean =>
   HARDWARE_WALLET_TYPES.has(accountType);
 
+/**
+ * Narrows a wallet to {@link HardwareWalletTrezor}, whose metadata may carry
+ * the key derivation type the device was set up with.
+ */
 export const isTrezorWallet = (
   wallet: AnyWallet,
 ): wallet is HardwareWalletTrezor => wallet.type === WalletType.HardwareTrezor;

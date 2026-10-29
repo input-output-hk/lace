@@ -39,9 +39,9 @@ const MAX_TRANSACTIONS_PER_REQUEST = 100;
 /**
  * Handles the results of multiple address transaction history fetches.
  *
- * @param {FetchAddressTransactionHistoryResult[]} results - The results of the transaction history fetches.
+ * @param results - The results of the transaction history fetches.
  *
- * @return {Observable<FetchAddressTransactionHistoryResult>} The result of the transaction history fetches.
+ * @returns The result of the transaction history fetches.
  */
 const handleResults = (results: FetchAddressTransactionHistoryResult[]) => {
   // If any request failed, return it and throw away all others
@@ -56,14 +56,14 @@ const handleResults = (results: FetchAddressTransactionHistoryResult[]) => {
 /**
  * Handles the result of a single address transaction history fetch.
  *
- * @param {Object} params - The parameters to handle the result.
- * @param {Result<CardanoTransactionHistoryItem[], ProviderError<unknown>>} params.result - The result of the transaction history fetch.
- * @param {CardanoPaymentAddress} params.address - The address of the transaction history.
- * @param {CardanoAddressTransactionHistoryMap[CardanoPaymentAddress]} params.addressHistory - The address history of the transaction history.
- * @param {CardanoTransactionHistoryItem} params.newestTx - The newest transaction in the address history.
- * @param {number} params.numberOfItems - The number of transaction items to load for each request.
+ * @param params - The parameters to handle the result.
+ *   - `result`: The result of the transaction history fetch.
+ *   - `address`: The address of the transaction history.
+ *   - `addressHistory`: The address history of the transaction history.
+ *   - `newestTx`: The newest transaction in the address history.
+ *   - `numberOfItems`: The number of transaction items to load for each request.
  *
- * @return {FetchAddressTransactionHistoryResult} The result of the transaction history fetch.
+ * @returns The result of the transaction history fetch.
  */
 const handleResult = ({
   result,
@@ -161,14 +161,14 @@ export type FetchAddressTransactionHistoriesResponse =
  * If any individual request to fetch the history of an account address fails, then only the failed
  * result is returned and all potentially successful results are thrown away to avoid inconsistency.
  *
- * @param {Object} params - The parameters to fetch transaction histories.
- * @param {Array} params.addresses - An array of address objects to fetch transaction histories for.
- * @param {Object} params.addressesHistories - A mapping of addresses to their respective transaction histories including metadata indicating if the oldest entry has been loaded.
- * @param {number} params.numberOfItems - The number of transaction items to load for each request.
- * @param {string} params.chainId - The network info for which the transaction histories are being fetched.
- * @param {Function} params.getAddressTransactionHistory - A function to fetch the transaction history for a specific address, accepting parameters for pagination and blockchain context.
+ * @param params - The parameters to fetch transaction histories.
+ *   - `addresses`: An array of address objects to fetch transaction histories for.
+ *   - `addressesHistories`: A mapping of addresses to their respective transaction histories including metadata indicating if the oldest entry has been loaded.
+ *   - `numberOfItems`: The number of transaction items to load for each request.
+ *   - `chainId`: The network info for which the transaction histories are being fetched.
+ *   - `getAddressTransactionHistory`: A function to fetch the transaction history for a specific address, accepting parameters for pagination and blockchain context.
  *
- * @return {Observable} Returns an observable stream of results with metadata about the individual request
+ * @returns Returns an observable stream of results with metadata about the individual request
  */
 export const fetchAddressTransactionHistories = ({
   addresses,

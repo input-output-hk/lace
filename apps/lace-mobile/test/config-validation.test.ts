@@ -86,8 +86,35 @@ describe('config validation', () => {
       expect(configValidationError).toBeNull();
       expect(appConfig?.postHogUrl).toBe('https://posthog.example.com');
       expect(appConfig?.postHogApiToken).toBe('test-token');
+      expect(appConfig?.midnightFoundationTermsAndConditionsUrl).toBe(
+        'https://www.lace.io/legal/midnight-network-third-party-notice',
+      );
+      expect(appConfig?.laceTermsOfUseUrl).toBe(
+        'https://www.lace.io/legal/lace-terms-of-use',
+      );
       expect(appConfig?.defaultMidnightTestnetNetworkId).toBe('undeployed');
       expect(appConfig?.defaultTestnetChainId).toBe(Cardano.ChainIds.Preprod);
+    });
+
+    it('allows explicit Midnight legal URL overrides', async () => {
+      Object.assign(
+        process.env,
+        createValidEnvironment({
+          EXPO_PUBLIC_MIDNIGHT_FOUNDATION_TERMS_AND_CONDITIONS_URL:
+            'https://example.com/midnight-notice',
+          EXPO_PUBLIC_LACE_TERMS_OF_USE_URL: 'https://example.com/lace-terms',
+        }),
+      );
+      const { appConfig, configValidationError } = await import(
+        '../src/app/util/config'
+      );
+      expect(configValidationError).toBeNull();
+      expect(appConfig?.midnightFoundationTermsAndConditionsUrl).toBe(
+        'https://example.com/midnight-notice',
+      );
+      expect(appConfig?.laceTermsOfUseUrl).toBe(
+        'https://example.com/lace-terms',
+      );
     });
 
     it('should return null and set error when required environment variables are missing', async () => {

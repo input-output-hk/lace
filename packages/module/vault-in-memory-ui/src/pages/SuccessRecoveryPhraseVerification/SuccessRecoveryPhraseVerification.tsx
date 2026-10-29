@@ -30,6 +30,6 @@ export const SuccessRecoveryPhraseVerification = ({
   }, [navigation, title, buttonText, buttonAction]);
 
   return (
-    <StatusSheetTemplate body={body} icon={{ name: image, variant: 'solid' }} />
+    <StatusSheetTemplate body={body} icon={{ name: image, strokeWidth: 2 }} />
   );
 };

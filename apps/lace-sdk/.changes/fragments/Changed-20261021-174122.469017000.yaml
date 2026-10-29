@@ -1,0 +1,6 @@
+kind: Changed
+body: Each package of the SDK, `@laceio/sdk`, `@laceio/cardano`, `@laceio/cardano-ledger` and `@laceio/cardano-trezor`, releases on its own version line, tagged with its name and version, and a release publishes only the packages that changed. A stable release depends on another package of the SDK by a caret range, so an app that also depends on it shares one copy within that range.
+time: 2026-10-21T17:41:22.469017+01:00
+custom:
+  Package: all
+  Build: stable

@@ -26,7 +26,7 @@ export const SignReviewErrorContent = ({
       gap={spacing.L}
       style={style}
       testID={testID}>
-      <Icon name="Sad" size={43} variant="solid" />
+      <Icon name="Sad" size={43} strokeWidth={2} />
       <Text.M>{t('dapp-connector.bitcoin.error-try-again')}</Text.M>
     </Column>
   );

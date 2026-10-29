@@ -1,5 +1,6 @@
 import { createCoordinateCardanoSync } from '@lace-contract/cardano-context';
 
+import { extensionSyncSideEffects } from './side-effects/account-extensions';
 import { addressDiscoverySync } from './side-effects/address-discovery-sync';
 import { manualAddressDiscoveryEnqueue } from './side-effects/manual-address-discovery';
 import { monolithCardanoSyncConfig } from './side-effects/monolith-cardano-sync-config';
@@ -20,6 +21,7 @@ export const createCardanoSyncSideEffects = (config: AppConfig) => [
   trackAccountUtxos,
   trackTip(config.cardanoProvider.tipPollFrequency),
   submitTxSideEffect,
+  ...extensionSyncSideEffects,
 ];
 
 const store: LaceInit<LaceModuleStoreInit> = props => ({

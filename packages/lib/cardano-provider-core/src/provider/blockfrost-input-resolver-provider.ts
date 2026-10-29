@@ -48,7 +48,6 @@ export class BlockfrostInputResolverProvider
   /**
    * Fetches and caches the transaction output (`Cardano.TxOut`) for a given transaction input (`Cardano.TxIn`).
    *
-   * @private
    * @param txIn - The transaction input to fetch and cache the output for.
    * @returns A promise that resolves to the corresponding `Cardano.TxOut` if found, or `null` if not.
    */

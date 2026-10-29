@@ -50,7 +50,7 @@ export const DeregistrationSuccess = ({
       <View style={styles.content}>
         <Icon
           name="RelievedFace"
-          variant="solid"
+          strokeWidth={2}
           size={60}
           style={styles.icon}
         />

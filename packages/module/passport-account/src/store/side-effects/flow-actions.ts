@@ -30,17 +30,22 @@ type FlowActionsProps<T> = {
   fallbackCode: string;
   /** The actions that publish the flow's result, emitted before 'ready'. */
   onDone: (result: T) => SideEffectAction[];
+  /**
+   * The actions that undo what state may wrongly claim after a failure,
+   * emitted before the error.
+   */
+  onFailed?: SideEffectAction[];
 };
 
 /**
  * Maps a flow's events onto the passport flow state: each stage to
  * setFlow, the result to its publishing actions followed by
- * setFlow('ready'), and a failure to a single setFlowError, so a flow
- * always settles in 'ready' or 'error'.
+ * setFlow('ready'), and a failure to its `onFailed` actions followed by
+ * a single setFlowError, so a flow always settles in 'ready' or 'error'.
  */
 export const flowActions = <T>(
   events$: Observable<FlowEvent<T>>,
-  { actions, fallbackCode, onDone }: FlowActionsProps<T>,
+  { actions, fallbackCode, onDone, onFailed = [] }: FlowActionsProps<T>,
 ): Observable<SideEffectAction> =>
   events$.pipe(
     mergeMap(event =>
@@ -49,6 +54,9 @@ export const flowActions = <T>(
         : [...onDone(event.result), actions.passport.setFlow('ready')],
     ),
     catchError(error =>
-      of(actions.passport.setFlowError(toFlowError(error, fallbackCode))),
+      of(
+        ...onFailed,
+        actions.passport.setFlowError(toFlowError(error, fallbackCode)),
+      ),
     ),
   );

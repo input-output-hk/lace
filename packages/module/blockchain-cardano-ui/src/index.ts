@@ -1,3 +1,5 @@
+import './augmentations';
+
 import { accountSettingsUIAddonContract } from '@lace-contract/account-management';
 import {
   activitiesDetailsSheetCustomizationsAddonContract,
@@ -27,10 +29,14 @@ import {
 } from '@lace-contract/views';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
 
+import store from './store';
+
 import type {
   LaceModuleMap,
-  ModuleActionCreators,
-  ModuleSelectors,
+  ContractsActionCreators,
+  ContractsSelectors,
+  ModuleStoreActionCreators,
+  ModuleStoreSelectors,
   LaceSideEffect,
   ModuleAddons,
 } from '@lace-contract/module';
@@ -61,6 +67,7 @@ const extensionModule = inferModuleContext({
   moduleName: ModuleName('blockchain-cardano-ui'),
   implements: implementsContracts,
   dependsOn: dependsOnContracts,
+  store,
   addons: {
     loadAccountSettingsUICustomisations: async () =>
       import('./addons/account-settings'),
@@ -86,8 +93,14 @@ const moduleMap: LaceModuleMap = {
 
 export default moduleMap;
 
-export type Selectors = ModuleSelectors<typeof extensionModule>;
-export type ActionCreators = ModuleActionCreators<typeof extensionModule>;
+export type Selectors = ContractsSelectors<typeof dependsOnContracts> &
+  ContractsSelectors<typeof implementsContracts> &
+  ModuleStoreSelectors<typeof store>;
+export type ActionCreators = ContractsActionCreators<
+  typeof dependsOnContracts
+> &
+  ContractsActionCreators<typeof implementsContracts> &
+  ModuleStoreActionCreators<typeof store>;
 export type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 export type AvailableAddons = ModuleAddons<
   typeof implementsContracts,

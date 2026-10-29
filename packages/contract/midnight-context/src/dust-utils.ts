@@ -50,8 +50,8 @@ export const formatDustTime = (seconds: number): string | undefined => {
  * Calculates time remaining in seconds for dust generation or decay.
  *
  * Uses SDK's pre-calculated maxCapReachedAt timestamp for both:
- * - Refilling (currentValue < maxCap): Time until dust reaches maxCap
- * - Decaying (currentValue > maxCap): Time until dust decays to maxCap
+ * - Refilling (`currentValue < maxCap`): Time until dust reaches maxCap
+ * - Decaying (`currentValue > maxCap`): Time until dust decays to maxCap
  *
  * @see https://github.com/midnightntwrk/midnight-wallet - SDK source for dust generation formulas
  */

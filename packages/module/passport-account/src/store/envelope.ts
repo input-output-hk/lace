@@ -8,11 +8,23 @@ const IV_LENGTH = 12;
  * The at-rest form of the persisted account record: the JSON-encoded
  * record encrypted under the passkey-derived storage key. `iv` and
  * `ciphertext` are lowercase hex; `v` versions the envelope layout.
+ * `pending` is the one plaintext fact beside the ciphertext: present
+ * while the record describes a creation still in progress, absent once
+ * the account is complete. It lets a reader without the key tell the two
+ * apart, which is not a secret, and it decides nothing on its own: what
+ * the record says is read only after the envelope opens.
  */
 export type SealedRecord = {
   v: 1;
   iv: string;
   ciphertext: string;
+  pending?: true;
+};
+
+/** What a seal marks on the envelope beside the ciphertext. */
+export type SealOptions = {
+  /** Whether the record describes a creation still in progress. */
+  pending?: boolean;
 };
 
 const utf8 = (value: string): Uint8Array<ArrayBuffer> =>
@@ -29,10 +41,14 @@ export const isSealedRecord = (value: unknown): value is SealedRecord => {
   );
 };
 
-/** Encrypts a record into a {@link SealedRecord} under the given key. */
+/**
+ * Encrypts a record into a {@link SealedRecord} under the given key,
+ * marking the envelope pending when asked.
+ */
 export const sealRecord = async <T>(
   key: CryptoKey,
   record: T,
+  { pending = false }: SealOptions = {},
 ): Promise<SealedRecord> => {
   const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH));
   const ciphertext = await crypto.subtle.encrypt(
@@ -44,6 +60,7 @@ export const sealRecord = async <T>(
     v: 1,
     iv: HexBytes.fromByteArray(iv),
     ciphertext: HexBytes.fromByteArray(new Uint8Array(ciphertext)),
+    ...(pending ? { pending: true } : {}),
   };
 };
 

@@ -37,8 +37,8 @@ export type MonolithCardanoSyncRoundContext = CardanoSyncRoundContext & {
  *   - natural trigger: combineLatest of accounts, addresses, tip, and chainId
  *   - manual retry trigger: re-syncs only accounts with Cardano sync failures
  * - `buildRoundOperations`:
- *   - account with addresses -> account-state operations (transaction polling)
- *   - account without addresses -> a single ADDRESS_DISCOVERY operation; the
+ *   - account with addresses → account-state operations (transaction polling)
+ *   - account without addresses → a single ADDRESS_DISCOVERY operation; the
  *     1st account's sync operation is always address discovery, account-state
  *     operations are chained onto the round by addressDiscoverySync's
  *     chainAccountStateOperations after a successful discovery.
@@ -50,7 +50,11 @@ export const monolithCardanoSyncConfig: CardanoSyncEngineConfig<MonolithCardanoS
       {
         wallets: { selectActiveNetworkAccounts$ },
         addresses: { selectAllAddresses$ },
-        cardanoContext: { selectTip$, selectChainId$ },
+        cardanoContext: {
+          selectTip$,
+          selectChainId$,
+          selectWalletSyncResetOperation$,
+        },
         failures: { selectAllFailures$ },
       },
     ) => {
@@ -132,7 +136,16 @@ export const monolithCardanoSyncConfig: CardanoSyncEngineConfig<MonolithCardanoS
       );
 
       // Merge natural and manual triggers
-      return merge(naturalTrigger$, manualRetryTrigger$);
+      return merge(naturalTrigger$, manualRetryTrigger$).pipe(
+        withLatestFrom(selectWalletSyncResetOperation$),
+        map(([context, resetOperation]) => ({
+          ...context,
+          accounts: context.accounts.filter(account => {
+            const status = resetOperation(account.accountId)?.status;
+            return status !== 'Pending' && status !== 'InProgress';
+          }),
+        })),
+      );
     },
     buildRoundOperations: (account, context) => {
       const hasAddresses = context.accountsWithAddresses.has(account.accountId);

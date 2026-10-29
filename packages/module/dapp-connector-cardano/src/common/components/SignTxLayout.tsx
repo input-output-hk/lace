@@ -20,11 +20,12 @@ export interface SignTxLayoutProps {
   resultView: React.ReactNode | null;
   /** Show error state (error title + error content). */
   hasError: boolean;
+  transactionError?: unknown;
   /**
-   * When set, the collateral-ownership guard blocked this request, so the
+   * When set, a pre-consent guard refused this request, so the
    * sheet shows the REFUSED state -- refusal copy, the requesting origin, no
    * transaction detail, and NO confirm button (the `primaryButton` prop is
-   * omitted entirely, the same idiom `hasError` already uses). Case and
+   * omitted entirely, the same idiom `hasError` already uses). Verdict and
    * origin travel together so neither can be rendered without the other.
    *
    * Distinct from `hasError` on purpose: a technical failure must keep
@@ -53,6 +54,7 @@ export interface SignTxLayoutProps {
 export const SignTxLayout = ({
   resultView,
   hasError,
+  transactionError,
   refusal = null,
   showLoading,
   contentProps,
@@ -122,7 +124,7 @@ export const SignTxLayout = ({
     // broken, and the two states never co-render.
     scrollContent = <SignTxRefused refusal={refusal} style={errorStyle} />;
   } else if (hasError) {
-    scrollContent = <SignTxError style={errorStyle} />;
+    scrollContent = <SignTxError error={transactionError} style={errorStyle} />;
   } else if (showLoading || !contentProps) {
     scrollContent = <SignTxLoadingContent style={loadingStyle} />;
   } else {

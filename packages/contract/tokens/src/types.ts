@@ -36,6 +36,7 @@ export type TokenMetadataValue =
   | { [key: string]: TokenMetadataValue }
   | null;
 
+/** Where a token balance is held: its account, address and blockchain. */
 export type TokenContextData = BlockchainAssigned<{
   accountId: AccountId;
   address: Address;
@@ -46,17 +47,26 @@ type TokenNameData = {
   ticker: string;
 };
 
+/**
+ * A token balance without its holder: the token ID and its `available` and
+ * `pending` amounts in the token's smallest unit.
+ */
 export type RawTokenWithoutContext = {
   tokenId: TokenId;
   available: BigNumber;
   pending: BigNumber;
 };
 
+/**
+ * A token balance of one account at one address, as the chain reports it:
+ * `available` and `pending` amounts in the token's smallest unit.
+ */
 export type RawToken = RawTokenWithoutContext & TokenContextData;
 
 export type TokenMetadata<BlockchainSpecificMetadata = unknown> =
   Partial<TokenNameData> & RequiredMetadata<BlockchainSpecificMetadata>;
 
+/** A token balance with its metadata and display names and decimals, as wallet state shows it. */
 export type Token<BlockchainSpecificMetadata = unknown> = RawToken & {
   metadata?: TokenMetadata<BlockchainSpecificMetadata>;
   unnamed?: boolean;
@@ -66,6 +76,11 @@ export type Token<BlockchainSpecificMetadata = unknown> = RawToken & {
   displayDecimalPlaces?: number;
 };
 
+/**
+ * A token's metadata as the wallet stores it, keyed by its token ID.
+ *
+ * @typeParam BlockchainSpecificMetadata - The shape of the chain-specific metadata.
+ */
 export type StoredTokenMetadata<BlockchainSpecificMetadata = unknown> = Pick<
   RawToken,
   'tokenId'

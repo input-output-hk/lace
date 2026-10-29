@@ -25,7 +25,7 @@ export class BlockfrostRegistrationsProvider extends BlockfrostProvider {
   /**
    * Fetches all registration history for a given reward account.
    *
-   * @param rewardAccount CardanoRewardAccount to fetch the registrations for
+   * @param rewardAccount - CardanoRewardAccount to fetch the registrations for
    * @returns Observable with Result containing all registrations or an error
    */
   public getAccountRegistrations({

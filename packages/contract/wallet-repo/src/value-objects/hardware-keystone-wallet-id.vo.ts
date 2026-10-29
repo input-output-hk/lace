@@ -19,6 +19,11 @@ export type HardwareKeystoneWalletId = Tagged<
   'HardwareKeystoneWalletId'
 >;
 
+/**
+ * The wallet ID of the Keystone with a master fingerprint, in any case.
+ *
+ * @throws `Error` when `xfpHex` is not 8 hex characters.
+ */
 export const HardwareKeystoneWalletId = (
   xfpHex: string,
 ): HardwareKeystoneWalletId => {

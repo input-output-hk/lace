@@ -17,37 +17,6 @@ import type {
 
 import './types';
 
-export const activitiesListCustomizationsAddonContract = inferContractContext({
-  name: ContractName('activities-list-customizations-addon'),
-  contractType: 'addon',
-  instance: 'zero-or-more',
-  provides: {
-    addons: [
-      'loadActivitiesListUICustomisations',
-      'loadActivitiesOfTokenUICustomisations',
-    ],
-  },
-});
-
-export const activitiesItemCustomizationsAddonContract = inferContractContext({
-  name: ContractName('activities-item-customizations-addon'),
-  contractType: 'addon',
-  instance: 'zero-or-more',
-  provides: {
-    addons: ['loadActivitiesItemUICustomisations'],
-  },
-});
-
-export const activitiesDetailsSheetCustomizationsAddonContract =
-  inferContractContext({
-    name: ContractName('activities-details-sheet-customizations-addon'),
-    contractType: 'addon',
-    instance: 'zero-or-more',
-    provides: {
-      addons: ['loadActivityDetailsSheetUICustomisations'],
-    },
-  });
-
 export const activitiesStoreContract = inferContractContext({
   name: ContractName('activities-store'),
   contractType: 'store',

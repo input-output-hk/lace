@@ -6,7 +6,7 @@ import type * as Crypto from '@cardano-sdk/crypto';
  * Utility function that conditionally adds a value to a set.
  * Adds the value only if it is not `null` or `undefined`.
  *
- * @template T - The type of the elements stored in the set.
+ * @typeParam T - The type of the elements stored in the set.
  * @param set - The set to which the value will be added.
  * @param v - The value to conditionally add.
  */

@@ -4,7 +4,7 @@ import { map, mergeMap, withLatestFrom, from } from 'rxjs';
 
 import { MidnightSyncFailureId } from '../../value-objects/midnight-sync-failure-id.vo';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../context';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 
 /**

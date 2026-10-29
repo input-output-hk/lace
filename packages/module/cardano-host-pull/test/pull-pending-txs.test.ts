@@ -138,6 +138,24 @@ const multiSigAccount = (): AnyAccount =>
     },
   } as unknown as AnyAccount);
 
+/** A custody account is a script account with no accountIndex, so it
+ * addresses no host account either. */
+const custodyAccount = (): AnyAccount =>
+  ({
+    accountId: 'w2-custody',
+    walletId: 'w2',
+    blockchainName: 'Cardano',
+    accountType: 'CardanoCustody',
+    networkType: 'testnet',
+    blockchainNetworkId: `cardano-${PREPROD}`,
+    metadata: { name: 'Custody' },
+    blockchainSpecific: {
+      stakeScriptHash:
+        '25b5b4ed1213ab11575a6d667a53c2af107bb052716b83b172bafe33',
+      chainId: { networkId: 0, networkMagic: PREPROD },
+    },
+  } as unknown as AnyAccount);
+
 const midnightAccount = (): AnyAccount =>
   ({
     accountId: 'w1-midnight',
@@ -333,6 +351,14 @@ describe('cardano-host-pull pullPendingTxs side effect', () => {
   it('excludes a MultiSig Cardano account — no host account is addressable for it', () => {
     const { pulls } = run({
       accounts: [multiSigAccount()],
+      expectedMarble: '',
+    });
+    expect(pulls).toEqual([]);
+  });
+
+  it('excludes a Cardano custody account — no host account is addressable for it', () => {
+    const { pulls } = run({
+      accounts: [custodyAccount()],
       expectedMarble: '',
     });
     expect(pulls).toEqual([]);

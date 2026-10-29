@@ -3,6 +3,7 @@ import { BlockchainNetworkId } from '@lace-contract/network';
 import type { MidnightSDKNetworkId } from '../const';
 import type { Tagged } from 'type-fest';
 
+/** Blockchain-qualified Midnight network identity for account derivation and selection. */
 export type MidnightNetworkId = BlockchainNetworkId &
   Tagged<string, 'MidnightNetworkId'>;
 
@@ -17,6 +18,7 @@ interface MidnightNetworkIdConstructor {
   ): MidnightSDKNetworkId | undefined;
 }
 
+/** Converts a Midnight network name to its blockchain-qualified identity and back. */
 export const MidnightNetworkId = Object.assign(
   (networkId: MidnightSDKNetworkId) =>
     BlockchainNetworkId(`${MIDNIGHT_NETWORK_PREFIX}${networkId}`),

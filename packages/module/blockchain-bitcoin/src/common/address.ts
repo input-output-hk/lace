@@ -56,12 +56,12 @@ export enum AddressType {
  * such as backward compatibility, SegWit efficiency, and Taproot privacy enhancements.
  * This function derives the appropriate Bitcoin address based on the specified address type.
  *
- * @param {Buffer} publicKey - The public key (compressed, 33 bytes).
- * @param {AddressType} addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot).
- * @param {bitcoin.networks.Network} network - The Bitcoin network (e.g., `bitcoin.networks.bitcoin` for mainnet or `bitcoin.networks.testnet`).
- * @returns {string} The derived Bitcoin address as a string.
+ * @param publicKey - The public key (compressed, 33 bytes).
+ * @param addressType - The address type (Legacy, SegWit, NativeSegWit, Taproot).
+ * @param network - The Bitcoin network (e.g., `bitcoin.networks.bitcoin` for mainnet or `bitcoin.networks.testnet`).
+ * @returns The derived Bitcoin address as a string.
  *
- * @throws {Error} If an unsupported address type is provided.
+ * @throws `Error` If an unsupported address type is provided.
  */
 export const deriveAddressByType = (
   publicKey: Buffer,
@@ -198,8 +198,8 @@ export enum AddressValidationResult {
 /**
  * Validates a Bitcoin address and returns a result indicating if the address is valid or the type of issue found.
  *
- * @param address The Bitcoin address to validate.
- * @param network The expected Bitcoin network (mainnet or testnet).
+ * @param address - The Bitcoin address to validate.
+ * @param network - The expected Bitcoin network (mainnet or testnet).
  * @returns An enum value indicating the validation result.
  */
 export const validateBitcoinAddress = (
@@ -246,8 +246,8 @@ export const validateBitcoinAddress = (
 
 /**
  * Checks if a Bitcoin address is a Taproot (P2TR) address.
- * @param {string} address - The Bitcoin address to check.
- * @returns {boolean} True if the address is a Taproot address, otherwise false.
+ * @param address - The Bitcoin address to check.
+ * @returns True if the address is a Taproot address, otherwise false.
  */
 export const isP2trAddress = (address: string): boolean =>
   address.startsWith('bc1p') || address.startsWith('tb1p');

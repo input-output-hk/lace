@@ -102,7 +102,7 @@ describe('cardano-context side effects', () => {
             },
             assertion: sideEffect$ => {
               // retryBackoff: 300ms + 600ms + 1200ms = 2100ms; final error → addFailure at frame 2104.
-              expectObservable(sideEffect$).toBe('2104ms a', {
+              expectObservable(sideEffect$, '^ 2200ms !').toBe('2104ms a', {
                 a: actions.failures.addFailure({
                   failureId,
                   message:
@@ -111,6 +111,177 @@ describe('cardano-context side effects', () => {
               });
               flush();
               expect(subscriptions).toBe(4);
+            },
+          };
+        },
+      );
+    });
+
+    it('recovers missing parameters after the provider becomes healthy without a chain change', () => {
+      testSideEffect(
+        trackProtocolParameters,
+        ({ cold, expectObservable, flush }) => {
+          const selectChainId$ = cold<Cardano.ChainId>('a', { a: chainId });
+          const selectProtocolParameters$ = cold<
+            RequiredProtocolParameters | undefined
+          >('a', { a: undefined });
+          let subscriptions = 0;
+          const getProtocolParameters = vi.fn().mockImplementation(() =>
+            defer(() => {
+              subscriptions += 1;
+              return subscriptions <= 4
+                ? cold('-#', {}, retriableError)
+                : cold('-a|', { a: Ok(mockProtocolParameters) });
+            }),
+          );
+          return {
+            actionObservables: {},
+            stateObservables: {
+              cardanoContext: { selectChainId$, selectProtocolParameters$ },
+              failures: {
+                selectFailureById$: cold('a', { a: noFailureSelector }),
+              },
+            },
+            dependencies: {
+              cardanoProvider: {
+                getProtocolParameters,
+              } as unknown as CardanoProviderDependencies['cardanoProvider'],
+              actions,
+            },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$, '^ 32300ms !').toBe(
+                '2104ms a 30000ms b',
+                {
+                  a: actions.failures.addFailure({
+                    failureId,
+                    message:
+                      'sync.error.cardano-protocol-parameters-failed' as TranslationKey,
+                  }),
+                  b: actions.cardanoContext.setProtocolParameters({
+                    protocolParameters: mockProtocolParameters,
+                    network,
+                  }),
+                },
+              );
+              flush();
+              expect(subscriptions).toBe(5);
+              expect(getProtocolParameters).toHaveBeenCalledTimes(2);
+            },
+          };
+        },
+      );
+    });
+
+    it('recovers after thousands of exhausted attempts without growing the subscription stack', () => {
+      testSideEffect(
+        trackProtocolParameters,
+        ({ cold, expectObservable, flush }) => {
+          const failedAttempts = 5_100;
+          const selectChainId$ = cold<Cardano.ChainId>('a', { a: chainId });
+          const selectProtocolParameters$ = cold<
+            RequiredProtocolParameters | undefined
+          >('a', { a: undefined });
+          let subscriptions = 0;
+          const getProtocolParameters = vi.fn().mockImplementation(() =>
+            defer(() => {
+              subscriptions += 1;
+              return subscriptions <= failedAttempts * 4
+                ? cold('-#', {}, retriableError)
+                : cold('-a|', { a: Ok(mockProtocolParameters) });
+            }),
+          );
+          return {
+            actionObservables: {},
+            stateObservables: {
+              cardanoContext: { selectChainId$, selectProtocolParameters$ },
+              failures: {
+                selectFailureById$: cold('a', { a: noFailureSelector }),
+              },
+            },
+            dependencies: {
+              cardanoProvider: {
+                getProtocolParameters,
+              } as unknown as CardanoProviderDependencies['cardanoProvider'],
+              actions,
+            },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe(
+                `2104ms a ${failedAttempts * 32_104 - 2104}ms b`,
+                {
+                  a: actions.failures.addFailure({
+                    failureId,
+                    message:
+                      'sync.error.cardano-protocol-parameters-failed' as TranslationKey,
+                  }),
+                  b: actions.cardanoContext.setProtocolParameters({
+                    protocolParameters: mockProtocolParameters,
+                    network,
+                  }),
+                },
+              );
+              flush();
+              expect(subscriptions).toBe(failedAttempts * 4 + 1);
+            },
+          };
+        },
+      );
+    });
+
+    it('cancels a pending recovery when the active chain changes', () => {
+      testSideEffect(
+        trackProtocolParameters,
+        ({ cold, expectObservable, flush }) => {
+          const mainnetChainId = Cardano.ChainIds.Mainnet;
+          const mainnetNetwork = CardanoNetworkId(mainnetChainId.networkMagic);
+          const selectChainId$ = cold<Cardano.ChainId>('a 2500ms b', {
+            a: chainId,
+            b: mainnetChainId,
+          });
+          const selectProtocolParameters$ = cold<
+            RequiredProtocolParameters | undefined
+          >('a', { a: undefined });
+          const requestedChains: Cardano.ChainId[] = [];
+          const getProtocolParameters = vi
+            .fn()
+            .mockImplementation(
+              ({ chainId: requested }: { chainId: Cardano.ChainId }) => {
+                requestedChains.push(requested);
+                return requested === mainnetChainId
+                  ? cold('-a|', { a: Ok(mockProtocolParameters) })
+                  : cold('-#', {}, retriableError);
+              },
+            );
+          return {
+            actionObservables: {},
+            stateObservables: {
+              cardanoContext: { selectChainId$, selectProtocolParameters$ },
+              failures: {
+                selectFailureById$: cold('a', { a: noFailureSelector }),
+              },
+            },
+            dependencies: {
+              cardanoProvider: {
+                getProtocolParameters,
+              } as unknown as CardanoProviderDependencies['cardanoProvider'],
+              actions,
+            },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$, '^ 35000ms !').toBe(
+                '2104ms a 397ms b',
+                {
+                  a: actions.failures.addFailure({
+                    failureId,
+                    message:
+                      'sync.error.cardano-protocol-parameters-failed' as TranslationKey,
+                  }),
+                  b: actions.cardanoContext.setProtocolParameters({
+                    protocolParameters: mockProtocolParameters,
+                    network: mainnetNetwork,
+                  }),
+                },
+              );
+              flush();
+              expect(requestedChains).toEqual([chainId, mainnetChainId]);
             },
           };
         },

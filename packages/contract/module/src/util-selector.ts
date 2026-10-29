@@ -1,18 +1,23 @@
 /**
- * Symbol to mark parameterized selectors for StateObservables detection
+ * The property `markParameterizedSelector` sets on a selector to mark it as
+ * taking arguments.
  */
 export const IS_PARAMETERIZED = Symbol.for('lace.isParameterized');
 
 /**
- * Marks a selector as parameterized so StateObservables emits it as a function
+ * Marks a selector that takes arguments, so the wallet's `stateObservables`
+ * expose it as an observable of a function of those arguments rather than of
+ * a value.
  *
- * @param selector - The selector function that takes (state, ...params)
- * @returns The same selector with IS_PARAMETERIZED marker attached (runtime only)
+ * @param selector - The selector, which takes the state and then its arguments.
+ * @returns The same selector, marked.
  *
  * @example
+ * ```ts
  * const selectById = markParameterizedSelector(
  *   (state, id) => state.items[id]
  * );
+ * ```
  */
 export const markParameterizedSelector = <S extends Function>(
   selector: S,

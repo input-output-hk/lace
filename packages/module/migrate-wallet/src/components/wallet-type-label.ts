@@ -14,6 +14,7 @@ const WALLET_TYPE_LABELS: Record<WalletType, string> = {
   [WalletType.HardwareSeedSigner]: 'SeedSigner',
   [WalletType.HardwareKeystone]: 'Keystone',
   [WalletType.MultiSig]: 'Shared',
+  [WalletType.CardanoCustody]: 'Custody',
 };
 
 /**

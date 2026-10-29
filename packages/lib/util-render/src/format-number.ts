@@ -14,7 +14,7 @@ const separatorCache = new Map<string, LocaleSeparators>();
  * Uses Intl.NumberFormat to detect the separators dynamically.
  * Results are cached for performance.
  *
- * @param locale Optional locale string (e.g., 'en-US', 'de-DE'). Defaults to system locale.
+ * @param locale - Optional locale string (e.g., 'en-US', 'de-DE'). Defaults to system locale.
  * @returns Object with groupSeparator and decimalSeparator. A locale that does
  * not group returns an empty groupSeparator. If the runtime reports no
  * separators at all, falls back to `,` and `.`.
@@ -104,8 +104,8 @@ export const getNumberUnit = (
 /**
  * Formats a numeric string value with the specified decimal places.
  *
- * @param value The numeric string value to be formatted.
- * @param decimalPlaces The number of decimal places.
+ * @param value - The numeric string value to be formatted.
+ * @param decimalPlaces - The number of decimal places.
  * @returns The formatted number string with locale-appropriate separators.
  */
 export const formatLocaleNumber = (
@@ -128,9 +128,9 @@ export const formatLocaleNumber = (
  * Returns a formatted string of a number value with the desired decimal places (2 by default) and its corresponding unit.
  * If the value has more decimals places than the desired amount, it will be truncated.
  *
- * @param value The value to be formatted
- * @param decimals The desired decimal places (default = 2)
- * @param abbreviationThreshold The threshold from which the number will be abbreviated (default = MILLION)
+ * @param value - The value to be formatted
+ * @param decimals - The desired decimal places (default = 2)
+ * @param abbreviationThreshold - The threshold from which the number will be abbreviated (default = MILLION)
  * @returns The formatted value with the desired decimals and the unit as a string
  */
 export const compactNumberWithUnit = (
@@ -159,11 +159,11 @@ export const compactNumberWithUnit = (
  * - 22.535842 with 6 decimals → "22.535842" (shows all decimals)
  * - 22.535000 with 6 decimals → "22.535" (truncates trailing zeros)
  *
- * @param amount The raw token amount as a string
- * @param tokenDecimal The number of decimal places for the token (default = 0)
- * @param displayDecimalPlace The number of decimal places to display (default = 2)
- * @param abbreviationThreshold The threshold from which to abbreviate (default = MILLION)
- * @param removeTrailingZeros If true, removes trailing zeros after decimal point (default = true)
+ * @param amount - The raw token amount as a string
+ * @param tokenDecimal - The number of decimal places for the token (default = 0)
+ * @param displayDecimalPlace - The number of decimal places to display (default = 2)
+ * @param abbreviationThreshold - The threshold from which to abbreviate (default = MILLION)
+ * @param removeTrailingZeros - If true, removes trailing zeros after decimal point (default = true)
  * @returns The formatted value with unit abbreviation and desired decimal places
  */
 export const formatAmountRawToCompact = ({
@@ -214,9 +214,9 @@ export const formatAmountRawToCompact = ({
 /**
  * Formats amount
  *
- * @param amount Tokens amount to be formatted
- * @param decimals Tokens decimals number
- * @param decimalPlaces Number of decimal places for formatted amount
+ * @param amount - Tokens amount to be formatted
+ * @param decimals - Tokens decimals number
+ * @param decimalPlaces - Number of decimal places for formatted amount
  */
 export const formatAmountRawToDenominated = (
   amount: string,
@@ -240,9 +240,9 @@ export const convertAmountToNormalized = (
  * Formats a numeric value to a locale-sensitive string with thousands separators.
  * Uses BigNumberJs for arbitrary precision and Intl.NumberFormat for locale detection.
  *
- * @param value The numeric value to format (string or number)
- * @param minimumFractionDigits Minimum decimal places to show (pads with zeros)
- * @param maximumFractionDigits Maximum decimal places to show (truncates with ROUND_DOWN)
+ * @param value - The numeric value to format (string or number)
+ * @param minimumFractionDigits - Minimum decimal places to show (pads with zeros)
+ * @param maximumFractionDigits - Maximum decimal places to show (truncates with ROUND_DOWN)
  * @returns Formatted string with locale-appropriate separators
  */
 export const valueToLocale = (
@@ -274,7 +274,7 @@ export const valueToLocale = (
  * Parses a locale-formatted number string back to a normalized number string.
  * Uses the current locale's separators to correctly interpret the input.
  *
- * @param value The locale-formatted number string (e.g., "1,234.56" or "1.234,56")
+ * @param value - The locale-formatted number string (e.g., "1,234.56" or "1.234,56")
  * @returns Normalized number string with '.' as decimal separator (e.g., "1234.56")
  */
 export const parseLocaleNumber = (value: string): string => {

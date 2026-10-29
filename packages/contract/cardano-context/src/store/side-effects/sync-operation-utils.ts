@@ -7,10 +7,15 @@ const NO_TIP = 'no-tip';
  * Cardano-specific sync operation types.
  */
 export enum CardanoSyncOperationType {
+  WALLET_RESET = 'wallet-reset',
   ADDRESS_DISCOVERY = 'address-discovery',
   ADDRESS_DISCOVERY_THOROUGH = 'address-discovery-thorough',
   TRANSACTION_POLLING = 'transaction-polling',
 }
+
+/** Whether the operation coordinates a user-requested account state rebuild. */
+export const isWalletResetOperation = (operationId: SyncOperationId): boolean =>
+  operationId.endsWith(`-${CardanoSyncOperationType.WALLET_RESET}`);
 
 /**
  * Creates a sync operation ID for a Cardano account.

@@ -1,0 +1,6 @@
+kind: Fixed
+body: Cardano transaction building can use the same output for funding and collateral, so a UTxO passed to both `setUnspentOutputs` and `setCollateralUtxos` may be spent. Without an execution-unit estimate, ADA-only collateral is accepted even when its remainder is too small for a return output.
+time: 2026-10-23T19:25:00Z
+custom:
+  Package: sdk
+  Build: stable

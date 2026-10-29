@@ -2,8 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { coingeckoClient } from '../src/coingecko-client';
 
+import type { Mock } from 'vitest';
+
 describe('coingeckoClient', () => {
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let fetchMock: Mock;
   const testBaseUrl = 'https://test.coingecko.io/api/v3';
 
   beforeEach(() => {

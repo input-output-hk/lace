@@ -22,7 +22,7 @@ type BackgroundType = 'colored' | 'semiTransparent' | 'transparent';
 export type IconConfig = {
   name: string;
   size?: number;
-  variant?: 'solid' | 'stroke';
+  strokeWidth?: number;
   color?: string;
 };
 
@@ -73,7 +73,7 @@ export const GlobalToast = ({ toast, onHide }: GlobalToastProps) => {
       <Icon
         name={config.name as IconName}
         size={config.size || defaultSize}
-        variant={config.variant || 'stroke'}
+        strokeWidth={config.strokeWidth}
         color={config.color}
       />
     ) : undefined;

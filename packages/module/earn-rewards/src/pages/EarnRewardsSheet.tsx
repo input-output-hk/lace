@@ -465,7 +465,7 @@ export const EarnRewardsSheet = (
                 })
               : t('v2.earn-rewards.success.subtitle-no-estimate')
           }
-          icon={{ name: 'Coins', variant: 'solid', size: 64 }}
+          icon={{ name: 'Coins', strokeWidth: 2, size: 64 }}
           testID="earn-rewards-result-success"
         />
         <Sheet.Footer
@@ -489,7 +489,7 @@ export const EarnRewardsSheet = (
         <SendResultTemplate
           transactionState={{ status: 'failure', blockchain: 'Cardano' }}
           subtitle={t(flowState.errorTranslationKeys.subtitle)}
-          icon={{ name: 'Sad', variant: 'solid', size: 64 }}
+          icon={{ name: 'Sad', strokeWidth: 2, size: 64 }}
           testID="earn-rewards-result-error"
         />
         <Sheet.Footer

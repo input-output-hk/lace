@@ -31,8 +31,8 @@ export const getTokenIdsWithoutMetadata = (
  * tokens that lack metadata. It fetches and loads missing token metadata by dispatching an appropriate
  * action. The function uses a debounced mechanism to optimize performance and reduce redundant computations.
  *
- * @param [options] - Configuration options for the function.
- * @param [options.debounce=Milliseconds(1000)] - The debounce time in milliseconds to
+ * @param options - Configuration options for the function.
+ *   - `debounce`: The debounce time in milliseconds to
  *        prevent frequent re-executions of the logic as activities in the store change.
  */
 export const findMissingTokensMetadataForActivities =

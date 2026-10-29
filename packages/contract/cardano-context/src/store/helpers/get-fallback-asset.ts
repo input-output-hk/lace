@@ -10,8 +10,8 @@ import type { Asset, AssetProvider } from '@cardano-sdk/core';
  * to default values. It serves as a utility for creating a default
  * representation of an asset when specific details are unavailable.
  *
- * @param {Cardano.AssetId} assetId - The unique identifier of the asset.
- * @returns {Asset.AssetInfo} An object representing the fallback AssetInfo, including:
+ * @param assetId - The unique identifier of the asset.
+ * @returns An object representing the fallback AssetInfo, including:
  * - assetId: The provided asset ID.
  * - fingerprint: The unique fingerprint generated from the policy ID and asset name.
  * - name: The extracted asset name.

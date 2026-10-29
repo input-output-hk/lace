@@ -6,7 +6,11 @@ import {
   ledger,
   pureCircuits,
 } from '../../src/acc/acc-module';
+import inventory from '../../src/acc/artefact-inventory.json';
 import { accManifest } from '../../src/acc/manifest';
+
+const circuits: Record<string, { verifier: { sha256: string } }> =
+  inventory.circuits;
 
 describe('acc-module', () => {
   it('exposes the generated Contract constructor and ledger decoder', () => {
@@ -14,10 +18,20 @@ describe('acc-module', () => {
     expect(typeof ledger).toBe('function');
   });
 
-  it('pins a verifier key digest per impure circuit, matching the manifest for proving circuits', () => {
-    for (const digest of Object.values(expectedVk)) {
-      expect(digest).toMatch(/^[0-9a-f]{64}$/);
-    }
+  it('pins a verifier key digest for exactly the circuits of the artefact inventory', () => {
+    expect(Object.keys(expectedVk).sort()).toEqual(
+      Object.keys(circuits).sort(),
+    );
+  });
+
+  it.each(Object.entries(circuits))(
+    'pins the inventory verifier key digest for %s',
+    (name, entry) => {
+      expect(expectedVk[name]).toBe(entry.verifier.sha256);
+    },
+  );
+
+  it('matches the manifest for proving circuits', () => {
     for (const entry of Object.values(accManifest.circuits)) {
       expect(expectedVk[entry.name]).toBe(entry.verifierKeySha256);
     }

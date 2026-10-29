@@ -7,6 +7,7 @@ import {
   isSendFlowClosed,
   isSendFlowFormStep,
   isSendFlowSuccess,
+  sendFlowSelectors,
 } from '@lace-contract/send-flow';
 import {
   FEATURE_FLAG_TOKEN_PRICING,
@@ -21,7 +22,6 @@ import {
   parseLocaleNumber,
   rawToBigInt,
   bigIntToRaw,
-  getLocaleSeparators,
   valueToLocale,
 } from '@lace-lib/util-render';
 import debounce from 'lodash/fp/debounce';
@@ -32,17 +32,26 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import { useStore } from 'react-redux';
 
 import { useLaceSelector, useDispatchLaceAction } from '../../hooks';
 import { useFeeToken } from '../../hooks/useFeeToken';
 import { useSendFlowNavigation } from '../../hooks/useSendFlowNavigation';
 import { computeFiatForFee } from '../../utils/computeFiatForFee';
 
+import { formatAssetInputValues } from './formatAssetInputValues';
+import { isSendFormReadyForReview } from './isSendFormReadyForReview';
+
+import type { SendFlowStoreState } from '@lace-contract/send-flow';
 import type { AccountId } from '@lace-contract/wallet-repo';
 import type { SheetScreenProps } from '@lace-lib/navigation';
 import type { AssetToSend, FeeEntry } from '@lace-lib/ui-toolkit';
 
 const NOTE_SECTION_MAX_LENGTH = 64;
+
+// The review step lists the transaction's withdrawals, so a build may draw on
+// the account's staking rewards when its UTxOs alone cannot fund the send.
+const ALLOW_REWARDS_WITHDRAWAL = { allowRewardsWithdrawal: true } as const;
 
 export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   const {
@@ -71,6 +80,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   // Redux state and actions for send-flow state machine
   const dispatchClosed = useDispatchLaceAction('sendFlow.closed', true);
   const sendFlowState = useLaceSelector('sendFlow.selectSendFlowState');
+  const store = useStore<SendFlowStoreState>();
   const dispatchOpenRequested = useDispatchLaceAction('sendFlow.openRequested');
   const dispatchFormDataChanged = useDispatchLaceAction(
     'sendFlow.formDataChanged',
@@ -409,6 +419,14 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
           const bigintValue = rawToBigInt(rawValue || '0', decimals);
           const bigNumberValue = BigNumber(bigintValue);
 
+          // Formatting can reschedule the sync without changing the amount.
+          if (
+            transfer.amount.dirty &&
+            BigNumber.valueOf(transfer.amount.value) === bigintValue
+          ) {
+            continue;
+          }
+
           dispatchFormDataChanged({
             data: {
               fieldName: 'tokenTransfers.amount',
@@ -521,63 +539,9 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
   const debouncedFormatInput = useMemo(
     () =>
       debounce(500, (tokenId: TokenId) => {
-        setAssetInputValues(previous => {
-          const targetIndex = previous.findIndex(
-            item => item.tokenId === tokenId,
-          );
-          if (targetIndex === -1) return previous;
-
-          const targetValue = previous[targetIndex].value;
-
-          if (!targetValue || targetValue.trim() === '') return previous;
-
-          const { decimalSeparator } = getLocaleSeparators();
-
-          // Count decimal separators in the value
-          const decimalSeparatorRegex =
-            decimalSeparator === '.'
-              ? /\./g
-              : new RegExp(decimalSeparator, 'g');
-          const decimalCount = (targetValue.match(decimalSeparatorRegex) || [])
-            .length;
-
-          // If value ends with a single decimal separator, allow it
-          // (user is in the middle of typing decimal digits)
-          if (decimalCount === 1 && targetValue.endsWith(decimalSeparator)) {
-            return previous;
-          }
-
-          // If there are multiple decimal separators, remove extras
-          if (decimalCount > 1) {
-            const parts = targetValue.split(decimalSeparator);
-            // Keep only the first decimal separator: join first two parts, discard rest
-            const cleanedValue =
-              parts[0] + decimalSeparator + parts.slice(1).join('');
-
-            return previous.map((item, index) =>
-              index === targetIndex ? { ...item, value: cleanedValue } : item,
-            );
-          }
-
-          // Count how many decimal digits the user typed (to preserve trailing zeros)
-          const decimalPart = targetValue.split(decimalSeparator)[1] || '';
-          // Keep only digits when counting decimal places (removes invalid characters)
-          const cleanDecimalPart = decimalPart.replace(/\D/g, '');
-          const userTypedDecimals = cleanDecimalPart.length;
-
-          const raw = parseLocaleNumber(targetValue);
-
-          // Format with at least as many decimal places as the user typed
-          // This preserves trailing zeros like "55555.0" → "55.555,0"
-          // Uses valueToLocale for arbitrary precision (important for crypto amounts)
-          const formatted = valueToLocale(raw, userTypedDecimals, 20);
-
-          if (formatted === targetValue) return previous;
-
-          return previous.map((item, index) =>
-            index === targetIndex ? { ...item, value: formatted } : item,
-          );
-        });
+        setAssetInputValues(previous =>
+          formatAssetInputValues(previous, tokenId),
+        );
       }),
     [setAssetInputValues],
   );
@@ -693,37 +657,41 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
     ],
   );
 
-  const isReviewTransactionEnabled = useMemo(
-    () => sendFlowState.status === 'Form' && sendFlowState.confirmButtonEnabled,
-    [sendFlowState],
+  const localFormRef = useRef({ recipientAddress, note, assetInputValues });
+  localFormRef.current = { recipientAddress, note, assetInputValues };
+  const isReviewTransactionEnabled = isSendFormReadyForReview(
+    sendFlowState,
+    localFormRef.current,
   );
 
   const handleReviewTransactionPress = useCallback(() => {
+    // The navigation-owned footer can still hold the previous render's handler.
+    const currentState = sendFlowSelectors.sendFlow.selectSendFlowState(
+      store.getState(),
+    );
     if (
-      !selectedAccountId ||
-      !recipientAddress ||
-      !isReviewTransactionEnabled
+      !isSendFormReadyForReview(currentState, localFormRef.current) ||
+      currentState.status !== 'Form'
     ) {
       return;
     }
 
     const account = accounts.find(
-      accumulator => accumulator.accountId === selectedAccountId,
+      accumulator => accumulator.accountId === currentState.accountId,
     );
     if (!account) return;
 
     trackEvent('send | review transaction | press');
-    // this is to ensure state machine has latest values, otherwise the review transaction sheet won't properly update the token values
-    debouncedAddressDispatch.flush();
-    debouncedAmountsSync.flush();
-    debouncedNoteDispatch.flush();
+    // The built transaction already matches every local field. Flushing an
+    // equivalent pending edit would restart the build and drop `confirmed`.
+    debouncedAddressDispatch.cancel();
+    debouncedAmountsSync.cancel();
+    debouncedNoteDispatch.cancel();
 
     // Only dispatch confirm - navigation happens reactively via useEffect when state becomes 'Summary'
     dispatchConfirm();
   }, [
-    selectedAccountId,
-    recipientAddress,
-    isReviewTransactionEnabled,
+    store,
     accounts,
     trackEvent,
     debouncedAddressDispatch,
@@ -794,6 +762,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       setRecipientAddress('');
       dispatchClosed();
       dispatchOpenRequested({
+        ...ALLOW_REWARDS_WITHDRAWAL,
         accountId: accountId,
       });
     },
@@ -875,6 +844,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
       }
       pendingInitialAdditionalTokensRef.current = [firstSelected];
       dispatchOpenRequested({
+        ...ALLOW_REWARDS_WITHDRAWAL,
         initialSelectedToken: lovelaceTokenForInitialSend,
         accountId: initialAccountId ?? firstSelected.accountId,
       });
@@ -887,6 +857,7 @@ export const useSendSheet = (props: SheetScreenProps<SheetRoutes.Send>) => {
         : null;
 
     dispatchOpenRequested({
+      ...ALLOW_REWARDS_WITHDRAWAL,
       initialSelectedToken: firstSelected,
       accountId: initialAccountId,
     });

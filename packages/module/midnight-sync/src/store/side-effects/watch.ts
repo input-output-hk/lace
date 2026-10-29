@@ -1,10 +1,10 @@
-import { deepEquals, Percent } from '@cardano-sdk/util';
+import { deepEquals, isNotNil, Percent } from '@cardano-sdk/util';
 import { blockingWithLatestFrom } from '@cardano-sdk/util-rxjs';
 import {
   createInitialMidnightTokenMetadata,
   createMidnightToken,
   isInMemoryMidnightAccount,
-  midnightWallets$,
+  midnightWalletsForRuntime,
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
 import { whileActive } from '@lace-contract/wallet-active-state';
@@ -18,9 +18,11 @@ import isEqual from 'lodash/isEqual';
 import {
   catchError,
   combineLatest,
+  connect,
   defaultIfEmpty,
   defer,
   distinctUntilChanged,
+  EMPTY,
   exhaustMap,
   filter,
   finalize,
@@ -31,6 +33,7 @@ import {
   mergeAll,
   mergeMap,
   of,
+  ReplaySubject,
   share,
   switchMap,
   take,
@@ -40,17 +43,20 @@ import {
   withLatestFrom,
   zip,
   type Observable,
+  type BehaviorSubject,
 } from 'rxjs';
 
 import { FEATURE_FLAG_MIDNIGHT_UNSHIELDED } from '../../const';
 import { MidnightSyncFailureId } from '../../value-objects/midnight-sync-failure-id.vo';
+import { createTemenosLedgerIndexerResolver } from '../temenos-ledger-indexer';
 
 import { createAccountKeyManager as createAccountKeyManagerImpl } from './account-key-manager';
 
-import type { ActionCreators, SideEffect } from '../..';
+import type { ActionCreators, SideEffect } from '../../context';
 import type { AuthSecret } from '@lace-contract/authentication-prompt';
 import type { FeatureFlag } from '@lace-contract/feature';
 import type {
+  MidnightWalletsByAccountId,
   AccountKeyManager,
   AccountKeys,
   CoinsByTokenType,
@@ -145,6 +151,30 @@ const buildAddressTokenData = ({
     })),
   );
 
+/**
+ * An account's generated DUST, from one engine state. `balance` sums every
+ * coin, so a pending DUST spend does not read as 0; `available` excludes the
+ * coin a pending transaction pays with, which is what the next transfer can
+ * spend.
+ */
+// Sums totalCoins rather than state.dust.balance: totalCoins is
+// availableCoins ++ pendingCoins, and a build moves the whole DUST coin it
+// pays with into pending.
+export const midnightDustBalances = ({
+  dust,
+}: {
+  dust: {
+    totalCoins: readonly { generatedNow: bigint }[];
+    availableCoins: readonly { generatedNow: bigint }[];
+  };
+}): { balance: bigint; available: bigint } => ({
+  balance: dust.totalCoins.reduce((sum, coin) => sum + coin.generatedNow, 0n),
+  available: dust.availableCoins.reduce(
+    (sum, coin) => sum + coin.generatedNow,
+    0n,
+  ),
+});
+
 // Dust balance subscription - emits setDustBalance when wallet.state() emits
 // Note: wallet.state() uses combineLatest([shielded, unshielded, dust]) internally.
 // DustWallet emits state immediately upon restoration (before start() is called),
@@ -154,33 +184,24 @@ const buildAddressTokenData = ({
 //
 // Throttled: during dust replay generatedNow changes every block, and each
 // dispatch pushes the whole root state to every UI port.
-//
-// Sum over totalCoins (not state.dust.balance) so a pending dust spend doesn't show as 0.
-// The spendable half rides alongside: totalCoins is availableCoins ++ pendingCoins,
-// and a build moves the whole dust coin it pays with into pending, so only
-// availableCoins answers what the next transfer can spend.
 export const updateDustBalance =
-  (wallet: MidnightWallet): SideEffect =>
+  (
+    wallet: MidnightWallet,
+    wallets$: BehaviorSubject<MidnightWalletsByAccountId>,
+  ): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
       throttleTime(500, undefined, { leading: true, trailing: true }),
       // Below the throttle: a queued trailing emission outlives the wallet and
       // would revive persisted dust state that a reset just cleared.
-      filter(() => !!midnightWallets$.value[wallet.accountId]),
-      map(state => ({
-        dustBalance: BigNumber(
-          state.dust.totalCoins.reduce(
-            (sum, coin) => sum + coin.generatedNow,
-            0n,
-          ),
-        ),
-        dustAvailable: BigNumber(
-          state.dust.availableCoins.reduce(
-            (sum, coin) => sum + coin.generatedNow,
-            0n,
-          ),
-        ),
-      })),
+      filter(() => !!wallets$.value[wallet.accountId]),
+      map(state => {
+        const { balance, available } = midnightDustBalances(state);
+        return {
+          dustBalance: BigNumber(balance),
+          dustAvailable: BigNumber(available),
+        };
+      }),
       distinctUntilChanged(
         (a, b) =>
           a.dustBalance === b.dustBalance &&
@@ -299,6 +320,7 @@ export const updateSyncProgress =
   (
     wallet: MidnightWallet,
     isUnshieldedEnabled$: Observable<boolean>,
+    wallets$: BehaviorSubject<MidnightWalletsByAccountId>,
   ): SideEffect =>
   (_, stateObservables, { actions }) =>
     wallet.syncProgress$.pipe(
@@ -306,7 +328,7 @@ export const updateSyncProgress =
       // Must sit BELOW the throttle: RxJS withholds completion until a queued
       // trailing emission has fired, so it outlives the wallet and revives
       // the sync record a reset just deleted, stamping lastSuccessfulSync.
-      filter(() => !!midnightWallets$.value[wallet.accountId]),
+      filter(() => !!wallets$.value[wallet.accountId]),
       blockingWithLatestFrom(isUnshieldedEnabled$),
       withLatestFrom(stateObservables.sync.selectSyncStatusByAccount$),
       mergeMap(
@@ -406,13 +428,16 @@ export const updateSyncProgress =
 // totalCoins (not availableCoins) so a pending dust spend doesn't show as 0.
 // Throttled for the same reason as updateDustBalance.
 export const updateDustGenerationDetails =
-  (wallet: MidnightWallet): SideEffect =>
+  (
+    wallet: MidnightWallet,
+    wallets$: BehaviorSubject<MidnightWalletsByAccountId>,
+  ): SideEffect =>
   (_, __, { actions }) =>
     wallet.state().pipe(
       throttleTime(500, undefined, { leading: true, trailing: true }),
       // Below the throttle: a queued trailing emission outlives the wallet and
       // would revive persisted dust state that a reset just cleared.
-      filter(() => !!midnightWallets$.value[wallet.accountId]),
+      filter(() => !!wallets$.value[wallet.accountId]),
       map((state): DustGenerationDetails | undefined => {
         const coinsWithFullInfo = state.dust.totalCoins;
         if (coinsWithFullInfo.length === 0) {
@@ -551,7 +576,10 @@ export const updateSetPublicKeys =
  * Redux actions for state updates (addresses, sync progress, dust balance, tokens).
  */
 export const subscribeToWallet =
-  (wallet: MidnightWallet): SideEffect =>
+  (
+    wallet: MidnightWallet,
+    wallets$: BehaviorSubject<MidnightWalletsByAccountId>,
+  ): SideEffect =>
   (actionObservables, stateObservables, dependencies) => {
     const isUnshieldedEnabled$ =
       stateObservables.features.selectLoadedFeatures$.pipe(
@@ -567,9 +595,9 @@ export const subscribeToWallet =
     return merge(
       ...[
         upsertAddresses(wallet, isUnshieldedEnabled$),
-        updateSyncProgress(wallet, isUnshieldedEnabled$),
-        updateDustBalance(wallet),
-        updateDustGenerationDetails(wallet),
+        updateSyncProgress(wallet, isUnshieldedEnabled$, wallets$),
+        updateDustBalance(wallet, wallets$),
+        updateDustGenerationDetails(wallet, wallets$),
         updateTokens(wallet, isUnshieldedEnabled$),
         updateSetPublicKeys(wallet),
       ].map(sideEffect =>
@@ -693,6 +721,7 @@ export const watchMidnightAccount =
     store: CollectionStorage<SerializedMidnightWallet>,
   ): SideEffect =>
   (actionObservables, stateObservables, dependencies) => {
+    const midnightWallets$ = midnightWalletsForRuntime(dependencies.runtime);
     const { keyManager, destroyAccountKeyManager } = createAccountKeyManager(
       account,
     )(actionObservables, stateObservables, dependencies);
@@ -703,6 +732,9 @@ export const watchMidnightAccount =
         config,
         store,
         keyManager,
+        getTemenosLedgerIndexerUrl: createTemenosLedgerIndexerResolver(
+          stateObservables.midnightContext.selectNetworksConfig$,
+        ),
       })
       .pipe(
         tap(midnightWallet => {
@@ -712,16 +744,34 @@ export const watchMidnightAccount =
           });
         }),
         mergeMap(midnightWallet =>
-          subscribeToWallet(midnightWallet)(
+          subscribeToWallet(midnightWallet, midnightWallets$)(
             actionObservables,
             stateObservables,
             dependencies,
           ).pipe(
+            filter(
+              () =>
+                midnightWallets$.value[midnightWallet.accountId] ===
+                midnightWallet,
+            ),
             finalize(() => {
-              midnightWallet.stop().subscribe();
-              const { [midnightWallet.accountId]: _, ...remainingWallets } =
-                midnightWallets$.value;
-              midnightWallets$.next(remainingWallets);
+              // An old watcher must not remove a replacement for the same account.
+              if (
+                midnightWallets$.value[midnightWallet.accountId] ===
+                midnightWallet
+              ) {
+                const { [midnightWallet.accountId]: _, ...remainingWallets } =
+                  midnightWallets$.value;
+                midnightWallets$.next(remainingWallets);
+              }
+              defer(() => midnightWallet.stop()).subscribe({
+                error: (error: unknown) => {
+                  dependencies.logger.error(
+                    'Midnight account watch teardown: stop failed',
+                    error,
+                  );
+                },
+              });
             }),
           ),
         ),
@@ -822,19 +872,55 @@ const watchMidnightAccountsInNetwork =
     return accounts$.pipe(
       mergeAll(),
       groupBy(account => account.accountId),
-      mergeMap(group$ =>
-        group$.pipe(
-          exhaustMap(account =>
-            watchSingleMidnightAccount({
-              account,
-              accounts$,
-              config: currentNetwork.config,
-              store,
-              watchAccount,
-            })(actionObservables, selectorObservables, dependencies),
+      mergeMap(group$ => {
+        const accountId = group$.key;
+        const restartRequests$ = (
+          actionObservables.midnightSync.restartAccountWatch$ ?? EMPTY
+        ).pipe(filter(({ payload }) => payload.accountId === accountId));
+        // The account as the list last emitted it, or undefined once the list
+        // no longer has it. Replayed, so a restart request starts the current
+        // account and never revives a removed one.
+        const currentAccount$ = merge(
+          group$,
+          accounts$.pipe(
+            noLongerHasAccount(accountId),
+            map(() => undefined),
           ),
-        ),
-      ),
+        );
+        return currentAccount$.pipe(
+          connect(
+            account$ =>
+              merge(of(undefined), restartRequests$).pipe(
+                // A restart request replaces the running watcher.
+                switchMap(() =>
+                  account$.pipe(
+                    filter(isNotNil),
+                    // exhaustMap: a list re-emission leaves a live watcher
+                    // alone but starts one that has ended, such as a watcher
+                    // whose retries ran out. Its inner must therefore end with
+                    // the watcher, which is why restart requests are handled
+                    // above it rather than inside it.
+                    exhaustMap(account =>
+                      watchSingleMidnightAccount({
+                        account,
+                        accounts$,
+                        config: currentNetwork.config,
+                        store,
+                        watchAccount,
+                      })(actionObservables, selectorObservables, dependencies),
+                    ),
+                  ),
+                ),
+              ),
+            {
+              connector: () =>
+                new ReplaySubject<
+                  InMemoryWalletAccount<MidnightAccountProps> | undefined
+                >(1),
+            },
+          ),
+        );
+      }),
     );
   };
 

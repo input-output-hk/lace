@@ -13,9 +13,9 @@
  *
  * The specifier is `@trezor/connect-web` — the SAME aliased name
  * `@cardano-sdk/hardware-trezor` hard-codes internally. tsc resolves it to
- * connect-web@9.4.0's real types (its `main` sibling `.d.ts` carries the default
+ * `connect-web@9.4.0`'s real types (its `main` sibling `.d.ts` carries the default
  * `TrezorConnect`), while the build's exact-specifier alias rewrites it to the
- * DOM-free `@trezor/connect-webextension` runtime `main` (the connect-web@9.4.0
+ * DOM-free `@trezor/connect-webextension` runtime `main` (the `connect-web@9.4.0`
  * CoreInIframe variant is SW-impossible and never bundles). So the Cardano
  * signer's internal Connect singleton and this entry's default resolve to the
  * ONE webextension copy the split hoists per document.

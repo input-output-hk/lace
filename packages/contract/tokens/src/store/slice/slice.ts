@@ -192,7 +192,7 @@ const selectTokensAndMetadata = createSelector(
 /**
  * Selector to get all tokens (fungible and NFTs) grouped by accountId.
  * Each account's tokens are aggregated across all addresses within that account.
- * Returns a map: { [accountId]: { fungible: Token[], nfts: Token[] } }
+ * Returns a map: `{ [accountId]: { fungible: Token[], nfts: Token[] } }`
  */
 const selectTokensGroupedByAccount = createSelector(
   rawTokensSelectors.selectAllMap,
@@ -495,7 +495,7 @@ const selectAggregatedTokensByAccountId = markParameterizedSelector(
 
 /**
  * Selector to get NFTs grouped into folders for a specific account.
- * Returns { folders: [], nonFolderTokens: [] } filtered by accountId.
+ * Returns `{ folders: [], nonFolderTokens: [] }` filtered by accountId.
  * Only includes folders that belong to the specified account.
  */
 const selectNFTsGroupedInFoldersByAccountId = markParameterizedSelector(
@@ -683,7 +683,7 @@ const tokensActions = {
 
 const tokensSelectors = {
   tokens: {
-    /** Master selector for per-account tokens (returns { fungible, nfts }) */
+    /** Master selector for per-account tokens (returns `{ fungible, nfts }`) */
     selectTokensGroupedByAccount,
     /** All tokens (fungible + NFTs) for a specific account */
     selectAggregatedTokensByAccountId,

@@ -91,8 +91,13 @@ export const useSendResult = (
   const isHardwareWalletFlow =
     'wallet' in sendFlowState && isHardwareWallet(sendFlowState.wallet);
 
-  const hwErrorKeys =
-    isFailure && isHardwareWalletFlow && 'errorTranslationKeys' in sendFlowState
+  const errorKeys =
+    isFailure &&
+    'errorTranslationKeys' in sendFlowState &&
+    (isHardwareWalletFlow ||
+      (isMidnight &&
+        sendFlowState.errorTranslationKeys?.title ===
+          'midnight.tee-attestation.failure.title'))
       ? sendFlowState.errorTranslationKeys
       : undefined;
 
@@ -105,11 +110,9 @@ export const useSendResult = (
       primaryButtonLabel: t('v2.send-flow.success.primary-button'),
     },
     failure: {
-      title: hwErrorKeys
-        ? t(hwErrorKeys.title)
-        : t('v2.send-flow.failure.title'),
-      subtitle: hwErrorKeys
-        ? t(hwErrorKeys.subtitle)
+      title: errorKeys ? t(errorKeys.title) : t('v2.send-flow.failure.title'),
+      subtitle: errorKeys
+        ? t(errorKeys.subtitle)
         : t('v2.send-flow.failure.subtitle'),
       errorDetailsTitle: t('v2.send-flow.failure.details-title'),
       primaryButtonLabel: t('v2.send-flow.failure.primary-button'),
@@ -149,7 +152,7 @@ export const useSendResult = (
 
   const icon = {
     name: iconName,
-    variant: status === 'processing' ? ('stroke' as const) : ('solid' as const),
+    strokeWidth: status === 'processing' ? undefined : 2,
     size: 48,
   };
 
@@ -164,7 +167,7 @@ export const useSendResult = (
   }, [sendFlowState]);
 
   const errorDetails =
-    isFailure && !hwErrorKeys
+    isFailure && !errorKeys
       ? (() => {
           const parsed = parseErrorDetails(
             submissionError,
@@ -272,5 +275,6 @@ export const useSendResult = (
     transactionDetails,
     transactionDetailsLabels,
     shouldHidePrimaryButtonOnSuccess,
+    ProcessingDetail: sendFlowSheetUICustomisation?.ProcessingDetail,
   };
 };

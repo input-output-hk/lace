@@ -326,6 +326,7 @@ export const trackAccountDelegationActivities: SideEffect = (
     cardanoContext: {
       loadAccountDelegationHistory$,
       clearAccountDelegationHistory$,
+      resetWalletSyncState$,
     },
   },
   {
@@ -362,11 +363,15 @@ export const trackAccountDelegationActivities: SideEffect = (
       ]) => {
         // Create a filtered observable that emits when clearAccountDelegationHistory
         // is called for the same accountId and rewardAccount
-        const cancel$ = clearAccountDelegationHistory$.pipe(
+        const cancel$ = merge(
+          clearAccountDelegationHistory$,
+          resetWalletSyncState$,
+        ).pipe(
           filter(
             ({ payload: clearPayload }) =>
               clearPayload.accountId === accountId &&
-              clearPayload.rewardAccount === rewardAccount,
+              (!('rewardAccount' in clearPayload) ||
+                clearPayload.rewardAccount === rewardAccount),
           ),
         );
 

@@ -12,7 +12,7 @@ import type { IconName } from '@lace-lib/ui-toolkit';
 
 type IconProps = {
   name: IconName;
-  variant?: 'solid' | 'stroke';
+  strokeWidth?: number;
 };
 
 export const useAddedAccountSuccess = () => {
@@ -38,7 +38,7 @@ export const useAddedAccountSuccess = () => {
   const body = t('v2.account-details.added-account-success.description');
   const buttonText = t('v2.account-details.added-account-success.button.close');
 
-  const icon: IconProps = { name: 'RelievedFace', variant: 'solid' };
+  const icon: IconProps = { name: 'RelievedFace', strokeWidth: 2 };
 
   return {
     title,

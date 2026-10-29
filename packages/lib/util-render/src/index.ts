@@ -1,5 +1,4 @@
-export * from './lace-render-root';
-export * from './lace-view';
+export * from './view-renderers';
 export * from './hooks';
 export { simpleCipher } from './simple-cipher';
 export * from './format-number';

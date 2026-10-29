@@ -85,6 +85,34 @@ describe('network slice', () => {
       });
     });
 
+    it('registers blockchain networks only while the blockchain has none', () => {
+      const registered = reducers.network(
+        undefined,
+        actions.network.registerBlockchainNetworks({
+          blockchain: 'Cardano',
+          mainnet: BlockchainNetworkId('cardano-764824073'),
+          testnet: BlockchainNetworkId('cardano-2'),
+        }),
+      );
+      expect(registered.blockchainNetworks.Cardano).toEqual({
+        mainnet: BlockchainNetworkId('cardano-764824073'),
+        testnet: BlockchainNetworkId('cardano-2'),
+      });
+
+      // A selection already made keeps precedence over a later registration.
+      const kept = reducers.network(
+        registered,
+        actions.network.registerBlockchainNetworks({
+          blockchain: 'Cardano',
+          mainnet: BlockchainNetworkId('cardano-764824073'),
+          testnet: BlockchainNetworkId('cardano-1'),
+        }),
+      );
+      expect(kept.blockchainNetworks.Cardano?.testnet).toBe(
+        BlockchainNetworkId('cardano-2'),
+      );
+    });
+
     it('selects blockchain networks', () => {
       const state = {
         network: {

@@ -33,7 +33,7 @@ export const RemoveAccountSuccess = ({
   return (
     <StatusSheet
       body={body}
-      icon={{ name: 'AlertSquare', variant: 'solid' }}
+      icon={{ name: 'AlertSquare', strokeWidth: 2 }}
       testID="remove-account-success-sheet"
     />
   );

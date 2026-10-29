@@ -144,7 +144,7 @@ const EmptyState = ({
   'addContactLabel' | 'emptyLabel' | 'onAddPress'
 >) => (
   <Column style={styles.emptyContainer}>
-    <Icon name={'Sad'} size={48} variant="solid" />
+    <Icon name={'Sad'} size={48} strokeWidth={2} />
     <Text.M>{emptyLabel}</Text.M>
     <AddContactButton label={addContactLabel} onPress={onAddPress} />
   </Column>

@@ -27,6 +27,7 @@ import {
   TTL_BUFFER_SLOTS,
   makeNightDesignationBuilding,
 } from '../../../src/store/night-designation/build-side-effect';
+import { custodyAddressEntry } from '../custody/custody-address-entry';
 
 import type { Activity } from '@lace-contract/activities';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -134,6 +135,31 @@ const cnightUtxos = [
   cnightUtxo('33'.repeat(32), 30n),
 ];
 
+// A second owned base address — its payment key is not among the tx's required
+// signers, which is what makes a reservation held there unusable.
+const otherOwnedAddress = Cardano.BaseAddress.fromCredentials(
+  Cardano.NetworkId.Testnet,
+  {
+    type: Cardano.CredentialType.KeyHash,
+    hash: Crypto.Hash28ByteBase16('ef'.repeat(28)),
+  },
+  {
+    type: Cardano.CredentialType.KeyHash,
+    hash: Crypto.Hash28ByteBase16(stakeKeyHashHex),
+  },
+)
+  .toAddress()
+  .toBech32() as unknown as Cardano.PaymentAddress;
+
+// The 5 ADA collateral reservation the cardano-collateral-flow creates at the
+// account's primary address and marks unspendable.
+const reservedCollateral = (
+  address: Cardano.PaymentAddress = baseAddress,
+): Cardano.Utxo => [
+  { txId: 'cc'.repeat(32) as Cardano.TransactionId, index: 0, address },
+  { address, value: { coins: 5_000_000n } },
+];
+
 // A registration UTxO at the script address whose inline datum is bound to the
 // account's stake key — what resolveAction scans for on update/deregister.
 const registrationUtxo: Cardano.Utxo = [
@@ -170,6 +196,7 @@ const plutusProtocolParameters = {
 type Overrides = {
   chainId?: Cardano.ChainId | undefined;
   accountUtxos?: Cardano.Utxo[];
+  unspendableUtxos?: Record<string, Cardano.Utxo[]>;
   addresses?: unknown[];
   scriptUtxos?: Cardano.Utxo[];
   scriptScanError?: Error;
@@ -227,7 +254,7 @@ const makeDependencies = (overrides: Overrides) => ({
     cardanoAccountUtxos$: of({
       [accountId]: overrides.accountUtxos ?? [...cnightUtxos, adaUtxo],
     }),
-    cardanoAccountUnspendableUtxos$: of({}),
+    cardanoAccountUnspendableUtxos$: of(overrides.unspendableUtxos ?? {}),
     cardanoAddresses$: of(overrides.addresses ?? [cardanoAddress]),
   },
   cardanoProvider: {
@@ -321,6 +348,13 @@ const waitFor = async (predicate: () => boolean): Promise<void> => {
 // arrive: a superseded build gets exactly the room a live one needs to emit.
 const settle = async (): Promise<void> => waitFor(() => false);
 
+const shippedBody = (action: {
+  payload: { result: { serializedTx?: string } };
+}): Cardano.TxBody =>
+  Serialization.Transaction.fromCbor(
+    action.payload.result.serializedTx as Serialization.TxCBOR,
+  ).toCore().body;
+
 /** The ex-units the built transaction actually declares for its redeemers. */
 const declaredExUnits = (action: {
   payload: { result: { serializedTx?: string } };
@@ -351,6 +385,105 @@ describe('makeNightDesignationBuilding', () => {
     expect(typeof action.payload.result.serializedTx).toBe('string');
     expect(action.payload.result.serializedTx?.length).toBeGreaterThan(0);
     expect(action.payload.result.fees?.length).toBe(1);
+  });
+
+  it('backs collateral with the reserved collateral UTxO and returns the rest to the account', async () => {
+    const reserved = reservedCollateral();
+    const action = await run(building(), {
+      accountUtxos: [...cnightUtxos, adaUtxo, reserved],
+      unspendableUtxos: { [accountId]: [reserved] },
+    });
+
+    expect(action.payload.result.success).toBe(true);
+    const body = shippedBody(action);
+
+    expect(body.inputs.some(input => input.txId === reserved[0].txId)).toBe(
+      false,
+    );
+    expect(body.collaterals).toHaveLength(1);
+    expect(body.collaterals![0].txId).toBe(reserved[0].txId);
+    // The unused collateral must come back to the account, not to the script or
+    // a third party.
+    expect(body.collateralReturn?.address).toBe(baseAddress);
+  });
+
+  it('ignores a reserved collateral UTxO held at another owned address', async () => {
+    const elsewhere = reservedCollateral(otherOwnedAddress);
+    const action = await run(building(), {
+      accountUtxos: [...cnightUtxos, adaUtxo, elsewhere],
+      unspendableUtxos: { [accountId]: [elsewhere] },
+    });
+
+    expect(action.payload.result.success).toBe(true);
+    const collaterals = shippedBody(action).collaterals ?? [];
+    expect(collaterals).toHaveLength(1);
+    expect(collaterals[0].txId).toBe(adaUtxo[0].txId);
+  });
+
+  // getEligibleCollateralUtxo demands pure ADA of exactly COLLATERAL_AMOUNT_LOVELACES,
+  // so a reservation of another shape is not collateral this flow can size against.
+  it.each([
+    ['holding more than the collateral amount', 6_000_000n, undefined],
+    ['carrying a native asset', 5_000_000n, 'asset'],
+  ])(
+    'falls back to the cover pool for a reserved UTxO %s',
+    async (_label, coins, asset) => {
+      const ineligible: Cardano.Utxo = [
+        {
+          txId: 'be'.repeat(32) as Cardano.TransactionId,
+          index: 0,
+          address: baseAddress,
+        },
+        {
+          address: baseAddress,
+          value: {
+            coins,
+            ...(asset ? { assets: new Map([[cnightAssetId, 1n]]) } : undefined),
+          },
+        },
+      ];
+
+      const action = await run(building(), {
+        accountUtxos: [...cnightUtxos, adaUtxo, ineligible],
+        unspendableUtxos: { [accountId]: [ineligible] },
+      });
+
+      expect(action.payload.result.success).toBe(true);
+      const collaterals = shippedBody(action).collaterals ?? [];
+      expect(collaterals).toHaveLength(1);
+      expect(collaterals[0].txId).toBe(adaUtxo[0].txId);
+    },
+  );
+
+  // deregister spends the registration UTxO under the script, so its inputs and
+  // redeemers differ from a designate's — the collateral wiring must not.
+  it('backs collateral with the reservation on a deregister too', async () => {
+    const reserved = reservedCollateral();
+    const action = await run(
+      building({ action: 'deregister', dustPubkeyHex: undefined }),
+      {
+        accountUtxos: [...cnightUtxos, adaUtxo, reserved],
+        unspendableUtxos: { [accountId]: [reserved] },
+        scriptUtxos: [registrationUtxo],
+      },
+    );
+
+    expect(action.payload.result.success).toBe(true);
+    const collaterals = shippedBody(action).collaterals ?? [];
+    expect(collaterals).toHaveLength(1);
+    expect(collaterals[0].txId).toBe(reserved[0].txId);
+  });
+
+  it('ignores a reserved collateral UTxO the account no longer holds', async () => {
+    const action = await run(building(), {
+      accountUtxos: [...cnightUtxos, adaUtxo],
+      unspendableUtxos: { [accountId]: [reservedCollateral()] },
+    });
+
+    expect(action.payload.result.success).toBe(true);
+    const collaterals = shippedBody(action).collaterals ?? [];
+    expect(collaterals).toHaveLength(1);
+    expect(collaterals[0].txId).toBe(adaUtxo[0].txId);
   });
 
   it('maps a missing chain id to the generic build-error keys', async () => {
@@ -455,11 +588,18 @@ describe('makeNightDesignationBuilding', () => {
     expect(action.payload.result.serializedTx?.length).toBeGreaterThan(0);
   });
 
-  it('maps a coin-selection balancing failure to the no-cardano-utxos keys', async () => {
-    // The lone ADA UTxO is fully reserved for collateral, leaving only the
-    // cNIGHT inputs' minimal ADA to fund the fee + script output + change — the
-    // balancer's deterministic fallback selector gives up (InputSelectionError),
-    // which must surface as the actionable "not enough ADA" copy, not generic.
+  // The account is genuinely short: its total sits above the collateral
+  // coverage target (so a collateral pick succeeds) but below what the fee,
+  // the script output and a 12-policy change output cost, so the balancer's
+  // deterministic fallback gives up with an InputSelectionError. That must
+  // surface the actionable "not enough ADA" copy, not the generic error.
+  //
+  // The cover figure matters: measured against current code, this shape fails
+  // from the target (2,634,266) up to ~4.3 ADA and succeeds at 4.5, so 3.5 sits
+  // mid-band. Before LW-15307 the same copy was reached by any cover size,
+  // because collateral was excluded from the funding pool — a 6 ADA cover then
+  // starved the build and now funds it.
+  it('maps a genuine coin-selection shortfall to the no-cardano-utxos keys', async () => {
     const lowAdaCnight: Cardano.Utxo = [
       {
         txId: 'bb'.repeat(32) as Cardano.TransactionId,
@@ -468,22 +608,39 @@ describe('makeNightDesignationBuilding', () => {
       },
       {
         address: baseAddress,
-        value: { coins: 1_300_000n, assets: new Map([[cnightAssetId, 50n]]) },
+        value: {
+          coins: 1_300_000n,
+          assets: new Map<Cardano.AssetId, bigint>([
+            [cnightAssetId, 50n],
+            ...Array.from(
+              { length: 11 },
+              (_, index) =>
+                [
+                  Cardano.AssetId(
+                    `${(0xa0 + index).toString(16).repeat(28)}746f6b`,
+                  ),
+                  1n,
+                ] as const,
+            ),
+          ]),
+        },
       },
     ];
-    const collateralOnly: Cardano.Utxo = [
+    const tooSmallCover: Cardano.Utxo = [
       {
         txId: '55'.repeat(32) as Cardano.TransactionId,
         index: 0,
         address: baseAddress,
       },
-      { address: baseAddress, value: { coins: 6_000_000n } },
+      { address: baseAddress, value: { coins: 3_500_000n } },
     ];
+
     const action = await run(building({ action: 'designate' }), {
-      accountUtxos: [lowAdaCnight, collateralOnly],
+      accountUtxos: [lowAdaCnight, tooSmallCover],
     });
 
     expect(action.payload.result.success).toBe(false);
+    expect(action.payload.result.error?.message).toMatch(/UTxO pool exhausted/);
     expect(action.payload.result.errorTranslationKeys?.title).toBe(
       'v2.cnight-designation.build.error.no-cardano-utxos.title',
     );
@@ -871,6 +1028,21 @@ describe('makeNightDesignationBuilding', () => {
 
     expect(buildCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ accountId }),
+    );
+  });
+
+  it('refuses a Cardano custody account before building', async () => {
+    const action = await run(building(), {
+      addresses: [custodyAddressEntry(accountId)],
+    });
+
+    expect(action.payload.result.success).toBe(false);
+    expect(action.payload.result.error).toEqual({
+      name: 'CardanoCustodyAccountRefusedError',
+      message: expect.stringContaining('Cardano custody account') as unknown,
+    });
+    expect(action.payload.result.errorTranslationKeys?.title).toBe(
+      'v2.cnight-designation.build.error.title',
     );
   });
 });

@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./sdk": "./src/sdk.ts",
+    "./custody-sdk": "./src/custody-sdk.ts",
     "./src/state": "./src/state.ts"
   },
   "main": "src/index.ts",
@@ -25,6 +26,7 @@
     "@lace-contract/tokens": "*",
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/cardano-custody": "*",
     "@lace-lib/cnight-dust-designation": "*",
     "@lace-lib/core": "*",
     "@lace-lib/extension-messaging": "*",

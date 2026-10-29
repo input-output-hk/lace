@@ -1,0 +1,176 @@
+import type { Fraction } from '.';
+import type { EpochNo, Slot } from './Block';
+import type { PlutusLanguageVersion } from './Script';
+import type * as Crypto from '@lace-lib/cardano-crypto';
+
+export interface ProtocolVersion {
+  major: number;
+  minor: number;
+  patch?: number;
+}
+
+/**
+ * Cost models are a way to provide predictable pricing for script execution by specifying
+ * how much each OP costs in terms of memory and CPU steps.
+ */
+export type CostModel = Array<number>;
+
+/**
+ * Each language version can have a different set of OP costs. CostModels is a map of
+ * plutus language version to its defined cost.
+ */
+export type CostModels = Map<PlutusLanguageVersion, CostModel>;
+
+export interface Prices {
+  memory: number;
+  steps: number;
+}
+export interface ExUnits {
+  memory: number;
+  steps: number;
+}
+
+export interface ValidityInterval {
+  invalidBefore?: Slot;
+  invalidHereafter?: Slot;
+}
+
+export interface TxFeePolicy {
+  coefficient: string;
+  constant: number;
+}
+
+export interface SoftforkRule {
+  initThreshold: string;
+  minThreshold: string;
+  decrementThreshold: string;
+}
+
+type ProtocolParametersByron = {
+  heavyDlgThreshold: string;
+  maxBlockSize: number;
+  maxHeaderSize: number;
+  maxProposalSize: number;
+  maxTxSize: number;
+  mpcThreshold: string;
+  scriptVersion: number;
+  slotDuration: number;
+  unlockStakeEpoch: number;
+  updateProposalThreshold: string;
+  updateProposalTimeToLive: number;
+  updateVoteThreshold: string;
+  txFeePolicy: TxFeePolicy;
+  softforkRule: SoftforkRule;
+};
+
+type NewProtocolParamsInShelley = {
+  minFeeCoefficient: number;
+  minFeeConstant: number;
+  maxBlockBodySize: number;
+  maxBlockHeaderSize: number;
+  stakeKeyDeposit: number;
+  poolDeposit: number | null;
+  poolRetirementEpochBound: number;
+  desiredNumberOfPools: number;
+  poolInfluence: string;
+  monetaryExpansion: string;
+  treasuryExpansion: string;
+  decentralizationParameter: string;
+  minUtxoValue: number;
+  minPoolCost: number;
+  extraEntropy: string | 'neutral';
+  protocolVersion: ProtocolVersion;
+};
+
+type ShelleyProtocolParams = NewProtocolParamsInShelley &
+  Pick<ProtocolParametersByron, 'maxTxSize'>;
+
+type NewProtocolParamsInAlonzo = {
+  coinsPerUtxoWord: number;
+  maxValueSize: number;
+  collateralPercentage: number;
+  maxCollateralInputs: number;
+  costModels: CostModels;
+  prices: Prices;
+  maxExecutionUnitsPerTransaction: ExUnits;
+  maxExecutionUnitsPerBlock: ExUnits;
+};
+
+type AlonzoProtocolParams = NewProtocolParamsInAlonzo &
+  Omit<ShelleyProtocolParams, 'minUtxoValue'>;
+
+type NewProtocolParamsInBabbage = {
+  coinsPerUtxoByte: number;
+};
+
+// coinsPerUtxoWord was replaced by coinsPerUtxoByte and extraEntropy was deprecated.
+type BabbageProtocolParameters = NewProtocolParamsInBabbage &
+  Omit<
+    AlonzoProtocolParams,
+    'coinsPerUtxoWord' | 'decentralizationParameter' | 'extraEntropy'
+  >;
+
+// Voting thresholds
+export interface PoolVotingThresholds {
+  motionNoConfidence: Fraction;
+  committeeNormal: Fraction;
+  committeeNoConfidence: Fraction;
+  hardForkInitiation: Fraction;
+  securityRelevantParamVotingThreshold: Fraction;
+}
+
+export interface DelegateRepresentativeThresholds
+  extends Omit<PoolVotingThresholds, 'securityRelevantParamVotingThreshold'> {
+  updateConstitution: Fraction;
+  ppNetworkGroup: Fraction;
+  ppEconomicGroup: Fraction;
+  ppTechnicalGroup: Fraction;
+  ppGovernanceGroup: Fraction;
+  treasuryWithdrawal: Fraction;
+}
+
+type NewProtocolParamsInConway = {
+  poolVotingThresholds: PoolVotingThresholds;
+  dRepVotingThresholds: DelegateRepresentativeThresholds;
+  minCommitteeSize: number;
+  committeeTermLimit: EpochNo;
+  governanceActionValidityPeriod: EpochNo;
+  governanceActionDeposit: number;
+  dRepDeposit: number;
+  dRepInactivityPeriod: EpochNo;
+  minFeeRefScriptCostPerByte: string;
+};
+
+type NewProtocolParamsInDijkstra = {
+  maxRefScriptSizePerBlock: number;
+  maxRefScriptSizePerTx: number;
+  refScriptCostStride: number;
+  refScriptCostMultiplier: string;
+};
+
+export type ProtocolParameters = BabbageProtocolParameters &
+  Partial<NewProtocolParamsInConway> &
+  Partial<NewProtocolParamsInDijkstra>;
+export type ConwayProtocolParameters = Omit<
+  ProtocolParameters,
+  'protocolVersion'
+>;
+
+// Even tho extraEntropy was deprecated on babbage era, and protocolVersion was deprecated in conway era,
+// they are still present in the ProtocolParametersUpdate structure since this structure is backward compatible with all eras.
+export type ProtocolParametersUpdate = Partial<
+  Pick<AlonzoProtocolParams, 'decentralizationParameter' | 'extraEntropy'> &
+    ProtocolParameters
+>;
+export type ProtocolParametersUpdateConway = Partial<ConwayProtocolParameters>;
+
+export type GenesisDelegateKeyHash = Crypto.Hash28ByteBase16;
+export type ProposedProtocolParameterUpdates = Map<
+  GenesisDelegateKeyHash,
+  ProtocolParametersUpdate
+>;
+
+export type Update = {
+  epoch: EpochNo;
+  proposedProtocolParameterUpdates: ProposedProtocolParameterUpdates;
+};

@@ -191,6 +191,7 @@ export const AccountCenter = ({
       [WalletType.InMemory]: <Icon name="BinaryCode" />,
       [WalletType.LazyInMemory]: <Icon name="BinaryCode" />,
       [WalletType.MultiSig]: <Icon name="Wallet" />,
+      [WalletType.CardanoCustody]: <Icon name="Wallet" />,
     }),
     [],
   );

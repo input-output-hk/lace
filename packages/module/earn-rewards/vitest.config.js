@@ -6,7 +6,10 @@ export default defineConfig({
   ...baseConfig,
   test: {
     ...baseConfig.test,
-    environment: 'jsdom',
+    // 'node', not 'jsdom': the suite resolves a real GOVERNANCE_CENTER
+    // payload, and the SDK's DRep-id reducer rejects jsdom's cross-realm
+    // Buffers — it would drop every configured DRep.
+    environment: 'node',
     coverage: {
       ...baseConfig.test.coverage,
       reportsDirectory: __dirname + '/coverage',

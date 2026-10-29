@@ -40,6 +40,7 @@ const createInitialState = (): CardanoDappConnectorState => ({
   pendingSignTxRequest: null,
   signTxCompleted: false,
   signTxError: false,
+  signTxErrorDetails: null,
   signTxHwErrorKeys: null,
   signDataCompleted: false,
   signDataError: false,
@@ -406,7 +407,7 @@ describe('cardanoDappConnector slice', () => {
       txHex: 'abcdef1234',
       partialSign: false,
       // Reviewable request (no collateral block verdict).
-      collateralRefusal: null,
+      refusal: null,
     };
 
     const mockPendingSignDataRequest: PendingSignDataRequest = {
@@ -586,6 +587,31 @@ describe('cardanoDappConnector slice', () => {
     });
 
     describe('setSignTxError', () => {
+      it('keeps diagnostic details after the pending request clears, and resets them when the error clears', () => {
+        const details = {
+          stage: 'signing' as const,
+          name: 'Error',
+          message: 'Unexpected end of buffer',
+        };
+        const failed = reducer(
+          createInitialState(),
+          actions.setSignTxError(details),
+        );
+        const cleared = reducer(failed, actions.clearPendingSignTxRequest());
+        expect(
+          selectors.selectSignTxErrorDetails({ cardanoDappConnector: cleared }),
+        ).toEqual(details);
+        expect(
+          selectors.selectSignTxError({ cardanoDappConnector: cleared }),
+        ).toBe(true);
+        const reset = reducer(cleared, actions.setSignTxError(false));
+        expect(
+          selectors.selectSignTxErrorDetails({ cardanoDappConnector: reset }),
+        ).toBeNull();
+        expect(
+          selectors.selectSignTxError({ cardanoDappConnector: reset }),
+        ).toBe(false);
+      });
       it('sets signTxError to true', () => {
         const nextState = reducer(
           createInitialState(),
@@ -687,7 +713,7 @@ describe('cardanoDappConnector slice', () => {
       txHex: 'abcdef1234',
       partialSign: false,
       // Reviewable request (no collateral block verdict).
-      collateralRefusal: null,
+      refusal: null,
     };
 
     const mockPendingSignDataRequest: PendingSignDataRequest = {

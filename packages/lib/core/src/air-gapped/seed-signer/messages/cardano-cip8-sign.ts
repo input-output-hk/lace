@@ -12,7 +12,7 @@ import type { CborReader, CborWriter } from '../../ur-transport';
 import type { DerivationPath } from '../value-objects/derivation-path.vo';
 import type { Xfp } from '../value-objects/xfp.vo';
 
-/** A derivation path for message signing. CDDL: {1: index uint, 2: [*path uint]}. */
+/** A derivation path for message signing. CDDL: `{1: index uint, 2: [*path uint]}`. */
 export interface SigningPath {
   index: number;
   path: DerivationPath;
@@ -22,8 +22,11 @@ export interface SigningPath {
  * CIP-8 message signing request. xfp may be empty (unspecified).
  *
  * UR type: cardano-cip8-sig-req. CDDL:
- *   {1: request_id(tstr), ?2: origin(tstr), 3: message_payload(bstr), 4: xfp(bstr 4),
- *    5: SigningPath, ?6: address_bytes(bstr)}
+ *
+ * ```cddl
+ * {1: request_id(tstr), ?2: origin(tstr), 3: message_payload(bstr), 4: xfp(bstr 4),
+ *  5: SigningPath, ?6: address_bytes(bstr)}
+ * ```
  */
 export interface CardanoMessageSignRequest {
   requestId: RequestId;
@@ -38,7 +41,10 @@ export interface CardanoMessageSignRequest {
  * Device reply carrying the COSE_Sign1 and COSE_Key.
  *
  * UR type: cardano-cip8-sig-res. CDDL:
- *   {1: request_id(tstr), 2: cose_sign1(bstr), 3: cose_key(bstr)}
+ *
+ * ```cddl
+ * {1: request_id(tstr), 2: cose_sign1(bstr), 3: cose_key(bstr)}
+ * ```
  */
 export interface CardanoCip8SignResponse {
   requestId: RequestId;

@@ -15,7 +15,6 @@ export type IconName = CustomIconName | HugeIconName;
 
 interface HugeIconProps extends SvgProps {
   name: IconName;
-  variant?: 'solid' | 'stroke';
   color?: string;
   size?: number;
   strokeWidth?: number;
@@ -24,7 +23,6 @@ interface HugeIconProps extends SvgProps {
 
 export const Icon = ({
   name,
-  variant = 'stroke',
   color,
   size = 24,
   strokeWidth,
@@ -45,17 +43,8 @@ export const Icon = ({
   }
 
   const defaultColor = color ?? theme.icons.background;
-  const icon = iconMap[name as HugeIconName];
-  if (!icon) return null;
-
-  const IconComponent = icon[variant];
-  if (!IconComponent) {
-    if (__DEV__) {
-      // eslint-disable-next-line no-console
-      console.warn(`Missing ${variant} variant for icon "${name}"`);
-    }
-    return null;
-  }
+  const IconComponent = iconMap[name as HugeIconName];
+  if (!IconComponent) return null;
 
   return (
     <HugeiconsIcon

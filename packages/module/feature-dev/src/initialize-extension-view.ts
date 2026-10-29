@@ -2,7 +2,7 @@ import { waitForState } from '@lace-contract/dev';
 
 import { setFeatureFlags } from './store/actions';
 
-import type { AvailableAddons } from '.';
+import type { AvailableAddons } from './contracts';
 import type { DevelopmentGlobalApi } from '@lace-contract/dev';
 import type { FeatureFlag } from '@lace-contract/feature';
 import type { ContextualLaceInit } from '@lace-contract/module';

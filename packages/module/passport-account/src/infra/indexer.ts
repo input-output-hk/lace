@@ -1,3 +1,5 @@
+import { ByteArray, HexBytes } from '@lace-lib/util';
+
 import type { IndexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 
 /** The slice of the midnight-js public data provider this client reads. */
@@ -59,6 +61,27 @@ export type ContractActionRecord = {
   endIndex?: number;
 };
 
+/**
+ * One shielded output a transaction created, as the ledger's own event
+ * reports it: the coin commitment as lowercase hex, the contract that
+ * received the coin when its recipient is a contract, and the position
+ * the commitment took in the Zswap commitment tree.
+ */
+export type ShieldedOutputRecord = {
+  commitment: string;
+  contractAddress?: string;
+  index: bigint;
+};
+
+/**
+ * The shielded events of one transaction: the outputs it created, and the
+ * nullifier of every shielded coin it spent, as lowercase hex.
+ */
+export type ShieldedTransactionEvents = {
+  outputs: ShieldedOutputRecord[];
+  nullifiers: string[];
+};
+
 export type EnumerateContractActionsOptions = {
   /** Deadline for the full replay (default 60 seconds). */
   timeoutMs?: number;
@@ -74,6 +97,7 @@ export type IndexerClient = {
     address: string,
     options?: EnumerateContractActionsOptions,
   ) => Promise<ContractActionRecord[]>;
+  queryShieldedEvents: (txHash: string) => Promise<ShieldedTransactionEvents>;
 };
 
 export type CreateIndexerClientProps = {
@@ -117,6 +141,35 @@ type GraphQlPayload = {
   errors?: unknown[];
 };
 
+type RawLedgerEvent = { raw?: string };
+
+/** The ledger event of one shielded output, as ledger-v9 types its details. */
+type ShieldedOutputEvent = {
+  tag: 'zswapOutput';
+  commitment: string;
+  contract: string | undefined;
+  mtIndex: bigint;
+};
+
+/** The ledger event of one shielded spend, as ledger-v9 types its details. */
+type ShieldedInputEvent = {
+  tag: 'zswapInput';
+  nullifier: string;
+};
+
+const isShieldedOutputEvent = (content: {
+  tag: string;
+}): content is ShieldedOutputEvent => content.tag === 'zswapOutput';
+
+const isShieldedInputEvent = (content: {
+  tag: string;
+}): content is ShieldedInputEvent => content.tag === 'zswapInput';
+
+type TransactionEventsPayload = {
+  data?: { transactions?: { zswapLedgerEvents?: RawLedgerEvent[] }[] };
+  errors?: unknown[];
+};
+
 type SubscriptionMessage = {
   type?: string;
   payload?: {
@@ -146,11 +199,27 @@ const toRecord = (action: RawContractAction): ContractActionRecord => {
 
 const stripHexPrefix = (address: string): string => address.replace(/^0x/, '');
 
+const HEX_BYTES_PATTERN = /^(?:[0-9a-fA-F]{2})*$/;
+
+/**
+ * The bytes of a ledger event the indexer returned as hex. A payload that
+ * is not whole hex bytes is refused outright: decoding it leniently would
+ * hand the ledger a truncated event and lose the output it described.
+ */
+const eventBytes = (raw: string): Uint8Array => {
+  if (!HEX_BYTES_PATTERN.test(raw)) {
+    throw new Error(`transactions query: ledger event is not hex: "${raw}"`);
+  }
+  return ByteArray.fromHex(HexBytes(raw));
+};
+
 /**
  * Reads Passport contract data from a Midnight indexer: the current
- * contract state through the midnight-js public data provider, and the
+ * contract state through the midnight-js public data provider, the
  * complete per-address action history through the indexer's
- * contractActions subscription.
+ * contractActions subscription, and the shielded outputs a transaction
+ * created and the coins it spent through the ledger events the indexer
+ * keeps per transaction.
  */
 export const createIndexerClient = ({
   indexerUrl,
@@ -173,26 +242,36 @@ export const createIndexerClient = ({
   const provider = async (): Promise<IndexerPublicData> =>
     (providerPromise ??= (createPublicDataProvider ?? defaultProvider)());
 
-  const latestContractAction = async (
-    address: string,
-  ): Promise<ContractActionRecord | null> => {
+  const postQuery = async <Payload extends { errors?: unknown[] }>(
+    name: string,
+    query: string,
+    variables: Record<string, unknown>,
+  ): Promise<Payload> => {
     const response = await fetchHttp(indexerUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: `query($address: HexEncoded!) { contractAction(address: $address) { ${ACTION_FIELDS} } }`,
-        variables: { address: stripHexPrefix(address) },
-      }),
+      body: JSON.stringify({ query, variables }),
     });
     if (!response.ok) {
       throw new Error(
-        `contractAction query failed: HTTP ${response.status} ${response.statusText}`,
+        `${name} query failed: HTTP ${response.status} ${response.statusText}`,
       );
     }
-    const body = (await response.json()) as GraphQlPayload;
+    const body = (await response.json()) as Payload;
     if (body.errors?.length) {
-      throw new Error(`contractAction query: ${JSON.stringify(body.errors)}`);
+      throw new Error(`${name} query: ${JSON.stringify(body.errors)}`);
     }
+    return body;
+  };
+
+  const latestContractAction = async (
+    address: string,
+  ): Promise<ContractActionRecord | null> => {
+    const body = await postQuery<GraphQlPayload>(
+      'contractAction',
+      `query($address: HexEncoded!) { contractAction(address: $address) { ${ACTION_FIELDS} } }`,
+      { address: stripHexPrefix(address) },
+    );
     const action = body.data?.contractAction;
     return action ? toRecord(action) : null;
   };
@@ -308,9 +387,50 @@ export const createIndexerClient = ({
     });
   };
 
+  /**
+   * The indexer keeps, per transaction, the events the ledger emitted while
+   * applying it; a shielded output's event carries the commitment and the
+   * tree index the ledger assigned, so the index is read, never inferred
+   * from the transaction's position window, and a shielded spend's event
+   * carries the nullifier the ledger recorded for the coin it consumed.
+   */
+  const queryShieldedEvents = async (
+    txHash: string,
+  ): Promise<ShieldedTransactionEvents> => {
+    const body = await postQuery<TransactionEventsPayload>(
+      'transactions',
+      `query($offset: TransactionOffset!) { transactions(offset: $offset) { hash ... on RegularTransaction { zswapLedgerEvents { raw } } } }`,
+      { offset: { hash: stripHexPrefix(txHash) } },
+    );
+    const events = (body.data?.transactions ?? []).flatMap(
+      transaction => transaction.zswapLedgerEvents ?? [],
+    );
+    const found: ShieldedTransactionEvents = { outputs: [], nullifiers: [] };
+    if (events.length === 0) return found;
+    const { Event } = await import('@midnightntwrk/ledger-v9');
+    for (const { raw } of events) {
+      const { content } = Event.deserialize(
+        eventBytes(stripHexPrefix(raw ?? '')),
+      );
+      if (isShieldedOutputEvent(content)) {
+        found.outputs.push({
+          commitment: content.commitment.toLowerCase(),
+          ...(content.contract === undefined
+            ? {}
+            : { contractAddress: content.contract.toLowerCase() }),
+          index: content.mtIndex,
+        });
+      } else if (isShieldedInputEvent(content)) {
+        found.nullifiers.push(content.nullifier.toLowerCase());
+      }
+    }
+    return found;
+  };
+
   return {
     queryContractState: async address =>
       (await provider()).queryContractState(address),
     enumerateContractActions,
+    queryShieldedEvents,
   };
 };

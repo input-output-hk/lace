@@ -1,0 +1,6 @@
+kind: Fixed
+body: Proving a Passport account circuit that calls another contract now fails with a clear error naming the contract address, circuit and verifier key hash, with the code `unresolved-contract-circuit`, instead of a bare 400 from the proof server.
+time: 2026-10-22T14:05:07.344748+08:00
+custom:
+  Package: sdk
+  Build: canary

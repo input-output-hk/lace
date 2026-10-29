@@ -24,14 +24,7 @@ export const TokenNameAddon = ({
         size="S"
         color="secondary"
         backgroundType="semiTransparent"
-        icon={
-          <Icon
-            name="Shield"
-            size={15}
-            color={theme.brand.white}
-            variant="stroke"
-          />
-        }
+        icon={<Icon name="Shield" size={15} color={theme.brand.white} />}
         label={t(
           'midnight.tokens-page.token-list-item-customisation.shielded-pill',
         )}

@@ -12,8 +12,11 @@ import type { EmptyObject, Tagged } from 'type-fest';
 export type BitcoinAddress = Address & Tagged<string, 'BitcoinAddress'>;
 export const BitcoinAddress = (address: string) => address as BitcoinAddress;
 
+/** The Bitcoin networks Lace supports. */
 export enum BitcoinNetwork {
+  /** Bitcoin mainnet. */
   Mainnet = 'mainnet',
+  /** Bitcoin testnet4. */
   Testnet = 'testnet4',
 }
 
@@ -58,11 +61,15 @@ export interface BitcoinFeeMarketProviderDependencies {
   bitcoinFeeMarketProvider: BitcoinFeeMarketProvider;
 }
 
+/** How the Bitcoin modules read chain data from their provider. */
 export interface BitcoinProviderConfig {
+  /** How often to poll for a new chain tip. */
   tipPollFrequency: Milliseconds;
+  /** How many of an address's most recent transactions to read. */
   historyDepth: number;
 }
 
+/** How the Bitcoin fee market module reads fee rate estimates. */
 export interface BitcoinFeeMarketProviderConfig {}
 
 /**

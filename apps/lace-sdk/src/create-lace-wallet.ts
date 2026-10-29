@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment */
-import { runInitializers } from '@lace-contract/app';
 import { selectModules, type FeatureFlag } from '@lace-contract/feature';
 import {
   createModuleLoader,
@@ -16,9 +15,12 @@ import {
   type ScopedSelectors,
   type StateObservables,
 } from '@lace-contract/module';
+import cardanoSync from '@lace-module/cardano-sync/sdk';
 import { dummyLogger } from 'ts-log';
 
+import { initializeAppContext } from './app-context';
 import { sdkBaseModule } from './base-module';
+import { sdkCardanoAppModule } from './cardano-app-module';
 
 import type { State } from '@lace-contract/module';
 
@@ -59,7 +61,13 @@ type KeyCombinations<T> = T extends object
 type Key1<Key> = Key extends `${infer T}.${infer _}` ? T : never;
 type Key2<Key> = Key extends `${infer _}.${infer T}` ? T : never;
 
-type DispatchFunction<ActionCreators extends ScopedActionCreators> = <
+/**
+ * The type of {@link LaceWallet.dispatch}: it takes an action's
+ * `'scope.action'` key, then the arguments of that action's creator. Both are
+ * typed from `ActionCreators`, the action creators of the modules passed to
+ * `createLaceWallet`, so the compiler checks the key and its arguments.
+ */
+export type DispatchFunction<ActionCreators extends ScopedActionCreators> = <
   Key extends KeyCombinations<ActionCreators>,
   Scope extends Key1<Key>,
   ActionCreatorName extends Key2<Key> & keyof ActionCreators[Scope],
@@ -74,31 +82,56 @@ type DispatchFunction<ActionCreators extends ScopedActionCreators> = <
 
 // ---- Public types ----
 
+/** The options of `createLaceWallet`. */
 export type CreateLaceWalletProps<
   T extends readonly LaceModule[] = readonly LaceModule[],
 > = {
+  /**
+   * The modules to load, such as those of the `m` namespace. Pass the array
+   * `as const` so the wallet's actions and state are typed from it.
+   */
   modules: T;
+  /** The runtime environment the modules see. */
   environment: Environment;
   /**
-   * Partial while the SDK type system is being developed.
-   * Will become non-partial with inferred types (like `dispatch`,
-   * `stateObservables`, and `actionObservables` already are).
+   * Provider and network configuration the modules read, such as
+   * `cardanoProvider`. Fields no loaded module reads may be left out.
    */
   config: Partial<AppConfig>;
+  /**
+   * The feature flags to enable, such as `FEATURE_FLAG_CARDANO`. A module
+   * gated by a flag loads only when the flag is enabled.
+   */
   featureFlags?: FeatureFlag[];
 };
 
+/**
+ * A wallet `createLaceWallet` returns: its state and actions as observables,
+ * typed from the modules it loaded, and `dispatch` to act on it.
+ */
 export type LaceWallet<
   Selectors extends ScopedSelectors = ScopedSelectors,
   ActionCreators extends ScopedActionCreators = ScopedActionCreators,
 > = {
+  /**
+   * Each module's state, by scope: `stateObservables.<scope>.<selector>$`
+   * emits the selector's value whenever it changes.
+   */
   stateObservables: StateObservables<Selectors>;
+  /**
+   * Each module's actions, by scope: `actionObservables.<scope>.<action>$`
+   * emits every dispatch of that action.
+   */
   actionObservables: ActionObservables<ActionCreators>;
+  /**
+   * Dispatches an action by its `'scope.action'` key, with the arguments its
+   * action creator takes, such as `dispatch('wallets.addWallet', entity)`.
+   * Throws for a key no loaded module provides.
+   */
   dispatch: DispatchFunction<ActionCreators>;
   /**
-   * Partial while the SDK type system is being developed.
-   * Will become non-partial with inferred types (like `dispatch`,
-   * `stateObservables`, and `actionObservables` already are).
+   * A snapshot of the store's current state. Its type is partial; the typed
+   * way to read state is `stateObservables`.
    */
   getState: () => Partial<State>;
   /** @internal Not for direct SDK consumer use. */
@@ -116,6 +149,18 @@ const parseKey = (key: string): [string, string] => {
   return items as [string, string];
 };
 
+/**
+ * Creates a wallet from a set of modules. The SDK adds its own base modules,
+ * keeps the modules whose feature flags are enabled, and checks that every
+ * contract a module depends on is implemented, and implemented once where it
+ * allows only one. It then loads the modules and returns a wallet whose
+ * actions and state are typed from them.
+ *
+ * @param props - The modules, environment, configuration and feature flags.
+ * @returns The wallet, typed from `props.modules`. Rejects with
+ * `MissingContractImplementationError` or `MultipleImplementationsError` when
+ * the modules do not fit together.
+ */
 export const createLaceWallet = async <T extends readonly LaceModule[]>(
   props: CreateLaceWalletProps<T>,
 ): Promise<
@@ -129,7 +174,12 @@ export const createLaceWallet = async <T extends readonly LaceModule[]>(
   const logger = dummyLogger;
 
   // 1. Prepend the SDK base module
-  const allModules = [sdkBaseModule as LaceModule, ...modules];
+  const allModules = [
+    sdkBaseModule as LaceModule,
+    sdkCardanoAppModule as LaceModule,
+    cardanoSync as LaceModule,
+    ...modules,
+  ];
 
   // 2. Filter by feature flags and validate compatibility
   const { modulesToLoad } = selectModules(
@@ -168,9 +218,8 @@ export const createLaceWallet = async <T extends readonly LaceModule[]>(
   });
   const reduxPersistStorage = createReduxPersistStorage(keyValueStorageFactory);
 
-  // 5. Load app context initializers (e.g., i18n)
-  const initializers = await loadModules('addons.loadInitializeAppContext');
-  await runInitializers(initializers);
+  // 5. Run app context initializers (e.g., i18n)
+  await initializeAppContext(loadModules);
 
   // 6. Create store
   const { store, stateObservables, actionObservables } = await createStore(

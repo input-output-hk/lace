@@ -5,7 +5,7 @@ import { BigNumber, Timestamp } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { from, merge, mergeMap, of, switchMap, withLatestFrom } from 'rxjs';
 
-import type { SideEffect } from '..';
+import type { SideEffect } from '../contracts';
 import type { ConfirmTx, FeeEntry, SubmitTx } from '@lace-contract/tx-executor';
 
 // =====================================================================
@@ -133,6 +133,7 @@ export const makeNightDesignationProcessing =
                     Cardano?: {
                       consumedInputs?: unknown[];
                       producedOutputs?: unknown[];
+                      withdrawals?: unknown[];
                     };
                   }
                 | undefined
@@ -141,6 +142,11 @@ export const makeNightDesignationProcessing =
               Cardano: {
                 consumedInputs: upstreamCardano?.consumedInputs ?? [],
                 producedOutputs: upstreamCardano?.producedOutputs ?? [],
+                // Kept so the balance does not count withdrawn rewards twice
+                // while the transaction is pending.
+                ...(upstreamCardano?.withdrawals && {
+                  withdrawals: upstreamCardano.withdrawals,
+                }),
                 nightDesignation: {
                   action: state.action,
                   ...(state.dustPubkeyHex === undefined

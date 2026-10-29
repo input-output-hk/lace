@@ -254,15 +254,15 @@ export const trackTip: (tipPollFrequency: Milliseconds) => SideEffect =
 /**
  * Factory function to create and configure a new BitcoinWallet instance.
  *
- * @param historyDepth The depth of transaction history to maintain.
- * @param requestResync$ Observable that triggers wallet resynchronization.
- * @param selectNetwork$ Observable providing the current Bitcoin network (undefined when not yet registered).
- * @param selectTip$ Observable providing the current blockchain tip.
- * @param bitcoinAccountWallets$ Observable holding the mapping of account IDs to BitcoinWallet instances.
- * @param provider The Bitcoin data provider.
- * @param feeMarketProvider The provider for fee market estimations.
- * @param account The in-memory wallet account data.
- * @param logger
+ * @param historyDepth - The depth of transaction history to maintain.
+ * @param requestResync$ - Observable that triggers wallet resynchronization.
+ * @param selectNetwork$ - Observable providing the current Bitcoin network (undefined when not yet registered).
+ * @param selectTip$ - Observable providing the current blockchain tip.
+ * @param bitcoinAccountWallets$ - Observable holding the mapping of account IDs to BitcoinWallet instances.
+ * @param provider - The Bitcoin data provider.
+ * @param feeMarketProvider - The provider for fee market estimations.
+ * @param account - The in-memory wallet account data.
+ * @param logger - The logger for wallet errors.
  * @returns An object containing observables for the wallet's tokens and addresses.
  */
 export const createBitcoinWallet = ({

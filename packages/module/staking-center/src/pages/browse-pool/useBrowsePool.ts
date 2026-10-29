@@ -131,6 +131,9 @@ export const useBrowsePool = ({
 } => {
   const { t } = useTranslation();
   const { layoutSize, theme } = useTheme();
+  // The SETTLED query only (seeded from the route param on re-entry): the
+  // field owns its text and reports it once typing stops, so the fuse search
+  // and the re-sort below never sit between a keystroke and the letter (ADR 64).
   const [searchValue, setSearchValue] = useState(searchQuery || '');
   const networkType = useLaceSelector('network.selectNetworkType');
 
@@ -224,16 +227,22 @@ export const useBrowsePool = ({
     };
   }, [searchValue, trackEvent]);
 
-  const handleFilterPress = useCallback(() => {
-    NavigationControls.navigate(SheetRoutes.BrowsePoolFilterControls, {
-      accountId,
-      searchQuery: searchValue,
-      browsePoolSortOption: selectedOption,
-      browsePoolSortOrder: selectedOrder,
-      // Dropped anywhere in the picker = selection mode silently lost.
-      ...poolSelection,
-    });
-  }, [accountId, searchValue, selectedOption, selectedOrder, poolSelection]);
+  // The query comes from the field, not from `searchValue`: the filter button
+  // lives inside the search bar, and the commit it triggers on press has not
+  // re-rendered this hook yet, so `searchValue` still holds the previous query.
+  const handleFilterPress = useCallback(
+    (searchText: string) => {
+      NavigationControls.navigate(SheetRoutes.BrowsePoolFilterControls, {
+        accountId,
+        searchQuery: searchText,
+        browsePoolSortOption: selectedOption,
+        browsePoolSortOrder: selectedOrder,
+        // Dropped anywhere in the picker = selection mode silently lost.
+        ...poolSelection,
+      });
+    },
+    [accountId, selectedOption, selectedOrder, poolSelection],
+  );
 
   const handlePoolPress = useCallback(
     (poolId: string) => {
@@ -284,7 +293,7 @@ export const useBrowsePool = ({
     theme,
     networkInfoValues,
     searchValue,
-    onSearchChange: setSearchValue,
+    onSearchCommit: setSearchValue,
     onFilterPress: handleFilterPress,
     onPoolPress: handlePoolPress,
     hasActiveFilters: isUserSorted,

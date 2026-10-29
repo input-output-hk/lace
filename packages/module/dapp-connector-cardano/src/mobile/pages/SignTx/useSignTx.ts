@@ -27,7 +27,7 @@ export interface UseSignTxResult extends UseSignTxDataResult {
   isLoading: boolean;
   isSigning: boolean;
   signTxResult: DappSignResult | null;
-  /** The collateral guard's verdict for this request, or `null` (LW-15498). */
+  /** The guard verdict that refused this request, or `null`. */
   refusal: SignTxRefusalDetails | null;
 }
 
@@ -45,7 +45,7 @@ export const useSignTx = ({
 
   // The verdict comes from the pending slot, the only channel that carries it.
   const refusal = useSignTxRefusal({
-    collateralRefusal: pendingRequest?.collateralRefusal,
+    refusal: pendingRequest?.refusal,
     dappOrigin: pendingRequest?.dapp?.origin,
   });
 

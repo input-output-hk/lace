@@ -14,7 +14,8 @@
     "@lace-contract/signer": "*",
     "@lace-contract/tokens": "*",
     "@lace-contract/wallet-repo": "*",
-    "@lace-lib/util": "*"
+    "@lace-lib/util": "*",
+    "@lace-lib/vendor": "*"
   },
   "devDependencies": {
     "@lace-lib/util-dev": "*"

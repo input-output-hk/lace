@@ -1,0 +1,6 @@
+kind: Added
+body: Passport agents can build each grant spend from their exported policy with `preparePassportGrantSpend`. It checks the spend against the grant and returns the withdrawal circuit, its arguments and the challenge to sign, for JubJub and secp256k1 grantees. `grantSpendAuthorisationArgs` turns the signature into the last arguments, and `loadPassportGrantSpendChallenges` exposes the challenge builders of every grant withdrawal.
+time: 2026-10-22T14:18:29.266474+08:00
+custom:
+  Package: sdk
+  Build: canary

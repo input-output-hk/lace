@@ -1,4 +1,3 @@
-import { FeatureFlagKey } from '@lace-contract/feature';
 import { BigNumber, HexBytes } from '@lace-lib/util';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -6,6 +5,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
+  FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+  FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER,
+  TEMENOS_PROOF_SERVER_MODES,
 } from '../../src/const';
 import { MidnightSDKNetworkIds } from '../../src/const';
 import {
@@ -69,10 +71,15 @@ describe('midnight slice', () => {
     describe('configuring Midnight network', () => {
       describe('setting user network overrides for specified network', () => {
         it('should set the user config overrides for the specified network', () => {
+          const customProofServer = {
+            kind: 'delegated' as const,
+            url: 'https://newProofServerAddress',
+            label: 'Custom',
+          };
           const newConfig = {
             nodeAddress: 'newNodeAddress',
             indexerAddress: 'newIndexerAddress',
-            proofServerAddress: 'newProofServerAddress',
+            proofServer: customProofServer,
           };
 
           const action = actions.midnightContext.setUserNetworkConfigOverride({
@@ -85,7 +92,7 @@ describe('midnight slice', () => {
           expect(state.userNetworksConfigOverrides[testNetworkId]).toEqual({
             nodeAddress: 'newNodeAddress',
             indexerAddress: 'newIndexerAddress',
-            proofServerAddress: 'newProofServerAddress',
+            proofServer: customProofServer,
           });
         });
 
@@ -93,7 +100,11 @@ describe('midnight slice', () => {
           const newConfig = {
             nodeAddress: 'newNodeAddress',
             indexerAddress: 'newIndexerAddress',
-            proofServerAddress: 'newProofServerAddress',
+            proofServer: {
+              kind: 'delegated' as const,
+              url: 'https://newProofServerAddress',
+              label: 'Custom',
+            },
           };
 
           const action = actions.midnightContext.setUserNetworkConfigOverride({
@@ -172,12 +183,17 @@ describe('midnight slice', () => {
         it('should consider feature flag overrides when computing base config', () => {
           const defaultConfig =
             initialState.defaultNetworksConfig[testNetworkId];
+          const remoteMode = {
+            kind: 'delegated' as const,
+            url: 'https://remote.proof-server.example.com',
+            label: 'Midnight',
+          };
           const featureFlagsOverrides = {
-            proofServerAddress: 'remoteProofServer',
+            proofServer: remoteMode,
           };
           const newConfig = {
             ...defaultConfig,
-            proofServerAddress: 'remoteProofServer',
+            proofServer: remoteMode,
           };
 
           const action = actions.midnightContext.setUserNetworkConfigOverride({
@@ -186,11 +202,121 @@ describe('midnight slice', () => {
             featureFlagsOverrides,
           });
           const state = reducers.midnightContext(initialState, action);
-          // proofServerAddress matches base (default + FF override), so no user override stored
+          // proofServer matches base (default + FF override), so no user override stored
           expect(
             state.userNetworksConfigOverrides[testNetworkId],
           ).toStrictEqual({});
         });
+      });
+    });
+
+    describe('setDefaultProofServers', () => {
+      const remoteMode = {
+        kind: 'delegated' as const,
+        url: 'https://prover.example',
+        label: 'prover.example',
+      };
+
+      it('replaces only the default proof server of the listed networks', () => {
+        const state = reducers.midnightContext(
+          initialState,
+          actions.midnightContext.setDefaultProofServers({
+            [testNetworkId]: remoteMode,
+          }),
+        );
+
+        expect(state.defaultNetworksConfig).toEqual({
+          ...initialState.defaultNetworksConfig,
+          [testNetworkId]: {
+            ...initialState.defaultNetworksConfig[testNetworkId],
+            proofServer: remoteMode,
+          },
+        });
+        expect(state.userNetworksConfigOverrides).toBe(
+          initialState.userNetworksConfigOverrides,
+        );
+      });
+
+      it('makes the new default the base proof server, with a user override of an available mode still taking precedence', () => {
+        const teeMode = TEMENOS_PROOF_SERVER_MODES[testNetworkId];
+        if (!teeMode) throw new Error('No Temenos mode on Preview');
+        const withDefault = reducers.midnightContext(
+          initialState,
+          actions.midnightContext.setDefaultProofServers({
+            [testNetworkId]: remoteMode,
+          }),
+        );
+        const features = {
+          loaded: {
+            modules: [],
+            featureFlags: [
+              { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+            ],
+          },
+        };
+        const defaultOnly: WithNetworkTestState = {
+          midnightContext: withDefault,
+          network: networkState,
+          features,
+        };
+        expect(
+          selectors.midnightContext.selectNetworksConfig(defaultOnly)[
+            testNetworkId
+          ].proofServer,
+        ).toEqual(remoteMode);
+        expect(
+          selectors.midnightContext.selectAllProofServerModes(defaultOnly)[
+            testNetworkId
+          ],
+        ).toEqual([remoteMode, teeMode]);
+
+        const userSelected: WithNetworkTestState = {
+          ...defaultOnly,
+          midnightContext: reducers.midnightContext(
+            withDefault,
+            actions.midnightContext.setUserNetworkConfigOverride({
+              networkId: testNetworkId,
+              config: {
+                ...withDefault.defaultNetworksConfig[testNetworkId],
+                proofServer: teeMode,
+              },
+              featureFlagsOverrides: {},
+            }),
+          ),
+        };
+        expect(
+          selectors.midnightContext.selectNetworksConfig(userSelected)[
+            testNetworkId
+          ].proofServer,
+        ).toEqual(teeMode);
+      });
+
+      it('does not honour a user override of the replaced default, which is no longer an available mode', () => {
+        const withDefault = reducers.midnightContext(
+          initialState,
+          actions.midnightContext.setDefaultProofServers({
+            [testNetworkId]: remoteMode,
+          }),
+        );
+        const state: WithNetworkTestState = {
+          midnightContext: {
+            ...withDefault,
+            userNetworksConfigOverrides: {
+              ...withDefault.userNetworksConfigOverrides,
+              [testNetworkId]: {
+                proofServer:
+                  initialState.defaultNetworksConfig[testNetworkId].proofServer,
+              },
+            },
+          },
+          network: networkState,
+          features: emptyFeaturesState,
+        };
+
+        expect(
+          selectors.midnightContext.selectNetworksConfig(state)[testNetworkId]
+            .proofServer,
+        ).toEqual(remoteMode);
       });
     });
 
@@ -507,6 +633,48 @@ describe('midnight slice', () => {
     });
   });
 
+  describe('proof-server disclosure acknowledgement', () => {
+    it('treats older persisted state as unacknowledged and records custom and delegated endpoint/version keys', () => {
+      const oldState = {
+        ...initialState,
+        proofServerDisclosureAcknowledgements: undefined,
+      };
+      expect(
+        selectors.midnightContext.selectProofServerDisclosureAcknowledgements({
+          midnightContext: oldState,
+        }),
+      ).toBeUndefined();
+      const local = reducers.midnightContext(
+        oldState,
+        actions.midnightContext.acknowledgeProofServerDisclosure({
+          kind: 'local-host',
+          url: 'http://localhost:6300',
+        }),
+      );
+      expect(local.proofServerDisclosureAcknowledgements).toEqual({
+        'v1:local-host:http://localhost:6300': true,
+      });
+      const wasm = reducers.midnightContext(
+        oldState,
+        actions.midnightContext.acknowledgeProofServerDisclosure({
+          kind: 'in-process',
+        }),
+      );
+      expect(wasm.proofServerDisclosureAcknowledgements).toBeUndefined();
+      const remote = TEMENOS_PROOF_SERVER_MODES['preprod']!;
+      const acknowledged = reducers.midnightContext(
+        oldState,
+        actions.midnightContext.acknowledgeProofServerDisclosure(remote),
+      );
+      expect(acknowledged.proofServerDisclosureAcknowledgements).toEqual({
+        [`v1:${remote.kind}:${remote.url}`]: true,
+      });
+      expect(acknowledged.userNetworksConfigOverrides).toEqual(
+        oldState.userNetworksConfigOverrides,
+      );
+    });
+  });
+
   describe('selectors', () => {
     it('should select the default networks config', () => {
       const state: TestState = {
@@ -589,11 +757,93 @@ describe('midnight slice', () => {
         }
       });
 
-      it('does not derive a proof server override, even from a flag carrying one', () => {
-        // The Shielded remote proof servers were retired (LW-15058), so
-        // proofServerAddress is no longer a flag-overridable field. A flag still
-        // carrying an address must not resurrect the option: local is the only
-        // one offered until a replacement provider is wired in deliberately.
+      it.each([
+        undefined,
+        { preview: [{ url: 'https://untrusted.example', label: 'Injected' }] },
+        'https://untrusted.example',
+      ])(
+        'cannot restore the retired remote provider through payload %j',
+        payload => {
+          const state: WithNetworkTestState = {
+            midnightContext: initialState,
+            network: networkState,
+            features: {
+              loaded: {
+                modules: [],
+                featureFlags: [
+                  { key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER, payload },
+                ],
+              },
+            },
+          };
+          expect(
+            selectors.midnightContext.selectNetworksConfigFeatureFlagsOverrides(
+              state,
+            )[testNetworkId],
+          ).toEqual({});
+          expect(
+            selectors.midnightContext.selectRemoteProofServerOptions(state)[
+              testNetworkId
+            ],
+          ).toBeUndefined();
+          expect(
+            selectors.midnightContext.selectAllProofServerModes(state)[
+              testNetworkId
+            ],
+          ).toEqual([{ kind: 'local-host', url: 'http://localhost:6300' }]);
+        },
+      );
+
+      it('offers WASM only with runtime support and restores the single saved selection', () => {
+        const state: WithNetworkTestState = {
+          midnightContext: {
+            ...initialState,
+            supportsWasmProver: true,
+            userNetworksConfigOverrides: {
+              ...initialState.userNetworksConfigOverrides,
+              [testNetworkId]: { proofServer: { kind: 'in-process' } },
+            },
+          },
+          network: networkState,
+          features: emptyFeaturesState,
+        };
+        const modes =
+          selectors.midnightContext.selectAllProofServerModes(state);
+        expect(modes[testNetworkId]).toEqual([
+          { kind: 'in-process' },
+          { kind: 'local-host', url: 'http://localhost:6300' },
+        ]);
+        expect(selectors.midnightContext.selectAllProofServerModes(state)).toBe(
+          modes,
+        );
+        expect(
+          selectors.midnightContext.selectNetworksConfig(state)[testNetworkId]
+            .proofServer,
+        ).toEqual({ kind: 'in-process' });
+        expect(
+          selectors.midnightContext.selectUnavailableProofServerNetworks(state),
+        ).toEqual([]);
+
+        const unsupportedState = {
+          ...state,
+          midnightContext: {
+            ...state.midnightContext,
+            supportsWasmProver: false,
+          },
+        };
+        expect(
+          selectors.midnightContext.selectNetworksConfig(unsupportedState)[
+            testNetworkId
+          ].proofServer,
+        ).toEqual({ kind: 'local-host', url: 'http://localhost:6300' });
+        expect(
+          selectors.midnightContext.selectUnavailableProofServerNetworks(
+            unsupportedState,
+          ),
+        ).toEqual([testNetworkId]);
+      });
+
+      it('selectAllProofServerModes appends the baked Temenos mode on networks with an entry when its flag is enabled', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -601,24 +851,211 @@ describe('midnight slice', () => {
             loaded: {
               modules: [],
               featureFlags: [
-                {
-                  key: FeatureFlagKey(
-                    'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
-                  ),
-                  payload: {
-                    [testNetworkId]: 'https://remote-proof-server.example.com',
-                  },
-                },
+                { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
               ],
             },
           },
         };
-        const overrides =
-          selectors.midnightContext.selectNetworksConfigFeatureFlagsOverrides(
-            state,
-          );
+        const modes =
+          selectors.midnightContext.selectAllProofServerModes(state);
 
-        expect(overrides[testNetworkId]?.proofServerAddress).toBeUndefined();
+        for (const networkId of [
+          MidnightSDKNetworkIds.MainNet,
+          MidnightSDKNetworkIds.PreProd,
+          MidnightSDKNetworkIds.Preview,
+        ] as const) {
+          expect(modes[networkId]).toEqual([
+            { kind: 'local-host', url: 'http://localhost:6300' },
+            TEMENOS_PROOF_SERVER_MODES[networkId],
+          ]);
+        }
+        const persistedMainnet: WithNetworkTestState = {
+          ...state,
+          midnightContext: {
+            ...initialState,
+            userNetworksConfigOverrides: {
+              ...initialState.userNetworksConfigOverrides,
+              mainnet: { proofServer: TEMENOS_PROOF_SERVER_MODES.preprod },
+            },
+          },
+        };
+        expect(
+          selectors.midnightContext.selectNetworksConfig(persistedMainnet)
+            .mainnet.proofServer.kind,
+        ).toBe('local-host');
+        expect(
+          selectors.midnightContext.selectUnavailableProofServerNetworks(
+            persistedMainnet,
+          ),
+        ).toContain('mainnet');
+        // No baked entry for this network — flag alone must not surface one.
+        expect(modes[MidnightSDKNetworkIds.QaNet]).toEqual([
+          { kind: 'local-host', url: 'http://localhost:6300' },
+        ]);
+      });
+
+      it('selectAllProofServerModes omits the Temenos mode when its flag is absent', () => {
+        const state: WithNetworkTestState = {
+          midnightContext: initialState,
+          network: networkState,
+          features: { loaded: { modules: [], featureFlags: [] } },
+        };
+        const modes =
+          selectors.midnightContext.selectAllProofServerModes(state);
+
+        expect(modes[MidnightSDKNetworkIds.PreProd]).toEqual([
+          { kind: 'local-host', url: 'http://localhost:6300' },
+        ]);
+      });
+
+      it.each([MidnightSDKNetworkIds.PreProd, MidnightSDKNetworkIds.Preview])(
+        'migrates a persisted Foundation choice on %s even with both flags enabled',
+        networkId => {
+          const state: WithNetworkTestState = {
+            midnightContext: {
+              ...initialState,
+              userNetworksConfigOverrides: {
+                ...initialState.userNetworksConfigOverrides,
+                [networkId]: {
+                  proofServer: {
+                    kind: 'delegated',
+                    url: `https://proof-server.${networkId}.midnight.network`,
+                    label: 'Midnight Foundation',
+                  },
+                  nodeAddress: 'https://custom-node.example',
+                },
+              },
+            },
+            network: networkState,
+            features: {
+              loaded: {
+                modules: [],
+                featureFlags: [
+                  { key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER },
+                  { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+                ],
+              },
+            },
+          };
+          expect(
+            selectors.midnightContext.selectAllProofServerModes(state)[
+              networkId
+            ],
+          ).toEqual([
+            { kind: 'local-host', url: 'http://localhost:6300' },
+            TEMENOS_PROOF_SERVER_MODES[networkId],
+          ]);
+          expect(
+            selectors.midnightContext.selectNetworksConfig(state)[networkId],
+          ).toMatchObject({
+            proofServer: { kind: 'local-host', url: 'http://localhost:6300' },
+            nodeAddress: 'https://custom-node.example',
+          });
+          expect(
+            selectors.midnightContext.selectUnavailableProofServerNetworks(
+              state,
+            ),
+          ).toEqual([networkId]);
+        },
+      );
+
+      describe('Temenos kill switch', () => {
+        const preprod = MidnightSDKNetworkIds.PreProd;
+        // Built per test: `initialState` is assigned in a beforeEach above.
+        const withTeeSelected = (): MidnightContextSliceState => ({
+          ...initialState,
+          userNetworksConfigOverrides: {
+            ...initialState.userNetworksConfigOverrides,
+            [preprod]: { proofServer: TEMENOS_PROOF_SERVER_MODES[preprod] },
+          },
+        });
+        const teeFlagOn = {
+          loaded: {
+            modules: [],
+            featureFlags: [
+              { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+            ],
+          },
+        };
+        const teeFlagOff = { loaded: { modules: [], featureFlags: [] } };
+
+        it('selectIsTemenosProofServerEnabled reflects the flag', () => {
+          const on: WithNetworkTestState = {
+            midnightContext: initialState,
+            network: networkState,
+            features: teeFlagOn,
+          };
+          const off: WithNetworkTestState = { ...on, features: teeFlagOff };
+          expect(
+            selectors.midnightContext.selectIsTemenosProofServerEnabled(on),
+          ).toBe(true);
+          expect(
+            selectors.midnightContext.selectIsTemenosProofServerEnabled(off),
+          ).toBe(false);
+        });
+
+        it('honours a persisted tee-delegated selection while the flag is on', () => {
+          const state: WithNetworkTestState = {
+            midnightContext: withTeeSelected(),
+            network: networkState,
+            features: teeFlagOn,
+          };
+          const config = selectors.midnightContext.selectNetworksConfig(state);
+          expect(config[preprod].proofServer).toEqual(
+            TEMENOS_PROOF_SERVER_MODES[preprod],
+          );
+        });
+
+        it('falls back to the base proof server when the flag is off, leaving other overrides intact', () => {
+          const selected = withTeeSelected();
+          const state: WithNetworkTestState = {
+            midnightContext: {
+              ...selected,
+              userNetworksConfigOverrides: {
+                ...selected.userNetworksConfigOverrides,
+                [preprod]: {
+                  proofServer: TEMENOS_PROOF_SERVER_MODES[preprod],
+                  nodeAddress: 'https://node.example',
+                },
+              },
+            },
+            network: networkState,
+            features: teeFlagOff,
+          };
+          const config = selectors.midnightContext.selectNetworksConfig(state);
+          expect(config[preprod].proofServer).toEqual(
+            initialState.defaultNetworksConfig[preprod].proofServer,
+          );
+          expect(config[preprod].nodeAddress).toBe('https://node.example');
+        });
+
+        it('rejects an unknown persisted remote URL when the flag is off', () => {
+          const delegated = {
+            kind: 'delegated' as const,
+            url: 'https://proof.example',
+            label: 'Provider',
+          };
+          const state: WithNetworkTestState = {
+            midnightContext: {
+              ...initialState,
+              userNetworksConfigOverrides: {
+                ...initialState.userNetworksConfigOverrides,
+                [preprod]: { proofServer: delegated },
+              },
+            },
+            network: networkState,
+            features: teeFlagOff,
+          };
+          const config = selectors.midnightContext.selectNetworksConfig(state);
+          expect(config[preprod].proofServer).toEqual(
+            initialState.defaultNetworksConfig[preprod].proofServer,
+          );
+          expect(
+            selectors.midnightContext.selectUnavailableProofServerNetworks(
+              state,
+            ),
+          ).toEqual([preprod]);
+        });
       });
 
       it('should derive indexer override from feature flags', () => {
@@ -677,7 +1114,7 @@ describe('midnight slice', () => {
         });
       });
 
-      it('should derive both remaining overrides from feature flags', () => {
+      it('should derive all three overrides from feature flags', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -697,6 +1134,17 @@ describe('midnight slice', () => {
                     [testNetworkId]: 'https://indexer.example.com',
                   },
                 },
+                {
+                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+                  payload: {
+                    [testNetworkId]: [
+                      {
+                        url: 'https://remote-proof-server.example.com',
+                        label: 'Midnight',
+                      },
+                    ],
+                  },
+                },
               ],
             },
           },
@@ -712,7 +1160,7 @@ describe('midnight slice', () => {
         });
       });
 
-      it('derives only the indexer override when a retired proof-server flag is also present', () => {
+      it('derives indexer overrides without reviving retired proof servers', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -721,11 +1169,14 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FeatureFlagKey(
-                    'BLOCKCHAIN_MIDNIGHT_REMOTE_PROOF_SERVER',
-                  ),
+                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
                   payload: {
-                    [testNetworkId]: 'https://remote-proof-server.example.com',
+                    [testNetworkId]: [
+                      {
+                        url: 'https://remote-proof-server.example.com',
+                        label: 'Midnight',
+                      },
+                    ],
                   },
                 },
                 {
@@ -765,7 +1216,7 @@ describe('midnight slice', () => {
         );
       });
 
-      it('should allow feature flags to override parts of the default network config', () => {
+      it('keeps the local default when the legacy remote flag is present', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -774,9 +1225,14 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
+                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
                   payload: {
-                    [testNetworkId]: 'newIndexerAddress',
+                    [testNetworkId]: [
+                      {
+                        url: 'https://newProofServerAddress',
+                        label: 'Midnight',
+                      },
+                    ],
                   },
                 },
               ],
@@ -788,18 +1244,21 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
-          indexerAddress: 'newIndexerAddress',
         });
       });
 
       it('should allow user overrides to trump default and feature flags', () => {
+        const userProofServer = {
+          kind: 'local-host' as const,
+          url: 'http://localhost:6300',
+        };
         const state: WithNetworkTestState = {
           midnightContext: {
             ...initialState,
             userNetworksConfigOverrides: {
               ...initialState.userNetworksConfigOverrides,
               [testNetworkId]: {
-                indexerAddress: 'userIndexerAddress',
+                proofServer: userProofServer,
               },
             },
           },
@@ -809,9 +1268,14 @@ describe('midnight slice', () => {
               modules: [],
               featureFlags: [
                 {
-                  key: FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
+                  key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
                   payload: {
-                    [testNetworkId]: 'flagIndexerAddress',
+                    [testNetworkId]: [
+                      {
+                        url: 'https://newProofServerAddress',
+                        label: 'Midnight',
+                      },
+                    ],
                   },
                 },
               ],
@@ -823,7 +1287,7 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
-          indexerAddress: 'userIndexerAddress',
+          proofServer: userProofServer,
         });
       });
     });

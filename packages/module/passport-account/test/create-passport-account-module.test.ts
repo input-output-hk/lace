@@ -11,6 +11,7 @@ import type {
 import type {
   FeeSponsor,
   PassportAuthoriser,
+  PassportEncryptionKey,
   PassportNetworkConfig,
   PassportProver,
 } from '@lace-contract/passport';
@@ -20,6 +21,13 @@ const authoriser: PassportAuthoriser = {
   deviceCommitment: vi.fn(),
   devicePublicKey: vi.fn(),
   authorise: vi.fn(),
+};
+const encryptionKey: PassportEncryptionKey = {
+  readerPublicKey: vi.fn(),
+  createKeys: vi.fn(),
+  sealToDevice: vi.fn(),
+  openInbox: vi.fn(),
+  sealGrant: vi.fn(),
 };
 const sponsor: FeeSponsor = { balanceAndSign: vi.fn() };
 const prover: PassportProver = { prove: vi.fn(), check: vi.fn() };
@@ -38,6 +46,7 @@ describe('createPassportAccountModule', () => {
   it('returns a module named passport-account implementing both passport contracts', () => {
     const module = createPassportAccountModule({
       authoriser,
+      encryptionKey,
       sponsor,
       prover,
       network,
@@ -50,9 +59,24 @@ describe('createPassportAccountModule', () => {
     ]);
   });
 
+  it('refuses a network config the Midnight clients could not use before building the module', () => {
+    expect(() =>
+      createPassportAccountModule({
+        authoriser,
+        encryptionKey,
+        sponsor,
+        prover,
+        network: { ...network, indexerWsUrl: 'https://indexer.example' },
+      }),
+    ).toThrow(
+      'The Passport network indexerWsUrl "https://indexer.example" must use ws: or wss:, not https:.',
+    );
+  });
+
   it('exposes the passport actions and selectors as the store context', () => {
     const module = createPassportAccountModule({
       authoriser,
+      encryptionKey,
       sponsor,
       prover,
       network,
@@ -62,9 +86,10 @@ describe('createPassportAccountModule', () => {
     expect(module.store?.context.selectors?.passport).toBeDefined();
   });
 
-  it('resolves store init to the registered side effects, the four injected dependencies and the flows', async () => {
+  it('resolves store init to the registered side effects, the five injected dependencies and the flows', async () => {
     const module = createPassportAccountModule({
       authoriser,
+      encryptionKey,
       sponsor,
       prover,
       network,
@@ -79,6 +104,7 @@ describe('createPassportAccountModule', () => {
     ]);
     expect(result.sideEffectDependencies).toEqual({
       passportAuthoriser: authoriser,
+      passportEncryptionKey: encryptionKey,
       passportSponsor: sponsor,
       passportProver: prover,
       passportNetwork: network,
@@ -87,6 +113,11 @@ describe('createPassportAccountModule', () => {
         signIn: expect.any(Function) as unknown,
         addDevice: expect.any(Function) as unknown,
         removeDevice: expect.any(Function) as unknown,
+        issueGrant: expect.any(Function) as unknown,
+        revokeGrant: expect.any(Function) as unknown,
+        revokeAllGrants: expect.any(Function) as unknown,
+        readShieldedHoldings: expect.any(Function) as unknown,
+        installOperations: expect.any(Function) as unknown,
       },
     });
   });

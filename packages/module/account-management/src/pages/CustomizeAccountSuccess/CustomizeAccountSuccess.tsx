@@ -34,7 +34,7 @@ export const CustomizeAccountSuccess = ({
   return (
     <StatusSheet
       body={body}
-      icon={{ name: 'RelievedFace', variant: 'solid' }}
+      icon={{ name: 'RelievedFace', strokeWidth: 2 }}
       testID="customize-account-success-sheet"
     />
   );

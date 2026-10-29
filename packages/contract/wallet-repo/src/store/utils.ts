@@ -4,6 +4,10 @@ import type { ActiveAccountContext, repositorySlice } from './repo-slice';
 import type { BlockchainNetworkConfig } from '@lace-contract/network';
 import type { BlockchainName } from '@lace-lib/util-store';
 
+/**
+ * The network selected for each blockchain, per network type (`mainnet` and
+ * `testnet`). A blockchain with no entry has no explicit selection.
+ */
 export type BlockchainNetworks = Partial<
   Record<BlockchainName, BlockchainNetworkConfig>
 >;

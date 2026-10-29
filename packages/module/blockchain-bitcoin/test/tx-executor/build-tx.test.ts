@@ -15,10 +15,8 @@ import { firstValueFrom, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { decodeUnsignedTxFromString } from '../../src/common';
-import {
-  applyInFlightUtxoAdjustments,
-  makeBuildTx,
-} from '../../src/tx-executor-implementation/build-tx';
+import { applyInFlightUtxoAdjustments } from '../../src/tx-builder';
+import { makeBuildTx } from '../../src/tx-executor-implementation/build-tx';
 
 import type {
   Activity,

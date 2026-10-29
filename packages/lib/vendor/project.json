@@ -11,6 +11,14 @@
       }
     },
     "lint": {},
-    "type-check-src": {}
+    "type-check-src": {},
+    "type-check-test": {},
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    }
   }
 }

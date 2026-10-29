@@ -2,6 +2,7 @@ import { MidnightInMemoryDataSigner } from './midnight-in-memory-data-signer';
 import { MidnightInMemoryTransactionSigner } from './midnight-in-memory-transaction-signer';
 
 import type {
+  MidnightWalletsByAccountId,
   MidnightDataSigner,
   MidnightSignerContext,
   MidnightSignerFactory,
@@ -9,8 +10,13 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { SignerContext } from '@lace-contract/signer';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
+import type { Observable } from 'rxjs';
 
 export class MidnightInMemorySignerFactory implements MidnightSignerFactory {
+  public constructor(
+    private readonly wallets$: Observable<MidnightWalletsByAccountId>,
+  ) {}
+
   public canSign(account: AnyAccount): boolean {
     return (
       account.accountType === 'InMemory' &&
@@ -35,6 +41,7 @@ export class MidnightInMemorySignerFactory implements MidnightSignerFactory {
     return new MidnightInMemoryTransactionSigner({
       accountId: context.accountId,
       auth: context.auth,
+      wallets$: this.wallets$,
     });
   }
 
@@ -50,6 +57,6 @@ export class MidnightInMemorySignerFactory implements MidnightSignerFactory {
       );
     }
 
-    return new MidnightInMemoryDataSigner(context.accountId);
+    return new MidnightInMemoryDataSigner(context.accountId, this.wallets$);
   }
 }

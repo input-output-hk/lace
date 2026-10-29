@@ -92,7 +92,7 @@ const renderEmptyState = (
     <Icon
       name={searchQuery.length > 0 ? 'Search' : 'User'}
       size={100}
-      variant="solid"
+      strokeWidth={2}
     />
     <Text.M>{emptyState.title}</Text.M>
     <Text.XS variant="secondary">{emptyState.subtitle}</Text.XS>

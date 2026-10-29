@@ -46,7 +46,13 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@lace-contract/i18n', async importOriginal => ({
   ...(await importOriginal<object>()),
-  useTranslation: () => ({ t: (key: string) => key }),
+  // Key-echo, plus the interpolation values when there are any: a network
+  // sentence that reached the screen without its wallet network is then a
+  // different string from one that did.
+  useTranslation: () => ({
+    t: (key: string, values?: Record<string, string>) =>
+      values ? `${key}:${Object.values(values).join(',')}` : key,
+  }),
 }));
 
 vi.mock('@react-navigation/native', () => ({
@@ -141,12 +147,22 @@ vi.mock('@lace-lib/ui-toolkit', () => ({
     ),
   },
   spacing: { L: 16, M: 12, S: 8 },
-  useTheme: () => ({ theme: { brand: { white: '#ffffff' } } }),
+  useCopyToClipboard: () => ({ copyToClipboard: vi.fn() }),
+  useTheme: () => ({
+    theme: {
+      brand: { white: '#ffffff' },
+      background: { secondary: '#eee' },
+      border: { middle: '#aaa' },
+    },
+  }),
 }));
 
 vi.mock('react-native', () => ({
   StyleSheet: { create: (styles: unknown) => styles },
   View: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  TouchableOpacity: ({ children }: React.PropsWithChildren) => (
+    <button>{children}</button>
+  ),
 }));
 
 const ATTACKER_ADDRESS =
@@ -155,8 +171,20 @@ const ATTACKER_TX_HEX = `84a4008182582${ATTACKER_ADDRESS}`;
 
 const DAPP_ORIGIN = 'https://evil-dex.example';
 
+const COLLATERAL_REFUSAL: PendingSignTxRequest['refusal'] = {
+  kind: 'collateral',
+  case: 'foreign-collateral-return',
+};
+
+const NETWORK_REFUSAL: PendingSignTxRequest['refusal'] = {
+  kind: 'network',
+  cause: 'states-other-network',
+  statedNetwork: 'mainnet',
+  walletNetwork: 'preprod',
+};
+
 const pendingRequest = (
-  collateralRefusal: PendingSignTxRequest['collateralRefusal'],
+  refusal: PendingSignTxRequest['refusal'],
   origin: string = DAPP_ORIGIN,
 ): PendingSignTxRequest => ({
   requestId: 'req-1',
@@ -164,7 +192,7 @@ const pendingRequest = (
   dapp: { name: 'Evil DEX', origin },
   txHex: ATTACKER_TX_HEX,
   partialSign: true,
-  collateralRefusal,
+  refusal,
 });
 
 const footerProps = () => mocks.navOptions.current?.footer?.props;
@@ -179,8 +207,34 @@ beforeEach(() => {
 });
 
 describe('the refused state renders (sheet mode)', () => {
+  it('a cross-network body renders the network sentence, naming the wallet network, and still offers no signing action', () => {
+    mocks.request = pendingRequest(NETWORK_REFUSAL);
+
+    render(<CardanoDappSignTx />);
+
+    expect(headerTitle()).toBe(SIGN_TX_REFUSED_KEYS.title);
+    // The stated side picks the KEY; the wallet side is interpolated. Both
+    // halves are asserted, because a sentence naming only one of them cannot
+    // tell the user which way the mismatch runs.
+    expect(
+      screen.getByText(
+        `${SIGN_TX_REFUSED_KEYS.description['network-mainnet']}:preprod`,
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.queryByText(
+        SIGN_TX_REFUSED_KEYS.description['foreign-collateral-return'],
+      ),
+    ).toBeNull();
+
+    expect(screen.getByText(DAPP_ORIGIN)).toBeTruthy();
+    expect(footerProps()?.primaryButton).toBeUndefined();
+    expect(footerProps()?.secondaryButton).toBeDefined();
+    expect(mocks.signTxDataArgs.current?.txHex).toBe('');
+  });
+
   it('case (b) foreign collateral return: renders title + body + reassurance from the i18n keys, with no signing action and exactly one dismiss action', () => {
-    mocks.request = pendingRequest('foreign-collateral-return');
+    mocks.request = pendingRequest(COLLATERAL_REFUSAL);
 
     render(<CardanoDappSignTx />);
 
@@ -249,7 +303,7 @@ describe('refused is distinct from error (sheet mode)', () => {
   });
 
   it('a block verdict renders the refusal copy and NOT the generic error copy, even when a transaction error is also present', () => {
-    mocks.request = pendingRequest('foreign-collateral-return');
+    mocks.request = pendingRequest(COLLATERAL_REFUSAL);
     mocks.transactionError = new Error('decode failed');
 
     render(<CardanoDappSignTx />);
@@ -268,7 +322,7 @@ describe('refused is distinct from error (sheet mode)', () => {
 
 describe('no attacker-supplied values are rendered (sheet mode)', () => {
   it('renders no transaction-derived value, and does not even feed the tx to the data hook', () => {
-    mocks.request = pendingRequest('foreign-collateral-return');
+    mocks.request = pendingRequest(COLLATERAL_REFUSAL);
 
     const { container } = render(<CardanoDappSignTx />);
 
@@ -280,7 +334,7 @@ describe('no attacker-supplied values are rendered (sheet mode)', () => {
 
 describe('the refused state names the requesting origin (sheet mode)', () => {
   it('renders the requesting origin, equal to the origin on the pending request', () => {
-    mocks.request = pendingRequest('foreign-collateral-return');
+    mocks.request = pendingRequest(COLLATERAL_REFUSAL);
 
     render(<CardanoDappSignTx />);
 
@@ -295,7 +349,7 @@ describe('the refused state names the requesting origin (sheet mode)', () => {
     // string child as markup, and nothing here renders it as HTML or as a
     // URL, so a spoofing attempt can only ever appear as characters.
     const HOSTILE = '<img src=x onerror=alert(1)>lace.io';
-    mocks.request = pendingRequest('foreign-collateral-return', HOSTILE);
+    mocks.request = pendingRequest(COLLATERAL_REFUSAL, HOSTILE);
 
     const { container } = render(<CardanoDappSignTx />);
 

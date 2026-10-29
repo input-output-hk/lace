@@ -1,0 +1,31 @@
+{
+  "name": "@lace-lib/cardano-tx-construction",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Types and functions for constructing transactions on Cardano",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./published": "./src/published.ts"
+  },
+  "main": "src/index.ts",
+  "dependencies": {
+    "@lace-lib/cardano-core": "*",
+    "@lace-lib/cardano-crypto": "*",
+    "@lace-lib/cardano-input-selection": "*",
+    "@lace-lib/cardano-key-management": "*",
+    "@lace-lib/cardano-util-rxjs": "*",
+    "@lace-lib/util": "*",
+    "lodash": "^4.17.21",
+    "rxjs": "^7.8.1",
+    "ts-custom-error": "^3.3.1",
+    "ts-log": "^2.2.7"
+  },
+  "devDependencies": {
+    "@lace-lib/cardano-util-dev": "*",
+    "@types/lodash": "^4.17.24",
+    "delay": "5.0.0",
+    "vitest": "*"
+  }
+}

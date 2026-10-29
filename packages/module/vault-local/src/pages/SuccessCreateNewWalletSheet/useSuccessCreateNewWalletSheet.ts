@@ -20,7 +20,7 @@ export const useSuccessCreateNewWalletSheet = ({
   }, [walletId]);
 
   return {
-    image: { name: 'RelievedFace' as IconName, variant: 'solid' as const },
+    image: { name: 'RelievedFace' as IconName, strokeWidth: 2 },
     title: t('v2.account-management.create-wallet.success.title'),
     body: t('v2.account-management.create-wallet.success.description'),
     buttonText: t('v2.account-management.create-wallet.success.cta'),

@@ -4,6 +4,8 @@ import { inKeySession } from '../../src/flows/key-session';
 
 import type { PassportAuthoriser } from '@lace-contract/passport';
 
+const flow = { kind: 'sign-in' as const };
+
 const authoriserWith = (
   withKeySession?: PassportAuthoriser['withKeySession'],
 ): PassportAuthoriser => ({
@@ -15,7 +17,7 @@ const authoriserWith = (
 });
 
 describe('inKeySession', () => {
-  it('delegates the operation to withKeySession when the authoriser exposes one', async () => {
+  it('delegates the operation and the flow to withKeySession when the authoriser exposes one', async () => {
     const withKeySession = vi.fn(async (operation: () => Promise<unknown>) =>
       operation(),
     );
@@ -24,16 +26,19 @@ describe('inKeySession', () => {
     await expect(
       inKeySession(
         authoriserWith(withKeySession as PassportAuthoriser['withKeySession']),
+        flow,
         operation,
       ),
     ).resolves.toBe(7);
-    expect(withKeySession).toHaveBeenCalledExactlyOnceWith(operation);
+    expect(withKeySession).toHaveBeenCalledExactlyOnceWith(operation, flow);
   });
 
   it('runs the operation directly when the authoriser exposes no session', async () => {
     const operation = vi.fn(async () => 7);
 
-    await expect(inKeySession(authoriserWith(), operation)).resolves.toBe(7);
+    await expect(inKeySession(authoriserWith(), flow, operation)).resolves.toBe(
+      7,
+    );
     expect(operation).toHaveBeenCalledOnce();
   });
 
@@ -45,6 +50,7 @@ describe('inKeySession', () => {
     await expect(
       inKeySession(
         authoriserWith(withKeySession as PassportAuthoriser['withKeySession']),
+        flow,
         async () => 7,
       ),
     ).rejects.toThrow('session lost');

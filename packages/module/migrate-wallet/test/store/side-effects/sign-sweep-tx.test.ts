@@ -18,11 +18,14 @@ const mockTx = {
 } as unknown as Serialization.Transaction;
 
 const transactionCtor = vi.hoisted(() =>
-  vi.fn((body: unknown, witnessSet: unknown) => ({
-    toCbor: () => 'signed',
-    body,
-    witnessSet,
-  })),
+  // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+  vi.fn(function (body: unknown, witnessSet: unknown) {
+    return {
+      toCbor: () => 'signed',
+      body,
+      witnessSet,
+    };
+  }),
 );
 
 const fromCbor = vi.hoisted(() => vi.fn());

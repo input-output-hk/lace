@@ -36,7 +36,7 @@
     "@react-navigation/native": "*",
     "@react-navigation/stack": "*",
     "@testing-library/react-native": "*",
-    "@vitest/ui": "^3.1.2",
-    "vitest": "^3.2.6"
+    "@vitest/ui": "^4.1.12",
+    "vitest": "^4.1.12"
   }
 }

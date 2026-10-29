@@ -21,8 +21,8 @@ import type { RequiredProtocolParameters } from '@lace-contract/cardano-context'
 // local, provider-dependency-free `TransactionBuilder` and produce an
 // unsigned tx.
 // =====================================================================
-// Pure over its injected `NightDesignationTxBuilderDependencies` (cover
-// UTxOs, cost models, input resolver, bounded ex-units evaluator) — no
+// Pure over its injected `NightDesignationTxBuilderDependencies` (cover +
+// collateral UTxOs, input resolver, bounded ex-units evaluator) — no
 // network, no Redux — so it unit-tests with fakes. The build side-effect
 // assembles the dependencies from account state + the Cardano provider
 // and feeds the already-resolved registration UTxO in via `params.action`.
@@ -51,14 +51,15 @@ export type BuildNightDesignationTxParams = {
 
 /**
  * Dependencies the local builder needs that are NOT derivable from the
- * blueprint: the network magic, the wallet's ADA-cover UTxO pool (also the
- * collateral source), an input resolver covering every input (script inputs
- * included), and an ex-units evaluator.
+ * blueprint: the network magic, the UTxO pools, an input resolver covering
+ * every input (script inputs included), and an ex-units evaluator.
  */
 export type NightDesignationTxBuilderDependencies = {
   networkMagic: Cardano.NetworkMagics;
-  /** Spendable, non-cNIGHT UTxOs — fund the fee + supply collateral. */
+  /** Spendable, non-cNIGHT UTxOs — fund the fee and the outputs. */
   coverUtxos: Cardano.Utxo[];
+  /** UTxOs collateral may be drawn from; may be the cover pool itself. */
+  collateralUtxos: Cardano.Utxo[];
   /** Resolves every input (cNIGHT, cover, script registration) to its output. */
   inputResolver: Cardano.InputResolver;
   /** Computes redeemer execution units (bounded fixed budget or provider-backed). */
@@ -106,7 +107,7 @@ export const buildNightDesignationTx = async (
   builder
     .setChangeAddress(params.changeAddress)
     .setUnspentOutputs(dependencies.coverUtxos)
-    .setCollateralUtxos(dependencies.coverUtxos)
+    .setCollateralUtxos(dependencies.collateralUtxos)
     .setCollateralChangeAddress(params.changeAddress)
     .setPlutusContext({
       costModels: params.protocolParameters.costModels,

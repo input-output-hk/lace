@@ -44,6 +44,8 @@ interface ReviewTransactionSheetProps {
     estimatedFeeLabel: string;
     totalAndFeesLabel: string;
     totalBreakDownLabel: string;
+    /** Label of the withdrawals row; the row shows only with `withdrawalsValue`. */
+    withdrawalsLabel?: string;
   };
   values: {
     accountValue: {
@@ -61,6 +63,8 @@ interface ReviewTransactionSheetProps {
     estimatedFeeValue: FeeEntry;
     totalAndFeesValue: TransactionDetail;
     assetsToSend: AssetToSend[];
+    /** What the transaction withdraws, e.g. staking rewards; omit when none. */
+    withdrawalsValue?: TransactionDetail;
   };
   /** Optional node rendered inside `Sheet.Scroll` immediately after the
    *  account row (before the sending / recipient rows). Used by the wallet
@@ -84,6 +88,7 @@ export const ReviewTransactionTemplate = ({
     estimatedFeeLabel,
     totalAndFeesLabel,
     totalBreakDownLabel,
+    withdrawalsLabel,
   } = labels;
   const {
     accountValue,
@@ -93,6 +98,7 @@ export const ReviewTransactionTemplate = ({
     estimatedFeeValue,
     totalAndFeesValue,
     assetsToSend,
+    withdrawalsValue,
   } = values;
 
   const recipientAddressLabelColor =
@@ -223,7 +229,7 @@ export const ReviewTransactionTemplate = ({
         )}
         {!!notesValue && (
           <>
-            <Row justifyContent="space-between">
+            <Row justifyContent="space-between" gap={spacing.M}>
               <Text.M
                 variant="secondary"
                 testID="review-transaction-notes-label">
@@ -265,6 +271,30 @@ export const ReviewTransactionTemplate = ({
           </Column>
         </Row>
         <Divider />
+        {!!withdrawalsValue && (
+          <>
+            <Row justifyContent="space-between">
+              <Text.M
+                variant="secondary"
+                testID="review-transaction-withdrawals-label">
+                {withdrawalsLabel}
+              </Text.M>
+              <Column alignItems="flex-end">
+                <Text.M testID="review-transaction-withdrawals-value">
+                  {withdrawalsValue.tickerValueAndSymbol}
+                </Text.M>
+                {!!withdrawalsValue.currencyValueAndName && (
+                  <Text.M
+                    variant="secondary"
+                    testID="review-transaction-withdrawals-amount">
+                    {withdrawalsValue.currencyValueAndName}
+                  </Text.M>
+                )}
+              </Column>
+            </Row>
+            <Divider />
+          </>
+        )}
         <Row justifyContent="space-between">
           <Text.M
             variant="secondary"

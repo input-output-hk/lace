@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script runs before npm install during EAS builds.
-# - Local builds: tokens not provided, uses existing ~/.npmrc
-# - Cloud builds: tokens from EAS secrets, appends to .npmrc
+# - Local builds: token not provided, uses existing ~/.npmrc
+# - Cloud builds: token from EAS secrets, appends to .npmrc
 
 set -e
 
@@ -19,22 +19,21 @@ fi
 echo "✅ Node versions in sync: $NVMRC_VERSION"
 
 # --- Configure npm authentication ---
-# If tokens are provided (cloud build), append to .npmrc
+# If the token is provided (cloud build), append to .npmrc
 # If not provided (local build), assume ~/.npmrc is already configured
 
-if [ -z "${NPM_TOKEN:-}" ] || [ -z "${HUGEICONS_TOKEN:-}" ]; then
-  echo "ℹ️  Auth tokens not provided - using existing npm config"
+if [ -z "${NPM_TOKEN:-}" ]; then
+  echo "ℹ️  Auth token not provided - using existing npm config"
   exit 0
 fi
 
-echo "✅ Auth tokens provided - configuring .npmrc"
+echo "✅ Auth token provided - configuring .npmrc"
 
 ROOT_NPMRC="$EAS_BUILD_WORKINGDIR/.npmrc"
 
 cat >> "$ROOT_NPMRC" << EOF
 //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
-//npm.hugeicons.com/:_authToken=${HUGEICONS_TOKEN}
 EOF
 
-echo "✅ Auth tokens appended to .npmrc"
+echo "✅ Auth token appended to .npmrc"
 

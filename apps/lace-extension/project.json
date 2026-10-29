@@ -32,9 +32,6 @@
           "env": "BLOCKFROST_PROXY_URL"
         },
         {
-          "env": "BLOCKFROST_IPFS_URL"
-        },
-        {
           "env": "MEMPOOLSPACE_URL_MAINNET"
         },
         {
@@ -45,6 +42,15 @@
         },
         {
           "env": "NFT_CDN_URL"
+        },
+        {
+          "env": "IMAGE_PROXY_URL"
+        },
+        {
+          "env": "IMAGE_PROXY_KEY"
+        },
+        {
+          "env": "IMAGE_PROXY_SALT"
         },
         {
           "env": "STEELSWAP_API_BASE_URL"
@@ -134,12 +140,44 @@
       "outputs": ["{projectRoot}/dist"]
     },
     "lint": {},
+    "verify-image-proxy": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "tsx scripts/verify-image-proxy.ts dist/expo",
+        "cwd": "{projectRoot}"
+      }
+    },
     "type-check-src": {},
     "type-check-test": {},
     "test": {
       "executor": "nx:run-commands",
       "options": {
         "command": "vitest run --config=vitest.config.js --coverage",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "continuous": true,
+      "options": {
+        "command": "expo start",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test-extension-startup": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/test-extension-startup.mjs",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "test-prover-runtime": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node scripts/test-prover-runtime.mjs",
         "cwd": "{projectRoot}"
       }
     }

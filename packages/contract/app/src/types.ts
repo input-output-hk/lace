@@ -50,8 +50,8 @@ export type SettingsOption = {
 /**
  * Settings page UI customisation - allows blockchain modules to inject custom settings items.
  *
- * @property DeprecatedLMPWalletSection - (LMP only, deprecated) Custom component rendered in wallet settings section
- * @property SettingsOptions - Settings list items appended to the bottom of the settings page
+ * - `DeprecatedLMPWalletSection`: (LMP only, deprecated) Custom component rendered in wallet settings section
+ * - `SettingsOptions`: Settings list items appended to the bottom of the settings page
  */
 export type SettingsPageUICustomisation = UICustomisation<
   Partial<{
@@ -127,11 +127,20 @@ export type SendFlowSheetUICustomisation = UICustomisation<
     /** Optional component for footer title row (e.g. InlineWindow content without close button, transparent background). Rendered below the sheet divider. */
     SheetFooterTitleRow?: ComponentType;
     /**
+     * Optional component rendered on the send result sheet under the
+     * processing subtitle, and kept visible in the failure layout (e.g.
+     * Midnight's TEE attestation checklist). Never rendered on success.
+     * The component decides itself whether it applies (may render null).
+     */
+    ProcessingDetail?: ComponentType;
+    /**
      * When true, the result sheet can be closed by the user while the tx is still processing.
      * When false, the result sheet cannot be closed until processing completes (success/failure).
      */
     isProcessingResultSheetClosable: boolean;
     NoticeComponent?: ComponentType;
+    /** Optional blockchain-specific notice shown before confirmation on transaction review. */
+    ReviewNoticeComponent?: ComponentType;
     computeTxRestrictions?: ComputeTxRestrictions;
     /**
      * Optional fee section component (e.g. Bitcoin fee rate selector).

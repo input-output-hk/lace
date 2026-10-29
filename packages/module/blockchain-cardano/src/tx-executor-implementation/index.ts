@@ -3,7 +3,10 @@ import { makeConfirmTx } from './confirm-tx';
 import { makeDiscardTx } from './discard-tx';
 import { makeSubmitTx } from './submit-tx';
 
-import type { AccountUtxoMap } from '@lace-contract/cardano-context';
+import type {
+  AccountUtxoMap,
+  PendingRewardWithdrawals,
+} from '@lace-contract/cardano-context';
 import type { MakeTxExecutorImplementation } from '@lace-contract/tx-executor';
 import type { Observable } from 'rxjs';
 
@@ -16,6 +19,7 @@ type StateObservablesWithAvailableAccountUtxos = {
   cardanoContext?: {
     selectAvailableAccountUtxos$?: Observable<AccountUtxoMap>;
     selectCollateralOwnershipUtxos$?: Observable<AccountUtxoMap>;
+    selectPendingRewardWithdrawals$?: Observable<PendingRewardWithdrawals>;
   };
 };
 
@@ -27,15 +31,30 @@ export const makeTxExecutor =
     const cardanoCollateralOwnershipUtxos$ = (
       stateObservables as StateObservablesWithAvailableAccountUtxos
     )?.cardanoContext?.selectCollateralOwnershipUtxos$;
-    if (!cardanoAvailableAccountUtxos$ || !cardanoCollateralOwnershipUtxos$) {
+    const pendingRewardWithdrawals$ = (
+      stateObservables as StateObservablesWithAvailableAccountUtxos
+    )?.cardanoContext?.selectPendingRewardWithdrawals$;
+    if (
+      !cardanoAvailableAccountUtxos$ ||
+      !cardanoCollateralOwnershipUtxos$ ||
+      !pendingRewardWithdrawals$
+    ) {
       throw new Error(
-        '[blockchain-cardano] makeTxExecutor requires cardanoContext.selectAvailableAccountUtxos$ and selectCollateralOwnershipUtxos$ state observables',
+        '[blockchain-cardano] makeTxExecutor requires cardanoContext.selectAvailableAccountUtxos$, selectCollateralOwnershipUtxos$ and selectPendingRewardWithdrawals$ state observables',
       );
     }
     return {
       blockchainName: 'Cardano',
-      buildTx: makeBuildTx(dependencies, cardanoAvailableAccountUtxos$),
-      previewTx: makePreviewTx(dependencies, cardanoAvailableAccountUtxos$),
+      buildTx: makeBuildTx(
+        dependencies,
+        cardanoAvailableAccountUtxos$,
+        pendingRewardWithdrawals$,
+      ),
+      previewTx: makePreviewTx(
+        dependencies,
+        cardanoAvailableAccountUtxos$,
+        pendingRewardWithdrawals$,
+      ),
       confirmTx: makeConfirmTx(
         dependencies,
         cardanoAvailableAccountUtxos$,

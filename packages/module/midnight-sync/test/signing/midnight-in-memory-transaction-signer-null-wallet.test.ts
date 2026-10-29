@@ -29,7 +29,6 @@ vi.mock('@midnightntwrk/wallet-sdk-address-format', () => ({
 
 vi.mock('@lace-contract/midnight-context', async () => ({
   ...(await vi.importActual('@lace-contract/midnight-context')),
-  midnightWallets$: of({}),
   fromUnshieldedTokenType: vi.fn().mockReturnValue('tDUST'),
 }));
 
@@ -46,6 +45,7 @@ describe('MidnightInMemoryTransactionSigner with empty wallet map', () => {
     const signer = new MidnightInMemoryTransactionSigner({
       accountId: testAccountId,
       auth: testSignerAuth,
+      wallets$: of({}),
     });
     await expect(firstValueFrom(signer.sign({ serializedTx }))).rejects.toThrow(
       'Could not load midnight wallet',

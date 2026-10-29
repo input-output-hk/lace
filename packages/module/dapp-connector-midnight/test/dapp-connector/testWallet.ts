@@ -1,3 +1,4 @@
+import { createProofJobs } from '@lace-lib/midnight-prover';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { vi } from 'vitest';
 
@@ -5,11 +6,7 @@ import type {
   SenderContext,
   ExtendedDAppConnectorWalletAPI,
 } from '../../src/types';
-import type {
-  Configuration,
-  KeyMaterialProvider,
-} from '@midnight-ntwrk/dapp-connector-api';
-import type { ProvingProvider } from '@midnight-ntwrk/ledger-v8';
+import type { Configuration } from '@midnight-ntwrk/dapp-connector-api';
 
 export const testServiceUriConfig: Configuration = {
   indexerUri: 'http://test-indexer-uri',
@@ -49,6 +46,8 @@ export const mockSender: SenderContext = {
   sender: { url: 'https://test-dapp.io' },
 };
 
+const proofJobs = createProofJobs({});
+
 export const testWalletApi: ExtendedDAppConnectorWalletAPI = {
   getNetworkId: async () => NetworkId.NetworkId.Preview,
   getShieldedBalances: async () => testWalletState.balances,
@@ -63,9 +62,13 @@ export const testWalletApi: ExtendedDAppConnectorWalletAPI = {
     unshieldedAddress: testWalletState.address,
   }),
   getDustAddress: async () => ({ dustAddress: testWalletState.address }),
-  getProvingProvider: async (_keyMaterialProvider: KeyMaterialProvider) => {
-    return {} as unknown as ProvingProvider;
-  },
+  proofCommand: async command =>
+    proofJobs.handle(command, 'test', {
+      check: testWalletApi.checkCircuit,
+      prove: testWalletApi.proveCircuit,
+    }),
+  checkCircuit: vi.fn().mockResolvedValue([42n]),
+  proveCircuit: vi.fn().mockResolvedValue(new Uint8Array([0xf0])),
   getTxHistory: async () => testWalletState.transactionHistory,
   balanceUnsealedTransaction: async () => ({ tx: 'test-tx-id' }),
   balanceSealedTransaction: async () => ({ tx: 'test-tx-id' }),

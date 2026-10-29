@@ -18,10 +18,8 @@ import type {
 
 const MAX_BALANCE_ITERATIONS = 20;
 
-// Fee-correction fixpoint bound. The correction lowers the fee toward the true
-// minimum over the final shipped body; for the cNIGHT designation tx (the sole
-// Plutus consumer) the collateral/change coin fields sit far from any CBOR
-// width boundary, so it converges in <=3 steps. The bound is a runaway guard.
+// Runaway guard rather than a proven step count: the fee descent is not
+// monotone in body size.
 const MAX_FEE_CORRECTION_ITERATIONS = 5;
 
 const BALANCE_EXHAUSTED_MESSAGE = 'Failed to balance transaction';
@@ -40,6 +38,27 @@ type BalancingLoopParams = Omit<
   BalanceTransactionParams,
   'fallbackCoinSelector'
 >;
+
+/**
+ * The evaluated transaction needs a larger fee than balancing funded: its
+ * redeemers measure above the execution units balancing priced, as they
+ * can when the caller's estimate is below the measurement. The fee is
+ * never raised after balancing, so the caller rebuilds priced at the
+ * evaluated units' sum or more.
+ */
+export class EvaluatedFeeShortfallError extends Error {
+  public constructor(
+    readonly requiredFee: Cardano.Lovelace,
+    readonly balancedFee: Cardano.Lovelace,
+    /** Every redeemer with the execution units evaluation gave it. */
+    readonly evaluatedRedeemers: readonly Cardano.Redeemer[],
+  ) {
+    super(
+      `Evaluated transaction body requires ${requiredFee} lovelace of fee, balanced fee is ${balancedFee}`,
+    );
+    this.name = 'EvaluatedFeeShortfallError';
+  }
+}
 
 /**
  * Coalesces the values of all inputs (by looking them up in `resolvedInputs`).
@@ -194,6 +213,7 @@ const runBalancingLoop = ({
   availableUtxo,
   preSelectedUtxo,
   collateralUtxos,
+  referenceUtxos,
   protocolParameters,
   coinSelector,
   changeAddress,
@@ -283,7 +303,11 @@ const runBalancingLoop = ({
       BigInt(protocolParameters.minFeeCoefficient),
     );
     const computedFee =
-      minFee(balancedTx, selection, protocolParameters) + vkWitnessesCost;
+      minFee(
+        balancedTx,
+        [...selection, ...(referenceUtxos ?? [])],
+        protocolParameters,
+      ) + vkWitnessesCost;
 
     if (computedFee > fee) {
       fee = computedFee;
@@ -403,9 +427,10 @@ export const balanceTransaction = ({
  * change output there is nowhere to refund a saving, so the balanced fee ships
  * unchanged.
  *
- * @throws Error When the balanced fee does not cover the body that would ship —
- *   the shipped fee is always one proven to cover its own body, and raising it
- *   would need a re-balance this function cannot perform.
+ * @throws `EvaluatedFeeShortfallError` When the balanced fee does not cover
+ *   the body that would ship — the shipped fee is always one proven to cover
+ *   its own body, and raising it would need a re-balance this function
+ *   cannot perform.
  */
 export const correctFeeAfterEvaluation = ({
   balancedTx,
@@ -499,9 +524,7 @@ export const correctFeeAfterEvaluation = ({
     fee: Cardano.Lovelace,
   ): void => {
     if (required > fee) {
-      throw new Error(
-        `Evaluated transaction body requires ${required} lovelace of fee, balanced fee is ${fee}`,
-      );
+      throw new EvaluatedFeeShortfallError(required, fee, evaluatedRedeemers);
     }
   };
 
@@ -517,9 +540,9 @@ export const correctFeeAfterEvaluation = ({
     };
   }
 
-  // Seed at the balancer's fee (priced with the per-tx max SEED ex-units, so the
-  // real evaluated body needs less for scripts) and lower it only to a value that
-  // still covers its own shipped body.
+  // Seed at the balancer's fee (priced with the seed ex-units: the per-tx max,
+  // or a caller's estimate the evaluation is expected to stay under) and lower
+  // it only to a value that still covers its own shipped body.
   let fee = seedFee;
   let priced = priceAt(fee);
   for (
@@ -527,10 +550,22 @@ export const correctFeeAfterEvaluation = ({
     iteration < MAX_FEE_CORRECTION_ITERATIONS && priced.requiredFee < fee;
     iteration++
   ) {
-    const candidateFee = priced.requiredFee;
-    const candidatePriced = priceAt(candidateFee);
-    // The candidate fee must cover the body priced at that fee; otherwise keep
-    // the last fee that did (guards a coin-width straddle across the step).
+    let candidateFee = priced.requiredFee;
+    let candidatePriced = priceAt(candidateFee);
+    // Two things grow the body as the fee falls: the collateral shape is
+    // fee-derived, and a refunded saving widens the change coin's CBOR width.
+    // Climbing stays under `fee`, which already covers its own body.
+    for (
+      let climb = 0;
+      climb < MAX_FEE_CORRECTION_ITERATIONS &&
+      candidatePriced.requiredFee > candidateFee &&
+      candidatePriced.requiredFee < fee;
+      climb++
+    ) {
+      candidateFee = candidatePriced.requiredFee;
+      candidatePriced = priceAt(candidateFee);
+    }
+    // No self-covering fee below `fee`; keep the last one that was.
     if (candidatePriced.requiredFee > candidateFee) break;
     fee = candidateFee;
     priced = candidatePriced;

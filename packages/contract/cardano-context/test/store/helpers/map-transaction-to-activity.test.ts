@@ -6,10 +6,11 @@ import {
 import { ActivityType } from '@lace-contract/activities';
 import { TokenId } from '@lace-contract/tokens';
 import { AccountId } from '@lace-contract/wallet-repo';
+import { ACCOUNT_VALIDATOR_HASH } from '@lace-lib/cardano-custody';
 import { BigNumber, Timestamp } from '@lace-lib/util';
 import { firstValueFrom, of } from 'rxjs';
 import { dummyLogger } from 'ts-log';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { assetProvider } from '../../../src/store/helpers/get-fallback-asset';
 import { mapTransactionToActivity } from '../../../src/store/helpers/map-transaction-to-activity';
@@ -229,7 +230,7 @@ describe('mapTransactionToActivity', () => {
         protocolParameters: mockProtocolParameters,
         resolveInput: mockResolveInput,
         logger,
-        isNightDesignationEnabled: true,
+        isExtensionActivityEnabled: true,
       });
 
       expect(transactionSummaryInspector).toHaveBeenCalledWith({
@@ -274,7 +275,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -323,7 +324,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -372,7 +373,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -428,7 +429,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -466,7 +467,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -529,7 +530,7 @@ describe('mapTransactionToActivity', () => {
             protocolParameters: mockProtocolParameters,
             resolveInput: mockResolveInput,
             logger,
-            isNightDesignationEnabled: true,
+            isExtensionActivityEnabled: true,
           }),
         );
 
@@ -574,7 +575,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: false,
+          isExtensionActivityEnabled: false,
         }),
       );
 
@@ -625,7 +626,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
 
@@ -697,7 +698,7 @@ describe('mapTransactionToActivity', () => {
           protocolParameters: mockProtocolParameters,
           resolveInput: mockResolveInput,
           logger,
-          isNightDesignationEnabled: true,
+          isExtensionActivityEnabled: true,
         }),
       );
     };
@@ -787,6 +788,73 @@ describe('mapTransactionToActivity', () => {
 
       expect(result.isOk()).toBe(true);
       if (result.isOk()) expect(result.value.activityId).toBe(mockTxId);
+    });
+
+    describe('custody accounts', () => {
+      // Lace's Preprod custody account; literal here because this file mocks
+      // `Cardano.AssetId`.
+      const stakeScriptHash =
+        'f176158fcbbdfc44c1e3b3f0863032dc048c091738b0fa4107975157';
+      const custodyAddress = CardanoPaymentAddress(
+        'addr_test1xrkkr936e9x39s9nyzl95vmvx6hkd0qzcwqwp23sqxyey5l3wc2cljaal3zvrcan7zrrqvkuqjxqj9eckrayzpuh29tsszhnvv',
+      );
+      const custodyRewardAccount = CardanoRewardAccount(
+        'stake_test17rchv9v0ew7lc3xpuwelpp3sxtwqfrqfzuutp7jpq7t4z4cnrk4ek',
+      );
+      const stateNftId = `${ACCOUNT_VALIDATOR_HASH}${stakeScriptHash}`;
+      const grantTokenId = `${ACCOUNT_VALIDATOR_HASH}${stakeScriptHash}00000007`;
+      const tokenId = `${'99'.repeat(28)}746f6b656e`;
+
+      beforeEach(async () => {
+        const { Cardano: actual } = await vi.importActual<typeof Core>(
+          '@cardano-sdk/core',
+        );
+        vi.mocked(Cardano.AssetId.getPolicyId).mockImplementation(
+          actual.AssetId.getPolicyId,
+        );
+        vi.mocked(Cardano.AssetId.getAssetName).mockImplementation(
+          actual.AssetId.getAssetName,
+        );
+      });
+
+      afterEach(() => {
+        vi.mocked(Cardano.AssetId.getPolicyId).mockReset();
+        vi.mocked(Cardano.AssetId.getAssetName).mockReset();
+      });
+
+      it('omits the state NFT and grant tokens from the balance changes, so no metadata is fetched for them', async () => {
+        mockTxSummaryInspector.mockReturnValue(
+          of({
+            summary: summaryOf({
+              assets: new Map([
+                [stateNftId, { amount: 1n }],
+                [grantTokenId, { amount: 1n }],
+                [tokenId, { amount: 5n }],
+              ]) as Core.TransactionSummaryInspection['assets'],
+            }),
+          }),
+        );
+
+        const result = await firstValueFrom(
+          mapTransactionToActivity({
+            accountId: AccountId('custody'),
+            txDetails: mockTxDetails,
+            accountAddresses: [custodyAddress],
+            rewardAccount: custodyRewardAccount,
+            protocolParameters: mockProtocolParameters,
+            resolveInput: mockResolveInput,
+            logger,
+            isExtensionActivityEnabled: true,
+          }),
+        );
+
+        expect(result.isOk()).toBe(true);
+        if (result.isOk()) {
+          expect(
+            result.value.tokenBalanceChanges.map(change => change.tokenId),
+          ).toEqual([TokenId(tokenId), TokenId('lovelace')]);
+        }
+      });
     });
   });
 });

@@ -1,0 +1,6 @@
+kind: Added
+body: Added support for locally supplied Midnight proof generation, enabling WASM prover integrations.
+time: 2026-10-22T14:16:45.784010011+02:00
+custom:
+  Package: sdk
+  Build: canary

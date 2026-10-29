@@ -61,7 +61,7 @@ export interface HwBlockchainSupport {
   /**
    * Highest account index (inclusive) the device can derive for this
    * blockchain, when its firmware caps derivation below the app-wide default
-   * (e.g. Keystone only derives Cardano accounts #0-#24). Unset means the
+   * (e.g. Keystone only derives Cardano accounts #0-#23). Unset means the
    * device imposes no limit and the app-wide default applies.
    */
   maxAccountIndex?: number;

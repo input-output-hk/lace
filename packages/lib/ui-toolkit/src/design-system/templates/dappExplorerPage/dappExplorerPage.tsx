@@ -160,7 +160,7 @@ export const DappExplorerPageTemplate = ({
               <Row alignItems="center" gap={spacing.S} style={styles.infoRow}>
                 <Icon
                   name="AlertTriangle"
-                  variant="solid"
+                  strokeWidth={2}
                   size={24}
                   color={theme.data.negative}
                 />
@@ -257,7 +257,7 @@ export const DappExplorerPageTemplate = ({
           gap={spacing.L}
           style={styles.errorStateContainer}
           testID="dapp-explorer-error-state">
-          <Icon name="Sad" size={100} variant="solid" />
+          <Icon name="Sad" size={100} strokeWidth={2} />
           <Column alignItems="center" gap={spacing.XS}>
             <Text.M align="center" testID="dapp-explorer-error-title">
               {t('v2.dapp-explorer.error.title')}

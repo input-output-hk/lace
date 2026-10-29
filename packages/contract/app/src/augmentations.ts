@@ -1,3 +1,9 @@
+// The stable SDK build resolves augmentations.stable.ts in place of this file,
+// which adds the reload dependency and no UI customisation addon.
+// Keep the two files' exports in step, apart from the names the variant
+// declares on stable-omits lines; the SDK's stable variant parity check
+// enforces it.
+
 import type {
   AccountUICustomisation,
   InitializeAppContext,

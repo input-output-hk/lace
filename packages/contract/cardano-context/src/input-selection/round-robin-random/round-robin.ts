@@ -12,7 +12,7 @@ const distance = (a: bigint, b: bigint): bigint => (a > b ? a - b : b - a);
  * Asserts that the pool (pre-selected entries included) can cover every
  * requirement's minimum.
  *
- * @throws {InputSelectionError} With `BalanceInsufficient` and the shortfall
+ * @throws `InputSelectionError` With `BalanceInsufficient` and the shortfall
  *   when some requirement cannot be covered.
  */
 const assertSufficientBalance = (processors: SelectionProcessor[]): void => {
@@ -88,7 +88,7 @@ const runRoundRobin = (
  * @param rng - The random number generator, freshly seeded for this call.
  * @param targetMultiplier - The improvement target as a multiple of each
  *   requirement's minimum (2 for the optimal strategy, 1 for minimal).
- * @throws {InputSelectionError} With `BalanceInsufficient` when the pool
+ * @throws `InputSelectionError` With `BalanceInsufficient` when the pool
  *   cannot cover the target, or when the forced lovelace pick fails.
  */
 export const runSelectionPhase = (

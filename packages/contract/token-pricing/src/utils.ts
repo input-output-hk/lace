@@ -13,7 +13,7 @@ import type { BigNumber } from '@lace-lib/util';
 
 /**
  * Extract the identifier for a token across all blockchains.
- * Priority: ticker > name > tokenId
+ * Priority: ticker, then name, then tokenId.
  */
 export const getTokenIdentifier = (token: Token): string => {
   return token.metadata?.ticker || token.metadata?.name || token.tokenId;
@@ -53,18 +53,14 @@ export const shouldFetchPriceHistory = (
 export const getTokenPriceId = (token: Token): TokenPriceId | null => {
   // Keyed by the unique on-chain tokenId, NOT the ticker: tickers are not unique
   // (two different Cardano native tokens can share one), so a ticker key collides.
-  switch (token.blockchainName) {
-    case 'Cardano':
-      return CardanoTokenPriceId(token.tokenId);
-    case 'Bitcoin':
-      return BitcoinTokenPriceId(token.tokenId);
-    case 'Midnight':
-      // Midnight tokens are not priced
-      return null;
-    default:
-      // Unsupported blockchain
-      return null;
+  if (token.blockchainName === 'Cardano') {
+    return CardanoTokenPriceId(token.tokenId);
   }
+  if (token.blockchainName === 'Bitcoin') {
+    return BitcoinTokenPriceId(token.tokenId);
+  }
+  // The other blockchains' tokens are not priced.
+  return null;
 };
 
 /**
@@ -107,7 +103,7 @@ const formatDateCheap = (timestamp: number): string => {
  *
  * Performance notes:
  * - Timestamps are downsampled to MAX_CHART_POINTS before computation.
- * - Per-token price lookups use pre-built Map<timestamp, price> (O(1) per lookup).
+ * - Per-token price lookups use pre-built `Map<timestamp, price>` (O(1) per lookup).
  * - Date formatting uses cheap getMonth/getDate instead of toLocaleDateString.
  */
 export const calculatePortfolioValueOverTime = (

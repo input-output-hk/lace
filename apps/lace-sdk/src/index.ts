@@ -19,19 +19,105 @@ export type { Result } from '@lace-lib/util';
 // Cryptographic value objects from @lace-lib/crypto
 export { EntropyHex, Mnemonic } from '@lace-lib/crypto';
 
-// Module utilities from @lace-contract/module
+// Module utilities from @lace-contract/module: what an app needs to write
+// its own modules and contracts. The runtime the wallet assembles them with
+// stays internal; createLaceWallet runs it.
 export {
   markParameterizedSelector,
   IS_PARAMETERIZED,
   assertModuleCompatibility,
   MultipleImplementationsError,
   MissingContractImplementationError,
+  inferContractContext,
   inferModuleContext,
   inferStoreContext,
   combineContracts,
+  ContractName,
   ModuleName,
 } from '@lace-contract/module';
-export type * from '@lace-contract/module';
+export type {
+  Action,
+  ActionObservables,
+  ActionType,
+  AddonContract,
+  AddonContractType,
+  AddonKey,
+  AnyFunction,
+  AnyLaceSideEffect,
+  AnyParameterizedSelector,
+  AnyParameteterlessSelector,
+  AppConfig,
+  ArrayType,
+  ContextualDynamicallyLoadedInit,
+  ContextualLaceInit,
+  ContextualLoadableKey,
+  ContextualModuleInitProps,
+  Contract,
+  ContractActionCreators,
+  ContractSelectors,
+  Contracts,
+  ContractsActionCreators,
+  ContractsSelectors,
+  CreateKeyValueStorageProps,
+  CreateLoaderProps,
+  CreateStoreDependencies,
+  CreateStoreProps,
+  CreateStoreResult,
+  DefaultSideEffectDependencies,
+  DynamicallyLoaded,
+  DynamicallyLoadedInit,
+  EmptyObjectSymbol,
+  Environment,
+  KeyValueStorage,
+  KeyValueStorageDependencies,
+  KeyValueStorageFactory,
+  LaceAddons,
+  LaceInit,
+  LaceInitSync,
+  LaceModule,
+  LaceModuleAddonNames,
+  LaceModuleMap,
+  LaceModuleMixin,
+  LaceModuleStore,
+  LaceModuleStoreInit,
+  LacePersistConfig,
+  LacePersistConfigMap,
+  LacePlatform,
+  LaceReduxObservableEpic,
+  LaceSideEffect,
+  LaceStoreContext,
+  LoadResult,
+  LoadableKey,
+  LoadedActionCreators,
+  LoadedSelectors,
+  ModuleActionCreators,
+  ModuleAddons,
+  ModuleExports,
+  ModuleInitDependencies,
+  ModuleInitProps,
+  ModuleLoader,
+  ModuleSelectors,
+  ModuleStoreActionCreators,
+  ModuleStoreSelectors,
+  ModuleValue,
+  NonUndefinedPersistedState,
+  OmitEmptyActionCreators,
+  PersistedState,
+  PersistedStateProperty,
+  Runtime,
+  ScopedActionCreators,
+  ScopedSelectors,
+  SideEffectDependencies,
+  SideEffectDependencyContract,
+  SideEffectDependencyContractType,
+  SideEffectDependencyNames,
+  State,
+  StateObservables,
+  StoreContract,
+  StoreContractType,
+  Values,
+  WithLaceContext,
+} from '@lace-contract/module';
 
 // Storage contract
 export {
@@ -40,7 +126,14 @@ export {
   CollectionStore,
   KeyValueStore,
 } from '@lace-contract/storage';
-export type * from '@lace-contract/storage';
+export type {
+  CollectionStorage,
+  CreateCollectionStorageProps,
+  CreateDocumentStorageProps,
+  DocumentStorage,
+  StorageAdapter,
+  StorageDependencies,
+} from '@lace-contract/storage';
 
 // Feature flags
 export { FeatureFlagKey } from '@lace-contract/feature';
@@ -50,20 +143,97 @@ export { FEATURE_FLAG_NETWORK_TYPE } from '@lace-contract/network';
 
 // Headless wallet
 export { createLaceWallet } from './create-lace-wallet';
-export type { LaceWallet, CreateLaceWalletProps } from './create-lace-wallet';
+export type {
+  LaceWallet,
+  CreateLaceWalletProps,
+  DispatchFunction,
+} from './create-lace-wallet';
 
 // Wallet entity creation
 export { createInMemoryWalletEntity } from './create-in-memory-wallet-entity';
 export type { CreateInMemoryWalletEntityProps } from './create-in-memory-wallet-entity';
 
-// Lazy in-memory vault (mnemonic fetched per sign call, never persisted by Lace)
+// Lazy in-memory vault (mnemonic scoped to each sign call, never persisted by Lace)
 export { createLazyInMemoryVaultModule } from './create-lazy-in-memory-vault-module';
 export type { CreateLazyInMemoryVaultModuleProps } from './create-lazy-in-memory-vault-module';
-export type { GetMnemonicWords } from './cardano-lazy-in-memory-signer-factory';
+export type { WithMnemonicWords } from './cardano-lazy-in-memory-signer-factory';
+export { LazyWalletMismatchError } from './lazy-wallet-mismatch-error';
+export { createPasskeyVaultModule } from './passkey-vault-module';
+export { createPasskeyWalletEntity } from './passkey-wallet-entity';
+export { PasskeyWalletMismatchError } from './passkey-wallet-mismatch-error';
+export type {
+  PasskeyWalletBinding,
+  CreatePasskeyWalletEntityProps,
+} from './passkey-wallet-entity';
+export {
+  createPasskeyKeySource,
+  createSignerClient,
+  RemoteSignerError,
+  SignerClosedError,
+  SignerPopupBlockedError,
+} from '@lace-lib/passkey';
+export type {
+  CreateSignerClientProps,
+  PasskeyCredentialRef,
+  PasskeyKeySource,
+  SignerClient,
+} from '@lace-lib/passkey';
+
+// Remote Cardano vault (signatures produced by the Lace signer page)
+export { createRemoteCardanoVaultModule } from './remote-cardano-vault-module';
+export type { CreateRemoteCardanoVaultModuleProps } from './remote-cardano-vault-module';
+export {
+  CardanoRemoteSignerFactory,
+  RemoteSignerResultError,
+} from './cardano-remote-signer-factory';
+export type {
+  CardanoRemoteSignerFactoryProps,
+  RemoteSignerRequester,
+} from './cardano-remote-signer-factory';
+export { createRemotePasskeySigner } from './remote-passkey-signer';
+export type {
+  CreateRemotePasskeySignerProps,
+  RemotePasskeySigner,
+} from './remote-passkey-signer';
+export { createRemotePasskeyWalletEntity } from './remote-passkey-wallet-entity';
+export type {
+  CreateRemotePasskeyWalletEntityProps,
+  RemotePasskeyWalletEntity,
+} from './remote-passkey-wallet-entity';
 
 // Wallet types
 export { AccountId, WalletId, WalletType } from '@lace-contract/wallet-repo';
-export type * from '@lace-contract/wallet-repo';
+export type {
+  AccountIdentityKey,
+  AccountMetadata,
+  AccountRef,
+  ActiveAccountContext,
+  AnyAccount,
+  AnyWallet,
+  BlockchainNetworks,
+  BlockchainSpecificHardwareWalletData,
+  BlockchainSpecificInMemoryWalletData,
+  BlockchainSpecificMultiSigWalletData,
+  HardwareKeystoneWalletId,
+  HardwareSeedSignerWalletId,
+  HardwareWallet,
+  HardwareWalletAccount,
+  HardwareWalletId,
+  HardwareWalletKeystone,
+  HardwareWalletLedger,
+  HardwareWalletSeedSigner,
+  HardwareWalletTrezor,
+  InMemoryWallet,
+  InMemoryWalletAccount,
+  LazyInMemoryWallet,
+  LazyInMemoryWalletAccount,
+  MultiSigWallet,
+  MultiSigWalletAccount,
+  WalletEntity,
+  WalletIdentity,
+  WalletMetadata,
+  WalletsState,
+} from '@lace-contract/wallet-repo';
 
 // Transaction building (simple, certificates, and Plutus smart contracts)
 export { TransactionBuilder } from '@lace-contract/cardano-context';
@@ -72,15 +242,28 @@ export type {
   ScriptInputProps,
 } from '@lace-contract/cardano-context';
 export { createTxBuilder, waitForNetworkInfo } from './create-tx-builder';
+export type {
+  CardanoContextObservables,
+  NetworkInfo,
+  WalletWithCardanoContext,
+} from './create-tx-builder';
 
 // Transaction signing
 export { signCardanoTx } from './sign-cardano-tx';
-export type { SignCardanoTxProps } from './sign-cardano-tx';
+export type {
+  SignCardanoTxProps,
+  WalletWithCardanoSigning,
+} from './sign-cardano-tx';
 export type { CardanoSignResult } from '@lace-contract/cardano-context';
 
 // Transaction submission
 export { submitCardanoTx } from './submit-cardano-tx';
-export type { SubmitCardanoTxProps } from './submit-cardano-tx';
+export type {
+  SubmitCardanoTxProps,
+  WalletWithCardanoSubmit,
+} from './submit-cardano-tx';
+
+export { HexBlob } from '@cardano-sdk/util';
 
 // Cardano chain IDs and CBOR serialization
 export { Cardano, Serialization } from '@cardano-sdk/core';
@@ -157,28 +340,5 @@ export {
 } from '@cardano-sdk/core';
 export type { SubmitTxArgs, ValueNotConservedData } from '@cardano-sdk/core';
 
-// Passport contract
-export {
-  passportStoreContract,
-  passportDependencyContract,
-  AccountContractMissingError,
-  AccountExistsError,
-  AccountNotFoundError,
-  ArtefactIntegrityError,
-  CeremonyCancelledError,
-  DeviceEntryNotFoundError,
-  LastDeviceError,
-  NoAccountError,
-  NotAuthorisedError,
-  PrfUnsupportedError,
-  RecordCorruptedError,
-  RecordUnreadableError,
-  RemovalTargetNotFoundError,
-  SponsorExhaustedError,
-  PRF_SALT_AUTHORISER_LABEL,
-  PRF_SALT_STORAGE_LABEL,
-} from '@lace-contract/passport';
-export type * from '@lace-contract/passport';
-
 // Module maps (re-exported as namespace for single-entrypoint bundling)
-export * as m from './modules';
+export * as m from './modules-cardano';

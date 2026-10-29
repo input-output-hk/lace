@@ -71,9 +71,6 @@ const validateEnvironment = (): AppConfig => {
       BLOCKFROST_PROXY_URL:
         process.env.BLOCKFROST_PROXY_URL ||
         process.env.EXPO_PUBLIC_BLOCKFROST_PROXY_URL,
-      BLOCKFROST_IPFS_URL:
-        process.env.BLOCKFROST_IPFS_URL ||
-        process.env.EXPO_PUBLIC_BLOCKFROST_IPFS_URL,
       MAESTRO_PROJECT_ID_TESTNET:
         process.env.MAESTRO_PROJECT_ID_TESTNET ||
         process.env.EXPO_PUBLIC_MAESTRO_PROJECT_ID_TESTNET,
@@ -164,10 +161,6 @@ const validateEnvironment = (): AppConfig => {
       }),
       BLOCKFROST_PROXY_URL: str({
         desc: 'Lace Blockfrost proxy base URL; per-network paths derived in code',
-      }),
-      BLOCKFROST_IPFS_URL: str({
-        desc: 'Blockfrost IPFS base URL',
-        default: 'https://ipfs.blockfrost.dev',
       }),
       MAESTRO_URL_TESTNET: str({
         desc: 'Maestro base URL',

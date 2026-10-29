@@ -21,9 +21,16 @@ import type {
 } from './steelswap-types';
 import type { SwapProvider } from '@lace-contract/swap-provider';
 
+/** The configuration of `createSteelSwapProvider`. */
 export type SteelSwapProviderConfig = {
+  /** The base URL of the SteelSwap API. */
   steelswapApiBaseUrl: string;
+  /** The base URL token icons are loaded from. */
   nftCdnUrl: string;
+  /**
+   * The partner name and address the swaps are attributed to; the
+   * provider's built-in partner when absent.
+   */
   partner?: SteelSwapPartner;
 };
 
@@ -56,6 +63,12 @@ const jsonGet = async <T>(url: string): Promise<T> => {
   return json;
 };
 
+/**
+ * A {@link SwapProvider} over the SteelSwap aggregator's API: it quotes swap
+ * routes across Cardano DEXes, builds the unsigned swap transaction for a
+ * quote, and lists and searches the tokens and DEXes it serves. Each call
+ * emits one `Result`; a failed request is an `Err` with a `SwapProviderError`.
+ */
 export const createSteelSwapProvider = (
   config: SteelSwapProviderConfig,
 ): SwapProvider => {

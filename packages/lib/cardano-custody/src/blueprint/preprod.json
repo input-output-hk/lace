@@ -1,0 +1,19 @@
+{
+  "network": "preprod",
+  "references": [
+    {
+      "scriptHash": "ed61963ac94d12c0b320be5a336c36af66bc02c380e0aa3001899253",
+      "txId": "574e6c3d2e64303015f4db89930848b47fef501c65c448a59d843a383a63fc7e",
+      "index": 0,
+      "address": "addr_test1wqkddr3e300el0ydy4mpfd2yqdz3aeez2g8v0p07znud7ksuhmmkz",
+      "lovelace": "12692950"
+    },
+    {
+      "scriptHash": "2cd68e398bdf9fbc8d257614b54403451ee722520ec785fe14f8df5a",
+      "txId": "000b0715bb8613761555becc9b50105dd3e23b93f91bce01dea72c3bbd0228f8",
+      "index": 0,
+      "address": "addr_test1wqkddr3e300el0ydy4mpfd2yqdz3aeez2g8v0p07znud7ksuhmmkz",
+      "lovelace": "40281260"
+    }
+  ]
+}

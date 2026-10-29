@@ -106,8 +106,10 @@ const makeDeps = (
   extraResolvable: Cardano.Utxo[] = [],
 ): NightDesignationTxBuilderDependencies => ({
   networkMagic: Cardano.NetworkMagics.Preprod,
-  // ADA cover + collateral pool (cNIGHT UTxOs are forced separately).
+  // ADA cover pool (cNIGHT UTxOs are forced separately); collateral defaults to
+  // the same pool, the no-reservation case.
   coverUtxos: utxo,
+  collateralUtxos: utxo,
   txEvaluator: boundedExUnitsEvaluator,
   inputResolver: createInputResolver([
     ...cnightUtxos,
@@ -366,6 +368,7 @@ describe('buildNightDesignationTx', () => {
         {
           networkMagic: Cardano.NetworkMagics.Preprod,
           coverUtxos: [smallAda],
+          collateralUtxos: [smallAda],
           txEvaluator: boundedExUnitsEvaluator,
           inputResolver: createInputResolver([...cnightUtxos, smallAda]),
         },
@@ -392,6 +395,7 @@ describe('buildNightDesignationTx', () => {
         {
           networkMagic: Cardano.NetworkMagics.Preprod,
           coverUtxos: utxo,
+          collateralUtxos: utxo,
           txEvaluator: boundedExUnitsEvaluator,
           // Missing cnightUtxos — every cNIGHT input is unresolvable.
           inputResolver: createInputResolver([...utxo]),
@@ -421,6 +425,7 @@ describe('buildNightDesignationTx', () => {
         {
           networkMagic: Cardano.NetworkMagics.Preprod,
           coverUtxos: utxo,
+          collateralUtxos: utxo,
           txEvaluator: emptyEvaluator,
           inputResolver: createInputResolver([...cnightUtxos, ...utxo]),
         },
@@ -428,13 +433,12 @@ describe('buildNightDesignationTx', () => {
     ).rejects.toThrow(/No ex-units evaluation/);
   });
 
-  // KNOWN DEFECT, pinned: collateral is reserved as a WHOLE UTxO and then
-  // removed from the funding pool, so an account whose only non-cNIGHT UTxO
-  // backs collateral has nothing left to fund the tx — it fails topping up the
-  // change min-ADA and surfaces as "not enough ADA" on an account with plenty.
-  // When that exclusion is removed this test FAILS: swap the rejection for
-  // `expect(result.ok).toBe(true)` rather than deleting the case.
-  it('known defect: a lone cover UTxO reserved as collateral leaves nothing to fund the build', async () => {
+  // Regression (LW-15307): collateral is reserved as a WHOLE UTxO, and the
+  // builder must not remove it from the funding pool — the ledger consumes
+  // inputs on success and collateral only on phase-2 failure, never both. Until
+  // that exclusion was deleted this account had nothing left to top up the
+  // change min-ADA and surfaced as "not enough ADA" while holding 236 ADA.
+  it('funds the build from a lone cover UTxO that also backs collateral', async () => {
     // 12 distinct policies, because change min-ADA scales with policy count
     // (2,835,980 here) — 12 names under a single policy would be far too cheap
     // to reproduce the shortfall. The coin figure is 4 ADA rather than the
@@ -499,21 +503,74 @@ describe('buildNightDesignationTx', () => {
         {
           networkMagic: Cardano.NetworkMagics.Preprod,
           coverUtxos: coverPool,
+          collateralUtxos: coverPool,
           txEvaluator: boundedExUnitsEvaluator,
           inputResolver: createInputResolver([tightCnightUtxo, ...coverPool]),
         },
       );
 
-    // 236 ADA of cover, and the build still cannot fund itself: collateral
-    // reserves that single UTxO and it leaves the spendable pool.
-    await expect(build([consolidatedCover])).rejects.toThrow(
-      /UTxO pool exhausted/,
+    const result = await build([consolidatedCover]);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    // The one UTxO really does both jobs — asserted because the build merely
+    // succeeding would also pass if collateral had been dropped altogether.
+    const body = parse(result.value.cbor).body;
+    const isCover = (ref: Cardano.TxIn): boolean =>
+      ref.txId === consolidatedCover[0].txId &&
+      ref.index === consolidatedCover[0].index;
+    expect(body.inputs.some(isCover)).toBe(true);
+    expect(body.collaterals?.some(isCover)).toBe(true);
+
+    // Unaffected by the fix: a second, far smaller cover UTxO still builds,
+    // with collateral still taking the larger one.
+    const withSecondCover = await build([consolidatedCover, secondCover]);
+    expect(withSecondCover.ok).toBe(true);
+  });
+
+  it('draws collateral from its own pool, not the cover pool', async () => {
+    const collateralOnly: Cardano.Utxo = [
+      {
+        txId: 'd4'.repeat(32) as Cardano.TransactionId,
+        index: 0,
+        address: ownAddress,
+      },
+      { address: ownAddress, value: { coins: 5_000_000n } },
+    ];
+
+    const result = await buildNightDesignationTx(
+      {
+        network,
+        action: { kind: 'register', dustPubkey },
+        cnightUtxos,
+        paymentKeyHash,
+        stakeKeyHash,
+        changeAddress: ownAddress,
+        ttlSlot,
+        protocolParameters: plutusProtocolParameters,
+      },
+      {
+        networkMagic: Cardano.NetworkMagics.Preprod,
+        coverUtxos: utxo,
+        collateralUtxos: [collateralOnly],
+        txEvaluator: boundedExUnitsEvaluator,
+        inputResolver: createInputResolver([
+          ...cnightUtxos,
+          ...utxo,
+          collateralOnly,
+        ]),
+      },
     );
 
-    // Proof the balance was never the problem — adding a second, far smaller
-    // cover UTxO (collateral still takes the larger one) makes the same build
-    // succeed. Any fix must make the first case behave like this one.
-    const result = await build([consolidatedCover, secondCover]);
     expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const body = parse(result.value.cbor).body;
+    const isCollateralOnly = (ref: Cardano.TxIn): boolean =>
+      ref.txId === collateralOnly[0].txId &&
+      ref.index === collateralOnly[0].index;
+
+    expect(body.collaterals).toHaveLength(1);
+    expect(isCollateralOnly(body.collaterals![0])).toBe(true);
   });
 });

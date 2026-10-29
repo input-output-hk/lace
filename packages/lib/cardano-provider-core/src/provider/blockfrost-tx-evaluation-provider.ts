@@ -168,7 +168,7 @@ export class BlockfrostTxEvaluationProvider extends BlockfrostProvider {
   /**
    * Evaluate a transaction's per-redeemer execution units.
    *
-   * @param tx transaction CBOR (unsigned is fine)
+   * @param tx - transaction CBOR (unsigned is fine)
    * @returns Observable with the per-redeemer budgets, or an error when the
    * network declined to evaluate (script failure, provider fault, HTTP error).
    */

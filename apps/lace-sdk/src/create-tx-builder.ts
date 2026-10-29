@@ -17,12 +17,16 @@ import type { RequiredProtocolParameters } from '@lace-contract/cardano-context'
 import type { State, StateObservables } from '@lace-contract/module';
 import type { Milliseconds, Result } from '@lace-lib/util';
 
-// Derived from the cardano-context contract — single source of truth.
-// Resolved concretely (not generic) so StateObservables can evaluate
-// the parameterless-vs-parameterized conditional in _StateObservables.
-type CardanoContextObservables = StateObservables<
+// Resolved concretely (not generic) so StateObservables can evaluate the
+// parameterless-vs-parameterized conditional in _StateObservables.
+/**
+ * The Cardano state of a wallet with the Cardano modules loaded, as
+ * observables: `wallet.stateObservables.cardanoContext`. Each
+ * `<selector>$` emits that selector's value whenever it changes.
+ */
+export type CardanoContextObservables = StateObservables<
   typeof cardanoContextSelectors
->;
+>['cardanoContext'];
 
 /**
  * Structural requirement: the wallet must have been created with
@@ -30,11 +34,20 @@ type CardanoContextObservables = StateObservables<
  */
 export type WalletWithCardanoContext = {
   getState: () => Partial<State>;
-  stateObservables: Pick<CardanoContextObservables, 'cardanoContext'>;
+  stateObservables: { cardanoContext: CardanoContextObservables };
 };
 
+/**
+ * The Cardano network a wallet is on, as {@link waitForNetworkInfo} resolves
+ * it.
+ */
 export type NetworkInfo = {
+  /** The network's ID and magic. */
   chainId: Cardano.ChainId;
+  /**
+   * The protocol parameters a transaction builder needs, such as fee and
+   * size limits.
+   */
   protocolParameters: RequiredProtocolParameters;
 };
 
@@ -44,8 +57,10 @@ export type NetworkInfo = {
  *
  * Call {@link waitForNetworkInfo} first to ensure the state is ready.
  *
- * @param wallet - A wallet with Cardano context (see {@link WalletWithCardanoContext}).
- * @returns `Ok<TransactionBuilder>` or `Err` if network info is not yet available.
+ * @param wallet - A wallet with the Cardano modules loaded (see
+ *   {@link WalletWithCardanoContext}), whose network info has arrived.
+ * @returns `Ok` with the builder, or `Err` until the chain ID and protocol
+ *   parameters are in the wallet's state.
  */
 export const createTxBuilder = (
   wallet: WalletWithCardanoContext,
@@ -86,16 +101,20 @@ export const createTxBuilder = (
  * protocol parameters) is available in the wallet state. Await this before
  * calling {@link createTxBuilder} to guarantee it succeeds.
  *
- * @param wallet - A wallet with Cardano context (see {@link WalletWithCardanoContext}).
+ * @param wallet - A wallet with the Cardano modules loaded (see
+ *   {@link WalletWithCardanoContext}).
  * @param options - Optional configuration.
- * @param options.timeout - Maximum time to wait for network info before
- *   rejecting with a `TimeoutError`. When omitted the promise waits
- *   indefinitely.
- * @returns The resolved chain ID and protocol parameters.
+ * @returns The chain ID and protocol parameters, once both are in state.
  */
 export const waitForNetworkInfo = async (
   wallet: WalletWithCardanoContext,
-  options?: { timeout?: Milliseconds },
+  options?: {
+    /**
+     * Maximum time to wait for network info before rejecting with a
+     * `TimeoutError`. When omitted the promise waits indefinitely.
+     */
+    timeout?: Milliseconds;
+  },
 ): Promise<NetworkInfo> =>
   firstValueFrom(
     combineLatest([

@@ -2,18 +2,17 @@ import type { BitcoinUTxO } from '@lace-contract/bitcoin-context';
 
 /**
  * Type definition for the properties required by the InputSelector.
- *
- * @property changeAddress - The address to which any change should be sent.
- * @property utxos - An array of available unspent transaction outputs (UTXOs).
- * @property outputs - An array of desired outputs, each containing an address and value.
- * @property feeRate - The fee rate in satoshis per byte to be used for the transaction.
- * @property hasOpReturn - A boolean indicating if the transaction includes an OP_RETURN output.
  */
 export type InputSelectorProps = {
+  /** The address to which any change should be sent. */
   changeAddress: string;
+  /** An array of available unspent transaction outputs (UTXOs). */
   utxos: BitcoinUTxO[];
+  /** An array of desired outputs, each containing an address and value. */
   outputs: { address: string; value: number }[];
+  /** The fee rate in satoshis per byte to be used for the transaction. */
   feeRate: number;
+  /** A boolean indicating if the transaction includes an OP_RETURN output. */
   hasOpReturn: boolean;
 };
 

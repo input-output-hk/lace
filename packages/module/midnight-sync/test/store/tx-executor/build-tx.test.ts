@@ -11,8 +11,8 @@ import {
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
+import { constructShieldedTransaction } from '../../../src/store/prepare-midnight-tx';
 import {
-  constructShieldedTransaction,
   makeBuildTx,
   buildTxDependencies,
 } from '../../../src/store/tx-executor/build-tx';

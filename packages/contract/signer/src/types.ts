@@ -25,11 +25,13 @@ export class AuthenticationCancelledError extends Error {
 
 /** Base transaction sign request. */
 export interface SignTransactionRequest {
+  /** The unsigned transaction, serialized as its chain encodes it: CBOR hex on Cardano. */
   serializedTx: HexBytes;
 }
 
 /** Base transaction sign result. */
 export interface SignTransactionResult {
+  /** The signed transaction, serialized as its chain encodes it: CBOR hex on Cardano. */
   serializedTx: HexBytes;
 }
 

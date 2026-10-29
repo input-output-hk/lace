@@ -1,15 +1,19 @@
 import { deepEquals } from '@cardano-sdk/util';
 import {
   convertHttpUrlToWebsocket,
+  getProofServerEndpoint,
   MidnightDustAddress,
   MidnightShieldedAddress,
   MidnightUnshieldedAddress,
-  midnightWallets$,
+  midnightWalletsForRuntime,
   SerialisedWalletState,
   toUnshieldedTokenType,
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { BigNumber, Milliseconds } from '@lace-lib/util';
+import { withReservationRelease } from '@lace-lib/vendor/midnight-facade-reservations';
+import { assertProofServerRouting } from '@lace-lib/vendor/midnight-proof-servers';
+import { createProgressSubmissionService } from '@lace-lib/vendor/midnight-submission-service';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
 import {
   InMemoryTransactionHistoryStorage,
@@ -31,7 +35,9 @@ import {
 import {
   catchError,
   defaultIfEmpty,
+  defer,
   distinctUntilChanged,
+  EMPTY,
   exhaustMap,
   filter,
   firstValueFrom,
@@ -48,8 +54,18 @@ import {
   zip,
 } from 'rxjs';
 
+import { createAttestedProofServerAccess } from './attested-proving-service';
 import { computeConnectedSyncRatio } from './compute-sync-ratio';
+import {
+  createHttpProofServerTransport,
+  createProofServerAccess,
+} from './proof-server-transport';
+import { createScopedProofServerAccess } from './scoped-proving';
+import { teeAttestationProgress$ } from './send-proof-progress';
 
+import type { AttestedProverProvider } from './attested-proving-service';
+import type { ProofServerAccess } from './proof-server-transport';
+import type { FinalizeRecipeWithProgress } from './scoped-proving';
 import type {
   AccountKeyManager,
   CoinsByTokenType,
@@ -57,6 +73,7 @@ import type {
   MidnightWallet,
   CoinStatus,
   MidnightAccountId,
+  ProofCircuitProvider,
   SerializedMidnightWallet,
   StartMidnightAccountWalletParams,
 } from '@lace-contract/midnight-context';
@@ -91,12 +108,43 @@ const keysWithAuthCancelledRecovery$ = (
 // Only create new serialized state every 5 seconds
 const STATE_SERIALISATION_THROTTLE_TIME = Milliseconds(5000);
 
+/** How the engine applies synced events: `size` events per synchronous WASM
+ * chunk, `spacing` ms between chunks. */
+export type MidnightSyncBatchUpdates = { size: number; spacing: number };
+
+// WASM applies each batch synchronously (~6ms per shielded event).
+// Bound its size to keep service-worker messaging responsive during catch-up.
+const DEFAULT_BATCH_UPDATES: MidnightSyncBatchUpdates = {
+  size: 12,
+  spacing: 4,
+};
+
+/** Builds the attested prover a `tee-delegated` proof server proves through. */
+export type CreateAttestedProver = (props: {
+  networkId: string;
+  proofServerApiUrl: string;
+  getLedgerIndexerUrl: () => Promise<string>;
+}) => AttestedProverProvider;
+
+/** What the loadout supplies to the engine. */
+export type MidnightEngineOptions = {
+  /** Without it, a wallet on a `tee-delegated` proof server does not start. */
+  createAttestedProver?: CreateAttestedProver;
+  /** App loadouts supply local proving; headless loadouts reject it by default. */
+  createLocalProofServerAccess?: (
+    onProgress: NonNullable<Parameters<FinalizeRecipeWithProgress>[2]>,
+  ) => ProofServerAccess;
+  batchUpdates?: MidnightSyncBatchUpdates;
+};
+
 type MidnightAccountWalletInstanceDependencies =
   StartMidnightAccountWalletParams;
 
 type AccountWalletInstanceResult = {
   walletFacade: WalletFacade;
   txHistoryStorage: InMemoryTransactionHistoryStorage;
+  proofCircuitProvider: ProofCircuitProvider;
+  finalizeRecipe: FinalizeRecipeWithProgress;
 };
 
 /**
@@ -131,10 +179,16 @@ const getAccountWalletInstance = async (
   {
     account,
     config,
+    getTemenosLedgerIndexerUrl,
     store,
     keyManager,
   }: MidnightAccountWalletInstanceDependencies,
   logger: WithLogger['logger'],
+  {
+    createAttestedProver,
+    createLocalProofServerAccess,
+    batchUpdates = DEFAULT_BATCH_UPDATES,
+  }: MidnightEngineOptions,
 ): Promise<AccountWalletInstanceResult> => {
   // Keyed read, not getAll().find(): computeDocId is the accountId, so this is
   // one adapter read of this account's own key. getAll() re-reads every
@@ -151,20 +205,62 @@ const getAccountWalletInstance = async (
   };
   const { networkId } = account.blockchainSpecific;
 
+  const proofServerUrl = getProofServerEndpoint(config.proofServer);
+  if (!proofServerUrl && config.proofServer.kind !== 'in-process') {
+    throw new Error(
+      `Cannot start Midnight wallet: proof server mode "${config.proofServer.kind}" has no HTTP endpoint`,
+    );
+  }
+  assertProofServerRouting(
+    config.proofServer,
+    !!createAttestedProver,
+    !!createLocalProofServerAccess,
+  );
+
+  // tee-delegated proving always goes through the attested service, and
+  // nothing — remote flag included — can swap it for anything that does not
+  // attest: without a prover the wallet does not start.
+  const createAccess = (
+    onProgress: NonNullable<Parameters<FinalizeRecipeWithProgress>[2]>,
+  ): ProofServerAccess =>
+    config.proofServer.kind === 'in-process' && createLocalProofServerAccess
+      ? createLocalProofServerAccess(onProgress)
+      : config.proofServer.kind === 'tee-delegated' && createAttestedProver
+      ? createAttestedProofServerAccess(
+          createAttestedProver({
+            networkId: networkId,
+            proofServerApiUrl: config.proofServer.url,
+            getLedgerIndexerUrl: async () => {
+              if (!getTemenosLedgerIndexerUrl)
+                throw new Error(
+                  'Temenos attestation requires a ledger indexer resolver',
+                );
+              return getTemenosLedgerIndexerUrl();
+            },
+          }),
+          onProgress,
+        )
+      : createProofServerAccess(
+          createHttpProofServerTransport(proofServerUrl!),
+        );
+
+  // Connector calls have no ownership of the wallet send checklist.
+  const proofServer = createScopedProofServerAccess(createAccess);
+  const { finalizeRecipe } = proofServer;
+
   const configuration: DefaultConfiguration = {
     costParameters: {
       additionalFeeOverhead: 300_000_000_000_000n,
       feeBlocksMargin: 5,
     },
     networkId,
-    // Each batch is applied as one synchronous WASM chunk (~6ms/event shielded),
-    // so `size` bounds the event loop's maximum blocking time (~70ms) to keep SW
-    // messaging responsive during catch-up. Apply cost dominates throughput, so
-    // larger batches barely sync faster while blocking the loop proportionally
-    // longer; per-event pacing (the previous approach) capped sync at ~100 ev/s.
-    batchUpdates: { size: 12, spacing: 4 },
+    batchUpdates,
     indexerClientConnection,
-    provingServerUrl: new URL(config.proofServerAddress),
+    // No `provingServerUrl`: the facade only reads it to build its default
+    // HTTP prover when no `provingService` is injected, and Lace always
+    // injects one. Leaving it unset means no SDK path can reach a proof
+    // server except through `proofServer` above — for `tee-delegated`, the
+    // attested channel.
     relayURL: new URL(convertHttpUrlToWebsocket(config.nodeAddress)),
     txHistoryStorage: new InMemoryTransactionHistoryStorage(
       WalletEntrySchema,
@@ -222,6 +318,8 @@ const getAccountWalletInstance = async (
       return {
         walletFacade: await WalletFacade.init({
           configuration,
+          provingService: () => proofServer.provingService,
+          submissionService: createProgressSubmissionService,
           shielded: config =>
             ShieldedWallet(config).restore(
               SerialisedWalletState.toJSON(shielded),
@@ -234,6 +332,8 @@ const getAccountWalletInstance = async (
             DustWallet(config).restore(SerialisedWalletState.toJSON(dust)),
         }),
         txHistoryStorage: restoredTxHistoryStorage,
+        proofCircuitProvider: proofServer.circuits,
+        finalizeRecipe,
       };
     }
   }
@@ -257,6 +357,8 @@ const getAccountWalletInstance = async (
   return {
     walletFacade: await WalletFacade.init({
       configuration,
+      provingService: () => proofServer.provingService,
+      submissionService: createProgressSubmissionService,
       shielded: config => ShieldedWallet(config).startWithSeed(zswapKeyBuffer),
       unshielded: config =>
         UnshieldedWallet(config).startWithPublicKey(
@@ -266,6 +368,8 @@ const getAccountWalletInstance = async (
         DustWallet(config).startWithSeed(dustKeyBuffer, dustParameters),
     }),
     txHistoryStorage,
+    proofCircuitProvider: proofServer.circuits,
+    finalizeRecipe,
   };
 };
 
@@ -280,17 +384,22 @@ const createAccountObservableMidnightWallet = ({
   keyManager,
   walletFacade,
   haltPersistence,
+  proofCircuitProvider,
+  finalizeRecipe,
 }: {
   account: StartMidnightAccountWalletParams['account'];
   keyManager: StartMidnightAccountWalletParams['keyManager'];
   walletFacade: WalletFacade;
   haltPersistence: () => void;
+  proofCircuitProvider: ProofCircuitProvider;
+  finalizeRecipe: FinalizeRecipeWithProgress;
 }): Observable<MidnightWallet> => {
   const { networkId } = account.blockchainSpecific;
 
   const state$ = walletFacade
     .state()
     .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+  const releasing = withReservationRelease(walletFacade);
 
   // Get nightVerifyingKey from first state emission - works for both restored and new wallets
   return state$.pipe(
@@ -306,6 +415,7 @@ const createAccountObservableMidnightWallet = ({
         areKeysAvailable$: keyManager.areKeysAvailable$,
         networkId,
         nightVerifyingKey,
+        proofCircuitProvider,
         walletId: account.walletId,
 
         address$: state$.pipe(
@@ -411,7 +521,7 @@ const createAccountObservableMidnightWallet = ({
             take(1),
             switchMap(({ walletKeys: { dustSecretKey, zswapSecretKeys } }) =>
               from(
-                walletFacade.balanceFinalizedTransaction(
+                releasing.balanceFinalizedTransaction(
                   tx,
                   {
                     shieldedSecretKeys: zswapSecretKeys,
@@ -427,7 +537,7 @@ const createAccountObservableMidnightWallet = ({
             take(1),
             switchMap(({ walletKeys: { dustSecretKey, zswapSecretKeys } }) =>
               from(
-                walletFacade.balanceUnboundTransaction(
+                releasing.balanceUnboundTransaction(
                   tx,
                   {
                     shieldedSecretKeys: zswapSecretKeys,
@@ -480,7 +590,8 @@ const createAccountObservableMidnightWallet = ({
           ),
         getTransactionHistoryEntryByHash: hash =>
           from(walletFacade.queryTxHistoryByHash(hash)),
-        finalizeRecipe: recipe => from(walletFacade.finalizeRecipe(recipe)),
+        finalizeRecipe: (recipe, onProgress) =>
+          defer(async () => finalizeRecipe(walletFacade, recipe, onProgress)),
         finalizeTransaction: recipe =>
           from(walletFacade.finalizeTransaction(recipe)),
         registerNightUtxosForDustGeneration: (nightUtxos, dustAddress) =>
@@ -497,6 +608,7 @@ const createAccountObservableMidnightWallet = ({
               ),
             ),
           ),
+        revert: recipe => from(walletFacade.revert(recipe)),
         state: () => state$,
         // Persistence is owned by the account watcher, so it outlives stop():
         // the SDK state stream goes silent rather than completing, and a queued
@@ -543,7 +655,7 @@ const createAccountObservableMidnightWallet = ({
             take(1),
             switchMap(({ walletKeys: { dustSecretKey, zswapSecretKeys } }) =>
               from(
-                walletFacade.transferTransaction(
+                releasing.transferTransaction(
                   outputs,
                   {
                     shieldedSecretKeys: zswapSecretKeys,
@@ -559,9 +671,8 @@ const createAccountObservableMidnightWallet = ({
             take(1),
             switchMap(({ walletKeys: { dustSecretKey, zswapSecretKeys } }) =>
               from(
-                walletFacade.initSwap(
-                  desiredInputs,
-                  desiredOutputs,
+                releasing.initSwap(
+                  { desiredInputs, desiredOutputs },
                   {
                     shieldedSecretKeys: zswapSecretKeys,
                     dustSecretKey: dustSecretKey,
@@ -580,6 +691,8 @@ type ManagedWalletInstances = {
   walletFacade: WalletFacade;
   /** Synchronously stops future persist writes; see the persistOnce guard. */
   haltPersistence: () => void;
+  proofCircuitProvider: ProofCircuitProvider;
+  finalizeRecipe: FinalizeRecipeWithProgress;
 };
 
 /**
@@ -598,6 +711,7 @@ type ManagedWalletInstances = {
 const createAndManageWallets = (
   props: StartMidnightAccountWalletParams,
   { logger }: WithLogger,
+  options: MidnightEngineOptions,
 ): Observable<ManagedWalletInstances> => {
   const { keyManager, account, store } = props;
 
@@ -615,8 +729,12 @@ const createAndManageWallets = (
 
     const init = async () => {
       // 1. Create all wallets + WalletFacade
-      const { walletFacade: facade, txHistoryStorage } =
-        await getAccountWalletInstance(props, logger);
+      const {
+        walletFacade: facade,
+        txHistoryStorage,
+        proofCircuitProvider,
+        finalizeRecipe,
+      } = await getAccountWalletInstance(props, logger, options);
 
       if (isDestroyed) {
         // Cleanup if unsubscribed during async init
@@ -801,6 +919,8 @@ const createAndManageWallets = (
         haltPersistence: () => {
           isPersistenceHalted = true;
         },
+        proofCircuitProvider,
+        finalizeRecipe,
       });
     };
 
@@ -842,60 +962,86 @@ const createAndManageWallets = (
 const createStartMidnightAccountWallet =
   (
     dependencies: WithLogger,
+    options: MidnightEngineOptions,
   ): MidnightSideEffectsDependencies['startMidnightAccountWallet'] =>
   props =>
-    createAndManageWallets(props, dependencies).pipe(
-      switchMap(({ walletFacade, haltPersistence }) =>
-        createAccountObservableMidnightWallet({
-          account: props.account,
-          keyManager: props.keyManager,
+    createAndManageWallets(props, dependencies, options).pipe(
+      switchMap(
+        ({
           walletFacade,
           haltPersistence,
-        }),
+          proofCircuitProvider,
+          finalizeRecipe,
+        }) =>
+          createAccountObservableMidnightWallet({
+            account: props.account,
+            keyManager: props.keyManager,
+            walletFacade,
+            haltPersistence,
+            proofCircuitProvider,
+            finalizeRecipe,
+          }),
       ),
     );
 
-export const initializeMidnightSideEffectDependencies: LaceInitSync<
-  MidnightSideEffectsDependencies
-> = (_, dependencies) => ({
-  midnightWallets$,
+/**
+ * The engine's side-effect dependencies. The attested prover is the
+ * loadout's: the app proves through the bundled Temenos deployment, which a
+ * headless loadout does not ship.
+ */
+export const createMidnightSideEffectDependencies =
+  (
+    options: MidnightEngineOptions = {},
+  ): LaceInitSync<MidnightSideEffectsDependencies> =>
+  ({ runtime }, dependencies) => {
+    const midnightWallets$ = midnightWalletsForRuntime(runtime);
+    return {
+      midnightWallets$,
 
-  getMidnightWalletByAccountId: (accountId: AccountId) =>
-    midnightWallets$.pipe(
-      take(1),
-      map(wallets => wallets[accountId]),
-      switchMap(wallet =>
-        wallet
-          ? of(wallet)
-          : throwError(
-              () =>
-                new Error(
-                  `Could not load midnight wallet for account ${accountId}`,
+      wasmProofActivities$: EMPTY,
+      dismissWasmProofActivity: () => undefined,
+      teeAttestationProgress$,
+
+      getMidnightWalletByAccountId: (accountId: AccountId) =>
+        midnightWallets$.pipe(
+          take(1),
+          map(wallets => wallets[accountId]),
+          switchMap(wallet =>
+            wallet
+              ? of(wallet)
+              : throwError(
+                  () =>
+                    new Error(
+                      `Could not load midnight wallet for account ${accountId}`,
+                    ),
                 ),
-            ),
+          ),
+        ),
+
+      stopAllMidnightWallets: () => {
+        const walletsArray = Object.values(midnightWallets$.value);
+        midnightWallets$.next({});
+        if (walletsArray.length === 0) {
+          return of(void 0);
+        }
+        return forkJoin(walletsArray.map(wallet => wallet.stop())).pipe(
+          map(() => void 0),
+        );
+      },
+
+      stopMidnightWallet: (accountId: AccountId) => {
+        const wallet = midnightWallets$.value[accountId];
+        if (!wallet) {
+          return of(void 0);
+        }
+        const { [accountId]: _, ...remaining } = midnightWallets$.value;
+        midnightWallets$.next(remaining);
+        return wallet.stop().pipe(map(() => void 0));
+      },
+
+      startMidnightAccountWallet: createStartMidnightAccountWallet(
+        dependencies,
+        options,
       ),
-    ),
-
-  stopAllMidnightWallets: () => {
-    const walletsArray = Object.values(midnightWallets$.value);
-    midnightWallets$.next({});
-    if (walletsArray.length === 0) {
-      return of(void 0);
-    }
-    return forkJoin(walletsArray.map(wallet => wallet.stop())).pipe(
-      map(() => void 0),
-    );
-  },
-
-  stopMidnightWallet: (accountId: AccountId) => {
-    const wallet = midnightWallets$.value[accountId];
-    if (!wallet) {
-      return of(void 0);
-    }
-    const { [accountId]: _, ...remaining } = midnightWallets$.value;
-    midnightWallets$.next(remaining);
-    return wallet.stop().pipe(map(() => void 0));
-  },
-
-  startMidnightAccountWallet: createStartMidnightAccountWallet(dependencies),
-});
+    };
+  };

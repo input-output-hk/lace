@@ -68,9 +68,9 @@ export interface DecodedHdKey {
  * conveys it (a real ur:crypto-account / ur:crypto-hdkey body decodes to a bare
  * CBOR map at the top level), while inner descriptors stay tagged.
  *
- * - tag whose number is in tags   -> consume it, positioning on the inner value
- * - tag whose number is NOT in tags -> throw (genuinely wrong type)
- * - not a tag                     -> leave the reader untouched (UR-untagged form)
+ * - tag whose number is in tags   → consume it, positioning on the inner value
+ * - tag whose number is NOT in tags → throw (genuinely wrong type)
+ * - not a tag                     → leave the reader untouched (UR-untagged form)
  *
  * Only use this for the OUTERMOST top-level registry tag. Inner descriptor tags
  * remain strictly required.
@@ -198,7 +198,7 @@ const childNumberFor = (components: PathComponent[]): number => {
  *
  * The extended key is ALWAYS serialized with the mainnet (xpub) version for both
  * networks. Lace stores Bitcoin account extended public keys this way because
- * '@scure/bip32' HDKey.fromExtendedKey recognizes only mainnet versions; the
+ * `@scure/bip32` HDKey.fromExtendedKey recognizes only mainnet versions; the
  * network is tracked separately via the keypath coin-type and the account
  * networkId. BIP-32 version bytes do not affect child derivation or key material.
  */

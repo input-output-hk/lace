@@ -10,6 +10,10 @@
  * this base module should shrink.
  */
 import { activitiesStoreContract } from '@lace-contract/activities';
+import {
+  analyticsProviderDependencyContract,
+  analyticsStoreContract,
+} from '@lace-contract/analytics';
 import { failuresStoreContract } from '@lace-contract/failures';
 import {
   combineContracts,
@@ -28,6 +32,17 @@ import store from './base-module-store';
 
 const implementsContracts = combineContracts([
   activitiesStoreContract,
+  // Every chain reaches the analytics store: Midnight through failures-store,
+  // Cardano through cardano-provider-store, and Cardano and Bitcoin through
+  // the app and views stores of the Cardano app module. The base module is
+  // the one module every loadout loads, so it carries the store for all of
+  // them, a loadout with no chain module included; loading it only where it
+  // is reached would need the module system to know which loadouts reach it.
+  // In every loadout the store mints a random analytics user id and persists
+  // it under the `analytics` key of the host's storage. The id goes no
+  // further: this module's `trackAnalyticsEvent` reports nothing.
+  analyticsStoreContract,
+  analyticsProviderDependencyContract,
   networkStoreContract,
   failuresStoreContract,
   walletActiveStateDependencyContract,

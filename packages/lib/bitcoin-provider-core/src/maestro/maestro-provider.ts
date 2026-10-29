@@ -34,7 +34,7 @@ import type {
 import type { Logger } from 'ts-log';
 
 /**
- * High‑level REST wrapper around Maestro’s Bitcoin API.
+ * High-level REST wrapper around Maestro's Bitcoin API.
  */
 export class MaestroBitcoinProvider {
   protected logger: Logger;
@@ -45,8 +45,8 @@ export class MaestroBitcoinProvider {
   /**
    * Creates a new instance of the Maestro Bitcoin provider.
    *
-   * @param client  Pre‑configured HTTP client.
-   * @param logger  Any ts‑log compatible logger implementation.
+   * @param client - Pre-configured HTTP client.
+   * @param logger - Any ts-log compatible logger implementation.
    */
   public constructor(client: HttpClient, logger: Logger) {
     this.#client = client;
@@ -56,7 +56,7 @@ export class MaestroBitcoinProvider {
   /**
    * Fetches the current block height and hash.
    *
-   * @returns {Promise<BitcoinBlockInfo>} A promise that resolves with the current blockchain information.
+   * @returns A promise that resolves with the current blockchain information.
    */
   public async getLastKnownBlock(): Promise<BitcoinBlockInfo> {
     const {
@@ -74,11 +74,11 @@ export class MaestroBitcoinProvider {
   /**
    * Retrieves detailed information about a specific blockchain transaction by its hash.
    *
-   * @param {string} txHash - The hash of the transaction to retrieve. This is typically a unique identifier
+   * @param txHash - The hash of the transaction to retrieve. This is typically a unique identifier
    * in hexadecimal format.
-   * @returns {Promise<BitcoinTransactionHistoryEntry>} A promise that resolves to a `TransactionHistoryEntry`.
+   * @returns A promise that resolves to a `TransactionHistoryEntry`.
    *
-   * @throws {Error} Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
+   * @throws `Error` Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
    * incorrect transaction hash, or the transaction not existing in the blockchain.
    */
   public async getTransaction(
@@ -108,10 +108,10 @@ export class MaestroBitcoinProvider {
    * Raw bytes of confirmed transactions are immutable, so they are cached
    * indefinitely; unconfirmed transactions are re-fetched on every call.
    *
-   * @param {string} txHash - The hash of the transaction to retrieve, in hexadecimal format.
-   * @returns {Promise<string>} A promise that resolves to the raw transaction hex.
+   * @param txHash - The hash of the transaction to retrieve, in hexadecimal format.
+   * @returns A promise that resolves to the raw transaction hex.
    *
-   * @throws {Error} Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
+   * @throws `Error` Throws an error if the transaction cannot be retrieved, which might occur due to network issues,
    * incorrect transaction hash, or the transaction not existing in the blockchain.
    */
   public async getRawTransaction(txHash: string): Promise<string> {
@@ -132,13 +132,13 @@ export class MaestroBitcoinProvider {
   }
 
   /**
-   * Retrieve a **paginated**, (reverse‑chronological by default) history of transactions
+   * Retrieve a **paginated**, (reverse-chronological by default) history of transactions
    * that involve a given address.
    *
-   * @param {string} address - The Bitcoin address or script pubkey to query for transactions.
+   * @param address - The Bitcoin address or script pubkey to query for transactions.
    * @param parameters - Optional parameters to filter and paginate the transaction history.
    *
-   * @returns `BitcoinPaginatedResponse` –
+   * @returns `BitcoinPaginatedResponse` -
    *          `{ items: TransactionHistoryEntry[]; cursor: string }`.
    */
   public async getTransactions(
@@ -174,9 +174,9 @@ export class MaestroBitcoinProvider {
    * It returns an array of transaction history entries representing UTXOs that are currently unconfirmed.
    * Optionally, you can filter transactions to only include those observed after a specified block height.
    *
-   * @param {string} address - The Bitcoin address or script pubkey to query for pending transactions.
+   * @param address - The Bitcoin address or script pubkey to query for pending transactions.
    * @param parameters - Optional parameters to filter and paginate the transaction history.
-   * @returns `BitcoinPaginatedResponse` –
+   * @returns `BitcoinPaginatedResponse` -
    *          `{ items: TransactionHistoryEntry[]; cursor: string }`.
    */
   public async getTransactionsInMempool(
@@ -217,7 +217,7 @@ export class MaestroBitcoinProvider {
   /**
    * Fetches the unspent transaction outputs (UTxOs) associated with a specified address.
    *
-   * @returns {Promise<BitcoinUTxO[]>} A promise that resolves with a list of UTxOs for the address.
+   * @returns A promise that resolves with a list of UTxOs for the address.
    */
   public async getUTxOs(
     address: string,
@@ -261,7 +261,7 @@ export class MaestroBitcoinProvider {
   /**
    * Submits a raw transaction to the blockchain for inclusion in a block.
    *
-   * @returns {Promise<string>} A promise that resolves with the transaction hash of the submitted transaction.
+   * @returns A promise that resolves with the transaction hash of the submitted transaction.
    */
   public async submitTransaction(rawTransaction: string): Promise<string> {
     const { data, status } = await this.request<string>(
@@ -286,7 +286,7 @@ export class MaestroBitcoinProvider {
   /**
    * Fetches the status of a specified transaction by its hash.
    *
-   * @returns {Promise<BitcoinTransactionStatus>} A promise that resolves with the current status of the transaction.
+   * @returns A promise that resolves with the current status of the transaction.
    */
   public async getTransactionStatus(
     txHash: string,
@@ -308,14 +308,14 @@ export class MaestroBitcoinProvider {
    * This method queries a blockchain fee estimation service to determine the appropriate fee
    * rate required for a transaction to be confirmed within the specified number of blocks.
    *
-   * @param {number} blocks - The target number of blocks within which the transaction should be confirmed.
+   * @param blocks - The target number of blocks within which the transaction should be confirmed.
    *                          A smaller number indicates a higher priority and typically results in a higher fee.
    *                          For example, `blocks = 1` requests a fee estimation for the next block confirmation.
-   * @param {BitcoinFeeEstimationMode} mode - The fee estimation mode, which determines the trade-off between
+   * @param mode - The fee estimation mode, which determines the trade-off between
    *                                   reliability and cost:
    *                                 - `FeeEstimationMode.Conservative`: Prioritizes confirmation reliability.
    *                                 - `FeeEstimationMode.Economical`: Aims to minimize fees, with potentially slower confirmations.
-   * @returns {Promise<number>} A promise that resolves to the estimated fee in satoshis per byte.
+   * @returns A promise that resolves to the estimated fee in satoshis per byte.
    *                            This value can be used to calculate the total transaction fee
    *                            based on the size of the transaction in bytes.
    */
@@ -347,16 +347,15 @@ export class MaestroBitcoinProvider {
   }
 
   /**
-   * Transform a Maestro transaction record into the wallet’s
+   * Transform a Maestro transaction record into the wallet's
    * `TransactionHistoryEntry` format.
    *
-   * @param txHash     The transaction hash.
-   * @param data       The data payload returned by `/rpc/transaction/{hash}`.
-   * @param overrides  Partial entry whose properties overwrite the derived base
+   * @param txHash - The transaction hash.
+   * @param data - The data payload returned by `/rpc/transaction/{hash}`.
+   * @param overrides - Partial entry whose properties overwrite the derived base
    *                   values (e.g. `{ status: Pending, confirmations: -1 }`).
    *
    * @returns A fully populated `TransactionHistoryEntry`.
-   * @private
    */
   private mapTxEntry(
     txHash: string,
@@ -393,8 +392,7 @@ export class MaestroBitcoinProvider {
   /**
    * Maps a transaction hash to a pending transaction entry.
    *
-   * @param txHash The transaction hash to map.
-   * @private
+   * @param txHash - The transaction hash to map.
    */
   private async mapTxToPendingEntry(
     txHash: string,
@@ -414,7 +412,6 @@ export class MaestroBitcoinProvider {
 
   /**
    * Performs a generic HTTP request to the Maestro API.
-   * @private
    */
   private async request<T>(
     endpoint: string,

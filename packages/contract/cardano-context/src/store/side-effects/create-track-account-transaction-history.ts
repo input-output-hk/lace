@@ -16,6 +16,9 @@ import {
   withLatestFrom,
   filter,
   combineLatest,
+  tap,
+  ignoreElements,
+  takeUntil,
 } from 'rxjs';
 
 import { getAccountAddresses } from '../helpers';
@@ -54,11 +57,36 @@ export const createTrackAccountTransactionHistory =
     }>,
   ): SideEffect =>
   (
-    _,
+    actionObservables,
     { addresses, cardanoContext, failures: { selectFailureById$ } },
     { actions, cardanoProvider: { getAddressTransactionHistory } },
-  ) =>
-    sourceObservable.pipe(
+  ) => {
+    const generations = new Map<AccountId, number>();
+    const reset$ = merge(
+      actionObservables.sync.clearPendingSyncsForAccounts$.pipe(
+        mergeMap(a =>
+          a.payload.accountIds.map(accountId => ({ payload: { accountId } })),
+        ),
+      ),
+      actionObservables.cardanoContext.resetWalletSyncState$,
+      actionObservables.cardanoContext.setWalletSyncResetResult$.pipe(
+        filter(a => a.payload.status === 'Failed'),
+      ),
+    );
+    return merge(
+      reset$.pipe(
+        tap(({ payload: { accountId } }) =>
+          generations.set(accountId, (generations.get(accountId) ?? 0) + 1),
+        ),
+        ignoreElements(),
+      ),
+      sourceObservable.pipe(
+        map(request => ({
+          request,
+          generation: generations.get(request.payload.accountId) ?? 0,
+        })),
+      ),
+    ).pipe(
       withLatestFrom(
         addresses.selectAllAddresses$,
         cardanoContext.selectAccountTransactionHistory$,
@@ -68,12 +96,16 @@ export const createTrackAccountTransactionHistory =
       concatMap(
         ([
           {
-            payload: { accountId, numberOfItems },
+            request: {
+              payload: { accountId, numberOfItems },
+            },
+            generation,
           },
           addresses,
           allAccountsAddressesHistories,
           chainId,
         ]) => {
+          if (generation !== (generations.get(accountId) ?? 0)) return EMPTY;
           const accountAddresses = getAccountAddresses(
             addresses,
             accountId,
@@ -97,6 +129,9 @@ export const createTrackAccountTransactionHistory =
               return result.unwrap();
             }),
             retryBackoff(PROVIDER_REQUEST_RETRY_CONFIG),
+            takeUntil(
+              reset$.pipe(filter(a => a.payload.accountId === accountId)),
+            ),
             mergeMap(addressHistories =>
               concat(
                 from<CardanoContextAction[]>([
@@ -133,6 +168,7 @@ export const createTrackAccountTransactionHistory =
         },
       ),
     );
+  };
 
 export const getLoadOlderActivitiesObservable = ({
   actionObservables,

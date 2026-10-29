@@ -49,6 +49,19 @@ export interface WebViewNavBarProps {
 
 export interface WebViewTemplateProps {
   url: string;
+  bridgeUnavailableNotice?: { title: string; body: string };
+  /**
+   * First valid native security-feature result per mounted protected Android WebView.
+   * Pending, malformed and stale results are excluded. Navigation and script changes
+   * share the allowance; reporting failures consume it. No document data is forwarded.
+   */
+  onBridgeCompatibilityClassified?: (
+    outcome:
+      | 'missing_both'
+      | 'missing_document_start_script'
+      | 'missing_web_message_listener'
+      | 'supported',
+  ) => void;
   onLoadStart?: (url: string) => void;
   onLoadEnd?: (url: string, loadTime: number) => void;
   onError?: (error: {

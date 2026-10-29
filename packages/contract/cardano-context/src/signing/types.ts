@@ -19,6 +19,8 @@ import type { HexBytes } from '@lace-lib/util';
 
 /** Interface for Cardano key operations. */
 export interface CardanoKeyAgent {
+  /** Release any short-lived in-memory unlock material after the sign call. */
+  dispose?(): void;
   /** Signs a transaction body and returns VKey witnesses. */
   signTransaction(
     txBody: Serialization.TransactionBody,
@@ -76,7 +78,9 @@ export interface CardanoTransactionSignerContext extends CardanoSignerContext {
 /** Transaction sign request. */
 export interface CardanoSignRequest extends SignTransactionRequest {}
 
+/** A signed Cardano transaction, ready for `submitCardanoTx`. */
 export interface CardanoSignResult extends SignTransactionResult {
+  /** How many witnesses signing added. */
   signatureCount: number;
 }
 

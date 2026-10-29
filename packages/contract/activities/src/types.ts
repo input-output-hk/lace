@@ -17,6 +17,10 @@ type BlockchainSpecificPart<BlockchainSpecificMetadata = unknown> = {
   blockchainSpecific?: BlockchainSpecificMetadata;
 };
 
+/**
+ * An entry in an account's transaction history: when it happened, its type,
+ * and the token balance changes it made, with chain-specific metadata.
+ */
 export type Activity<BlockchainSpecificMetadata = unknown> =
   BlockchainSpecificPart<BlockchainSpecificMetadata> & {
     accountId: AccountId;
@@ -26,6 +30,7 @@ export type Activity<BlockchainSpecificMetadata = unknown> =
     type: ActivityType;
   };
 
+/** An activity recording staking rewards received by the account. */
 export type RewardActivity<BlockchainSpecificMetadata = unknown> = Omit<
   Activity<BlockchainSpecificMetadata>,
   'type'
@@ -33,6 +38,7 @@ export type RewardActivity<BlockchainSpecificMetadata = unknown> = Omit<
   type: ActivityType.Rewards;
 };
 
+/** An activity with the fee it paid and the address it concerns, for its detail view. */
 export type ActivityDetail<BlockchainSpecificMetadata = unknown> =
   Activity<BlockchainSpecificMetadata> & {
     fee: string;
@@ -46,6 +52,11 @@ export type ActivityDetailsSheetUICustomisation = UICustomisation<
   { blockchainName: BlockchainName }
 >;
 
+/**
+ * Props a blockchain passes to its activity detail content component: the
+ * activity and its detail (`undefined` while loading), the block explorer
+ * link, the account and address it concerns, and token metadata for display.
+ */
 export type ActivityDetailsContentProps = {
   activityDetail: ActivityDetail | undefined;
   activityId: string;
@@ -72,6 +83,11 @@ export type ActivityTokenBalanceChange = {
   amount: BigNumber;
 };
 
+/**
+ * A display-ready summary of an activity's token balance changes: a title of
+ * formatted amount and label (for example a ticker or "NFTs"), and an
+ * optional subtitle.
+ */
 export type TokensInfoSummary = {
   title: {
     amount: string;
@@ -80,10 +96,18 @@ export type TokensInfoSummary = {
   subtitle?: string;
 };
 
+/**
+ * Picks the balance change to show as an activity's headline amount from all
+ * its token balance changes, or returns `undefined` when there is none.
+ */
 export type GetActivityTokenBalanceChange = (
   tokenBalanceChanges: Array<ActivityTokenBalanceChange>,
 ) => ActivityTokenBalanceChange | undefined;
 
+/**
+ * Summarises an activity's token balance changes for the activity list, using
+ * the given translated labels for NFTs, tokens, mixed assets and unknown tokens.
+ */
 export type GetActivityTokensInfoSummary = (
   tokenBalanceChanges: Array<ActivityTokenBalanceChange>,
   translations: {

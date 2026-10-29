@@ -2,19 +2,45 @@ import { Observable } from 'rxjs';
 
 import { createAccount } from '../flows/create-account';
 import { addDevice, removeDevice } from '../flows/devices';
+import { issueGrant, revokeAllGrants, revokeGrant } from '../flows/grants';
+import { readShieldedHoldings } from '../flows/holdings';
+import { installOperations } from '../flows/install-operations';
 import { signIn } from '../flows/sign-in';
 
 import { createAccountRecordStore, toAccountRecords } from './account-record';
 
 import type { CreatePassportAccountModuleProps } from '../create-passport-account-module';
-import type { SealedWithoutKeyOptions } from './account-record';
+import type {
+  AccountRecordStore,
+  SealedWithoutKeyOptions,
+} from './account-record';
 import type {
   CreateAccountInput,
   CreatedAccount,
 } from '../flows/create-account';
-import type { DeviceCallInput, DeviceRoster } from '../flows/devices';
+import type {
+  AddDeviceInput,
+  DeviceCallInput,
+  DeviceRoster,
+} from '../flows/devices';
+import type {
+  GrantRoster,
+  IssuedGrant,
+  IssueGrantInput,
+  RevokeGrantInput,
+} from '../flows/grants';
+import type { ReadHoldingsInput, ShieldedHoldings } from '../flows/holdings';
+import type {
+  InstalledOperations,
+  InstallOperationsInput,
+} from '../flows/install-operations';
 import type { RecognisedAccount } from '../flows/sign-in';
-import type { FlowContext, FlowProgress, FlowStage } from '../flows/types';
+import type {
+  AccountCallInput,
+  FlowContext,
+  FlowProgress,
+  FlowStage,
+} from '../flows/types';
 import type { PassportDependencies, SideEffect } from '@lace-contract/passport';
 
 /** What a flow reports while it runs: each stage as entered, then its result. */
@@ -40,13 +66,33 @@ export interface PassportFlowDependencies {
       dependencies: FlowRunnerDependencies,
     ) => Observable<FlowEvent<RecognisedAccount>>;
     addDevice: (
-      input: DeviceCallInput,
+      input: AddDeviceInput,
       dependencies: FlowRunnerDependencies,
     ) => Observable<FlowEvent<DeviceRoster>>;
     removeDevice: (
       input: DeviceCallInput,
       dependencies: FlowRunnerDependencies,
     ) => Observable<FlowEvent<DeviceRoster>>;
+    issueGrant: (
+      input: IssueGrantInput,
+      dependencies: FlowRunnerDependencies,
+    ) => Observable<FlowEvent<IssuedGrant>>;
+    revokeGrant: (
+      input: RevokeGrantInput,
+      dependencies: FlowRunnerDependencies,
+    ) => Observable<FlowEvent<GrantRoster>>;
+    revokeAllGrants: (
+      input: AccountCallInput,
+      dependencies: FlowRunnerDependencies,
+    ) => Observable<FlowEvent<GrantRoster>>;
+    readShieldedHoldings: (
+      input: ReadHoldingsInput,
+      dependencies: FlowRunnerDependencies,
+    ) => Observable<FlowEvent<ShieldedHoldings>>;
+    installOperations: (
+      input: InstallOperationsInput,
+      dependencies: FlowRunnerDependencies,
+    ) => Observable<FlowEvent<InstalledOperations>>;
   };
 }
 
@@ -81,10 +127,23 @@ const observeFlow = <T>(
   });
 
 /**
+ * What the host gives a flow context beyond the dependency bag: the
+ * record store, when the host supplies its own, the relying party id,
+ * when the host runs under one, and how a built store reads a sealed
+ * record it has no key for.
+ */
+type FlowHost = SealedWithoutKeyOptions & {
+  store?: AccountRecordStore;
+  rpId: string | undefined;
+};
+
+/**
  * The context a flow runs under, drawn from the side-effect dependency
- * bag: the four seams and a record store keyed by the authoriser, so a
- * record sealed by one authoriser is only ever written through it.
- * `recordOptions` is forwarded to the record store; signIn passes
+ * bag: the five seams, the record store and the relying party id. An
+ * injected store is used as is; otherwise the store is built over the
+ * platform storage and keyed by the authoriser, so a record sealed by one
+ * authoriser is only ever written through it. The sealed-record options
+ * apply to that built store; signIn and the grant flows pass
  * `onSealedWithoutKey: 'error'` so a sealed record found without a
  * storage key surfaces as record-unreadable rather than as an absent
  * account.
@@ -93,27 +152,31 @@ const toFlowContext = (
   {
     createKeyValueStorage,
     passportAuthoriser,
+    passportEncryptionKey,
     passportNetwork,
     passportProver,
     passportSponsor,
   }: FlowRunnerDependencies,
   onProgress: FlowProgress,
-  recordOptions?: SealedWithoutKeyOptions,
+  { store, rpId, ...recordOptions }: FlowHost,
 ): FlowContext => ({
   seams: {
     passportAuthoriser,
+    passportEncryptionKey,
     passportNetwork,
     passportProver,
     passportSponsor,
   },
   accountRecords: toAccountRecords(
-    createAccountRecordStore(
-      createKeyValueStorage,
-      passportAuthoriser.storageKey,
-      recordOptions,
-    ),
+    store ??
+      createAccountRecordStore(
+        createKeyValueStorage,
+        passportAuthoriser.storageKey,
+        recordOptions,
+      ),
   ),
   onProgress,
+  rpId,
 });
 
 /**
@@ -122,39 +185,79 @@ const toFlowContext = (
  * flows observable-based. The flows are promise functions; wrapping them
  * here rather than in the side effects is what keeps promise handling out
  * of the side effects, so they compose the flows as plain streams and stay
- * testable on a virtual scheduler.
+ * testable on a virtual scheduler. The relying party id defaults to the
+ * page's hostname, as the passkey ceremony's does.
  */
 export const createDependencies = ({
   authoriser,
+  encryptionKey,
   sponsor,
   prover,
   network,
+  accountRecordStore,
+  rpId = globalThis.location?.hostname,
 }: CreatePassportAccountModuleProps): PassportDependencies &
-  PassportFlowDependencies => ({
-  passportAuthoriser: authoriser,
-  passportSponsor: sponsor,
-  passportProver: prover,
-  passportNetwork: network,
-  passportFlows: {
-    createAccount: (input, dependencies) =>
-      observeFlow(async onProgress =>
-        createAccount(input, toFlowContext(dependencies, onProgress)),
-      ),
-    signIn: dependencies =>
-      observeFlow(async onProgress =>
-        signIn(
-          toFlowContext(dependencies, onProgress, {
-            onSealedWithoutKey: 'error',
-          }),
+  PassportFlowDependencies => {
+  const host: FlowHost = { store: accountRecordStore, rpId };
+  const recordRequired: FlowHost = { ...host, onSealedWithoutKey: 'error' };
+  return {
+    passportAuthoriser: authoriser,
+    passportEncryptionKey: encryptionKey,
+    passportSponsor: sponsor,
+    passportProver: prover,
+    passportNetwork: network,
+    passportFlows: {
+      createAccount: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          createAccount(input, toFlowContext(dependencies, onProgress, host)),
         ),
-      ),
-    addDevice: (input, dependencies) =>
-      observeFlow(async onProgress =>
-        addDevice(input, toFlowContext(dependencies, onProgress)),
-      ),
-    removeDevice: (input, dependencies) =>
-      observeFlow(async onProgress =>
-        removeDevice(input, toFlowContext(dependencies, onProgress)),
-      ),
-  },
-});
+      signIn: dependencies =>
+        observeFlow(async onProgress =>
+          signIn(toFlowContext(dependencies, onProgress, recordRequired)),
+        ),
+      addDevice: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          addDevice(input, toFlowContext(dependencies, onProgress, host)),
+        ),
+      removeDevice: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          removeDevice(input, toFlowContext(dependencies, onProgress, host)),
+        ),
+      issueGrant: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          issueGrant(
+            input,
+            toFlowContext(dependencies, onProgress, recordRequired),
+          ),
+        ),
+      revokeGrant: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          revokeGrant(
+            input,
+            toFlowContext(dependencies, onProgress, recordRequired),
+          ),
+        ),
+      revokeAllGrants: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          revokeAllGrants(
+            input,
+            toFlowContext(dependencies, onProgress, recordRequired),
+          ),
+        ),
+      readShieldedHoldings: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          readShieldedHoldings(
+            input,
+            toFlowContext(dependencies, onProgress, host),
+          ),
+        ),
+      installOperations: (input, dependencies) =>
+        observeFlow(async onProgress =>
+          installOperations(
+            input,
+            toFlowContext(dependencies, onProgress, host),
+          ),
+        ),
+    },
+  };
+};

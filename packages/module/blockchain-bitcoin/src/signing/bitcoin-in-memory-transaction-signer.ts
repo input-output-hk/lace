@@ -1,17 +1,9 @@
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { SecretBox } from '@lace-lib/core';
-import { HexBytes } from '@lace-lib/util';
 import { Redacted } from '@lace-lib/util-redacted';
 import { from, switchMap, throwError } from 'rxjs';
 
-import {
-  decodeUnsignedTxFromString,
-  deriveAccountRootKeyPair,
-  deriveChildKeyPair,
-  tweakTaprootPrivateKey,
-  AddressType,
-} from '../common';
-import { BitcoinSigner, signTx } from '../wallet';
+import { signBitcoinTransactionWithSeed } from './sign-bitcoin-transaction-with-seed';
 
 import type {
   BitcoinSignRequest,
@@ -19,6 +11,7 @@ import type {
   BitcoinTransactionSigner,
 } from '@lace-contract/bitcoin-context';
 import type { SignerAuth } from '@lace-contract/signer';
+import type { HexBytes } from '@lace-lib/util';
 import type { Observable } from 'rxjs';
 
 /** Signs Bitcoin transactions using an in-memory wallet. */
@@ -69,61 +62,10 @@ export class BitcoinInMemoryTransactionSigner
 
       rootPrivateKey = Redacted.make(Buffer.from(decryptedBytes));
 
-      const tx = decodeUnsignedTxFromString(serializedTx);
-      const signers = [];
-
-      for (const signingKey of tx.signers) {
-        const rootPrivateKeyValue = Redacted.value(rootPrivateKey);
-        const rootKeyPair = deriveAccountRootKeyPair({
-          seed: rootPrivateKeyValue,
-          addressType: signingKey.addressType,
-          network: signingKey.network,
-          account: signingKey.account,
-        });
-
-        const keyPair = deriveChildKeyPair(
-          rootKeyPair.pair.privateKey,
-          signingKey.chain,
-          signingKey.index,
-        );
-
-        let finalKeyPair = keyPair.pair;
-
-        if (signingKey.addressType === AddressType.Taproot) {
-          const internalXOnlyPubKey = keyPair.pair.publicKey.slice(1);
-          const tweakedPrivateKey = tweakTaprootPrivateKey(
-            Buffer.from(keyPair.pair.privateKey, 'hex'),
-            Buffer.from(internalXOnlyPubKey, 'hex'),
-          );
-
-          finalKeyPair = {
-            publicKey: keyPair.pair.publicKey,
-            privateKey: Buffer.from(tweakedPrivateKey).toString('hex'),
-          };
-        }
-
-        signers.push(
-          new BitcoinSigner({
-            publicKey: Buffer.from(finalKeyPair.publicKey, 'hex'),
-            privateKey: Buffer.from(finalKeyPair.privateKey, 'hex'),
-          }),
-        );
-      }
-
-      const signedTx = signTx(tx, signers);
-
-      for (const signer of signers) {
-        signer.clearSecrets();
-      }
-
-      return {
-        serializedTx: HexBytes.fromUTF8(
-          JSON.stringify({
-            network: tx.network,
-            hex: signedTx.hex,
-          }),
-        ),
-      };
+      return signBitcoinTransactionWithSeed(
+        serializedTx,
+        Redacted.value(rootPrivateKey),
+      );
     } finally {
       if (rootPrivateKey) {
         Redacted.unsafeWipe(rootPrivateKey);

@@ -58,9 +58,9 @@ const slice = createSlice({
 /**
  * Whether analytics may identify the wallet and report events.
  *
- * Without `ANALYTICS_CONSENT_REQUIRED` this is always `true`, which is the
- * behaviour every app but the carbon guest ships. Do not invert the default:
- * an app that never declares the flag would silently stop reporting.
+ * Without `ANALYTICS_CONSENT_REQUIRED` this is always `true`, the behaviour
+ * of every app that does not declare the flag. Do not invert the default: an
+ * app that never declares the flag would silently stop reporting.
  */
 const selectIsAnalyticsPermitted = createSelector(
   slice.selectors.selectAnalyticsConsent,

@@ -123,7 +123,7 @@ export const canonicalDustPayloadDefect = (
 };
 
 /**
- * @throws {MidnightCoinPubkeyError} `invalid-dust-payload` when `payload` is
+ * @throws `MidnightCoinPubkeyError` `invalid-dust-payload` when `payload` is
  *   not the canonical SCALE-compact encoding of an in-field BLS12-381 scalar.
  */
 const assertCanonicalDustPayload = (payload: Uint8Array): void => {
@@ -157,7 +157,7 @@ const dustNetworkFromHrp = (hrp: string): CardanoDustNetwork | undefined => {
  * of a BLS12-381 scalar, consuming the whole bech32m payload. The accepted
  * payload is returned verbatim as hex — the exact bytes that go on chain.
  *
- * @throws {MidnightCoinPubkeyError} `invalid-bech32m` when the string is
+ * @throws `MidnightCoinPubkeyError` `invalid-bech32m` when the string is
  *   not bech32m or not a `mn_dust*` HRP; `invalid-dust-payload` when the
  *   payload is not a canonical scalar encoding (which subsumes any over-long
  *   payload — a canonical in-field scalar never exceeds 33 bytes).

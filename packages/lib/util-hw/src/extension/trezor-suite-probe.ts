@@ -6,7 +6,7 @@ export const TREZOR_SUITE_DOWNLOAD_URL = 'https://trezor.io/trezor-suite';
  * other copies of this origin must stay in sync with it:
  *   - the `$TREZOR_SUITE_CONNECT_SRC` CSP replacement in
  *     apps/lace-extension/webpack/webpack-utils.js
- *   - @trezor/connect-webextension's own core-in-suite-desktop transport
+ *   - `@trezor/connect-webextension`'s own core-in-suite-desktop transport
  * The SDK owns the third copy, so a single shared constant can't cover all
  * three — hence the burned-in value guarded by this note.
  */
@@ -34,7 +34,7 @@ const isExtensionContext = (): boolean => {
  * its own. `null` means the probe does not apply (not an extension context,
  * e.g. mobile or Storybook) and no guidance should be derived from it.
  *
- * @param timeoutMs a localhost handshake settles in well under 50ms; the wide
+ * @param timeoutMs - a localhost handshake settles in well under 50ms; the wide
  *   default leaves headroom so a momentarily busy machine is not misreported
  *   as Suite being down.
  */

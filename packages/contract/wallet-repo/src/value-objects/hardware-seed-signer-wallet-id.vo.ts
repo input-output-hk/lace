@@ -19,6 +19,11 @@ export type HardwareSeedSignerWalletId = Tagged<
   'HardwareSeedSignerWalletId'
 >;
 
+/**
+ * The wallet ID of the Seed Signer with a master fingerprint, in any case.
+ *
+ * @throws `Error` when `xfpHex` is not 8 hex characters.
+ */
 export const HardwareSeedSignerWalletId = (
   xfpHex: string,
 ): HardwareSeedSignerWalletId => {

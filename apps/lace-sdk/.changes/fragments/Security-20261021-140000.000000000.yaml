@@ -1,0 +1,6 @@
+kind: Security
+body: '`@laceio/cardano` depends on `ip-address` 10.7.4 and `pbkdf2` 3.1.7, past their published advisories, so an app installing it or `@laceio/sdk` gets the fixed releases.'
+time: 2026-10-21T14:00:00.000000000+01:00
+custom:
+  Package: cardano
+  Build: stable

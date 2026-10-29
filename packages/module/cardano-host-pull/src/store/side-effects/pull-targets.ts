@@ -1,4 +1,4 @@
-import { isCardanoAccount } from '@lace-contract/cardano-context';
+import { isCardanoBip32Account } from '@lace-contract/cardano-context';
 
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 
@@ -12,12 +12,12 @@ export type PullTarget = {
   networkMagic: number;
 };
 
-/** The active-network Cardano accounts a pull covers. MultiSig is excluded: its
- * `blockchainSpecific` carries a key path rather than an accountIndex, so no
- * host account is addressable for it. */
+/** The active-network Cardano accounts a pull covers. Script accounts
+ * (MultiSig, custody) are excluded: their `blockchainSpecific` carries no
+ * accountIndex, so no host account is addressable for them. */
 export const pullTargets = (accounts: readonly AnyAccount[]): PullTarget[] =>
   accounts.flatMap(account => {
-    if (!isCardanoAccount(account) || account.accountType === 'MultiSig') {
+    if (!isCardanoBip32Account(account)) {
       return [];
     }
     const { accountIndex, chainId } = account.blockchainSpecific;

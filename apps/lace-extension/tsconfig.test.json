@@ -1,5 +1,13 @@
 {
   "extends": "../../tsconfig.test.json",
   "exclude": ["node_modules", "dist", "coverage"],
-  "include": ["./test/**/*test.ts", "../../declarations.d.ts"]
+  "include": [
+    "./test/**/*test.ts",
+    "./test/prover-runtime/**/*.ts",
+    "../../declarations.d.ts"
+  ],
+  "compilerOptions": {
+    "types": ["node", "vitest", "chrome"],
+    "lib": ["ES2023", "DOM", "WebWorker"]
+  }
 }

@@ -43,7 +43,7 @@ export const DelegationSuccess = ({
 
   return (
     <Column style={styles.content} testID={testID}>
-      <Icon name="RelievedFace" variant="solid" size={60} style={styles.icon} />
+      <Icon name="RelievedFace" strokeWidth={2} size={60} style={styles.icon} />
       <Text.M style={styles.message}>
         {t('v2.generic.staking.delegation-success.subtitle')}
       </Text.M>

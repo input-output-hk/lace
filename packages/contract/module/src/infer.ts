@@ -9,7 +9,9 @@ import type {
 } from './types';
 
 /**
- * Infer generic parameters in a way that preserves type safety
+ * Declares a module. It returns the module unchanged, with the types of its
+ * contracts, store and addons inferred from it, so a wallet that loads it is
+ * typed from them.
  */
 export const inferModuleContext = <
   Selectors extends object = object,
@@ -33,6 +35,11 @@ export const inferModuleContext = <
   >,
 ) => laceModule;
 
+/**
+ * Declares a contract. It returns the contract unchanged, with the types of
+ * its selectors, action creators and addons inferred from it, so the modules
+ * implementing or depending on it are typed from them.
+ */
 export const inferContractContext = <
   Selectors extends object = object,
   ActionCreators extends object = object,
@@ -95,6 +102,11 @@ type CombineContractProvidesAddons<
     >
   : Accumulator;
 
+/**
+ * Combines contracts into the set a module implements or depends on, typed
+ * with the selectors, action creators and addons of them all. Pass the array
+ * `as const` to keep each contract's types.
+ */
 export const combineContracts = <T extends Contract[]>(
   contracts: T,
 ): Contracts<
@@ -111,6 +123,7 @@ export const combineContracts = <T extends Contract[]>(
   >['contracts'],
 });
 
+/** The action creators a contract provides: its mixin's and those of the contracts it depends on. */
 export type ContractActionCreators<T> = [T] extends [
   Contract<
     infer _MixinSelectors,
@@ -122,6 +135,7 @@ export type ContractActionCreators<T> = [T] extends [
   ? DependencyActionCreators & MixinActionCreators
   : never;
 
+/** The action creators available to a module: its own store's, its contracts' and its dependencies'. */
 export type ModuleActionCreators<T> = T extends LaceModule<
   infer _Selectors,
   infer ActionCreators,
@@ -153,7 +167,9 @@ export type ModuleStoreActionCreators<T> = T extends LaceModuleStore<
   : never;
 
 /**
- * Infer generic parameters in a way that preserves type safety
+ * Declares a module's store: its actions, selectors and the loader of its
+ * reducers and side effects. It returns the store unchanged, with its
+ * selector and action-creator types inferred from it.
  */
 export const inferStoreContext = <
   Selectors extends object = object,

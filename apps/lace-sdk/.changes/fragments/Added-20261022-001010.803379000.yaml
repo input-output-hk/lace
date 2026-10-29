@@ -1,0 +1,6 @@
+kind: Added
+body: Password-based secret encryption gains a validated adapter for asynchronous native Argon2id implementations. Existing EMIP-003 encrypted secrets remain readable.
+time: 2026-10-22T00:10:10.803279+00:00
+custom:
+  Build: stable
+  Package: sdk

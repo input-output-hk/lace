@@ -1,0 +1,6 @@
+kind: Changed
+body: "A Passport account created with `lockAccount: false` hands its maintenance authority to the account's devices instead of leaving it with a key nobody keeps. Every device holding the account keys can upgrade the account, grants never can, and removing a device takes the authority away from it."
+time: 2026-10-21T19:49:08.522529+08:00
+custom:
+  Package: sdk
+  Build: canary

@@ -1431,6 +1431,62 @@ describe('send-flow sideEffects', () => {
     });
   });
 
+  describe('makeSendFlowTxBuilding (rewards withdrawal)', () => {
+    it.each([
+      ['build', false, 'FormTxBuilding'],
+      ['preview', true, 'Form'],
+    ] as const)(
+      'forwards the opening UI’s rewards permission to %s',
+      (_, preview, status) => {
+        const buildTx = vi.fn();
+        const previewTx = vi.fn();
+        const state = {
+          status,
+          accountId: cardanoAccount.accountId,
+          allowRewardsWithdrawal: true,
+          blockchainName: cardanoAccount.blockchainName,
+          blockchainSpecificData: {},
+          serializedTx: '',
+          minimumAmount: BigNumber(1n),
+          form: {
+            address: { dirty: true, error: null, value: 'address' },
+            tokenTransfers: [
+              {
+                amount: { dirty: true, error: null, value: BigNumber(10n) },
+                token: { value: midnightToken },
+              },
+            ],
+          },
+        } as unknown as SendFlowSliceState;
+        testSideEffect(
+          {
+            build: ({ cold }) => {
+              buildTx.mockReturnValue(cold(''));
+              previewTx.mockReturnValue(cold(''));
+              return makeSendFlowTxBuilding({ buildTx, previewTx, preview });
+            },
+          },
+          ({ cold, expectObservable, flush }) => ({
+            actionObservables: {},
+            stateObservables: {
+              sendFlow: { selectSendFlowState$: cold('a', { a: state }) },
+            },
+            dependencies: { actions: sendFlowActions },
+            assertion: sideEffect$ => {
+              expectObservable(sideEffect$).toBe('');
+              flush();
+
+              expect(preview ? previewTx : buildTx).toHaveBeenCalledWith(
+                expect.objectContaining({ allowRewardsWithdrawal: true }),
+                expect.any(Function),
+              );
+            },
+          }),
+        );
+      },
+    );
+  });
+
   describe('makeSendFlowAwaitingConfirmation', () => {
     it('calls "confirmTx"', () => {
       const confirmTx = vi.fn();
@@ -1536,6 +1592,7 @@ describe('send-flow sideEffects', () => {
               selectSendFlowState$: cold('a', {
                 a: {
                   accountId: midnightAccount.accountId,
+                  allowRewardsWithdrawal: false,
                   blockchainName: midnightAccount.blockchainName,
                   blockchainSpecificData: {},
                   confirmButtonEnabled: false,
@@ -1560,6 +1617,7 @@ describe('send-flow sideEffects', () => {
                     ],
                   },
                   fees: [],
+                  withdrawals: [],
                   minimumAmount: BigNumber(1n),
                   serializedTx,
                   wallet: {} as AnyWallet,

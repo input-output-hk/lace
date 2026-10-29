@@ -10,7 +10,7 @@ import {
   take,
 } from 'rxjs';
 
-import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
+import type { SignTxRefusal } from '../sign-tx-refusal';
 import type { Dapp } from '@lace-contract/dapp-connector';
 import type { DisconnectEvent } from '@lace-lib/extension-messaging';
 import type { Observable, Subscriber } from 'rxjs';
@@ -30,12 +30,12 @@ export type SignTxRequestData = {
   /** Whether this is a partial sign (multiple signers) */
   partialSign: boolean;
   /**
-   * Present ONLY when the collateral-ownership guard blocked the request: the
-   * consent surface is then opened in the refused state instead of the review
-   * state. Omitted entirely on the allow path, which keeps the ordinary
-   * request payload byte-identical to today.
+   * Present ONLY when a guard refused the request: the consent surface is then
+   * opened in the refused state instead of the review state. Omitted entirely
+   * on the allow path, which keeps the ordinary request payload
+   * byte-identical to today.
    */
-  collateralRefusal?: CollateralOwnershipErrorCase;
+  refusal?: SignTxRefusal;
 };
 
 /**
@@ -99,13 +99,10 @@ export type CardanoConfirmationRequest = ConfirmationRequestBase & {
   /** Partial sign flag for signTx requests */
   partialSign?: boolean;
   /**
-   * The collateral guard's refusal, or `null` when the request carries none.
-   * Required, never optional: a required key must be PRESENT in an object
-   * literal, so it cannot be dropped where the request is built -- and a
-   * dropped verdict would render a refused transaction as an ordinary review,
-   * live Sign button and all.
+   * The guard verdict that refused this request, or `null` when it carries
+   * none. Required, never optional -- see {@link SignTxRefusal}.
    */
-  collateralRefusal: CollateralOwnershipErrorCase | null;
+  refusal: SignTxRefusal | null;
   /** Address for signData requests */
   signDataAddress?: string;
   /** Payload for signData requests */
@@ -230,10 +227,9 @@ export const createCardanoConfirmationCallback = <T>(
         // Hoisted out of the conditional spread below: `null` on a connect or
         // signData request is TRUE, not filler -- that request carries no
         // verdict -- and only a plain key can be compile-checked for presence.
-        collateralRefusal:
+        refusal:
           type === 'signTx'
-            ? (requestData as SignTxRequestData | undefined)
-                ?.collateralRefusal ?? null
+            ? (requestData as SignTxRequestData | undefined)?.refusal ?? null
             : null,
         ...(type === 'signTx' &&
           requestData && {

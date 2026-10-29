@@ -5,7 +5,8 @@ import {
   type PayloadAction,
 } from '@reduxjs/toolkit';
 
-import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
+import type { SignTxRefusal } from './sign-tx-refusal';
+import type { SanitisedSignTxError } from '../utils/sign-tx-error-details';
 import type { ViewLocation } from '@lace-contract/views';
 import type { AccountId, AnyAccount } from '@lace-contract/wallet-repo';
 import type { HwSigningErrorTranslationKeys } from '@lace-lib/util-hw';
@@ -43,7 +44,7 @@ export type WebViewResponse = {
   id: string;
   success: boolean;
   result?: unknown;
-  error?: { code: number; info: string };
+  error?: { code: number; info: string; diagnostics?: SanitisedSignTxError };
   timestamp: number;
 };
 
@@ -126,15 +127,11 @@ export type PendingSignTxRequest = {
   txHex: string;
   partialSign: boolean;
   /**
-   * The collateral guard's block verdict, or `null` for a reviewable request.
-   * The only channel that puts either render mode into the refused state.
-   *
-   * Required, never optional: each hop from `#validateCanSign` to the screen
-   * copies explicit fields, and an optional one would typecheck while
-   * shipping the normal review screen -- live Sign button -- on a blocked
-   * transaction.
+   * The guard verdict that refused this request, or `null` for a reviewable
+   * one. The only channel that puts either render mode into the refused
+   * state; {@link SignTxRefusal} carries why it is a single required field.
    */
-  collateralRefusal: CollateralOwnershipErrorCase | null;
+  refusal: SignTxRefusal | null;
 };
 
 /**
@@ -205,6 +202,7 @@ export type CardanoDappConnectorState = {
   signTxCompleted: boolean;
   /** Whether signTx failed with a non-cancellation error (for showing error screen) */
   signTxError: boolean;
+  signTxErrorDetails: SanitisedSignTxError | null;
   /** Hardware-wallet-specific error translation keys for the error screen. */
   signTxHwErrorKeys: HwSigningErrorTranslationKeys | null;
   /** Whether signData completed successfully (for showing success screen) */
@@ -230,6 +228,7 @@ const initialState: CardanoDappConnectorState = {
   pendingSignTxRequest: null,
   signTxCompleted: false,
   signTxError: false,
+  signTxErrorDetails: null,
   signTxHwErrorKeys: null,
   signDataCompleted: false,
   signDataError: false,
@@ -428,8 +427,12 @@ const slice = createSlice({
     /**
      * Mark signTx as failed with a non-cancellation error (for error screen).
      */
-    setSignTxError: (state, { payload }: PayloadAction<boolean>) => {
-      state.signTxError = payload;
+    setSignTxError: (
+      state,
+      { payload }: PayloadAction<SanitisedSignTxError | boolean>,
+    ) => {
+      state.signTxError = payload !== false;
+      state.signTxErrorDetails = typeof payload === 'boolean' ? null : payload;
       if (!payload) state.signTxHwErrorKeys = null;
     },
     setSignTxHwErrorKeys: (
@@ -491,6 +494,7 @@ const slice = createSlice({
       if (payload !== null) {
         state.signTxCompleted = false;
         state.signTxError = false;
+        state.signTxErrorDetails = null;
         state.signTxHwErrorKeys = null;
       }
     },
@@ -600,6 +604,8 @@ const slice = createSlice({
       state.signTxCompleted,
     /** Whether signTx failed with a non-cancellation error */
     selectSignTxError: (state: CardanoDappConnectorState) => state.signTxError,
+    selectSignTxErrorDetails: (state: CardanoDappConnectorState) =>
+      state.signTxErrorDetails,
     /** HW-specific translation keys for a sign-tx failure, if any. */
     selectSignTxHwErrorKeys: (state: CardanoDappConnectorState) =>
       state.signTxHwErrorKeys,

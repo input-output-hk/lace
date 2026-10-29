@@ -29,9 +29,15 @@ const hoisted = vi.hoisted(() => {
     mockTxBody,
     mockTransaction,
     signTransaction: vi.fn().mockResolvedValue(new Map()),
-    TransactionCtor: Object.assign(vi.fn().mockReturnValue(mockSignedTx), {
-      fromCbor: vi.fn().mockReturnValue(mockTransaction),
-    }),
+    TransactionCtor: Object.assign(
+      // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
+      vi.fn(function () {
+        return mockSignedTx;
+      }),
+      {
+        fromCbor: vi.fn().mockReturnValue(mockTransaction),
+      },
+    ),
   };
 });
 

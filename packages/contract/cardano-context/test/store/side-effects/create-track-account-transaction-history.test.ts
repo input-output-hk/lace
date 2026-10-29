@@ -7,8 +7,8 @@ import {
 import { failuresActions } from '@lace-contract/failures';
 import { walletsActions } from '@lace-contract/wallet-repo';
 import { Err, Ok, Timestamp } from '@lace-lib/util';
-import { testSideEffect } from '@lace-lib/util-dev';
-import { EMPTY, of } from 'rxjs';
+import { testSideEffect as baseTestSideEffect } from '@lace-lib/util-dev';
+import { EMPTY, NEVER, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -42,6 +42,31 @@ import type {
   ActionObservables,
   StateObservables,
 } from '@lace-contract/module';
+import type { AccountId } from '@lace-contract/wallet-repo';
+
+const testSideEffect: typeof baseTestSideEffect<Selectors, ActionCreators> = (
+  effect,
+  setup,
+) => {
+  baseTestSideEffect(effect, helpers => {
+    const config = setup(helpers);
+    return {
+      ...config,
+      actionObservables: {
+        ...config.actionObservables,
+        sync: {
+          clearPendingSyncsForAccounts$: NEVER,
+          ...config.actionObservables?.sync,
+        },
+        cardanoContext: {
+          resetWalletSyncState$: NEVER,
+          setWalletSyncResetResult$: NEVER,
+          ...config.actionObservables?.cardanoContext,
+        },
+      },
+    };
+  });
+};
 
 const actions = {
   ...cardanoContextActions,
@@ -120,6 +145,147 @@ const mockAddress2History = [
 
 describe('cardano-context side effects', () => {
   describe('trackAccountTransactionHistory', () => {
+    it('preserves another account’s in-flight and queued pages when the target account resets', () => {
+      const target = cardanoAccount0Addr.accountId;
+      const other = cardanoAccount2Addr1WithCardanoData.accountId;
+      const fetchHistory = vi.fn();
+      testSideEffect(
+        {
+          build: ({ cold, hot }) => {
+            fetchHistory.mockReturnValue(cold('--------a|', { a: Ok([]) }));
+            return createTrackAccountTransactionHistory(
+              fetchHistory,
+              hot('-aba---b', {
+                a: { payload: { accountId: other, numberOfItems: 3 } },
+                b: { payload: { accountId: target, numberOfItems: 3 } },
+              }),
+            );
+          },
+        },
+        ({ hot, flush }) => ({
+          actionObservables: {
+            cardanoContext: {
+              resetWalletSyncState$: hot('-----a', {
+                a: actions.cardanoContext.resetWalletSyncState({
+                  accountId: target,
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            addresses: {
+              selectAllAddresses$: of([
+                cardanoAccount0Addr,
+                cardanoAccount2Addr1WithCardanoData,
+              ]),
+            },
+            cardanoContext: {
+              selectChainId$: of(chainId),
+              selectAccountTransactionHistory$: of({}),
+            },
+            failures: { selectFailureById$ },
+          },
+          dependencies: {
+            actions,
+            cardanoProvider: {
+              getTip: vi.fn(),
+              discoverAddresses: vi.fn(),
+              getTokens: vi.fn(),
+              getTokenMetadata: vi.fn(),
+              getAddressTransactionHistory: vi.fn(),
+              getAccountRewards: vi.fn(),
+              getAccountDelegations: vi.fn(),
+              getAccountRegistrations: vi.fn(),
+              getAccountWithdrawals: vi.fn(),
+              getAccountUtxos: vi.fn(),
+              getUtxosAtAddress: vi.fn(),
+              getRewardAccountInfo: vi.fn(),
+              getTransactionDetails: vi.fn(),
+              getProtocolParameters: vi.fn(),
+              getEraSummaries: vi.fn(),
+              resolveInput: vi.fn(),
+              submitTx: vi.fn(),
+              evaluateTx: vi.fn(),
+              getDReps: vi.fn(),
+            },
+          },
+          assertion: sideEffect$ => {
+            const accounts: AccountId[] = [];
+            sideEffect$.subscribe(action => {
+              if (
+                actions.cardanoContext.setAccountTransactionHistory.match(
+                  action,
+                )
+              )
+                accounts.push(action.payload.accountId);
+            });
+            flush();
+            expect(fetchHistory).toHaveBeenCalledTimes(3);
+            expect(accounts).toEqual([other, other, target]);
+          },
+        }),
+      );
+    });
+
+    it('drops queued pre-reset pagination and accepts fresh requests afterwards', () => {
+      const request = {
+        payload: { accountId: cardanoAccount0Addr.accountId, numberOfItems: 3 },
+      };
+      const fetchHistory = vi.fn();
+      testSideEffect(
+        {
+          build: ({ cold, hot }) => {
+            fetchHistory.mockReturnValue(cold('--------a|', { a: Ok([]) }));
+            return createTrackAccountTransactionHistory(
+              fetchHistory,
+              hot('-ab---c', { a: request, b: request, c: request }),
+            );
+          },
+        },
+        ({ hot, flush }) => ({
+          actionObservables: {
+            cardanoContext: {
+              resetWalletSyncState$: hot('----a', {
+                a: actions.cardanoContext.resetWalletSyncState({
+                  accountId: request.payload.accountId,
+                }),
+              }),
+            },
+          },
+          stateObservables: {
+            addresses: { selectAllAddresses$: of([cardanoAccount0Addr]) },
+            cardanoContext: {
+              selectChainId$: of(chainId),
+              selectAccountTransactionHistory$: of({}),
+            },
+            failures: { selectFailureById$ },
+          },
+          dependencies: {
+            actions,
+            cardanoProvider: {
+              getAddressTransactionHistory: vi.fn(),
+            } as unknown as CardanoProviderDependencies['cardanoProvider'],
+          },
+          assertion: sideEffect$ => {
+            const results: unknown[] = [];
+            sideEffect$.subscribe(action => results.push(action));
+            flush();
+            expect(fetchHistory).toHaveBeenCalledTimes(2);
+            expect(results).toEqual([
+              actions.cardanoContext.setAccountTransactionHistory({
+                accountId: request.payload.accountId,
+                addressHistories: [],
+              }),
+              actions.activities.setHasLoadedOldestEntry({
+                accountId: request.payload.accountId,
+                hasLoadedOldestEntry: true,
+              }),
+            ]);
+          },
+        }),
+      );
+    });
+
     it('queries and updates transaction history for a given cardano account on active network', () => {
       // Simulate successful history provider response for both addresses
       const getAddressTransactionHistoryMock = vi

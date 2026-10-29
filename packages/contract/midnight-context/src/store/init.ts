@@ -1,5 +1,7 @@
 import { createMigrate } from 'redux-persist';
 
+import { TEMENOS_PROOF_SERVER_MODES } from '../const';
+
 import { initializeSideEffects } from './side-effects';
 import { initialState, midnightContextReducers } from './slice';
 
@@ -11,24 +13,23 @@ import type {
   PersistedState,
 } from '@lace-contract/module';
 
-const store: LaceInit<LaceModuleStoreInit> = ({
-  runtime: {
-    config: { defaultMidnightTestnetNetworkId },
-  },
-}) => ({
+const store: LaceInit<LaceModuleStoreInit> = async props => ({
   sideEffects: initializeSideEffects(),
   reducers: midnightContextReducers,
   preloadedState: {
     midnightContext: {
       ...initialState,
-      defaultTestNetNetworkId: defaultMidnightTestnetNetworkId,
+      supportsWasmProver: props.runtime.app === 'lace-extension',
+      defaultTestNetNetworkId:
+        props.runtime.config.defaultMidnightTestnetNetworkId,
     },
   },
   persistConfig: {
     midnightContext: {
-      version: 12,
+      version: 14,
       whitelist: [
         'userNetworksConfigOverrides',
+        'proofServerDisclosureAcknowledgements',
         'isActivityPageHeaderBannerDismissed',
         'isPortfolioBannerDismissed',
         // Persist dustBalanceByAccount and dustGenerationDetailsByAccount to
@@ -129,7 +130,42 @@ const store: LaceInit<LaceModuleStoreInit> = ({
             for (const networkId in userOverrides) {
               const override =
                 userOverrides[networkId as keyof typeof userOverrides];
-              if (override) delete override.proofServerAddress;
+              if (override)
+                delete (override as { proofServerAddress?: string })
+                  .proofServerAddress;
+            }
+          }
+          return typedState;
+        },
+        13: state => {
+          // v12 deliberately retired legacy URL overrides. Do not turn a
+          // residual URL into a new delegated provider. Pre-release v12
+          // profiles may already have a proofServer selection; preserve it
+          // and let provider availability checks resolve it as usual.
+          const typedState = state as PersistedState<MidnightContextSliceState>;
+          for (const override of Object.values(
+            typedState.userNetworksConfigOverrides ?? {},
+          )) {
+            if (override)
+              delete (override as { proofServerAddress?: string })
+                .proofServerAddress;
+          }
+          return typedState;
+        },
+        14: state => {
+          const typedState = state as PersistedState<MidnightContextSliceState>;
+          for (const networkId of ['mainnet', 'preview'] as const) {
+            const override =
+              typedState.userNetworksConfigOverrides?.[networkId];
+            const previousMode = override?.proofServer;
+            const mode = TEMENOS_PROOF_SERVER_MODES[networkId];
+            if (
+              override &&
+              mode &&
+              previousMode?.kind === 'tee-delegated' &&
+              previousMode.url === 'https://api.proofserver.wastedp.io'
+            ) {
+              override.proofServer = { ...mode };
             }
           }
           return typedState;

@@ -1,4 +1,4 @@
-import { initializeMidnightSideEffectDependencies } from './dependencies';
+import { initializeMidnightSideEffectDependencies } from './initialize-dependencies';
 import { initializeSideEffects } from './side-effects';
 
 import type { LaceInit, LaceModuleStoreInit } from '@lace-contract/module';

@@ -31,7 +31,6 @@ export interface SignDataResultProps {
 
 interface ResultStateConfig {
   icon: IconName;
-  iconVariant: 'solid' | 'stroke';
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
   getIconColor: (theme: ReturnType<typeof useTheme>['theme']) => string;
@@ -40,7 +39,6 @@ interface ResultStateConfig {
 const RESULT_STATE_CONFIGS: Record<SignDataResultState, ResultStateConfig> = {
   success: {
     icon: 'RelievedFace',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-data.result.success.title',
     descriptionKey:
       'dapp-connector.cardano.sign-data.result.success.description',
@@ -48,14 +46,12 @@ const RESULT_STATE_CONFIGS: Record<SignDataResultState, ResultStateConfig> = {
   },
   failure: {
     icon: 'Sad',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-data.result.failure.drawer-title',
     descriptionKey: 'dapp-connector.cardano.sign-data.result.failure.body',
     getIconColor: theme => theme.text.primary,
   },
   rejected: {
     icon: 'Sad',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-data.result.rejected.title',
     descriptionKey:
       'dapp-connector.cardano.sign-data.result.rejected.description',
@@ -63,7 +59,6 @@ const RESULT_STATE_CONFIGS: Record<SignDataResultState, ResultStateConfig> = {
   },
   signing: {
     icon: 'Clock',
-    iconVariant: 'stroke',
     titleKey: 'dapp-connector.cardano.sign-data.result.signing.title',
     descriptionKey:
       'dapp-connector.cardano.sign-data.result.signing.description',
@@ -120,12 +115,7 @@ export const SignDataResult = ({
           <View
             style={styles.iconContainer}
             testID={testID ? `${testID}-icon` : undefined}>
-            <Icon
-              name={config.icon}
-              size={64}
-              variant={config.iconVariant}
-              color={iconColor}
-            />
+            <Icon name={config.icon} size={64} color={iconColor} />
           </View>
 
           <Text.M

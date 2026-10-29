@@ -1,0 +1,6 @@
+kind: Fixed
+body: '`@laceio/cardano` imports `Buffer` from the `buffer` package where it uses it, so it loads in a browser that defines no `Buffer` global.'
+time: 2026-10-21T12:20:13.240351000+01:00
+custom:
+  Package: cardano
+  Build: stable

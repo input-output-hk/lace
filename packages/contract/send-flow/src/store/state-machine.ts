@@ -41,12 +41,14 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
       _,
       {
         accountId,
+        allowRewardsWithdrawal = false,
         blockchainSpecificData = {},
         initialAddress,
         initialAmount,
         initialSelectedToken,
       }: {
         accountId?: AccountId;
+        allowRewardsWithdrawal?: boolean;
         blockchainSpecificData?: unknown;
         initialAddress?: string;
         initialAmount?: BigNumber;
@@ -55,6 +57,7 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
     ) => ({
       status: 'Preparing',
       accountId,
+      allowRewardsWithdrawal,
       blockchainSpecificData,
       initialAddress,
       initialAmount,
@@ -64,7 +67,7 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
   },
   Preparing: {
     preparingCompleted: (
-      { blockchainSpecificData },
+      { allowRewardsWithdrawal, blockchainSpecificData },
       {
         accountId,
         blockchainName,
@@ -77,10 +80,12 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
       }>,
     ) => ({
       accountId,
+      allowRewardsWithdrawal: allowRewardsWithdrawal ?? false,
       blockchainSpecificData,
       confirmButtonEnabled: false,
       blockchainName,
       fees: [],
+      withdrawals: [],
       form,
       // Initialize minimum amount to -1 (which is impossible as a valid amount) to indicate
       // that it is not yet initialized so that the user can see the three dots in the UI
@@ -177,6 +182,7 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
         ...previousState,
         confirmButtonEnabled: false,
         fees: [],
+        withdrawals: [],
         txBuildErrorTranslationKey: undefined,
         status: 'FormPendingValidation',
         form: {
@@ -360,10 +366,15 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
   Failure: {
     confirmed: previousState => ({
       ...previousState,
-      // Clear error state when retrying to prevent stale errors from persisting
+      // Confirmation replaces the build payload with signed bytes. Rebuild
+      // from the retained form before another confirmation attempt. Keep the
+      // old payload until buildTx can discard any resources it owns.
+      confirmButtonEnabled: false,
+      fees: [],
+      txBuildErrorTranslationKey: undefined,
       error: undefined,
       errorTranslationKeys: undefined,
-      status: 'Form',
+      status: 'FormPendingValidation',
     }),
 
     closed: ({ serializedTx, blockchainName }) => ({
@@ -378,12 +389,14 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
       _,
       {
         accountId,
+        allowRewardsWithdrawal = false,
         blockchainSpecificData = {},
         initialAddress,
         initialAmount,
         initialSelectedToken,
       }: {
         accountId?: AccountId;
+        allowRewardsWithdrawal?: boolean;
         blockchainSpecificData?: unknown;
         initialAddress?: string;
         initialAmount?: BigNumber;
@@ -392,6 +405,7 @@ export const sendFlowMachine = createStateMachine('sendFlow', initialState, {
     ) => ({
       status: 'Preparing',
       accountId,
+      allowRewardsWithdrawal,
       blockchainSpecificData,
       initialAddress,
       initialAmount,

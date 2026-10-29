@@ -1,10 +1,11 @@
 {
-  "name": "@input-output-hk/lace-sdk",
-  "version": "0.1.0",
+  "name": "@laceio/sdk",
+  "version": "0.0.0-development",
   "private": false,
+  "homepage": "https://sdk.lace.io",
   "repository": {
     "type": "git",
-    "url": "https://github.com/input-output-hk/lace-platform.git",
+    "url": "git+https://github.com/input-output-hk/lace-sdk.git",
     "directory": "apps/lace-sdk"
   },
   "license": "Apache-2.0",
@@ -15,6 +16,26 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./cardano": {
+      "types": "./dist/cardano.d.ts",
+      "import": "./dist/cardano.js",
+      "require": "./dist/cardano.cjs"
+    },
+    "./midnight": {
+      "types": "./dist/midnight.d.ts",
+      "import": "./dist/midnight.js",
+      "require": "./dist/midnight.cjs"
+    },
+    "./bitcoin": {
+      "types": "./dist/bitcoin.d.ts",
+      "import": "./dist/bitcoin.js",
+      "require": "./dist/bitcoin.cjs"
+    },
+    "./experimental": {
+      "types": "./dist/experimental.d.ts",
+      "import": "./dist/experimental.js",
+      "require": "./dist/experimental.cjs"
     }
   },
   "main": "./dist/index.cjs",
@@ -24,22 +45,65 @@
     "dist"
   ],
   "dependencies": {
+    "@laceio/cardano": "0.0.0-development",
     "@reduxjs/toolkit": "^2.6.1",
+    "bignumber.js": "9.0.1",
     "lodash": "^4.17.21",
+    "redux": "^5.0.1",
     "redux-observable": "^3.0.0-rc.2",
     "redux-persist": "^6.0.0",
+    "reselect": "5.3.0",
     "rxjs": "^7.8.1",
+    "serialize-error": "8.1.0",
     "ts-custom-error": "^3.3.1",
-    "ts-log": "^2.2.7"
+    "ts-log": "^2.2.7",
+    "ts-results-es": "4.2.0",
+    "type-fest": "4.41.0"
   },
   "devDependencies": {
     "@lace-lib/util-dev-cardano": "*",
     "@rolldown/plugin-node-polyfills": "^1.0.3",
+    "rolldown": "^1.0.0-rc.9",
     "rollup": "^4.59.0",
     "rollup-plugin-dts": "^6.4.0"
   },
+  "peerDependencies": {
+    "@midnight-ntwrk/ledger-v8": "8.1.0",
+    "@midnightntwrk/wallet-sdk": "^1.2.0",
+    "@midnightntwrk/wallet-sdk-abstractions": "^2.1.0",
+    "@midnightntwrk/wallet-sdk-address-format": "^3.1.2",
+    "@polkadot/api": "^16.5.4",
+    "@subsquid/scale-codec": "^4.0.1",
+    "@polkadot/api-base": "^16.5.4",
+    "@polkadot/util": "^14.0.1"
+  },
+  "peerDependenciesMeta": {
+    "@midnight-ntwrk/ledger-v8": {
+      "optional": true
+    },
+    "@midnightntwrk/wallet-sdk": {
+      "optional": true
+    },
+    "@midnightntwrk/wallet-sdk-abstractions": {
+      "optional": true
+    },
+    "@midnightntwrk/wallet-sdk-address-format": {
+      "optional": true
+    },
+    "@polkadot/api": {
+      "optional": true
+    },
+    "@polkadot/api-base": {
+      "optional": true
+    },
+    "@polkadot/util": {
+      "optional": true
+    },
+    "@subsquid/scale-codec": {
+      "optional": true
+    }
+  },
   "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   }
 }

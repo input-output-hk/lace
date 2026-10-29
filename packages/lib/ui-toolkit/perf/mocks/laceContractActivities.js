@@ -9,6 +9,8 @@
  * cardano-context in the barrel-load graph) falls back to emptyModule's
  * chainable no-op proxy, as before.
  */
+// The perf island loads the dependency-free const module by path, past the package barrel.
+// eslint-disable-next-line @nx/enforce-module-boundaries
 const real = require('../../../../contract/activities/src/const');
 
 const noop = require('./emptyModule');

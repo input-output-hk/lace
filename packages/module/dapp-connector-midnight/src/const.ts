@@ -1,15 +1,12 @@
 import { FeatureFlagKey } from '@lace-contract/feature';
 
-import type { LockInfo, NetworkInfo } from './types';
-import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import type { ExtendedDAppConnectorWalletAPI } from './types';
 
 export const FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_DAPP_CONNECTOR',
 );
 
-type WalletApiMethod = ConnectedAPI & LockInfo & NetworkInfo;
-
-export const WalletApiMethodNames: (keyof WalletApiMethod)[] = [
+export const WalletApiMethodNames: (keyof ExtendedDAppConnectorWalletAPI)[] = [
   'getShieldedBalances',
   'getUnshieldedBalances',
   'getDustBalance',
@@ -24,6 +21,9 @@ export const WalletApiMethodNames: (keyof WalletApiMethod)[] = [
   'getConfiguration',
   'getConnectionStatus',
   'submitTransaction',
+  'proofCommand',
+  'checkCircuit',
+  'proveCircuit',
   'getTxHistory',
   'getNetworkId',
   'checkNetworkSupport',

@@ -76,11 +76,11 @@ export const parseFeesForSendFlow = (
  * Updates a single Token by tokenId.
  * Performs an immutable update using the provided updater function.
  *
- * @template T - Element type containing `{ token: { value: Token } }`.
- * @param {readonly T[]} array - Non-empty array of elements.
- * @param {TokenId} id - Token identifier to match.
- * @param {(t: T) => T} updater - Callback that receives and returns the updated element.
- * @returns {T[]} A new array with the updated element, or a shallow copy if not found.
+ * @typeParam T - Element type containing `{ token: { value: Token } }`.
+ * @param array - Non-empty array of elements.
+ * @param id - Token identifier to match.
+ * @param updater - Callback that receives and returns the updated element.
+ * @returns A new array with the updated element, or a shallow copy if not found.
  */
 export const updateToken = <T extends { token: { value: Token } }>(
   array: readonly T[],
@@ -95,10 +95,10 @@ export const updateToken = <T extends { token: { value: Token } }>(
 /**
  * Updates the `amount.error` field for a specific token transfer, if found.
  *
- * @param {StateOpen['form']['tokenTransfers']} transfers - Current list of token transfers.
- * @param {TokenId} tokenId - Token identifier to find.
- * @param {StateOpen['form']['tokenTransfers'][number]['amount']['error']} error - New error value.
- * @returns {[TokenTransfer, ...TokenTransfer[]] | null} Updated transfer list, or `null` if not found.
+ * @param transfers - Current list of token transfers.
+ * @param tokenId - Token identifier to find.
+ * @param error - New error value.
+ * @returns Updated transfer list, or `null` if not found.
  */
 export const updateTokenErrorIfFound = (
   transfers: StateOpen['form']['tokenTransfers'],
@@ -118,14 +118,16 @@ export const updateTokenErrorIfFound = (
  * Removes a token transfer by `tokenId`.
  * Returns a new array copy and never mutates the original.
  *
- * @template T
- * @param {readonly T[]} array - array of token transfers.
- * @param {TokenId} id - Token identifier to remove.
- * @returns {T[]} New array with the token removed
+ * @typeParam T - The token transfer type.
+ * @param array - array of token transfers.
+ * @param id - Token identifier to remove.
+ * @returns New array with the token removed
  *
  * @example
+ * ```ts
  * const next = removeTokenById(form.tokenTransfers, tokenB.tokenId);
  * form = { ...form, tokenTransfers: next };
+ * ```
  */
 export const removeTokenById = <T extends { token: { value: Token } }>(
   array: readonly T[],
@@ -135,8 +137,8 @@ export const removeTokenById = <T extends { token: { value: Token } }>(
 /**
  * Type guard for address field changes.
  *
- * @param {FormChangeData} d - Change descriptor.
- * @returns {d is Extract<FormChangeData, { fieldName: 'address' }>} True if the field is `address`.
+ * @param d - Change descriptor.
+ * @returns True if the field is `address`.
  */
 export const isAddressChange = (
   d: FormChangeData,
@@ -146,8 +148,8 @@ export const isAddressChange = (
 /**
  * Type guard for token amount field changes.
  *
- * @param {FormChangeData} d - Change descriptor.
- * @returns {d is Extract<FormChangeData, { fieldName: 'tokenTransfers.amount' }>} True if field is `tokenTransfers.amount`.
+ * @param d - Change descriptor.
+ * @returns True if field is `tokenTransfers.amount`.
  */
 export const isAmountChange = (
   d: FormChangeData,
@@ -157,8 +159,8 @@ export const isAmountChange = (
 /**
  * Type guard for token addition change.
  *
- * @param {FormChangeData} d - Change descriptor.
- * @returns {d is Extract<FormChangeData, { fieldName: 'tokenTransfers.addTokens' }>} True if field is `tokenTransfers.addTokens`.
+ * @param d - Change descriptor.
+ * @returns True if field is `tokenTransfers.addTokens`.
  */
 export const isAddTokens = (
   d: FormChangeData,
@@ -168,8 +170,8 @@ export const isAddTokens = (
 /**
  * Type guard for token removal change.
  *
- * @param {FormChangeData} d - Change descriptor.
- * @returns {d is Extract<FormChangeData, { fieldName: 'tokenTransfers.removeToken' }>} True if field is `tokenTransfers.removeToken`.
+ * @param d - Change descriptor.
+ * @returns True if field is `tokenTransfers.removeToken`.
  */
 export const isRemoveToken = (
   d: FormChangeData,
@@ -179,8 +181,8 @@ export const isRemoveToken = (
 /**
  * Type guard for blockchain-specific form changes.
  *
- * @param {FormChangeData} d - Change descriptor.
- * @returns {d is Extract<FormChangeData, { fieldName: 'blockchainSpecific' }>} True if field is `blockchainSpecific`.
+ * @param d - Change descriptor.
+ * @returns True if field is `blockchainSpecific`.
  */
 export const isBlockchainSpecificChange = (
   d: FormChangeData,
@@ -190,9 +192,9 @@ export const isBlockchainSpecificChange = (
 /**
  * Wraps a single value into a non-empty tuple.
  *
- * @template T
- * @param {T} x - The single element.
- * @returns {[T, ...T[]]} Non-empty tuple containing `x`.
+ * @typeParam T - The element type.
+ * @param x - The single element.
+ * @returns Non-empty tuple containing `x`.
  *
  * @example
  * const transfers = singleTransfer(initialTransfer);
@@ -202,9 +204,9 @@ export const singleTransfer = <T>(x: T): [T, ...T[]] => [x];
 /**
  * Applies or clears an address error on a form, immutably.
  *
- * @param {StateOpen['form']} form - Current form.
- * @param {TranslationKey | null} error - New error value or `null` to clear.
- * @returns {StateOpen['form']} Updated form (or same reference if unchanged).
+ * @param form - Current form.
+ * @param error - New error value or `null` to clear.
+ * @returns Updated form (or same reference if unchanged).
  */
 export const applyAddressValidationResult = (
   form: StateOpen['form'],
@@ -225,9 +227,9 @@ export const applyAddressValidationResult = (
 /**
  * Applies a blockchain-specific error if the field exists and value changed.
  *
- * @param {StateOpen['form']} form - Current form.
- * @param {string | null} error - New error value or `null` to clear.
- * @returns {StateOpen['form']} Updated form (or same reference if unchanged).
+ * @param form - Current form.
+ * @param error - New error value or `null` to clear.
+ * @returns Updated form (or same reference if unchanged).
  */
 export const applyBlockchainSpecificError = (
   form: StateOpen['form'],
@@ -241,10 +243,10 @@ export const applyBlockchainSpecificError = (
 /**
  * Applies a token amount error by token ID, if found.
  *
- * @param {StateOpen['form']} form - Current form.
- * @param {TokenId} id - Token identifier to target.
- * @param {AmountError | null} error - New error value or `null` to clear.
- * @returns {StateOpen['form']} Updated form (or same reference if unchanged).
+ * @param form - Current form.
+ * @param id - Token identifier to target.
+ * @param error - New error value or `null` to clear.
+ * @returns Updated form (or same reference if unchanged).
  */
 export const applyTokenAmountError = (
   form: StateOpen['form'],
@@ -318,6 +320,7 @@ export const applyFormDataChange = <S extends StateOpen>(
     ...previousState,
     confirmButtonEnabled: false,
     fees: [],
+    withdrawals: [],
     txBuildErrorTranslationKey: undefined,
     form: nextForm,
     status: 'FormPendingValidation',
@@ -337,6 +340,7 @@ export const txBuildResulted = (
         ...previousState,
         confirmButtonEnabled: !result.warningTranslationKey,
         fees: result.fees,
+        withdrawals: result.withdrawals ?? [],
         serializedTx: result.serializedTx,
         status: 'Form' as const,
         txBuildErrorTranslationKey: result.warningTranslationKey,
@@ -345,6 +349,7 @@ export const txBuildResulted = (
         ...previousState,
         confirmButtonEnabled: false,
         fees: [],
+        withdrawals: [],
         status: 'Form' as const,
         txBuildErrorTranslationKey: result.errorTranslationKey,
       };

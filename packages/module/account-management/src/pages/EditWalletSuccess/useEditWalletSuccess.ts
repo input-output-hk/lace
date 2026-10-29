@@ -6,7 +6,7 @@ import type { IconName } from '@lace-lib/ui-toolkit';
 
 type IconProps = {
   name: IconName;
-  variant?: 'solid' | 'stroke';
+  strokeWidth?: number;
   size?: number;
 };
 
@@ -21,7 +21,7 @@ export const useEditWalletSuccess = () => {
   const body = t('v2.wallet-settings.edit-wallet-success.body');
   const buttonText = t('v2.wallet-settings.edit-wallet-success.button');
 
-  const icon: IconProps = { name: 'RelievedFace', variant: 'solid' };
+  const icon: IconProps = { name: 'RelievedFace', strokeWidth: 2 };
 
   return {
     title,

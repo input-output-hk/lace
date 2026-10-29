@@ -4,6 +4,7 @@ import {
   buildCip30SignTxWitnessSet,
   countTransactionSignatures,
   isCardanoAccount,
+  utxoKey,
 } from '@lace-contract/cardano-context';
 import {
   AuthenticationCancelledError,
@@ -44,12 +45,26 @@ import {
 import { createChainedTxOutputCache } from '../../common/store/chained-tx-output-cache';
 import { createPendingDappActivity } from '../../common/store/create-pending-dapp-activity';
 import { createDeriveNextAddress } from '../../common/store/derive-next-address';
+import {
+  isVerdictOnUnfetchedOwnership,
+  ownershipNotReadyError,
+} from '../../common/store/ownership-readiness';
 import { createResolveForeignInputsFlow } from '../../common/store/resolve-foreign-inputs';
 import { transformToGroupedAddresses } from '../../common/store/util';
 import {
   createCombinedInputResolver,
   requiresForeignSignaturesFromCbor,
 } from '../../common/store/utils/input-resolver';
+import {
+  cardanoNetworkName,
+  cborNetworkBindingRefusal,
+  cborStatedNetworkLabel,
+  networkBindingRefusalMessage,
+} from '../../common/store/utils/network-binding';
+import {
+  sanitiseSignTxError,
+  type SignTxErrorStage,
+} from '../../common/utils/sign-tx-error-details';
 import {
   CARDANO_DAPP_CONNECT_LOCATION,
   CARDANO_DAPP_SIGN_DATA_LOCATION,
@@ -95,8 +110,7 @@ import type {
   CardanoTransactionSignerContext,
 } from '@lace-contract/cardano-context';
 import type { Dapp } from '@lace-contract/dapp-connector';
-import type { ActionType } from '@lace-contract/module';
-import type { LaceInitSync, ViewId } from '@lace-contract/module';
+import type { ActionType, LaceInitSync, ViewId } from '@lace-contract/module';
 import type { SignerFactory } from '@lace-contract/signer';
 import type { View, ViewLocation } from '@lace-contract/views';
 import type {
@@ -191,6 +205,7 @@ const createSignTransactionWrapper = ({
     // serialized behind it. The checks below all throw before the signing
     // try/catch that used to be the only reporting path.
     let hasReportedResult = false;
+    let errorStage: SignTxErrorStage = 'signing preparation';
     const reportResult = (result: SigningResult) => {
       hasReportedResult = true;
       signingResult$.next(result);
@@ -275,6 +290,26 @@ const createSignTransactionWrapper = ({
         await deriveBip32PublicKey(extendedAccountPublicKey, KeyRole.DRep, 0),
       );
 
+      // Re-checked here, not only pre-consent: this wrapper is the last point
+      // before a witness exists, and it is reachable on its own.
+      const binding = cborNetworkBindingRefusal(
+        txCbor,
+        chainId.networkId,
+        new Set(ownershipUtxos.map(utxoKey)),
+      );
+      if (isVerdictOnUnfetchedOwnership(binding, accountUtxos, accountId)) {
+        throw ownershipNotReadyError();
+      }
+      if (binding !== null) {
+        throw new TxSignError(
+          TxSignErrorCode.ProofGeneration,
+          networkBindingRefusalMessage(binding, {
+            statedNetwork: cborStatedNetworkLabel(txCbor, chainId.networkId),
+            walletNetwork: cardanoNetworkName(chainId.networkMagic),
+          }),
+        );
+      }
+
       if (
         !partialSign &&
         (await requiresForeignSignaturesFromCbor(
@@ -316,7 +351,9 @@ const createSignTransactionWrapper = ({
         auth,
       };
       try {
+        errorStage = 'signer setup';
         const signer = signerFactory.createTransactionSigner(signerContext);
+        errorStage = 'signing';
         const result = await firstValueFrom(
           signer.sign({ serializedTx: HexBytes(txCbor) }),
         );
@@ -335,6 +372,7 @@ const createSignTransactionWrapper = ({
         // signingResult$ is consumed with take(1), so a reported success
         // cannot be taken back. Build before reporting, or a throwing build
         // leaves the popup showing success while the dApp's promise rejects.
+        errorStage = 'witness assembly';
         const witnessSet = buildCip30SignTxWitnessSet(
           Serialization.TxCBOR(txCbor),
           Serialization.TxCBOR(result.serializedTx),
@@ -348,12 +386,20 @@ const createSignTransactionWrapper = ({
           const hwErrorKeys = isHardwareWallet(wallet)
             ? mapHwSigningError(error)
             : undefined;
-          reportResult({ type: 'error', hwErrorKeys });
+          reportResult({
+            type: 'error',
+            hwErrorKeys,
+            error: sanitiseSignTxError(error, errorStage),
+          });
         }
         throw error;
       }
     } catch (postConsentError) {
-      if (!hasReportedResult) reportResult({ type: 'error' });
+      if (!hasReportedResult)
+        reportResult({
+          type: 'error',
+          error: sanitiseSignTxError(postConsentError, errorStage),
+        });
       throw postConsentError;
     }
   };
@@ -1033,9 +1079,7 @@ export const resolveForeignTransactionInputs: SideEffect = (
     triggerAction$: setPendingSignTxRequest$.pipe(
       // A refused request is never reviewed and renders no transaction value,
       // so its hostile CBOR must not drive provider input resolution either.
-      filter(
-        ({ payload }) => payload !== null && payload.collateralRefusal === null,
-      ),
+      filter(({ payload }) => payload !== null && !payload.refusal),
     ),
     getTxHex: ({ payload }) => payload!.txHex,
     selectAccountUtxos$,

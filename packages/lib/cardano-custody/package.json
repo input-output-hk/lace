@@ -1,0 +1,16 @@
+{
+  "name": "@lace-lib/cardano-custody",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "main": "src/index.ts",
+  "dependencies": {
+    "@cardano-sdk/core": "0.47.1",
+    "@cardano-sdk/crypto": "0.4.7",
+    "@cardano-sdk/util": "0.17.2"
+  },
+  "devDependencies": {
+    "@blaze-cardano/uplc": "0.4.3"
+  }
+}

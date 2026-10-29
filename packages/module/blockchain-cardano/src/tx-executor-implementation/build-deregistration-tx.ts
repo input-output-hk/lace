@@ -9,6 +9,8 @@ import { BigNumber } from '@lace-lib/util';
 import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+import { refuseExtensionAccount } from '../store/account-guards';
+
 import type { AnyAddress } from '@lace-contract/addresses';
 import type {
   BuildDeregistrationTx,
@@ -114,6 +116,8 @@ export const makeBuildDeregistrationTx =
           error: new Error('Protocol parameters not available'),
         };
       }
+
+      refuseExtensionAccount(accountId, cardanoAddresses);
 
       const availableUtxo = filterSpendableUtxos(
         allAccountUtxos[accountId] ?? [],

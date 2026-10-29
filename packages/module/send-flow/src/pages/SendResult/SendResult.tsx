@@ -16,6 +16,7 @@ export const SendResult = (props: SheetScreenProps<SheetRoutes.SendResult>) => {
     transactionDetails,
     transactionDetailsLabels,
     shouldHidePrimaryButtonOnSuccess,
+    ProcessingDetail,
   } = useSendResult(props);
   const isSuccess = result.status === 'success';
   const isFailure = result.status === 'failure';
@@ -69,6 +70,7 @@ export const SendResult = (props: SheetScreenProps<SheetRoutes.SendResult>) => {
       transactionDetails={transactionDetails}
       labels={transactionDetailsLabels}
       errorDetails={errorDetails}
+      ProcessingDetail={ProcessingDetail}
     />
   );
 };

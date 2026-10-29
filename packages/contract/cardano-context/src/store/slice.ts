@@ -19,13 +19,22 @@ import uniqBy from 'lodash/uniqBy';
 
 import {
   applyInFlightUtxoAdjustments,
+  applyPendingRewardWithdrawals,
   ownPendingOutputs,
+  pendingRewardWithdrawals,
 } from '../apply-in-flight-utxo-adjustments';
+import {
+  extensionActions,
+  extensionReducers,
+  extensionSelectors,
+  selectAccountIdsExcludedFromSpending,
+} from '../extensions';
 import { EXPLOIT_DESCRIPTORS } from '../security/exploit-descriptors';
 import {
   filterSpendableUtxos,
   getEligibleCollateralUtxo,
   utxoKey,
+  isCardanoAccount,
 } from '../util';
 import { CardanoNetworkId, CardanoSyncFailureId } from '../value-objects';
 
@@ -41,20 +50,12 @@ import {
 } from './composer-flow';
 import { getRewardSpendableDate, mapRewardToActivity } from './helpers';
 import {
-  nightDesignationFlowActions,
-  nightDesignationFlowReducers,
-  nightDesignationFlowSelectors,
-} from './night-designation-flow';
-import {
-  nightDesignationIndexActions,
-  nightDesignationIndexReducers,
-  nightDesignationIndexSelectors,
-} from './night-designation-index';
-import {
+  isWalletResetOperation,
   isAddressDiscoveryOperation,
   isThoroughAddressDiscoveryOperation,
 } from './side-effects/sync-operation-utils';
 
+import type { ExtensionAccountProps } from '../extensions';
 import type {
   AccountRewardAccountDetailsMap,
   CardanoAccountAddressHistoryMap,
@@ -87,6 +88,7 @@ import type {
   Activity,
   BlockchainSpecificActivityMetadata,
 } from '@lace-contract/activities';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { TokenId } from '@lace-contract/tokens';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
 import type { HexBytes } from '@lace-lib/util';
@@ -205,6 +207,44 @@ const slice = createSlice({
   name: 'cardanoContext',
   initialState,
   reducers: {
+    /**
+     * Rebuild one Cardano account's chain-derived state without removing credentials or collateral.
+     * Requires the cardano-sync module's thorough discovery, chained transaction polling,
+     * and UTXO refetch handlers, in addition to the cardano-context side effects.
+     */
+    requestWalletSyncReset: (
+      _state,
+      _action: PayloadAction<{ accountId: AccountId }>,
+    ) => {},
+    /** Request fresh account UTXOs through cardano-sync, bypassing its cached-fetch gate. */
+    refetchAccountUtxos: (
+      _state,
+      _action: PayloadAction<{ accountId: AccountId }>,
+    ) => {},
+    /** Refresh this account's current rewards and staking details, bypassing the cache. */
+    refetchRewardAccountDetails: (
+      _state,
+      _action: PayloadAction<{ accountId: AccountId }>,
+    ) => {},
+    setWalletSyncResetResult: (
+      _state,
+      {
+        payload: _payload,
+      }: PayloadAction<{
+        accountId: AccountId;
+        status: 'Completed' | 'Failed';
+        error?: TranslationKey;
+      }>,
+    ) => {},
+    resetWalletSyncState: (
+      state,
+      { payload: { accountId } }: PayloadAction<{ accountId: AccountId }>,
+    ) => {
+      delete state.accountTransactionHistory[accountId];
+      delete state.accountRewardsHistory[accountId];
+      delete state.accountDelegationsHistory[accountId];
+      delete state.delegationActivities[accountId];
+    },
     setTip: (
       state,
       {
@@ -540,9 +580,7 @@ const slice = createSlice({
     requestManualAddressDiscovery: (
       _state,
       _action: PayloadAction<{ accountId: AccountId }>,
-    ) => {
-      // Trigger action only - no state changes
-    },
+    ) => {},
     /**
      * Trigger action requesting an opt-in proactive security re-scan of the
      * account's on-chain tx history. Observed by the `securityRescan`
@@ -946,6 +984,31 @@ const selectRewardAccountDetails = createSelector(
 
 const { selectPendingActivitiesByAccount } = activitiesSelectors.activities;
 
+/**
+ * Rewards each reward account has withdrawn in not-yet-settled transactions.
+ * A builder reads this to avoid withdrawing the same rewards twice; it must
+ * not derive a withdrawal amount from it.
+ */
+const selectPendingRewardWithdrawals = createSelector(
+  selectPendingActivitiesByAccount,
+  addressesSelectors.addresses.selectAllAddresses,
+  pendingRewardWithdrawals,
+);
+
+/**
+ * The BALANCE view of the reward details: withdrawable rewards minus those a
+ * pending transaction already moved into its outputs (see
+ * `applyPendingRewardWithdrawals`). For balance accounting only; screens and
+ * builders that need what the chain reports read
+ * {@link selectRewardAccountDetails}.
+ */
+const selectRewardAccountDetailsWithInFlight = createSelector(
+  selectRewardAccountDetails,
+  selectPendingRewardWithdrawals,
+  addressesSelectors.addresses.selectAllAddresses,
+  applyPendingRewardWithdrawals,
+);
+
 const EMPTY_CARDANO_ADDRESSES: CardanoPaymentAddress[] = [];
 const EMPTY_UTXOS: Cardano.Utxo[] = [];
 
@@ -1011,21 +1074,33 @@ const selectCollateralOwnershipUtxos = createSelector(
   },
 );
 
+/**
+ * What each account's transactions can spend: the settled set minus the
+ * reserved collateral, with in-flight adjustments applied.
+ *
+ * Accounts whose UTxOs a script locks are left out (see
+ * `selectAccountIdsExcludedFromSpending`): only their own builders may spend
+ * them, and an ordinary builder given one would build a transaction the chain
+ * refuses.
+ */
 /* eslint-disable max-params */
 const selectAvailableAccountUtxos = createSelector(
   selectAccountUtxos,
   selectAccountUnspendableUtxos,
   selectPendingActivitiesByAccount,
   selectCardanoAddressesByAccount,
+  selectAccountIdsExcludedFromSpending,
   (
     accountUtxos,
     accountUnspendableUtxos,
     pendingActivitiesByAccount,
     addressesByAccount,
+    excludedAccountIds,
   ): AccountUtxoMap => {
     const result: AccountUtxoMap = {};
 
     for (const [accountId, utxos] of Object.entries(accountUtxos)) {
+      if (excludedAccountIds.has(accountId)) continue;
       const spendable = filterSpendableUtxos(
         utxos,
         accountUnspendableUtxos[AccountId(accountId)] ?? [],
@@ -1220,10 +1295,36 @@ const selectStakingStatus = createSelector(
   },
 );
 
+/** Why this account cannot safely begin a reset, or undefined when it can. */
+const selectWalletSyncResetBlockedReason = markParameterizedSelector(
+  createSelector(
+    createSelector(
+      walletsSelectors.wallets.selectActiveNetworkAccounts,
+      (_state: unknown, accountId: AccountId) => accountId,
+      (accounts, accountId) =>
+        accounts.find(candidate => candidate.accountId === accountId),
+    ),
+    activitiesSelectors.activities.selectPendingActivitiesByAccount,
+    syncSelectors.sync.selectSyncStatusByAccount,
+    (account, pending, statuses) => {
+      if (!account || !isCardanoAccount(account)) return 'unavailable';
+      const { accountId } = account;
+      if (pending[accountId]?.length) return 'pending-transactions';
+      if (
+        Object.values(statuses[accountId]?.pendingSync?.operations ?? {}).some(
+          operation =>
+            operation.status === 'Pending' || operation.status === 'InProgress',
+        )
+      )
+        return 'syncing';
+      return undefined;
+    },
+  ),
+);
+
 /**
- * True while a user-triggered (thorough) address discovery for this account
- * is Pending or InProgress. Standard automatic ADDRESS_DISCOVERY is ignored —
- * only the thorough variant drives the manual-sync UI.
+ * True while thorough discovery or a wallet reset for this account is pending or running.
+ * Automatic discovery does not drive the manual-sync overlay.
  */
 const selectIsManualHdSyncInProgress = markParameterizedSelector(
   createSelector(
@@ -1234,10 +1335,22 @@ const selectIsManualHdSyncInProgress = markParameterizedSelector(
       if (!pending) return false;
       return Object.values(pending.operations).some(
         op =>
-          isThoroughAddressDiscoveryOperation(op.operationId) &&
+          (isThoroughAddressDiscoveryOperation(op.operationId) ||
+            isWalletResetOperation(op.operationId)) &&
           (op.status === 'Pending' || op.status === 'InProgress'),
       );
     },
+  ),
+);
+
+const selectWalletSyncResetOperation = markParameterizedSelector(
+  createSelector(
+    syncSelectors.sync.selectSyncStatusByAccount,
+    (_state: unknown, accountId: AccountId) => accountId,
+    (statuses, accountId) =>
+      Object.values(statuses[accountId]?.pendingSync?.operations ?? {}).find(
+        op => isWalletResetOperation(op.operationId),
+      ),
   ),
 );
 
@@ -1264,7 +1377,7 @@ const selectIsAddressDiscoveryInProgress = markParameterizedSelector(
 );
 
 /**
- * AccountId of any account that currently has a thorough address discovery
+ * AccountId of any account that currently has a thorough discovery or wallet reset
  * operation in its `pendingSync` — irrespective of operation status.
  *
  * Returns the accountId while the op is Pending/InProgress (so the overlay
@@ -1284,10 +1397,12 @@ const selectAccountIdInManualHdSync = createSelector(
     for (const accountId in syncStatusByAccount) {
       const pending = syncStatusByAccount[accountId as AccountId]?.pendingSync;
       if (!pending) continue;
-      const hasThorough = Object.values(pending.operations).some(op =>
-        isThoroughAddressDiscoveryOperation(op.operationId),
+      const hasManualSync = Object.values(pending.operations).some(
+        op =>
+          isThoroughAddressDiscoveryOperation(op.operationId) ||
+          isWalletResetOperation(op.operationId),
       );
-      if (hasThorough) return accountId as AccountId;
+      if (hasManualSync) return accountId as AccountId;
     }
     return undefined;
   },
@@ -1298,6 +1413,7 @@ const selectAccountIdInManualHdSync = createSelector(
  * operation for this account, while it still lives in `pendingSync`.
  * Returns 'Completed' or 'Failed' for a brief window before the sync round
  * clears `pendingSync` entirely. Used by `HdSyncOverlay` to pick a toast.
+ * Suppressed while a reset owns the round; reset results notify through a side effect.
  */
 const selectManualHdSyncTerminalStatus = markParameterizedSelector(
   createSelector(
@@ -1306,6 +1422,10 @@ const selectManualHdSyncTerminalStatus = markParameterizedSelector(
     (syncStatusByAccount, accountId) => {
       const pending = syncStatusByAccount[accountId]?.pendingSync;
       if (!pending) return undefined;
+      const reset = Object.values(pending.operations).find(op =>
+        isWalletResetOperation(op.operationId),
+      );
+      if (reset) return undefined;
       for (const op of Object.values(pending.operations)) {
         if (!isThoroughAddressDiscoveryOperation(op.operationId)) continue;
         if (op.status === 'Completed' || op.status === 'Failed') {
@@ -1327,7 +1447,8 @@ const selectActiveCardanoAccounts = createSelector(
       ): account is AnyAccount<
         CardanoBip32AccountProps,
         CardanoBip32AccountProps,
-        CardanoMultiSigAccountProps
+        CardanoMultiSigAccountProps,
+        ExtensionAccountProps
       > => account.blockchainNetworkId === blockchainNetworkId,
     ),
 );
@@ -1484,7 +1605,7 @@ const selectRescanInputs = createSelector(
  * transaction history (the exploit only manifests through a signed transaction,
  * so accounts with no history have nothing to scan) AND an exploit applies to
  * its blockchain AND it has not already been dedicated-scanned AND either its
- * onboarding date is unknown (persisted before the field existed -> assume
+ * onboarding date is unknown (persisted before the field existed → assume
  * pre-detection) or that exploit's detection shipped after the account was
  * onboarded (so activity-time detection never covered it). Accounts on a
  * blockchain no exploit targets are never offered, and an account the user has
@@ -1521,8 +1642,7 @@ export const cardanoContextReducers = {
   [slice.name]: slice.reducer,
   ...collateralFlowReducers,
   ...composerFlowReducers,
-  ...nightDesignationFlowReducers,
-  ...nightDesignationIndexReducers,
+  ...extensionReducers,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1549,8 +1669,7 @@ export const cardanoContextActions = {
   },
   ...collateralFlowActions,
   ...composerFlowActions,
-  ...nightDesignationFlowActions,
-  ...nightDesignationIndexActions,
+  ...extensionActions,
 };
 
 /** Direct import of this is an anti-pattern. OK for tests. */
@@ -1567,6 +1686,8 @@ export const cardanoContextSelectors = {
     selectAccountUnspendableUtxos,
     selectLastFetchedUtxoCacheKeyByAccount,
     selectRewardAccountDetails,
+    selectRewardAccountDetailsWithInFlight,
+    selectPendingRewardWithdrawals,
     selectAvailableAccountUtxos,
     selectAvailableAccountUtxosWithEligibleCollateral,
     selectCombinedTransactionHistory,
@@ -1576,6 +1697,8 @@ export const cardanoContextSelectors = {
     selectDelegationActivities,
     selectRewardsHistoryForAccount,
     selectIsManualHdSyncInProgress,
+    selectWalletSyncResetOperation,
+    selectWalletSyncResetBlockedReason,
     selectIsAddressDiscoveryInProgress,
     selectManualHdSyncTerminalStatus,
     selectAccountIdInManualHdSync,
@@ -1588,8 +1711,7 @@ export const cardanoContextSelectors = {
   },
   ...collateralFlowSelectors,
   ...composerFlowSelectors,
-  ...nightDesignationFlowSelectors,
-  ...nightDesignationIndexSelectors,
+  ...extensionSelectors,
 };
 
 export type CardanoContextStoreState = StateFromReducersMapObject<

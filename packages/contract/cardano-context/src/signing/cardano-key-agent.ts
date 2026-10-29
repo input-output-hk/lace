@@ -3,6 +3,7 @@ import {
   InMemoryKeyAgent,
   KeyPurpose,
   KeyRole,
+  type SerializableInMemoryKeyAgentData,
   util,
 } from '@cardano-sdk/key-management';
 import {
@@ -25,6 +26,11 @@ export type CreateCardanoKeyAgentFromMnemonicProps = {
   accountIndex: number;
   chainId: Cardano.ChainId;
   mnemonicWords: string[];
+  /**
+   * Derivation purpose of the account: CIP-1852 (`STANDARD`, the default) or
+   * CIP-1854 (`MULTI_SIG`).
+   */
+  purpose?: KeyPurpose;
 };
 
 /**
@@ -32,29 +38,44 @@ export type CreateCardanoKeyAgentFromMnemonicProps = {
  *
  * The mnemonic is encrypted in memory under a single-use session passphrase
  * generated per call. The agent is meant to be discarded immediately after a
- * single sign call so the in-memory ciphertext (and its passphrase) become
- * unreachable along with it.
+ * single sign call. Call `dispose` after signing to zero the byte-array
+ * passphrase, including on failure or cancellation. JavaScript mnemonic
+ * strings cannot be reliably zeroed; callers must not retain them.
  */
 export const createCardanoKeyAgentFromMnemonic = async ({
   accountIndex,
   chainId,
   mnemonicWords,
-}: CreateCardanoKeyAgentFromMnemonicProps): Promise<CardanoKeyAgent> => {
+  purpose = KeyPurpose.STANDARD,
+}: CreateCardanoKeyAgentFromMnemonicProps): Promise<
+  CardanoKeyAgent & { extendedAccountPublicKey: Bip32PublicKeyHex }
+> => {
   const bip32Ed25519 = await SodiumBip32Ed25519.create();
   const sessionPassphrase = crypto.getRandomValues(new Uint8Array(32));
 
-  const keyAgent = await InMemoryKeyAgent.fromBip39MnemonicWords(
-    {
-      accountIndex,
-      chainId,
-      getPassphrase: async () => sessionPassphrase,
-      mnemonicWords,
-      purpose: KeyPurpose.STANDARD,
-    },
-    { bip32Ed25519, logger: dummyLogger },
-  );
+  try {
+    const keyAgent = await InMemoryKeyAgent.fromBip39MnemonicWords(
+      {
+        accountIndex,
+        chainId,
+        getPassphrase: async () => sessionPassphrase,
+        mnemonicWords,
+        purpose,
+      },
+      { bip32Ed25519, logger: dummyLogger },
+    );
 
-  return wrapInMemoryKeyAgent(keyAgent);
+    return {
+      ...wrapInMemoryKeyAgent(keyAgent),
+      extendedAccountPublicKey: (
+        keyAgent.serializableData as SerializableInMemoryKeyAgentData
+      ).extendedAccountPublicKey,
+      dispose: () => sessionPassphrase.fill(0),
+    };
+  } catch (error) {
+    sessionPassphrase.fill(0);
+    throw error;
+  }
 };
 
 export type CreateCardanoKeyAgentFromEncryptedRootProps = {

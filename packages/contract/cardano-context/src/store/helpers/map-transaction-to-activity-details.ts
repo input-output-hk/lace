@@ -8,6 +8,7 @@ import {
   computeNetFlows,
   type TokenTransferValue,
 } from '../../compute-net-flows';
+import { isAccountTokenOf } from '../../extensions';
 
 import { computeOwnNetCoins } from './compute-own-net-coins';
 import { inputOutputTransformer } from './input-output-transform';
@@ -22,6 +23,7 @@ import type {
   CardanoTransaction,
   ExtendedTxDetails,
   RequiredProtocolParameters,
+  TxInput,
   TxSummary,
   TxMetadata,
 } from '../../types';
@@ -130,6 +132,25 @@ const hasRegOrDeregCertificate = (
 
 const MAX_SUMMARY_ADDRESSES = 5;
 
+const withoutAssets = <T extends Pick<TxInput, 'value'>>(
+  txInOut: T,
+  isOmitted: (assetId: Cardano.AssetId) => boolean,
+): T => {
+  const { value } = txInOut;
+  if (!value?.assets || ![...value.assets.keys()].some(isOmitted)) {
+    return txInOut;
+  }
+  return {
+    ...txInOut,
+    value: {
+      ...value,
+      assets: new Map(
+        [...value.assets].filter(([assetId]) => !isOmitted(assetId)),
+      ),
+    },
+  };
+};
+
 const buildTxSummaryFromNetFlows = (
   netFlows: {
     from: Map<Cardano.PaymentAddress, TokenTransferValue>;
@@ -192,11 +213,14 @@ const buildCardanoTransaction = ({
   tokenTransfer,
 }: BuildCardanoTransactionParams): CardanoTransaction => {
   const { collateral, deposit, resolvedInputs, returnedDeposit } = summary;
+  // Account tokens are no holding: the details list them nowhere, as the
+  // balance and tokens do not.
+  const isAccountToken = isAccountTokenOf(rewardAccount);
   const addrInputs = resolvedInputs.map(input =>
-    inputOutputTransformer(input, assetsInfo),
+    inputOutputTransformer(withoutAssets(input, isAccountToken), assetsInfo),
   );
   const addrOutputs = outputs.map(output =>
-    inputOutputTransformer(output, assetsInfo),
+    inputOutputTransformer(withoutAssets(output, isAccountToken), assetsInfo),
   );
 
   let txSummary: TxSummary[] | undefined;
@@ -259,11 +283,21 @@ export const mapTransactionToActivityDetails = ({
   });
 
   return from(txSummaryInspector(txDetails)).pipe(
-    switchMap(({ summary, metadata, tokenTransfer }) =>
-      fetchAssetsMetadata(summary, getTokenMetadata).pipe(
+    switchMap(({ summary, metadata, tokenTransfer }) => {
+      // Account tokens are no holding, so their metadata is never fetched.
+      const isAccountToken = isAccountTokenOf(
+        Cardano.RewardAccount(rewardAccount),
+      );
+      const listedAssets = new Map(
+        [...summary.assets].filter(([assetId]) => !isAccountToken(assetId)),
+      );
+      return fetchAssetsMetadata(
+        { assets: listedAssets },
+        getTokenMetadata,
+      ).pipe(
         map(assetsInfo => ({ summary, metadata, tokenTransfer, assetsInfo })),
-      ),
-    ),
+      );
+    }),
     map(({ summary, metadata, tokenTransfer, assetsInfo }) => ({
       fee: summary.fee.toString(),
       cardano: buildCardanoTransaction({

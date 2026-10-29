@@ -8,5 +8,9 @@ import type { Tagged } from 'type-fest';
  * owns the account's `blockchainSpecific` shape, via the wallet-identity addon.
  */
 export type AccountIdentityKey = Tagged<string, 'AccountIdentityKey'>;
+/**
+ * Types a string as an account identity key. It checks nothing; the
+ * wallet-identity addon of the account's blockchain derives the key.
+ */
 export const AccountIdentityKey = (value: string): AccountIdentityKey =>
   value as AccountIdentityKey;

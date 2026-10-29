@@ -262,6 +262,24 @@ const runConfirmation = async (
 };
 
 describe('dApp-connector mobile signTx — native-script witness end-to-end (commit 7a23ff29)', () => {
+  it('propagates a signer-factory failure with its actual stage and sanitised message', async () => {
+    const signerFactory = stubSignerFactory();
+    signerFactory.createTransactionSigner.mockImplementationOnce(() => {
+      throw new Error(
+        'No signer factory registered for account type "InMemory"',
+      );
+    });
+    const response = await runConfirmation(
+      buildScriptTxCbor([requireSig(ownPaymentKeyHash)]),
+      true,
+      { signerFactory },
+    );
+    expect(response.error?.diagnostics).toEqual({
+      stage: 'signer setup',
+      name: 'Error',
+      message: 'No signer factory registered for account type "InMemory"',
+    });
+  });
   it('returns the wallet key witness produced only via a native script to the dApp', async () => {
     const txCbor = buildScriptTxCbor([requireSig(ownPaymentKeyHash)]);
 

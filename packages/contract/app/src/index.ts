@@ -1,6 +1,7 @@
 import './augmentations';
 
 export * from './contract';
+export * from './ui-addon-contracts';
 export type * from './types';
 export { appActions, uiActions } from './store';
 export type * from './store';

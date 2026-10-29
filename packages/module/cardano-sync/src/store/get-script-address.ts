@@ -9,10 +9,10 @@ import type { GroupedAddress } from '@cardano-sdk/key-management';
 /**
  * Method to derive the wallet's grouped address from the script and network ID.
  *
- * @param {Cardano.NativeScript} paymentScript - The native script to be used for the payment credential.
- * @param {Cardano.NativeScript} stakingScript - The native script to be used for the staking credential.
- * @param {Cardano.NetworkId} networkId - The network identifier.
- * @returns {}GroupedAddress} The derived grouped address.
+ * @param paymentScript - The native script to be used for the payment credential.
+ * @param stakingScript - The native script to be used for the staking credential.
+ * @param networkId - The network identifier.
+ * @returns The derived grouped address.
  */
 export const getScriptAddress = (
   paymentScript: Cardano.NativeScript,

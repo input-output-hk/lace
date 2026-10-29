@@ -2,7 +2,7 @@ import { BehaviorSubject } from 'rxjs';
 
 /**
  * Plaintext recovery phrase staged while the user moves through the restore
- * wallet sheets (enter phrase -> select blockchains -> create).
+ * wallet sheets (enter phrase → select blockchains → create).
  *
  * Kept in a module-scoped in-memory buffer rather than Redux state so the
  * phrase stays in the UI process only, off the action log and out of every

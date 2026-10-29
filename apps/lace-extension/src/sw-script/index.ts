@@ -1,9 +1,17 @@
+import './prover';
 import { getBackgroundMessenger } from '@lace-lib/extension-messaging';
 import { runtime } from 'webextension-polyfill';
 
 import { logger } from '../util/logger';
 
 import { createIsConnectionAuthorized } from './authorize-connection';
+import { restrictStorageToTrustedContexts } from './storage-access';
+
+// Stored state is for extension contexts only (./storage-access.ts).
+void restrictStorageToTrustedContexts({
+  storage: chrome.storage.local,
+  logger,
+});
 
 // initialize background messenger so that it starts listening for connections as soon as SW starts.
 // MUST remain the first messenger initialization in the SW: getBackgroundMessenger is a singleton,

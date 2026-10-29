@@ -1,0 +1,105 @@
+import { Cardano, Serialization } from '@lace-lib/cardano-core';
+
+import { computeScriptDataHash } from './computeScriptDataHash';
+import { getDefaultCostModelsForVersions } from './tx-builder/costModels';
+
+import type { TxBodyPreInputSelection } from './types';
+import type * as Crypto from '@lace-lib/cardano-crypto';
+import type { SelectionResult } from '@lace-lib/cardano-input-selection';
+
+export type CreateTxInternalsProps = {
+  inputSelection: SelectionResult['selection'];
+  referenceInputs?: Set<Cardano.TxIn>;
+  validityInterval: Cardano.ValidityInterval;
+  certificates?: Cardano.Certificate[];
+  withdrawals?: Cardano.Withdrawal[];
+  auxiliaryData?: Cardano.AuxiliaryData;
+  collaterals?: Set<Cardano.TxIn>;
+  collateralReturn?: Cardano.TxOut;
+  mint?: Cardano.TokenMap;
+  scriptIntegrityHash?: Crypto.Hash32ByteBase16;
+  requiredExtraSignatures?: Crypto.Ed25519KeyHashHex[];
+};
+
+/** Returns transaction body based on the information available before input selection takes place */
+export const createPreInputSelectionTxBody = ({
+  auxiliaryData,
+  withdrawals,
+  certificates,
+  validityInterval,
+  collaterals,
+  collateralReturn,
+  mint,
+  scriptIntegrityHash,
+  referenceInputs,
+  requiredExtraSignatures,
+  outputs,
+}: Omit<CreateTxInternalsProps, 'inputSelection'> & {
+  outputs?: Cardano.TxOut[];
+}): {
+  txBody: TxBodyPreInputSelection;
+  auxiliaryData?: Cardano.AuxiliaryData;
+} => ({
+  auxiliaryData,
+  txBody: {
+    auxiliaryDataHash: auxiliaryData
+      ? Cardano.computeAuxiliaryDataHash(auxiliaryData)
+      : undefined,
+    certificates,
+    mint,
+    outputs: outputs || [],
+    referenceInputs: referenceInputs ? [...referenceInputs] : undefined,
+    requiredExtraSignatures,
+    scriptIntegrityHash,
+    validityInterval,
+    ...(withdrawals?.length && { withdrawals }),
+    ...(collaterals?.size && { collaterals: [...collaterals] }),
+    collateralReturn,
+  },
+});
+
+/** Updates the txBody after input selection takes place with the calculated change and selected inputs */
+export const includeChangeAndInputs = ({
+  bodyPreInputSelection,
+  inputSelection,
+  scriptVersions,
+  witness,
+}: Pick<CreateTxInternalsProps, 'inputSelection'> & {
+  bodyPreInputSelection: TxBodyPreInputSelection;
+  witness?: Cardano.Witness;
+  scriptVersions?: Set<Cardano.PlutusLanguageVersion>;
+}): Cardano.TxBodyWithHash => {
+  const body: Cardano.TxBody = {
+    ...bodyPreInputSelection,
+    fee: inputSelection.fee,
+    inputs: [...inputSelection.inputs].map(([txIn]) => txIn),
+    outputs: [...inputSelection.outputs, ...inputSelection.change],
+  };
+
+  if (scriptVersions && witness) {
+    const costModels = getDefaultCostModelsForVersions([...scriptVersions]);
+    body.scriptIntegrityHash = computeScriptDataHash(
+      costModels,
+      [...scriptVersions],
+      witness.redeemers,
+      witness.datums,
+    );
+  }
+
+  const serializableBody = Serialization.TransactionBody.fromCore(body);
+
+  return {
+    body,
+    hash: serializableBody.hash(),
+  };
+};
+
+export const createTransactionInternals = (
+  props: CreateTxInternalsProps,
+): Cardano.TxBodyWithHash => {
+  const { txBody } = createPreInputSelectionTxBody({ ...props });
+  return includeChangeAndInputs({
+    bodyPreInputSelection: txBody,
+    inputSelection: props.inputSelection,
+  });
+};

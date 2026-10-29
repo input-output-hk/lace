@@ -81,6 +81,17 @@ const transformManifest = (content, mode) => {
             'https://rpc.midnight-mainnet.blockfrost.io',
             'https://rpc.midnight-preprod.blockfrost.io',
             'https://rpc.midnight-preview.blockfrost.io',
+            // Temenos TEE proof server (LW-15081): API, attestation host
+            // (evidence + the AKX attested channel under /tee_attestation)
+            // and Warden.
+            'https://api.proofserver.wastedp.io',
+            'https://midnight-s3-fileshare-dev-eu-west-1.s3.eu-west-1.amazonaws.com',
+            'https://attestation.proofserver.wastedp.io',
+            'https://api.proofserver.mainnet.wastedp.io',
+            'https://attestation.proofserver.mainnet.wastedp.io',
+            'https://api.proofserver.preview.wastedp.io',
+            'https://attestation.proofserver.preview.wastedp.io',
+            'https://warden.wastedp.io',
           ]
             .flatMap(url => [url, convertHttpToWebSocket(url)])
             .join(' '),
@@ -218,13 +229,7 @@ const withMaybeSentry = createWithConditionalEntries(
   process.env.SENTRY_DSN && process.env.SENTRY_DSN !== '',
 );
 
-const withMaybeDevelopmentEntries = createWithConditionalEntries(
-  path.join(__dirname, '..', 'reactScan.js'),
-  process.env.NODE_ENV === 'development',
-);
-
 module.exports = {
   transformManifest,
   withMaybeSentry,
-  withMaybeDevelopmentEntries,
 };

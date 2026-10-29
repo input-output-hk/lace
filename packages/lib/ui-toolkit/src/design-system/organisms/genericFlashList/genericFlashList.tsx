@@ -37,14 +37,25 @@ export const GenericFlashList = <T,>(props: GenericFlashListProps<T>) => {
     return config[layoutSize];
   }, [gridColumns, layoutSize, flashListProps.numColumns]);
 
+  const { horizontal: isHorizontal, onLayout: consumerOnLayout } =
+    flashListProps;
+  // A list of one column has no column width to get wrong, so it never needs
+  // the remount below.
+  const isGrid = (numberColumns ?? 1) > 1;
+
   const onLayout = useCallback<NonNullable<FlashListProps<T>['onLayout']>>(
     event => {
-      if (isWeb) {
-        flashListProps.onLayout?.(event);
+      // The remount exists only to re-measure GRID columns: the dApp explorer
+      // resized its columns when a first near-zero-width layout was followed
+      // by a real one (what a sheet animating open produces). Remounting takes
+      // the whole list with it, header included — focus, the keyboard and a
+      // half-typed search among it — so single-column lists opt out (ADR 64).
+      if (isWeb || !isGrid) {
+        consumerOnLayout?.(event);
         return;
       }
       const { height, width } = event.nativeEvent.layout;
-      const fixedDimension = flashListProps.horizontal ? height : width;
+      const fixedDimension = isHorizontal ? height : width;
 
       if (Math.floor(fixedDimension) <= 1) {
         sizeRef.current = true;
@@ -53,9 +64,9 @@ export const GenericFlashList = <T,>(props: GenericFlashListProps<T>) => {
         setRemountToken(t => t + 1);
       }
 
-      flashListProps.onLayout?.(event);
+      consumerOnLayout?.(event);
     },
-    [flashListProps],
+    [consumerOnLayout, isHorizontal, isGrid],
   );
 
   const extraData = useMemo(() => {

@@ -33,6 +33,7 @@ import { tokensStoreContract } from '@lace-contract/tokens';
 import { txExecutorStoreContract } from '@lace-contract/tx-executor';
 import {
   viewsStoreContract,
+  globalOverlaysAddonContract,
   sheetPagesAddonContract,
 } from '@lace-contract/views';
 import { walletRepoStoreContract } from '@lace-contract/wallet-repo';
@@ -50,6 +51,7 @@ import type {
 
 const implementsContracts = combineContracts([
   accountSettingsUIAddonContract,
+  globalOverlaysAddonContract,
   tokensStoreContract,
   addressesStoreContract,
   midnightContextStoreContract,
@@ -91,6 +93,8 @@ const reactNativeModule = inferModuleContext({
     },
   },
   addons: {
+    loadGlobalOverlays: async () =>
+      import('./exported-modules/proof-activity-overlay'),
     // make the naming prefix consistent: add/remove 'load' to all properties
     loadAddressValidator: async () =>
       import('./exported-modules/address-validator'),

@@ -35,7 +35,7 @@ export interface FeeSectionProps {
  * - If the user clears the field or no numeric content remains,
  *   returns `"0"` as the safe default value.
  *
- * @param input Raw string from a text input.
+ * @param input - Raw string from a text input.
  * @returns A normalized decimal string (never empty; `"0"` for blank input).
  */
 export const normalizeFeeRateInput = (input: string): string => {

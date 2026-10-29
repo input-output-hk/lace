@@ -1,7 +1,9 @@
+import { ACTIVITIES_PER_PAGE } from '@lace-contract/activities';
 import { autoDismissFailureOnSuccess } from '@lace-contract/failures';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
 import { retryBackoff } from 'backoff-rxjs';
+import isEqual from 'lodash/isEqual';
 import {
   catchError,
   combineLatest,
@@ -15,12 +17,21 @@ import {
   mergeMap,
   of,
   switchMap,
+  takeUntil,
+  tap,
+  ignoreElements,
+  distinctUntilChanged,
+  scan,
+  startWith,
 } from 'rxjs';
 
-import { FEATURE_FLAG_CNIGHT_DESIGNATION } from '../../const';
+import { isExtensionActivityFeatureEnabled } from '../../extensions';
 import { ActivityKind } from '../../types';
+import { isCardanoAccount } from '../../util';
 import { CardanoActivitiesProcessingFailureId } from '../../value-objects';
 import { createInputResolver } from '../helpers/transaction-processors';
+
+import { retryAfterWalletResetFailure } from './retry-after-wallet-reset-failure';
 
 import type { CardanoContextAction, SideEffect } from '../../contract';
 import type {
@@ -66,7 +77,7 @@ type ProcessTransactionDeps = {
   protocolParameters: RequiredProtocolParameters;
   chainId: Cardano.ChainId;
   selectFailureById$: Observable<(id: FailureId) => Failure | undefined>;
-  isNightDesignationEnabled: boolean;
+  isExtensionActivityEnabled: boolean;
 };
 
 const processTransaction = (
@@ -83,7 +94,7 @@ const processTransaction = (
     logger,
     actions,
     selectFailureById$,
-    isNightDesignationEnabled,
+    isExtensionActivityEnabled,
   } = deps;
 
   const failureId = CardanoActivitiesProcessingFailureId(AccountId(accountId));
@@ -103,7 +114,7 @@ const processTransaction = (
         protocolParameters,
         logger,
         resolveInput: createInputResolver(resolveInput, chainId).resolveInput,
-        isNightDesignationEnabled,
+        isExtensionActivityEnabled,
       }).pipe(
         map(result => {
           if (result.isErr()) throw result.unwrapErr();
@@ -151,12 +162,12 @@ const processReward = (
  * Creates a side effect for tracking account activities and updating the activity state
  * based on transactions and rewards fetched from a Cardano blockchain provider.
  *
- * @param {TrackAccountActivitiesParams} options - The required options for tracking account activities.
- * @param {Function} options.findMissingActivities - A function to determine the activities that need to be processed.
- * @param {Function} options.mapTransactionToActivity - A function to map transaction details into activity objects.
- * @param {number} options.debounceTimeout - The debounce time (in milliseconds) before processing the activity updates.
+ * @param options - The required options for tracking account activities.
+ *   - `findMissingActivities`: A function to determine the activities that need to be processed.
+ *   - `mapTransactionToActivity`: A function to map transaction details into activity objects.
+ *   - `debounceTimeout`: The debounce time (in milliseconds) before processing the activity updates.
  *
- * @returns {SideEffect} A side effect that listens for state changes, processes account activities, and dispatches updates.
+ * @returns A side effect that listens for state changes, processes account activities, and dispatches updates.
  */
 export const createTrackAccountActivities =
   ({
@@ -166,10 +177,11 @@ export const createTrackAccountActivities =
     debounceTimeout,
   }: TrackAccountActivitiesParams): SideEffect =>
   (
-    _,
+    actionObservables,
     {
       activities,
       addresses,
+      wallets,
       cardanoContext,
       failures: { selectFailureById$ },
       features: { selectLoadedFeatures$ },
@@ -180,69 +192,158 @@ export const createTrackAccountActivities =
       actions,
     },
   ) =>
-    combineLatest([
-      addresses.selectAllAddresses$,
-      activities.selectAllMap$,
-      cardanoContext.selectChainId$.pipe(filter(Boolean)),
-      activities.selectDesiredLoadedActivitiesCountPerAccount$,
-      cardanoContext.selectProtocolParameters$,
-      cardanoContext.selectEraSummaries$,
-      cardanoContext.selectTransactionHistoryGroupedByAccount$,
-      cardanoContext.selectRewardsHistoryGroupedByAccount$,
-      selectLoadedFeatures$,
-    ]).pipe(
-      debounceTime(debounceTimeout),
-      switchMap(
-        ([
-          addresses,
-          loadedActivities,
-          chainId,
-          desiredLoadedActivitiesCountPerAccount,
-          protocolParameters,
-          eraSummaries,
-          transactionHistoryByAccount,
-          accountRewardsHistoryByAccount,
-          loadedFeatures,
-        ]) => {
-          // only proceed if we have protocol parameters
-          if (protocolParameters === undefined || eraSummaries === undefined)
-            return EMPTY;
+    wallets.selectActiveNetworkAccounts$.pipe(
+      switchMap(accounts =>
+        rxMerge(
+          ...accounts.filter(isCardanoAccount).map(({ accountId }) =>
+            combineLatest([
+              addresses.selectAllAddresses$,
+              activities.selectAllMap$,
+              cardanoContext.selectChainId$.pipe(filter(Boolean)),
+              activities.selectDesiredLoadedActivitiesCountPerAccount$,
+              cardanoContext.selectProtocolParameters$,
+              cardanoContext.selectEraSummaries$,
+              cardanoContext.selectTransactionHistoryGroupedByAccount$,
+              cardanoContext.selectRewardsHistoryGroupedByAccount$,
+              selectLoadedFeatures$,
+              rxMerge(
+                retryAfterWalletResetFailure(accountId, actionObservables),
+                actionObservables.sync.clearPendingSyncsForAccounts$.pipe(
+                  filter(a => a.payload.accountIds.includes(accountId)),
+                ),
+              ).pipe(
+                scan(generation => generation + 1, 0),
+                startWith(0),
+              ),
+            ]).pipe(
+              map(
+                ([
+                  addresses,
+                  loaded,
+                  chainId,
+                  desired,
+                  protocol,
+                  eras,
+                  history,
+                  rewards,
+                  features,
+                  generation,
+                ]) =>
+                  [
+                    addresses.filter(
+                      address => address.accountId === accountId,
+                    ),
+                    { [accountId]: loaded[accountId] ?? [] },
+                    chainId,
+                    { [accountId]: desired[accountId] ?? ACTIVITIES_PER_PAGE },
+                    protocol,
+                    eras,
+                    { [accountId]: history[accountId] ?? [] },
+                    { [accountId]: rewards[accountId] ?? [] },
+                    features,
+                    generation,
+                  ] as const,
+              ),
+              distinctUntilChanged((previous, current) =>
+                isEqual(previous, current),
+              ),
+              debounceTime(debounceTimeout),
+              switchMap(
+                ([
+                  addresses,
+                  loadedActivities,
+                  chainId,
+                  desiredLoadedActivitiesCountPerAccount,
+                  protocolParameters,
+                  eraSummaries,
+                  transactionHistoryByAccount,
+                  accountRewardsHistoryByAccount,
+                  loadedFeatures,
+                ]) => {
+                  // only proceed if we have protocol parameters
+                  if (
+                    protocolParameters === undefined ||
+                    eraSummaries === undefined
+                  )
+                    return EMPTY;
 
-          const isNightDesignationEnabled = loadedFeatures.featureFlags.some(
-            f => f.key === FEATURE_FLAG_CNIGHT_DESIGNATION,
-          );
+                  const isExtensionActivityEnabled =
+                    isExtensionActivityFeatureEnabled(
+                      loadedFeatures.featureFlags,
+                    );
 
-          const activitiesToLoad = findMissingActivities({
-            addresses,
-            transactionHistoryByAccount,
-            accountRewardsHistoryByAccount,
-            loadedActivities,
-            chainId,
-            eraSummaries,
-            mapRewardToActivity,
-            desiredLoadedActivitiesCountPerAccount,
-          });
+                  const activitiesToLoad = findMissingActivities({
+                    addresses,
+                    transactionHistoryByAccount,
+                    accountRewardsHistoryByAccount,
+                    loadedActivities,
+                    chainId,
+                    eraSummaries,
+                    mapRewardToActivity,
+                    desiredLoadedActivitiesCountPerAccount,
+                  });
 
-          const processTransactionDeps: ProcessTransactionDeps = {
-            actions,
-            logger,
-            getTransactionDetails,
-            resolveInput,
-            mapTransactionToActivity,
-            protocolParameters,
-            chainId,
-            selectFailureById$,
-            isNightDesignationEnabled,
-          };
+                  const processTransactionDeps: ProcessTransactionDeps = {
+                    actions,
+                    logger,
+                    getTransactionDetails,
+                    resolveInput,
+                    mapTransactionToActivity,
+                    protocolParameters,
+                    chainId,
+                    selectFailureById$,
+                    isExtensionActivityEnabled,
+                  };
 
-          return from(activitiesToLoad).pipe(
-            concatMap(data => {
-              if (data.kind === ActivityKind.Transaction) {
-                return processTransaction(data, processTransactionDeps);
-              }
-              return processReward(data, actions);
-            }),
-          );
-        },
+                  const reset$ = rxMerge(
+                    actionObservables.sync.clearPendingSyncsForAccounts$.pipe(
+                      mergeMap(a =>
+                        a.payload.accountIds.map(id => ({
+                          payload: { accountId: id },
+                        })),
+                      ),
+                    ),
+                    actionObservables.cardanoContext.resetWalletSyncState$,
+                    actionObservables.cardanoContext.setWalletSyncResetResult$.pipe(
+                      filter(a => a.payload.status === 'Failed'),
+                    ),
+                  );
+                  const cancelledAccounts = new Set<AccountId>();
+                  return rxMerge(
+                    reset$.pipe(
+                      tap(({ payload: { accountId } }) =>
+                        cancelledAccounts.add(accountId),
+                      ),
+                      ignoreElements(),
+                    ),
+                    from(
+                      activitiesToLoad.filter(
+                        data => data.accountId === accountId,
+                      ),
+                    ).pipe(
+                      concatMap(data => {
+                        if (cancelledAccounts.has(data.accountId)) return EMPTY;
+                        return (
+                          data.kind === ActivityKind.Transaction
+                            ? processTransaction(data, processTransactionDeps)
+                            : processReward(data, actions)
+                        ).pipe(
+                          takeUntil(
+                            reset$.pipe(
+                              filter(
+                                action =>
+                                  action.payload.accountId === data.accountId,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
       ),
     );

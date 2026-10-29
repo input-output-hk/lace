@@ -3,6 +3,7 @@ import { Image, StyleSheet, View } from 'react-native';
 
 import { spacing, useTheme } from '../../../design-tokens';
 import { Row, Text } from '../../atoms';
+import { getAssetImageUrl } from '../../util';
 
 /**
  * Props for the DappInfoCard component.
@@ -10,7 +11,8 @@ import { Row, Text } from '../../atoms';
 interface DappInfoCardProps {
   /**
    * URL of the dApp's icon/logo image.
-   * If not provided, displays the first letter of the name as fallback.
+   * Falls back to the first letter of the name when absent, unloadable, or
+   * refused by the toolkit's image rules.
    */
   imageUrl?: string;
   /**
@@ -59,6 +61,10 @@ const styles = StyleSheet.create({
 export const DappInfoCard = ({ imageUrl, name, url }: DappInfoCardProps) => {
   const { theme } = useTheme();
   const [hasImgError, setImgError] = useState(false);
+  // A dApp's favicon is whatever its own `<link rel=icon>` declares, so it is
+  // attacker-chosen. The shared rules (ADR 42) proxy remote bytes and refuse an
+  // svg `data:` payload (M-301) that a raw Image source would happily load.
+  const logoUri = useMemo(() => getAssetImageUrl(imageUrl), [imageUrl]);
 
   const logoContainerStyle = useMemo(
     () => [
@@ -74,9 +80,9 @@ export const DappInfoCard = ({ imageUrl, name, url }: DappInfoCardProps) => {
   return (
     <Row alignItems="center" gap={spacing.S} style={styles.container}>
       <View style={logoContainerStyle} testID="dapp-info-logo-container">
-        {imageUrl && !hasImgError ? (
+        {logoUri && !hasImgError ? (
           <Image
-            source={{ uri: imageUrl }}
+            source={{ uri: logoUri }}
             style={styles.logo}
             resizeMode="cover"
             testID="dapp-info-logo"

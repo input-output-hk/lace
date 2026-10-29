@@ -22,6 +22,12 @@ export class DeviceCommitmentHexError extends Error {
   }
 }
 
+/**
+ * Checks that a string is 32 bytes of lowercase hex and types it as a device
+ * commitment.
+ *
+ * @throws {@link DeviceCommitmentHexError} when it is not.
+ */
 export const DeviceCommitmentHex = (value: string): DeviceCommitmentHex => {
   if (
     value.length !== DEVICE_COMMITMENT_BYTE_LENGTH * 2 ||

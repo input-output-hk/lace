@@ -20,10 +20,10 @@ import type { SideEffect } from '../../contract';
  * `AwaitingSetup → Unlocked` (first-run setup), neither of which follows
  * a pause that would leave stale syncs behind.
  *
- * Scoped to Cardano accounts only. Bitcoin (`${accountId}-bitcoin-sync`)
- * and Midnight (`${accountId}-midnight-sync`) use stable per-account IDs;
- * their operations are updated in place by the next emission and must
- * NOT be cleared — clearing leaves a gap that surfaces as "syncing
+ * Scoped to Cardano accounts only. The other blockchains' syncs (such as
+ * Bitcoin's `${accountId}-bitcoin-sync`) use stable per-account IDs; their
+ * operations are updated in place by the next emission and must NOT be
+ * cleared — clearing leaves a gap that surfaces as "syncing
  * without percentage" for accounts that have never reached
  * `lastSuccessfulSync`.
  *

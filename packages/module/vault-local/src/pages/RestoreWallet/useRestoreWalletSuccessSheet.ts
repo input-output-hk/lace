@@ -34,7 +34,7 @@ export const useRestoreWalletSuccessSheet = ({
   }, [clearRestoreWalletFlow]);
 
   return {
-    image: { name: 'RelievedFace' as IconName, variant: 'solid' as const },
+    image: { name: 'RelievedFace' as IconName, strokeWidth: 2 },
     title: t('v2.account-management.restore-wallet.success.title'),
     body: t('v2.account-management.restore-wallet.success.description'),
     buttonText: t('v2.account-management.restore-wallet.success.cta'),

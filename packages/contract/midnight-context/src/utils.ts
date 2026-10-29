@@ -74,7 +74,7 @@ export const isMidnightNetworkConfig = (
   typeof item === 'object' &&
   item !== null &&
   'nodeAddress' in item &&
-  'proofServerAddress' in item &&
+  'proofServer' in item &&
   'indexerAddress' in item;
 
 export const isPartialMidnightNetworkConfig = (
@@ -84,7 +84,7 @@ export const isPartialMidnightNetworkConfig = (
     typeof item === 'object' &&
     item !== null &&
     Object.keys(item).every(key =>
-      ['nodeAddress', 'proofServerAddress', 'indexerAddress'].includes(key),
+      ['nodeAddress', 'proofServer', 'indexerAddress'].includes(key),
     )
   );
 };

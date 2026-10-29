@@ -17,7 +17,7 @@ const fallbackCode = 'account-create-failed';
 
 const done = (result: string): FlowEvent<string> => ({ type: 'done', result });
 const progress = (
-  stage: 'activating' | 'deploying' | 'proving' | 'sponsoring',
+  stage: 'activating' | 'confirming' | 'deploying' | 'proving' | 'sponsoring',
 ): FlowEvent<string> => ({ type: 'progress', stage });
 
 describe('toFlowError', () => {
@@ -110,6 +110,35 @@ describe('flowActions', () => {
           message: 'node unreachable',
         }),
       });
+    });
+  });
+
+  it('emits the failure actions ahead of setFlowError, and none on success', () => {
+    scheduler.run(({ cold, expectObservable }) => {
+      const onFailed = [actions.passport.clearEncKey()];
+
+      expectObservable(
+        flowActions(cold('-#', {}, new Error('node unreachable')), {
+          actions,
+          fallbackCode,
+          onDone: () => [],
+          onFailed,
+        }),
+      ).toBe('-(ab|)', {
+        a: actions.passport.clearEncKey(),
+        b: actions.passport.setFlowError({
+          code: fallbackCode,
+          message: 'node unreachable',
+        }),
+      });
+      expectObservable(
+        flowActions(cold('-(a|)', { a: done('created') }), {
+          actions,
+          fallbackCode,
+          onDone: () => [],
+          onFailed,
+        }),
+      ).toBe('-(a|)', { a: actions.passport.setFlow('ready') });
     });
   });
 });

@@ -13,6 +13,7 @@ export interface ClaimSuccessToken {
 }
 
 export interface ClaimSuccessProps {
+  showActions?: boolean;
   title: string;
   description: string;
   adaBalance: string | undefined;
@@ -26,6 +27,7 @@ export interface ClaimSuccessProps {
 }
 
 export const ClaimSuccess = ({
+  showActions = true,
   title,
   description,
   adaBalance,
@@ -74,22 +76,24 @@ export const ClaimSuccess = ({
         />
       ))}
     </Column>
-    <Row gap={spacing.S}>
-      {shouldShowViewTransactionButton && (
-        <Button.Secondary
+    {showActions && (
+      <Row gap={spacing.S}>
+        {shouldShowViewTransactionButton && (
+          <Button.Secondary
+            flex={1}
+            label={viewTransactionLabel}
+            onPress={onViewTransaction}
+            testID="claim-success-view-tx-btn"
+          />
+        )}
+        <Button.Primary
           flex={1}
-          label={viewTransactionLabel}
-          onPress={onViewTransaction}
-          testID="claim-success-view-tx-btn"
+          label={doneLabel}
+          onPress={onDone}
+          testID="claim-success-done-btn"
         />
-      )}
-      <Button.Primary
-        flex={1}
-        label={doneLabel}
-        onPress={onDone}
-        testID="claim-success-done-btn"
-      />
-    </Row>
+      </Row>
+    )}
   </Column>
 );
 

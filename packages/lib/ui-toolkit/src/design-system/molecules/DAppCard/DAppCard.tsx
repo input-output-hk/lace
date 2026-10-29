@@ -52,7 +52,7 @@ const DAppCardComponent = ({
             <Icon
               name={blockchain}
               size={16}
-              variant="solid"
+              strokeWidth={2}
               testID="dapp-card-blockchain-icon"
             />
             {hasBlockchainLabel && (
@@ -64,14 +64,7 @@ const DAppCardComponent = ({
         ) : null}
         {onDelete ? (
           <IconButton.Static
-            icon={
-              <Icon
-                name="Delete04"
-                variant="stroke"
-                size={16}
-                strokeWidth={2}
-              />
-            }
+            icon={<Icon name="Delete04" size={16} strokeWidth={2} />}
             onPress={onDelete}
             containerStyle={styles.squaredButton}
             testID="dapp-card-delete-button"

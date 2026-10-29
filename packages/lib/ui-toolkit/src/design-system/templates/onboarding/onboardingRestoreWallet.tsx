@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Keyboard,
   KeyboardAvoidingView,
+  ScrollView,
   StyleSheet,
   TouchableWithoutFeedback,
   View,
@@ -57,6 +58,14 @@ export const OnboardingRestoreWallet = ({
   const form = useAppForm({
     ...mnemonicFormOptions,
   });
+  const scrollRef = React.useRef<ScrollView>(null);
+
+  const keepInputVisible = React.useCallback(() => {
+    if (form.store.state.values.isTextInputFocused) {
+      // Keyboard avoidance resizes the viewport without revealing the focused field.
+      scrollRef.current?.scrollToEnd({ animated: false });
+    }
+  }, [form]);
 
   const { t } = useTranslation();
 
@@ -108,7 +117,14 @@ export const OnboardingRestoreWallet = ({
           testID="mnemonic-outside-tap">
           <View style={styles.container}>
             <NavigationHeader title={title} onBackPress={onBackPress} />
-            <Box style={styles.content}>
+            <ScrollView
+              ref={scrollRef}
+              testID="onboarding-restore-wallet-scroll"
+              style={styles.container}
+              contentContainerStyle={styles.content}
+              onLayout={keepInputVisible}
+              onContentSizeChange={keepInputVisible}
+              keyboardShouldPersistTaps="handled">
               <form.AppField
                 name="passphrase"
                 validators={{
@@ -129,8 +145,6 @@ export const OnboardingRestoreWallet = ({
                         <HardwareWalletRestoreWarning />
                       </View>
 
-                      {/* In normal flow, never absolute: the callout reserves
-                          its own space so it cannot occlude the input below. */}
                       {callout && (
                         <View style={styles.calloutWrapper}>{callout}</View>
                       )}
@@ -139,6 +153,7 @@ export const OnboardingRestoreWallet = ({
                         <field.MnemonicTextInput
                           testID="restore-passphrase-input"
                           placeholderText={placeholderText}
+                          onFocus={keepInputVisible}
                         />
                       </Box>
 
@@ -164,7 +179,7 @@ export const OnboardingRestoreWallet = ({
                   );
                 }}
               />
-            </Box>
+            </ScrollView>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
@@ -178,7 +193,7 @@ const createStyles = () =>
       flex: 1,
     },
     content: {
-      flex: 1,
+      flexGrow: 1,
       paddingHorizontal: spacing.L,
       paddingTop: spacing.XXL,
       paddingBottom: spacing.XXL,
@@ -195,7 +210,8 @@ const createStyles = () =>
       marginBottom: spacing.XXL,
     },
     inputContainer: {
-      flex: 1,
+      flexGrow: 1,
       justifyContent: 'center',
+      paddingBottom: spacing.L,
     },
   });

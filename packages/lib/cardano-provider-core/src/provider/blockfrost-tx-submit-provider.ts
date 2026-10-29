@@ -101,6 +101,13 @@ const tryMapTxBlockfrostSubmissionError = (
   return null;
 };
 
+/**
+ * Submits signed transactions through Blockfrost and resolves with the
+ * transaction ID. Takes the client `createBlockfrostHttpClient` builds. A
+ * rejection throws a `ProviderError`. For the node rejections it recognises,
+ * such as a value that is not conserved or a validity interval that has
+ * passed, its `innerError` is a `TxSubmissionError` with the matching code.
+ */
 export class BlockfrostTxSubmitProvider extends BlockfrostProvider {
   public constructor(client: HttpClient, logger: Logger) {
     super(client, logger);

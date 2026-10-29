@@ -1,21 +1,39 @@
-import { describe, expect, it, vi } from 'vitest';
+import { Effect } from 'effect';
+import { describe, expect, it } from 'vitest';
 
+import { AttestationError } from '../../../src/store/attested-proving-service';
+import { TemenosAttestationError } from '../../../src/store/temenos-attested-prover';
 import {
   mapMidnightBuildError,
   mapMidnightConfirmError,
   mapMidnightSubmitError,
 } from '../../../src/store/tx-executor/error-mapping';
 
-vi.mock('@lace-lib/util-store', async () => ({
-  ...(await vi.importActual('@lace-lib/util-store')),
-  serializeError: ({ message, name }: Error) => ({ message, name }),
-}));
-
-vi.mock('@lace-lib/util-redacted', () => ({
-  filterRedacted: (value: unknown) => value,
-}));
-
 describe('mapMidnightConfirmError', () => {
+  it.each([mapMidnightConfirmError, mapMidnightSubmitError])(
+    'preserves the SDK FiberFailure message despite its custom JSON representation',
+    async mapError => {
+      const error = await Effect.runPromise(
+        Effect.fail(new Error('Too many proof material uploads')),
+      ).catch((failure: Error) => failure);
+      const result = mapError(error);
+      expect(result.error?.message).toBe('Too many proof material uploads');
+      expect(result.error?.name).toContain('FiberFailure');
+    },
+  );
+
+  it.each([
+    new AttestationError('example', 'evidence', 'raw provider diagnostic'),
+    new TemenosAttestationError('bind-channel'),
+  ])('maps attestation failures to translated recovery copy', error => {
+    const result = mapMidnightConfirmError(error);
+    expect(result.errorTranslationKeys).toEqual({
+      title: 'midnight.tee-attestation.failure.title',
+      subtitle: 'midnight.tee-attestation.failure.recovery',
+    });
+    expect(result.error?.message).toBe(error.message);
+  });
+
   it('returns generic keys with serialized error', () => {
     const error = new Error('Some SDK error');
     error.name = 'SdkError';
@@ -26,7 +44,7 @@ describe('mapMidnightConfirmError', () => {
       title: 'tx-executor.confirmation-error.generic.title',
       subtitle: 'tx-executor.confirmation-error.generic.subtitle',
     });
-    expect(result.error).toEqual({
+    expect(result.error).toMatchObject({
       message: 'Some SDK error',
       name: 'SdkError',
     });

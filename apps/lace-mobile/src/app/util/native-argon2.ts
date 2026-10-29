@@ -1,48 +1,24 @@
-import { ByteArray, HexBytes, SecretBox } from '@lace-lib/core';
+import { createNativeArgon2id, SecretBox } from '@lace-lib/core';
 import { NativeModules } from 'react-native';
 
 import { logger } from './logger';
 
-import type { Argon2idImplementation } from '@lace-lib/core';
+import type { NativeArgon2id } from '@lace-lib/core';
 
 type NativeArgon2 = {
-  argon2id(
-    passwordHex: string,
-    saltHex: string,
-    memoryKb: number,
-    iterations: number,
-    parallelism: number,
-    outLength: number,
-  ): Promise<string>;
+  argon2id: NativeArgon2id;
 };
 
 const { ApolloModule } = NativeModules as {
   ApolloModule?: Partial<NativeArgon2>;
 };
 
-const nativeArgon2id: Argon2idImplementation = async (
-  password,
-  salt,
-  { m, t, p, dkLen },
-) => {
+const nativeArgon2id = createNativeArgon2id(async (...args) => {
   if (typeof ApolloModule?.argon2id !== 'function') {
     throw new TypeError('ApolloModule.argon2id is not available');
   }
-  const derivedHex = await ApolloModule.argon2id(
-    HexBytes.fromByteArray(password),
-    HexBytes.fromByteArray(salt),
-    m,
-    t,
-    p,
-    dkLen,
-  );
-  if (typeof derivedHex !== 'string' || derivedHex.length !== dkLen * 2) {
-    throw new Error(
-      `Native argon2id returned an invalid result: expected ${dkLen} bytes`,
-    );
-  }
-  return ByteArray.fromHex(HexBytes(derivedHex));
-};
+  return ApolloModule.argon2id(...args);
+});
 
 /**
  * Registers the ApolloModule Argon2id as the SecretBox key-derivation

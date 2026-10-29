@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createJubjubAuthoriser } from '../../src/acc/jubjub-authoriser';
 import { JubjubDevice } from '../../src/acc/signer';
-import { loadJubjubSigning } from '../../src/acc/signing-loader';
+import {
+  loadGrantDerivation,
+  loadJubjubSigning,
+} from '../../src/acc/signing-loader';
 
 describe('loadJubjubSigning', () => {
   it('resolves to the same instance across repeated uses', async () => {
@@ -43,6 +46,46 @@ describe('loadJubjubSigning', () => {
       expect(await load()).toBe(signing);
     } finally {
       vi.doUnmock('../../src/acc/signer');
+      vi.resetModules();
+    }
+  });
+});
+
+describe('loadGrantDerivation', () => {
+  it('resolves to the grant helpers, the same instance across repeated uses', async () => {
+    const [first, second] = await Promise.all([
+      loadGrantDerivation(),
+      loadGrantDerivation(),
+    ]);
+
+    expect(first).toBe(second);
+    expect(await loadGrantDerivation()).toBe(first);
+    expect(typeof first.deriveGrantId).toBe('function');
+    expect(typeof first.issueGrantBinding).toBe('function');
+  });
+
+  it('retries the import after a rejected load instead of caching the rejection', async () => {
+    vi.resetModules();
+    const loadFailure = new Error('chunk load failed');
+    let shouldFailNext = true;
+    vi.doMock('../../src/acc/grants', async importOriginal => {
+      if (shouldFailNext) {
+        shouldFailNext = false;
+        throw loadFailure;
+      }
+      return importOriginal();
+    });
+    try {
+      const { loadGrantDerivation: load } = await import(
+        '../../src/acc/signing-loader'
+      );
+      await expect(load()).rejects.toMatchObject({ cause: loadFailure });
+
+      const derivation = await load();
+      expect(typeof derivation.deriveGrantId).toBe('function');
+      expect(await load()).toBe(derivation);
+    } finally {
+      vi.doUnmock('../../src/acc/grants');
       vi.resetModules();
     }
   });

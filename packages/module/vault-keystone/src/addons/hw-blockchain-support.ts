@@ -15,7 +15,7 @@ import type { HwBlockchainSupport } from '@lace-contract/onboarding-v2';
  * keyed by its own onboarding option id. For Cardano, account selection stays
  * with the app: Lace requests a specific account index via the
  * qr-hardware-call key derivation request and the device only approves, but
- * Keystone firmware only derives accounts #0-#24, so the picker is capped. For
+ * Keystone firmware only derives accounts #0-#23, so the picker is capped. For
  * Bitcoin, the device dictates the account: the connect-software-wallet
  * export carries whatever account the device pre-derived, so Lace cannot
  * request a specific one.

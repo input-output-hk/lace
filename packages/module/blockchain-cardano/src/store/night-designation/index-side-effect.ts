@@ -37,7 +37,7 @@ import { resolveAccountKeyHashes } from './account-key-hashes';
 import { findRegistrationUtxo } from './registration-utxo';
 import { unwrapProviderResult } from './unwrap-provider-result';
 
-import type { SideEffect } from '../..';
+import type { SideEffect } from '../../contracts';
 import type { Cardano } from '@cardano-sdk/core';
 import type { AnyAddress } from '@lace-contract/addresses';
 import type { SideEffectDependencies } from '@lace-contract/module';

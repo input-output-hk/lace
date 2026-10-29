@@ -7,10 +7,11 @@ import { CoinGeckoProvider } from '../src/coingecko-provider';
 
 import type { TokenPriceRequest } from '@lace-contract/token-pricing';
 import type { BlockchainName } from '@lace-lib/util-store';
+import type { Mock } from 'vitest';
 
 describe('CoinGeckoProvider', () => {
   let provider: CoinGeckoProvider;
-  let fetchMock: ReturnType<typeof vi.fn>;
+  let fetchMock: Mock;
   const testBaseUrl = 'https://test.coingecko.io/api/v3';
 
   const mockCoinsList = [

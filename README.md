@@ -7,6 +7,10 @@ A multi-chain, multi-platform wallet for Cardano, Bitcoin, and Midnight.
   · also available on Microsoft Edge Add-ons
 - **Mobile**: [Google Play](https://play.google.com/store/apps/details?id=io.lace.mobilewallet)
   · also available on the App Store
+- **SDK**: [`@laceio/sdk`](https://www.npmjs.com/package/@laceio/sdk)
+  on npm, the Lace platform as a TypeScript SDK for dApps, published from
+  [`input-output-hk/lace-sdk`](https://github.com/input-output-hk/lace-sdk) ·
+  [developer site](https://sdk.lace.io/)
 
 This repository is an **open-source mirror** of Lace. It exists so that
 anyone can inspect the source code, understand how the released

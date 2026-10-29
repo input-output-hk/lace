@@ -6,25 +6,25 @@ import {
 } from './sign-tx-refused-keys';
 
 import type { SignTxRefusalDetails } from './sign-tx-refused-keys';
-import type { CollateralOwnershipErrorCase } from '@lace-contract/cardano-context';
+import type { SignTxRefusal } from '../store/sign-tx-refusal';
 
 /**
- * The block verdict a pending request carries, or `null` for a reviewable one.
- * Memoized on the two primitives, because callers put it in dependency lists.
+ * The guard verdict a pending request carries; `null` for a reviewable
+ * request, or one whose origin is not yet known.
+ * Memoized because callers put it in dependency lists; `refusal` is the object
+ * the slice holds, so its identity only changes when the request does.
  */
 export const useSignTxRefusal = ({
-  collateralRefusal,
+  refusal,
   dappOrigin,
 }: {
-  collateralRefusal?: CollateralOwnershipErrorCase | null;
+  refusal?: SignTxRefusal | null;
   dappOrigin?: string;
 }): SignTxRefusalDetails | null =>
   useMemo(
     () =>
-      collateralRefusal && dappOrigin !== undefined
-        ? { case: collateralRefusal, dappOrigin }
-        : null,
-    [collateralRefusal, dappOrigin],
+      refusal && dappOrigin !== undefined ? { ...refusal, dappOrigin } : null,
+    [refusal, dappOrigin],
   );
 
 /**

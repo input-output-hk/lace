@@ -7,6 +7,7 @@ import { describe, it } from 'vitest';
 
 import { LOVELACE_TOKEN_ID } from '../../../src/const';
 import { trackAccountTokens } from '../../../src/store/side-effects/track-account-tokens';
+import { cardanoCustodyAccount, controlUtxo } from '../../custody-mocks';
 import {
   cardanoAccount0Addr,
   cardanoAccount2Addr1,
@@ -18,6 +19,7 @@ import type {
   AccountRewardAccountDetailsMap,
   AccountUtxoMap,
   CardanoBip32AccountProps,
+  CardanoCustodyAccountProps,
   CardanoMultiSigAccountProps,
 } from '../../../src/types';
 import type { AnyAccount } from '@lace-contract/wallet-repo';
@@ -25,7 +27,8 @@ import type { AnyAccount } from '@lace-contract/wallet-repo';
 type CardanoAccount = AnyAccount<
   CardanoBip32AccountProps,
   CardanoBip32AccountProps,
-  CardanoMultiSigAccountProps
+  CardanoMultiSigAccountProps,
+  CardanoCustodyAccountProps
 >;
 
 const actions = {
@@ -104,17 +107,15 @@ describe('trackAccountTokens', () => {
         a: { [account2.accountId]: utxos },
       });
 
-      const selectRewardAccountDetails$ = cold<AccountRewardAccountDetailsMap>(
-        'a',
-        { a: {} },
-      );
+      const selectRewardAccountDetailsWithInFlight$ =
+        cold<AccountRewardAccountDetailsMap>('a', { a: {} });
 
       return {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
             selectAccountUtxosWithInFlight$,
-            selectRewardAccountDetails$,
+            selectRewardAccountDetailsWithInFlight$,
           },
         },
         dependencies: { actions },
@@ -200,17 +201,15 @@ describe('trackAccountTokens', () => {
         b: { [account0.accountId]: utxosUpdated },
       });
 
-      const selectRewardAccountDetails$ = cold<AccountRewardAccountDetailsMap>(
-        'a',
-        { a: {} },
-      );
+      const selectRewardAccountDetailsWithInFlight$ =
+        cold<AccountRewardAccountDetailsMap>('a', { a: {} });
 
       return {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
             selectAccountUtxosWithInFlight$,
-            selectRewardAccountDetails$,
+            selectRewardAccountDetailsWithInFlight$,
           },
         },
         dependencies: { actions },
@@ -280,9 +279,8 @@ describe('trackAccountTokens', () => {
         a: { [account0.accountId]: utxos },
       });
 
-      const selectRewardAccountDetails$ = cold<AccountRewardAccountDetailsMap>(
-        'a',
-        {
+      const selectRewardAccountDetailsWithInFlight$ =
+        cold<AccountRewardAccountDetailsMap>('a', {
           a: {
             [account0.accountId]: {
               rewardAccountInfo: {
@@ -294,15 +292,14 @@ describe('trackAccountTokens', () => {
               },
             },
           },
-        },
-      );
+        });
 
       return {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
             selectAccountUtxosWithInFlight$,
-            selectRewardAccountDetails$,
+            selectRewardAccountDetailsWithInFlight$,
           },
         },
         dependencies: { actions },
@@ -330,6 +327,80 @@ describe('trackAccountTokens', () => {
     });
   });
 
+  it('counts rewards from the balance view, which leaves out pending withdrawals', () => {
+    testSideEffect(trackAccountTokens, ({ cold, expectObservable }) => {
+      const utxos: Cardano.Utxo[] = [
+        [
+          {
+            address: Cardano.PaymentAddress(cardanoAccount0Addr.address),
+            txId: Cardano.TransactionId(
+              '39a7a284c2a0948189dc45dec670211cd4d72f7b66c5726c08d9b3df11e44d58',
+            ),
+            index: 0,
+          },
+          {
+            address: Cardano.PaymentAddress(cardanoAccount0Addr.address),
+            value: { coins: 5_000_000n, assets: new Map() },
+          },
+        ],
+      ];
+      const rewardsOf = (withdrawable: bigint) => ({
+        [account0.accountId]: {
+          rewardAccountInfo: {
+            rewardsSum: BigNumber(2_000_000n),
+            isActive: true,
+            isRegistered: true,
+            controlledAmount: BigNumber(10_000_000n),
+            withdrawableAmount: BigNumber(withdrawable),
+          },
+        },
+      });
+
+      return {
+        stateObservables: {
+          cardanoContext: {
+            selectActiveCardanoAccounts$: cold<CardanoAccount[]>('a', {
+              a: [account0],
+            }),
+            selectAccountUtxosWithInFlight$: cold<AccountUtxoMap>('a', {
+              a: { [account0.accountId]: utxos },
+            }),
+            // The chain still reports 2 ADA; a pending tx already withdrew it.
+            selectRewardAccountDetails$: cold<AccountRewardAccountDetailsMap>(
+              'a',
+              {
+                a: rewardsOf(2_000_000n),
+              },
+            ),
+            selectRewardAccountDetailsWithInFlight$:
+              cold<AccountRewardAccountDetailsMap>('a', { a: rewardsOf(0n) }),
+          },
+        },
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('a', {
+            a: actions.tokens.setAccountTokens({
+              blockchainName: 'Cardano',
+              accountId: account0.accountId,
+              byAddress: [
+                {
+                  address: cardanoAccount0Addr.address,
+                  tokens: [
+                    {
+                      tokenId: LOVELACE_TOKEN_ID,
+                      available: BigNumber(5_000_000n),
+                      pending: BigNumber(0n),
+                    },
+                  ],
+                },
+              ],
+            }),
+          });
+        },
+      };
+    });
+  });
+
   it('emits empty byAddress when account has no utxos', () => {
     testSideEffect(trackAccountTokens, ({ cold, expectObservable }) => {
       const selectActiveCardanoAccounts$ = cold<CardanoAccount[]>('a', {
@@ -340,17 +411,15 @@ describe('trackAccountTokens', () => {
         a: { [account0.accountId]: [] },
       });
 
-      const selectRewardAccountDetails$ = cold<AccountRewardAccountDetailsMap>(
-        'a',
-        { a: {} },
-      );
+      const selectRewardAccountDetailsWithInFlight$ =
+        cold<AccountRewardAccountDetailsMap>('a', { a: {} });
 
       return {
         stateObservables: {
           cardanoContext: {
             selectActiveCardanoAccounts$,
             selectAccountUtxosWithInFlight$,
-            selectRewardAccountDetails$,
+            selectRewardAccountDetailsWithInFlight$,
           },
         },
         dependencies: { actions },
@@ -360,6 +429,60 @@ describe('trackAccountTokens', () => {
               blockchainName: 'Cardano',
               accountId: account0.accountId,
               byAddress: [],
+            }),
+          });
+        },
+      };
+    });
+  });
+
+  it('leaves a custody account to the custody store', () => {
+    testSideEffect(trackAccountTokens, ({ cold, expectObservable }) => {
+      const keyUtxo: Cardano.Utxo = [
+        {
+          address: Cardano.PaymentAddress(cardanoAccount0Addr.address),
+          txId: Cardano.TransactionId('ab'.repeat(32)),
+          index: 0,
+        },
+        {
+          address: Cardano.PaymentAddress(cardanoAccount0Addr.address),
+          value: { coins: 2_000_000n },
+        },
+      ];
+      return {
+        stateObservables: {
+          cardanoContext: {
+            selectActiveCardanoAccounts$: cold<CardanoAccount[]>('a', {
+              a: [account0, cardanoCustodyAccount],
+            }),
+            selectAccountUtxosWithInFlight$: cold<AccountUtxoMap>('a', {
+              a: {
+                [account0.accountId]: [keyUtxo],
+                [cardanoCustodyAccount.accountId]: [controlUtxo(1)],
+              },
+            }),
+            selectRewardAccountDetailsWithInFlight$:
+              cold<AccountRewardAccountDetailsMap>('a', { a: {} }),
+          },
+        },
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('a', {
+            a: actions.tokens.setAccountTokens({
+              blockchainName: 'Cardano',
+              accountId: account0.accountId,
+              byAddress: [
+                {
+                  address: cardanoAccount0Addr.address,
+                  tokens: [
+                    {
+                      tokenId: LOVELACE_TOKEN_ID,
+                      available: BigNumber(2_000_000n),
+                      pending: BigNumber(0n),
+                    },
+                  ],
+                },
+              ],
             }),
           });
         },

@@ -39,10 +39,10 @@ export class BlockfrostActivityProvider extends BlockfrostProvider {
   /**
    * Fetches the transaction history for a Cardano address.
    *
-   * @param address Cardano payment address to fetch transaction history for
-   * @param numberOfItems How many history items should be fetched (order: newer -> older)
-   * @param startAtBlock At which block (inclusive) should it start
-   * @param startAtIndex At which index (inclusive) should it start
+   * @param address - Cardano payment address to fetch transaction history for
+   * @param numberOfItems - How many history items should be fetched (order: newer → older)
+   * @param startAtBlock - At which block (inclusive) should it start
+   * @param startAtIndex - At which index (inclusive) should it start
    * @returns Observable with Result containing the history items or an error
    */
   public getAddressTransactionHistory({
@@ -106,7 +106,7 @@ export class BlockfrostActivityProvider extends BlockfrostProvider {
    * which is returned inside a tuple together with the tx details which holds
    * additional info not stored in the HydratedTx.
    *
-   * @param txId Cardano.TransactionId
+   * @param txId - Cardano.TransactionId
    */
   public getTransactionDetails(
     txId: Cardano.TransactionId,

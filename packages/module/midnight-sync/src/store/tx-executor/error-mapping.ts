@@ -1,6 +1,8 @@
 import { filterRedacted } from '@lace-lib/util-redacted';
 import { serializeError, type ErrorObject } from '@lace-lib/util-store';
 
+import { AttestationError } from '../attested-proving-service';
+
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { TxErrorTranslationKeys } from '@lace-contract/tx-executor';
 
@@ -14,15 +16,29 @@ type MappedError = {
   error?: ErrorObject;
 };
 
+const serializeMidnightError = (error: Error): ErrorObject =>
+  filterRedacted({
+    ...serializeError(error),
+    // Effect errors serialize via toJSON(), which omits these display fields.
+    name: error.name,
+    message: error.message,
+  }) as ErrorObject;
+
 const isInsufficientDustError = (message: string): boolean =>
   INSUFFICIENT_DUST_PATTERNS.some(pattern => message.includes(pattern));
 
 export const mapMidnightConfirmError = (error: Error): MappedError => ({
-  errorTranslationKeys: {
-    title: 'tx-executor.confirmation-error.generic.title',
-    subtitle: 'tx-executor.confirmation-error.generic.subtitle',
-  },
-  error: filterRedacted(serializeError(error)) as ErrorObject,
+  errorTranslationKeys:
+    error instanceof AttestationError
+      ? {
+          title: 'midnight.tee-attestation.failure.title',
+          subtitle: 'midnight.tee-attestation.failure.recovery',
+        }
+      : {
+          title: 'tx-executor.confirmation-error.generic.title',
+          subtitle: 'tx-executor.confirmation-error.generic.subtitle',
+        },
+  error: serializeMidnightError(error),
 });
 
 export const mapMidnightSubmitError = (error: Error): MappedError => ({
@@ -30,7 +46,7 @@ export const mapMidnightSubmitError = (error: Error): MappedError => ({
     title: 'tx-executor.submission-error.generic.title',
     subtitle: 'tx-executor.submission-error.generic.subtitle',
   },
-  error: filterRedacted(serializeError(error)) as ErrorObject,
+  error: serializeMidnightError(error),
 });
 
 export const mapMidnightBuildError = (error: Error): TranslationKey => {

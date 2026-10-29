@@ -8,6 +8,7 @@ import { useDustDesignationSheet } from '../../../src/customisations/dust-design
 
 import type { SheetScreenProps } from '@lace-lib/navigation';
 import type { SheetRoutes } from '@lace-lib/navigation';
+import type { Mock } from 'vitest';
 
 // Mock navigation
 const mockNavigate = vi.fn();
@@ -75,7 +76,7 @@ const mockDispatchFormDataChanged = vi.fn();
 const mockDispatchConfirm = vi.fn();
 const mockDispatchBack = vi.fn();
 
-const dispatchMocks: Record<string, ReturnType<typeof vi.fn>> = {
+const dispatchMocks: Record<string, Mock<() => void>> = {
   'sendFlow.closed': mockDispatchClosed,
   'sendFlow.openRequested': mockDispatchOpenRequested,
   'sendFlow.formDataChanged': mockDispatchFormDataChanged,

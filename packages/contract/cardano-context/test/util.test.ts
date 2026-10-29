@@ -2,7 +2,14 @@ import { Cardano } from '@cardano-sdk/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { COLLATERAL_AMOUNT_LOVELACES } from '../src/const';
-import { filterSpendableUtxos, getEligibleCollateralUtxo } from '../src/util';
+import { isCardanoCustodyAccount } from '../src/custody/account';
+import {
+  filterSpendableUtxos,
+  getEligibleCollateralUtxo,
+  isCardanoBip32Account,
+} from '../src/util';
+
+import type { AnyAccount } from '@lace-contract/wallet-repo';
 
 const makeUtxo = (txId: string, index: number, coins: bigint): Cardano.Utxo =>
   [
@@ -302,5 +309,46 @@ describe('getEligibleCollateralUtxo', () => {
 
     const result = getEligibleCollateralUtxo([utxoWithMinAmountAndAssets]);
     expect(result).toBeUndefined();
+  });
+});
+
+describe('Cardano account guards', () => {
+  const account = (
+    accountType: AnyAccount['accountType'],
+    blockchainName = 'Cardano',
+  ): AnyAccount => ({ accountType, blockchainName } as unknown as AnyAccount);
+
+  const BIP32_ACCOUNT_TYPES: AnyAccount['accountType'][] = [
+    'InMemory',
+    'LazyInMemory',
+    'HardwareLedger',
+    'HardwareTrezor',
+    'HardwareSeedSigner',
+    'HardwareKeystone',
+  ];
+
+  it.each(BIP32_ACCOUNT_TYPES)(
+    'treats a Cardano %s account as BIP-32 and not custody',
+    accountType => {
+      expect(isCardanoBip32Account(account(accountType))).toBe(true);
+      expect(isCardanoCustodyAccount(account(accountType))).toBe(false);
+    },
+  );
+
+  it('treats a Cardano custody account as custody and not BIP-32', () => {
+    expect(isCardanoCustodyAccount(account('CardanoCustody'))).toBe(true);
+    expect(isCardanoBip32Account(account('CardanoCustody'))).toBe(false);
+  });
+
+  it('treats a Cardano MultiSig account as neither BIP-32 nor custody', () => {
+    expect(isCardanoBip32Account(account('MultiSig'))).toBe(false);
+    expect(isCardanoCustodyAccount(account('MultiSig'))).toBe(false);
+  });
+
+  it('rejects accounts of another blockchain', () => {
+    expect(isCardanoBip32Account(account('InMemory', 'Bitcoin'))).toBe(false);
+    expect(isCardanoCustodyAccount(account('CardanoCustody', 'Bitcoin'))).toBe(
+      false,
+    );
   });
 });

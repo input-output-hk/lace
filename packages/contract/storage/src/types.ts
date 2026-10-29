@@ -27,7 +27,7 @@ export interface CollectionStorage<T> {
   /**
    * Get all stored documents.
    *
-   * @returns {Observable}
+   * @returns
    * - When have some documents stored: emits once and completes.
    * - When no documents are stored or the storage is destroyed: completes without emitting.
    */
@@ -40,7 +40,7 @@ export interface CollectionStorage<T> {
    * collection must not cost a read of every other entity's payload — with
    * per-document keys that is the whole point of the layout.
    *
-   * @returns {Observable}
+   * @returns
    * - When the document is stored and readable: emits once and completes.
    * - When it is absent, unreadable, or the storage is destroyed: completes
    *   without emitting. An unreadable document is logged, matching getAll.
@@ -60,35 +60,40 @@ export interface CollectionStorage<T> {
    * unreadable index reads as an empty collection — so one read glitch turns
    * the call into "delete everything". No caller remains.
    *
-   * @returns {Observable} Emits undefined and completes. Completes without emitting if the storage is destroyed.
+   * @returns Emits undefined and completes. Completes without emitting if the storage is destroyed.
    */
   setAll: (documents: T[]) => Observable<void>;
   /**
    * Insert the document, or replace the stored document with the same
    * computed doc id. Safe for concurrent writers of DIFFERENT documents.
    *
-   * @returns {Observable} Emits undefined and completes. Completes without emitting if the storage is destroyed.
+   * @returns Emits undefined and completes. Completes without emitting if the storage is destroyed.
    */
   upsert: (document: T) => Observable<void>;
   /**
    * Remove every stored document matching the predicate.
    *
-   * @returns {Observable} Emits undefined and completes. Completes without emitting if the storage is destroyed.
+   * @returns Emits undefined and completes. Completes without emitting if the storage is destroyed.
    */
   removeWhere: (predicate: (document: T) => boolean) => Observable<void>;
   /**
    * Remove all stored documents.
    *
-   * @returns {Observable} Emits undefined and completes. Completes without emitting if the storage is destroyed.
+   * @returns Emits undefined and completes. Completes without emitting if the storage is destroyed.
    */
   clear: () => Observable<void>;
 }
 
+/**
+ * Persistent storage for a single document, read and replaced as a whole.
+ *
+ * @typeParam T - The stored document.
+ */
 export interface DocumentStorage<T> {
   /**
    * Get the stored document.
    *
-   * @returns {Observable}
+   * @returns
    * - When have some document stored: emits once and completes.
    * - When no document is stored or the storage is destroyed: completes without emitting.
    */
@@ -96,11 +101,17 @@ export interface DocumentStorage<T> {
   /**
    * Store the document.
    *
-   * @returns {Observable} Emits undefined and completes. Completes without emitting if the storage is destroyed.
+   * @returns Emits undefined and completes. Completes without emitting if the storage is destroyed.
    */
   set: (document: T) => Observable<void>;
 }
 
+/**
+ * Options for creating a {@link CollectionStorage}: the collection's id, which
+ * names its storage, and how to derive each document's id.
+ *
+ * @typeParam T - The stored document.
+ */
 export type CreateCollectionStorageProps<T> = {
   collectionId: string;
   /**
@@ -111,10 +122,15 @@ export type CreateCollectionStorageProps<T> = {
   computeDocId: (document: T) => string;
 };
 
+/** Options for creating a {@link DocumentStorage}: the id that names the document's storage. */
 export type CreateDocumentStorageProps = {
   documentId: string;
 };
 
+/**
+ * Factories for collection and document storage, provided to side effects by
+ * the platform's storage module.
+ */
 export interface StorageDependencies {
   createCollectionStorage: <T extends object>(
     props: Readonly<CreateCollectionStorageProps<T>>,

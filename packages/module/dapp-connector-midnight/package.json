@@ -4,6 +4,11 @@
   "private": true,
   "license": "MIT",
   "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./sdk": "./src/sdk.ts",
+    "./src/render/components/midnight-account-selector": "./src/render/components/midnight-account-selector.tsx"
+  },
   "main": "src/index.ts",
   "dependencies": {
     "@lace-contract/activities": "*",
@@ -20,10 +25,12 @@
     "@lace-contract/wallet-repo": "*",
     "@lace-lib/dapp-connector": "*",
     "@lace-lib/extension-messaging": "*",
+    "@lace-lib/midnight-prover": "*",
     "@lace-lib/ui-extension": "*",
     "@lace-lib/util": "*",
     "@lace-lib/util-render": "*",
     "@lace-lib/util-store": "*",
+    "@lace-lib/vendor": "*",
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {

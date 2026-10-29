@@ -1,31 +1,14 @@
-import { ActivityType } from '@lace-contract/activities';
 import { BITCOIN_TOKEN_ID } from '@lace-contract/bitcoin-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-lib/util';
-import { Transaction } from 'bitcoinjs-lib';
-import { defer, firstValueFrom, forkJoin, of } from 'rxjs';
+import { defer, firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { DUST_THRESHOLD, encodeUnsignedTxToString } from '../common';
-import {
-  BitcoinTxBuildError,
-  BitcoinTxBuildErrorCode,
-  buildErrorTranslationKey,
-  TransactionBuilder,
-} from '../tx-builder';
+import { DUST_THRESHOLD } from '../common';
+import { buildBitcoinPayment, buildErrorTranslationKey } from '../tx-builder';
 
-import type { ProviderError } from '@cardano-sdk/core';
-import type {
-  Activity,
-  BlockchainSpecificActivityMetadata,
-  PendingActivitiesByAccount,
-} from '@lace-contract/activities';
-import type {
-  BitcoinBlockchainSpecificTxData,
-  BitcoinEstimatedFees,
-  BitcoinInFlightUtxoActivityMetadata,
-  BitcoinUTxO,
-} from '@lace-contract/bitcoin-context';
+import type { PendingActivitiesByAccount } from '@lace-contract/activities';
+import type { BitcoinBlockchainSpecificTxData } from '@lace-contract/bitcoin-context';
 import type { SideEffectDependencies } from '@lace-contract/module';
 import type {
   TokenTransfer,
@@ -33,21 +16,19 @@ import type {
   TxExecutorImplementation,
   TxParams,
 } from '@lace-contract/tx-executor';
-import type { Result } from '@lace-lib/util';
-import type { Psbt } from 'bitcoinjs-lib';
 import type { Observable } from 'rxjs';
 
 /**
  * Case-insensitive Bitcoin detection.
- * @param tokenId The token ID to check.
+ * @param tokenId - The token ID to check.
  */
 export const isBitcoin = (tokenId: string): boolean =>
   tokenId === BITCOIN_TOKEN_ID;
 
 /**
  * Convert a single TokenTransfer to a bigint value for Bitcoin transactions.
- * @param normalizedAmount The normalized amount of the token transfer.
- * @param token The token information of the token transfer.
+ * @param normalizedAmount - The normalized amount of the token transfer.
+ * @param token - The token information of the token transfer.
  */
 export const tokenTransferToValue = ({
   normalizedAmount,
@@ -64,7 +45,7 @@ export const tokenTransferToValue = ({
 
 /**
  * Convert TxParams to amount for Bitcoin transactions.
- * @param txp The transaction parameters.
+ * @param txp - The transaction parameters.
  */
 export const txParamsToAmount = (txp: TxParams): number => {
   if (txp.tokenTransfers.length !== 1) {
@@ -74,118 +55,6 @@ export const txParamsToAmount = (txp: TxParams): number => {
   }
 
   return Number(tokenTransferToValue(txp.tokenTransfers[0]));
-};
-
-const getBitcoinInFlight = (
-  activity: Activity,
-): BitcoinInFlightUtxoActivityMetadata | undefined => {
-  if (activity.type !== ActivityType.Pending) return undefined;
-  const blockchainSpecific = activity.blockchainSpecific as
-    | BlockchainSpecificActivityMetadata
-    | undefined;
-  return blockchainSpecific?.Bitcoin;
-};
-
-const outpointKey = (ref: { txId: string; index: number }) =>
-  `${ref.txId}#${ref.index}`;
-
-// Bitcoin: only drop outpoints consumed by pending txs. Unconfirmed produced
-// outputs are not added to the spendable set — spending unconfirmed Bitcoin
-// outputs is unsafe under RBF and bounded by mempool ancestor limits.
-export const applyInFlightUtxoAdjustments = (
-  utxos: readonly BitcoinUTxO[],
-  _accountAddresses: ReadonlySet<string>,
-  pendingActivities: readonly Activity[],
-): BitcoinUTxO[] => {
-  const spent = new Set<string>();
-  for (const activity of pendingActivities) {
-    const inFlight = getBitcoinInFlight(activity);
-    if (!inFlight) continue;
-    for (const input of inFlight.consumedInputs) {
-      spent.add(outpointKey(input));
-    }
-  }
-
-  if (spent.size === 0) return [...utxos];
-
-  return utxos.filter(utxo => !spent.has(outpointKey(utxo)));
-};
-
-/**
- * Resolves the rate to build against, in BTC per kilobyte.
- *
- * The market is read ONLY for the three quoted tiers. `Custom` is a rate the
- * user typed and must stay buildable while mempool.space is unreachable — do
- * not hoist the fetch above that branch, or an unreachable market fails every
- * Bitcoin build. A tier build still fails when the market cannot be read.
- *
- * @param feeRate The chosen option, plus the typed rate when it is `Custom`.
- * @param getCurrentFeeMarket Fetches the market; called only for a tier.
- */
-const resolveFeeRate = async (
-  feeRate: BitcoinBlockchainSpecificTxData['feeRate'],
-  getCurrentFeeMarket: () => Observable<
-    Result<BitcoinEstimatedFees, ProviderError>
-  >,
-): Promise<number> => {
-  if (feeRate.feeOption === 'Custom') return feeRate.customFeeRate ?? 0.0;
-
-  const market = (await firstValueFrom(getCurrentFeeMarket())).unwrap();
-
-  switch (feeRate.feeOption) {
-    case 'Fast':
-      return market.fast.feeRate;
-    case 'Average':
-      return market.standard.feeRate;
-    case 'Low':
-      return market.slow.feeRate;
-  }
-};
-
-/**
- * Embeds each input's full previous transaction (nonWitnessUtxo) into the
- * PSBT so it is self-contained for hardware signers: Ledger requires the
- * previous transaction for segwit-v0 inputs and Trezor consumes it as refTxs.
- * Duplicate previous transactions are fetched only once and all fetches run
- * concurrently. Each fetched transaction is verified to hash to the requested
- * txid so a wrong provider response fails the build locally instead of as an
- * opaque device-side rejection. Throws if any fetch fails, failing the build
- * instead of producing a PSBT a device would reject.
- *
- * @param psbt The freshly built PSBT whose inputs carry only witnessUtxo.
- * @param getRawTransaction Fetches the raw transaction hex for a tx id.
- */
-const embedPreviousTransactions = async (
-  psbt: Psbt,
-  getRawTransaction: (
-    txId: string,
-  ) => Observable<Result<string, ProviderError>>,
-): Promise<void> => {
-  const inputTxIds = psbt.txInputs.map(input =>
-    Buffer.from(input.hash).reverse().toString('hex'),
-  );
-
-  const uniqueTxIds = [...new Set(inputTxIds)];
-  if (uniqueTxIds.length === 0) return;
-
-  const rawTxResults = await firstValueFrom(
-    forkJoin(uniqueTxIds.map(txId => getRawTransaction(txId))),
-  );
-
-  const rawTxByTxId = new Map<string, Buffer>();
-  uniqueTxIds.forEach((txId, index) => {
-    const rawTx = Buffer.from(rawTxResults[index].unwrap(), 'hex');
-    if (Transaction.fromBuffer(rawTx).getId() !== txId) {
-      throw new Error(
-        `Fetched previous transaction does not match requested txid ${txId}`,
-      );
-    }
-    rawTxByTxId.set(txId, rawTx);
-  });
-
-  inputTxIds.forEach((txId, index) => {
-    psbt.updateInput(index, { nonWitnessUtxo: rawTxByTxId.get(txId)! });
-  });
 };
 
 export const makeBuildTx =
@@ -217,9 +86,6 @@ export const makeBuildTx =
         };
       }
 
-      const network = bitcoinAccountWallet.network;
-      const utxos = await firstValueFrom(bitcoinAccountWallet.utxos$);
-      const addresses = await firstValueFrom(bitcoinAccountWallet.addresses$);
       const pendingActivitiesByAccount = await firstValueFrom(
         pendingActivitiesByAccount$,
       );
@@ -234,62 +100,22 @@ export const makeBuildTx =
       const { feeRate, memo } = txParams[0]
         .blockchainSpecific as BitcoinBlockchainSpecificTxData;
 
-      const rateToUse = await resolveFeeRate(feeRate, () =>
-        bitcoinAccountWallet.getCurrentFeeMarket(),
-      );
-
-      if (!Number.isFinite(rateToUse) || rateToUse <= 0) {
-        throw new BitcoinTxBuildError(
-          BitcoinTxBuildErrorCode.InvalidFeeRate,
-          `Invalid fee rate: ${rateToUse}`,
-        );
-      }
-
-      logger.debug(`Bitcoin buildTx: Using fee rate of ${rateToUse} BTC/kB`);
-      const txBuilder = new TransactionBuilder(network, rateToUse, addresses);
-
-      const ownAddresses = new Set(addresses.map(a => a.address));
-      const adjustedUtxos = applyInFlightUtxoAdjustments(
-        utxos,
-        ownAddresses,
-        pendingActivitiesByAccount[firstTokenTransfer.token.accountId] ?? [],
-      );
-
-      txBuilder
-        .setChange(
-          bitcoinAccountWallet.address,
-          bitcoinAccountWallet.masterFingerprint,
-        )
-        .setUtxoSet(adjustedUtxos);
-
-      for (const txp of txParams) {
-        const amount = txParamsToAmount(txp);
-        txBuilder.addOutput(txp.address, amount);
-
-        logger.debug(
-          `Bitcoin buildTx: Adding output to address: ${txp.address} with amount from txParams: ${amount}`,
-        );
-      }
-
-      if (memo) {
-        logger.debug(`Bitcoin buildTx: Adding OP_RETURN memo: ${memo}`);
-        txBuilder.addOpReturnOutput(memo);
-      }
-
-      const tx = txBuilder.build();
-      tx.network = network;
-
-      if (bitcoinAccountWallet.masterFingerprint) {
-        await embedPreviousTransactions(tx.context, txId =>
-          bitcoinAccountWallet.getRawTransaction(txId),
-        );
-      }
+      const { serializedTx, fee } = await buildBitcoinPayment({
+        wallet: bitcoinAccountWallet,
+        pendingActivities:
+          pendingActivitiesByAccount[firstTokenTransfer.token.accountId] ?? [],
+        outputs: txParams.map(txp => ({
+          address: txp.address,
+          amount: txParamsToAmount(txp),
+        })),
+        feeRate,
+        memo,
+        logger,
+      });
 
       return {
-        fees: [
-          { amount: BigNumber(BigInt(tx.fee)), tokenId: BITCOIN_TOKEN_ID },
-        ],
-        serializedTx: encodeUnsignedTxToString(tx),
+        fees: [{ amount: BigNumber(fee), tokenId: BITCOIN_TOKEN_ID }],
+        serializedTx,
         success: true,
       };
     }).pipe(

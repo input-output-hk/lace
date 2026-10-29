@@ -30,6 +30,7 @@ import type {
   BrowseDRepListItem,
   DefaultDelegationOption,
 } from './useBrowseDRep';
+import type { DRepSummary } from '@lace-contract/cardano-context';
 import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 const OPTION_TEST_IDS: Record<DefaultDelegationOption['type'], string> = {
@@ -71,6 +72,37 @@ const DelegationOptionRow = ({
   );
 };
 
+/**
+ * Owns its own press handler so the memoized DRepCard sees a stable `onPress`:
+ * built inline in renderItem it would be a new function per render, and every
+ * row would re-run its BigNumber voting-power formatting on any commit above
+ * the list.
+ */
+const DRepRow = ({
+  summary,
+  onSelect,
+}: {
+  summary: DRepSummary;
+  onSelect: (drepId: string) => void;
+}) => {
+  const handlePress = useCallback(() => {
+    onSelect(summary.drepId);
+  }, [onSelect, summary.drepId]);
+
+  return (
+    <DRepCard
+      drepId={summary.drepId}
+      amount={summary.amount}
+      isActive={summary.isActive}
+      name={summary.name}
+      cip105DrepId={summary.cip105DrepId}
+      votingPowerLovelace={summary.amount}
+      avatarUri={toHttpImageUrl(summary.metadata?.imageUrl)}
+      onPress={handlePress}
+    />
+  );
+};
+
 const SKELETON_ITEMS = [0, 1, 2, 3];
 
 export const BrowseDRepSheet = (
@@ -84,8 +116,7 @@ export const BrowseDRepSheet = (
     isLoading,
     hasError,
     retry,
-    searchValue,
-    onSearchChange,
+    onSearchCommit,
     status,
     sortBy,
     setStatus,
@@ -120,85 +151,43 @@ export const BrowseDRepSheet = (
         );
       }
 
-      const { summary } = item;
       return (
         <View style={styles.cardWrapper}>
-          <DRepCard
-            drepId={summary.drepId}
-            amount={summary.amount}
-            isActive={summary.isActive}
-            name={summary.name}
-            cip105DrepId={summary.cip105DrepId}
-            votingPowerLovelace={summary.amount}
-            avatarUri={toHttpImageUrl(summary.metadata?.imageUrl)}
-            onPress={() => {
-              onSelectDRep(summary.drepId);
-            }}
-          />
+          <DRepRow summary={item.summary} onSelect={onSelectDRep} />
         </View>
       );
     },
     [onSelectDRep, onSelectDefaultOption],
   );
 
-  const ListHeaderComponent = useMemo(
-    () => (
-      <View style={styles.header}>
-        {promotedDReps.length > 0 && (
-          <View style={styles.promotedSection}>
-            <Text.XS variant="secondary" testID="browse-drep-promoted-title">
-              {t('v2.governance.browse-drep.promoted-section-title')}
-            </Text.XS>
-            {promotedDReps.map(({ summary, description }) => (
-              <DRepCard
-                key={summary.drepId}
-                testID={`drep-promoted-${summary.drepId}`}
-                drepId={summary.drepId}
-                amount={summary.amount}
-                isActive={summary.isActive}
-                name={summary.name}
-                cip105DrepId={summary.cip105DrepId}
-                votingPowerLovelace={summary.amount}
-                description={description}
-                avatarUri={toHttpImageUrl(summary.metadata?.imageUrl)}
-                onPress={() => {
-                  onSelectDRep(summary.drepId);
-                }}
-              />
-            ))}
-          </View>
-        )}
-        <Row alignItems="center" gap={spacing.S}>
-          <View style={styles.searchBar}>
-            <SearchBar
-              placeholder={t('v2.governance.browse-drep.search-placeholder')}
-              value={searchValue}
-              onChangeText={onSearchChange}
-            />
-          </View>
-          <DRepFilterDropdown
-            status={status}
-            sortBy={sortBy}
-            onStatusChange={setStatus}
-            onSortByChange={setSortBy}
-            isActive={hasActiveFilters}
+  const ListHeaderComponent = useMemo(() => {
+    if (promotedDReps.length === 0) return null;
+
+    return (
+      <View style={styles.promotedSection}>
+        <Text.XS variant="secondary" testID="browse-drep-promoted-title">
+          {t('v2.governance.browse-drep.promoted-section-title')}
+        </Text.XS>
+        {promotedDReps.map(({ summary, description }) => (
+          <DRepCard
+            key={summary.drepId}
+            testID={`drep-promoted-${summary.drepId}`}
+            drepId={summary.drepId}
+            amount={summary.amount}
+            isActive={summary.isActive}
+            name={summary.name}
+            cip105DrepId={summary.cip105DrepId}
+            votingPowerLovelace={summary.amount}
+            description={description}
+            avatarUri={toHttpImageUrl(summary.metadata?.imageUrl)}
+            onPress={() => {
+              onSelectDRep(summary.drepId);
+            }}
           />
-        </Row>
+        ))}
       </View>
-    ),
-    [
-      t,
-      promotedDReps,
-      onSelectDRep,
-      searchValue,
-      onSearchChange,
-      status,
-      sortBy,
-      setStatus,
-      setSortBy,
-      hasActiveFilters,
-    ],
-  );
+    );
+  }, [t, promotedDReps, onSelectDRep]);
 
   const ListEmptyComponent = useMemo(() => {
     if (isLoading) {
@@ -255,6 +244,26 @@ export const BrowseDRepSheet = (
 
   return (
     <View style={styles.container} testID="browse-drep-content">
+      {/* Above the list, not inside its ListHeaderComponent: a list remount
+          takes its header with it — focus, the keyboard and any character not
+          yet committed — and the field also reports only the settled query, so
+          typing never re-renders the list (ADR 64). Same placement the address
+          book and the dapp explorer already use. */}
+      <Row alignItems="center" gap={spacing.S} style={styles.searchRow}>
+        <View style={styles.searchBar}>
+          <SearchBar
+            placeholder={t('v2.governance.browse-drep.search-placeholder')}
+            onSearchCommit={onSearchCommit}
+          />
+        </View>
+        <DRepFilterDropdown
+          status={status}
+          sortBy={sortBy}
+          onStatusChange={setStatus}
+          onSortByChange={setSortBy}
+          isActive={hasActiveFilters}
+        />
+      </Row>
       <GenericFlashList<BrowseDRepListItem>
         style={styles.list}
         data={listItems}
@@ -279,14 +288,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: spacing.M,
+    paddingHorizontal: spacing.M,
+    paddingBottom: spacing.M,
   },
-  header: {
-    gap: spacing.S,
-    marginBottom: spacing.S,
+  searchRow: {
+    paddingHorizontal: spacing.M,
+    paddingTop: spacing.M,
+    paddingBottom: spacing.S,
   },
   promotedSection: {
     gap: spacing.S,
+    marginBottom: spacing.S,
   },
   searchBar: {
     flex: 1,

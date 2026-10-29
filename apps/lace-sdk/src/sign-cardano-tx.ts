@@ -51,11 +51,12 @@ export type WalletWithCardanoSigning = {
   _loadModules: ReturnType<typeof createModuleLoader>;
 };
 
+/** The options of `signCardanoTx`: the transaction, and what signs it. */
 export interface SignCardanoTxProps extends CardanoSignRequest {
   /**
-   * Password for {@link WalletType.InMemory} wallets. Required when the
-   * resolved account is `InMemory`; ignored for `LazyInMemory` accounts
-   * (the mnemonic is fetched on demand by the signer factory).
+   * The wallet's password. Required when the signing account belongs to a
+   * {@link WalletType.InMemory} wallet, one created with a password; ignored
+   * for a `LazyInMemory` wallet, whose vault module supplies the keys.
    */
   password?: Uint8Array;
   /**
@@ -73,6 +74,20 @@ const isSignableCardanoWallet = (wallet: {
   wallet.type === WalletType.InMemory ||
   wallet.type === WalletType.LazyInMemory;
 
+/**
+ * Signs a Cardano transaction with the wallet's keys, through the signer of
+ * its wallet kind, with no confirmation prompt of the SDK's own: confirm with
+ * the user before calling it. The account is `props.accountId`, or the only
+ * signable Cardano account on the active network.
+ *
+ * @param wallet - A wallet holding the signing account (see
+ *   {@link WalletWithCardanoSigning}).
+ * @param props - The unsigned transaction, and the password and account when
+ *   needed.
+ * @returns `Ok` with the signed transaction, ready for `submitCardanoTx`, or
+ *   `Err` when no account matches, the password is missing or signing fails.
+ *   It never rejects.
+ */
 export const signCardanoTx = async (
   wallet: WalletWithCardanoSigning,
   props: SignCardanoTxProps,

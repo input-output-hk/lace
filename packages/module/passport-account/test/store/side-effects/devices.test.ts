@@ -37,6 +37,7 @@ const account: PassportAccountInfo = {
   address: accountAddress,
   bindingVersion: '0.1.0-lace.1',
   status: 'ready',
+  networkId: 'undeployed',
 };
 const localDevice: PassportDevice = {
   commitmentHex: localCommitment,
@@ -63,11 +64,33 @@ const revoked: DeviceRoster = {
   devices: [refreshedLocalDevice],
   localUseCounter: '3',
 };
+const rotatedKey = '0d'.repeat(32);
+const joiningReader = {
+  readerPublicKey: '44'.repeat(32),
+  devicePublicKey: '55'.repeat(32),
+};
 
 /** The flow events a cold marble may carry, keyed by their marble letter. */
 const events: Record<string, FlowEvent<DeviceRoster>> = {
   f: { type: 'done', result: enrolled },
   v: { type: 'done', result: revoked },
+  w: { type: 'done', result: { ...revoked, encKey: rotatedKey } },
+  q: {
+    type: 'done',
+    result: {
+      ...enrolled,
+      encKey: rotatedKey,
+      droppedDevices: ['dd'.repeat(32)],
+    },
+  },
+  k: {
+    type: 'done',
+    result: {
+      ...revoked,
+      encKey: rotatedKey,
+      droppedDevices: ['dd'.repeat(32)],
+    },
+  },
 };
 
 /** The actions the gate and the flows publish, keyed by their marble letter. */
@@ -77,6 +100,11 @@ const emitted = {
   h: actions.passport.setDevices(revoked.devices),
   i: actions.passport.setLocalUseCounter('3'),
   j: actions.passport.setFlow('ready'),
+  o: actions.passport.setEncKey(rotatedKey),
+  f: actions.passport.clearEncKey(),
+  u: actions.passport.setUnsealedGrantIds([]),
+  b: actions.passport.setRevocationPendingGrantIds([]),
+  z: actions.passport.setDroppedDevices(['dd'.repeat(32)]),
   n: actions.passport.setFlowError({
     code: 'no-account',
     message: 'No ready Passport account is available.',
@@ -144,8 +172,17 @@ const runFlowTest = ({
         passport: {
           addDevice$: hot(addDevice, {
             d: actions.passport.addDevice({ commitmentHex: joiningCommitment }),
+            k: actions.passport.addDevice({
+              commitmentHex: joiningCommitment,
+              reader: joiningReader,
+            }),
           }),
           createAccount$: NEVER,
+          issueGrant$: NEVER,
+          installOperations$: NEVER,
+          readShieldedHoldings$: NEVER,
+          revokeAllGrants$: NEVER,
+          revokeGrant$: NEVER,
           removeDevice$: hot(removeDevice, {
             r: actions.passport.removeDevice({
               commitmentHex: targetCommitment,
@@ -205,6 +242,16 @@ beforeEach(() => {
 });
 
 describe('runPassportFlow: addDevice', () => {
+  it('publishes the enc_key and the dropped devices of an enrolment that rotated, after the roster and the counter', () => {
+    runFlowTest({
+      addDevice: '-d',
+      addFlows: cold => [cold('--(q|)', events)],
+      assertion: ({ sideEffect$, helpers }) => {
+        helpers.expectObservable(sideEffect$).toBe('-a-(giozj)', emitted);
+      },
+    });
+  });
+
   it('enters the ceremony with the trigger, then publishes the roster and the counter in order', () => {
     runFlowTest({
       addDevice: '-d',
@@ -236,13 +283,13 @@ describe('runPassportFlow: addDevice', () => {
   });
 
   it.each(typedFailures)(
-    'maps a typed flow failure to one setFlowError carrying its code: $code',
+    'forgets the key state and maps a typed flow failure to one setFlowError carrying its code: $code',
     failure => {
       runFlowTest({
         addDevice: '-d',
         addFlows: cold => [cold('-#', events, failure)],
         assertion: ({ sideEffect$, helpers }) => {
-          helpers.expectObservable(sideEffect$).toBe('-ak', {
+          helpers.expectObservable(sideEffect$).toBe('-a(fubk)', {
             ...emitted,
             k: actions.passport.setFlowError({
               code: failure.code,
@@ -254,12 +301,12 @@ describe('runPassportFlow: addDevice', () => {
     },
   );
 
-  it('maps an untyped flow failure to setFlowError with the device-add-failed code', () => {
+  it('forgets the key state and maps an untyped flow failure to setFlowError with the device-add-failed code', () => {
     runFlowTest({
       addDevice: '-d',
       addFlows: cold => [cold('-#', events, new Error('node unreachable'))],
       assertion: ({ sideEffect$, helpers }) => {
-        helpers.expectObservable(sideEffect$).toBe('-ak', {
+        helpers.expectObservable(sideEffect$).toBe('-a(fubk)', {
           ...emitted,
           k: actions.passport.setFlowError({
             code: 'device-add-failed',
@@ -316,13 +363,13 @@ describe('runPassportFlow: addDevice', () => {
 
   it('accepts a new addDevice after a failed flow', () => {
     runFlowTest({
-      addDevice: '-d--d',
+      addDevice: '-d------d',
       addFlows: cold => [
         cold('-#', events, new Error('first lost')),
         cold('-(f|)', events),
       ],
       assertion: ({ sideEffect$, helpers, addDeviceFlow }) => {
-        helpers.expectObservable(sideEffect$).toBe('-ak-a(gij)', {
+        helpers.expectObservable(sideEffect$).toBe('-a(fubk)a(gij)', {
           ...emitted,
           k: actions.passport.setFlowError({
             code: 'device-add-failed',
@@ -364,7 +411,50 @@ describe('runPassportFlow: addDevice', () => {
   });
 });
 
+describe('runPassportFlow: addDevice with the joining device keys', () => {
+  it('hands the joining reader and device keys to the flow', () => {
+    runFlowTest({
+      addDevice: '-k',
+      addFlows: cold => [cold('--(f|)', events)],
+      assertion: ({ sideEffect$, helpers, addDeviceFlow }) => {
+        helpers.expectObservable(sideEffect$).toBe('-a-(gij)', emitted);
+        helpers.flush();
+        expect(addDeviceFlow).toHaveBeenCalledExactlyOnceWith(
+          {
+            commitmentHex: joiningCommitment,
+            reader: joiningReader,
+            account,
+            devices: sampledDevices,
+            localUseCounter: knownUseCounter,
+          },
+          expect.objectContaining({ actions }),
+        );
+      },
+    });
+  });
+});
+
 describe('runPassportFlow: removeDevice', () => {
+  it('publishes the enc_key the removal rotated to after the roster and the counter', () => {
+    runFlowTest({
+      removeDevice: '-r',
+      removeFlows: cold => [cold('--(w|)', events)],
+      assertion: ({ sideEffect$, helpers }) => {
+        helpers.expectObservable(sideEffect$).toBe('-a-(hioj)', emitted);
+      },
+    });
+  });
+
+  it('publishes the devices the removal left without the new key after the enc_key', () => {
+    runFlowTest({
+      removeDevice: '-r',
+      removeFlows: cold => [cold('--(k|)', events)],
+      assertion: ({ sideEffect$, helpers }) => {
+        helpers.expectObservable(sideEffect$).toBe('-a-(hiozj)', emitted);
+      },
+    });
+  });
+
   it('enters the ceremony with the trigger, then publishes the roster and the counter in order', () => {
     runFlowTest({
       removeDevice: '-r',
@@ -386,13 +476,13 @@ describe('runPassportFlow: removeDevice', () => {
   });
 
   it.each(typedFailures)(
-    'maps a typed flow failure to one setFlowError carrying its code: $code',
+    'forgets the key state and maps a typed flow failure to one setFlowError carrying its code: $code',
     failure => {
       runFlowTest({
         removeDevice: '-r',
         removeFlows: cold => [cold('-#', events, failure)],
         assertion: ({ sideEffect$, helpers }) => {
-          helpers.expectObservable(sideEffect$).toBe('-ak', {
+          helpers.expectObservable(sideEffect$).toBe('-a(fubk)', {
             ...emitted,
             k: actions.passport.setFlowError({
               code: failure.code,
@@ -404,12 +494,12 @@ describe('runPassportFlow: removeDevice', () => {
     },
   );
 
-  it('maps an untyped flow failure to setFlowError with the device-remove-failed code', () => {
+  it('forgets the key state and maps an untyped flow failure to setFlowError with the device-remove-failed code', () => {
     runFlowTest({
       removeDevice: '-r',
       removeFlows: cold => [cold('-#', events, 'submission lost')],
       assertion: ({ sideEffect$, helpers }) => {
-        helpers.expectObservable(sideEffect$).toBe('-ak', {
+        helpers.expectObservable(sideEffect$).toBe('-a(fubk)', {
           ...emitted,
           k: actions.passport.setFlowError({
             code: 'device-remove-failed',

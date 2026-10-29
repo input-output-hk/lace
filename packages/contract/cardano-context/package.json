@@ -27,6 +27,7 @@
     "@lace-contract/tx-executor": "*",
     "@lace-contract/wallet-active-state": "*",
     "@lace-contract/wallet-repo": "*",
+    "@lace-lib/cardano-custody": "*",
     "@lace-lib/core": "*",
     "@lace-lib/util": "*",
     "@lace-lib/util-render": "*",

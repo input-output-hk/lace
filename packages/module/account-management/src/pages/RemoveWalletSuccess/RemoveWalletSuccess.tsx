@@ -33,7 +33,7 @@ export const RemoveWalletSuccess = ({
   return (
     <StatusSheet
       body={body}
-      icon={{ name: 'AlertSquare', variant: 'solid' }}
+      icon={{ name: 'AlertSquare', strokeWidth: 2 }}
       testID="remove-wallet-success-sheet"
     />
   );

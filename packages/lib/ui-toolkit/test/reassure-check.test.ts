@@ -21,7 +21,7 @@ type Gate = {
 
 // The gate is a plain CommonJS script (CI runs it with bare node), so it is
 // required rather than imported, and its contract is declared above.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @nx/enforce-module-boundaries
 const gate = require('../../../../scripts/reassure-check.js') as Gate;
 const { evaluateComparison } = gate;
 

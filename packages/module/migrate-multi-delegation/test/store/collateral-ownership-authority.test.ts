@@ -24,7 +24,10 @@ import { migrateMultiDelegationActions } from '../../src/store/slice';
 import type { AccountContext } from '../../src/store/side-effects';
 import type { Cardano, Serialization } from '@cardano-sdk/core';
 import type { GroupedAddress } from '@cardano-sdk/key-management';
-import type { CardanoTransactionSignerContext } from '@lace-contract/cardano-context';
+import type {
+  CardanoTransactionSigner,
+  CardanoTransactionSignerContext,
+} from '@lace-contract/cardano-context';
 import type { SideEffectDependencies } from '@lace-contract/module';
 import type { AnyWallet } from '@lace-contract/wallet-repo';
 
@@ -82,7 +85,7 @@ const tx = (cbor: string) =>
 
 const run = async (
   accountContext: AccountContext,
-  innerSign: ReturnType<typeof vi.fn>,
+  innerSign: CardanoTransactionSigner['sign'],
   {
     log = logger(),
     cardanoProvider = { resolveInput: vi.fn() },

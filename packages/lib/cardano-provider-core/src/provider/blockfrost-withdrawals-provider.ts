@@ -25,7 +25,7 @@ export class BlockfrostWithdrawalsProvider extends BlockfrostProvider {
   /**
    * Fetches all withdrawal history for a given reward account.
    *
-   * @param rewardAccount CardanoRewardAccount to fetch the withdrawals for
+   * @param rewardAccount - CardanoRewardAccount to fetch the withdrawals for
    * @returns Observable with Result containing all withdrawals or an error
    */
   public getAccountWithdrawals({

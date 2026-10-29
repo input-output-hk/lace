@@ -4,6 +4,7 @@ flowchart TB
     direction TB
     extension["lace-extension"]
     mobile["lace-mobile"]
+    sdk["lace-sdk"]
   end
   subgraph module["packages/module"]
     direction TB
@@ -34,6 +35,10 @@ flowchart TB
 `lib → contract` is an allowed edge: some `@lace-lib/*` packages consume
 `@lace-contract/*` types and abstractions (e.g. `ui-toolkit`, `util-hw`,
 `util-provider`, `cardano-provider-core`, `bitcoin-provider-core`).
+
+`lace-sdk` is the app whose build is a published package, `@laceio/sdk`: it loads modules like the
+other apps and exports them, with the wallet engine, for dApps to use. Its exports are the product, so they ship
+ahead of any in-repo caller.
 
 An **app** is the only thing that may reach a module, and it only _loads_ one
 (`app -- Load --> module` above). Every other inbound edge is forbidden:

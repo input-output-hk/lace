@@ -3,6 +3,16 @@ import { ByteArray, HexBytes } from '@lace-lib/util';
 
 import { UnknownCircuitError } from './artefact-loader';
 import { jubjubChallenges } from './challenges';
+import {
+  APPEND_INBOX_CIRCUIT,
+  ROTATE_ENC_KEY_CIRCUIT,
+} from './enc-key-circuits';
+import {
+  ISSUE_GRANT_CIRCUIT,
+  REVOKE_ALL_GRANTS_CIRCUIT,
+  REVOKE_GRANT_CIRCUIT,
+} from './grant-circuits';
+import { issueGrantBinding } from './grants';
 
 import type { CallContext, ChallengeBuilder } from './challenges';
 import type { JubjubDevice } from './signer';
@@ -34,6 +44,12 @@ const bytesArgument = (request: AuthorisationRequest): Uint8Array => {
   return entry;
 };
 
+const noArguments = (request: AuthorisationRequest): void => {
+  if (request.args.length > 0) {
+    throw new Error(`Circuit ${request.circuit} takes no argument`);
+  }
+};
+
 const challengeBuilders: Record<
   string,
   (
@@ -46,6 +62,18 @@ const challengeBuilders: Record<
     jubjubChallenges.addDevice(context, pk, bytesArgument(request)),
   remove_device_with_jubjub: (context, pk, request) =>
     jubjubChallenges.removeDevice(context, pk, bytesArgument(request)),
+  [ISSUE_GRANT_CIRCUIT]: (context, pk, request) =>
+    jubjubChallenges.issueGrant(context, pk, issueGrantBinding(request.args)),
+  [REVOKE_GRANT_CIRCUIT]: (context, pk, request) =>
+    jubjubChallenges.revokeGrant(context, pk, bytesArgument(request)),
+  [REVOKE_ALL_GRANTS_CIRCUIT]: (context, pk, request) => {
+    noArguments(request);
+    return jubjubChallenges.revokeAllGrants(context, pk);
+  },
+  [ROTATE_ENC_KEY_CIRCUIT]: (context, pk, request) =>
+    jubjubChallenges.rotateEncKey(context, pk, bytesArgument(request)),
+  [APPEND_INBOX_CIRCUIT]: (context, pk, request) =>
+    jubjubChallenges.appendInbox(context, pk, bytesArgument(request)),
 };
 
 /**
@@ -67,8 +95,8 @@ export type JubjubAuthoriser = PassportAuthoriser &
 
 /**
  * A PassportAuthoriser over any JubJub device key source. Authorises the
- * device-management circuits this module calls and rejects everything
- * else, including the permissionless
+ * device-management, grant lifecycle and encryption key circuits this
+ * module calls and rejects everything else, including the permissionless
  * `activate_initial_device_with_jubjub`, which needs no authorisation.
  */
 export const createJubjubAuthoriser = (

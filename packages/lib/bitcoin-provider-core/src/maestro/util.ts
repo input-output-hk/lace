@@ -6,8 +6,8 @@ const SATS_IN_BTC = 100_000_000;
  * Converts a Bitcoin amount expressed as a decimal string (I.E `"0.00012345"`)
  * into its integer value in satoshis.
  *
- * @param btcString  Bitcoin amount as a string (e.g. `"2"`, `"0.5"`, `"0.00000001"`).
- * @returns          Amount in satoshis as a number.
+ * @param btcString - Bitcoin amount as a string (e.g. `"2"`, `"0.5"`, `"0.00000001"`).
+ * @returns Amount in satoshis as a number.
  */
 export const btcStringToSatoshis = (btcString: string): number => {
   const [integerPart, fractionPart = ''] = btcString.split('.');

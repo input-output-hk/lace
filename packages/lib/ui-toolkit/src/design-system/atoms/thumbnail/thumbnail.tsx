@@ -16,7 +16,12 @@ import React, {
 import { StyleSheet, View, Pressable } from 'react-native';
 
 import { radius, spacing, useTheme } from '../../../design-tokens';
-import { getImageUri, getWebIpfsFallbackSource, isWeb } from '../../util';
+import {
+  getAssetImageUrl,
+  getImageUri,
+  getWebIpfsFallbackSource,
+  isWeb,
+} from '../../util';
 import { Icon } from '../icons/Icon';
 import { Text } from '../text/text';
 
@@ -51,12 +56,25 @@ export const Thumbnail = ({
   );
   const isSizeDeterminedRef = useRef(size !== 0);
 
-  const originalUri = useMemo(() => getImageUri(source), [source]);
-  const resolvedSource = useMemo(
-    () => fallbackSource ?? source,
-    [fallbackSource, source],
+  // This atom hands a uri straight to expo-image, so the proxy + single-IPFS-
+  // gateway rules are applied HERE rather than at each call site: callers that
+  // pass raw token metadata (tokenGroupSummary among them) would otherwise
+  // fetch attacker-controlled origins directly. Also refuses unsafe data: URIs
+  // (M-301), which surface as the ImageNotFound fallback below.
+  const sourceUri = useMemo(() => getImageUri(source), [source]);
+  const normalizedUri = useMemo(() => getAssetImageUrl(sourceUri), [sourceUri]);
+  const normalizedSource = useMemo<ImageSource | undefined>(
+    () =>
+      normalizedUri === undefined
+        ? undefined
+        : { ...source, uri: normalizedUri },
+    [normalizedUri, source],
   );
-  const resolvedUri = getImageUri(resolvedSource);
+  const resolvedSource = useMemo(
+    () => fallbackSource ?? normalizedSource,
+    [fallbackSource, normalizedSource],
+  );
+  const resolvedUri = resolvedSource ? getImageUri(resolvedSource) : undefined;
   const hasValidSource = !!resolvedUri && !hasImageError;
 
   useEffect(() => {
@@ -72,7 +90,7 @@ export const Thumbnail = ({
   useEffect(() => {
     setHasImageError(false);
     setFallbackSource(null);
-  }, [originalUri]);
+  }, [normalizedUri]);
 
   const thumbnailStyles = useMemo(
     () => getStyles(imageSize, theme),
@@ -96,15 +114,18 @@ export const Thumbnail = ({
   );
 
   const handleImageError = useCallback(() => {
+    // Retry from the url that actually failed, not the caller's raw uri: only
+    // the resolved url tells the fallback whether the load was proxied (worth a
+    // plain-gateway retry) or already the plain gateway (nothing to retry).
     const retrySource = !fallbackSource
-      ? getWebIpfsFallbackSource(originalUri)
+      ? getWebIpfsFallbackSource(normalizedUri)
       : null;
     if (retrySource && !fallbackSource) {
       setFallbackSource(retrySource);
       return;
     }
     setHasImageError(true);
-  }, [originalUri, fallbackSource]);
+  }, [normalizedUri, fallbackSource]);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     if (!isSizeDeterminedRef.current) {

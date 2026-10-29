@@ -15,8 +15,8 @@ export class BlockchainInputResolver implements InputResolver {
   /**
    * Creates an instance of `BlockchainInputResolver`.
    *
-   * @param {BitcoinProvider} dataProvider - The provider used to fetch transaction data from the blockchain.
-   * @param network
+   * @param dataProvider - The provider used to fetch transaction data from the blockchain.
+   * @param network - The Bitcoin network the inputs belong to.
    */
   public constructor(
     private readonly dataProvider: BitcoinProvider,
@@ -27,10 +27,10 @@ export class BlockchainInputResolver implements InputResolver {
    * Resolves the transaction input to a `UTxO` object providing detailed information
    * about the input, including the owning address and the amount.
    *
-   * @param {string} txId - The hexadecimal string representing the transaction ID of the input to resolve.
-   * @param {number} index - The zero-based index of the input within the transaction's list of outputs.
+   * @param txId - The hexadecimal string representing the transaction ID of the input to resolve.
+   * @param index - The zero-based index of the input within the transaction's list of outputs.
    *
-   * @returns {Promise<BitcoinUTxO>} A promise that resolves to a `BitcoinUTxO` object containing the resolved input details.
+   * @returns A promise that resolves to a `BitcoinUTxO` object containing the resolved input details.
    * If the input cannot be resolved, the promise should reject with an error explaining the failure.
    */
   public async resolve(txId: string, index: number): Promise<BitcoinUTxO> {

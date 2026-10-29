@@ -313,52 +313,45 @@ export interface MaestroTransactionResponse {
 
 /**
  * Common pagination and block‑height filters.
- *
- * @property {number} count   Max results per page (provider default when omitted).
- * @property {'asc' | 'desc'} order Sort order by block height.
- * @property {number} from    Include results from this height (inclusive).
- * @property {number} to      Include results up to this height (inclusive).
- * @property {string} cursor  Cursor returned by a previous call; start from
- *                            the top when empty or undefined.
  */
 interface MaestroPaginationParams {
+  /** Max results per page (provider default when omitted). */
   count?: number;
+  /** Sort order by block height. */
   order?: 'asc' | 'desc';
+  /** Include results from this height (inclusive). */
   from?: number;
+  /** Include results up to this height (inclusive). */
   to?: number;
+  /**
+   * Cursor returned by a previous call; start from the top when empty or
+   * undefined.
+   */
   cursor?: string;
 }
 
 /**
  * Optional filters.
- *
- * @property {boolean} filter_dust          Ignore UTxOs under the filter_dust_threshold.
- * @property {number}  filter_dust_threshold Ignore UTxOs below this custom threshold (defaults to 100 if left undefined).
- * @property {boolean} exclude_metaprotocols Exclude UTxOs involved in metaprotocols (runes, inscriptions, etc.).
  */
 interface MaestroFilterParams {
+  /** Ignore UTxOs under the filter_dust_threshold. */
   filter_dust?: boolean;
+  /** Ignore UTxOs below this custom threshold (defaults to 100 if left undefined). */
   filter_dust_threshold?: number;
+  /** Exclude UTxOs involved in metaprotocols (runes, inscriptions, etc.). */
   exclude_metaprotocols?: boolean;
 }
 
 /**
  * Parameters for fetching confirmed transactions.
- *
- * @template BitcoinGetTransactionsParams
- * @augments MaestroPaginationParams
- * @property {number} confirmations Minimum number of confirmations.
  */
 export type MaestroGetTransactionsQueryParams = MaestroPaginationParams & {
+  /** Minimum number of confirmations. */
   confirmations?: number;
 };
 
 /**
  * Parameters for fetching UTxOs
- *
- * @template BitcoinGetUTxOsParams
- * @augments MaestroPaginationParams
- * @augments MaestroFilterParams
  */
 export type MaestroGetUTxOsQueryParams = MaestroFilterParams &
   MaestroPaginationParams;
@@ -366,13 +359,9 @@ export type MaestroGetUTxOsQueryParams = MaestroFilterParams &
 /**
  * Parameters for fetching mempool transactions
  * (`/address/.../mempool`).
- *
- * @template BitcoinGetMempoolTransactionsParams
- * @augments MaestroFilterParams
- * @augments MaestroPaginationParams
- * @property {number} mempool_blocks_limit Cap on pseudo‑block depth inspected in the mempool (provider‑specific).
  */
 export type MaestroGetMempoolTransactionsQueryParams = MaestroFilterParams &
   MaestroPaginationParams & {
+    /** Cap on pseudo-block depth inspected in the mempool (provider-specific). */
     mempool_blocks_limit?: number;
   };

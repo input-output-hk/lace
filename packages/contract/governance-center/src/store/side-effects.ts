@@ -14,11 +14,13 @@ import {
   of,
   skip,
   switchMap,
+  tap,
   withLatestFrom,
 } from 'rxjs';
 
 import {
   FEATURE_FLAG_GOVERNANCE_CENTER,
+  describeGovernancePayloadIssues,
   parseGovernanceFeatureFlagPayload,
   promotedNetworkKeyForChainId,
 } from '../const';
@@ -294,13 +296,19 @@ export const trackGovernanceDelegationConfirmed: SideEffect = (
 export const syncGovernanceFeatureFlagPayload: SideEffect = (
   _,
   { features: { selectLoadedFeatures$, selectNextFeatureFlags$ } },
-  { actions },
+  { actions, logger },
 ) => {
+  // The issues ride alongside the parsed config rather than being logged as
+  // they are computed, so `distinctUntilChanged` below dedups them too: a
+  // re-emission of the same flags must not re-report the same broken config.
   const getConfig = (featureFlags: { key: string; payload?: unknown }[]) => {
     const flag = featureFlags.find(
       f => f.key === FEATURE_FLAG_GOVERNANCE_CENTER,
     );
-    return parseGovernanceFeatureFlagPayload(flag);
+    return {
+      issues: describeGovernancePayloadIssues(flag?.payload),
+      payload: parseGovernanceFeatureFlagPayload(flag),
+    };
   };
 
   return merge(
@@ -313,7 +321,18 @@ export const syncGovernanceFeatureFlagPayload: SideEffect = (
     ),
   ).pipe(
     distinctUntilChanged(deepEquals),
-    mergeMap(payload => [
+    // Parsing cannot raise — it degrades a broken payload to "not
+    // configured", which looks exactly like ops configuring nothing. Without
+    // this line a typo'd network key or a mistyped id blocks and promotes
+    // nobody, in silence.
+    tap(({ issues }) => {
+      if (issues.length > 0) {
+        logger.error(
+          `GOVERNANCE_CENTER payload is misconfigured: ${issues.join('; ')}`,
+        );
+      }
+    }),
+    mergeMap(({ payload }) => [
       actions.promotedDReps.setConfig(payload.promotedDreps ?? {}),
       actions.promotedDReps.setBlockedConfig(payload.blockedDreps ?? {}),
     ]),

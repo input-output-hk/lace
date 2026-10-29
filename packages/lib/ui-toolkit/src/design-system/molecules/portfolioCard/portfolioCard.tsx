@@ -60,6 +60,7 @@ interface PortfolioCardProps {
     }[];
   };
   price?: string;
+  balanceVisibilityControl?: React.ReactNode;
   onActionPress?: ActionHandlers;
   priceHistoryData?: LineChartData;
   currency?: string;
@@ -181,7 +182,7 @@ const AlternativeActions = memo(
     const themedStyles = useMemo(() => getThemedActionStyles(theme), [theme]);
 
     const iconStyle = useMemo(
-      () => ({ color: theme.brand.white, variant: 'solid' } as const),
+      () => ({ color: theme.brand.white, strokeWidth: 2 } as const),
       [theme.brand.white],
     );
 
@@ -270,6 +271,7 @@ export const PortfolioCard = ({
   onActionPress,
   priceHistoryData,
   price,
+  balanceVisibilityControl,
   currency = 'USD',
   onTimeRangeChange,
   timeRange = '24H',
@@ -328,7 +330,7 @@ export const PortfolioCard = ({
         icon={
           <Icon
             name="CarouselHorizontal"
-            variant="solid"
+            strokeWidth={2}
             color={theme.brand.white}
           />
         }
@@ -373,6 +375,14 @@ export const PortfolioCard = ({
     const containerProps = isAlternativeEnhanced
       ? { style: styles.enhancedPriceContainer }
       : { style: styles.priceRow };
+    const currencyLabel = (
+      <Text.S
+        variant="secondary"
+        style={[styles.currency, !price && styles.hiddenText]}
+        testID="portfolio-card-currency">
+        {currency}
+      </Text.S>
+    );
 
     return (
       <Container {...containerProps}>
@@ -381,16 +391,19 @@ export const PortfolioCard = ({
           testID="portfolio-card-price">
           {price ?? '0'}
         </Text.L>
-        <Text.S
-          variant="secondary"
-          style={[styles.currency, !price && styles.hiddenText]}
-          testID="portfolio-card-currency">
-          {currency}
-        </Text.S>
+        {balanceVisibilityControl ? (
+          <Row alignItems="center">
+            {balanceVisibilityControl}
+            {currencyLabel}
+          </Row>
+        ) : (
+          currencyLabel
+        )}
       </Container>
     );
   }, [
     price,
+    balanceVisibilityControl,
     currency,
     styles.price,
     styles.currency,

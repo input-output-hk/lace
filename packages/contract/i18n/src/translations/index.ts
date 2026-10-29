@@ -1,23 +1,13 @@
-// To add a new language:
-// 1. Create a translation JSON (e.g. `fr.json`) mirroring the `en.json` keys.
-// 2. Translate the values and ensure `translation.language.name` / `.code` are set.
-// 3. Import the new file below and register it in `rawTranslations`.
-// 4. i18next initialisation and the language picker will pick it up automatically.
-import en from './en.json';
-import es from './es.json';
-import ja from './ja.json';
+// To add a new language, add its bundle in bundles.ts.
+import { rawTranslations } from './bundles';
+
+import type { TranslationMessages } from './bundles';
+
+export { rawTranslations } from './bundles';
 
 // Each translation file exposes these keys for the language picker metadata.
 type TranslationNameKey = 'translation.language.name';
 type TranslationCodeKey = 'translation.language.code';
-
-// Collect every locale bundle we ship so the rest of the helpers can derive
-// their data from a single source of truth.
-export const rawTranslations = {
-  en,
-  es,
-  ja,
-} as const;
 
 // Stash the key names to avoid repeating string literals throughout the file.
 const PICK_NAME_KEY: TranslationNameKey = 'translation.language.name';
@@ -38,7 +28,7 @@ export const DEFAULT_LANGUAGE = 'en';
 // options in the language picker.
 export const availableLanguages = (
   Object.entries(rawTranslations) as Array<
-    readonly [keyof typeof rawTranslations, typeof en]
+    readonly [keyof typeof rawTranslations, TranslationMessages]
   >
 ).map(([fallbackCode, messages]) => {
   const flattenedMessages = messages as Record<string, string>;
@@ -64,7 +54,7 @@ export const translationResources = availableLanguages.reduce(
     };
     return resources;
   },
-  {} as Record<string, { translation: typeof en }>,
+  {} as Record<string, { translation: TranslationMessages }>,
 );
 
 // Type guard that confirms a persisted/user-supplied code is valid before use.
@@ -109,20 +99,4 @@ type NestedKeyOf<ObjectType extends object> = {
     : `${Key}`;
 }[keyof ObjectType & (number | string)];
 
-export type I18nMessages = Record<NestedKeyOf<typeof en>, string>;
-
-// Use tsc (typecheck) to verify that translation files are in sync
-const _en: typeof en = es;
-const _es: typeof es = en;
-const _ja: typeof ja = en;
-// `_ja` above only catches `en` missing a `ja` key; this catches the reverse —
-// `ja` missing an `en` key (the gap that let 22 en/es keys ship without `ja`).
-const _enJa: typeof en = ja;
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-_en;
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-_es;
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-_ja;
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
-_enJa;
+export type I18nMessages = Record<NestedKeyOf<TranslationMessages>, string>;

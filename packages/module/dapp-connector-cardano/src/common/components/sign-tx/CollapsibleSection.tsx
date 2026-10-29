@@ -93,7 +93,6 @@ export const CollapsibleSection = ({
                 name="InformationCircle"
                 size={20}
                 color={theme.text.secondary}
-                variant="stroke"
               />
             )}
           </Row>
@@ -103,7 +102,7 @@ export const CollapsibleSection = ({
             icon={
               <Animated.View
                 style={{ transform: [{ rotate: chevronRotation }] }}>
-                <Icon name="CaretDown" size={20} variant="stroke" />
+                <Icon name="CaretDown" size={20} />
               </Animated.View>
             }
           />

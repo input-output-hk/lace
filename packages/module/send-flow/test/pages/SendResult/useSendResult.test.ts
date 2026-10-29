@@ -206,7 +206,7 @@ describe('useSendResult', () => {
       const { result } = renderHook(() => useSendResult(createMockProps()));
 
       expect(result.current.icon.name).toBe('Clock');
-      expect(result.current.icon.variant).toBe('stroke');
+      expect(result.current.icon.strokeWidth).toBeUndefined();
     });
 
     it('returns RelievedFace icon for success state after minimum time', () => {
@@ -219,7 +219,7 @@ describe('useSendResult', () => {
       });
 
       expect(result.current.icon.name).toBe('RelievedFace');
-      expect(result.current.icon.variant).toBe('solid');
+      expect(result.current.icon.strokeWidth).toBe(2);
     });
 
     it('returns Sad icon for failure state immediately (no minimum wait)', () => {
@@ -229,7 +229,26 @@ describe('useSendResult', () => {
 
       // Failure should show immediately without waiting for the timer
       expect(result.current.icon.name).toBe('Sad');
-      expect(result.current.icon.variant).toBe('solid');
+      expect(result.current.icon.strokeWidth).toBe(2);
+    });
+
+    it('uses mapped attestation recovery copy for an in-memory Midnight send', () => {
+      mockUseLaceSelector.mockReturnValue({
+        status: 'Failure',
+        errorTranslationKeys: {
+          title: 'midnight.tee-attestation.failure.title',
+          subtitle: 'midnight.tee-attestation.failure.recovery',
+        },
+      });
+      const { result } = renderHook(() =>
+        useSendResult(createMockProps('failure', 'Midnight')),
+      );
+      expect(result.current.headerTitle).toBe(
+        'midnight.tee-attestation.failure.title',
+      );
+      expect(result.current.subtitle).toBe(
+        'midnight.tee-attestation.failure.recovery',
+      );
     });
 
     it('returns processing title and subtitle initially', () => {

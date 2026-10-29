@@ -39,7 +39,12 @@ import { ModuleLoadingErrorScreen } from './ModuleLoadingErrorScreen';
 import { Router } from './Router';
 import { logger } from './util';
 import { appConfig, configValidationError, ENV } from './util';
-import { BLOCKFROST_IPFS_URL, WEB_IPFS_GATEWAY_URL } from './util/constants';
+import {
+  WEB_IPFS_GATEWAY_URL,
+  IMAGE_PROXY_URL,
+  IMAGE_PROXY_KEY,
+  IMAGE_PROXY_SALT,
+} from './util/constants';
 import { sentryNavigationIntegration } from './util/sentry-navigation';
 
 import type { ThemePreference } from './util';
@@ -48,8 +53,12 @@ import type { ThemePreference } from './util';
 void SplashScreen.preventAutoHideAsync();
 
 configureImageFormat({
-  ipfsGatewayUrl: BLOCKFROST_IPFS_URL,
+  // No ipfsGatewayUrl: native falls back to the toolkit's built-in gateway,
+  // the one every Lace client resolves a CID against (ADR 42 §4).
   webIpfsGatewayUrl: WEB_IPFS_GATEWAY_URL,
+  imageProxyUrl: IMAGE_PROXY_URL,
+  imageProxyKey: IMAGE_PROXY_KEY,
+  imageProxySalt: IMAGE_PROXY_SALT,
 });
 
 // Sentry initialization (non-web platforms only)
@@ -64,17 +73,37 @@ if (Platform.OS === 'web') {
   try {
     if (isSentryEnabled) {
       const isProduction = ENV === 'production';
+      // Only the measured (BrowserStack-bound) build inlines this at bundle
+      // time: a nightly session yields a handful of launches, and at 0.1 most
+      // nights would record no app start at all. Store builds never set it,
+      // so real users stay sampled at 0.1.
+      const shouldForceFullTracing =
+        process.env.EXPO_PUBLIC_SENTRY_FORCE_FULL_TRACING === 'true';
+      // CI stamps the measured (BrowserStack-bound) build with the commit sha
+      // so every span is attributable to a commit — the same traceability the
+      // lace-next builds have. Store builds never set it and keep the SDK's
+      // package@version release. Safe for symbolication: sourcemaps are keyed
+      // by debug id, not by release.
+      const sentryRelease = process.env.EXPO_PUBLIC_SENTRY_RELEASE as
+        | string
+        | undefined;
       initializeObservability(createSentryProvider(Sentry), {
         dsn: sentryDsn,
         debug: !isProduction,
+        ...(sentryRelease ? { release: sentryRelease } : {}),
         environment: String(
           process.env.EXPO_PUBLIC_SENTRY_ENVIRONMENT ||
             'EXPO_PUBLIC_SENTRY_ENVIRONMENT was empty',
         ),
         sendDefaultPii: false,
-        tracesSampleRate: isProduction ? 0.1 : 1.0,
-        profilesSampleRate: isProduction ? 0.1 : 1.0,
+        tracesSampleRate: isProduction && !shouldForceFullTracing ? 0.1 : 1.0,
+        profilesSampleRate: isProduction && !shouldForceFullTracing ? 0.1 : 1.0,
         integrations: [sentryNavigationIntegration],
+        // ENV derives from NODE_ENV, which the EAS build never sets explicitly —
+        // whether Metro inlines it is not observable from CI logs or the Hermes
+        // bytecode. Tagging it is what distinguishes "no regression" from "sampling
+        // dropped 90% of the transactions" when reading perf data.
+        initialScope: { tags: { app_env: ENV } },
       });
     } else {
       initializeObservability(new NoOpProvider());

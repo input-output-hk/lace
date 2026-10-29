@@ -12,6 +12,7 @@ import {
   TxSignErrorCode,
 } from '../src/common/api-error';
 import { cardanoDappConnectorActions } from '../src/common/store/slice';
+import { networkBindingRefusalMessage } from '../src/common/store/utils/network-binding';
 import {
   handleAuthResponse,
   handleSignDataConfirmation,
@@ -559,7 +560,7 @@ describe('mobile side effects', () => {
             partialSign: false,
             // Mobile has no pre-sheet collateral seam yet, so every request
             // it presents is reviewable.
-            collateralRefusal: null,
+            refusal: null,
           },
         ),
       );
@@ -623,7 +624,7 @@ describe('mobile side effects', () => {
         signingType: 'signTx',
         txHex: 'abcd1234',
         partialSign: true,
-        collateralRefusal: 'foreign-collateral-return',
+        refusal: { kind: 'collateral', case: 'foreign-collateral-return' },
       });
       const action =
         cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
@@ -657,7 +658,76 @@ describe('mobile side effects', () => {
             dapp: { name: 'dapp.example', origin: dappOrigin },
             txHex: 'abcd1234',
             partialSign: true,
-            collateralRefusal: 'foreign-collateral-return',
+            refusal: { kind: 'collateral', case: 'foreign-collateral-return' },
+          },
+        ),
+      ]);
+      expect(navigationMocks.navigate).toHaveBeenCalledWith(
+        'SignTx',
+        expect.objectContaining({ requestId: message.id }),
+      );
+    });
+
+    // Seam test: the handler is mocked, so this pins what the side effect does
+    // GIVEN a network verdict. That the verdict is produced for a real
+    // cross-network body is pinned separately, on `getSignTxRefusal`.
+    it('given a NETWORK verdict, navigates to the sheet and answers the dApp the sentence naming both networks', async () => {
+      const message = createMessage('req-refused-net', 'signTx');
+      const dappOrigin = 'https://dapp.example';
+      const refusal = {
+        kind: 'network' as const,
+        cause: 'states-other-network' as const,
+        statedNetwork: 'mainnet' as const,
+        walletNetwork: 'preprod',
+      };
+      cip30Mocks.handleCip30Message.mockResolvedValue({
+        type: 'signing_required',
+        requestId: message.id,
+        dappOrigin,
+        dappName: 'dapp.example',
+        signingType: 'signTx',
+        txHex: 'abcd1234',
+        partialSign: true,
+        refusal,
+      });
+      const output$ = invokeProcessWebViewMessage(
+        cardanoDappConnectorActions.cardanoDappConnector.receiveWebViewMessage({
+          message,
+          dappOrigin,
+          timestamp: 0,
+        }),
+        {
+          cardanoDappConnector: {
+            selectSessionAuthorizedOrigins$: of([dappOrigin]),
+            selectSessionAccountByOrigin$: of({
+              [dappOrigin]: AccountId('acc-1'),
+            }),
+          },
+        },
+      );
+      const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
+      expect(emitted).toEqual([
+        cardanoDappConnectorActions.cardanoDappConnector.setWebViewResponse({
+          id: message.id,
+          success: false,
+          error: {
+            code: TxSignErrorCode.ProofGeneration,
+            // The dApp's answer is unchanged by showing the user a screen.
+            info: networkBindingRefusalMessage('states-other-network', {
+              statedNetwork: 'mainnet',
+              walletNetwork: 'preprod',
+            }),
+          },
+          timestamp: expect.any(Number) as unknown as number,
+        }),
+        cardanoDappConnectorActions.cardanoDappConnector.setPendingSignTxRequest(
+          {
+            requestId: message.id,
+            dappOrigin,
+            dapp: { name: 'dapp.example', origin: dappOrigin },
+            txHex: 'abcd1234',
+            partialSign: true,
+            refusal,
           },
         ),
       ]);
@@ -687,7 +757,10 @@ describe('mobile side effects', () => {
                   },
                   txHex: 'abcd1234',
                   partialSign: true,
-                  collateralRefusal: 'foreign-collateral-return',
+                  refusal: {
+                    kind: 'collateral',
+                    case: 'foreign-collateral-return',
+                  },
                 },
               ),
             ),
@@ -719,7 +792,10 @@ describe('mobile side effects', () => {
         dapp: { icon: { fallback: string }; name: string; origin: string };
         txHex: string;
         partialSign: boolean;
-        collateralRefusal?: 'foreign-collateral-return' | null;
+        refusal?: {
+          kind: 'collateral';
+          case: 'foreign-collateral-return';
+        } | null;
       } | null,
     ) => {
       const actionObservables = {
@@ -783,7 +859,7 @@ describe('mobile side effects', () => {
         },
         txHex: 'abcd1234',
         partialSign: true,
-        collateralRefusal: 'foreign-collateral-return',
+        refusal: { kind: 'collateral', case: 'foreign-collateral-return' },
       });
       const emitted = await firstValueFrom(output$.pipe(take(2), toArray()));
       expect(emitted).toEqual([

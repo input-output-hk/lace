@@ -1,10 +1,7 @@
 import type { TranslationKey } from '@lace-contract/i18n';
 
 /**
- * Stable codes for the failure modes that can occur while building a Bitcoin
- * transaction. Kept i18n-free so the low-level {@link TransactionBuilder} stays
- * decoupled from translations — mapping a code to a user-facing message lives in
- * {@link buildErrorTranslationKey}, consumed at the buildTx boundary.
+ * The reason a Bitcoin payment cannot be built.
  */
 export enum BitcoinTxBuildErrorCode {
   /** The funding UTxO set is empty (e.g. the only UTxO is spent by a pending tx). */
@@ -28,11 +25,10 @@ export enum BitcoinTxBuildErrorCode {
 }
 
 /**
- * Error thrown while building a Bitcoin transaction, carrying a stable
- * {@link BitcoinTxBuildErrorCode} so the buildTx boundary can map it to a
- * translation key without matching on message text.
+ * The error a Bitcoin payment build fails with, identified by its `code`.
  */
 export class BitcoinTxBuildError extends Error {
+  /** The reason the payment cannot be built. */
   public readonly code: BitcoinTxBuildErrorCode;
 
   public constructor(code: BitcoinTxBuildErrorCode, message: string) {

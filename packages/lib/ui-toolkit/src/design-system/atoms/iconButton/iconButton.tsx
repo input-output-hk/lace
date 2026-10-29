@@ -31,6 +31,7 @@ export type IconButtonProps = Omit<PressableProps, 'style'> & {
   onPressAnimation?: () => void;
 };
 
+// Keep the empty spacers: labeled variants include their flex gap in the layout.
 const Static = ({
   icon,
   containerStyle,
@@ -62,8 +63,12 @@ const Static = ({
   );
 
   return (
-    <Pressable style={pressableStyle} disabled={disabled} {...restProps}>
-      <View testID={testID} />
+    <Pressable
+      testID={testID}
+      style={pressableStyle}
+      disabled={disabled}
+      {...restProps}>
+      <View />
       {label && <Text.XS style={textStyle}>{label.content}</Text.XS>}
       {icon}
     </Pressable>
@@ -126,8 +131,12 @@ const Animated = ({
   };
 
   return (
-    <Pressable style={pressableStyle} onPress={handlePress} {...restProps}>
-      <View testID={testID} />
+    <Pressable
+      testID={testID}
+      style={pressableStyle}
+      onPress={handlePress}
+      {...restProps}>
+      <View />
       {label && <Text.XS style={textStyle}>{label.content}</Text.XS>}
       <ReAnimated.View style={animatedStyle}>{icon}</ReAnimated.View>
     </Pressable>

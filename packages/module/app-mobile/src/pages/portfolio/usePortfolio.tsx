@@ -74,6 +74,7 @@ const WALLET_ICONS = {
   [WalletType.InMemory]: <Icon name="Wallet" size={15} />,
   [WalletType.LazyInMemory]: <Icon name="Wallet" size={15} />,
   [WalletType.MultiSig]: <Icon name="HardwareWallet" size={15} />,
+  [WalletType.CardanoCustody]: <Icon name="Wallet" size={15} />,
 } as const;
 
 const BLOCKCHAIN_ICONS = {

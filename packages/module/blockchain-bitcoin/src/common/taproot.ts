@@ -53,7 +53,7 @@ const taggedHash = (tag: string, message: Buffer): Buffer => {
  * @param internalPubKey - The 32-byte internal public key (x‑only) as a Buffer.
  * @param merkleRoot - An optional 32-byte merkle root (if a script tree is used).
  * @returns The tweaked output public key (x‑only) as a Buffer.
- * @throws {Error} If the internal public key is not 32 bytes or if the tweak addition fails.
+ * @throws `Error` If the internal public key is not 32 bytes or if the tweak addition fails.
  */
 export const tweakTaprootPubKey = (
   internalPubKey: Buffer,

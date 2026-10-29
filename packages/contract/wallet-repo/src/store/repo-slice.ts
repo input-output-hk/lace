@@ -11,6 +11,14 @@ import type { WalletEntity } from '../entities';
 import type { AccountId, WalletId } from '../value-objects';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+/**
+ * The wallet and account the user currently has selected, or `null` when none
+ * is: before a wallet with accounts is added, after
+ * `clearActiveAccountContext` or `removeAllWallets`, after removing the
+ * selected wallet when no other wallet has accounts, and after a migration
+ * drops a stored selection. Adding a wallet while it is `null` selects the
+ * first account of the first wallet that has one.
+ */
 export type ActiveAccountContext = {
   walletId: WalletId;
   accountId: AccountId;

@@ -3,7 +3,9 @@ import { AccountId } from '@lace-contract/wallet-repo';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
+import { CardanoCustodyAccountRefusedError } from '../../src/store/custody/custody-account-guard';
 import { makeBuildVoteDelegationTx } from '../../src/tx-executor-implementation';
+import { custodyAddressEntry } from '../store/custody/custody-address-entry';
 
 import type { Address, AnyAddress } from '@lace-contract/addresses';
 import type {
@@ -376,5 +378,18 @@ describe('makeBuildVoteDelegationTx', () => {
     );
 
     expect(result.success).toBe(true);
+  });
+
+  it('refuses a Cardano custody account before building', async () => {
+    const result = await firstValueFrom(
+      makeBuildVoteDelegationTx(
+        makeDependencies({ addresses: [custodyAddressEntry(testAccountId)] }),
+      )({ accountId: testAccountId, dRep: { type: 'alwaysAbstain' } }),
+    );
+
+    expect(result).toEqual({
+      success: false,
+      error: expect.any(CardanoCustodyAccountRefusedError) as unknown,
+    });
   });
 });

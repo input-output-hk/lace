@@ -5,6 +5,9 @@
 .vscode
 .cursor
 .claude/worktrees
+.claude/workspaces
+.agents/worktrees
+.agents/workspaces
 .claude/*.lock
 
 # dependencies
@@ -41,6 +44,8 @@ feature-flags.override.ts
 # dist files
 dist
 dist-web/
+dist-canary/
+apps/lace-sdk/tsconfig.dts-gen.generated.json
 dist-extension/
 dist-approval/
 dist-native/
@@ -66,6 +71,8 @@ storybook-static
 settings.local.json
 **/CLAUDE.local.md
 .osgrep/
+# per-run scratch for the triage-severity bulk pass (queue, assessments, plans)
+.claude/triage-run/
 
 # Expo
 node_modules/
@@ -82,6 +89,12 @@ npm-debug.*
 web-build/
 cache/
 apps/lace-mobile-e2e/artifacts
+# perf harness outputs: archived builds, raw traces, network fixtures, seeded profiles, machine-local canary history
+apps/lace-next/perfs/artifacts/
+apps/lace-next/perfs/extension/traces/
+apps/lace-next/perfs/extension/fixtures/
+apps/lace-next/perfs/extension/profiles/
+apps/lace-next/perfs/extension/canary-history.json
 .junie/
 /android/
 # expo prebuild output (scoped to apps so ci/android + ci/ios stay tracked)
@@ -97,3 +110,7 @@ apps/*/modules/*/android/.gradle/
 # reassure perf-test output (baseline/current measurements + compare reports)
 .reassure/
 **/.gradle/
+
+# EAS local-signing file: carries plain-text signing passwords; CI writes it
+# on runners only — a local copy must never be committable.
+apps/lace-next/credentials.json

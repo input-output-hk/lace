@@ -2,6 +2,8 @@ import { useAnalytics } from '@lace-contract/analytics';
 import { useTranslation } from '@lace-contract/i18n';
 import {
   Loader,
+  Button,
+  ProgressBar,
   SheetSafeOverlay,
   Text,
   backdropStyle,
@@ -10,7 +12,7 @@ import {
   spacing,
   useTheme,
 } from '@lace-lib/ui-toolkit';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
 
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
@@ -21,45 +23,43 @@ import type { LayoutSize, Theme } from '@lace-lib/ui-toolkit';
 const TEST_ID_PREFIX = 'address-discovery-warning-modal';
 
 /**
- * Renders a blocking overlay while a user-triggered (thorough) HD address
- * discovery is running for ANY Cardano account, and dispatches a
- * success/error toast on completion.
+ * Renders a blocking overlay while user-triggered HD address discovery or a
+ * wallet reset is running for any Cardano account, retaining reset failures
+ * with Retry and Close after the attempt releases its sync round.
  *
  * Not scoped to an "active" account: the row that triggers manual sync is
  * mounted on the account-details page, which is bound to URL params rather
  * than the active-account context, so the user can trigger a sync from a
  * non-active account. The overlay follows whichever account currently has
- * a thorough op in `pendingSync` (slice selector
- * `selectAccountIdInManualHdSync`).
+ * a manual sync in progress, or a retained reset failure.
  *
  * Why this doesn't use `Modal` from `@lace-lib/ui-toolkit`:
  * - `Modal` requires `RequireAtLeastOne<{ onClose, onConfirm }>` and renders
  *   a close X whenever `onClose` is truthy and a confirm button whenever
- *   `onConfirm` is truthy. We need neither — the overlay must be entirely
- *   non-cancellable while the scan runs. `SheetSafeOverlay` is the same
- *   platform-aware primitive `Modal` uses; we wrap it with a custom card.
+ *   `onConfirm` is truthy. We need neither while an attempt runs: it must
+ *   remain non-cancellable. `SheetSafeOverlay` is the same platform-aware
+ *   primitive `Modal` uses; we wrap it with a custom card.
  *
- * Closability is suppressed at multiple layers:
- * - No X-button (we don't render one).
- * - No backdrop tap handler (the overlay View is non-pressable).
- * - Android hardware back: `SheetSafeOverlay`'s `onRequestClose` is omitted
- *   (RN's native modal stays visible until parent toggles `visible`), and
- *   we additionally intercept `hardwareBackPress` while in-flight so other
- *   listeners can't react either.
+ * Active attempts have no close button or backdrop tap handler. Android
+ * hardware back is consumed, and `SheetSafeOverlay` has no `onRequestClose`
+ * handler until a reset fails. A failed reset can be closed explicitly or
+ * through Android back without controlling the account's normal syncing.
  *
- * Outcome is captured from the (still-pending) sync op's terminal status on
- * the `isInProgress` falling edge — the sync slice clears `pendingSync`
- * shortly after the round completes, so the snapshot must happen at the
- * transition moment. The parent selector intentionally keeps returning the
- * accountId while the thorough op sits in `pendingSync` in a terminal
- * state, so the child stays mounted long enough for the toast effect.
+ * Discovery-only outcomes are captured from the sync op's terminal status
+ * on the `isInProgress` falling edge, before the sync slice clears its round.
+ * The parent selector retains the account while that terminal discovery op
+ * is pending so the child can report the outcome. Reset notifications come
+ * from a store side effect; their retained UI failure does not replay them.
  */
 export const HdSyncOverlay = () => {
-  const accountId = useLaceSelector(
+  const syncingAccountId = useLaceSelector(
     'cardanoContext.selectAccountIdInManualHdSync',
   );
+  const failures = useLaceSelector('cardanoSyncUi.selectFailedResets');
+  const accountId =
+    syncingAccountId ?? (Object.keys(failures)[0] as AccountId | undefined);
   if (!accountId) return null;
-  return <HdSyncOverlayForAccount accountId={accountId} />;
+  return <HdSyncOverlayForAccount key={accountId} accountId={accountId} />;
 };
 
 const HdSyncOverlayForAccount = ({ accountId }: { accountId: AccountId }) => {
@@ -70,6 +70,30 @@ const HdSyncOverlayForAccount = ({ accountId }: { accountId: AccountId }) => {
     [theme, layoutSize],
   );
   const showToast = useDispatchLaceAction('ui.showToast');
+  const requestReset = useDispatchLaceAction(
+    'cardanoContext.requestWalletSyncReset',
+  );
+  const reset = useLaceSelector(
+    'cardanoContext.selectWalletSyncResetOperation',
+    accountId,
+  );
+  const failures = useLaceSelector('cardanoSyncUi.selectFailedResets');
+  const error = failures[accountId];
+  const hasFailed = Boolean(error);
+  const dismissFailure = useDispatchLaceAction(
+    'cardanoSyncUi.dismissResetFailure',
+  );
+  const close = useCallback(
+    () => dismissFailure({ accountId }),
+    [accountId, dismissFailure],
+  );
+  const blockedReason = useLaceSelector(
+    'cardanoContext.selectWalletSyncResetBlockedReason',
+    accountId,
+  );
+  const retry = useCallback(() => {
+    requestReset({ accountId });
+  }, [accountId, requestReset]);
   const { trackEvent } = useAnalytics();
   const isInProgress = useLaceSelector(
     'cardanoContext.selectIsManualHdSyncInProgress',
@@ -84,12 +108,15 @@ const HdSyncOverlayForAccount = ({ accountId }: { accountId: AccountId }) => {
   // true from the listener to consume the event so other registered
   // hardwareBackPress listeners (e.g. router) don't see it either.
   useEffect(() => {
-    if (!isInProgress) return;
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+    if (!isInProgress && !hasFailed) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (hasFailed) close();
+      return true;
+    });
     return () => {
       sub.remove();
     };
-  }, [isInProgress]);
+  }, [isInProgress, hasFailed, close]);
 
   // Edge-triggered outcome detection. Captures the terminal status while it's
   // still observable on the operation, before pendingSync clears.
@@ -133,15 +160,59 @@ const HdSyncOverlayForAccount = ({ accountId }: { accountId: AccountId }) => {
     wasInProgressRef.current = isInProgress;
   }, [isInProgress, showToast, t, trackEvent]);
 
-  if (!isInProgress) return null;
+  if (!isInProgress && !hasFailed) return null;
   return (
-    <SheetSafeOverlay>
+    <SheetSafeOverlay onRequestClose={hasFailed ? close : undefined}>
       <View style={styles.overlay} testID={`${TEST_ID_PREFIX}-overlay`}>
         <View style={styles.card} testID={`${TEST_ID_PREFIX}-component`}>
           <Text.M align="center" testID={`${TEST_ID_PREFIX}-title-text`}>
-            {t('v2.account-settings.hd-wallet-sync.modal.title')}
+            {t(
+              hasFailed
+                ? 'v2.account-settings.hd-wallet-sync.toast.error'
+                : 'v2.account-settings.hd-wallet-sync.modal.title',
+            )}
           </Text.M>
-          <Loader size={32} testID={`${TEST_ID_PREFIX}-loader`} />
+          {hasFailed ? (
+            <>
+              <Text.S
+                align="center"
+                accessibilityLiveRegion="assertive"
+                testID={`${TEST_ID_PREFIX}-error`}>
+                {t(error ?? 'v2.account-settings.hd-wallet-sync.toast.error')}
+              </Text.S>
+              {blockedReason && (
+                <Text.S
+                  align="center"
+                  accessibilityLiveRegion="polite"
+                  testID={`${TEST_ID_PREFIX}-retry-blocked`}>
+                  {t(
+                    blockedReason === 'pending-transactions'
+                      ? 'v2.account-settings.hd-wallet-sync.pending'
+                      : 'app.sync-status.syncing',
+                  )}
+                </Text.S>
+              )}
+              <Button.Primary
+                disabled={Boolean(blockedReason)}
+                label={t('v2.account-settings.hd-wallet-sync.retry')}
+                onPress={retry}
+                testID={`${TEST_ID_PREFIX}-retry`}
+              />
+              <Button.Secondary
+                label={t('v2.generic.btn.close')}
+                onPress={close}
+                testID={`${TEST_ID_PREFIX}-close-button`}
+              />
+            </>
+          ) : (
+            <>
+              <Loader size={32} testID={`${TEST_ID_PREFIX}-loader`} />
+              {reset?.status === 'InProgress' &&
+                reset.type === 'Determinate' && (
+                  <ProgressBar progress={reset.progress * 100} showPercentage />
+                )}
+            </>
+          )}
         </View>
       </View>
     </SheetSafeOverlay>

@@ -3,3 +3,7 @@ export * from './device-commitment-hex.vo';
 export * from './use-counter.vo';
 export * from './device-epoch.vo';
 export * from './acc-binding-version.vo';
+export * from './grant-id.vo';
+export * from './grant-scope-salt.vo';
+export * from './grant-slot.vo';
+export * from './token-color.vo';

@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useMidnightSettings } from '../../src/hooks/useMidnightSettings';
 
 import type { MidnightSettingsDrawerState } from '../../src/store/slice';
+import type { ProofServerMode } from '@lace-contract/midnight-context';
 
 // Mock the hooks module
 const mockUseLaceSelector = vi.fn();
@@ -18,46 +19,28 @@ vi.mock('../../src/hooks/lace-context', () => ({
     mockUseDispatchLaceAction(action, ...args),
 }));
 
-// Mock createProveServerOptions
-vi.mock('../../src/extension/components/forms/ConfigureMidnightForm', () => ({
-  createProveServerOptions: vi.fn(
-    ({
-      localProofServerAddress,
-      remoteProofServerAddress,
-    }: {
-      localProofServerAddress: string;
-      remoteProofServerAddress?: string;
-    }) => {
-      const options = [{ url: localProofServerAddress, variant: 'local' }];
-      if (remoteProofServerAddress) {
-        options.unshift({
-          url: remoteProofServerAddress,
-          variant: 'remote',
-        });
-      }
-      return options;
-    },
-  ),
-}));
-
 describe('useMidnightSettings', () => {
   const mockNetworkId = 'preprod';
+  const localProofServer: ProofServerMode = {
+    kind: 'local-host',
+    url: 'http://localhost:6300',
+  };
   const mockNetworksConfig = {
     preprod: {
-      proofServerAddress: 'http://localhost:6300',
+      proofServer: localProofServer,
       nodeAddress: 'http://localhost:9000',
       indexerAddress: 'http://localhost:8000',
     },
   };
-  const mockDefaultNetworksConfig = {
-    preprod: {
-      proofServerAddress: 'http://localhost:6300',
-    },
-  };
-  const mockFeatureFlagsOverrides = {
-    preprod: {
-      proofServerAddress: 'https://remote.prover.com',
-    },
+  const defaultAllModes: Partial<Record<string, ProofServerMode[]>> = {
+    preprod: [
+      localProofServer,
+      {
+        kind: 'delegated',
+        url: 'https://remote.prover.com',
+        label: 'Midnight',
+      },
+    ],
   };
   const mockSupportedNetworkIds = ['preprod'] as const;
   const mockOpenSettings = vi.fn();
@@ -66,7 +49,9 @@ describe('useMidnightSettings', () => {
 
   const setupMocks = (
     settingsDrawerState: MidnightSettingsDrawerState = { status: 'Closed' },
-    featureFlagsOverrides = mockFeatureFlagsOverrides,
+    allProofServerModes: Partial<
+      Record<string, ProofServerMode[]>
+    > = defaultAllModes,
   ) => {
     mockUseLaceSelector.mockImplementation((selector: string) => {
       switch (selector) {
@@ -74,10 +59,8 @@ describe('useMidnightSettings', () => {
           return mockNetworkId;
         case 'midnightContext.selectNetworksConfig':
           return mockNetworksConfig;
-        case 'midnightContext.selectNetworksDefaultConfig':
-          return mockDefaultNetworksConfig;
-        case 'midnightContext.selectNetworksConfigFeatureFlagsOverrides':
-          return featureFlagsOverrides;
+        case 'midnightContext.selectAllProofServerModes':
+          return allProofServerModes;
         case 'midnightContext.selectSupportedNetworksIds':
           return mockSupportedNetworkIds;
         case 'midnight.selectSettingsDrawerState':
@@ -119,10 +102,7 @@ describe('useMidnightSettings', () => {
         'midnightContext.selectNetworksConfig',
       );
       expect(mockUseLaceSelector).toHaveBeenCalledWith(
-        'midnightContext.selectNetworksDefaultConfig',
-      );
-      expect(mockUseLaceSelector).toHaveBeenCalledWith(
-        'midnightContext.selectNetworksConfigFeatureFlagsOverrides',
+        'midnightContext.selectAllProofServerModes',
       );
       expect(mockUseLaceSelector).toHaveBeenCalledWith(
         'midnightContext.selectSupportedNetworksIds',
@@ -187,38 +167,121 @@ describe('useMidnightSettings', () => {
     });
   });
 
-  describe('getProveServerOptions', () => {
-    it('returns both options when remote address exists', () => {
+  describe('getProofServerSections', () => {
+    it('places custom servers after delegated providers', () => {
       setupMocks();
       const { result } = renderHook(() => useMidnightSettings());
 
-      const options = result.current.getProveServerOptions('preprod');
+      const sections = result.current.getProofServerSections('preprod');
 
-      expect(options).toHaveLength(2);
-      expect(options[0]).toEqual({
-        url: 'https://remote.prover.com',
-        variant: 'remote',
-      });
-      expect(options[1]).toEqual({
-        url: 'http://localhost:6300',
-        variant: 'local',
-      });
+      expect(sections).toEqual([
+        {
+          tier: 'delegated',
+          modes: [
+            {
+              kind: 'delegated',
+              url: 'https://remote.prover.com',
+              label: 'Midnight',
+            },
+          ],
+        },
+        { tier: 'custom', modes: [localProofServer] },
+      ]);
     });
 
-    it('returns only local option when remote address is undefined', () => {
-      const noRemoteOverrides = {
-        preprod: { proofServerAddress: undefined as unknown as string },
-      };
-      setupMocks({ status: 'Closed' }, noRemoteOverrides);
+    it('exposes multiple delegated providers in flag order', () => {
+      setupMocks(
+        { status: 'Closed' },
+        {
+          preprod: [
+            localProofServer,
+            {
+              kind: 'delegated',
+              url: 'https://midnight.example.com',
+              label: 'Midnight Foundation',
+            },
+            {
+              kind: 'delegated',
+              url: 'https://provider.example.com',
+              label: 'Example Provider',
+            },
+          ],
+        },
+      );
       const { result } = renderHook(() => useMidnightSettings());
 
-      const options = result.current.getProveServerOptions('preprod');
+      const sections = result.current.getProofServerSections('preprod');
 
-      expect(options).toHaveLength(1);
-      expect(options[0]).toEqual({
-        url: 'http://localhost:6300',
-        variant: 'local',
-      });
+      expect(sections).toEqual([
+        {
+          tier: 'delegated',
+          modes: [
+            {
+              kind: 'delegated',
+              url: 'https://midnight.example.com',
+              label: 'Midnight Foundation',
+            },
+            {
+              kind: 'delegated',
+              url: 'https://provider.example.com',
+              label: 'Example Provider',
+            },
+          ],
+        },
+        { tier: 'custom', modes: [localProofServer] },
+      ]);
+    });
+
+    it('orders the delegated tier: TEE first, then delegated providers in payload order', () => {
+      setupMocks(
+        { status: 'Closed' },
+        {
+          preprod: [
+            localProofServer,
+            {
+              kind: 'delegated',
+              url: 'https://provider.example.com',
+              label: 'Example Provider',
+            },
+            {
+              kind: 'tee-delegated',
+              url: 'https://api.proofserver.example.com',
+              label: 'Temenos (remote TEE proof server)',
+            },
+            {
+              kind: 'delegated',
+              url: 'https://midnight.example.com',
+              label: 'Midnight Foundation',
+            },
+          ],
+        },
+      );
+      const { result } = renderHook(() => useMidnightSettings());
+
+      const sections = result.current.getProofServerSections('preprod');
+
+      expect(sections[0]?.tier).toBe('delegated');
+      expect(sections[0]?.modes.map(mode => mode.kind)).toEqual([
+        'tee-delegated',
+        'delegated',
+        'delegated',
+      ]);
+      expect(
+        sections[0]?.modes.map(mode => ('label' in mode ? mode.label : '')),
+      ).toEqual([
+        'Temenos (remote TEE proof server)',
+        'Example Provider',
+        'Midnight Foundation',
+      ]);
+    });
+
+    it('drops empty sections when no remotes are configured', () => {
+      setupMocks({ status: 'Closed' }, { preprod: [localProofServer] });
+      const { result } = renderHook(() => useMidnightSettings());
+
+      const sections = result.current.getProofServerSections('preprod');
+
+      expect(sections).toEqual([{ tier: 'custom', modes: [localProofServer] }]);
     });
   });
 

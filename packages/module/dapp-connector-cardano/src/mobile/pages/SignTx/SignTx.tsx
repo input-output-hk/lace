@@ -33,6 +33,7 @@ export const SignTx = (props: SheetScreenProps<SheetRoutes.SignTx>) => {
   const resultView = signTxResult ? (
     <SignTxResult
       state={signTxResult.state}
+      error={signTxResult.error?.diagnostics ?? signTxResult.error}
       onClose={handleCloseResult}
       dappName={contentProps.dapp?.name}
       dappOrigin={contentProps.dapp?.origin}
@@ -66,6 +67,7 @@ export const SignTx = (props: SheetScreenProps<SheetRoutes.SignTx>) => {
     <SignTxLayout
       resultView={resultView}
       hasError={hasError}
+      transactionError={transactionError}
       refusal={refusal}
       showLoading={isShowingLoading}
       contentProps={layoutContentProps}

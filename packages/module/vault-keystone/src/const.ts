@@ -30,5 +30,10 @@ export const KEYSTONE_REQUEST_ORIGIN = 'Lace';
  * Highest Cardano account index (inclusive) Keystone firmware will derive.
  * Advertised to the account pickers via hw-blockchain-support and enforced
  * at the account-export boundary.
+ *
+ * 23, not 24: the firmware's xpub table ends at `ada_23`
+ * (`M/1852'/1815'/23'`) and `GetAdaXPubTypeByIndexAndDerivationType` clamps
+ * `index > 23` to `0`, so asking for 24 returns ACCOUNT 0's xpub instead of
+ * failing — an account filed under 24 would hold another account's key.
  */
-export const KEYSTONE_MAX_CARDANO_ACCOUNT_INDEX = 24;
+export const KEYSTONE_MAX_CARDANO_ACCOUNT_INDEX = 23;

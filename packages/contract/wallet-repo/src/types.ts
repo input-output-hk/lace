@@ -1,57 +1,19 @@
+import type { AccountBase, WalletBase } from './bases';
 import type { AccountId, AccountIdentityKey, WalletId } from './value-objects';
-import type { BlockchainNetworkId } from '@lace-contract/network';
-import type { NetworkType } from '@lace-contract/network';
+import type { ExtensionAccount, ExtensionWallet } from './wallet-kinds';
+import type { WalletType } from './wallet-type';
 import type { HexBytes, Timestamp } from '@lace-lib/util';
-import type { BlockchainAssigned, BlockchainName } from '@lace-lib/util-store';
+import type { BlockchainAssigned } from '@lace-lib/util-store';
 
-export enum WalletType {
-  /***
-   * Keys are managed by Lace
-   */
-  InMemory = 'InMemory',
-  /**
-   * Keys (and the seed they derive from) are NOT persisted by Lace.
-   * The wallet entity holds only public material; an external module
-   * supplies the seed on demand via its own signer-factory-addon
-   * implementation (e.g. fetching from a remote key-management service
-   * such as Torus on each signing request).
-   */
-  LazyInMemory = 'LazyInMemory',
-  /**
-   * Keys are managed by an external Ledger device
-   */
-  HardwareLedger = 'HardwareLedger',
-  /**
-   * Keys are managed by an external Trezor device
-   */
-  HardwareTrezor = 'HardwareTrezor',
-  /**
-   * Keys are managed by an external Cardano Seed Signer device.
-   * Like other hardware wallets it is watch-only; it additionally
-   * persists the device master fingerprint (xfp) so signing requests
-   * can target the right device seed.
-   */
-  HardwareSeedSigner = 'HardwareSeedSigner',
-  /**
-   * Keys are managed by an external Keystone device.
-   * Like other hardware wallets it is watch-only; the device communicates
-   * exclusively over QR codes and is identified by its BIP-32 master
-   * fingerprint (xfp) so signing requests can target the right device seed.
-   */
-  HardwareKeystone = 'HardwareKeystone',
-  /**
-   * Requires more than 1 set of keys to spend from this wallet.
-   * Some (or all) co-signers are other wallet (InMemory/Hardware)
-   * accounts from this repository.
-   */
-  MultiSig = 'MultiSig',
-}
+export { WalletType } from './wallet-type';
 
+/** Identifies one account by the wallet that holds it and its own ID. */
 export type AccountRef = {
   walletId: WalletId;
   accountId: AccountId;
 };
 
+/** User-facing details of a wallet: its display name and its position in the wallet list. */
 export interface WalletMetadata {
   name: string;
   order: number;
@@ -64,6 +26,7 @@ export interface WalletMetadata {
    */
   migratedOutAt?: Timestamp;
 }
+/** User-facing details of an account, such as its display name and avatar. */
 export interface AccountMetadata {
   name: string;
   /**
@@ -75,8 +38,8 @@ export interface AccountMetadata {
   /** Optional avatar image URL for account display (e.g. in account selector). */
   avatarUri?: string;
   /**
-   * Epoch-ms timestamp of when this account was first created/onboarded in
-   * Lace. Optional for backwards compatibility: accounts persisted before this
+   * Epoch-ms timestamp of when this account was first created or onboarded.
+   * Optional for backwards compatibility: accounts persisted before this
    * field existed rehydrate with it undefined, which is treated as "onboarded
    * before any security detection shipped" and thus eligible for a proactive
    * re-scan. Stamped at account-creation sites, never in a reducer.
@@ -84,23 +47,30 @@ export interface AccountMetadata {
   onboardedAt?: Timestamp;
 }
 
-type AccountBase<BlockchainSpecific> = {
-  accountId: AccountId;
-  walletId: WalletId;
-  blockchainName: BlockchainName;
-  networkType: NetworkType;
-  blockchainNetworkId: BlockchainNetworkId;
-  metadata: AccountMetadata;
-  blockchainSpecific: BlockchainSpecific;
-};
+/**
+ * An account of an {@link InMemoryWallet}, belonging to one blockchain network.
+ *
+ * @typeParam BlockchainSpecific - The blockchain-defined data the account carries.
+ */
 export interface InMemoryWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
   accountType: 'InMemory';
 }
+/**
+ * An account of a {@link LazyInMemoryWallet}, belonging to one blockchain network.
+ *
+ * @typeParam BlockchainSpecific - The blockchain-defined data the account carries.
+ */
 export interface LazyInMemoryWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
   accountType: 'LazyInMemory';
 }
+/**
+ * An account of a {@link HardwareWallet}, belonging to one blockchain network;
+ * `accountType` names the device vendor.
+ *
+ * @typeParam BlockchainSpecific - The blockchain-defined data the account carries.
+ */
 export interface HardwareWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
   accountType:
@@ -109,39 +79,78 @@ export interface HardwareWalletAccount<BlockchainSpecific = unknown>
     | 'HardwareSeedSigner'
     | 'HardwareTrezor';
 }
+/**
+ * An account of a {@link MultiSigWallet}, belonging to one blockchain network.
+ * `ownSigners` lists the accounts in this repository that co-sign for it.
+ *
+ * @typeParam BlockchainSpecific - The blockchain-defined data the account carries.
+ */
 export interface MultiSigWalletAccount<BlockchainSpecific = unknown>
   extends AccountBase<BlockchainSpecific> {
   accountType: 'MultiSig';
   ownSigners: AccountRef[];
 }
 
+/**
+ * Wallet-level data that blockchain modules attach to in-memory and lazy
+ * in-memory wallets, keyed by blockchain name. Empty here; each blockchain
+ * contract adds its key through module augmentation.
+ */
 export interface BlockchainSpecificInMemoryWalletData {}
+/**
+ * Wallet-level data that contracts can attach to hardware wallets through
+ * module augmentation. Empty by default.
+ */
 export interface BlockchainSpecificHardwareWalletData {}
+/**
+ * Wallet-level data that contracts can attach to multi-signature wallets
+ * through module augmentation. Empty by default.
+ */
 export interface BlockchainSpecificMultiSigWalletData {}
 
-type WalletBase<BlockchainSpecific, Metadata = WalletMetadata> = {
-  metadata: Metadata;
-  walletId: WalletId;
-  blockchainSpecific: BlockchainSpecific;
-};
+/**
+ * A wallet that holds its keys. See {@link WalletType.InMemory} for how its
+ * recovery phrase is stored.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type InMemoryWallet<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificInMemoryWalletData> & {
-    // Absent for wallets imported from Nami via Lace V1, which never stored a mnemonic.
+    // Absent for a wallet imported without its recovery phrase.
     encryptedRecoveryPhrase?: HexBytes;
     accounts: InMemoryWalletAccount<BlockchainSpecificAccountProps>[];
     type: WalletType.InMemory;
     isPassphraseConfirmed: boolean;
   };
+/**
+ * A wallet that stores only public keys and has a vault module sign for it.
+ * See {@link WalletType.LazyInMemory}.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type LazyInMemoryWallet<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificInMemoryWalletData> & {
     accounts: LazyInMemoryWalletAccount<BlockchainSpecificAccountProps>[];
     type: WalletType.LazyInMemory;
   };
+/**
+ * A wallet whose keys live on a Ledger device: the wallet stores only its
+ * public keys, and the device signs.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type HardwareWalletLedger<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificHardwareWalletData> & {
     type: WalletType.HardwareLedger;
     accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
   };
+/**
+ * A wallet whose keys live on a Trezor device: the wallet stores only its
+ * public keys, and the device signs. Its metadata may record the key derivation type
+ * the wallet was set up with.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type HardwareWalletTrezor<BlockchainSpecificAccountProps = unknown> =
   WalletBase<
     BlockchainSpecificHardwareWalletData,
@@ -152,36 +161,71 @@ export type HardwareWalletTrezor<BlockchainSpecificAccountProps = unknown> =
     type: WalletType.HardwareTrezor;
     accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
   };
+/**
+ * A wallet whose keys live on a Cardano Seed Signer device: the wallet stores
+ * only its public keys, and the device signs.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type HardwareWalletSeedSigner<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificHardwareWalletData> & {
     type: WalletType.HardwareSeedSigner;
     accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
   };
+/**
+ * A wallet whose keys live on a Keystone device: the wallet stores only its
+ * public keys, and the device signs.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type HardwareWalletKeystone<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificHardwareWalletData> & {
     type: WalletType.HardwareKeystone;
     accounts: HardwareWalletAccount<BlockchainSpecificAccountProps>[];
   };
+/**
+ * Any hardware wallet: Keystone, Ledger, Seed Signer or Trezor.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type HardwareWallet<BlockchainSpecificAccountProps = unknown> =
   | HardwareWalletKeystone<BlockchainSpecificAccountProps>
   | HardwareWalletLedger<BlockchainSpecificAccountProps>
   | HardwareWalletSeedSigner<BlockchainSpecificAccountProps>
   | HardwareWalletTrezor<BlockchainSpecificAccountProps>;
+/**
+ * A wallet that needs more than one set of keys to spend; some or all
+ * co-signers are other accounts in this repository.
+ *
+ * @typeParam BlockchainSpecificAccountProps - The blockchain-defined data its accounts carry.
+ */
 export type MultiSigWallet<BlockchainSpecificAccountProps = unknown> =
   WalletBase<BlockchainSpecificMultiSigWalletData> & {
     type: WalletType.MultiSig;
     accounts: MultiSigWalletAccount<BlockchainSpecificAccountProps>[];
   };
+/** Any wallet the wallet repository can hold, discriminated by `type`. */
 export type AnyWallet =
+  | ExtensionWallet
   | HardwareWallet
   | InMemoryWallet
   | LazyInMemoryWallet
   | MultiSigWallet;
+/**
+ * Any account of any wallet, discriminated by `accountType`.
+ *
+ * @typeParam HwProps - Blockchain-defined data on hardware wallet accounts.
+ * @typeParam InMemoryProps - Blockchain-defined data on in-memory and lazy in-memory accounts.
+ * @typeParam MultiSigProps - Blockchain-defined data on multi-signature accounts.
+ * @typeParam ExtensionProps - Blockchain-defined data on the account kinds features add.
+ */
 export type AnyAccount<
   HwProps = unknown,
   InMemoryProps = unknown,
   MultiSigProps = unknown,
+  ExtensionProps = unknown,
 > =
+  | ExtensionAccount<ExtensionProps>
   | HardwareWalletAccount<HwProps>
   | InMemoryWalletAccount<InMemoryProps>
   | LazyInMemoryWalletAccount<InMemoryProps>

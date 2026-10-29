@@ -49,7 +49,7 @@ export const createSecureStorePasswordManager = (secureStore: SecureStore) => {
      * - Auto-generation fails and we fall back to user password
      * - User is on a path without biometrics (mobileWithoutBiometrics strategy)
      *
-     * @param password The password to store
+     * @param password - The password to store
      * @throws Error if biometric authentication is not available (Android: requires biometrics)
      */
     setPassword: (password: AuthSecret): void => {

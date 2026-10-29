@@ -66,6 +66,7 @@ describe('makeBuildTx reads from the injected cardanoAvailableAccountUtxos$', ()
         cardanoNetworkMagic$: of(764824073),
         cardanoProtocolParameters$: of(mockProtocolParameters),
         cardanoAddresses$: of([mockAddress]),
+        cardanoRewardAccountDetails$: of({}),
       },
     } as unknown as SideEffectDependencies);
 
@@ -101,13 +102,18 @@ describe('makeBuildTx reads from the injected cardanoAvailableAccountUtxos$', ()
         makeUtxo(previousTxId, 0, 10_000_000n),
         makeUtxo(previousTxId, 1, 5_000_000n),
       ]),
+      of(new Map()),
     );
     const result = await firstValueFrom(buildTx(buildParams));
     expect(result.success).toBe(true);
   });
 
   it('returns a buildTx error when the available UTxO set is empty', async () => {
-    const buildTx = makeBuildTx(makeDeps(), toAvailableAccountUtxos$([]));
+    const buildTx = makeBuildTx(
+      makeDeps(),
+      toAvailableAccountUtxos$([]),
+      of(new Map()),
+    );
     const result = await firstValueFrom(buildTx(buildParams));
     expect(result.success).toBe(false);
   });

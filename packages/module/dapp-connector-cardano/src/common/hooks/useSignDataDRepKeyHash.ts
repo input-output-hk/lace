@@ -1,7 +1,7 @@
 import * as Crypto from '@cardano-sdk/crypto';
 import { blake2b } from '@cardano-sdk/crypto';
 import { Bip32Account, KeyRole } from '@cardano-sdk/key-management';
-import { isCardanoAccount } from '@lace-contract/cardano-context';
+import { isCardanoBip32Account } from '@lace-contract/cardano-context';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useLaceSelector } from './storeHooks';
@@ -35,11 +35,7 @@ export const useSignDataDRepKeyHash = (
 
   useEffect(() => {
     setDRepKeyHash(undefined);
-    if (
-      !account ||
-      !isCardanoAccount(account) ||
-      account.accountType === 'MultiSig'
-    ) {
+    if (!account || !isCardanoBip32Account(account)) {
       return;
     }
 

@@ -28,6 +28,8 @@ interface AccountKeySheetTemplateProps<Key extends string> {
   onDone: () => void;
   doneButtonTestID: string;
   qrCodeBgColor?: string;
+  /** Disable when the host screen owns navigation chrome. */
+  configureNavigation?: boolean;
 }
 
 export const AccountKeySheetTemplate = <Key extends string>({
@@ -46,6 +48,7 @@ export const AccountKeySheetTemplate = <Key extends string>({
   onDone,
   doneButtonTestID,
   qrCodeBgColor,
+  configureNavigation = true,
 }: AccountKeySheetTemplateProps<Key>) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
@@ -75,6 +78,7 @@ export const AccountKeySheetTemplate = <Key extends string>({
   }
 
   useLayoutEffect(() => {
+    if (!configureNavigation) return;
     navigation.setOptions({
       header: <Sheet.Header title={title} testID="account-key-sheet-header" />,
       footer: (
@@ -100,6 +104,7 @@ export const AccountKeySheetTemplate = <Key extends string>({
       ),
     });
   }, [
+    configureNavigation,
     navigation,
     title,
     shouldShowShareButton,

@@ -4,6 +4,7 @@ import { BitcoinNetwork } from '..';
 
 import type { Tagged } from 'type-fest';
 
+/** The network id of a Bitcoin network, such as `bitcoin-testnet4`. */
 export type BitcoinNetworkId = BlockchainNetworkId &
   Tagged<string, 'BitcoinNetworkId'>;
 
@@ -16,6 +17,10 @@ interface BitcoinNetworkIdConstructor {
   getBitcoinNetwork(networkId: BlockchainNetworkId): BitcoinNetwork | undefined;
 }
 
+/**
+ * Builds the network id of a Bitcoin network; `getBitcoinNetwork` reads the
+ * network back from an id.
+ */
 export const BitcoinNetworkId: BitcoinNetworkIdConstructor = Object.assign(
   (payload: `${BitcoinNetwork}`): BitcoinNetworkId =>
     BlockchainNetworkId(

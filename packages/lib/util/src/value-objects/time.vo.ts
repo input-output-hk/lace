@@ -2,23 +2,40 @@ import { Tagged } from 'type-fest';
 
 /** Milliseconds time unit. */
 export type Milliseconds = Tagged<number, 'Milliseconds'>;
+/**
+ * Types a number as a duration in milliseconds, so it cannot be confused with
+ * another unit. It checks nothing; `Milliseconds.toSeconds` converts.
+ */
 export const Milliseconds = (value: number): Milliseconds =>
   value as Milliseconds;
 
 /** Seconds time unit. */
 export type Seconds = Tagged<number, 'Seconds'>;
+/**
+ * Types a number as a duration in seconds. It checks nothing;
+ * `Seconds.toMilliseconds` and `Seconds.toMinutes` convert.
+ */
 export const Seconds = (value: number): Seconds => value as Seconds;
 
 /** Minutes time unit. */
 export type Minutes = Tagged<number, 'Minutes'>;
+/**
+ * Types a number as a duration in minutes. It checks nothing;
+ * `Minutes.toSeconds` and `Minutes.toHours` convert.
+ */
 export const Minutes = (value: number): Minutes => value as Minutes;
 
 /** Hours time unit. */
 export type Hours = Tagged<number, 'Hours'>;
+/**
+ * Types a number as a duration in hours. It checks nothing;
+ * `Hours.toMinutes` and `Hours.toDays` convert.
+ */
 export const Hours = (value: number): Hours => value as Hours;
 
-/** days time unit. */
+/** Days time unit. */
 export type Days = Tagged<number, 'Days'>;
+/** Types a number as a duration in days. It checks nothing; `Days.toHours` converts. */
 export const Days = (value: number): Days => value as Days;
 
 Hours.toDays = (value: Hours): Days => (value / 24) as Days;
@@ -42,7 +59,7 @@ export class TimeSpan {
   /**
    * Initializes a new instance of the TimeSpan class.
    *
-   * @param elapsed The time interval in milliseconds.
+   * @param elapsed - The time interval in milliseconds.
    */
   constructor(elapsed: Milliseconds) {
     this.elapsed = elapsed;
@@ -51,7 +68,7 @@ export class TimeSpan {
   /**
    * Creates a time span from milliseconds.
    *
-   * @param milliseconds The number of milliseconds.
+   * @param milliseconds - The number of milliseconds.
    * @returns The time span.
    */
   public static fromMilliseconds(milliseconds: Milliseconds): TimeSpan {
@@ -61,7 +78,7 @@ export class TimeSpan {
   /**
    * Creates a time span from seconds.
    *
-   * @param seconds The number of seconds.
+   * @param seconds - The number of seconds.
    * @returns The time span.
    */
   public static fromSeconds(seconds: Seconds): TimeSpan {
@@ -71,7 +88,7 @@ export class TimeSpan {
   /**
    * Creates a time span from minutes.
    *
-   * @param minutes The number of minutes.
+   * @param minutes - The number of minutes.
    * @returns The time span.
    */
   public static fromMinutes(minutes: Minutes): TimeSpan {
@@ -81,7 +98,7 @@ export class TimeSpan {
   /**
    * Creates a time span from hours.
    *
-   * @param hours The number of hours.
+   * @param hours - The number of hours.
    * @returns The time span.
    */
   public static fromHours(hours: Hours): TimeSpan {
@@ -217,6 +234,11 @@ export class TimeSpan {
   }
 }
 
+/** A point in time, in milliseconds since the Unix epoch. */
 export type Timestamp = Tagged<number, 'Timestamp'>;
+/**
+ * Types a number as a point in time, in milliseconds since the Unix epoch.
+ * It checks nothing; `Timestamp.now()` gives the current time.
+ */
 export const Timestamp = (value: number): Timestamp => value as Timestamp;
 Timestamp.now = () => Timestamp(Date.now());
