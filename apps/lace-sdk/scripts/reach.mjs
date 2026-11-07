@@ -79,9 +79,11 @@ export const reachedOwnSource = channel => {
  */
 export const reachedWorkspaceFiles = (roots, options = compilerOptions()) => {
   const files = new Set(roots.map(root => fs.realpathSync(root)));
+  const programRoots = new Set(files);
+  let program;
   for (;;) {
-    const program = ts.createProgram([...files], options);
-    const before = files.size;
+    program = ts.createProgram([...programRoots], options, undefined, program);
+    const before = programRoots.size;
     for (const source of program.getSourceFiles()) {
       const match = PACKAGE_SOURCE.exec(source.fileName);
       if (!match) continue;
@@ -109,9 +111,15 @@ export const reachedWorkspaceFiles = (roots, options = compilerOptions()) => {
           ),
         )
         .find(file => fs.existsSync(file));
-      if (augmentations) files.add(augmentations);
+      if (augmentations) {
+        const real = fs.realpathSync(augmentations);
+        files.add(real);
+        programRoots.add(real);
+      }
     }
-    if (files.size === before) return [...files].sort();
+    // Imported sources are already in the program; only new augmentation roots
+    // require another pass to discover declarations nothing imports.
+    if (programRoots.size === before) return [...files].sort();
   }
 };
 

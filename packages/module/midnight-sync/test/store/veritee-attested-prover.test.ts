@@ -1,22 +1,22 @@
-import { RealLedgerClient } from '@input-output-hk/temenos-attestation-verifier';
+import { RealLedgerClient } from '@input-output-hk/veritee-attestation-verifier';
 import {
   createMockDependencies,
   FIXTURE_CONFIG,
-} from '@input-output-hk/temenos-attestation-verifier/mocks';
+} from '@input-output-hk/veritee-attestation-verifier/mocks';
 import {
   MidnightSDKNetworkIds,
-  TEMENOS_PROOF_SERVER_MODES,
+  VERITEE_PROOF_SERVER_MODES,
 } from '@lace-contract/midnight-context';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-  createStoreTemenosAttestedProver,
-  TemenosAttestationError,
-} from '../../src/store/temenos-attested-prover';
+  createStoreVeriteeAttestedProver,
+  VeriteeAttestationError,
+} from '../../src/store/veritee-attested-prover';
 
 import type { AttestationProgressEvent } from '@lace-contract/midnight-context';
 
-const TEMENOS_PROOF_SERVER_URL = 'https://api.proofserver.wastedp.io';
+const VERITEE_PROOF_SERVER_URL = 'https://api.proofserver.wastedp.io';
 
 const CONTRACT_CHECK_IDS = new Set([
   'ak-extraction',
@@ -35,10 +35,10 @@ const createDriver = () => {
   // FIXTURE_CONFIG must accompany the mock dependencies: the mock channel
   // binder validates the config's proof-server host against the fixture
   // evidence's webserver_tls endpoints (api.mock.local).
-  const driver = createStoreTemenosAttestedProver(
+  const driver = createStoreVeriteeAttestedProver(
     {
       networkId: MidnightSDKNetworkIds.PreProd,
-      proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+      proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
       getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
       trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
     },
@@ -55,36 +55,36 @@ const phaseEvents = (events: AttestationProgressEvent[]) =>
     event.type === 'phase' ? [`${event.phase}:${event.status}`] : [],
   );
 
-describe('createStoreTemenosAttestedProver', () => {
+describe('createStoreVeriteeAttestedProver', () => {
   it('throws for a proof server that is not the one baked for the network', () => {
     expect(() =>
-      createStoreTemenosAttestedProver({
+      createStoreVeriteeAttestedProver({
         networkId: MidnightSDKNetworkIds.PreProd,
         proofServerApiUrl: 'https://unknown.example.com',
         getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
         trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
       }),
-    ).toThrow(/no baked temenos attestation config/i);
+    ).toThrow(/no baked veritee attestation config/i);
   });
 
   it.each([MidnightSDKNetworkIds.QaNet])(
     'rejects ineligible network %s before attestation',
     networkId => {
       expect(() =>
-        createStoreTemenosAttestedProver({
+        createStoreVeriteeAttestedProver({
           networkId,
-          proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+          proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
           getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
           trustRoots: {
             amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates,
           },
         }),
-      ).toThrow(/no baked temenos attestation config/i);
+      ).toThrow(/no baked veritee attestation config/i);
     },
   );
 
-  it('bakes an attestation config for every network that offers the Temenos mode', () => {
-    const networks = Object.keys(TEMENOS_PROOF_SERVER_MODES);
+  it('bakes an attestation config for every network that offers the Veritee mode', () => {
+    const networks = Object.keys(VERITEE_PROOF_SERVER_MODES);
     expect(networks).toEqual(
       expect.arrayContaining([
         MidnightSDKNetworkIds.MainNet,
@@ -93,11 +93,11 @@ describe('createStoreTemenosAttestedProver', () => {
       ]),
     );
     for (const [networkId, mode] of Object.entries(
-      TEMENOS_PROOF_SERVER_MODES,
+      VERITEE_PROOF_SERVER_MODES,
     )) {
-      if (!mode) throw new Error('Missing Temenos mode');
+      if (!mode) throw new Error('Missing Veritee mode');
       expect(() =>
-        createStoreTemenosAttestedProver({
+        createStoreVeriteeAttestedProver({
           networkId: networkId,
           proofServerApiUrl: mode.url,
           getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
@@ -158,7 +158,7 @@ describe('createStoreTemenosAttestedProver', () => {
     dependencies.localVerifier.failCheck = 'pcr15-recompute';
 
     await expect(run()).rejects.toMatchObject({
-      name: 'TemenosAttestationError',
+      name: 'VeriteeAttestationError',
       phase: 'verify-locally',
       checkId: 'pcr15-recompute',
     });
@@ -178,7 +178,7 @@ describe('createStoreTemenosAttestedProver', () => {
     await expect(run()).rejects.toMatchObject({
       phase: 'fetch-expected-values',
     });
-    await expect(run()).rejects.toBeInstanceOf(TemenosAttestationError);
+    await expect(run()).rejects.toBeInstanceOf(VeriteeAttestationError);
   });
 
   it('maps a Warden rejection to a warden-verify failure', async () => {
@@ -202,10 +202,10 @@ describe('explicit trust-root input', () => {
     const dependencies = createMockDependencies({ latencyMs: 0 });
     const verify = vi.spyOn(dependencies.localVerifier, 'verify');
     const roots = ['caller-selected-root'];
-    const provider = createStoreTemenosAttestedProver(
+    const provider = createStoreVeriteeAttestedProver(
       {
         networkId: MidnightSDKNetworkIds.PreProd,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
         getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
         trustRoots: { amdRootCertificates: roots },
       },
@@ -220,9 +220,9 @@ describe('explicit trust-root input', () => {
 
   it('rejects an empty trust set instead of using bundled roots implicitly', () => {
     expect(() =>
-      createStoreTemenosAttestedProver({
+      createStoreVeriteeAttestedProver({
         networkId: MidnightSDKNetworkIds.PreProd,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
         getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
         trustRoots: { amdRootCertificates: [] },
       }),
@@ -233,10 +233,10 @@ describe('explicit trust-root input', () => {
     const dependencies = createMockDependencies({ latencyMs: 0 });
     dependencies.localVerifier.failCheck = 'snp-signature-chain';
     const bind = vi.spyOn(dependencies.channelBinder, 'bind');
-    const provider = createStoreTemenosAttestedProver(
+    const provider = createStoreVeriteeAttestedProver(
       {
         networkId: MidnightSDKNetworkIds.PreProd,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
         getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
         trustRoots: { amdRootCertificates: ['unaccepted-root'] },
       },
@@ -245,7 +245,7 @@ describe('explicit trust-root input', () => {
     await expect(
       provider.establishAttestedSession(() => undefined),
     ).rejects.toMatchObject({
-      providerId: 'temenos',
+      providerId: 'veritee',
       stage: 'appraisal',
       checkId: 'snp-signature-chain',
     });
@@ -266,10 +266,10 @@ describe('resolved measurement configuration', () => {
       .mockResolvedValueOnce('https://indexer.example/graphql?apiKey=first')
       .mockResolvedValueOnce('https://indexer.example/graphql?apiKey=second');
     const { ledgerClient: _, ...overrides } = dependencies;
-    const provider = createStoreTemenosAttestedProver(
+    const provider = createStoreVeriteeAttestedProver(
       {
         networkId: MidnightSDKNetworkIds.PreProd,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
         trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
         getLedgerIndexerUrl,
       },
@@ -318,7 +318,7 @@ describe('resolved measurement configuration', () => {
   });
 });
 
-it('aborts Temenos evidence requests instead of waiting for their network timeout', async () => {
+it('aborts Veritee evidence requests instead of waiting for their network timeout', async () => {
   const signals: AbortSignal[] = [];
   vi.stubGlobal(
     'fetch',
@@ -341,9 +341,9 @@ it('aborts Temenos evidence requests instead of waiting for their network timeou
     }),
   );
   try {
-    const driver = createStoreTemenosAttestedProver({
+    const driver = createStoreVeriteeAttestedProver({
       networkId: MidnightSDKNetworkIds.PreProd,
-      proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+      proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
       getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
       trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
     });

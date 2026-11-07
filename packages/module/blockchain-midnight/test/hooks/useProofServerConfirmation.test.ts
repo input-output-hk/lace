@@ -19,15 +19,15 @@ const local: ProofServerMode = {
   kind: 'local-host',
   url: 'http://localhost:6300',
 };
-const temenos: ProofServerMode = {
+const veritee: ProofServerMode = {
   kind: 'tee-delegated',
   url: 'https://api.proofserver.wastedp.io',
-  label: 'Temenos',
+  label: 'Veritee',
 };
 const props = (): Parameters<typeof useProofServerConfirmation>[0] => ({
   networkId: 'preprod' as const,
-  mode: temenos,
-  availableModes: [local, temenos],
+  mode: veritee,
+  availableModes: [local, veritee],
   isOpen: true,
   isSaving: false,
   onSave: vi.fn(),
@@ -48,7 +48,7 @@ describe('proof-server confirmation', () => {
     });
     expect(result.current.confirmation).toEqual({
       isCustom: false,
-      provider: 'Temenos',
+      provider: 'Veritee',
       isFirstUse: true,
     });
     expect(input.onSave).not.toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('proof-server confirmation', () => {
     act(() => {
       result.current.confirm();
     });
-    expect(mocks.acknowledge).toHaveBeenCalledWith(temenos);
+    expect(mocks.acknowledge).toHaveBeenCalledWith(veritee);
     expect(input.onSave).toHaveBeenCalledTimes(1);
     expect(result.current.confirmation).toBeUndefined();
   });
@@ -80,7 +80,7 @@ describe('proof-server confirmation', () => {
   });
 
   it('acknowledged providers still require a lighter confirmation', () => {
-    mocks.acknowledgements = { [proofServerDisclosureKey(temenos)!]: true };
+    mocks.acknowledgements = { [proofServerDisclosureKey(veritee)!]: true };
     const input = props();
     const { result } = renderHook(() => useProofServerConfirmation(input));
     act(() => {
@@ -95,8 +95,8 @@ describe('proof-server confirmation', () => {
   });
 
   it('does not reuse acknowledgement for another endpoint', () => {
-    mocks.acknowledgements = { [proofServerDisclosureKey(temenos)!]: true };
-    const other: ProofServerMode = { ...temenos, url: 'https://other.example' };
+    mocks.acknowledgements = { [proofServerDisclosureKey(veritee)!]: true };
+    const other: ProofServerMode = { ...veritee, url: 'https://other.example' };
     const { result } = renderHook(() =>
       useProofServerConfirmation({
         ...props(),
@@ -112,7 +112,7 @@ describe('proof-server confirmation', () => {
 
   it('on-device proving saves without server consent', () => {
     const mode: ProofServerMode = { kind: 'in-process' };
-    const input = { ...props(), mode, availableModes: [mode, temenos] };
+    const input = { ...props(), mode, availableModes: [mode, veritee] };
     const { result } = renderHook(() => useProofServerConfirmation(input));
     act(() => {
       result.current.requestSave();

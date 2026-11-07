@@ -2,7 +2,7 @@ import {
   MidnightAccountId,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
-  TEMENOS_PROOF_SERVER_MODES,
+  VERITEE_PROOF_SERVER_MODES,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { AccountId } from '@lace-contract/wallet-repo';
@@ -137,7 +137,7 @@ afterEach(() => {
 });
 
 describe('SDK attested routing', () => {
-  const tee = TEMENOS_PROOF_SERVER_MODES[networkId]!;
+  const tee = VERITEE_PROOF_SERVER_MODES[networkId]!;
   it('forwards the public provider through SDK store initialization into engine dependencies', async () => {
     const providerFailure = new Error('provider refused startup');
     const createAttestedProver = vi.fn(() => {

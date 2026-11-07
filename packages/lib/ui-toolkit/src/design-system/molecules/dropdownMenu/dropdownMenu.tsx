@@ -33,6 +33,7 @@ import {
   Text,
   Divider,
   BlurView,
+  WebBlurProvider,
   Icon,
   Avatar,
   Row,
@@ -638,28 +639,30 @@ export const DropdownMenu = React.memo(
     // sheet's ScrollView — nesting a VirtualizedList there breaks windowing —
     // and the item count is too small for virtualization to matter.
     const dropdownList = (
-      <BlurView style={defaultStyles.blurView}>
-        <ScrollView
-          nestedScrollEnabled={true}
-          testID={testID || 'dropdown-menu'}
-          showsVerticalScrollIndicator={
-            normalizedItems.length > maxVisibleItems
-          }
-          contentContainerStyle={defaultStyles.contentContainer}>
-          {normalizedItems.map((item, index) => (
-            <MenuItem
-              key={item.id}
-              item={item}
-              index={index}
-              selectedItemId={selectedItemId}
-              onPress={handleSelect}
-              isLastItem={index === normalizedItems.length - 1}
-              theme={theme}
-              truncateText={truncateText}
-            />
-          ))}
-        </ScrollView>
-      </BlurView>
+      <WebBlurProvider enabled>
+        <BlurView style={defaultStyles.blurView}>
+          <ScrollView
+            nestedScrollEnabled={true}
+            testID={testID || 'dropdown-menu'}
+            showsVerticalScrollIndicator={
+              normalizedItems.length > maxVisibleItems
+            }
+            contentContainerStyle={defaultStyles.contentContainer}>
+            {normalizedItems.map((item, index) => (
+              <MenuItem
+                key={item.id}
+                item={item}
+                index={index}
+                selectedItemId={selectedItemId}
+                onPress={handleSelect}
+                isLastItem={index === normalizedItems.length - 1}
+                theme={theme}
+                truncateText={truncateText}
+              />
+            ))}
+          </ScrollView>
+        </BlurView>
+      </WebBlurProvider>
     );
 
     return (

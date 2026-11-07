@@ -62,6 +62,9 @@
   },
   "devDependencies": {
     "@lace-lib/util-dev-cardano": "*",
+    "@midnightntwrk/wallet-sdk": "1.2.0",
+    "@midnightntwrk/wallet-sdk-abstractions": "2.1.0",
+    "@midnightntwrk/wallet-sdk-address-format": "3.1.2",
     "@rolldown/plugin-node-polyfills": "^1.0.3",
     "rolldown": "^1.0.0-rc.9",
     "rollup": "^4.59.0",

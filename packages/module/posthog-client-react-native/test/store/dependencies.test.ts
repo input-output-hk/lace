@@ -1,4 +1,6 @@
-import { describe, expect, it, vi } from 'vitest';
+import PostHog from 'posthog-react-native';
+import { Platform } from 'react-native';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('posthog-react-native', () => ({
   // eslint-disable-next-line prefer-arrow-functions/prefer-arrow-functions -- invoked with `new`, which an arrow function cannot be
@@ -6,6 +8,7 @@ vi.mock('posthog-react-native', () => ({
     return {
       capture: vi.fn(),
       identify: vi.fn(),
+      setPersonPropertiesForFlags: vi.fn(),
       reloadFeatureFlagsAsync: vi.fn().mockResolvedValue(undefined),
       getFeatureFlagsAndPayloads: vi
         .fn()
@@ -37,14 +40,63 @@ const makeInit = () =>
     {} as never,
   );
 
-describe('posthog-client-react-native default event properties', () => {
+describe.each(['ios', 'android'] as const)('PostHog on %s', platform => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Object.defineProperty(Platform, 'OS', { value: platform });
+  });
+
   it('includes platform, osVersion, and appVersion', () => {
     const { getDefaultPostHogEventProperties } = makeInit();
 
     expect(getDefaultPostHogEventProperties()).toEqual({
-      platform: 'ios',
+      platform,
       osVersion: '17.4',
       appVersion: '2.1.0',
+    });
+  });
+
+  it('adds platform to SDK event properties without losing native metadata', () => {
+    makeInit();
+    const options = vi.mocked(PostHog).mock.calls[0][1]!;
+    const customAppProperties = options.customAppProperties;
+
+    expect(typeof customAppProperties).toBe('function');
+    if (typeof customAppProperties !== 'function')
+      throw new Error('Expected property callback');
+    expect(
+      customAppProperties({ $os_name: 'native OS', $app_version: '2.1.0' }),
+    ).toEqual({
+      $os_name: 'native OS',
+      $app_version: '2.1.0',
+      platform,
+    });
+  });
+
+  it('supplies platform for flags before identification without an extra reload', () => {
+    makeInit();
+    const sdk = vi.mocked(PostHog).mock.results[0].value as PostHog;
+
+    expect(sdk.setPersonPropertiesForFlags).toHaveBeenCalledWith(
+      { platform },
+      false,
+    );
+    expect(sdk.identify).not.toHaveBeenCalled();
+    expect(sdk.reloadFeatureFlagsAsync).not.toHaveBeenCalled();
+  });
+
+  it('identifies the current device platform while preserving person properties', () => {
+    const { posthog } = makeInit();
+    const sdk = vi.mocked(PostHog).mock.results[0].value as PostHog;
+
+    posthog.identify('test-user', {
+      platform: 'stale-platform',
+      language: 'en',
+    });
+
+    expect(sdk.identify).toHaveBeenCalledWith('test-user', {
+      platform,
+      language: 'en',
     });
   });
 });

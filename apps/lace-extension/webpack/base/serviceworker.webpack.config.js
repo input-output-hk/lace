@@ -17,6 +17,16 @@ module.exports = {
     path: path.join(outputDirectory, 'js', 'sw'),
     publicPath: process.env.WEBPACK_PUBLIC_PATH,
   },
+  module: {
+    rules: [
+      {
+        test: /[\\/]@midnightntwrk[\\/]wallet-sdk-indexer-client[\\/]dist[\\/]effect[\\/]DeflateWebSocket\.js$/,
+        use: [
+          path.join(__dirname, '..', 'midnight-indexer-transport-loader.js'),
+        ],
+      },
+    ],
+  },
   plugins: [
     // MV3 forbids remotely hosted code. @sentry/browser's lazyLoadIntegration
     // embeds "https://browser.sentry-cdn.com" even when unused — tree-shaking

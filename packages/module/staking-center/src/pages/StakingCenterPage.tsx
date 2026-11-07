@@ -156,7 +156,13 @@ export const StakingCenterPage = () => {
             balanceLabel={t('v2.generic.staking.center.total-balance')}
             balanceValue={productCardBalanceOf(card)}
             yieldLabel={t('v2.generic.staking.center.yield')}
-            yieldValue={card.apyDisplay(featureFlags, activeNetworkId)}
+            yieldValue={
+              card.Yield ? (
+                <card.Yield />
+              ) : (
+                card.apyDisplay(featureFlags, activeNetworkId)
+              )
+            }
             onPress={card.onPress}
             testID={`product-card-${card.id}`}
           />

@@ -1,8 +1,10 @@
 import {
   createMockDependencies,
   FIXTURE_CONFIG,
-} from '@input-output-hk/temenos-attestation-verifier/mocks';
+} from '@input-output-hk/veritee-attestation-verifier/mocks';
 import { MidnightSDKNetworkIds } from '@lace-contract/midnight-context';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -10,9 +12,9 @@ import {
   ProofOperationUnavailableError,
 } from '../../src/store/attested-proving-service';
 import {
-  createStoreTemenosAttestedProver,
-  TemenosAttestationError,
-} from '../../src/store/temenos-attested-prover';
+  createStoreVeriteeAttestedProver,
+  VeriteeAttestationError,
+} from '../../src/store/veritee-attested-prover';
 
 import type {
   AttestedProverProvider,
@@ -23,7 +25,7 @@ import type {
   AttestationProgressEvent,
 } from '@lace-contract/midnight-context';
 
-const TEMENOS_PROOF_SERVER_URL = 'https://api.proofserver.wastedp.io';
+const VERITEE_PROOF_SERVER_URL = 'https://api.proofserver.wastedp.io';
 
 const checkPayload = new Uint8Array([0xc0]);
 const provePayload = new Uint8Array([0xf0]);
@@ -46,10 +48,10 @@ const createAccess = () => {
   const dependencies = createMockDependencies({ latencyMs: 0 });
   const events: AttestationProgressEvent[] = [];
   const access = createAttestedProofServerAccess(
-    createStoreTemenosAttestedProver(
+    createStoreVeriteeAttestedProver(
       {
         networkId: MidnightSDKNetworkIds.PreProd,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_URL,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_URL,
         getLedgerIndexerUrl: async () => FIXTURE_CONFIG.indexerUrl,
         trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
       },
@@ -180,7 +182,7 @@ describe('createAttestedProofServerAccess', () => {
       const { access, events } = context;
 
       await expect(access.transport.prove(provePayload)).rejects.toThrow(
-        TemenosAttestationError,
+        VeriteeAttestationError,
       );
       await expect(access.transport.prove(provePayload)).rejects.toMatchObject({
         phase,
@@ -330,13 +332,15 @@ describe('createAttestedProofServerAccess', () => {
       };
       const access = createAttestedProofServerAccess(driver, () => undefined);
       const prove = vi.fn().mockResolvedValue('proven');
-      const transaction = { prove } as unknown as Parameters<
-        typeof access.provingService.prove
-      >[0];
+      const transaction = Transaction.fromParts('undeployed');
+      vi.spyOn(transaction, 'prove').mockImplementation(prove);
 
-      await expect(access.provingService.prove(transaction)).resolves.toBe(
-        'proven',
-      );
+      await expect(
+        access.provingService.prove(
+          transaction,
+          ProtocolVersion.MinSupportedVersion,
+        ),
+      ).resolves.toBe('proven');
       // The SDK drives the circuit-level provider the session is adapted
       // into; it must be the session, not any other transport.
       const [provider] = prove.mock.calls[0] as [

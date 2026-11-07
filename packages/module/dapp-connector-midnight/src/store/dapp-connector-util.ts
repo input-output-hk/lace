@@ -218,7 +218,11 @@ export const signData$ = ({
     requestPayload: {
       dapp: request.requestingDapp,
       payload: request.signDataPayload ?? '',
-      keyType: request.signDataKeyType ?? 'unshielded',
+      keyType: `${request.signDataKeyType ?? 'unshielded'} (${
+        request.signDataScheme === 'ecdsa_secp256k1_sha256'
+          ? 'ECDSA'
+          : 'Schnorr'
+      })`,
     },
   });
 

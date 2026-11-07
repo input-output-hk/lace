@@ -3,8 +3,8 @@ import {
   MidnightAccountId,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
-  FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER,
-  TEMENOS_PROOF_SERVER_MODES,
+  FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER,
+  VERITEE_PROOF_SERVER_MODES,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { FEATURE_FLAG_NETWORK_TYPE } from '@lace-contract/network';
@@ -433,14 +433,14 @@ describe('Midnight loadout', () => {
   });
 
   it('proves with a user-selected available prover over the loadout default', async () => {
-    const teeMode = TEMENOS_PROOF_SERVER_MODES[MidnightSDKNetworkIds.Preview];
-    if (!teeMode) throw new Error('No Temenos mode on Preview');
+    const teeMode = VERITEE_PROOF_SERVER_MODES[MidnightSDKNetworkIds.Preview];
+    if (!teeMode) throw new Error('No Veritee mode on Preview');
     const wallet = await createMidnightWallet(
       { proofServerUrl: 'https://prover.example' },
       {
         flags: [
           ...featureFlags,
-          { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+          { key: FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER },
         ],
       },
     );
@@ -462,8 +462,8 @@ describe('Midnight loadout', () => {
   });
 
   it('refuses a TEE proof server without attested routing', () => {
-    const teeMode = TEMENOS_PROOF_SERVER_MODES[MidnightSDKNetworkIds.Preview];
-    if (!teeMode) throw new Error('No Temenos mode on Preview');
+    const teeMode = VERITEE_PROOF_SERVER_MODES[MidnightSDKNetworkIds.Preview];
+    if (!teeMode) throw new Error('No Veritee mode on Preview');
 
     expect(() =>
       createMidnightModule({ password, proofServerUrl: teeMode.url }),

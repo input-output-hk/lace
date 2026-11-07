@@ -1,10 +1,7 @@
 import { executeCircuit } from '@lace-lib/midnight-prover';
-import {
-  fromProvingProvider,
-  ProvingError,
-} from '@midnightntwrk/wallet-sdk/capabilities/proving';
-import { Effect } from 'effect';
+import { ProvingError } from '@midnightntwrk/wallet-sdk/capabilities/proving';
 
+import { createVersionedProvingService } from './proof-server-transport';
 import {
   createConfiguredWasmProver,
   wasmProofActivities,
@@ -104,7 +101,7 @@ export const createWasmProofServerAccess = (
         ),
     },
     provingService: {
-      prove: async transaction =>
+      prove: async (transaction, version) =>
         wasmProofActivities.run('transaction', async observe => {
           const circuits = raw(observe);
           const pending = new Set<Promise<unknown>>();
@@ -116,28 +113,19 @@ export const createWasmProofServerAccess = (
             );
             return promise;
           };
-          const service = fromProvingProvider({
-            check: async (serializedPreimage, keyLocation) =>
-              track(circuits.check({ serializedPreimage, keyLocation })),
-            prove: async (
-              serializedPreimage,
-              keyLocation,
-              overwriteBindingInput,
-            ) =>
-              track(
-                circuits.prove({
-                  serializedPreimage,
-                  keyLocation,
-                  overwriteBindingInput,
-                }),
-              ),
-          });
+          const service = createVersionedProvingService(
+            {
+              check: async request => track(circuits.check(request)),
+              prove: async request => track(circuits.prove(request)),
+            },
+            withProvingErrorDetails,
+          );
           try {
-            return await Effect.runPromise(
-              service
-                .prove(transaction)
-                .pipe(Effect.mapError(withProvingErrorDetails)),
-            );
+            return await service.prove(transaction, version);
+          } catch (error) {
+            if (error instanceof ProvingError)
+              throw withProvingErrorDetails(error);
+            throw error;
           } finally {
             // SDK failure may interrupt sibling effects without cancelling their
             // native promises. Keep the group active until those jobs settle.

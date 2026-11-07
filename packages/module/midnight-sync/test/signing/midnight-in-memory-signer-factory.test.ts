@@ -126,7 +126,12 @@ describe('MidnightInMemorySignerFactory', () => {
 
 it('passes the instance registry to data signers and rejects a removed account', async () => {
   const engine = {
-    signData: vi.fn(() => of({ signature: 'aa', verifyingKey: 'bb' })),
+    signData: vi.fn(() =>
+      of({
+        signature: { tag: 'schnorr', value: 'aa' },
+        verifyingKey: { tag: 'schnorr', value: 'bb' },
+      }),
+    ),
   } as unknown as MidnightWallet;
   const registry = new BehaviorSubject<MidnightWalletsByAccountId>({
     [mockAccountId]: engine,

@@ -78,6 +78,7 @@ const createMockTxHistoryEntry = (
   const { createdUtxos = [], spentUtxos = [], ...rest } = overrides;
   return {
     hash: 'hash1',
+    lifecycle: { status: 'finalized' },
     protocolVersion: 1,
     identifiers: [],
     timestamp: mockDate,
@@ -110,6 +111,7 @@ describe('updateActivities', () => {
     const activities = [
       createMockTxHistoryEntry({
         hash: 'hash1',
+        lifecycle: { status: 'finalized' },
         createdUtxos: [unshieldedUtxo],
       }),
       createMockTxHistoryEntry({
@@ -183,6 +185,7 @@ describe('updateActivities', () => {
               a: [
                 createMockTxHistoryEntry({
                   hash: 'hash1',
+                  lifecycle: { status: 'finalized' },
                   createdUtxos,
                   spentUtxos,
                 }),
@@ -262,6 +265,7 @@ describe('updateActivities', () => {
               a: [
                 createMockTxHistoryEntry({
                   hash: 'hash1',
+                  lifecycle: { status: 'finalized' },
                   createdUtxos,
                   spentUtxos,
                 }),
@@ -742,7 +746,7 @@ describe('loadActivityDetails', () => {
                   accountId,
                   txHistoryEntry,
                   networkId: NetworkId.NetworkId.Preview,
-                }),
+                })!,
                 address: resolvedAddress,
                 fee: '50',
               },

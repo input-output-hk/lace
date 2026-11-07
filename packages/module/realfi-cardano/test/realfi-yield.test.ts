@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { fetchStakingYield } from '../src/realfi-apy';
 import {
   displayableApy,
-  fetchStakingYield,
   fetchVaultRate,
   setCachedEarnedUsdPerSusdr,
   setCachedPendingUnstakeBaseUnits,
@@ -11,6 +11,12 @@ import {
 } from '../src/realfi-yield';
 
 const API_URL = 'https://api.preview.realfi.co/graphql';
+const sdk = vi.hoisted(() => ({ getSusdrAPY: vi.fn(), create: vi.fn() }));
+vi.mock('@realfi-co/realfi-partner-sdk', () => ({
+  RealfiApi: {
+    create: sdk.create.mockReturnValue({ getSusdrAPY: sdk.getSusdrAPY }),
+  },
+}));
 const NOW_MS = 1_756_100_000_000;
 
 const stubInputs = (
@@ -133,8 +139,8 @@ describe('displayableApy', () => {
     expect(displayableApy(0)).toBe(0);
   });
 
-  it('hides a negative APY and an unknown one', () => {
-    expect(displayableApy(-0.314)).toBeUndefined();
+  it('preserves a negative historical APY and hides an unknown one', () => {
+    expect(displayableApy(-0.314)).toBe(-0.314);
     expect(displayableApy(undefined)).toBeUndefined();
   });
 
@@ -146,32 +152,28 @@ describe('displayableApy', () => {
 });
 
 describe('fetchStakingYield', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
+  it.each([0.0925, 0, -0.0347])(
+    'uses the SDK 30-day net return unchanged: %s',
+    async apy => {
+      sdk.getSusdrAPY.mockResolvedValue(apy);
+      expect(await fetchStakingYield(API_URL)).toEqual({ apy });
+      expect(sdk.create).toHaveBeenCalledWith(
+        expect.objectContaining({ realfiUrl: API_URL }),
+      );
+      expect(sdk.getSusdrAPY).toHaveBeenCalledWith('30d');
+    },
+  );
+
+  it('reports absent APY when the SDK read fails', async () => {
+    sdk.getSusdrAPY.mockRejectedValue(new Error('history unavailable'));
+    expect(await fetchStakingYield(API_URL)).toBeUndefined();
   });
 
-  it('reports no yield when the ratio history is malformed', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(
-        async () =>
-          ({
-            ok: true,
-            status: 200,
-            json: async () => ({
-              data: {
-                vaultRatioHistory: {
-                  ratioHistory: [
-                    { ratio: 'not-a-number', unixMilli: '0', partial: false },
-                    { ratio: '1001800', unixMilli: '86400000', partial: false },
-                  ],
-                },
-              },
-            }),
-          } as never),
-      ),
-    );
-
+  it.each([NaN, Infinity])('rejects non-finite SDK APY: %s', async apy => {
+    sdk.getSusdrAPY.mockResolvedValue(apy);
     expect(await fetchStakingYield(API_URL)).toBeUndefined();
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 });

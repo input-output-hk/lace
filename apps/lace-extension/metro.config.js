@@ -199,6 +199,7 @@ const patchNxConfig = nxConfig => {
     const midnightBlackList = [
       './workaround-for-importing-midnight-ledger',
       '@midnight-ntwrk/ledger-v8',
+      '@midnightntwrk/ledger-v9',
       // Local proving runs in the webpack-bundled service worker. Metro's
       // tab UI must not import the engine's WebAssembly binary.
       '@midnight-ntwrk/zkir-v2',

@@ -1,6 +1,8 @@
 import { wasmProofActivities } from '@lace-lib/vendor/wasm-proof-backend';
 import { createWasmCircuitProvider } from '@lace-lib/vendor/wasm-proof-compute';
 import { createWasmProofServerAccess } from '@lace-lib/vendor/wasm-proof-server';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ProofActivity } from '@lace-lib/vendor/wasm-proof-backend';
@@ -13,7 +15,14 @@ const mocks = vi.hoisted(() => ({
   prove: vi.fn<(...args: unknown[]) => Promise<Uint8Array>>(),
   check: vi.fn<(...args: unknown[]) => Promise<(bigint | undefined)[]>>(),
 }));
-vi.mock('@midnight-ntwrk/zkir-v2', () => ({
+// Mock the vendor's pinned prover, which can differ from the root's legacy copy.
+const vendorProver = await vi.hoisted(async () => {
+  const { createRequire } = await import('node:module');
+  return createRequire(
+    new URL('../../../../lib/vendor/package.json', import.meta.url),
+  ).resolve('@midnight-ntwrk/zkir-v2');
+});
+vi.mock(vendorProver, () => ({
   provingProvider: (keys: KeyMaterialProvider) => ({
     prove: async (preimage: Uint8Array, location: string, binding?: bigint) =>
       mocks.prove(
@@ -26,6 +35,16 @@ vi.mock('@midnight-ntwrk/zkir-v2', () => ({
       mocks.check(preimage, await keys.lookupKey(location)),
   }),
 }));
+
+const proofTransaction = (fixture: {
+  prove: (provider: ProvingProvider) => Promise<unknown>;
+}) => {
+  const transaction = Transaction.fromParts('undeployed');
+  vi.spyOn(transaction, 'prove').mockImplementation(
+    fixture.prove as typeof transaction.prove,
+  );
+  return transaction;
+};
 
 describe('WASM proof backend', () => {
   const builtIn = {
@@ -91,15 +110,18 @@ describe('WASM proof backend', () => {
     });
     for (const activity of latest) wasmProofActivities.dismiss(activity.id);
     const access = createWasmProofServerAccess(createWasmCircuitProvider(keys));
-    await access.provingService.prove({
-      prove: async (provider: ProvingProvider) => {
-        await Promise.all([
-          provider.prove(preimage, 'midnight/zswap/output', 3n),
-          provider.prove(preimage, 'midnight/zswap/spend', 3n),
-        ]);
-        return new Uint8Array([9]);
-      },
-    } as never);
+    await access.provingService.prove(
+      proofTransaction({
+        prove: async (provider: ProvingProvider) => {
+          await Promise.all([
+            provider.prove(preimage, 'midnight/zswap/output', 3n),
+            provider.prove(preimage, 'midnight/zswap/spend', 3n),
+          ]);
+          return new Uint8Array([9]);
+        },
+      }),
+      ProtocolVersion.MinSupportedVersion as never,
+    );
     expect(latest).toEqual([
       expect.objectContaining({ kind: 'transaction', status: 'succeeded' }),
     ]);
@@ -126,15 +148,18 @@ describe('WASM proof backend', () => {
       .mockImplementationOnce(async () => failing)
       .mockImplementationOnce(async () => sibling);
     const access = createWasmProofServerAccess(createWasmCircuitProvider(keys));
-    const result = access.provingService.prove({
-      prove: async (provider: ProvingProvider) => {
-        await Promise.all([
-          provider.prove(preimage, 'midnight/zswap/output', 3n),
-          provider.prove(preimage, 'midnight/zswap/spend', 3n),
-        ]);
-        return new Uint8Array([9]);
-      },
-    } as never);
+    const result = access.provingService.prove(
+      proofTransaction({
+        prove: async (provider: ProvingProvider) => {
+          await Promise.all([
+            provider.prove(preimage, 'midnight/zswap/output', 3n),
+            provider.prove(preimage, 'midnight/zswap/spend', 3n),
+          ]);
+          return new Uint8Array([9]);
+        },
+      }),
+      ProtocolVersion.MinSupportedVersion as never,
+    );
     const rejected = expect(result).rejects.toThrow(
       'Failed to prove transaction',
     );
@@ -160,7 +185,10 @@ describe('WASM proof backend', () => {
       ),
     };
     await expect(
-      access.provingService.prove(transaction as never),
+      access.provingService.prove(
+        proofTransaction(transaction),
+        ProtocolVersion.MinSupportedVersion,
+      ),
     ).resolves.toEqual(new Uint8Array([9]));
     expect(keys.lookupKey).toHaveBeenCalledWith('midnight/zswap/output');
     expect(mocks.prove).toHaveBeenCalledWith(preimage, builtIn, 3n, params);
@@ -173,10 +201,13 @@ describe('WASM proof backend', () => {
     mocks.prove.mockRejectedValueOnce(new Error(message));
     const access = createWasmProofServerAccess(createWasmCircuitProvider(keys));
     await expect(
-      access.provingService.prove({
-        prove: async (provider: ProvingProvider) =>
-          provider.prove(preimage, 'midnight/zswap/output'),
-      } as never),
+      access.provingService.prove(
+        proofTransaction({
+          prove: async (provider: ProvingProvider) =>
+            provider.prove(preimage, 'midnight/zswap/output'),
+        }),
+        ProtocolVersion.MinSupportedVersion as never,
+      ),
     ).rejects.toThrow(`Failed to prove transaction: ${message}`);
   });
 
@@ -188,10 +219,13 @@ describe('WASM proof backend', () => {
     );
     const access = createWasmProofServerAccess(createWasmCircuitProvider(keys));
     await expect(
-      access.provingService.prove({
-        prove: async (provider: ProvingProvider) =>
-          provider.prove(preimage, 'midnight/zswap/output'),
-      } as never),
+      access.provingService.prove(
+        proofTransaction({
+          prove: async (provider: ProvingProvider) =>
+            provider.prove(preimage, 'midnight/zswap/output'),
+        }),
+        ProtocolVersion.MinSupportedVersion as never,
+      ),
     ).rejects.toThrow('Failed to prove transaction: Download failed at [URL]');
   });
 

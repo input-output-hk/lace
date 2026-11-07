@@ -2,6 +2,10 @@ import { toUnshieldedTokenType } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { BigNumber } from '@lace-lib/util';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
+import {
+  ProtocolVersion,
+  WalletTransaction,
+} from '@midnightntwrk/wallet-sdk-abstractions';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -40,6 +44,7 @@ describe('headless and extension preparation conformance', () => {
         const headless = construct({ networkId, transfers });
         const extension = buildTxDependencies.buildTransaction({
           networkId,
+          protocolVersion: ProtocolVersion.MinSupportedVersion,
           nightUtxos: [],
           nightVerifyingKey: '',
           blockchainSpecificSendFlowData: { flowType: 'send' },
@@ -117,7 +122,11 @@ describe('headless and extension preparation conformance', () => {
       estimateTransactionFee: vi.fn(() => of(2n)),
       calculateTransactionFee: vi.fn(() => of(3n)),
     };
-    const tx = ledger.Transaction.fromParts(networkId);
+    const tx = WalletTransaction.adopt(
+      'Unproven',
+      ledger.Transaction.fromParts(networkId),
+      ProtocolVersion.MinSupportedVersion,
+    );
     expect(
       await firstValueFrom(estimatePreparedMidnightFee(wallet, tx, options)),
     ).toBe(fee);

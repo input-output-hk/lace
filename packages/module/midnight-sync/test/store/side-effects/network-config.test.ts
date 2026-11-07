@@ -125,7 +125,7 @@ describe('createApplyNetworkDefaultsMiddleware', () => {
       }),
     );
     expect(store.getState().midnightContext.supportedNetworksIds).toHaveLength(
-      7,
+      8,
     );
 
     store.dispatch({ type: 'persist/PERSIST' });
@@ -156,7 +156,7 @@ describe('createApplyNetworkDefaultsMiddleware', () => {
 
     expect(dispatched).toEqual(['persist/PERSIST']);
     expect(store.getState().midnightContext.supportedNetworksIds).toHaveLength(
-      7,
+      8,
     );
   });
 });

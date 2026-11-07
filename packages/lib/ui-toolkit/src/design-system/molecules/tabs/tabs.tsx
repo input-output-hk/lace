@@ -9,7 +9,7 @@ import { StyleSheet, View, Pressable } from 'react-native';
 
 import { useTheme, radius, spacing } from '../../../design-tokens';
 import { getShadowStyle } from '../../../design-tokens/tokens/shadows';
-import { Text, BlurView, Loader } from '../../atoms';
+import { Text, BlurView, Loader, useIsWebBlurEnabled } from '../../atoms';
 import { isWeb } from '../../util';
 
 import type { Theme } from '../../../design-tokens';
@@ -47,9 +47,10 @@ export const Tabs = <Value extends number | string>({
   loadingTabIndex,
 }: TabsProps<Value>) => {
   const { theme } = useTheme();
+  const isWebBlurEnabled = useIsWebBlurEnabled();
   const isCompact = size === 'compact';
   const styles = {
-    ...commonStyles(theme),
+    ...commonStyles(theme, isWebBlurEnabled),
     ...getHorizontalTabsStyles(theme, isCompact),
   };
 
@@ -223,7 +224,11 @@ const VerticalTabs = <Value extends number | string>({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const { theme } = useTheme();
-  const styles = { ...commonStyles(theme), ...getVerticalTabsStyles(theme) };
+  const isWebBlurEnabled = useIsWebBlurEnabled();
+  const styles = {
+    ...commonStyles(theme, isWebBlurEnabled),
+    ...getVerticalTabsStyles(theme),
+  };
 
   useEffect(() => {
     if (value !== undefined) {
@@ -332,7 +337,10 @@ const VerticalTabs = <Value extends number | string>({
   );
 };
 
-const commonStyles = (theme: Theme) => {
+const commonStyles = (theme: Theme, isWebBlurEnabled: boolean) => {
+  // Shadow tokens include a backdrop filter independently of BlurView.
+  const disabledWebBlur =
+    isWeb && !isWebBlurEnabled ? { backdropFilter: 'none' } : {};
   return StyleSheet.create({
     container: {
       width: '100%',
@@ -340,15 +348,18 @@ const commonStyles = (theme: Theme) => {
     selectedTab: {
       backgroundColor: theme.background.tertiary,
       ...getShadowStyle({ theme, variant: 'elevated' }),
+      ...disabledWebBlur,
     },
     hoveredTab: {
       ...getShadowStyle({ theme, variant: 'elevated' }),
+      ...disabledWebBlur,
     },
     pressedTab: {
       backgroundColor: isWeb
         ? theme.background.primary
         : theme.background.secondary,
       ...getShadowStyle({ theme, variant: 'inset' }),
+      ...disabledWebBlur,
       opacity: !isWeb ? 0.8 : 1,
     },
     tabText: {

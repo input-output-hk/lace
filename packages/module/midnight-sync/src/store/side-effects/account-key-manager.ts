@@ -11,6 +11,7 @@ import {
   Subject,
   switchMap,
   take,
+  takeUntil,
   tap,
   throwError,
   timer,
@@ -51,6 +52,7 @@ export const createAccountKeyManager = (
 
   // Subject to signal each key access (for resetting idle timer)
   const access$ = new Subject<void>();
+  const destroyed$ = new Subject<void>();
 
   // Track pending request to share among concurrent subscribers
   let pendingRequest$: Observable<AccountKeys> | null = null;
@@ -75,6 +77,7 @@ export const createAccountKeyManager = (
 
     pendingRequest$ = defer(() => requestKeys()).pipe(
       take(1),
+      takeUntil(destroyed$),
       tap(keys => {
         cache$.next(keys);
         access$.next(); // Start idle timer
@@ -127,6 +130,9 @@ export const createAccountKeyManager = (
   const destroy = (): void => {
     if (isDestroyed) return;
     isDestroyed = true;
+    destroyed$.next();
+    destroyed$.complete();
+    pendingRequest$ = null;
 
     // Clear cached keys
     clearCache();

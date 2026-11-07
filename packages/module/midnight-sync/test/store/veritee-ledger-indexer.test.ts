@@ -10,7 +10,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 
-import { createTemenosLedgerIndexerResolver } from '../../src/store/temenos-ledger-indexer';
+import { createVeriteeLedgerIndexerResolver } from '../../src/store/veritee-ledger-indexer';
 
 const resolvedConfig = (preprod?: string) =>
   midnightContextSelectors.midnightContext.selectNetworksConfig({
@@ -25,7 +25,7 @@ const resolvedConfig = (preprod?: string) =>
     },
   });
 
-describe('Temenos ledger indexer resolution', () => {
+describe('Veritee ledger indexer resolution', () => {
   it.each([MidnightSDKNetworkIds.Preview, MidnightSDKNetworkIds.MainNet])(
     'uses preprod defaults even when the %s wallet indexer differs',
     async networkId => {
@@ -33,7 +33,7 @@ describe('Temenos ledger indexer resolution', () => {
       expect(config[networkId].indexerAddress).not.toBe(
         config.preprod.indexerAddress,
       );
-      const resolve = createTemenosLedgerIndexerResolver(
+      const resolve = createVeriteeLedgerIndexerResolver(
         new BehaviorSubject(config),
       );
       await expect(resolve()).resolves.toBe(
@@ -44,7 +44,7 @@ describe('Temenos ledger indexer resolution', () => {
 
   it('reads subsequent PostHog changes and preserves authentication parameters', async () => {
     const config$ = new BehaviorSubject(resolvedConfig());
-    const resolve = createTemenosLedgerIndexerResolver(config$);
+    const resolve = createVeriteeLedgerIndexerResolver(config$);
     await expect(resolve()).resolves.toBe(
       DEFAULT_NETWORKS_CONFIG.preprod.indexerAddress,
     );

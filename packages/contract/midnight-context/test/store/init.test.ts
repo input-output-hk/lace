@@ -4,7 +4,7 @@ import {
   DEFAULT_LOCAL_PROOF_SERVER_URL,
   defaultLocalProofServerMode,
   MidnightSDKNetworkIds,
-  TEMENOS_PROOF_SERVER_MODES,
+  VERITEE_PROOF_SERVER_MODES,
 } from '../../src/const';
 import store from '../../src/store/init';
 
@@ -91,7 +91,7 @@ describe('Midnight persistence migrations', () => {
 
   it.each([
     ['local', defaultLocalProofServerMode],
-    ['Temenos', TEMENOS_PROOF_SERVER_MODES.preview],
+    ['Veritee', VERITEE_PROOF_SERVER_MODES.preview],
   ] as const)(
     'preserves a new-format %s selection from a pre-release v12 profile',
     async (_provider, proofServer) => {
@@ -130,16 +130,16 @@ describe('Midnight persistence migrations', () => {
     const state = {
       _persist: { version: 14, rehydrated: true },
       userNetworksConfigOverrides: {
-        preview: { proofServer: TEMENOS_PROOF_SERVER_MODES.preview },
+        preview: { proofServer: VERITEE_PROOF_SERVER_MODES.preview },
       },
     };
     expect(await migrate(state)).toBe(state);
   });
 });
 
-describe('Temenos deployment migration', () => {
+describe('Veritee deployment migration', () => {
   it('updates old mainnet and preview TEE selections and preserves other overrides', async () => {
-    const oldMode = TEMENOS_PROOF_SERVER_MODES.preprod;
+    const oldMode = VERITEE_PROOF_SERVER_MODES.preprod;
     const state = {
       _persist: { version: 13, rehydrated: true },
       userNetworksConfigOverrides: {
@@ -151,11 +151,11 @@ describe('Temenos deployment migration', () => {
     await migrate(state);
     expect(state.userNetworksConfigOverrides).toEqual({
       mainnet: {
-        proofServer: TEMENOS_PROOF_SERVER_MODES.mainnet,
+        proofServer: VERITEE_PROOF_SERVER_MODES.mainnet,
         nodeAddress: 'https://node.example',
       },
       preprod: { proofServer: oldMode },
-      preview: { proofServer: TEMENOS_PROOF_SERVER_MODES.preview },
+      preview: { proofServer: VERITEE_PROOF_SERVER_MODES.preview },
     });
   });
 
@@ -168,10 +168,10 @@ describe('Temenos deployment migration', () => {
         label: 'Other provider',
       },
       {
-        ...TEMENOS_PROOF_SERVER_MODES[networkId]!,
+        ...VERITEE_PROOF_SERVER_MODES[networkId]!,
         url: 'https://unknown.example',
       },
-      TEMENOS_PROOF_SERVER_MODES[networkId]!,
+      VERITEE_PROOF_SERVER_MODES[networkId]!,
     ])('preserves other selections: %j', async proofServer => {
       const state = {
         _persist: { version: 13, rehydrated: true },

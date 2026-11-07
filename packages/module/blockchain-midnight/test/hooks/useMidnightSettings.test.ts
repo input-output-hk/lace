@@ -246,7 +246,7 @@ describe('useMidnightSettings', () => {
             {
               kind: 'tee-delegated',
               url: 'https://api.proofserver.example.com',
-              label: 'Temenos (remote TEE proof server)',
+              label: 'Veritee (remote TEE proof server)',
             },
             {
               kind: 'delegated',
@@ -269,7 +269,7 @@ describe('useMidnightSettings', () => {
       expect(
         sections[0]?.modes.map(mode => ('label' in mode ? mode.label : '')),
       ).toEqual([
-        'Temenos (remote TEE proof server)',
+        'Veritee (remote TEE proof server)',
         'Example Provider',
         'Midnight Foundation',
       ]);

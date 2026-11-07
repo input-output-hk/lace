@@ -1,3 +1,4 @@
+import { ActivityType } from '@lace-contract/activities';
 import { Timestamp } from '@lace-lib/util';
 import {
   EMPTY,
@@ -39,8 +40,24 @@ export const mapTxHistoryEntryToActivity = ({
   accountId: AccountId;
   txHistoryEntry: WalletEntry;
   networkId: MidnightSDKNetworkId;
-}): Activity => {
-  const { hash, timestamp, status } = txHistoryEntry;
+}): Activity | undefined => {
+  const { hash, lifecycle } = txHistoryEntry;
+  const timestamp =
+    txHistoryEntry.timestamp ??
+    (lifecycle.status === 'pending'
+      ? lifecycle.submittedAt
+      : lifecycle.status === 'rejected'
+      ? lifecycle.rejectedAt
+      : lifecycle.finalizedBlock?.timestamp);
+  // A legacy finalized row can have no date at all. Wait for metadata instead
+  // of fabricating an epoch/current date in the shared activity list.
+  if (!timestamp || !Number.isFinite(timestamp.getTime())) return undefined;
+  const status =
+    lifecycle.status === 'pending'
+      ? undefined
+      : lifecycle.status === 'rejected'
+      ? 'FAILURE'
+      : txHistoryEntry.status;
   const createdUtxos = txHistoryEntry.unshielded?.createdUtxos ?? [];
   const spentUtxos = txHistoryEntry.unshielded?.spentUtxos ?? [];
   const { type, tokenBalanceChanges } = deriveUnshieldedActivity({
@@ -52,8 +69,8 @@ export const mapTxHistoryEntryToActivity = ({
   return {
     accountId,
     activityId: hash,
-    type,
-    timestamp: Timestamp(timestamp?.getTime() ?? 0),
+    type: lifecycle.status === 'pending' ? ActivityType.Pending : type,
+    timestamp: Timestamp(timestamp.getTime()),
     tokenBalanceChanges,
   };
 };
@@ -66,7 +83,7 @@ const mapTxHistoryEntryToActivityDetail = ({
   accountId: AccountId;
   txHistoryEntry: WalletEntry;
   networkId: MidnightSDKNetworkId;
-}): ActivityDetail => {
+}): ActivityDetail | undefined => {
   const createdUtxos = txHistoryEntry.unshielded?.createdUtxos ?? [];
   const spentUtxos = txHistoryEntry.unshielded?.spentUtxos ?? [];
   const activity = mapTxHistoryEntryToActivity({
@@ -74,6 +91,7 @@ const mapTxHistoryEntryToActivityDetail = ({
     txHistoryEntry,
     networkId,
   });
+  if (!activity) return undefined;
   const address = getAddressFromUtxos(createdUtxos, spentUtxos);
   return {
     ...activity,
@@ -87,12 +105,7 @@ type WalletsDiff = {
   added: MidnightWallet[];
 };
 
-/**
- * Whether confirmed rows with no unshielded section are shown. They carry no
- * readable value or date, so they render as amount-less "unknown" / 1970 rows;
- * hiding them is the default and the flag restores the earlier behaviour while
- * the product decision is open.
- */
+/** Whether history rows without unshielded value changes are shown. */
 const showShieldedOnlyRows$ = (
   stateObservables: Parameters<SideEffect>[1],
 ): Observable<boolean> =>
@@ -128,40 +141,47 @@ export const updateActivities: SideEffect = (
         wallet.transactionHistory$,
         showShieldedOnlyRows$(stateObservables),
       ]).pipe(
-        map(([transactionHistory, showShieldedOnlyRows]) => ({
-          activities: transactionHistory
-            .filter(
-              entry =>
-                showShieldedOnlyRows || entryHasUnshieldedActivity(entry),
-            )
-            .map(txHistoryEntry =>
-              mapTxHistoryEntryToActivity({
-                accountId: wallet.accountId,
-                txHistoryEntry,
-                networkId: wallet.networkId,
-              }),
-            ),
-          // No shipped build has ever suppressed these rows, so every upgrading
-          // user has them persisted by hash; upsert never removes, so purge them
-          // explicitly once their entry reappears in the history.
-          suppressedActivityIds: showShieldedOnlyRows
-            ? []
-            : transactionHistory
-                .filter(entry => !entryHasUnshieldedActivity(entry))
-                .map(entry => entry.hash),
-        })),
-        mergeMap(({ activities, suppressedActivityIds }) => [
+        map(([transactionHistory, showShieldedOnlyRows]) => {
+          const canonicalIds = new Set(
+            transactionHistory.map(entry => entry.hash),
+          );
+          const activities: Activity[] = [];
+          const suppressedActivityIds: string[] = [];
+          for (const txHistoryEntry of transactionHistory) {
+            const activity =
+              showShieldedOnlyRows || entryHasUnshieldedActivity(txHistoryEntry)
+                ? mapTxHistoryEntryToActivity({
+                    accountId: wallet.accountId,
+                    txHistoryEntry,
+                    networkId: wallet.networkId,
+                  })
+                : undefined;
+            if (activity) activities.push(activity);
+            // Upsert alone would retain an old optimistic row when a later
+            // entry has no displayable metadata or is hidden by the feature gate.
+            else suppressedActivityIds.push(txHistoryEntry.hash);
+          }
+          return {
+            activities,
+            suppressedActivityIds,
+            aliasActivityIds: transactionHistory
+              .flatMap(entry => entry.identifiers)
+              .filter(id => !canonicalIds.has(id)),
+          };
+        }),
+        mergeMap(({ activities, suppressedActivityIds, aliasActivityIds }) => [
           actions.activities.upsertActivities({
             accountId: wallet.accountId,
             activities,
           }),
-          // Skipped when nothing is suppressed (always, with the flag on) so a
-          // steady sync does not dispatch a no-op on every history emission.
-          ...(suppressedActivityIds.length > 0
+          // Avoid a no-op removal on steady history emissions.
+          ...(suppressedActivityIds.length + aliasActivityIds.length > 0
             ? [
                 actions.activities.removeActivities({
                   accountId: wallet.accountId,
-                  activityIds: suppressedActivityIds,
+                  activityIds: [
+                    ...new Set([...suppressedActivityIds, ...aliasActivityIds]),
+                  ],
                 }),
               ]
             : []),

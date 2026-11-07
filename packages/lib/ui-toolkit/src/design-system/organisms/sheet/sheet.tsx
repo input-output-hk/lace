@@ -30,6 +30,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spacing, useTheme } from '../../../design-tokens';
 import {
   Avatar,
+  WebBlurProvider,
   Button,
   Column,
   Divider,
@@ -123,7 +124,7 @@ const SheetContainer = ({ children, style, ...props }: ViewProps) => {
 
   return (
     <SheetGestureRoot {...props} style={containerStyle}>
-      {children}
+      <WebBlurProvider enabled={false}>{children}</WebBlurProvider>
     </SheetGestureRoot>
   );
 };
@@ -166,54 +167,59 @@ const Header = ({
     // Unconditional, unlike the other slots: this root predates the Android
     // fix and every platform's header has always had it.
     <GestureHandlerRootView testID={testID} style={styles.headerContainer}>
-      <Row alignItems="center" justifyContent="center" style={styles.headerRow}>
-        {leftIconOnPress && (
-          <IconButton.Static
-            icon={<Icon name="CaretLeft" size={24} />}
-            onPress={leftIconOnPress}
-            containerStyle={styles.leftIcon}
-            testID={`${testID}-left-icon`}
-          />
-        )}
+      <WebBlurProvider enabled={false}>
         <Row
           alignItems="center"
           justifyContent="center"
-          style={styles.titleContainer}
-          gap={spacing.S}>
-          {!!headerIcon && <Icon name={headerIcon} />}
-          {!!headerAvatar && (
-            <Avatar
-              size={AVATAR_SIZE}
-              shape="rounded"
-              content={avatarContent}
+          style={styles.headerRow}>
+          {leftIconOnPress && (
+            <IconButton.Static
+              icon={<Icon name="CaretLeft" size={24} />}
+              onPress={leftIconOnPress}
+              containerStyle={styles.leftIcon}
+              testID={`${testID}-left-icon`}
             />
           )}
-          <Text.S numberOfLines={1} align="center" testID={`${testID}-title`}>
-            {title}
-          </Text.S>
+          <Row
+            alignItems="center"
+            justifyContent="center"
+            style={styles.titleContainer}
+            gap={spacing.S}>
+            {!!headerIcon && <Icon name={headerIcon} />}
+            {!!headerAvatar && (
+              <Avatar
+                size={AVATAR_SIZE}
+                shape="rounded"
+                content={avatarContent}
+              />
+            )}
+            <Text.S numberOfLines={1} align="center" testID={`${testID}-title`}>
+              {title}
+            </Text.S>
+          </Row>
+          {showCloseButton && (
+            <IconButton.Static
+              icon={<Icon name="Cancel" size={20} />}
+              onPress={onClosePress}
+              containerStyle={headerStyles.closeButton}
+              testID={'side-sheet-close-button'}
+            />
+          )}
         </Row>
-        {showCloseButton && (
-          <IconButton.Static
-            icon={<Icon name="Cancel" size={20} />}
-            onPress={onClosePress}
-            containerStyle={headerStyles.closeButton}
-            testID={'side-sheet-close-button'}
-          />
+        {showDivider && (
+          <View style={styles.divider}>
+            <Divider />
+          </View>
         )}
-      </Row>
-      {showDivider && (
-        <View style={styles.divider}>
-          <Divider />
-        </View>
-      )}
-      {subtitle && (
-        <Text.S
-          align="center"
-          style={styles.subtitle}
-          testID={`${testID}-subtitle`}>
-          {subtitle}
-        </Text.S>
-      )}
+        {subtitle && (
+          <Text.S
+            align="center"
+            style={styles.subtitle}
+            testID={`${testID}-subtitle`}>
+            {subtitle}
+          </Text.S>
+        )}
+      </WebBlurProvider>
     </GestureHandlerRootView>
   );
 };
@@ -265,47 +271,49 @@ const Footer = ({
 
   return (
     <Column style={footerStyles.footer} gap={spacing.S} testID={testID}>
-      {showDivider && <Divider />}
-      {titleRow}
-      <ButtonsContainer
-        alignItems={vertical ? 'stretch' : 'center'}
-        gap={spacing.S}>
-        {!vertical && secondaryButton && (
-          <SecondaryButtonComponent
-            flex={1}
-            label={secondaryButton.label}
-            onPress={secondaryButton.onPress}
-            loading={secondaryButton.loading}
-            disabled={secondaryButton.disabled}
-            preIconName={secondaryButton.preIconName}
-            iconColor={secondaryButton.iconColor}
-            testID={secondaryButton.testID}
-          />
-        )}
-        {primaryButton && (
-          <PrimaryButtonComponent
-            flex={vertical ? undefined : 1}
-            label={primaryButton.label}
-            onPress={primaryButton.onPress}
-            loading={primaryButton.loading}
-            disabled={primaryButton.disabled}
-            preIconName={primaryButton.preIconName}
-            iconColor={primaryButton.iconColor}
-            testID={primaryButton.testID}
-          />
-        )}
-        {vertical && secondaryButton && (
-          <SecondaryButtonComponent
-            label={secondaryButton.label}
-            onPress={secondaryButton.onPress}
-            loading={secondaryButton.loading}
-            disabled={secondaryButton.disabled}
-            preIconName={secondaryButton.preIconName}
-            iconColor={secondaryButton.iconColor}
-            testID={secondaryButton.testID}
-          />
-        )}
-      </ButtonsContainer>
+      <WebBlurProvider enabled={false}>
+        {showDivider && <Divider />}
+        {titleRow}
+        <ButtonsContainer
+          alignItems={vertical ? 'stretch' : 'center'}
+          gap={spacing.S}>
+          {!vertical && secondaryButton && (
+            <SecondaryButtonComponent
+              flex={1}
+              label={secondaryButton.label}
+              onPress={secondaryButton.onPress}
+              loading={secondaryButton.loading}
+              disabled={secondaryButton.disabled}
+              preIconName={secondaryButton.preIconName}
+              iconColor={secondaryButton.iconColor}
+              testID={secondaryButton.testID}
+            />
+          )}
+          {primaryButton && (
+            <PrimaryButtonComponent
+              flex={vertical ? undefined : 1}
+              label={primaryButton.label}
+              onPress={primaryButton.onPress}
+              loading={primaryButton.loading}
+              disabled={primaryButton.disabled}
+              preIconName={primaryButton.preIconName}
+              iconColor={primaryButton.iconColor}
+              testID={primaryButton.testID}
+            />
+          )}
+          {vertical && secondaryButton && (
+            <SecondaryButtonComponent
+              label={secondaryButton.label}
+              onPress={secondaryButton.onPress}
+              loading={secondaryButton.loading}
+              disabled={secondaryButton.disabled}
+              preIconName={secondaryButton.preIconName}
+              iconColor={secondaryButton.iconColor}
+              testID={secondaryButton.testID}
+            />
+          )}
+        </ButtonsContainer>
+      </WebBlurProvider>
     </Column>
   );
 };
@@ -460,13 +468,15 @@ const Scroll = (props: SheetScrollProps) => {
       {/* Inside the ScrollView, never around it: a wrapping root has to pick one
           sizing and the detents need opposite ones — 'auto' collapses under its
           `flex: 1`, `scrollable` clips without it. See SheetGestureRoot. */}
-      {isAndroid ? (
-        <GestureHandlerRootView style={styles.gestureRoot}>
-          {children}
-        </GestureHandlerRootView>
-      ) : (
-        children
-      )}
+      <WebBlurProvider enabled={false}>
+        {isAndroid ? (
+          <GestureHandlerRootView style={styles.gestureRoot}>
+            {children}
+          </GestureHandlerRootView>
+        ) : (
+          children
+        )}
+      </WebBlurProvider>
     </ScrollView>
   );
 };

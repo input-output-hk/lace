@@ -37,6 +37,11 @@ const mockMidnightWallet = {
   balanceUnprovenTransaction: vi.fn(),
 } as unknown as MidnightWallet;
 
+// Pipeline fixture; real handle validation is covered by v2-facade-contract.test.ts.
+vi.mock('@lace-lib/vendor/midnight-transaction-handle', () => ({
+  readMidnightTransaction: (transaction: unknown) => transaction,
+}));
+
 vi.mock('@midnight-ntwrk/ledger-v8', () => ({
   nativeToken: () => ({ raw: 'NIGHT_RAW' }),
 }));

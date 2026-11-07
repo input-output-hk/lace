@@ -4,6 +4,7 @@ import {
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { BigNumber, HexBytes } from '@lace-lib/util';
+import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
 import { nativeToken } from '@midnight-ntwrk/ledger-v8';
 import {
   DustAddress,
@@ -30,8 +31,8 @@ import type {
 } from '@lace-contract/midnight-context';
 import type { SignerAuth } from '@lace-contract/signer';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type { CombinedTokenTransfer } from '@midnightntwrk/wallet-sdk/facade';
+import type { FinalizedTx } from '@midnightntwrk/wallet-sdk-abstractions';
 import type { Observable } from 'rxjs';
 
 /**
@@ -90,8 +91,8 @@ const signWithWallet = (
     phase: 'transaction-preparing',
     status: 'started',
   });
-  const serialize = (transaction: FinalizedTransaction) => {
-    const txId = transaction.identifiers().at(-1);
+  const serialize = (transaction: FinalizedTx) => {
+    const txId = readMidnightTransaction(transaction).identifiers().at(-1);
     if (txId) trackSendSubmission(accountId, txId, onProgress);
     return { serializedTx: HexBytes.fromByteArray(transaction.serialize()) };
   };

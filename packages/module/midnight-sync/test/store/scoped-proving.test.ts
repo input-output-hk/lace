@@ -1,8 +1,8 @@
 import { midnightContextActions } from '@lace-contract/midnight-context';
 import { midnightContextReducers } from '@lace-contract/midnight-context/src/store/slice';
 import { AccountId } from '@lace-contract/wallet-repo';
-import { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
-import { EMPTY } from 'rxjs';
+import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import { expect, it, vi } from 'vitest';
 
 import { createAttestedProofServerAccess } from '../../src/store/attested-proving-service';
@@ -11,10 +11,11 @@ import {
   beginSendProofProgress,
   teeAttestationProgress$,
 } from '../../src/store/send-proof-progress';
+import { createFacadeHarness, unproven } from '../helpers/v2-facade';
 
 import type { AttestedProverProvider } from '../../src/store/attested-proving-service';
 import type * as ledger from '@midnight-ntwrk/ledger-v8';
-import type { DefaultConfiguration } from '@midnightntwrk/wallet-sdk/facade';
+import type { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
 
 // Payload encoding needs a real preimage; this test only asserts routing.
 vi.mock('@midnight-ntwrk/ledger-v8', async importOriginal => ({
@@ -54,36 +55,28 @@ it('keeps the real send reducer pending when a concurrent dApp proof completes',
   };
   const walletFinished = deferred();
   const provingStarted = deferred();
-  const finalized = {};
+  const finalized = Transaction.fromParts('undeployed').mockProve();
   // Stub the ledger's expensive proving call; the facade, attested service,
   // callback routing, subject and Redux reducer are the production code.
+  const transaction = unproven();
+  vi.spyOn(readMidnightTransaction(transaction), 'prove').mockImplementation(
+    async () => {
+      provingStarted.resolve();
+      await walletFinished.promise;
+      return { bind: () => finalized } as never;
+    },
+  );
   const recipe = {
     type: 'UNPROVEN_TRANSACTION' as const,
-    transaction: {
-      prove: async () => {
-        provingStarted.resolve();
-        await walletFinished.promise;
-        return { bind: () => finalized };
-      },
-    },
-  } as unknown as Parameters<WalletFacade['finalizeRecipe']>[0];
-  const configuration = {} as DefaultConfiguration;
+    transaction,
+    protocolVersion: transaction.protocolVersion,
+  };
   const access = createScopedProofServerAccess(onProgress =>
     createAttestedProofServerAccess(provider, onProgress),
   );
-  const wallet = await WalletFacade.init({
-    configuration,
-    shielded: () => ({ revertTransaction: vi.fn() } as never),
-    unshielded: () => ({ revertTransaction: vi.fn() } as never),
-    dust: () => ({ revertTransaction: vi.fn() } as never),
-    submissionService: () => ({} as never),
-    pendingTransactionsService: () =>
-      ({
-        state: () => EMPTY,
-        addPendingTransaction: vi.fn(async () => undefined),
-      } as never),
-    provingService: () => access.provingService,
-  });
+  const h = await createFacadeHarness();
+  h.proving.prove.mockImplementation(access.provingService.prove);
+  const wallet = h.wallet;
   try {
     const onProgress = beginSendProofProgress(AccountId('account-one'));
     const send = access.finalizeRecipe(wallet, recipe, onProgress);
@@ -96,18 +89,25 @@ it('keeps the real send reducer pending when a concurrent dApp proof completes',
     });
     expect(state).toBe(pending);
     // The dApp's facade finalization is also unscoped, not only /prove.
+    const dappTransaction = unproven();
+    vi.spyOn(
+      readMidnightTransaction(dappTransaction),
+      'prove',
+    ).mockResolvedValue({ bind: () => finalized } as never);
     await wallet.finalizeRecipe({
       type: 'UNPROVEN_TRANSACTION',
-      transaction: { prove: async () => ({ bind: () => finalized }) },
-    } as never);
+      transaction: dappTransaction,
+      protocolVersion: dappTransaction.protocolVersion,
+    });
     expect(state).toBe(pending);
     walletFinished.resolve();
-    await expect(send).resolves.toBe(finalized);
+    expect(readMidnightTransaction(await send)).toBe(finalized);
     expect(state.status).toBe('succeeded');
     expect(close).toHaveBeenCalledTimes(3);
   } finally {
     walletFinished.resolve();
     subscription.unsubscribe();
+    await wallet.stop();
   }
 });
 
@@ -131,15 +131,17 @@ it('releases a failed transaction scope for retry without retaining its observer
     .fn()
     .mockRejectedValueOnce(new Error('failed proof'))
     .mockResolvedValue({});
+  const transaction = unproven();
+  const raw = readMidnightTransaction(transaction);
+  vi.spyOn(raw, 'prove').mockImplementation(prove);
   const recipe = {
-    type: 'UNPROVEN_TRANSACTION',
-    transaction: { prove },
-  } as unknown as Extract<
-    Parameters<WalletFacade['finalizeRecipe']>[0],
-    { type: 'UNPROVEN_TRANSACTION' }
-  >;
+    type: 'UNPROVEN_TRANSACTION' as const,
+    transaction,
+    protocolVersion: transaction.protocolVersion,
+  };
   const facade = {
-    finalizeRecipe: async () => access.provingService.prove(recipe.transaction),
+    finalizeRecipe: async () =>
+      access.provingService.prove(raw as never, transaction.protocolVersion),
   } as unknown as WalletFacade;
   const first = vi.fn();
   const second = vi.fn();

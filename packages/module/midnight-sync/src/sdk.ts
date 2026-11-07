@@ -97,11 +97,11 @@ export {
   normalizeMidnightTransfers,
   estimatePreparedMidnightFee,
 } from './store/prepare-midnight-tx';
-export { createTemenosAttestedProver } from '@lace-lib/vendor/temenos-attested-prover';
+export { createVeriteeAttestedProver } from '@lace-lib/vendor/veritee-attested-prover';
 export type {
-  TemenosTrustRoots,
-  TemenosVerifier,
-} from '@lace-lib/vendor/temenos-attested-prover';
+  VeriteeTrustRoots,
+  VeriteeVerifier,
+} from '@lace-lib/vendor/veritee-attested-prover';
 export type {
   AttestedProverProvider,
   AttestedProvingSession,

@@ -23,6 +23,14 @@ const workflow = parse(
     'utf8',
   ),
 );
+const vendorWorkflow = parse(
+  await readFile(
+    fileURLToPath(
+      new URL('../../.github/workflows/vendor-check.yml', import.meta.url),
+    ),
+    'utf8',
+  ),
+);
 
 const stepScript = (job, id) => {
   const step = workflow.jobs[job].steps.find(candidate => candidate.id === id);
@@ -76,6 +84,134 @@ const GATES = [
   ['build-lace-mobile-storybook', 'affected'],
   ['lace-next-build-and-e2e', 'affected'],
 ];
+
+describe('workspace builds', () => {
+  it.each([
+    {
+      event: 'pull_request',
+      base: 'release/2.5.x',
+      diffStatus: 0,
+      deferred: true,
+    },
+    {
+      event: 'pull_request',
+      base: 'release/2.5.x',
+      diffStatus: 1,
+      deferred: false,
+    },
+    { event: 'pull_request', base: 'main', diffStatus: 0, deferred: false },
+    {
+      event: 'workflow_dispatch',
+      base: 'release/2.5.x',
+      diffStatus: 0,
+      deferred: false,
+    },
+  ])(
+    'scopes the SDK migration exception to unchanged release PRs: $event / $base / $diffStatus',
+    ({ event, base, diffStatus, deferred }) =>
+      inRunner(async directory => {
+        await stub(directory, 'git', 'exit "${GIT_DIFF_STATUS:-0}"');
+        await stub(
+          directory,
+          'npx',
+          'printf "%s\\n" "$*" >> "$RUNNER_TEMP/commands"',
+        );
+        const { code } = await runStep(
+          directory,
+          stepScript('build', 'build-workspace'),
+          {
+            GITHUB_EVENT_NAME: event,
+            GITHUB_BASE_REF: base,
+            RELEASE_BASE_SHA: 'release-base',
+            GIT_DIFF_STATUS: String(diffStatus),
+          },
+        );
+        expect(code).toBe(0);
+        const commands = await readFile(join(directory, 'commands'), 'utf8');
+        expect(commands).toContain(
+          `nx run-many --target=build --exclude=lace-sdk-site${
+            deferred ? ',lace-sdk,lace-sdk-example-passport' : ''
+          }`,
+        );
+        expect(commands).toContain(
+          'tsx apps/lace-extension/scripts/verify-build-output.ts',
+        );
+      }),
+  );
+});
+
+describe('the release vendor audit', () => {
+  const steps = vendorWorkflow.jobs['verify-vendor-bundle'].steps;
+  const audit = steps.find(step => step.id === 'release-audit');
+  const compare = steps.find(step => step.id === 'compare-vendor');
+
+  it('only substitutes the audited build for release pull requests', () => {
+    expect(audit.if).toContain("github.event_name == 'pull_request'");
+    expect(audit.if).toContain("github.base_ref == 'release/2.5.x'");
+  });
+
+  it.each([0, 1])('refuses changed vendor inputs (git diff exit %s)', status =>
+    inRunner(async directory => {
+      await mkdir(join(directory, 'scripts'));
+      await writeFile(
+        join(directory, 'scripts/fix-wallet-sdk-abstractions.js'),
+        '',
+      );
+      await stub(
+        directory,
+        'git',
+        [
+          'if [[ "$1" == diff ]]; then exit "$AUDIT_DIFF_STATUS"; fi',
+          'if [[ "$1" == worktree ]]; then mkdir -p "$RUNNER_TEMP/lace-vendor-v1/scripts"; fi',
+        ].join('\n'),
+      );
+      await stub(
+        directory,
+        'node',
+        'printf "%s\\n" "$*" >> "$RUNNER_TEMP/commands"',
+      );
+      const { code } = await runStep(directory, audit.run, {
+        RELEASE_BASE_SHA: 'release-base',
+        AUDIT_DIFF_STATUS: String(status),
+      });
+      expect(code === 0).toBe(status === 0);
+      if (status === 0) {
+        const commands = await readFile(join(directory, 'commands'), 'utf8');
+        expect(commands).toContain('scripts/fix-wallet-sdk-abstractions.js');
+        expect(commands).toContain('packages/lib/vendor/scripts/build.mjs');
+      }
+    }),
+  );
+
+  it.each([
+    ['release/2.5.x', 'lace-vendor-v1/packages/lib/vendor/dist'],
+    ['main', 'packages/lib/vendor/dist'],
+  ])('compares the correct artifact for %s', (base, expected) =>
+    inRunner(async directory => {
+      await stub(
+        directory,
+        'diff',
+        'printf "%s\\n" "$*" >> "$RUNNER_TEMP/commands"',
+      );
+      const { code } = await runStep(directory, compare.run, {
+        GITHUB_BASE_REF: base,
+      });
+      expect(code).toBe(0);
+      expect(await readFile(join(directory, 'commands'), 'utf8')).toContain(
+        expected,
+      );
+    }),
+  );
+
+  it('fails when the audited bytes differ', () =>
+    inRunner(async directory => {
+      await stub(directory, 'diff', 'exit 1');
+      const { code } = await runStep(directory, compare.run, {
+        GITHUB_BASE_REF: 'release/2.5.x',
+      });
+      expect(code).not.toBe(0);
+    }));
+});
 
 describe('the affected gates', () => {
   it.each(GATES)('%s fails when the helper fails', (job, id) =>

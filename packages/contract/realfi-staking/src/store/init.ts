@@ -20,27 +20,45 @@ type PositionState = RealFiStakingStoreState['realfiPosition'];
 export const realfiPositionTransform = createTransform<
   PersistedStateProperty<PositionState>,
   PersistedStateProperty<PositionState>
->((inboundState, key) => {
-  if (isReduxPersistState(key, inboundState)) {
-    return inboundState;
-  }
-
-  if (key === 'positionsByAccount') {
-    const inbound = inboundState as PositionState['positionsByAccount'];
-    const outbound: PositionState['positionsByAccount'] = {};
-    for (const accountId in inbound) {
-      const position = inbound[AccountId(accountId)];
-      outbound[AccountId(accountId)] = {
-        ...position,
-        pendingStake: undefined,
-        pendingUnstake: undefined,
-      };
+>(
+  (inboundState, key) => {
+    if (isReduxPersistState(key, inboundState)) {
+      return inboundState;
     }
-    return outbound;
-  }
 
-  return inboundState;
-});
+    if (key === 'positionsByAccount') {
+      const inbound = inboundState as PositionState['positionsByAccount'];
+      const outbound: PositionState['positionsByAccount'] = {};
+      for (const accountId in inbound) {
+        const position = inbound[AccountId(accountId)];
+        outbound[AccountId(accountId)] = {
+          ...position,
+          pendingStake: undefined,
+          pendingUnstake: undefined,
+        };
+      }
+      return outbound;
+    }
+
+    return inboundState;
+  },
+  (outboundState, key) => {
+    if (key !== 'yieldInfoByNetwork') return outboundState;
+    const byNetwork = outboundState as PositionState['yieldInfoByNetwork'];
+    return Object.fromEntries(
+      Object.entries(byNetwork).map(([network, info]) => [
+        network,
+        info
+          ? {
+              ...info,
+              apy: info.apyPeriod === '30d' ? info.apy : undefined,
+              fetchedAt: info.apyPeriod === '30d' ? info.fetchedAt : 0,
+            }
+          : info,
+      ]),
+    );
+  },
+);
 
 const store: LaceInit<LaceModuleStoreInit> = () => ({
   reducers: realfiStakingReducers,

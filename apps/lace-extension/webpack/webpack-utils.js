@@ -81,7 +81,7 @@ const transformManifest = (content, mode) => {
             'https://rpc.midnight-mainnet.blockfrost.io',
             'https://rpc.midnight-preprod.blockfrost.io',
             'https://rpc.midnight-preview.blockfrost.io',
-            // Temenos TEE proof server (LW-15081): API, attestation host
+            // Veritee TEE proof server (LW-15081): API, attestation host
             // (evidence + the AKX attested channel under /tee_attestation)
             // and Warden.
             'https://api.proofserver.wastedp.io',

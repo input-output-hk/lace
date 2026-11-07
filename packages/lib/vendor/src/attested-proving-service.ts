@@ -157,12 +157,12 @@ export const createAttestedProofServerAccess = (
       }),
     },
     provingService: {
-      prove: async transaction =>
+      prove: async (transaction, version) =>
         attested('prove', async session =>
           createProvingServiceFromTransport({
             check: async payload => checkSession(session, payload),
             prove: async payload => session.prove(payload),
-          }).prove(transaction),
+          }).prove(transaction, version),
         ),
     },
     transport,

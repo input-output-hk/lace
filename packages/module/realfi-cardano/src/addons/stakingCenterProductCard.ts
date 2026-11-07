@@ -4,8 +4,9 @@ import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import { Logos } from '@lace-lib/ui-toolkit';
 
 import { GenesisBoostBanner } from '../components/GenesisBoostBanner';
+import { StakingApy } from '../components/StakingApy';
+import { formatStakingApy } from '../format-staking-apy';
 import {
-  displayableApy,
   getCachedEarnedUsdPerSusdr,
   getCachedPendingUnstakeBaseUnits,
   getCachedStakingApy,
@@ -41,6 +42,7 @@ const USDR_DECIMALS = 6;
 const buildCard = (): StakingCenterProductCard => {
   return {
     id: 'realfi-usdr',
+    Yield: StakingApy,
     accountId: PLACEHOLDER_ACCOUNT_ID,
     // The hub calls this with the LIVE flags + active network on every render —
     // the addon itself runs network-blind in the loader, so this closure is how
@@ -77,10 +79,10 @@ const buildCard = (): StakingCenterProductCard => {
     // shows no yield rather than an invented (or another network's) rate.
     apyDisplay: (featureFlags, activeNetworkId) => {
       const config = getRealFiConfigFromFlags(featureFlags, activeNetworkId);
-      const apy = displayableApy(
+      const apy = formatStakingApy(
         config ? getCachedStakingApy(config.realfiNetwork) : undefined,
       );
-      return apy === undefined ? undefined : `${(apy * 100).toFixed(1)}%`;
+      return apy;
     },
     // Total Earned contribution (LW-14651): staked sUSDr earns its vault-rate
     // appreciation over the persisted first-seen basis; the host multiplies by

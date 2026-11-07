@@ -107,7 +107,10 @@ const createMockMidnightWallet = (
 ): MidnightWallet => ({
   accountId,
   networkId,
-  nightVerifyingKey: createKeystore(randomBytes(32), networkId).getPublicKey(),
+  nightVerifyingKey: createKeystore(
+    { kind: 'schnorr', secret: randomBytes(32) },
+    networkId,
+  ).getPublicKey(),
   proofCircuitProvider: {
     check: async () => [],
     prove: async () => new Uint8Array(),
@@ -118,6 +121,7 @@ const createMockMidnightWallet = (
   coinsByTokenType$: cold(''),
   syncProgress$: cold(''),
   transactionHistory$: cold(''),
+  adoptTransaction: () => cold(''),
   balanceFinalizedTransaction: () => cold(''),
   balanceUnboundTransaction: () => cold(''),
   balanceUnprovenTransaction: () => cold(''),

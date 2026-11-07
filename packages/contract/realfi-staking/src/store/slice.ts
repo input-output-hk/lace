@@ -265,6 +265,7 @@ const realfiPositionSlice = createSlice({
       if (
         existing &&
         existing.apy === incoming.apy &&
+        existing.apyPeriod === incoming.apyPeriod &&
         existing.exchangeRate === incoming.exchangeRate
       ) {
         existing.fetchedAt = incoming.fetchedAt;

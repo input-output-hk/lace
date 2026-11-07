@@ -112,13 +112,13 @@ export type {
   ProvingProvider,
 } from '@midnight-ntwrk/dapp-connector-api';
 export type { AttestationProgressEvent } from '@lace-contract/midnight-context';
-export { createTemenosAttestedProver } from '@lace-module/midnight-sync/sdk';
+export { createVeriteeAttestedProver } from '@lace-module/midnight-sync/sdk';
 export type {
   CreateAttestedProver,
   AttestedProverProvider,
   AttestedProvingSession,
-  TemenosTrustRoots,
-  TemenosVerifier,
+  VeriteeTrustRoots,
+  VeriteeVerifier,
 } from '@lace-module/midnight-sync/sdk';
 export {
   balanceMidnightSealedTransaction,

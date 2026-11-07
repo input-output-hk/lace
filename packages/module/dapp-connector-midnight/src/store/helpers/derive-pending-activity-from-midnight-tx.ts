@@ -9,14 +9,10 @@ import { BigNumber, Timestamp } from '@lace-lib/util';
 import type { Activity } from '@lace-contract/activities';
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { AccountId } from '@lace-contract/wallet-repo';
-import type * as ledger from '@midnight-ntwrk/ledger-v8';
+import type { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 
-type DeserializedTx = ledger.Transaction<
-  ledger.SignatureEnabled,
-  ledger.Proof,
-  ledger.Binding
->;
+type DeserializedTx = ReturnType<typeof readMidnightTransaction>;
 
 type DerivePendingActivityFromMidnightTxParams = {
   deserializedTx: DeserializedTx;
@@ -32,7 +28,12 @@ const utxoKey = (intentHash: string, outputNo: number) =>
 type OfferDelta = { nightDelta: bigint; isInvolved: boolean };
 
 const processOffer = (
-  offer: ledger.UnshieldedOffer<ledger.SignatureEnabled> | undefined,
+  offer:
+    | {
+        inputs: readonly { intentHash: string; outputNo: number }[];
+        outputs: readonly { owner: string; type: string; value: bigint }[];
+      }
+    | undefined,
   ownUtxoIndex: ReadonlyMap<string, UtxoWithMeta>,
   ownUserAddressHex: string,
 ): OfferDelta => {

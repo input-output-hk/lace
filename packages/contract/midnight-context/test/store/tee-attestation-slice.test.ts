@@ -249,7 +249,7 @@ describe('provider-defined progress', () => {
     expect(state.failure?.checkId).toBeUndefined();
   });
 
-  it('finishes a supported check operation without naming Temenos phases', () => {
+  it('finishes a supported check operation without naming Veritee phases', () => {
     const state = foldEvents([
       { type: 'reset', steps: ['example:evidence', 'checking'] },
       { type: 'phase', phase: 'example:evidence', status: 'completed' },
@@ -303,7 +303,7 @@ describe('wallet transaction stages', () => {
     phase: `transaction-${id}`,
     status,
   });
-  it('keeps transaction progress when Temenos resets and finishes its own checklist', () => {
+  it('keeps transaction progress when Veritee resets and finishes its own checklist', () => {
     const state = foldEvents([
       phase('preparing'),
       phase('proving'),

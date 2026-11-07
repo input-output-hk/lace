@@ -1,6 +1,7 @@
 import type { ByteOperation, ByteRef, ByteReply } from './bytes';
 
 export type CircuitRequest = {
+  ledgerVersion?: 'v8' | 'v9';
   serializedPreimage: Uint8Array;
   keyLocation: string;
   keyMaterial?: {
@@ -52,6 +53,7 @@ export type JobStatus =
 export type WireRequest = {
   method: 'check' | 'checkAndProve' | 'prove';
   circuit: {
+    ledgerVersion?: 'v8' | 'v9';
     serializedPreimage: ByteRef;
     keyLocation: string;
     keyMaterial?: { proverKey: ByteRef; verifierKey: ByteRef; ir: ByteRef };
@@ -89,6 +91,7 @@ export const encodeRequest = async (
   circuit: {
     serializedPreimage: await upload(circuit.serializedPreimage),
     keyLocation: circuit.keyLocation,
+    ...(circuit.ledgerVersion ? { ledgerVersion: circuit.ledgerVersion } : {}),
     ...(circuit.overwriteBindingInput === undefined
       ? {}
       : { overwriteBindingInput: String(circuit.overwriteBindingInput) }),
@@ -132,12 +135,21 @@ export const decodeRequest = (
       circuit.keyMaterial.verifierKey,
       circuit.keyMaterial.ir,
     );
+  if (
+    circuit.ledgerVersion !== undefined &&
+    circuit.ledgerVersion !== 'v8' &&
+    circuit.ledgerVersion !== 'v9'
+  )
+    throw new Error('Unsupported circuit ledger version');
   const [serializedPreimage, proverKey, verifierKey, ir] = pin(references);
   return {
     method: request.method,
     circuit: {
       serializedPreimage,
       keyLocation: circuit.keyLocation,
+      ...(circuit.ledgerVersion
+        ? { ledgerVersion: circuit.ledgerVersion }
+        : {}),
       ...(circuit.overwriteBindingInput === undefined
         ? {}
         : { overwriteBindingInput: BigInt(circuit.overwriteBindingInput) }),

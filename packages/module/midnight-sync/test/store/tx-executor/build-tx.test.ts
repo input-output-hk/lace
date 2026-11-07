@@ -3,7 +3,9 @@ import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { TokenId } from '@lace-contract/tokens';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-lib/util';
+import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
+import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
   MidnightBech32m,
   UnshieldedAddress,
@@ -107,6 +109,7 @@ const prepare = (
         state: vi.fn().mockReturnValue(
           cold('a', {
             a: {
+              activeProtocolVersion: ProtocolVersion.MinSupportedVersion,
               dust: { balance: () => dustWalletBalance },
               unshielded: { availableCoins: [] },
             },
@@ -243,12 +246,20 @@ describe('blockchain-midnight build-tx', () => {
 
   it('calculates fee', () => {
     prepare(({ flush }, { expectAnyObservable, wallet }) => {
-      const buildTransaction = vi.fn().mockReturnValue('built tx');
+      const built = ledger.Transaction.fromParts('undeployed');
+      const buildTransaction = vi.fn().mockReturnValue(built);
 
       expectAnyObservable({ dependencies: { buildTransaction } });
       flush();
+      expect(
+        readMidnightTransaction(
+          vi.mocked(wallet.estimateTransactionFee).mock.calls[0][0],
+        ),
+      ).toBe(built);
       expect(wallet.estimateTransactionFee).toHaveBeenCalledWith(
-        'built tx',
+        expect.objectContaining({
+          protocolVersion: ProtocolVersion.MinSupportedVersion,
+        }),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expect.objectContaining({ currentTime: expect.any(Date) }),
       );
@@ -261,7 +272,8 @@ describe('blockchain-midnight build-tx', () => {
         { expectObservable, flush },
         { buildTxParams, createWallet, createWallet$ },
       ) => {
-        const buildTransaction = vi.fn().mockReturnValue('built tx');
+        const built = ledger.Transaction.fromParts('undeployed');
+        const buildTransaction = vi.fn().mockReturnValue(built);
         const wallet = createWallet({ areKeysAvailable: false });
         const wallet$ = createWallet$(wallet);
 
@@ -277,14 +289,20 @@ describe('blockchain-midnight build-tx', () => {
         });
 
         flush();
-        expect(wallet.calculateTransactionFee).toHaveBeenCalledWith('built tx');
+        expect(wallet.calculateTransactionFee).toHaveBeenCalledOnce();
+        expect(
+          readMidnightTransaction(
+            vi.mocked(wallet.calculateTransactionFee).mock.calls[0][0],
+          ),
+        ).toBe(built);
         expect(wallet.estimateTransactionFee).not.toHaveBeenCalled();
       },
     );
   });
 
   it('hardcodes fee to 0 for designation flow if no designation has been made yet', () => {
-    const buildTransaction = vi.fn().mockReturnValue('built tx');
+    const built = ledger.Transaction.fromParts('undeployed');
+    const buildTransaction = vi.fn().mockReturnValue(built);
     prepare(
       (
         { expectObservable, flush },
@@ -427,6 +445,7 @@ describe('multi-token transfers (LW-15154)', () => {
     const transaction = buildTxDependencies.buildTransaction({
       blockchainSpecificSendFlowData: { flowType: 'send' },
       networkId: stubData.networkId,
+      protocolVersion: ProtocolVersion.MinSupportedVersion,
       nightUtxos: [],
       nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
       txParams: twoTokenParams,
@@ -453,6 +472,7 @@ describe('multi-token transfers (LW-15154)', () => {
     const transaction = buildTxDependencies.buildTransaction({
       blockchainSpecificSendFlowData: { flowType: 'send' },
       networkId: stubData.networkId,
+      protocolVersion: ProtocolVersion.MinSupportedVersion,
       nightUtxos: [],
       nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
       txParams: [
@@ -507,6 +527,7 @@ describe('multi-token transfers (LW-15154)', () => {
       buildTxDependencies.buildTransaction({
         blockchainSpecificSendFlowData: { flowType: 'send' },
         networkId: stubData.networkId,
+        protocolVersion: ProtocolVersion.MinSupportedVersion,
         nightUtxos: [],
         nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
         // The tuple type forbids an empty bundle; the runtime guard covers
@@ -535,6 +556,7 @@ describe('multi-token transfers (LW-15154)', () => {
       buildTxDependencies.buildTransaction({
         blockchainSpecificSendFlowData: { flowType: 'send' },
         networkId: stubData.networkId,
+        protocolVersion: ProtocolVersion.MinSupportedVersion,
         nightUtxos: [],
         nightVerifyingKey: undefined as unknown as ledger.SignatureVerifyingKey,
         txParams: [

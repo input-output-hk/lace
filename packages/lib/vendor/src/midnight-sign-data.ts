@@ -1,4 +1,4 @@
-import type { SignDataOptions } from '@midnight-ntwrk/dapp-connector-api';
+import type { SignDataOptions } from '@midnightntwrk/dapp-connector-api';
 
 /** Decode the connector transport form, preserving Buffer's permissive hex/base64 handling. */
 export const decodeMidnightSignData = (

@@ -28,7 +28,7 @@ import type {
   LaceSideEffect,
 } from '@lace-contract/module';
 
-// Keep side-effect types separate from the store, whose app init loads Temenos.
+// Keep side-effect types separate from the store, whose app init loads Veritee.
 // Headless loadouts must not reach that app initialization.
 export const implementsContracts = combineContracts([
   inMemoryIntegrationAddonContract,

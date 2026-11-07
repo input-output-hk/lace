@@ -38,6 +38,6 @@
     "@lace-lib/util-dev": "*"
   },
   "optionalDependencies": {
-    "@realfi-co/realfi-partner-sdk": "3.2.0"
+    "@realfi-co/realfi-partner-sdk": "3.6.0"
   }
 }

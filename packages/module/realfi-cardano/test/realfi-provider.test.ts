@@ -79,10 +79,13 @@ vi.mock('../src/realfi-exchange-rate', () => ({
 }));
 
 vi.mock('../src/realfi-yield', () => ({
-  fetchStakingYield: vi.fn(async () => ({ apy: 0.083, usdrPerSusdr: 1.1337 })),
   fetchVaultRate: vi.fn(async () => 1.1337),
 }));
+vi.mock('../src/realfi-apy', () => ({
+  fetchStakingYield: vi.fn(async () => ({ apy: 0.083 })),
+}));
 
+import { fetchStakingYield } from '../src/realfi-apy';
 import { claimOrderAttribution } from '../src/realfi-attribution';
 import { fetchVaultRatioScaled } from '../src/realfi-exchange-rate';
 import { fetchSwapCounterpartAssets } from '../src/realfi-partner-config';
@@ -92,7 +95,7 @@ import {
   buildUnstakeUnsignedTx,
   fetchBuildableStakeInputs,
 } from '../src/realfi-stake-tx';
-import { fetchStakingYield, fetchVaultRate } from '../src/realfi-yield';
+import { fetchVaultRate } from '../src/realfi-yield';
 import { fetchYieldEarned } from '../src/realfi-yield-earned';
 
 import type {

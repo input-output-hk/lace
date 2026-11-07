@@ -9,7 +9,11 @@ import { MidnightSettingsSheet } from '../../src/customisations/settings/Midnigh
 
 import type * as I18n from '@lace-contract/i18n';
 
-const state = vi.hoisted(() => ({ isFirstUse: true, isCustom: false }));
+const state = vi.hoisted(() => ({
+  isFirstUse: true,
+  isCustom: false,
+  showConfirmation: true,
+}));
 vi.mock('@lace-contract/i18n', async importOriginal => {
   const actual = await importOriginal<typeof I18n>();
   return {
@@ -38,6 +42,7 @@ vi.mock('@lace-lib/ui-toolkit', () => {
     createElement('div', {}, children);
   return {
     Column: container,
+    Accordion: { Root: container },
     Row: container,
     Text: { S: container, XS: container },
     RadioButton: container,
@@ -53,6 +58,8 @@ vi.mock('../../src/hooks/useMidnightSettings', () => ({
     networkId: 'preprod',
     networksConfig: {
       preprod: {
+        nodeAddress: 'https://node.example',
+        indexerAddress: 'https://indexer.example',
         proofServer: state.isCustom
           ? {
               kind: 'local-host',
@@ -60,7 +67,7 @@ vi.mock('../../src/hooks/useMidnightSettings', () => ({
             }
           : {
               kind: 'tee-delegated',
-              label: 'Temenos',
+              label: 'Veritee',
               url: 'https://api.proofserver.wastedp.io',
             },
       },
@@ -69,16 +76,24 @@ vi.mock('../../src/hooks/useMidnightSettings', () => ({
     isSaving: false,
     openSettings: vi.fn(),
     save: vi.fn(),
-    getProofServerSections: () => [],
+    getProofServerSections: () => [
+      { tier: 'on-device', modes: [{ kind: 'in-process' }] },
+      {
+        tier: 'custom',
+        modes: [{ kind: 'local-host', url: 'http://localhost:6300' }],
+      },
+    ],
   }),
 }));
 vi.mock('../../src/hooks/useProofServerConfirmation', () => ({
   useProofServerConfirmation: () => ({
-    confirmation: {
-      provider: 'Temenos',
-      isFirstUse: state.isFirstUse,
-      isCustom: state.isCustom,
-    },
+    confirmation: state.showConfirmation
+      ? {
+          provider: 'Veritee',
+          isFirstUse: state.isFirstUse,
+          isCustom: state.isCustom,
+        }
+      : undefined,
     requestSave: vi.fn(),
     confirm: vi.fn(),
     cancel: vi.fn(),
@@ -88,10 +103,26 @@ vi.mock('../../src/hooks/useProofServerConfirmation', () => ({
 beforeEach(() => {
   state.isFirstUse = true;
   state.isCustom = false;
+  state.showConfirmation = true;
 });
 afterEach(cleanup);
 
 describe('proof-server disclosure presentation', () => {
+  it('labels proof generation and network endpoints, including the local WASM placeholder', () => {
+    state.showConfirmation = false;
+    render(createElement(MidnightSettingsSheet));
+    for (const label of [
+      'Proof generator',
+      'Locally generated',
+      'Node RPC',
+      'Indexer',
+      'https://node.example',
+      'https://indexer.example',
+      'http://localhost:6300',
+    ]) {
+      expect(screen.getByText(label)).toBeTruthy();
+    }
+  });
   it('warns on first use and labels the endpoint outside the warning', () => {
     render(createElement(MidnightSettingsSheet));
     const warning = screen.getByTestId('warning');
@@ -107,7 +138,7 @@ describe('proof-server disclosure presentation', () => {
     state.isFirstUse = false;
     render(createElement(MidnightSettingsSheet));
     expect(screen.queryByTestId('warning')).toBeNull();
-    expect(screen.getByText(/Proofs will use Temenos/)).toBeTruthy();
+    expect(screen.getByText(/Proofs will use Veritee/)).toBeTruthy();
     expect(screen.getByText('Proof server address')).toBeTruthy();
     expect(screen.getByText('https://api.proofserver.wastedp.io')).toBeTruthy();
   });
@@ -124,7 +155,7 @@ describe('proof-server disclosure presentation', () => {
       expect(screen.getByText(/including spending keys/)).toBeTruthy();
       expect(screen.getByText('http://localhost:6300')).toBeTruthy();
       expect(
-        screen.queryByText(/Using Temenos|Proofs will use Temenos/),
+        screen.queryByText(/Using Veritee|Proofs will use Veritee/),
       ).toBeNull();
       if (isFirstUse) {
         expect(screen.getByTestId('warning').textContent).toContain(

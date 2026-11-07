@@ -30,8 +30,8 @@ import { RPointsCard } from '../components/RPointsCard';
 import { UsdrStakingPortfolioCard } from '../components/UsdrStakingPortfolioCard';
 import { formatCooldownRemaining } from '../cooldown-remaining';
 import { hasFeedMismatch } from '../feed-mismatch';
+import { formatStakingApy } from '../format-staking-apy';
 import { useDispatchLaceAction, useLaceSelector } from '../hooks';
-import { displayableApy } from '../realfi-yield';
 import { useActiveRealFiConfig } from '../use-realfi-config';
 import {
   formatYieldEarnedFiat,
@@ -269,14 +269,14 @@ export const UsdrStakingDetail = (
     usdToCurrencyRate,
   ]);
 
-  // APY tag under the balances (LW-14652): only for a non-zero position
-  // with a known persisted APY — hidden at zero balance (LW-14650 empty state).
   const apyTag = useMemo(() => {
-    const apy = displayableApy(yieldInfo?.apy);
-    if (apy === undefined || stakedBaseUnits + availableBaseUnits === 0n)
-      return undefined;
-    return `+${(apy * 100).toFixed(1)}% ${t('realfi.detail.apy')}`;
-  }, [yieldInfo?.apy, stakedBaseUnits, availableBaseUnits, t]);
+    const apy = formatStakingApy(yieldInfo?.apy);
+    return apy === undefined
+      ? undefined
+      : `${(yieldInfo?.apy ?? 0) > 0 ? '+' : ''}${apy} ${t(
+          'realfi.detail.apy',
+        )}`;
+  }, [yieldInfo?.apy, t]);
 
   // Lifetime yield across the active-network accounts, as RealFi reports it
   // (refreshed with the staking history), valued like Total Balance: USDr at

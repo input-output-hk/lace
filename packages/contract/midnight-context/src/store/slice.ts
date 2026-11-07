@@ -13,8 +13,8 @@ import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
-  FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER,
-  TEMENOS_PROOF_SERVER_MODES,
+  FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER,
+  VERITEE_PROOF_SERVER_MODES,
   REMOTE_PROOF_SERVER_MODES,
 } from '../const';
 import { MidnightSDKNetworkId } from '../const';
@@ -448,15 +448,15 @@ const selectNetworksConfigFeatureFlagsOverrides = createSelector(
 );
 
 /**
- * The Temenos TEE option is build-baked; this remote boolean flag decides
+ * The Veritee TEE option is build-baked; this remote boolean flag decides
  * whether it is offered and — as the kill switch — whether an already
  * persisted `tee-delegated` selection is still honoured.
  */
-const selectIsTemenosProofServerEnabled = createSelector(
+const selectIsVeriteeProofServerEnabled = createSelector(
   featuresSelectors.features.selectLoadedFeatures,
   loadedFeatures =>
     loadedFeatures.featureFlags.some(
-      f => f.key === FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER,
+      f => f.key === FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER,
     ),
 );
 
@@ -471,19 +471,19 @@ const selectAllProofServerModes = createSelector(
   slice.selectors.selectNetworksDefaultConfig,
   selectRemoteProofServerOptions,
   createSelector(
-    selectIsTemenosProofServerEnabled,
+    selectIsVeriteeProofServerEnabled,
     slice.selectors.selectSupportsWasmProver,
-    (isTemenosEnabled, supportsWasmProver) => ({
-      isTemenosEnabled,
+    (isVeriteeEnabled, supportsWasmProver) => ({
+      isVeriteeEnabled,
       supportsWasmProver,
     }),
   ),
   (
     defaultNetworksConfig,
     remoteProofServerOptions,
-    { isTemenosEnabled, supportsWasmProver },
+    { isVeriteeEnabled, supportsWasmProver },
   ): Partial<Record<MidnightSDKNetworkId, ProofServerMode[]>> => {
-    // The Temenos TEE entry is build-baked, never payload-delivered: the
+    // The Veritee TEE entry is build-baked, never payload-delivered: the
     // boolean flag controls availability without supplying provider URLs.
     const result: Partial<Record<MidnightSDKNetworkId, ProofServerMode[]>> = {};
     for (const [id, config] of Object.entries(defaultNetworksConfig)) {
@@ -503,9 +503,9 @@ const selectAllProofServerModes = createSelector(
             : {}),
         });
       }
-      const temenosMode = TEMENOS_PROOF_SERVER_MODES[networkId];
-      if (isTemenosEnabled && temenosMode) {
-        modes.push(temenosMode);
+      const veriteeMode = VERITEE_PROOF_SERVER_MODES[networkId];
+      if (isVeriteeEnabled && veriteeMode) {
+        modes.push(veriteeMode);
       }
       result[networkId] = modes;
     }
@@ -619,7 +619,7 @@ export const midnightContextSelectors = {
     selectRemoteProofServerOptions,
     selectAllProofServerModes,
     selectUnavailableProofServerNetworks,
-    selectIsTemenosProofServerEnabled,
+    selectIsVeriteeProofServerEnabled,
     selectCurrentNetwork,
     selectDustGenerationDetails,
     selectPublicKeysByAccountId,

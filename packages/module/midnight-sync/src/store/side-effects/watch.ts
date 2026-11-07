@@ -8,11 +8,9 @@ import {
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
 import { whileActive } from '@lace-contract/wallet-active-state';
-import { SecretBox } from '@lace-lib/core';
-import { BigNumber, ByteArray, HexBytes, Timestamp } from '@lace-lib/util';
+import { WalletType } from '@lace-contract/wallet-repo';
+import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 import { PROVIDER_REQUEST_RETRY_CONFIG } from '@lace-lib/util-provider';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
-import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import { retryBackoff } from 'backoff-rxjs';
 import isEqual from 'lodash/isEqual';
 import {
@@ -48,12 +46,12 @@ import {
 
 import { FEATURE_FLAG_MIDNIGHT_UNSHIELDED } from '../../const';
 import { MidnightSyncFailureId } from '../../value-objects/midnight-sync-failure-id.vo';
-import { createTemenosLedgerIndexerResolver } from '../temenos-ledger-indexer';
+import { loadAccountKeys } from '../account-keys';
+import { createVeriteeLedgerIndexerResolver } from '../veritee-ledger-indexer';
 
 import { createAccountKeyManager as createAccountKeyManagerImpl } from './account-key-manager';
 
 import type { ActionCreators, SideEffect } from '../../context';
-import type { AuthSecret } from '@lace-contract/authentication-prompt';
 import type { FeatureFlag } from '@lace-contract/feature';
 import type {
   MidnightWalletsByAccountId,
@@ -606,54 +604,6 @@ export const subscribeToWallet =
     );
   };
 
-/**
- * Helper to decrypt an encrypted key buffer with an auth secret.
- */
-const decryptKey = async (
-  encryptedKey: HexBytes,
-  authSecret: AuthSecret,
-): Promise<ByteArray> =>
-  ByteArray(await SecretBox.open(ByteArray.fromHex(encryptedKey), authSecret));
-
-/**
- * Pre-computes ledger key objects from decrypted key buffers and assembles
- * the AccountKeys structure. Extracted as a top-level helper to avoid
- * deeply nested function expressions inside the requestKeys observable chain.
- */
-const buildAccountKeys = (
-  [nightKeyBuffer, dustKeyBuffer, zswapKeyBuffer]: readonly [
-    ByteArray,
-    ByteArray,
-    ByteArray,
-  ],
-  networkId: MidnightSDKNetworkId,
-): AccountKeys => {
-  // Pre-compute ledger key objects once to avoid repeated fromSeed() calls
-  const dustSecretKey = ledger.DustSecretKey.fromSeed(dustKeyBuffer);
-  const zswapSecretKeys = ledger.ZswapSecretKeys.fromSeed(zswapKeyBuffer);
-
-  return {
-    unshieldedKeystore: createKeystore(nightKeyBuffer, networkId),
-    walletKeys: {
-      dustKeyBuffer,
-      zswapKeyBuffer,
-      dustSecretKey,
-      zswapSecretKeys,
-    },
-    clear: () => {
-      nightKeyBuffer.fill(0);
-      zswapKeyBuffer.fill(0);
-      dustKeyBuffer.fill(0);
-      // Safe for both: the sync streams hold their own copies derived from
-      // these buffers, so clearing here cannot wedge them. Transaction paths
-      // re-derive on their NEXT keys$ read; a call already in flight holds
-      // these and fails — intended when locking mid-signing.
-      zswapSecretKeys.clear();
-      dustSecretKey.clear();
-    },
-  };
-};
-
 type AccountKeyManagerResult = {
   keyManager: AccountKeyManager;
   destroyAccountKeyManager: () => void;
@@ -666,34 +616,28 @@ const createAccountKeyManager =
   (
     account: InMemoryWalletAccount<MidnightAccountProps>,
   ): ((...props: Parameters<SideEffect>) => AccountKeyManagerResult) =>
-  (_, __, { accessAuthSecret }) => {
-    const { networkId } = account.blockchainSpecific;
-
-    /**
-     * Decrypts all account keys using available auth secret.
-     * Hangs on the secret access if app is locked.
-     * Pre-computes ledger key objects (DustSecretKey, ZswapSecretKeys) to avoid
-     * repeated fromSeed() calls during sync and wallet operations.
-     */
+  (_, stateObservables, { accessAuthSecret }) => {
+    // Existing profiles already retain the encrypted seed. Deriving role 4 on
+    // unlock adds ECDSA without changing their Schnorr identity or stored shape.
     const requestKeys = (): Observable<AccountKeys> =>
-      accessAuthSecret(authSecret =>
-        from(
-          Promise.all([
-            decryptKey(
-              account.blockchainSpecific.nightExternalKey.encryptedKey,
+      defer(() => stateObservables.wallets.selectWalletById$).pipe(
+        take(1),
+        switchMap(selectWallet => {
+          const wallet = selectWallet(account.walletId);
+          const encryptedSeed =
+            wallet?.type === WalletType.InMemory
+              ? wallet.blockchainSpecific.Midnight?.encryptedSeed
+              : undefined;
+          if (!encryptedSeed) throw new Error('Missing Midnight wallet seed');
+          return accessAuthSecret(authSecret =>
+            loadAccountKeys(
+              account.blockchainSpecific,
+              encryptedSeed,
               authSecret,
             ),
-            decryptKey(
-              account.blockchainSpecific.dustKey.encryptedKey,
-              authSecret,
-            ),
-            decryptKey(
-              account.blockchainSpecific.zswapKey.encryptedKey,
-              authSecret,
-            ),
-          ]),
-        ),
-      ).pipe(map(buffers => buildAccountKeys(buffers, networkId)));
+          );
+        }),
+      );
 
     const keyManager = createAccountKeyManagerImpl({ requestKeys });
 
@@ -732,7 +676,7 @@ export const watchMidnightAccount =
         config,
         store,
         keyManager,
-        getTemenosLedgerIndexerUrl: createTemenosLedgerIndexerResolver(
+        getVeriteeLedgerIndexerUrl: createVeriteeLedgerIndexerResolver(
           stateObservables.midnightContext.selectNetworksConfig$,
         ),
       })

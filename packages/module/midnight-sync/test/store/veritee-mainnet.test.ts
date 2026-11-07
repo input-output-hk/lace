@@ -1,19 +1,19 @@
-import { AkxEvidenceProvider } from '@input-output-hk/temenos-attestation-verifier';
+import { AkxEvidenceProvider } from '@input-output-hk/veritee-attestation-verifier';
 import {
   createMockDependencies,
   FIXTURE_CONFIG,
-} from '@input-output-hk/temenos-attestation-verifier/mocks';
+} from '@input-output-hk/veritee-attestation-verifier/mocks';
 import {
   MidnightSDKNetworkIds,
-  TEMENOS_PROOF_SERVER_MODES,
+  VERITEE_PROOF_SERVER_MODES,
 } from '@lace-contract/midnight-context';
 import { describe, expect, it, vi } from 'vitest';
 
-import { createStoreTemenosAttestedProver } from '../../src/store/temenos-attested-prover';
+import { createStoreVeriteeAttestedProver } from '../../src/store/veritee-attested-prover';
 
 const PREPROD_URL = 'https://api.proofserver.wastedp.io';
 
-describe('Temenos deployments', () => {
+describe('Veritee deployments', () => {
   it.each([
     {
       networkId: MidnightSDKNetworkIds.MainNet,
@@ -55,12 +55,12 @@ describe('Temenos deployments', () => {
       const { evidenceProvider: _, ...overrides } = dependencies;
       const options = {
         networkId: config.networkId,
-        proofServerApiUrl: TEMENOS_PROOF_SERVER_MODES[config.networkId]!.url,
+        proofServerApiUrl: VERITEE_PROOF_SERVER_MODES[config.networkId]!.url,
         trustRoots: { amdRootCertificates: FIXTURE_CONFIG.amdRootCertificates },
         getLedgerIndexerUrl: async () =>
           'https://ledger.example/preprod?apiKey=test',
       };
-      const provider = createStoreTemenosAttestedProver(options, {
+      const provider = createStoreVeriteeAttestedProver(options, {
         dependencies: overrides,
       });
       try {
@@ -98,8 +98,8 @@ describe('Temenos deployments', () => {
         getLedgerIndexerUrl: async () =>
           'https://ledger.example/preprod?apiKey=test',
       };
-      expect(() => createStoreTemenosAttestedProver(options)).toThrow(
-        /no baked temenos attestation config/i,
+      expect(() => createStoreVeriteeAttestedProver(options)).toThrow(
+        /no baked veritee attestation config/i,
       );
     },
   );

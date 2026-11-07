@@ -1,7 +1,13 @@
 import type { MidnightSDKNetworkId } from '@lace-contract/midnight-context';
 import type { ProverCommand, ProverReply } from '@lace-lib/midnight-prover';
 import type { ProofCircuitRequest } from '@lace-lib/vendor/midnight-proof-servers';
-import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import type {
+  ConnectedAPI,
+  KeyMaterialProvider,
+  SignDataOptions,
+  Signature,
+} from '@midnightntwrk/dapp-connector-api';
+import type { ProvingProvider } from '@midnightntwrk/ledger-v9';
 import type { Runtime } from 'webextension-polyfill';
 
 export type NetworkInfo = {
@@ -21,12 +27,26 @@ export type ProofServerApi = {
   proofCommand(command: ProverCommand): Promise<ProverReply>;
 };
 
-/**
- * The connector surface the service worker implements: `getProvingProvider`
- * is page-side only (it needs the dApp's key-material callbacks, which cannot
- * cross the messaging boundary) and is composed over {@link ProofServerApi}.
- */
-export type DAppConnectorWalletAPI = Omit<ConnectedAPI, 'getProvingProvider'> &
+/** Lace adds scheme selection while existing requests retain Schnorr. */
+export type MidnightSignDataOptions = SignDataOptions & {
+  scheme?: NonNullable<Signature['scheme']>;
+};
+
+export type MidnightConnectedAPI = Omit<
+  ConnectedAPI,
+  'getProvingProvider' | 'signData'
+> & {
+  signData(data: string, options: MidnightSignDataOptions): Promise<Signature>;
+  getProvingProvider(
+    keyMaterialProvider: KeyMaterialProvider,
+  ): Promise<ProvingProvider>;
+};
+
+/** Key-material callbacks stay page-side; circuit bytes cross the transport. */
+export type DAppConnectorWalletAPI = Omit<
+  MidnightConnectedAPI,
+  'getProvingProvider'
+> &
   ProofServerApi;
 
 export type ExtendedDAppConnectorWalletAPI = DAppConnectorWalletAPI &

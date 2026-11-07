@@ -6,8 +6,8 @@ import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
-  FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER,
-  TEMENOS_PROOF_SERVER_MODES,
+  FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER,
+  VERITEE_PROOF_SERVER_MODES,
 } from '../../src/const';
 import { MidnightSDKNetworkIds } from '../../src/const';
 import {
@@ -238,8 +238,8 @@ describe('midnight slice', () => {
       });
 
       it('makes the new default the base proof server, with a user override of an available mode still taking precedence', () => {
-        const teeMode = TEMENOS_PROOF_SERVER_MODES[testNetworkId];
-        if (!teeMode) throw new Error('No Temenos mode on Preview');
+        const teeMode = VERITEE_PROOF_SERVER_MODES[testNetworkId];
+        if (!teeMode) throw new Error('No Veritee mode on Preview');
         const withDefault = reducers.midnightContext(
           initialState,
           actions.midnightContext.setDefaultProofServers({
@@ -250,7 +250,7 @@ describe('midnight slice', () => {
           loaded: {
             modules: [],
             featureFlags: [
-              { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+              { key: FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER },
             ],
           },
         };
@@ -661,7 +661,7 @@ describe('midnight slice', () => {
         }),
       );
       expect(wasm.proofServerDisclosureAcknowledgements).toBeUndefined();
-      const remote = TEMENOS_PROOF_SERVER_MODES['preprod']!;
+      const remote = VERITEE_PROOF_SERVER_MODES['preprod']!;
       const acknowledged = reducers.midnightContext(
         oldState,
         actions.midnightContext.acknowledgeProofServerDisclosure(remote),
@@ -843,7 +843,7 @@ describe('midnight slice', () => {
         ).toEqual([testNetworkId]);
       });
 
-      it('selectAllProofServerModes appends the baked Temenos mode on networks with an entry when its flag is enabled', () => {
+      it('selectAllProofServerModes appends the baked Veritee mode on networks with an entry when its flag is enabled', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -851,7 +851,7 @@ describe('midnight slice', () => {
             loaded: {
               modules: [],
               featureFlags: [
-                { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+                { key: FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER },
               ],
             },
           },
@@ -866,7 +866,7 @@ describe('midnight slice', () => {
         ] as const) {
           expect(modes[networkId]).toEqual([
             { kind: 'local-host', url: 'http://localhost:6300' },
-            TEMENOS_PROOF_SERVER_MODES[networkId],
+            VERITEE_PROOF_SERVER_MODES[networkId],
           ]);
         }
         const persistedMainnet: WithNetworkTestState = {
@@ -875,7 +875,7 @@ describe('midnight slice', () => {
             ...initialState,
             userNetworksConfigOverrides: {
               ...initialState.userNetworksConfigOverrides,
-              mainnet: { proofServer: TEMENOS_PROOF_SERVER_MODES.preprod },
+              mainnet: { proofServer: VERITEE_PROOF_SERVER_MODES.preprod },
             },
           },
         };
@@ -894,7 +894,7 @@ describe('midnight slice', () => {
         ]);
       });
 
-      it('selectAllProofServerModes omits the Temenos mode when its flag is absent', () => {
+      it('selectAllProofServerModes omits the Veritee mode when its flag is absent', () => {
         const state: WithNetworkTestState = {
           midnightContext: initialState,
           network: networkState,
@@ -932,7 +932,7 @@ describe('midnight slice', () => {
                 modules: [],
                 featureFlags: [
                   { key: FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER },
-                  { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+                  { key: FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER },
                 ],
               },
             },
@@ -943,7 +943,7 @@ describe('midnight slice', () => {
             ],
           ).toEqual([
             { kind: 'local-host', url: 'http://localhost:6300' },
-            TEMENOS_PROOF_SERVER_MODES[networkId],
+            VERITEE_PROOF_SERVER_MODES[networkId],
           ]);
           expect(
             selectors.midnightContext.selectNetworksConfig(state)[networkId],
@@ -959,27 +959,31 @@ describe('midnight slice', () => {
         },
       );
 
-      describe('Temenos kill switch', () => {
+      describe('Veritee kill switch', () => {
         const preprod = MidnightSDKNetworkIds.PreProd;
         // Built per test: `initialState` is assigned in a beforeEach above.
-        const withTeeSelected = (): MidnightContextSliceState => ({
+        const withTeeSelected = (
+          label = VERITEE_PROOF_SERVER_MODES[preprod]!.label,
+        ): MidnightContextSliceState => ({
           ...initialState,
           userNetworksConfigOverrides: {
             ...initialState.userNetworksConfigOverrides,
-            [preprod]: { proofServer: TEMENOS_PROOF_SERVER_MODES[preprod] },
+            [preprod]: {
+              proofServer: { ...VERITEE_PROOF_SERVER_MODES[preprod]!, label },
+            },
           },
         });
         const teeFlagOn = {
           loaded: {
             modules: [],
             featureFlags: [
-              { key: FEATURE_FLAG_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER },
+              { key: FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER },
             ],
           },
         };
         const teeFlagOff = { loaded: { modules: [], featureFlags: [] } };
 
-        it('selectIsTemenosProofServerEnabled reflects the flag', () => {
+        it('selectIsVeriteeProofServerEnabled reflects the flag', () => {
           const on: WithNetworkTestState = {
             midnightContext: initialState,
             network: networkState,
@@ -987,24 +991,31 @@ describe('midnight slice', () => {
           };
           const off: WithNetworkTestState = { ...on, features: teeFlagOff };
           expect(
-            selectors.midnightContext.selectIsTemenosProofServerEnabled(on),
+            selectors.midnightContext.selectIsVeriteeProofServerEnabled(on),
           ).toBe(true);
           expect(
-            selectors.midnightContext.selectIsTemenosProofServerEnabled(off),
+            selectors.midnightContext.selectIsVeriteeProofServerEnabled(off),
           ).toBe(false);
         });
 
-        it('honours a persisted tee-delegated selection while the flag is on', () => {
-          const state: WithNetworkTestState = {
-            midnightContext: withTeeSelected(),
-            network: networkState,
-            features: teeFlagOn,
-          };
-          const config = selectors.midnightContext.selectNetworksConfig(state);
-          expect(config[preprod].proofServer).toEqual(
-            TEMENOS_PROOF_SERVER_MODES[preprod],
-          );
-        });
+        it.each([
+          'Temenos (remote TEE proof server)',
+          'Veritee (remote TEE proof server)',
+        ])(
+          'refreshes the saved provider label %s while preserving the selected endpoint',
+          label => {
+            const state: WithNetworkTestState = {
+              midnightContext: withTeeSelected(label),
+              network: networkState,
+              features: teeFlagOn,
+            };
+            const config =
+              selectors.midnightContext.selectNetworksConfig(state);
+            expect(config[preprod].proofServer).toEqual(
+              VERITEE_PROOF_SERVER_MODES[preprod],
+            );
+          },
+        );
 
         it('falls back to the base proof server when the flag is off, leaving other overrides intact', () => {
           const selected = withTeeSelected();
@@ -1014,7 +1025,7 @@ describe('midnight slice', () => {
               userNetworksConfigOverrides: {
                 ...selected.userNetworksConfigOverrides,
                 [preprod]: {
-                  proofServer: TEMENOS_PROOF_SERVER_MODES[preprod],
+                  proofServer: VERITEE_PROOF_SERVER_MODES[preprod],
                   nodeAddress: 'https://node.example',
                 },
               },
