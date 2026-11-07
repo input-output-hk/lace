@@ -1,21 +1,4 @@
-/**
- * Live sUSDr staking APY, computed from RealFi's vault-ratio history
- * (`vaultRatioHistory`) — the same GraphQL feed the RealFi dApp derives its
- * headline APY from. Neither the SDK nor the API exposes a protocol-APY field,
- * so the APY is derived: annualize the sUSDr↔USDr vault-ratio appreciation over
- * a trailing window (Option A — see docs/projects/plans/realfi-usdr-staking).
- *
- * Trailing 30d is used deliberately. On preview the literal 90d window is skewed
- * by one-off test-yield step jumps (a single +10.76% day on 2026-04-13 annualizes
- * the raw 90d endpoints to ~56%), whereas the trailing-30d annualization
- * reproduces the dApp's ~8.3%.
- *
- * Known shortcuts (parity with realfi-stake-activities.ts):
- *  - reads the RealFi GraphQL directly via `fetch` (the ADR-19-correct form is a
- *    provider dependency + side-effect + store slice fed by this feed);
- *  - endpoint + trailing window come from the compiled network config rather
- *    than injected provider configuration.
- */
+/** Vault valuation and synchronous UI caches; the provider reads SDK APY separately. */
 import { realfiDebugLog } from '@lace-contract/realfi-staking';
 
 import type {
@@ -25,25 +8,6 @@ import type {
 
 /** RealFi vault ratio is USDr-per-sUSDr scaled by 1e6. */
 const VAULT_RATIO_SCALE = 1e6;
-/** Trailing window (days) over which the vault-ratio appreciation is annualized. */
-const APY_WINDOW_DAYS = 30;
-const MS_PER_DAY = 86_400_000;
-const DAYS_PER_YEAR = 365;
-
-const VAULT_RATIO_HISTORY_QUERY = `
-  query vaultRatioHistory($interval: Interval!, $start: String!, $end: String!) {
-    vaultRatioHistory(interval: $interval, start: $start, end: $end) {
-      ratioHistory {
-        ratio
-        unixMilli
-        partial
-      }
-    }
-  }
-`;
-
-type RatioHistoryItem = { ratio: string; unixMilli: string; partial: boolean };
-
 const graphql = async <T>(
   realfiApiUrl: string,
   body: Record<string, unknown>,
@@ -67,52 +31,6 @@ const graphql = async <T>(
     realfiDebugLog('vault-ratio GraphQL fetch failed', { error });
     return undefined;
   }
-};
-
-/** RFC3339 without fractional seconds (the API's Go parser expects `...Z`). */
-const rfc3339 = (ms: number): string =>
-  new Date(ms).toISOString().replace(/\.\d+Z$/, 'Z');
-
-type StakingYield = {
-  /** Annualized sUSDr APY as a fraction (0.082 = 8.2%). */
-  apy: number;
-  /** Live USDr backing per 1 sUSDr (vault exchange rate, ≥ 1 as yield accrues). */
-  usdrPerSusdr: number;
-};
-
-/**
- * Fetches the trailing-window vault-ratio series and derives:
- *  - `apy` = (ratioₙ / ratio₀) ^ (365 / spanDays) − 1
- *  - `usdrPerSusdr` = latest ratio / 1e6
- * Returns `undefined` on any read failure (callers show no yield instead).
- */
-export const fetchStakingYield = async (
-  realfiApiUrl: string,
-): Promise<StakingYield | undefined> => {
-  const end = Date.now();
-  const start = end - APY_WINDOW_DAYS * MS_PER_DAY;
-  const data = await graphql<{
-    vaultRatioHistory: { ratioHistory: RatioHistoryItem[] } | null;
-  }>(realfiApiUrl, {
-    query: VAULT_RATIO_HISTORY_QUERY,
-    variables: { interval: 'Daily', start: rfc3339(start), end: rfc3339(end) },
-  });
-  // Drop partial (still-forming) buckets so the endpoints are settled values.
-  const points = (data?.vaultRatioHistory?.ratioHistory ?? []).filter(
-    point => !point.partial,
-  );
-  if (points.length < 2) return undefined;
-  const first = points[0];
-  const last = points[points.length - 1];
-  const r0 = Number(first.ratio);
-  const r1 = Number(last.ratio);
-  const spanDays =
-    (Number(last.unixMilli) - Number(first.unixMilli)) / MS_PER_DAY;
-  if (!(r0 > 0 && r1 > 0 && spanDays > 0)) return undefined;
-  return {
-    apy: (r1 / r0) ** (DAYS_PER_YEAR / spanDays) - 1,
-    usdrPerSusdr: r1 / VAULT_RATIO_SCALE,
-  };
 };
 
 // The diffusion-aware rate inputs — the same query the partner SDK's
@@ -274,19 +192,11 @@ export const getCachedStakingApy = (
   network: RealFiSdkNetwork,
 ): number | undefined => yieldInfoCache[network]?.apy;
 
-/**
- * The APY to present, or `undefined` to show no yield. A negative trailing
- * figure means the vault ratio stepped down inside the window, and an
- * advertised negative staking rate would read as the position losing money.
- * A missing or non-finite figure (persisted NaN reads back as `null`) has
- * nothing to present either.
- */
+/** Finite historical returns are shown with their real sign. */
 export const displayableApy = (
   apy: number | null | undefined,
 ): number | undefined =>
-  apy === null || apy === undefined || !Number.isFinite(apy) || apy < 0
-    ? undefined
-    : apy;
+  apy === null || apy === undefined || !Number.isFinite(apy) ? undefined : apy;
 
 /** The store's last-known vault rate (USDr per sUSDr) for a network, or 1
  * (no premium) before the first-ever successful read on it. */

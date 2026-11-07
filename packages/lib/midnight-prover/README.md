@@ -17,7 +17,7 @@ never executes in the service worker. Document ownership goes through
 - The worker stays warm for 30 seconds after computation, retaining key caches.
   Once results are released/expired, idle cleanup terminates it.
 - Cancellation passes an internal AbortSignal through provider hops. HTTP and
-  Temenos requests abort; native worker cancellation terminates that worker, and
+  Veritee requests abort; native worker cancellation terminates that worker, and
   the next job gets a fresh one. Remote servers may still finish computation.
 - Worker errors reject the job. There is no fallback to service-worker execution.
 - Both Chrome boundaries use acknowledged 256 KiB byte chunks (hex on the wire)

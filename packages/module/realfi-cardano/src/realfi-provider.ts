@@ -2,6 +2,7 @@ import { realfiDebugLog } from '@lace-contract/realfi-staking';
 import { Err, Ok } from '@lace-lib/util';
 import { catchError, defer, from, map, of } from 'rxjs';
 
+import { fetchStakingYield } from './realfi-apy';
 import { claimOrderAttribution } from './realfi-attribution';
 import { buildCancelUnsignedTx } from './realfi-cancel-tx';
 import { isUsdrTokenId } from './realfi-config';
@@ -28,7 +29,7 @@ import {
   vaultRateNumbers,
 } from './realfi-vault-rate';
 import { buildWithdrawUnsignedTx } from './realfi-withdraw-tx';
-import { fetchStakingYield, fetchVaultRate } from './realfi-yield';
+import { fetchVaultRate } from './realfi-yield';
 import { fetchYieldEarned } from './realfi-yield-earned';
 
 import type { RealFiBlockfrostConfig } from './realfi-blockfrost';
@@ -516,7 +517,7 @@ export const createRealFiProvider = (
     );
   },
   getExchangeRateAndApy: (request: RealFiStakeInputAssetsRequest) => {
-    // Live sUSDr APY (trailing-30d vault-ratio annualization) + the
+    // SDK capped 30-day historical net APY + the
     // diffusion-aware vault exchange rate, read from the FLAG-RESOLVED
     // config's endpoint so a CMS rotation reaches the yield feed. Feeds the
     // persisted per-network yieldInfo store via `makeYieldInfo`, so failures
@@ -545,6 +546,7 @@ export const createRealFiProvider = (
           // good persisted APY in the store (the reducer keeps the previous
           // value when this is undefined).
           apy: stakingYield?.apy as Percent | undefined,
+          apyPeriod: '30d' as const,
           exchangeRate,
           fetchedAt: Date.now() as Milliseconds,
         });

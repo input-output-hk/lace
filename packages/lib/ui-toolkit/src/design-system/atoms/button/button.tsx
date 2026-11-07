@@ -9,6 +9,8 @@ import { Pressable, View } from 'react-native';
 
 import { useTheme, spacing } from '../../../design-tokens';
 import { Icon, Loader, Row, Text } from '../../atoms';
+import { isWeb } from '../../util';
+import { useIsWebBlurEnabled } from '../blur-view/blur-view';
 
 import { getButtonStyles } from './button.styles';
 
@@ -33,6 +35,7 @@ const ButtonRoot = ({
   iconColor,
 }: ButtonProps) => {
   const { theme } = useTheme();
+  const isWebBlurEnabled = useIsWebBlurEnabled();
   const [isHovered, setIsHovered] = useState(false);
   const styles = useMemo(
     () => getButtonStyles({ size, variant, disabled, loading, theme }),
@@ -80,12 +83,22 @@ const ButtonRoot = ({
         disabled && styles.disabled,
         shouldShowHoveredStyle && styles.hoveredStyle,
         isPressed && styles.pressedStyle,
+        isWeb && !isWebBlurEnabled && ({ backdropFilter: 'none' } as ViewStyle),
         hasOnlyIcon ? styles.hasOnlyIcon : styles.minWidth,
         !hasOnlyIcon && fullWidth && styles.fullWidth,
         !hasOnlyIcon && flex !== undefined && { flex },
       ].filter(Boolean);
     },
-    [disabled, loading, hasOnlyIcon, fullWidth, flex, isHovered, styles],
+    [
+      disabled,
+      loading,
+      hasOnlyIcon,
+      fullWidth,
+      flex,
+      isHovered,
+      styles,
+      isWebBlurEnabled,
+    ],
   );
 
   const pressableContentStyle: StyleProp<ViewStyle> = useMemo(() => {

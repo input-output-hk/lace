@@ -9,8 +9,6 @@ import {
 import { senderOrigin } from '@lace-lib/dapp-connector';
 import { createProofJobs } from '@lace-lib/midnight-prover';
 import {
-  deserializeMidnightSealedTransaction,
-  deserializeMidnightUnsealedTransaction,
   groupMidnightConnectorInputs,
   groupMidnightConnectorOutputs,
 } from '@lace-lib/vendor/midnight-connector-transaction';
@@ -18,9 +16,12 @@ import {
   applyMidnightSignedMessagePrefix,
   decodeMidnightSignData,
 } from '@lace-lib/vendor/midnight-sign-data';
-import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
+import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
+import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
+  MidnightBech32m,
+  UnshieldedAddress,
   ShieldedCoinPublicKey,
   ShieldedEncryptionPublicKey,
 } from '@midnightntwrk/wallet-sdk-address-format';
@@ -32,6 +33,7 @@ import { derivePendingActivityFromMidnightTx } from '../helpers/derive-pending-a
 import type { ConfirmationCallback } from './create-confirmation-callback';
 import type {
   DAppConnectorWalletAPI,
+  MidnightSignDataOptions,
   SenderContext,
   WithSenderContext,
 } from '../../types';
@@ -51,11 +53,10 @@ import type {
   DesiredInput,
   DesiredOutput,
   Signature,
-  SignDataOptions,
   Configuration,
   ConnectionStatus,
   WalletConnectedAPI,
-} from '@midnight-ntwrk/dapp-connector-api';
+} from '@midnightntwrk/dapp-connector-api';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
@@ -262,12 +263,14 @@ export class MidnightDappConnectorApi
     );
 
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await deserializeMidnightSealedTransaction(tx);
+    const deserializedTx = await firstValueFrom(
+      wallet.adoptTransaction(Buffer.from(tx, 'hex'), 'Finalized'),
+    );
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
       'proveTransaction',
-      { transactionData: deserializedTx.toString() },
+      { transactionData: readMidnightTransaction(deserializedTx).toString() },
     );
 
     if (!isConfirmed) {
@@ -316,12 +319,14 @@ export class MidnightDappConnectorApi
     );
 
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await deserializeMidnightUnsealedTransaction(tx);
+    const deserializedTx = await firstValueFrom(
+      wallet.adoptTransaction(Buffer.from(tx, 'hex'), 'Unbound'),
+    );
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
       'proveTransaction',
-      { transactionData: deserializedTx.toString() },
+      { transactionData: readMidnightTransaction(deserializedTx).toString() },
     );
 
     if (!isConfirmed) {
@@ -463,7 +468,9 @@ export class MidnightDappConnectorApi
     { sender }: SenderContext,
   ): Promise<void> {
     const wallet = await this.ensureWallet(sender);
-    const deserializedTx = await deserializeMidnightSealedTransaction(tx);
+    const deserializedTx = await firstValueFrom(
+      wallet.adoptTransaction(Buffer.from(tx, 'hex'), 'Finalized'),
+    );
 
     // Capture wallet state BEFORE submission. The SDK may optimistically remove
     // consumed coins from availableCoins on submit, which would make own-input
@@ -486,9 +493,12 @@ export class MidnightDappConnectorApi
 
     if (!this.#onPendingActivity || !preSubmitNightUtxos) return;
     try {
-      const ownUserAddress = ledger.addressFromKey(wallet.nightVerifyingKey);
+      const address = await firstValueFrom(wallet.address$);
+      const ownUserAddress = UnshieldedAddress.codec
+        .decode(wallet.networkId, MidnightBech32m.parse(address.unshielded))
+        .data.toString('hex');
       const activity = derivePendingActivityFromMidnightTx({
-        deserializedTx,
+        deserializedTx: readMidnightTransaction(deserializedTx),
         accountId: wallet.accountId,
         ownUserAddressHex: ownUserAddress,
         nightUtxos: preSubmitNightUtxos,
@@ -525,7 +535,26 @@ export class MidnightDappConnectorApi
       wallet.accountId,
       wallet.networkId,
     ]);
-    return this.#proofJobs.handle(command, owner, wallet.proofCircuitProvider);
+    // Pin an unversioned request when its job starts, even if a fork occurs
+    // while the backend is queued or proving.
+    const versionedCommand =
+      command.operation === 'start'
+        ? {
+            ...command,
+            request: {
+              ...command.request,
+              circuit: await this.withCircuitEpoch(
+                wallet,
+                command.request.circuit,
+              ),
+            },
+          }
+        : command;
+    return this.#proofJobs.handle(
+      versionedCommand,
+      owner,
+      wallet.proofCircuitProvider,
+    );
   }
 
   /** dApp circuits use the same backend as wallet transactions. */
@@ -534,7 +563,9 @@ export class MidnightDappConnectorApi
     { sender }: SenderContext,
   ): Promise<(bigint | undefined)[]> {
     const wallet = await this.ensureWallet(sender);
-    return wallet.proofCircuitProvider.check(request);
+    return wallet.proofCircuitProvider.check(
+      await this.withCircuitEpoch(wallet, request),
+    );
   }
 
   public async proveCircuit(
@@ -542,7 +573,9 @@ export class MidnightDappConnectorApi
     { sender }: SenderContext,
   ): Promise<Uint8Array> {
     const wallet = await this.ensureWallet(sender);
-    return wallet.proofCircuitProvider.prove(request);
+    return wallet.proofCircuitProvider.prove(
+      await this.withCircuitEpoch(wallet, request),
+    );
   }
 
   public async getTxHistory(
@@ -630,15 +663,26 @@ export class MidnightDappConnectorApi
 
   public async signData(
     data: string,
-    options: SignDataOptions,
+    options: MidnightSignDataOptions,
     { sender }: SenderContext,
   ): Promise<Signature> {
+    const scheme = options.scheme ?? 'schnorr_bip340';
+    if (scheme !== 'schnorr_bip340' && scheme !== 'ecdsa_secp256k1_sha256') {
+      throw new APIError(
+        ErrorCodes.InvalidRequest,
+        'Unsupported signature scheme',
+      );
+    }
     const wallet = await this.ensureWallet(sender);
 
     const { isConfirmed } = await this.#userConfirmationRequest(
       sender,
       'signData',
-      { signDataPayload: data, signDataKeyType: options.keyType },
+      {
+        signDataPayload: data,
+        signDataKeyType: options.keyType,
+        signDataScheme: scheme,
+      },
     );
 
     if (!isConfirmed) {
@@ -654,10 +698,46 @@ export class MidnightDappConnectorApi
     );
 
     const { signature, verifyingKey } = await firstValueFrom(
-      wallet.signData(dataBytes),
+      wallet.signData(
+        dataBytes,
+        scheme === 'schnorr_bip340' ? 'schnorr' : 'ecdsa',
+      ),
     );
 
-    return { data, signature, verifyingKey };
+    if (
+      signature.tag !== verifyingKey.tag ||
+      signature.tag !== (scheme === 'schnorr_bip340' ? 'schnorr' : 'ecdsa')
+    ) {
+      throw new APIError(
+        ErrorCodes.InternalError,
+        'Signature and verifying key schemes do not match',
+      );
+    }
+    return {
+      data,
+      signature: signature.value,
+      verifyingKey: verifyingKey.value,
+      scheme:
+        signature.tag === 'schnorr'
+          ? 'schnorr_bip340'
+          : 'ecdsa_secp256k1_sha256',
+    };
+  }
+
+  private async withCircuitEpoch<T extends { ledgerVersion?: 'v8' | 'v9' }>(
+    wallet: MidnightWallet,
+    request: T,
+  ): Promise<T & { ledgerVersion: 'v8' | 'v9' }> {
+    if (request.ledgerVersion)
+      return { ...request, ledgerVersion: request.ledgerVersion };
+    const { activeProtocolVersion } = await firstValueFrom(wallet.state());
+    return {
+      ...request,
+      ledgerVersion:
+        activeProtocolVersion >= ProtocolVersion.V9NativeForkVersion
+          ? 'v9'
+          : 'v8',
+    };
   }
 
   private resolveSenderAndOptions(

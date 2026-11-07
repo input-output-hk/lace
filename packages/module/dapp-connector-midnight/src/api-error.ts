@@ -1,7 +1,7 @@
 import type {
   APIError as MidnightAPIError,
   ErrorCode,
-} from '@midnight-ntwrk/dapp-connector-api';
+} from '@midnightntwrk/dapp-connector-api';
 
 export class APIError extends Error implements MidnightAPIError {
   public readonly reason: string;

@@ -1,0 +1,33 @@
+{
+  "provenance": {
+    "sdk": "1.2.0",
+    "components": {
+      "wallet-sdk-dust-wallet": "4.2.0",
+      "wallet-sdk-shielded": "3.0.2",
+      "wallet-sdk-unshielded-wallet": "3.1.0",
+      "wallet-sdk-facade": "4.1.0"
+    },
+    "source": "SDK 1.2.0 serializers, synthetic seed bytes all 7, no user wallet data",
+    "generator": "evidence/2026-11-04-rc2-integration/generate-legacy-fixture.mjs"
+  },
+  "expected": {
+    "networkId": "undeployed",
+    "dustPublicKey": "20000316309827021981150346430801061325953910895723765820572682198918950628975",
+    "shieldedPublicKeys": {
+      "coinPublicKey": "19d316b8bc931a9fb308370cc43c6bf7fed9e484a5a7e961ec4b68fd9524e602",
+      "encryptionPublicKey": "fd56b2e79eed0426dbb973e7149f16236dbaae5eb055958c175f05fedc714590"
+    },
+    "unshieldedPublicKey": {
+      "publicKey": "989c0b76cb563971fdc9bef31ec06c3560f3249d6ee9e5d83c57625596e05f6f",
+      "addressHex": "3f662275b53a056c7fb91fe4e5b98f00f6ef6c9f97b3358e15daf33f7a7037ca",
+      "address": "mn_addr_undeployed18anzyad48gzkclaerljwtwv0qrmw7mylj7entrs4mten77nsxl9qplved5"
+    },
+    "unshieldedValue": "123456"
+  },
+  "serializedState": {
+    "dust": "{\"publicKey\":{\"publicKey\":\"20000316309827021981150346430801061325953910895723765820572682198918950628975\"},\"state\":\"6d69646e696768743a647573742d6c6f63616c2d73746174655b76315d3a080004000800007c022000022000000700f2052a012d81302a0000000000000000000000000000\",\"protocolVersion\":\"0\",\"networkId\":\"undeployed\",\"offset\":\"42\"}",
+    "shielded": "{\"publicKeys\":{\"coinPublicKey\":\"19d316b8bc931a9fb308370cc43c6bf7fed9e484a5a7e961ec4b68fd9524e602\",\"encryptionPublicKey\":\"fd56b2e79eed0426dbb973e7149f16236dbaae5eb055958c175f05fedc714590\"},\"state\":\"6d69646e696768743a7a737761702d6c6f63616c2d73746174655b76365d3a080004000c0000000c022000\",\"protocolVersion\":\"0\",\"offset\":\"43\",\"networkId\":\"undeployed\",\"coinHashes\":{}}",
+    "unshielded": "{\"publicKey\":{\"publicKey\":\"989c0b76cb563971fdc9bef31ec06c3560f3249d6ee9e5d83c57625596e05f6f\",\"addressHex\":\"3f662275b53a056c7fb91fe4e5b98f00f6ef6c9f97b3358e15daf33f7a7037ca\",\"address\":\"mn_addr_undeployed18anzyad48gzkclaerljwtwv0qrmw7mylj7entrs4mten77nsxl9qplved5\"},\"state\":{\"availableUtxos\":[{\"utxo\":{\"value\":\"123456\",\"owner\":\"3f662275b53a056c7fb91fe4e5b98f00f6ef6c9f97b3358e15daf33f7a7037ca\",\"type\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"intentHash\":\"abababababababababababababababababababababababababababababababab\",\"outputNo\":0},\"meta\":{\"ctime\":\"2026-11-01T00:00:00.000Z\",\"registeredForDustGeneration\":true}}],\"pendingUtxos\":[]},\"protocolVersion\":\"0\",\"appliedId\":\"44\",\"networkId\":\"undeployed\"}",
+    "txHistory": "[{\"hash\":\"cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd\",\"protocolVersion\":0,\"status\":\"SUCCESS\",\"identifiers\":[\"efefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefef\"],\"timestamp\":\"2026-11-01T00:00:00.000Z\",\"fees\":\"123\"}]"
+  }
+}

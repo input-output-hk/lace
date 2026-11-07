@@ -21,7 +21,7 @@ import defaultFeatureFlags from '../src/feature-flags';
 import { allModules } from '../src/util/all-modules';
 
 it.each([
-  'BLOCKCHAIN_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER',
+  'BLOCKCHAIN_MIDNIGHT_TEE_VERITEE_PROOF_SERVER',
   'EARN_REWARDS',
   'MIGRATE_WALLET',
   'NOTIFICATION_CENTER',
@@ -60,7 +60,7 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('EARN_REWARDS') },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_SHIELDED_ACTIVITY_ROWS') },
   { key: FEATURE_FLAG_REALFI },
-  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_TEE_TEMENOS_PROOF_SERVER') },
+  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_TEE_VERITEE_PROOF_SERVER') },
 ];
 
 testFeatureFlagCompatibility(

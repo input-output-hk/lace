@@ -7,34 +7,34 @@ import {
   RealLedgerClient,
   RealLocalVerifier,
   RealWardenClient,
-} from '@input-output-hk/temenos-attestation-verifier';
-import { createTemenosAttestedProverWith } from '@lace-lib/vendor/temenos-attested-prover';
+} from '@input-output-hk/veritee-attestation-verifier';
+import { createVeriteeAttestedProverWith } from '@lace-lib/vendor/veritee-attested-prover';
 
 import type {
   VerifierConfig,
   VerifierDependencies,
-} from '@input-output-hk/temenos-attestation-verifier';
-import type { TemenosTrustRoots } from '@lace-lib/vendor/temenos-attested-prover';
+} from '@input-output-hk/veritee-attestation-verifier';
+import type { VeriteeTrustRoots } from '@lace-lib/vendor/veritee-attested-prover';
 
-export { TemenosAttestationError } from '@lace-lib/vendor/temenos-attested-prover';
+export { VeriteeAttestationError } from '@lace-lib/vendor/veritee-attested-prover';
 export type {
-  TemenosAttestationPhaseId,
-  TemenosAttestationCheckId,
-  TemenosTrustRoots,
-} from '@lace-lib/vendor/temenos-attested-prover';
+  VeriteeAttestationPhaseId,
+  VeriteeAttestationCheckId,
+  VeriteeTrustRoots,
+} from '@lace-lib/vendor/veritee-attested-prover';
 
 /**
- * The extension's Temenos driver with the verifier library's real
+ * The extension's Veritee driver with the verifier library's real
  * dependencies; the public SDK supplies its verifier through the host.
  *
  * @param testSeam - internal: only tests pass it, to swap in the library's mock
  *   dependencies and fixture deployment. No public entry re-exports this function.
  */
-export const createStoreTemenosAttestedProver = (
+export const createStoreVeriteeAttestedProver = (
   props: {
     networkId: string;
     proofServerApiUrl: string;
-    trustRoots: TemenosTrustRoots;
+    trustRoots: VeriteeTrustRoots;
     getLedgerIndexerUrl: () => Promise<string>;
   },
   testSeam?: {
@@ -42,7 +42,7 @@ export const createStoreTemenosAttestedProver = (
     config?: Omit<VerifierConfig, 'amdRootCertificates' | 'indexerUrl'>;
   },
 ) =>
-  createTemenosAttestedProverWith(
+  createVeriteeAttestedProverWith(
     {
       ...props,
       verifier: {

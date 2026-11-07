@@ -2,14 +2,15 @@
 // Babel plugin to fix problematic midnight-ntwrk imports
 // This plugin temporarily removes the 'exports' field from problematic @midnight-ntwrk packages
 const fs = require('fs');
-const path = require('path');
 const Module = require('module');
+const path = require('path');
 
 // List of problematic packages to patch (removes 'exports' field so Node falls back to 'main')
 // Only works when the package has a CJS file reachable via 'main' or root-level fallback,
 // or when Node's require(esm) can load the 'main' file (ESM-only @midnightntwrk packages).
 const packagesToPatch = [
   '@midnight-ntwrk/dapp-connector-api',
+  '@midnightntwrk/dapp-connector-api',
   '@midnightntwrk/wallet-sdk-abstractions',
   '@midnightntwrk/wallet-sdk-address-format',
   '@midnightntwrk/wallet-sdk-hd',
@@ -31,9 +32,35 @@ const STUB_PACKAGES = [
 const originalLoad = Module._load;
 Module._load = function (request, parent, isMain) {
   if (
-    STUB_PACKAGES.some(pkg => request === pkg || request.startsWith(pkg + '/'))
+    STUB_PACKAGES.some(
+      package_ => request === package_ || request.startsWith(package_ + '/'),
+    )
   ) {
     return {};
+  }
+  // LW-15105: the canary HD package only exposes an import condition. Resolve
+  // the nearest installed copy so documentation does not accidentally load v1.
+  // Remove this fallback when wallet-sdk-hd supports require(esm) via exports.
+  if (request === '@midnightntwrk/wallet-sdk-hd') {
+    try {
+      Module._resolveFilename(request, parent);
+    } catch (error) {
+      if (error.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') throw error;
+      for (const directory of Module._resolveLookupPaths(request, parent)) {
+        const manifestPath = path.join(directory, request, 'package.json');
+        if (!fs.existsSync(manifestPath)) continue;
+        const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+        const entry = manifest.exports?.['.']?.import;
+        if (typeof entry !== 'string' || !entry.startsWith('./')) throw error;
+        return originalLoad.call(
+          this,
+          path.resolve(path.dirname(manifestPath), entry),
+          parent,
+          isMain,
+        );
+      }
+      throw error;
+    }
   }
   return originalLoad.apply(this, arguments);
 };

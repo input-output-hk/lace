@@ -11,11 +11,12 @@ const testAccountId = 'test-account-id' as AccountId;
 
 const mockMidnightWallet = {
   accountId: testAccountId,
-  signData: vi
-    .fn()
-    .mockReturnValue(
-      of({ signature: 'mock-signature', verifyingKey: 'mock-verifying-key' }),
-    ),
+  signData: vi.fn().mockReturnValue(
+    of({
+      signature: { tag: 'schnorr', value: 'mock-signature' },
+      verifyingKey: { tag: 'schnorr', value: 'mock-verifying-key' },
+    }),
+  ),
 } as unknown as MidnightWallet;
 
 const wallets$ = of({ [testAccountId]: mockMidnightWallet });
@@ -54,7 +55,12 @@ describe('instance-bound data signing', () => {
   it('signs through its injected engine and refuses after removal without global fallback', async () => {
     const engine = (signature: string) => ({
       ...mockMidnightWallet,
-      signData: vi.fn(() => of({ signature, verifyingKey: signature })),
+      signData: vi.fn(() =>
+        of({
+          signature: { tag: 'schnorr' as const, value: signature },
+          verifyingKey: { tag: 'schnorr' as const, value: signature },
+        }),
+      ),
     });
     const first = engine('aa');
     const second = engine('bb');

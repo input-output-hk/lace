@@ -22,7 +22,7 @@ export type StakingOptionCardProps = {
   balanceUnit?: string;
   yieldLabel: string;
   /** Absent while the live rate is still loading — renders an em dash. */
-  yieldValue?: string;
+  yieldValue?: React.ReactNode;
   onPress: () => void;
   testID?: string;
 };

@@ -1,6 +1,6 @@
 import { createMigrate } from 'redux-persist';
 
-import { TEMENOS_PROOF_SERVER_MODES } from '../const';
+import { VERITEE_PROOF_SERVER_MODES } from '../const';
 
 import { initializeSideEffects } from './side-effects';
 import { initialState, midnightContextReducers } from './slice';
@@ -158,7 +158,7 @@ const store: LaceInit<LaceModuleStoreInit> = async props => ({
             const override =
               typedState.userNetworksConfigOverrides?.[networkId];
             const previousMode = override?.proofServer;
-            const mode = TEMENOS_PROOF_SERVER_MODES[networkId];
+            const mode = VERITEE_PROOF_SERVER_MODES[networkId];
             if (
               override &&
               mode &&

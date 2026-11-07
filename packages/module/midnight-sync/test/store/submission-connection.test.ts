@@ -1,11 +1,15 @@
 import { EventEmitter } from 'node:events';
 
 import { createProgressSubmissionService } from '@lace-lib/vendor/midnight-submission-service';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import { PolkadotNodeClient } from '@midnightntwrk/wallet-sdk/node-client/effect';
-import { Duration, Effect } from 'effect';
+import {
+  WalletTransaction,
+  ProtocolVersion,
+} from '@midnightntwrk/wallet-sdk-abstractions';
+import { Duration, Effect, SynchronizedRef } from 'effect';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type { ApiPromise } from '@polkadot/api';
 
 // Keep the SDK client and stream real; emulate the browser's asynchronous close.
@@ -33,6 +37,7 @@ const setup = () => {
         events.emit('disconnected');
       };
     }),
+    rpc: { system: { chain: vi.fn(async () => 'test') } },
     tx: { midnight: { sendMnTransaction: () => ({ send }) } },
   });
   const make = vi.spyOn(PolkadotNodeClient, 'make').mockReturnValue(
@@ -47,6 +52,7 @@ const setup = () => {
             reconnectionTimeout: Duration.seconds(1),
           },
           api as unknown as ApiPromise,
+          Effect.runSync(SynchronizedRef.make(0)),
         );
       }),
       () => Effect.promise(async () => api.disconnect()),
@@ -57,7 +63,11 @@ const setup = () => {
   });
   const submit = async () =>
     service.submitTransaction(
-      { serialize: () => new Uint8Array([1]) } as FinalizedTransaction,
+      WalletTransaction.adopt(
+        'Finalized',
+        Transaction.fromParts('undeployed').mockProve(),
+        ProtocolVersion.MinSupportedVersion,
+      ),
       'Submitted',
     );
   return {

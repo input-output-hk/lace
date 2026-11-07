@@ -16,6 +16,7 @@ export type RadioButtonProps = {
   value?: string;
   showBorder?: boolean;
   testID?: string;
+  accessibilityLabel?: string;
 };
 
 export const RadioButton = ({
@@ -25,6 +26,7 @@ export const RadioButton = ({
   style,
   showBorder = false,
   testID,
+  accessibilityLabel,
 }: RadioButtonProps) => {
   const { theme } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -96,6 +98,7 @@ export const RadioButton = ({
       onHoverOut={handleOnHoverOut}
       disabled={isDisabled}
       accessibilityRole="radio"
+      accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled: isDisabled, selected: isChecked }}
       testID={testID}>
       <View style={styles.iconContainer}>

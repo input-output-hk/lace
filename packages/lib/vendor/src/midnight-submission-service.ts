@@ -6,14 +6,14 @@ import {
 import { SerializedTransaction } from '@midnightntwrk/wallet-sdk-abstractions';
 import { Effect, Exit, Option, Scope, Stream } from 'effect';
 
-import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type {
   SubmissionEvent,
   SubmissionService,
 } from '@midnightntwrk/wallet-sdk/capabilities/submission';
+import type { FinalizedTx } from '@midnightntwrk/wallet-sdk-abstractions';
 
 const observers = new WeakMap<
-  FinalizedTransaction,
+  FinalizedTx,
   (stage: SubmissionEvent['_tag']) => void
 >();
 
@@ -34,7 +34,7 @@ const awaitDisconnection = (client: PolkadotNodeClient) =>
 
 /** Exact object ownership: unrelated dApp submissions cannot update a wallet send. */
 export const observeSubmission = (
-  tx: FinalizedTransaction,
+  tx: FinalizedTx,
   report: (stage: SubmissionEvent['_tag']) => void,
 ) => {
   observers.set(tx, report);
@@ -48,7 +48,7 @@ export const createProgressSubmissionService = ({
   relayURL,
 }: {
   relayURL: URL;
-}): SubmissionService<FinalizedTransaction> => {
+}): SubmissionService<FinalizedTx> => {
   // Reuse metadata, but serialize sends: the SDK disconnects after each stream.
   const scope = Effect.runSync(Scope.make());
   const submissions = Effect.runSync(Effect.makeSemaphore(1));
@@ -59,7 +59,7 @@ export const createProgressSubmissionService = ({
     Effect.runSync,
   );
   const submit = async (
-    tx: FinalizedTransaction,
+    tx: FinalizedTx,
     waitFor: SubmissionEvent['_tag'] = 'InBlock',
   ) => {
     const serialized = SerializedTransaction.from(tx);
@@ -101,7 +101,7 @@ export const createProgressSubmissionService = ({
   return {
     // The runtime selects the requested tag above; SDK expresses this as overloads.
     submitTransaction:
-      submit as SubmissionService<FinalizedTransaction>['submitTransaction'],
+      submit as SubmissionService<FinalizedTx>['submitTransaction'],
     close: async () =>
       Scope.close(scope, Exit.void).pipe(
         Effect.ignoreLogged,

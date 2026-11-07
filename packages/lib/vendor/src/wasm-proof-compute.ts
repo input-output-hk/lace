@@ -10,11 +10,14 @@ import type { KeyMaterialProvider } from '@midnight-ntwrk/zkir-v2';
 
 // The SDK caches downloaded wallet circuits and parameters. Share that cache
 // across wallets and dApp calls for the lifetime of the engine.
-const defaultKeys = WasmProver.makeDefaultKeyMaterialProvider();
+const defaultKeys = {
+  v8: WasmProver.makeV8KeyMaterialProvider(),
+  v9: WasmProver.makeV9KeyMaterialProvider(),
+};
 
 /** Local proving with no proof-server fallback. Key downloads contain no witness. */
 export const createWasmCircuitProvider = (
-  keys: KeyMaterialProvider = defaultKeys,
+  keys?: KeyMaterialProvider,
   onProgress?: (event: AttestationProgressEvent) => void,
 ): ProofCircuitProvider => {
   const loading = async <T>(load: () => Promise<T>): Promise<T> => {
@@ -34,9 +37,16 @@ export const createWasmCircuitProvider = (
       // Material belongs to this one call. Never cache a dApp's circuit under
       // a name that another origin (or a built-in wallet circuit) could reuse.
       lookupKey: async location =>
-        (await loading(async () => keys.lookupKey(location))) ??
+        (await loading(async () =>
+          (keys ?? defaultKeys[request.ledgerVersion ?? 'v8']).lookupKey(
+            location,
+          ),
+        )) ??
         (location === request.keyLocation ? request.keyMaterial : undefined),
-      getParams: async k => loading(async () => keys.getParams(k)),
+      getParams: async k =>
+        loading(async () =>
+          (keys ?? defaultKeys[request.ledgerVersion ?? 'v8']).getParams(k),
+        ),
     });
   return {
     check: async request =>

@@ -4,10 +4,13 @@ import {
 } from '@lace-contract/midnight-context';
 import { networkId } from '@lace-contract/midnight-context/src/stub-data';
 import { createProverClient } from '@lace-lib/midnight-prover';
-import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
 import * as ledger from '@midnight-ntwrk/ledger-v8';
-import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
-import { Observable, of } from 'rxjs';
+import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
+import {
+  NetworkId,
+  ProtocolVersion,
+} from '@midnightntwrk/wallet-sdk-abstractions';
+import { Observable, of, from } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { APIError } from '../../src/api-error';
@@ -17,6 +20,7 @@ import type { MidnightDappConnectorApiOptions } from '../../src/store/dependenci
 import type { SenderContext } from '../../src/types';
 import type {
   MidnightWalletsByAccountId,
+  MidnightWalletAddress,
   MidnightNetworkConfig,
   MidnightWallet,
 } from '@lace-contract/midnight-context';
@@ -24,7 +28,12 @@ import type { AccountId } from '@lace-contract/wallet-repo';
 import type {
   DesiredInput,
   DesiredOutput,
-} from '@midnight-ntwrk/dapp-connector-api';
+} from '@midnightntwrk/dapp-connector-api';
+
+const adoptFixture = vi.fn();
+vi.mock('@lace-lib/vendor/midnight-transaction-handle', () => ({
+  readMidnightTransaction: (handle: unknown) => handle,
+}));
 
 vi.mock('@midnight-ntwrk/ledger-v8', async () => {
   const actual = await vi.importActual('@midnight-ntwrk/ledger-v8');
@@ -54,11 +63,17 @@ vi.mock('@midnightntwrk/wallet-sdk-address-format', () => ({
     },
   },
   UnshieldedAddress: {
-    codec: { decode: (_networkId: string, address: string) => address },
+    codec: {
+      decode: (_networkId: string, address: string) =>
+        address === 'pending-own-address'
+          ? { data: { toString: () => 'own-useraddress-hex' } }
+          : address,
+    },
   },
 }));
 
 const mockWalletState = {
+  activeProtocolVersion: ProtocolVersion.MinSupportedVersion,
   shielded: {
     balances: { token1: 100n },
     address: {
@@ -126,7 +141,10 @@ describe('MidnightDappConnectorApi', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    adoptFixture.mockResolvedValue({});
     mockWallet = {
+      adoptTransaction: (bytes: Uint8Array, stage: string) =>
+        from(adoptFixture(bytes, stage)),
       accountId: 'test-account-id',
       networkId: NetworkId.NetworkId.Preview,
       state: vi.fn().mockReturnValue(of(mockWalletState)),
@@ -397,10 +415,50 @@ describe('MidnightDappConnectorApi', () => {
         new Uint8Array([0xf0]),
       );
       expect(mockWallet.proofCircuitProvider.prove).toHaveBeenCalledWith(
-        payload,
+        { ...payload, ledgerVersion: 'v8' },
         expect.any(AbortSignal),
       );
     });
+    it('keeps the starting v9 epoch through checking and proving when wallet state changes', async () => {
+      vi.mocked(mockWallet.state).mockReturnValue(
+        of({
+          ...mockWalletState,
+          activeProtocolVersion: ProtocolVersion.V9NativeForkVersion,
+        }) as unknown as ReturnType<MidnightWallet['state']>,
+      );
+      vi.mocked(mockWallet.proofCircuitProvider.check).mockImplementation(
+        async () => {
+          vi.mocked(mockWallet.state).mockReturnValue(
+            of(mockWalletState) as unknown as ReturnType<
+              MidnightWallet['state']
+            >,
+          );
+          return [42n];
+        },
+      );
+      const api = new MidnightDappConnectorApi(optionsWithWallet);
+      const provider = createProverClient({
+        ensure: async () => {},
+        release: async () => {},
+        intervalMs: 0,
+        send: async command => api.proofCommand(command, sender),
+      }).provider();
+      const payload = {
+        serializedPreimage: new Uint8Array([1]),
+        keyLocation: 'circuit',
+      };
+      await expect(provider.checkAndProve(payload)).resolves.toEqual(
+        new Uint8Array([0xf0]),
+      );
+      for (const method of ['check', 'prove'] as const) {
+        expect(mockWallet.proofCircuitProvider[method]).toHaveBeenCalledWith(
+          { ...payload, ledgerVersion: 'v9' },
+          expect.any(AbortSignal),
+        );
+      }
+      expect(mockWallet.state).toHaveBeenCalledTimes(1);
+    });
+
     it('rejects missing document identity and handles from another document', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
       const upload = {
@@ -462,9 +520,10 @@ describe('MidnightDappConnectorApi', () => {
       await expect(api.checkCircuit(payload, testSender)).resolves.toEqual([
         42n,
       ]);
-      expect(mockWallet.proofCircuitProvider.check).toHaveBeenCalledWith(
-        payload,
-      );
+      expect(mockWallet.proofCircuitProvider.check).toHaveBeenCalledWith({
+        ...payload,
+        ledgerVersion: 'v8',
+      });
     });
 
     it('forwards the prove payload through the bound wallet transport', async () => {
@@ -473,10 +532,46 @@ describe('MidnightDappConnectorApi', () => {
       await expect(api.proveCircuit(payload, testSender)).resolves.toEqual(
         new Uint8Array([0xf0]),
       );
-      expect(mockWallet.proofCircuitProvider.prove).toHaveBeenCalledWith(
-        payload,
-      );
+      expect(mockWallet.proofCircuitProvider.prove).toHaveBeenCalledWith({
+        ...payload,
+        ledgerVersion: 'v8',
+      });
     });
+
+    it.each(['check', 'prove'] as const)(
+      'routes %s to v9 and preserves an explicit v8 circuit epoch',
+      async method => {
+        vi.mocked(mockWallet.state).mockReturnValue(
+          of({
+            ...mockWalletState,
+            activeProtocolVersion: ProtocolVersion.V9NativeForkVersion,
+          }) as unknown as ReturnType<MidnightWallet['state']>,
+        );
+        const api = new MidnightDappConnectorApi(optionsWithWallet);
+        if (method === 'check') {
+          await api.checkCircuit(payload, testSender);
+          await api.checkCircuit(
+            { ...payload, ledgerVersion: 'v8' },
+            testSender,
+          );
+        } else {
+          await api.proveCircuit(payload, testSender);
+          await api.proveCircuit(
+            { ...payload, ledgerVersion: 'v8' },
+            testSender,
+          );
+        }
+        expect(mockWallet.proofCircuitProvider[method]).toHaveBeenNthCalledWith(
+          1,
+          { ...payload, ledgerVersion: 'v9' },
+        );
+        expect(mockWallet.proofCircuitProvider[method]).toHaveBeenNthCalledWith(
+          2,
+          { ...payload, ledgerVersion: 'v8' },
+        );
+        expect(mockWallet.state).toHaveBeenCalledTimes(1);
+      },
+    );
 
     it('refuses when no account is bound to the requesting origin', async () => {
       const api = new MidnightDappConnectorApi(optionsWithWallet);
@@ -506,9 +601,7 @@ describe('MidnightDappConnectorApi', () => {
       const mockSubmitTransaction = vi.fn().mockReturnValue(of(undefined));
 
       // Mock the Transaction.deserialize to return a mock transaction object
-      vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue(
-        mockDeserializedTx,
-      );
+      adoptFixture.mockResolvedValue(mockDeserializedTx);
 
       mockWallet.submitTransaction = mockSubmitTransaction;
 
@@ -516,11 +609,9 @@ describe('MidnightDappConnectorApi', () => {
 
       await api.submitTransaction(mockSerializedTx, testSender);
 
-      expect(ledger.Transaction.deserialize).toHaveBeenCalledWith(
-        'signature',
-        'proof',
-        'binding',
+      expect(adoptFixture).toHaveBeenCalledWith(
         Buffer.from(mockSerializedTx, 'hex'),
+        'Finalized',
       );
       expect(mockSubmitTransaction).toHaveBeenCalledWith(mockDeserializedTx);
       expect(mockSubmitTransaction).toHaveBeenCalledTimes(1);
@@ -560,6 +651,11 @@ describe('MidnightDappConnectorApi', () => {
       } as unknown as Parameters<typeof ledger.addressFromKey>[0];
 
       beforeEach(() => {
+        mockWallet.address$ = of({
+          unshielded: 'pending-own-address',
+          dust: 'dust-address',
+          shielded: 'shielded-address',
+        } as MidnightWalletAddress);
         (mockWallet as unknown as { state: ReturnType<typeof vi.fn> }).state =
           vi.fn().mockReturnValue(
             of({
@@ -574,7 +670,7 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       it('invokes onPendingActivity with a pending activity when the helper attributes the tx', async () => {
-        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+        adoptFixture.mockResolvedValue({
           intents: new Map([
             [
               1,
@@ -615,7 +711,7 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       it('does not invoke onPendingActivity when the helper returns undefined', async () => {
-        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+        adoptFixture.mockResolvedValue({
           intents: new Map([
             [
               1,
@@ -649,7 +745,7 @@ describe('MidnightDappConnectorApi', () => {
       });
 
       it('swallows derivation errors so the DApp-facing submit remains successful', async () => {
-        vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue({
+        adoptFixture.mockResolvedValue({
           get intents(): never {
             throw new Error('boom');
           },
@@ -1063,9 +1159,7 @@ describe('MidnightDappConnectorApi', () => {
     const mockSender = { sender: { url: 'https://test-dapp.io' } };
 
     beforeEach(() => {
-      vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue(
-        mockDeserializedTx,
-      );
+      adoptFixture.mockResolvedValue(mockDeserializedTx);
       mockWallet.balanceFinalizedTransaction = vi
         .fn()
         .mockReturnValue(of(mockRecipe));
@@ -1083,11 +1177,9 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       expect(result.tx).toBe(mockFinalizedSerializedTx.toString('hex'));
-      expect(ledger.Transaction.deserialize).toHaveBeenCalledWith(
-        'signature',
-        'proof',
-        'binding',
+      expect(adoptFixture).toHaveBeenCalledWith(
         Buffer.from(mockSerializedTx, 'hex'),
+        'Finalized',
       );
       expect(mockWallet.balanceFinalizedTransaction).toHaveBeenCalledWith(
         mockDeserializedTx,
@@ -1179,9 +1271,7 @@ describe('MidnightDappConnectorApi', () => {
     const mockSender = { sender: { url: 'https://test-dapp.io' } };
 
     beforeEach(() => {
-      vi.spyOn(ledger.Transaction, 'deserialize').mockResolvedValue(
-        mockDeserializedTx,
-      );
+      adoptFixture.mockResolvedValue(mockDeserializedTx);
       mockWallet.balanceUnboundTransaction = vi
         .fn()
         .mockReturnValue(of(mockRecipe));
@@ -1199,11 +1289,9 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       expect(result.tx).toBe(mockFinalizedSerializedTx.toString('hex'));
-      expect(ledger.Transaction.deserialize).toHaveBeenCalledWith(
-        'signature',
-        'proof',
-        'pre-binding',
+      expect(adoptFixture).toHaveBeenCalledWith(
         Buffer.from(mockSerializedTx, 'hex'),
+        'Unbound',
       );
       expect(mockWallet.balanceUnboundTransaction).toHaveBeenCalledWith(
         mockDeserializedTx,
@@ -1402,8 +1490,61 @@ describe('MidnightDappConnectorApi', () => {
       verifyingKey: 'mock-verifying-key',
     };
 
+    it('returns a scheme-labelled Schnorr signature over the connector payload', async () => {
+      const secret = '01'.repeat(32);
+      const verifyingKey = ledger.signatureVerifyingKey(secret);
+      const wallet = {
+        ...mockWallet,
+        signData: (bytes: Uint8Array) =>
+          of({
+            signature: {
+              tag: 'schnorr',
+              value: ledger.signData(secret, bytes),
+            },
+            verifyingKey: { tag: 'schnorr', value: verifyingKey },
+          }),
+      } as unknown as MidnightWallet;
+      const api = new MidnightDappConnectorApi({
+        ...optionsWithWallet,
+        wallets$: of({ [wallet.accountId]: wallet }),
+      });
+
+      const result = await api.signData(
+        'Hello',
+        { encoding: 'text', keyType: 'unshielded' },
+        mockSender,
+      );
+
+      expect(result.scheme).toBe('schnorr_bip340');
+      expect(result.data).toBe('Hello');
+      expect(Buffer.from(result.verifyingKey, 'hex')).toHaveLength(32);
+      expect(Buffer.from(result.signature, 'hex')).toHaveLength(64);
+      expect(
+        ledger.verifySignature(
+          result.verifyingKey,
+          new TextEncoder().encode('midnight_signed_message:5:Hello'),
+          result.signature,
+        ),
+      ).toBe(true);
+      expect(
+        ledger.verifySignature(
+          result.verifyingKey,
+          new TextEncoder().encode(result.data),
+          result.signature,
+        ),
+      ).toBe(false);
+    });
+
     it('should sign hex-encoded data and return signature', async () => {
-      const mockSignData = vi.fn().mockReturnValue(of(mockSignResult));
+      const mockSignData = vi.fn().mockReturnValue(
+        of({
+          signature: { tag: 'schnorr', value: mockSignResult.signature },
+          verifyingKey: {
+            tag: 'schnorr',
+            value: mockSignResult.verifyingKey,
+          },
+        }),
+      );
       const wallet = {
         ...mockWallet,
         signData: mockSignData,
@@ -1421,6 +1562,7 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       expect(result).toEqual({
+        scheme: 'schnorr_bip340',
         data: '48656c6c6f',
         signature: 'mock-signature',
         verifyingKey: 'mock-verifying-key',
@@ -1429,11 +1571,20 @@ describe('MidnightDappConnectorApi', () => {
       // decoded payload (LW-15403): `midnight_signed_message:<size>:` + "Hello".
       expect(mockSignData).toHaveBeenCalledWith(
         new TextEncoder().encode('midnight_signed_message:5:Hello'),
+        'schnorr',
       );
     });
 
     it('should sign base64-encoded data and return signature', async () => {
-      const mockSignData = vi.fn().mockReturnValue(of(mockSignResult));
+      const mockSignData = vi.fn().mockReturnValue(
+        of({
+          signature: { tag: 'schnorr', value: mockSignResult.signature },
+          verifyingKey: {
+            tag: 'schnorr',
+            value: mockSignResult.verifyingKey,
+          },
+        }),
+      );
       const wallet = {
         ...mockWallet,
         signData: mockSignData,
@@ -1451,17 +1602,27 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       expect(result).toEqual({
+        scheme: 'schnorr_bip340',
         data: 'SGVsbG8=',
         signature: 'mock-signature',
         verifyingKey: 'mock-verifying-key',
       });
       expect(mockSignData).toHaveBeenCalledWith(
         new TextEncoder().encode('midnight_signed_message:5:Hello'),
+        'schnorr',
       );
     });
 
     it('should sign text-encoded data and return signature', async () => {
-      const mockSignData = vi.fn().mockReturnValue(of(mockSignResult));
+      const mockSignData = vi.fn().mockReturnValue(
+        of({
+          signature: { tag: 'schnorr', value: mockSignResult.signature },
+          verifyingKey: {
+            tag: 'schnorr',
+            value: mockSignResult.verifyingKey,
+          },
+        }),
+      );
       const wallet = {
         ...mockWallet,
         signData: mockSignData,
@@ -1479,12 +1640,14 @@ describe('MidnightDappConnectorApi', () => {
       );
 
       expect(result).toEqual({
+        scheme: 'schnorr_bip340',
         data: 'Hello',
         signature: 'mock-signature',
         verifyingKey: 'mock-verifying-key',
       });
       expect(mockSignData).toHaveBeenCalledWith(
         new TextEncoder().encode('midnight_signed_message:5:Hello'),
+        'schnorr',
       );
     });
 
@@ -1508,7 +1671,15 @@ describe('MidnightDappConnectorApi', () => {
     ] as const)(
       'preserves connector decoding for %s %j',
       async (encoding, data, expected) => {
-        const signData = vi.fn(() => of(mockSignResult));
+        const signData = vi.fn(() =>
+          of({
+            signature: { tag: 'schnorr', value: mockSignResult.signature },
+            verifyingKey: {
+              tag: 'schnorr',
+              value: mockSignResult.verifyingKey,
+            },
+          }),
+        );
         const wallet = { ...mockWallet, signData } as unknown as MidnightWallet;
         const api = new MidnightDappConnectorApi({
           ...optionsWithWallet,
@@ -1520,15 +1691,21 @@ describe('MidnightDappConnectorApi', () => {
             { encoding, keyType: 'unshielded' },
             mockSender,
           ),
-        ).toEqual({ data, ...mockSignResult });
+        ).toEqual({ data, ...mockSignResult, scheme: 'schnorr_bip340' });
         expect(signData).toHaveBeenCalledExactlyOnceWith(
           new TextEncoder().encode(expected),
+          'schnorr',
         );
       },
     );
 
     it('preserves the connector InvalidRequest error for unsupported encodings', async () => {
-      const signData = vi.fn(() => of(mockSignResult));
+      const signData = vi.fn(() =>
+        of({
+          signature: { tag: 'schnorr', value: mockSignResult.signature },
+          verifyingKey: { tag: 'schnorr', value: mockSignResult.verifyingKey },
+        }),
+      );
       const wallet = { ...mockWallet, signData } as unknown as MidnightWallet;
       const api = new MidnightDappConnectorApi({
         ...optionsWithWallet,

@@ -1,7 +1,6 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { ByteArray, HexBytes } from '@lace-lib/util';
-import * as ledgerV6 from '@midnight-ntwrk/ledger-v8';
 import { dummyLogger } from 'ts-log';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -18,18 +17,9 @@ import type { Mock } from 'vitest';
 
 const testAccountId = 'test-account-id' as MidnightAccountId;
 
-vi.mock('@midnight-ntwrk/ledger-v8', async () => {
-  const actual: typeof ledgerV6 = await vi.importActual(
-    '@midnight-ntwrk/ledger-v8',
-  );
-
-  return {
-    ...actual,
-    Transaction: Object.assign({}, actual.Transaction, {
-      deserialize: vi.fn(),
-    }),
-  };
-});
+vi.mock('@lace-lib/vendor/midnight-transaction-handle', () => ({
+  readMidnightTransaction: (transaction: unknown) => transaction,
+}));
 
 type MockWallet = MidnightWallet & {
   submitTransaction: Mock<MidnightWallet['submitTransaction']>;
@@ -61,15 +51,12 @@ const prepare = (
 
     const serializedTx = '';
 
-    const transactionDeserializeMock = vi.mocked(
-      ledgerV6.Transaction.deserialize,
-    );
-    transactionDeserializeMock.mockReturnValue(
-      results.deserialize as unknown as ledgerV6.UnprovenTransaction,
-    );
-
     const { cold, expectObservable } = helpers;
+    const transactionDeserializeMock = vi.fn(() =>
+      cold('(a|)', { a: results.deserialize }),
+    );
     const wallet = {
+      adoptTransaction: transactionDeserializeMock,
       accountId: testAccountId,
       submitTransaction: vi.fn().mockReturnValue(
         cold('a', {
@@ -119,10 +106,8 @@ describe('blockchain-midnight submitTx', () => {
         flush();
 
         expect(transactionDeserializeMock).toHaveBeenCalledWith(
-          'signature',
-          'proof',
-          'binding',
           ByteArray.fromHex(HexBytes(serializedTx)),
+          'Finalized',
         );
       },
     );

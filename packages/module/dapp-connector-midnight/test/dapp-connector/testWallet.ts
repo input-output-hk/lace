@@ -6,7 +6,7 @@ import type {
   SenderContext,
   ExtendedDAppConnectorWalletAPI,
 } from '../../src/types';
-import type { Configuration } from '@midnight-ntwrk/dapp-connector-api';
+import type { Configuration } from '@midnightntwrk/dapp-connector-api';
 
 export const testServiceUriConfig: Configuration = {
   indexerUri: 'http://test-indexer-uri',

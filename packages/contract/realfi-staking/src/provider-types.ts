@@ -161,6 +161,8 @@ export type RealFiExchangeRateAndApy = {
    * 0, which would overwrite a good persisted APY in the store.
    */
   apy?: Percent;
+  /** Absent on older persisted locally calculated returns. */
+  apyPeriod?: '30d';
   /** Current sUSDr↔USDr exchange rate (≈1 staking leg). */
   exchangeRate: number;
   fetchedAt: Milliseconds;

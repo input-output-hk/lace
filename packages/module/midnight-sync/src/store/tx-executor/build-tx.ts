@@ -2,6 +2,7 @@ import { getDustTokenIdByNetwork } from '@lace-contract/midnight-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber, HexBytes } from '@lace-lib/util';
 import { nativeToken } from '@midnight-ntwrk/ledger-v8';
+import { WalletTransaction } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
   catchError,
   map,
@@ -40,6 +41,7 @@ import type {
 } from '@lace-contract/tx-executor';
 import type { WithLogger } from '@lace-lib/util';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
+import type { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import type { Observable } from 'rxjs';
 
 const isNativeNightCoin = (coin: UtxoWithMeta) =>
@@ -111,16 +113,19 @@ const buildTransaction = ({
   networkId,
   nightUtxos,
   nightVerifyingKey,
+  protocolVersion,
   txParams,
 }: DustDesignationDependencies & {
   blockchainSpecificSendFlowData: MidnightSpecificSendFlowData;
   networkId: MidnightSDKNetworkId;
+  protocolVersion: ProtocolVersion.ProtocolVersion;
   txParams: TxParamsBundle<MidnightSpecificTokenMetadata>;
 }) => {
   if (flowType === 'dust-designation') {
     return constructDustDesignationTransaction({
       address: txParams[0].address,
       networkId,
+      protocolVersion,
       nightUtxos,
       nightVerifyingKey,
     });
@@ -141,7 +146,7 @@ const buildTransaction = ({
     transfers[0].tokenKind === 'shielded'
       ? constructShieldedTransaction
       : constructUnshieldedTransaction;
-  return construct({ networkId, transfers: normalized });
+  return construct({ networkId, transfers: normalized, protocolVersion });
 };
 
 const serialiseTx = (
@@ -196,17 +201,19 @@ export const makeBuildTx =
       switchMap(midnightWallet =>
         midnightWallet.state().pipe(
           take(1),
-          map(({ unshielded: { availableCoins } }) =>
-            availableCoins.filter(isNativeNightCoin),
-          ),
-          map(availableNightCoins =>
-            dependencies.buildTransaction({
-              blockchainSpecificSendFlowData,
-              networkId: midnightWallet.networkId,
-              nightUtxos: availableNightCoins,
-              nightVerifyingKey: midnightWallet.nightVerifyingKey,
-              txParams,
-            }),
+          map(({ unshielded: { availableCoins }, activeProtocolVersion }) =>
+            WalletTransaction.adopt(
+              'Unproven',
+              dependencies.buildTransaction({
+                blockchainSpecificSendFlowData,
+                networkId: midnightWallet.networkId,
+                nightUtxos: availableCoins.filter(isNativeNightCoin),
+                protocolVersion: activeProtocolVersion,
+                nightVerifyingKey: midnightWallet.nightVerifyingKey,
+                txParams,
+              }),
+              activeProtocolVersion,
+            ),
           ),
           withLatestFrom(
             midnightWallet.state().pipe(

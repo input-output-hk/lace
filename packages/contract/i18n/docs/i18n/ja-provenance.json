@@ -115,7 +115,7 @@
   "midnight.label": "unknown",
   "cardano-bitcoin.label": "unknown",
   "midnight.network-config.invalid-network-url": "unknown",
-  "midnight.network-config.node-address": "unknown",
+  "midnight.network-config.node-address": "machine-translated",
   "midnight.network-config.proof-server-label": "unknown",
   "midnight.proof-server.section.on-device": "machine-translated",
   "midnight.proof-server.section.paired": "machine-translated",
@@ -167,9 +167,10 @@
   "midnight.network-config.network-option.mainnet": "unknown",
   "midnight.network-config.network-option.preprod": "unknown",
   "midnight.network-config.network-option.preview": "unknown",
+  "midnight.network-config.network-option.stagenet": "verbatim",
   "midnight.network-config.network-option.qanet": "unknown",
   "bitcoin.network-config.network-option.testnet4": "unknown",
-  "midnight.network-config.indexer-address": "unknown",
+  "midnight.network-config.indexer-address": "machine-translated",
   "midnight.resync.modal.cancel": "unknown",
   "midnight.resync.modal.confirm": "unknown",
   "midnight.resync.modal.description": "unknown",
@@ -3024,5 +3025,8 @@
   "midnight.proof-server.custom.disclosure.title": "mtpe",
   "midnight.proof-server.custom.disclosure.first-use": "mtpe",
   "midnight.proof-server.custom.disclosure.reminder": "mtpe",
-  "midnight.proof-server.custom.transaction-notice": "mtpe"
+  "midnight.proof-server.custom.transaction-notice": "mtpe",
+  "midnight.proof-server.title": "machine-translated",
+  "midnight.proof-server.locally-generated": "machine-translated",
+  "midnight.proof-server.description": "machine-translated"
 }

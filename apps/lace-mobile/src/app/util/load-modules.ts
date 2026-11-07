@@ -54,11 +54,13 @@ export const createFeatureFlagModuleLoader = async ({
   featureFlags,
   viewId,
   storeEnhancer,
+  runtimeApp = 'lace-mobile',
 }: {
   availableModules?: LaceModule[];
   featureFlags: FeatureFlag[];
   viewId: ViewId;
   storeEnhancer?: StoreEnhancer;
+  runtimeApp?: 'lace-extension' | 'lace-mobile';
 }): Promise<CreateLoaderProps & CreateStoreProps> => {
   const { featuresToLoad, modulesToLoad, fallback } = selectModulesWithFallback(
     {
@@ -70,7 +72,7 @@ export const createFeatureFlagModuleLoader = async ({
   );
   const features = { loaded: featuresToLoad, availableModules, fallback };
   const runtime = {
-    app: 'lace-mobile' as const,
+    app: runtimeApp,
     env: ENV,
     features,
     // Non-null assertion: App only initializes modules when config is valid

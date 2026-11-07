@@ -171,6 +171,8 @@ export type RealFiYieldInfo = {
    * reducer keeps a previously-known APY when a refresh arrives without one.
    */
   apy?: Percent;
+  /** Absent on older persisted locally calculated returns. */
+  apyPeriod?: '30d';
   /** "1 USDr = 1 sUSDr" staking leg; live for swap legs. */
   exchangeRate: number;
   fetchedAt: Milliseconds;

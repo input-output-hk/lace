@@ -19,6 +19,7 @@ import {
 } from '@lace-lib/navigation';
 import {
   BaseTemplate,
+  WebBlurProvider,
   GlobalToast,
   spacing,
   Splash,
@@ -281,7 +282,9 @@ export const Router = ({
                       name={SheetRoutes.RootStack}
                       component={RootStack}
                     />
-                    <SheetStack.Group screenOptions={sheetGroupScreenOptions}>
+                    <SheetStack.Group
+                      screenLayout={renderSheetContent}
+                      screenOptions={sheetGroupScreenOptions}>
                       {pages.sheetPages}
                     </SheetStack.Group>
                   </>
@@ -301,3 +304,8 @@ export const Router = ({
     </SendProvider>
   );
 };
+
+// Direct sheet viewports can bypass the toolkit's sheet content slots.
+const renderSheetContent = ({ children }: { children: React.ReactNode }) => (
+  <WebBlurProvider enabled={false}>{children}</WebBlurProvider>
+);

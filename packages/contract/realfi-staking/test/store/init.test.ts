@@ -8,6 +8,30 @@ import type { RealFiStakeId } from '../../src/value-objects';
 import type { Milliseconds } from '@lace-lib/util';
 
 describe('realfi-staking store init', () => {
+  it.each([undefined, '7d', '30d'])(
+    'rehydrates only thirty-day SDK APY, keeping the vault rate (%s)',
+    apyPeriod => {
+      const result = realfiPositionTransform.out(
+        {
+          preprod: {
+            apy: -0.0347,
+            apyPeriod,
+            exchangeRate: 1.02,
+            fetchedAt: 1,
+          },
+        } as never,
+        'yieldInfoByNetwork',
+        {} as never,
+      ) as {
+        preprod: { apy?: number; exchangeRate: number; fetchedAt: number };
+      };
+      expect(result.preprod.apy).toBe(
+        apyPeriod === '30d' ? -0.0347 : undefined,
+      );
+      expect(result.preprod.exchangeRate).toBe(1.02);
+      expect(result.preprod.fetchedAt).toBe(apyPeriod === '30d' ? 1 : 0);
+    },
+  );
   it('returns reducers, side-effects, and position persistConfig', () => {
     const result = store({} as never, {} as never) as ReturnType<
       typeof store

@@ -8,7 +8,7 @@ import {
 import type {
   DesiredInput,
   DesiredOutput,
-} from '@midnight-ntwrk/dapp-connector-api';
+} from '@midnightntwrk/dapp-connector-api';
 import type {
   CombinedSwapInputs,
   CombinedTokenTransfer,

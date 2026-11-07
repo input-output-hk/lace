@@ -28,7 +28,7 @@ import type {
 } from '@lace-contract/dapp-connector';
 import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
 import type { RemoteApiProperties } from '@lace-lib/extension-messaging';
-import type { ConnectedAPI } from '@midnight-ntwrk/dapp-connector-api';
+import type { ConnectedAPI } from '@midnightntwrk/dapp-connector-api';
 
 export const midnightDappConnectorWalletApiProperties: RemoteApiProperties<ExtendedDAppConnectorWalletAPI> =
   Object.fromEntries(

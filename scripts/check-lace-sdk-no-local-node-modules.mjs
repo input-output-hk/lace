@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,19 +9,39 @@ if (!existsSync(nodeModulesPath)) {
   process.exit(0);
 }
 
-const entries = readdirSync(nodeModulesPath);
-// npm may create node_modules with only .package-lock.json — that's fine
-const realPackages = entries.filter(
-  entry => !entry.startsWith('.') && entry !== '.package-lock.json',
-);
+// LW-15105: the SDK retains its v1 development peers while the extension uses
+// v2 at the root. This exception does not establish SDK compatibility with v2.
+const retainedMidnightPackages = new Map([
+  ['@midnightntwrk/wallet-sdk', '1.2.0'],
+  ['@midnightntwrk/wallet-sdk-abstractions', '2.1.0'],
+  ['@midnightntwrk/wallet-sdk-address-format', '3.1.2'],
+  ['@midnightntwrk/wallet-sdk-indexer-client', '1.2.3'],
+  ['@midnightntwrk/wallet-sdk-utilities', '1.2.1'],
+  ['@scure/base', '2.4.0'],
+]);
+const installedPackages = readdirSync(nodeModulesPath)
+  .filter(entry => !entry.startsWith('.'))
+  .flatMap(entry =>
+    entry.startsWith('@')
+      ? readdirSync(resolve(nodeModulesPath, entry)).map(
+          name => `${entry}/${name}`,
+        )
+      : [entry],
+  );
+const unexpectedPackages = installedPackages.filter(name => {
+  const expected = retainedMidnightPackages.get(name);
+  if (!expected) return true;
+  const manifest = resolve(nodeModulesPath, name, 'package.json');
+  if (!existsSync(manifest)) return true;
+  return JSON.parse(readFileSync(manifest, 'utf8')).version !== expected;
+});
 
-if (realPackages.length > 0) {
+if (unexpectedPackages.length > 0) {
   // eslint-disable-next-line no-console
   console.error(
-    `\n❌ apps/lace-sdk has local node_modules with non-hoisted packages:\n` +
-      realPackages.map(package_ => `  - ${package_}`).join('\n') +
-      `\n\nAll dependencies of @laceio/sdk must be hoisted to the monorepo root.\n` +
-      `Fix: align the dependency versions in apps/lace-sdk/package.json with the root package.json.\n`,
+    `Unexpected SDK-local dependencies:\n${unexpectedPackages.join('\n')}\n` +
+      'Only the pinned LW-15105 Midnight v1 development dependency closure may remain local.\n' +
+      'Align other SDK dependencies with the root package.json.',
   );
   process.exit(1);
 }

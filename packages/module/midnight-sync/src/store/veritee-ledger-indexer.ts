@@ -4,8 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import type { MidnightNetworksConfig } from '@lace-contract/midnight-context';
 import type { Observable } from 'rxjs';
 
-/** The Temenos ledger is on preprod, including for mainnet proof servers. */
-export const createTemenosLedgerIndexerResolver =
+/** The Veritee ledger is on preprod, including for mainnet proof servers. */
+export const createVeriteeLedgerIndexerResolver =
   (
     networksConfig$: Observable<MidnightNetworksConfig>,
   ): (() => Promise<string>) =>

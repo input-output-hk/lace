@@ -287,6 +287,7 @@ export const MidnightSettingsSheet = () => {
   return (
     <Sheet.Scroll showsVerticalScrollIndicator={false}>
       <Column gap={spacing.L}>
+        <Text.S>{t('midnight.proof-server.title')}</Text.S>
         {sections.map(section => (
           <ProofServerTierSection
             key={section.tier}
@@ -299,15 +300,39 @@ export const MidnightSettingsSheet = () => {
             sectionHeader={t(tierHeaderKey[section.tier])}
             secondaryTextStyle={styles.secondaryText}
             optionContentStyle={styles.optionContent}
+            sectionHeaderStyle={styles.sectionHeader}
+            locallyGeneratedLabel={t('midnight.proof-server.locally-generated')}
           />
         ))}
         <Column gap={spacing.S}>
           <Text.S>{t('midnight.network-config.node-address')}</Text.S>
-          <Text.XS>{nodeAddresses}</Text.XS>
+          <Row alignItems="flex-start" gap={spacing.M}>
+            <RadioButton
+              isChecked
+              isDisabled
+              onRadioValueChange={() => undefined}
+              testID="midnight-node-radio"
+              accessibilityLabel={`${t(
+                'midnight.network-config.node-address',
+              )}: ${nodeAddresses}`}
+            />
+            <Text.XS style={styles.optionContent}>{nodeAddresses}</Text.XS>
+          </Row>
         </Column>
         <Column gap={spacing.S}>
           <Text.S>{t('midnight.network-config.indexer-address')}</Text.S>
-          <Text.XS>{indexerAddress}</Text.XS>
+          <Row alignItems="flex-start" gap={spacing.M}>
+            <RadioButton
+              isChecked
+              isDisabled
+              onRadioValueChange={() => undefined}
+              testID="midnight-indexer-radio"
+              accessibilityLabel={`${t(
+                'midnight.network-config.indexer-address',
+              )}: ${indexerAddress}`}
+            />
+            <Text.XS style={styles.optionContent}>{indexerAddress}</Text.XS>
+          </Row>
         </Column>
       </Column>
     </Sheet.Scroll>
@@ -324,6 +349,8 @@ type ProofServerTierSectionProps = {
   sectionHeader: string;
   secondaryTextStyle: ReturnType<typeof useStyles>['secondaryText'];
   optionContentStyle: ReturnType<typeof useStyles>['optionContent'];
+  sectionHeaderStyle: ReturnType<typeof useStyles>['sectionHeader'];
+  locallyGeneratedLabel: string;
 };
 
 const ProofServerTierSection = ({
@@ -336,16 +363,21 @@ const ProofServerTierSection = ({
   sectionHeader,
   secondaryTextStyle,
   optionContentStyle,
+  sectionHeaderStyle,
+  locallyGeneratedLabel,
 }: ProofServerTierSectionProps) => (
   <Column gap={spacing.M}>
     <Text.S
-      style={secondaryTextStyle}
+      style={[secondaryTextStyle, sectionHeaderStyle]}
       testID={`proof-server-section-${section.tier}`}>
       {sectionHeader}
     </Text.S>
     {section.modes.map(mode => {
       const testIdSuffix = testIdForMode(mode);
-      const endpoint = endpointForDisplay(mode);
+      const endpoint =
+        mode.kind === 'in-process'
+          ? locallyGeneratedLabel
+          : endpointForDisplay(mode);
       const description = getDescription(mode);
       const isSelected = isSameProofServerMode(selected, mode);
       return (
@@ -357,6 +389,9 @@ const ProofServerTierSection = ({
               onSelect(mode);
             }}
             testID={`proof-server-${testIdSuffix}-radio`}
+            accessibilityLabel={
+              endpoint ? `${getLabel(mode)}: ${endpoint}` : getLabel(mode)
+            }
           />
           <Column gap={spacing.XS} style={optionContentStyle}>
             <Text.S testID={`proof-server-${testIdSuffix}-title`}>
@@ -366,7 +401,11 @@ const ProofServerTierSection = ({
               <Text.XS style={secondaryTextStyle}>{endpoint}</Text.XS>
             ) : null}
             {description ? (
-              <Text.XS style={secondaryTextStyle}>{description}</Text.XS>
+              <Text.XS
+                style={secondaryTextStyle}
+                testID={`proof-server-${testIdSuffix}-description`}>
+                {description}
+              </Text.XS>
             ) : null}
           </Column>
         </Row>
@@ -381,6 +420,7 @@ const useStyles = () => {
     optionContent: {
       flex: 1,
     },
+    sectionHeader: { paddingLeft: 28 + spacing.M },
     secondaryText: { color: theme.text.secondary },
   });
 };

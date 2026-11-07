@@ -409,8 +409,8 @@ const MIDNIGHT_IMPORT_ONLY = [
 const NON_PERMISSIVE_EXTERNAL = [/^@subsquid\//];
 const BUNDLES_IMPORT_ONLY = (format: 'esm' | 'cjs') =>
   format === 'cjs' && CHANNEL === 'canary';
-// The bundled wallet SDK reaches Node builtins (its prover client's worker
-// and msgpack code) that the browser shims below cannot serve: readFileSync,
+// The bundled wallet SDK reaches Node builtins through its prover workers,
+// msgpack and compression code that browser shims cannot serve: readFileSync,
 // pathToFileURL, createRequire. The CommonJS output runs in Node only, so
 // those stay the real modules for the modules of that graph, as `crypto`
 // does for every module; the Cardano and Bitcoin code keeps the shims it has
@@ -426,7 +426,7 @@ const CJS_NODE_BUILTINS = new Set([
   'worker_threads',
 ]);
 const BUNDLED_WALLET_SDK_IMPORTER =
-  /[/\\]node_modules[/\\](?:@midnightntwrk[/\\]wallet-sdk|web-worker|msgpackr|@effect[/\\]platform)/;
+  /[/\\]node_modules[/\\](?:@midnightntwrk[/\\]wallet-sdk|web-worker|msgpackr|fflate|@effect[/\\]platform)/;
 const nodeBuiltinsForCjs: Plugin = {
   name: 'node-builtins-for-cjs',
   resolveId(source, importer) {

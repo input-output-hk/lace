@@ -98,6 +98,8 @@ export type StakingCenterProductCard = {
    * the live flag payload, not compile-time config.
    */
   usdBalance?: StakingCenterUsdBalanceResolver;
+  /** A store-connected yield value for hosts running outside the background worker. */
+  Yield?: ComponentType;
   /**
    * Yield shown as % APY for the ACTIVE network, e.g. "8.2%" — resolved per
    * render like {@link isEnabledForNetwork}, because the network can switch

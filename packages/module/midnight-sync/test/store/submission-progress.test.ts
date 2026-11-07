@@ -3,7 +3,12 @@ import {
   createProgressSubmissionService,
   observeSubmission,
 } from '@lace-lib/vendor/midnight-submission-service';
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
 import { PolkadotNodeClient } from '@midnightntwrk/wallet-sdk/node-client/effect';
+import {
+  WalletTransaction,
+  ProtocolVersion,
+} from '@midnightntwrk/wallet-sdk-abstractions';
 import { Effect, Stream } from 'effect';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -13,7 +18,6 @@ import {
   trackSendSubmission,
 } from '../../src/store/send-proof-progress';
 
-import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type { SubmissionEvent } from '@midnightntwrk/wallet-sdk/capabilities/submission';
 import type * as NodeClientExports from '@midnightntwrk/wallet-sdk/node-client/effect';
 
@@ -25,7 +29,11 @@ vi.mock(
   }),
 );
 const tx = () =>
-  ({ serialize: () => new Uint8Array([1]) } as unknown as FinalizedTransaction);
+  WalletTransaction.adopt(
+    'Finalized',
+    Transaction.fromParts('undeployed').mockProve(),
+    ProtocolVersion.MinSupportedVersion,
+  );
 const event = (_tag: SubmissionEvent['_tag']) => ({ _tag } as SubmissionEvent);
 const setup = (events: Stream.Stream<SubmissionEvent, Error>) => {
   const send = vi.fn(() => events);

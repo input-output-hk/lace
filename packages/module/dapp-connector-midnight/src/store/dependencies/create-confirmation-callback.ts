@@ -30,6 +30,7 @@ export type ConfirmationRequest<R extends RequestType = RequestType> = {
   transactionData?: string;
   signDataPayload?: string;
   signDataKeyType?: string;
+  signDataScheme?: string;
 };
 
 export type ConfirmationCallback = ReturnType<
@@ -53,6 +54,7 @@ export const createConfirmationCallback = <T>(
       transactionData?: string;
       signDataPayload?: string;
       signDataKeyType?: string;
+      signDataScheme?: string;
     },
   ) => {
     const dappOrigin = senderOrigin(sender) || '';
@@ -74,6 +76,9 @@ export const createConfirmationCallback = <T>(
         }),
         ...(options?.signDataPayload !== undefined && {
           signDataPayload: options.signDataPayload,
+        }),
+        ...(options?.signDataScheme !== undefined && {
+          signDataScheme: options.signDataScheme,
         }),
         ...(options?.signDataKeyType !== undefined && {
           signDataKeyType: options.signDataKeyType,

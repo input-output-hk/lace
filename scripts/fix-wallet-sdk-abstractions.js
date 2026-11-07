@@ -21,6 +21,7 @@ const path = require('path');
 // TODO: remove as part of DoD for LW-13253 and V2 mobile
 const PACKAGES_TO_FIX = [
   '@midnight-ntwrk/dapp-connector-api',
+  '@midnightntwrk/dapp-connector-api',
   '@midnightntwrk/wallet-sdk-abstractions',
   '@midnightntwrk/wallet-sdk-address-format',
   '@midnightntwrk/wallet-sdk-hd',
@@ -29,22 +30,27 @@ const PACKAGES_TO_FIX = [
 /**
  * Fix a single package's package.json
  * @param {string} fullPackageName - The scoped package name
+ * @param {string} workspacePath - Workspace containing a nested installation, if any
  * @returns {boolean} - Returns true if package was fixed, false otherwise
  */
-const fixPackage = fullPackageName => {
+const fixPackage = (fullPackageName, workspacePath = '') => {
   const packageJsonPath = path.join(
     __dirname,
     '..',
+    workspacePath,
     'node_modules',
     fullPackageName,
     'package.json',
   );
+  const packageLabel = workspacePath
+    ? `${workspacePath}/node_modules/${fullPackageName}`
+    : fullPackageName;
 
   try {
     // Check if package is installed
     if (!fs.existsSync(packageJsonPath)) {
       console.log(
-        `[postinstall] ${fullPackageName} not found, skipping fix (package may not be installed)`,
+        `[postinstall] ${packageLabel} not found, skipping fix (package may not be installed)`,
       );
       return false;
     }
@@ -94,21 +100,18 @@ const fixPackage = fullPackageName => {
       fs.writeFileSync(packageJsonPath, updatedContent, 'utf8');
 
       console.log(
-        `[postinstall] Fixed ${fullPackageName}: ${changesMade.join(', ')}`,
+        `[postinstall] Fixed ${packageLabel}: ${changesMade.join(', ')}`,
       );
       return true;
     } else {
       console.log(
-        `[postinstall] ${fullPackageName} already has required fields, skipping fix`,
+        `[postinstall] ${packageLabel} already has required fields, skipping fix`,
       );
       return false;
     }
   } catch (error) {
     // Don't fail the install process if this script fails
-    console.error(
-      `[postinstall] Error fixing ${fullPackageName}:`,
-      error.message,
-    );
+    console.error(`[postinstall] Error fixing ${packageLabel}:`, error.message);
     return false;
   }
 };
@@ -119,6 +122,10 @@ for (const packageName of PACKAGES_TO_FIX) {
   if (fixPackage(packageName)) {
     fixedCount++;
   }
+}
+
+if (fixPackage('@midnightntwrk/wallet-sdk-hd', 'packages/lib/vendor')) {
+  fixedCount++;
 }
 
 if (fixedCount === 0) {

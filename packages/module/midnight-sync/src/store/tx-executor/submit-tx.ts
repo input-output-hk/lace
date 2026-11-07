@@ -1,6 +1,6 @@
 import { ByteArray, HexBytes } from '@lace-lib/util';
 import { observeSubmission } from '@lace-lib/vendor/midnight-submission-service';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
 import {
   catchError,
   defer,
@@ -27,7 +27,6 @@ import type {
   TxExecutorImplementation,
   TxSubmissionResult,
 } from '@lace-contract/tx-executor';
-import type { FinalizedTransaction } from '@midnight-ntwrk/ledger-v8';
 import type { Observable } from 'rxjs';
 import type { Logger } from 'ts-log';
 
@@ -68,42 +67,47 @@ export const makeSubmitTx =
       // fails), confirmTx's finalizeRecipe() will have already marked coins as
       // pending with no path to revert them.
       switchMap(midnightWallet => {
-        const finalizedTx: FinalizedTransaction = Transaction.deserialize(
-          'signature',
-          'proof',
-          'binding',
-          ByteArray.fromHex(HexBytes(serializedTx)),
-        );
-        const report = takeSendSubmission(
-          accountId,
-          finalizedTx.identifiers().at(-1) ?? '',
-        );
-        report?.({
-          type: 'phase',
-          phase: 'transaction-submitting',
-          status: 'started',
-        });
-        const stopObserving = observeSubmission(finalizedTx, stage => {
-          report?.({
-            type: 'phase',
-            phase:
-              stage === 'Submitted'
-                ? 'transaction-inclusion'
-                : 'transaction-confirmation',
-            status: stage === 'Finalized' ? 'completed' : 'started',
-          });
-        });
-        return defer(() => midnightWallet.submitTransaction(finalizedTx)).pipe(
-          tap({
-            error: () =>
+        return midnightWallet
+          .adoptTransaction(
+            ByteArray.fromHex(HexBytes(serializedTx)),
+            'Finalized',
+          )
+          .pipe(
+            switchMap(finalizedTx => {
+              const report = takeSendSubmission(
+                accountId,
+                readMidnightTransaction(finalizedTx).identifiers().at(-1) ?? '',
+              );
               report?.({
                 type: 'phase',
-                phase: 'transaction-failed',
-                status: 'failed',
-              }),
-          }),
-          finalize(stopObserving),
-        );
+                phase: 'transaction-submitting',
+                status: 'started',
+              });
+              const stopObserving = observeSubmission(finalizedTx, stage => {
+                report?.({
+                  type: 'phase',
+                  phase:
+                    stage === 'Submitted'
+                      ? 'transaction-inclusion'
+                      : 'transaction-confirmation',
+                  status: stage === 'Finalized' ? 'completed' : 'started',
+                });
+              });
+              return defer(() =>
+                midnightWallet.submitTransaction(finalizedTx),
+              ).pipe(
+                tap({
+                  error: () =>
+                    report?.({
+                      type: 'phase',
+                      phase: 'transaction-failed',
+                      status: 'failed',
+                    }),
+                }),
+                finalize(stopObserving),
+              );
+            }),
+          );
       }),
       map(
         txId =>

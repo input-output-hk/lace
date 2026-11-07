@@ -17,7 +17,12 @@ export const initializeSideEffectDependencies: LaceInitSync<
 }) => {
   const posthog = new PostHog(postHogApiToken, {
     host: postHogUrl,
+    customAppProperties: properties => ({
+      ...properties,
+      platform: Platform.OS,
+    }),
   });
+  posthog.setPersonPropertiesForFlags({ platform: Platform.OS }, false);
 
   const posthogClient: PostHogClient = {
     captureEvent: ({ event, properties }) => {
@@ -34,7 +39,7 @@ export const initializeSideEffectDependencies: LaceInitSync<
       };
     },
     identify: (distinctId, properties) => {
-      posthog.identify(distinctId, properties);
+      posthog.identify(distinctId, { ...properties, platform: Platform.OS });
     },
   };
 

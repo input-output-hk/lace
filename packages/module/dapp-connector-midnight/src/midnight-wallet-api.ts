@@ -1,17 +1,17 @@
 import { AuthenticatorErrorCode } from '@lace-contract/dapp-connector';
 import { createProverClient } from '@lace-lib/midnight-prover';
-import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
+import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
 
 import { APIError } from './api-error';
 import { FEATURE_FLAG_MIDNIGHT_DAPP_CONNECTOR } from './const';
-import { type ExtendedDAppConnectorWalletAPI } from './types';
+import {
+  type ExtendedDAppConnectorWalletAPI,
+  type MidnightConnectedAPI,
+} from './types';
 
 import type { FeatureFlagProbe } from '@lace-contract/dapp-connector';
 import type { RemoteAuthenticator } from '@lace-lib/dapp-connector';
-import type {
-  ConnectedAPI,
-  KeyMaterialProvider,
-} from '@midnight-ntwrk/dapp-connector-api';
+import type { KeyMaterialProvider } from '@midnightntwrk/dapp-connector-api';
 import type { Logger } from 'ts-log';
 
 export type ApiVersion = string;
@@ -33,7 +33,8 @@ export type WalletDependencies = {
 };
 
 export class MidnightWalletApi {
-  public readonly apiVersion: ApiVersion = '4.0.1';
+  public readonly apiVersion: ApiVersion =
+    '4.1.0-canary.20260819082604-3b622cb';
   public readonly name: WalletName;
   public readonly icon: WalletIcon;
 
@@ -54,7 +55,7 @@ export class MidnightWalletApi {
     this.#featureFlagProbe = dependencies.featureFlagProbe;
   }
 
-  public async connect(networkId: string): Promise<ConnectedAPI> {
+  public async connect(networkId: string): Promise<MidnightConnectedAPI> {
     // Check if the Midnight dapp connector FF is enabled on the SW
     // before calling any SW-side channel (checkNetworkSupport, authenticator),
     // which would hang indefinitely if the SW-side module isn't loaded.
@@ -138,6 +139,7 @@ export class MidnightWalletApi {
           send: async command => this.#api.proofCommand(command),
         }).provider();
         return {
+          lookupKey: keyMaterial,
           check: async (serializedPreimage, keyLocation) =>
             provider.check({
               serializedPreimage,

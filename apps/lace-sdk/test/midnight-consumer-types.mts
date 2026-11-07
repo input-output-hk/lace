@@ -40,7 +40,7 @@ import {
   createLaceWallet,
   createMidnightModule,
   createMidnightAccounts,
-  createTemenosAttestedProver,
+  createVeriteeAttestedProver,
   getMidnightProvingProvider,
   type GetMidnightProvingProviderProps,
   proveMidnightTx,
@@ -48,8 +48,8 @@ import {
   type CreateAttestedProver,
   type KeyMaterialProvider,
   type ProvingProvider,
-  type TemenosTrustRoots,
-  type TemenosVerifier,
+  type VeriteeTrustRoots,
+  type VeriteeVerifier,
   type MidnightTxRecipe,
   createMidnightPasskeyWalletEntity,
   createPasskeyKeySource,
@@ -301,14 +301,14 @@ export const attestedProving = async (
   wallet: WalletWithMidnight,
   recipe: MidnightTxRecipe,
   keyMaterialProvider: KeyMaterialProvider,
-  trustRoots: TemenosTrustRoots,
-  verifier: TemenosVerifier,
+  trustRoots: VeriteeTrustRoots,
+  verifier: VeriteeVerifier,
 ) => {
   const createAttestedProver: CreateAttestedProver = props =>
-    createTemenosAttestedProver({ ...props, trustRoots, verifier });
+    createVeriteeAttestedProver({ ...props, trustRoots, verifier });
   const getLedgerIndexerUrl = async () =>
     'https://indexer.preprod.midnight.network/api/v4/graphql';
-  createTemenosAttestedProver(
+  createVeriteeAttestedProver(
     {
       networkId: 'preview',
       proofServerApiUrl: 'https://api.proofserver.preview.wastedp.io',
@@ -320,8 +320,8 @@ export const attestedProving = async (
     // former second parameter accepted an undefined config).
     { config: undefined },
   );
-  // @ts-expect-error Temenos integration requires an explicit host verifier.
-  createTemenosAttestedProver({
+  // @ts-expect-error Veritee integration requires an explicit host verifier.
+  createVeriteeAttestedProver({
     networkId: 'preview',
     proofServerApiUrl: 'https://api.proofserver.preview.wastedp.io',
     trustRoots,
@@ -337,7 +337,7 @@ export const attestedProving = async (
         proofServer: {
           kind: 'tee-delegated',
           url: 'https://api.proofserver.preview.wastedp.io',
-          label: 'Temenos',
+          label: 'Veritee',
         },
       },
     },

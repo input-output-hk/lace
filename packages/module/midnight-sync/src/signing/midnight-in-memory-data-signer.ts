@@ -39,8 +39,8 @@ export class MidnightInMemoryDataSigner implements MidnightDataSigner {
         }
         return wallet.signData(request.data).pipe(
           map(({ signature, verifyingKey }) => ({
-            signature: HexBytes(signature),
-            verifyingKey: HexBytes(verifyingKey),
+            signature: HexBytes(signature.value),
+            verifyingKey: HexBytes(verifyingKey.value),
           })),
         );
       }),

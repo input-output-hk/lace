@@ -29,7 +29,7 @@ export type ProofServerMode =
       kind: 'tee-delegated';
       /**
        * Proof-server API URL. Also the stable identity of the mode and the
-       * lookup key into the baked per-network Temenos config — attestation
+       * lookup key into the baked per-network Veritee config — attestation
        * parameters (endpoints, trust anchors) deliberately do not live on
        * the mode, which is persisted in redux; they stay in code.
        */
@@ -81,53 +81,53 @@ export const getProofServerEndpoint = (
   mode: ProofServerMode,
 ): string | undefined => ('url' in mode ? mode.url : undefined);
 
-const TEMENOS_PREPROD_DEPLOYMENT_MODE: Extract<
+const VERITEE_PREPROD_DEPLOYMENT_MODE: Extract<
   ProofServerMode,
   { kind: 'tee-delegated' }
 > = {
   kind: 'tee-delegated',
   url: 'https://api.proofserver.wastedp.io',
-  label: 'Temenos (remote TEE proof server)',
+  label: 'Veritee (remote TEE proof server)',
   descriptionKey: 'midnight.proof-server.tee-delegated.description',
 };
 
-const TEMENOS_MAINNET_DEPLOYMENT_MODE: Extract<
+const VERITEE_MAINNET_DEPLOYMENT_MODE: Extract<
   ProofServerMode,
   { kind: 'tee-delegated' }
 > = {
   kind: 'tee-delegated',
   url: 'https://api.proofserver.mainnet.wastedp.io',
-  label: 'Temenos (remote TEE proof server)',
+  label: 'Veritee (remote TEE proof server)',
   descriptionKey: 'midnight.proof-server.tee-delegated.description',
 };
 
-const TEMENOS_PREVIEW_DEPLOYMENT_MODE: Extract<
+const VERITEE_PREVIEW_DEPLOYMENT_MODE: Extract<
   ProofServerMode,
   { kind: 'tee-delegated' }
 > = {
   kind: 'tee-delegated',
   url: 'https://api.proofserver.preview.wastedp.io',
-  label: 'Temenos (remote TEE proof server)',
+  label: 'Veritee (remote TEE proof server)',
   descriptionKey: 'midnight.proof-server.tee-delegated.description',
 };
 
 /**
- * Contract-visible part of the baked Temenos TEE proof-server config, per
+ * Contract-visible part of the baked Veritee TEE proof-server config, per
  * network: just enough for `selectAllProofServerModes` to synthesize the
  * settings row without importing module code. The heavyweight attestation
  * config (evidence/Warden endpoints, application id, AMD root certificates)
- * lives in the vendor Temenos driver, keyed by the same network id and
+ * lives in the vendor Veritee driver, keyed by the same network id and
  * cross-checked against this mode's `url` at module load.
  *
  * Values are build-baked and reviewed like code (rotating an endpoint
  * requires a release); the remote feature flag only toggles visibility.
  */
-export const TEMENOS_PROOF_SERVER_MODES: Partial<
+export const VERITEE_PROOF_SERVER_MODES: Partial<
   Record<string, Extract<ProofServerMode, { kind: 'tee-delegated' }>>
 > = {
-  ['mainnet']: TEMENOS_MAINNET_DEPLOYMENT_MODE,
-  ['preprod']: TEMENOS_PREPROD_DEPLOYMENT_MODE,
-  ['preview']: TEMENOS_PREVIEW_DEPLOYMENT_MODE,
+  ['mainnet']: VERITEE_MAINNET_DEPLOYMENT_MODE,
+  ['preprod']: VERITEE_PREPROD_DEPLOYMENT_MODE,
+  ['preview']: VERITEE_PREVIEW_DEPLOYMENT_MODE,
 };
 
 /** Source-controlled ordinary remote providers. Currently empty: the Midnight
@@ -144,13 +144,13 @@ export const defaultLocalProofServerMode: ProofServerMode = {
   url: DEFAULT_LOCAL_PROOF_SERVER_URL,
 };
 
-/** Provider-owned phase/check IDs. Temenos keeps its existing wire values. */
+/** Provider-owned phase/check IDs. Veritee keeps its existing wire values. */
 export type AttestationPhaseId = string;
 export type AttestationCheckId = string;
 
 export type AttestationCheckResult = {
   id: AttestationCheckId;
-  /** Owning phase; absent on legacy Temenos events (verify-locally). */
+  /** Owning phase; absent on legacy Veritee events (verify-locally). */
   phase?: AttestationPhaseId;
   status: 'failed' | 'passed';
   detail?: string;
@@ -184,7 +184,7 @@ export const assertProofServerRouting = (
   if (mode.kind === 'in-process' || mode.kind === 'paired-device')
     throw new Error(`Unsupported Midnight proof server mode "${mode.kind}"`);
   const hostname = new URL(mode.url).hostname.replace(/\.$/, '');
-  const isRecognizedTee = Object.values(TEMENOS_PROOF_SERVER_MODES).some(
+  const isRecognizedTee = Object.values(VERITEE_PROOF_SERVER_MODES).some(
     candidate =>
       candidate &&
       new URL(candidate.url).hostname.replace(/\.$/, '') === hostname,
@@ -201,6 +201,7 @@ export const assertProofServerRouting = (
 
 /** Circuit data stays inside the wallet's proving boundary for every backend. */
 export type ProofCircuitRequest = {
+  ledgerVersion?: 'v8' | 'v9';
   serializedPreimage: Uint8Array;
   keyLocation: string;
   keyMaterial?: {

@@ -2,12 +2,12 @@ import { Effect } from 'effect';
 import { describe, expect, it } from 'vitest';
 
 import { AttestationError } from '../../../src/store/attested-proving-service';
-import { TemenosAttestationError } from '../../../src/store/temenos-attested-prover';
 import {
   mapMidnightBuildError,
   mapMidnightConfirmError,
   mapMidnightSubmitError,
 } from '../../../src/store/tx-executor/error-mapping';
+import { VeriteeAttestationError } from '../../../src/store/veritee-attested-prover';
 
 describe('mapMidnightConfirmError', () => {
   it.each([mapMidnightConfirmError, mapMidnightSubmitError])(
@@ -24,7 +24,7 @@ describe('mapMidnightConfirmError', () => {
 
   it.each([
     new AttestationError('example', 'evidence', 'raw provider diagnostic'),
-    new TemenosAttestationError('bind-channel'),
+    new VeriteeAttestationError('bind-channel'),
   ])('maps attestation failures to translated recovery copy', error => {
     const result = mapMidnightConfirmError(error);
     expect(result.errorTranslationKeys).toEqual({

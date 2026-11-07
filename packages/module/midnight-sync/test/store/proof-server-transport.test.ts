@@ -1,3 +1,5 @@
+import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -7,10 +9,7 @@ import {
   createProvingServiceFromTransport,
 } from '../../src/store/proof-server-transport';
 
-import type {
-  ProvingProvider,
-  UnprovenTransaction,
-} from '@midnight-ntwrk/ledger-v8';
+import type { ProvingProvider } from '@midnight-ntwrk/ledger-v8';
 
 const ledgerMocks = vi.hoisted(() => ({
   createCheckPayload: vi.fn(() => new Uint8Array([0xcc])),
@@ -71,7 +70,9 @@ describe('createProvingServiceFromTransport', () => {
     const service = createProvingServiceFromTransport(transport);
     const otherService = createProvingServiceFromTransport(transport);
     const providers: ProvingProvider[] = [];
-    const result = {};
+    const result = {} as Awaited<
+      ReturnType<ReturnType<typeof Transaction.fromParts>['prove']>
+    >;
     let release!: () => void;
     const pending = new Promise<void>(resolve => {
       release = resolve;
@@ -81,12 +82,15 @@ describe('createProvingServiceFromTransport', () => {
       await pending;
       return result;
     });
-    const transaction = { prove } as unknown as UnprovenTransaction;
+    const transaction = Transaction.fromParts('undeployed');
+    vi.spyOn(transaction, 'prove').mockImplementation(
+      prove as typeof transaction.prove,
+    );
 
     const proofs = [
-      service.prove(transaction),
-      service.prove(transaction),
-      otherService.prove(transaction),
+      service.prove(transaction, ProtocolVersion.MinSupportedVersion),
+      service.prove(transaction, ProtocolVersion.MinSupportedVersion),
+      otherService.prove(transaction, ProtocolVersion.MinSupportedVersion),
     ];
     try {
       await vi.waitFor(() => {
@@ -105,17 +109,24 @@ describe('createProvingServiceFromTransport', () => {
       check: vi.fn(),
       prove: vi.fn(),
     });
-    const result = {};
+    const result = {} as Awaited<
+      ReturnType<ReturnType<typeof Transaction.fromParts>['prove']>
+    >;
     const prove = vi
       .fn()
       .mockRejectedValueOnce(new Error('proof unavailable'))
       .mockResolvedValueOnce(result);
-    const transaction = { prove } as unknown as UnprovenTransaction;
-
-    await expect(service.prove(transaction)).rejects.toThrow(
-      'Failed to prove transaction',
+    const transaction = Transaction.fromParts('undeployed');
+    vi.spyOn(transaction, 'prove').mockImplementation(
+      prove as typeof transaction.prove,
     );
-    await expect(service.prove(transaction)).resolves.toBe(result);
+
+    await expect(
+      service.prove(transaction, ProtocolVersion.MinSupportedVersion),
+    ).rejects.toThrow('Failed to prove transaction');
+    await expect(
+      service.prove(transaction, ProtocolVersion.MinSupportedVersion),
+    ).resolves.toBe(result);
     expect(prove).toHaveBeenCalledTimes(2);
     expect(prove.mock.calls[1][0]).toBe(prove.mock.calls[0][0]);
   });

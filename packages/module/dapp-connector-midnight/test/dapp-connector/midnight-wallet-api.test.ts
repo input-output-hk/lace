@@ -2,7 +2,7 @@ import {
   AuthenticatorError,
   AuthenticatorErrorCode,
 } from '@lace-contract/dapp-connector';
-import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
+import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { dummyLogger } from 'ts-log';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -60,7 +60,7 @@ describe('MidnightWalletApi', () => {
   it('constructed state', async () => {
     expect(walletApi.name).toBe(testWalletProperties.name);
     expect(walletApi.icon).toBe('');
-    expect(walletApi.apiVersion).toBe('4.0.1');
+    expect(walletApi.apiVersion).toBe('4.1.0-canary.20260819082604-3b622cb');
     expect(walletApi.connect).toBeInstanceOf(Function);
   });
 
@@ -162,7 +162,30 @@ describe('MidnightWalletApi', () => {
         ).toBeLessThan(
           vi.mocked(testWalletApi.proveCircuit).mock.invocationCallOrder[0],
         );
-        expect(Object.keys(provider).sort()).toEqual(['check', 'prove']);
+        expect(Object.keys(provider).sort()).toEqual([
+          'check',
+          'lookupKey',
+          'prove',
+        ]);
+      });
+
+      it('resolves v9 key material through the dApp callbacks', async () => {
+        (authenticator.requestAccess as Mock).mockResolvedValue(true);
+        const connected = await walletApi.connect(NetworkId.NetworkId.Preview);
+        const provider = await connected.getProvingProvider(
+          keyMaterialProvider,
+        );
+        await expect(provider.lookupKey('circuit')).resolves.toEqual(
+          keyMaterial,
+        );
+        expect(keyMaterialProvider.getProverKey).toHaveBeenCalledWith(
+          'circuit',
+        );
+        expect(keyMaterialProvider.getVerifierKey).toHaveBeenCalledWith(
+          'circuit',
+        );
+        expect(keyMaterialProvider.getZKIR).toHaveBeenCalledWith('circuit');
+        expect(testWalletApi.proveCircuit).not.toHaveBeenCalled();
       });
 
       it('returns the check result from the wallet', async () => {
@@ -193,6 +216,7 @@ describe('MidnightWalletApi', () => {
           getProverKey: vi.fn().mockRejectedValue(new Error('unknown')),
         });
 
+        await expect(provider.lookupKey('builtin')).resolves.toBeUndefined();
         await provider.prove(preimage, 'builtin');
 
         expect(testWalletApi.proveCircuit).toHaveBeenCalledWith(

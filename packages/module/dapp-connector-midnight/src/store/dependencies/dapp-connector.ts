@@ -3,7 +3,7 @@ import {
   exposeApi,
   RemoteApiPropertyType,
 } from '@lace-lib/extension-messaging';
-import { ErrorCodes } from '@midnight-ntwrk/dapp-connector-api';
+import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
 import { firstValueFrom, Observable, of } from 'rxjs';
 // TODO: MOBILE hoist those side effect dependencies to extension-specific module
 // This couples midnight module with web extension application

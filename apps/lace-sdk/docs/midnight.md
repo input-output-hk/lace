@@ -162,20 +162,20 @@ To prove in a trusted execution environment, select a `tee-delegated` proof serv
 each run, because the attestation ledger is on Preprod for every network. The callback is trusted host code: it
 must validate the evidence and policy and bind the channel before it returns a session.
 
-`createTemenosAttestedProver({ ...props, trustRoots, verifier })` is the adapter for the Temenos prover. It
+`createVeriteeAttestedProver({ ...props, trustRoots, verifier })` is the adapter for the Veritee prover. It
 accepts only its supported network and deployment configuration.
 
 ```typescript
 import {
   createMidnightModule,
-  createTemenosAttestedProver,
+  createVeriteeAttestedProver,
 } from '@laceio/sdk/midnight';
-import type { TemenosTrustRoots, TemenosVerifier } from '@laceio/sdk/midnight';
+import type { VeriteeTrustRoots, VeriteeVerifier } from '@laceio/sdk/midnight';
 
 const attestedModule = (
   password: Uint8Array,
-  trustRoots: TemenosTrustRoots,
-  verifier: TemenosVerifier,
+  trustRoots: VeriteeTrustRoots,
+  verifier: VeriteeVerifier,
 ) =>
   createMidnightModule({
     password,
@@ -184,16 +184,16 @@ const attestedModule = (
         proofServer: {
           kind: 'tee-delegated',
           url: 'https://api.proofserver.preview.wastedp.io',
-          label: 'Temenos',
+          label: 'Veritee',
         },
       },
     },
     createAttestedProver: props =>
-      createTemenosAttestedProver({ ...props, trustRoots, verifier }),
+      createVeriteeAttestedProver({ ...props, trustRoots, verifier }),
   });
 ```
 
-The Temenos adapter needs host access to the private `@input-output-hk/temenos-attestation-verifier@0.3.0`
+The Veritee adapter needs host access to the private `@input-output-hk/veritee-attestation-verifier@0.4.0`
 package, which the SDK neither installs nor imports. Supply in `verifier` its `LocalCheckFailedError` and
 `AttestationVerificationError` classes, and `createVerifier(config)` returning a **new** `AttestationVerifier` on
 each call, built from that same config: `AkxEvidenceProvider.fromConfig(config)`,
@@ -210,7 +210,7 @@ The rules the engine enforces:
 - A `tee-delegated` proof server without an adapter is refused.
 - A recognised TEE host configured as an ordinary HTTP prover is refused, even when an adapter exists.
 - An attestation failure never falls back to HTTP.
-- Temenos supports `prove`; its attested channel does not support `check`, which rejects.
+- Veritee supports `prove`; its attested channel does not support `check`, which rejects.
 - In-process and paired-device proving are not supported.
 
 ## Wallets and accounts
@@ -618,7 +618,7 @@ arrive as ordinary `Error` values with the engine's message.
 | `proveMidnightTx(wallet, props)`                    | Prove a signed recipe through the configured proof server               |
 | `submitMidnightTx(wallet, props)`                   | Submit a proved transaction                                             |
 | `getMidnightProvingProvider(wallet, props)`         | Account-bound circuit `check` and `prove` through the configured prover |
-| `createTemenosAttestedProver(props)`                | Temenos adapter with a host-supplied verifier and trust roots           |
+| `createVeriteeAttestedProver(props)`                | Veritee adapter with a host-supplied verifier and trust roots           |
 | `balanceMidnightSealedTransaction(wallet, props)`   | Balance, sign and prove a binding connector transaction                 |
 | `balanceMidnightUnsealedTransaction(wallet, props)` | Balance, sign and prove a pre-binding connector transaction             |
 | `makeMidnightTransfer(wallet, props)`               | Build, sign and prove mixed-kind connector transfers                    |

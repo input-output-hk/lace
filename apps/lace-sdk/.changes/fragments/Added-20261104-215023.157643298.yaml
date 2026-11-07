@@ -1,0 +1,6 @@
+kind: Added
+body: The Lace browser extension supports Midnight v9 while retaining support for Midnight v8.
+time: 2026-11-04T21:50:23.157643298+01:00
+custom:
+  Build: canary
+  Package: sdk

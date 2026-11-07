@@ -1,7 +1,6 @@
 import { createTestScheduler } from '@cardano-sdk/util-dev';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { ByteArray, Milliseconds } from '@lace-lib/util';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { defer, EMPTY, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -15,9 +14,6 @@ const createMockAccountKeys = (): MockedObject<AccountKeys> => {
   // Must be 32 bytes for ledger key generation
   const dustKeyBuffer = ByteArray(new Uint8Array(32).fill(1));
   const zswapKeyBuffer = ByteArray(new Uint8Array(32).fill(2));
-  // Pre-compute ledger key objects (matching real implementation)
-  const dustSecretKey = ledger.DustSecretKey.fromSeed(dustKeyBuffer);
-  const zswapSecretKeys = ledger.ZswapSecretKeys.fromSeed(zswapKeyBuffer);
   const clear = vi.fn();
 
   return {
@@ -25,11 +21,13 @@ const createMockAccountKeys = (): MockedObject<AccountKeys> => {
       getPublicKey: vi.fn(),
       signData: vi.fn(),
     } as unknown as UnshieldedKeystore,
+    ecdsaKeystore: {
+      getPublicKey: vi.fn(),
+      signDataAsync: vi.fn(),
+    } as unknown as UnshieldedKeystore,
     walletKeys: {
       dustKeyBuffer,
       zswapKeyBuffer,
-      dustSecretKey,
-      zswapSecretKeys,
     },
     clear,
   };

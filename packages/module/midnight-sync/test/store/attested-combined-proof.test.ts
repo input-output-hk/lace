@@ -18,7 +18,7 @@ it('proves through a prove-only attested channel while explicit check remains un
   const establishAttestedSession = vi.fn(async () => ({ prove, close }));
   const access = createAttestedProofServerAccess(
     {
-      id: 'temenos',
+      id: 'veritee',
       phases: ['evidence'],
       operations: ['prove'],
       establishAttestedSession,
@@ -44,7 +44,7 @@ it('proves through a prove-only attested channel while explicit check remains un
 it('does not bypass attestation when a combined proof fails to establish a session', async () => {
   const access = createAttestedProofServerAccess(
     {
-      id: 'temenos',
+      id: 'veritee',
       phases: ['evidence'],
       operations: ['prove'],
       establishAttestedSession: async () => {
