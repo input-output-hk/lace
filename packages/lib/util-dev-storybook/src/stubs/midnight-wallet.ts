@@ -35,7 +35,7 @@ export const createStubMidnightWallet = (
 ): MidnightWallet => ({
   accountId: params.account.accountId as MidnightAccountId,
   networkId: params.account.blockchainSpecific.networkId,
-  nightVerifyingKey: 'stubPublicKey', // stub public key
+  nightVerifyingKey: { tag: 'schnorr', value: 'stubPublicKey' },
   proofCircuitProvider: {
     check: async () => [],
     prove: async () => new Uint8Array(),
@@ -78,6 +78,7 @@ export const createStubMidnightWallet = (
 
   transactionHistory$: of([]),
 
+  adoptTransaction: () => NEVER,
   balanceFinalizedTransaction: () => NEVER,
   balanceUnboundTransaction: () => NEVER,
   balanceUnprovenTransaction: () => NEVER,

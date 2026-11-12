@@ -43,6 +43,7 @@ const productionFeatureFlags = defaultFeatureFlags.filter(
 );
 
 const experimentalFeatureFlags = [
+  { key: FeatureFlagKey('BUY_FLOW') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SWAP_CENTER') },
   { key: FeatureFlagKey('ACTIVITIES') },
@@ -63,6 +64,12 @@ const experimentalFeatureFlags = [
   { key: FeatureFlagKey('EARN_REWARDS') },
   { key: FEATURE_FLAG_REALFI },
 ];
+
+it('keeps Banxa disabled until BUY_FLOW is explicitly enabled', () => {
+  expect(defaultFeatureFlags.map(flag => flag.key)).not.toContain(
+    FeatureFlagKey('BUY_FLOW'),
+  );
+});
 
 testFeatureFlagCompatibility(
   allModules,

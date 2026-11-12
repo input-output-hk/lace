@@ -260,7 +260,7 @@ export const createPostHogHttpClient = ({
         };
       return {
         featureFlagPayloads: body.featureFlagPayloads ?? {},
-        featureFlags: body.featureFlags ?? {},
+        featureFlags: body.featureFlags,
       };
     },
     // Person properties, so they go under `$set` — a bare property on an

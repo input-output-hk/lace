@@ -42,6 +42,7 @@ const productionFeatureFlags = defaultFeatureFlags
 
 const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FeatureFlagKey('MIGRATE_WALLET') },
+  { key: FeatureFlagKey('BUY_FLOW') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SWAP_CENTER') },
   { key: V1_MIGRATION_FEATURE_FLAG },
@@ -62,6 +63,12 @@ const experimentalFeatureFlags: FeatureFlag[] = [
   { key: FEATURE_FLAG_REALFI },
   { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_TEE_VERITEE_PROOF_SERVER') },
 ];
+
+it('keeps Banxa disabled until BUY_FLOW is explicitly enabled', () => {
+  expect(defaultFeatureFlags.map(flag => flag.key)).not.toContain(
+    FeatureFlagKey('BUY_FLOW'),
+  );
+});
 
 testFeatureFlagCompatibility(
   allModules,

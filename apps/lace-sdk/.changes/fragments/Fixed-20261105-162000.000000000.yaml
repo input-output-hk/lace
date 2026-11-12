@@ -1,0 +1,6 @@
+kind: Fixed
+body: Dispatching `featureDev.setFeatureFlags` can restore the initial flag set after a previous change in the same session.
+time: 2026-11-05T16:20:00Z
+custom:
+  Package: sdk
+  Build: stable

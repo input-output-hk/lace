@@ -209,5 +209,60 @@ describe('steelswap-mappers', () => {
       expect(result.code).toBe('UNKNOWN');
       expect(result.message).toBe('string error');
     });
+
+    const apiError = (status: number, body: unknown) =>
+      new Error(`SteelSwap API error (${status}): ${JSON.stringify(body)}`);
+
+    it('uses a string detail from the response body', () => {
+      const result = toSwapProviderError(
+        apiError(406, { detail: 'Insufficient funds.' }),
+      );
+      expect(result.message).toBe('Insufficient funds.');
+    });
+
+    it('joins the messages of a validation error list', () => {
+      const result = toSwapProviderError(
+        apiError(422, {
+          detail: [
+            {
+              type: 'value_error',
+              loc: ['body', 'quantity'],
+              msg: 'Value error, amount must be a positive number',
+              input: 0,
+              ctx: { error: {} },
+            },
+            {
+              type: 'missing',
+              loc: ['body', 'address'],
+              msg: 'Field required',
+            },
+          ],
+        }),
+      );
+      expect(result.message).toBe(
+        'Value error, amount must be a positive number; Field required',
+      );
+    });
+
+    it('skips list items without a string message', () => {
+      const result = toSwapProviderError(
+        apiError(422, {
+          detail: [{ msg: 42 }, null, 'text', { msg: 'Field required' }],
+        }),
+      );
+      expect(result.message).toBe('Field required');
+    });
+
+    it.each([
+      ['an empty string', ''],
+      ['an empty list', []],
+      ['a list without messages', [{ type: 'missing' }, { msg: '' }]],
+      ['an object', { msg: 'not a list' }],
+      ['a number', 422],
+      ['null', null],
+    ])('keeps the raw message when the detail is %s', (_, detail) => {
+      const error = apiError(422, { detail });
+      expect(toSwapProviderError(error).message).toBe(error.message);
+    });
   });
 });

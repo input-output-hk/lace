@@ -10,13 +10,18 @@ const native = vi.hoisted(() => ({
   AppState: { addEventListener: vi.fn() },
   Dimensions: { get: () => ({ width: 390, height: 844 }) },
 }));
-const transport = vi.hoisted(() => ({
-  fetch: vi.fn(async (_url: string, _options: { body?: string }) => ({
-    status: 200,
-    json: async () => ({ featureFlags: { MOBILE_TEST: true } }),
-    text: async () => '',
-  })),
-}));
+const transport = vi.hoisted(() => {
+  const response = {
+    body: { featureFlags: { MOBILE_TEST: true } } as unknown,
+  };
+  return {
+    response,
+    fetch: vi.fn(
+      async (_url: string, _options: { body?: string }) =>
+        new Response(JSON.stringify(response.body), { status: 200 }),
+    ),
+  };
+});
 const sdkState = vi.hoisted(() => ({
   clients: [] as PostHog[],
   restoreNative: () => {},
@@ -52,6 +57,7 @@ vi.mock('posthog-react-native', async () => {
           disableCompression: true,
           disableRemoteConfig: true,
           flushInterval: 0,
+          fetchRetryCount: 0,
         });
         sdkState.clients.push(this);
       }
@@ -63,29 +69,34 @@ afterEach(async () => {
   await Promise.all(sdkState.clients.map(async client => client.shutdown()));
   sdkState.clients.length = 0;
   transport.fetch.mockClear();
+  transport.response.body = { featureFlags: { MOBILE_TEST: true } };
   vi.unstubAllGlobals();
 });
 afterAll(() => {
   sdkState.restoreNative();
 });
 
+const makeClient = (platform: string) => {
+  native.Platform.OS = platform;
+  vi.stubGlobal('fetch', transport.fetch);
+  return initializeSideEffectDependencies(
+    {
+      runtime: {
+        config: {
+          postHogApiToken: 'test-token',
+          postHogUrl: 'https://example.test',
+        },
+      },
+    } as never,
+    {} as never,
+  ).posthog;
+};
+
 describe.each(['ios', 'android'])(
   'real PostHog SDK transport on %s',
   platform => {
     it('sends platform on capture, SDK identity events, person updates, and flag requests', async () => {
-      native.Platform.OS = platform;
-      vi.stubGlobal('fetch', transport.fetch);
-      const { posthog } = initializeSideEffectDependencies(
-        {
-          runtime: {
-            config: {
-              postHogApiToken: 'test-token',
-              postHogUrl: 'https://example.test',
-            },
-          },
-        } as never,
-        {} as never,
-      );
+      const posthog = makeClient(platform);
 
       await posthog.getFeatureFlags('anonymous');
       posthog.captureEvent({
@@ -124,6 +135,124 @@ describe.each(['ios', 'android'])(
       ).toMatchObject({
         platform,
         $set: { platform, language: 'en' },
+      });
+    });
+    it.each([
+      ['incomplete response', {}],
+      ['null legacy flags', { featureFlags: null }],
+      ['array legacy flags', { featureFlags: [] }],
+      ['null detailed flags', { flags: null }],
+      ['array detailed flags', { flags: [] }],
+      ['empty flag detail', { flags: { BUY_FLOW: {} } }],
+      [
+        'metadata-only flag detail',
+        { flags: { BUY_FLOW: { metadata: { payload: '{}' } } } },
+      ],
+      ['null legacy flag value', { featureFlags: { BUY_FLOW: null } }],
+      [
+        'malformed detailed flags alongside legacy flags',
+        { flags: null, featureFlags: { BUY_FLOW: true } },
+      ],
+      [
+        'partially computed flags',
+        { featureFlags: { PARTIAL: true }, errorsWhileComputingFlags: true },
+      ],
+      ['quota-limited response', { quotaLimited: ['feature_flags'] }],
+      [
+        'malformed quota marker',
+        { featureFlags: {}, quotaLimited: 'feature_flags' },
+      ],
+      [
+        'quota-limited legacy flags',
+        { featureFlags: {}, quotaLimited: ['feature_flags'] },
+      ],
+      [
+        'quota-limited detailed flags',
+        { flags: {}, quotaLimited: ['feature_flags'] },
+      ],
+    ])(
+      'preserves known flags on %s and recovers after a complete response',
+      async (_name, body) => {
+        transport.response.body = {
+          featureFlags: { BUY_FLOW: true },
+          featureFlagPayloads: { BUY_FLOW: { cohort: 'test' } },
+        };
+        const posthog = makeClient(platform);
+        const enabled = {
+          featureFlags: { BUY_FLOW: true },
+          featureFlagPayloads: { BUY_FLOW: { cohort: 'test' } },
+        };
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual(
+          enabled,
+        );
+
+        transport.response.body = body;
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({});
+        expect(sdkState.clients[0].getFeatureFlagsAndPayloads()).toEqual({
+          flags: enabled.featureFlags,
+          payloads: enabled.featureFlagPayloads,
+        });
+
+        transport.response.body = {
+          featureFlags: { BUY_FLOW: true, RECOVERY: true },
+        };
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+          featureFlags: { BUY_FLOW: true, RECOVERY: true },
+          featureFlagPayloads: {},
+        });
+      },
+    );
+    it.each([
+      ['legacy', { featureFlags: {} }],
+      ['detailed', { flags: {} }],
+    ])(
+      'accepts complete %s empty flags and unrelated quotas',
+      async (_name, emptyFlags) => {
+        transport.response.body = {
+          featureFlags: { BUY_FLOW: true },
+          quotaLimited: ['events'],
+        };
+        const posthog = makeClient(platform);
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+          featureFlags: { BUY_FLOW: true },
+          featureFlagPayloads: {},
+        });
+
+        transport.response.body = { featureFlags: { BUY_FLOW: false } };
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+          featureFlags: { BUY_FLOW: false },
+          featureFlagPayloads: {},
+        });
+
+        transport.response.body = emptyFlags;
+        await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+          featureFlags: {},
+          featureFlagPayloads: {},
+        });
+      },
+    );
+    it('accepts detailed boolean and variant values with their payloads', async () => {
+      transport.response.body = {
+        flags: {
+          BUY_FLOW: {
+            enabled: true,
+            metadata: { payload: '{"cohort":"test"}' },
+          },
+          DISABLED: { enabled: false },
+          VARIANT: {
+            enabled: true,
+            variant: 'cohort-b',
+            metadata: { payload: '{"variant":2}' },
+          },
+        },
+      };
+      const posthog = makeClient(platform);
+      await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+        featureFlags: { BUY_FLOW: true, DISABLED: false, VARIANT: 'cohort-b' },
+        featureFlagPayloads: {
+          BUY_FLOW: { cohort: 'test' },
+          VARIANT: { variant: 2 },
+        },
       });
     });
   },

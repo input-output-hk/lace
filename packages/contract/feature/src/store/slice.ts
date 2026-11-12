@@ -40,7 +40,7 @@ const slice = createSlice({
       const currentLoaded = current(state.loaded);
 
       // Handle identical payloads to avoid unnecessary work
-      if (isEqual(payload, currentLoaded)) {
+      if (!state.next && isEqual(payload, currentLoaded)) {
         return;
       }
 

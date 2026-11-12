@@ -106,6 +106,45 @@ describe('Side Effects', () => {
       });
     });
 
+    it('persists and emits a remote flag restored to its startup value', () => {
+      const initialFeatureFlags = [{ key: FeatureFlagKey('BUY_FLOW') }];
+      const storage = { set: vi.fn(of) };
+      const effect = updateFeatures(
+        {
+          availableModules: [],
+          loaded: { featureFlags: initialFeatureFlags, modules: [] },
+        },
+        {
+          env: developmentEnvironment,
+          config: { extraFeatureFlags: [], defaultFeatureFlags },
+        },
+      );
+      testSideEffect(effect, ({ expectObservable, flush }) => ({
+        dependencies: {
+          featureFlags$: of(initialFeatureFlags, [], [], initialFeatureFlags),
+          createDocumentStorage: vi.fn().mockReturnValue(storage),
+          actions,
+        },
+        assertion: sideEffect$ => {
+          expectObservable(sideEffect$).toBe('(ab|)', {
+            a: actions.features.updateFeatures({
+              featureFlags: [],
+              modules: [],
+            }),
+            b: actions.features.updateFeatures({
+              featureFlags: initialFeatureFlags,
+              modules: [],
+            }),
+          });
+          flush();
+          expect(storage.set).toHaveBeenCalledTimes(2);
+          expect(storage.set).toHaveBeenLastCalledWith({
+            featureFlags: initialFeatureFlags,
+          });
+        },
+      }));
+    });
+
     describe('runtime fallback', () => {
       const compatibleFlags: FeatureFlag[] = [{ key: FeatureFlagKey('flag1') }];
       const incompatibleFlags: FeatureFlag[] = [

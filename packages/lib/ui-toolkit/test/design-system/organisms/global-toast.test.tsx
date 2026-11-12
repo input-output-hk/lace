@@ -15,8 +15,16 @@ import type { ReactTestRenderer } from 'react-test-renderer';
 // ElementType only admits intrinsic DOM tags — recast the mocked RN hosts.
 const asHost = (type: string): ElementType => type as unknown as ElementType;
 
+// Throws on a non-string key, as i18next does.
 vi.mock('@lace-contract/i18n', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: unknown) => {
+      if (typeof key !== 'string') {
+        throw new TypeError('key.indexOf is not a function');
+      }
+      return key;
+    },
+  }),
 }));
 
 vi.mock('react-native-reanimated', () => ({
@@ -47,6 +55,83 @@ describe('GlobalToast', () => {
     const overlay = renderer.root.findByType(asHost('FloatingOverlay'));
     expect(overlay.props.onTouchThrough).toBe(onHide);
     expect(onHide).not.toHaveBeenCalled();
+
+    act(() => {
+      renderer?.unmount();
+    });
+  });
+
+  it('passes string text and subtitle to Toast', () => {
+    let renderer: ReactTestRenderer | undefined;
+    act(() => {
+      renderer = create(
+        <GlobalToast
+          toast={{ text: 'copied', subtitle: 'address' }}
+          onHide={vi.fn()}
+        />,
+      );
+    });
+    if (!renderer) throw new Error('GlobalToast did not render');
+
+    const toast = renderer.root.findByType(asHost('Toast'));
+    expect(toast.props.text).toBe('copied');
+    expect(toast.props.subtitle).toBe('address');
+
+    act(() => {
+      renderer?.unmount();
+    });
+  });
+
+  // The shape a SteelSwap validation error left in persisted state, which
+  // crashed every launch before the hide timer could clear it.
+  it('drops a subtitle that is not a string and still hides the toast', () => {
+    vi.useFakeTimers();
+    const onHide = vi.fn();
+    const subtitle = [
+      { type: 'value_error', msg: 'amount must be a positive number' },
+    ] as unknown as string;
+    let renderer: ReactTestRenderer | undefined;
+    try {
+      act(() => {
+        renderer = create(
+          <GlobalToast
+            toast={{ text: 'v2.swap.toast.build-failed.title', subtitle }}
+            onHide={onHide}
+          />,
+        );
+      });
+      if (!renderer) throw new Error('GlobalToast did not render');
+
+      const toast = renderer.root.findByType(asHost('Toast'));
+      expect(toast.props.text).toBe('v2.swap.toast.build-failed.title');
+      expect(toast.props.subtitle).toBeUndefined();
+      expect(onHide).not.toHaveBeenCalled();
+
+      act(() => {
+        vi.advanceTimersByTime(3600);
+      });
+      expect(onHide).toHaveBeenCalledTimes(1);
+    } finally {
+      act(() => {
+        renderer?.unmount();
+      });
+      vi.useRealTimers();
+    }
+  });
+
+  it('renders empty text when the text is not a string', () => {
+    let renderer: ReactTestRenderer | undefined;
+    act(() => {
+      renderer = create(
+        <GlobalToast
+          toast={{ text: { key: 'copied' } as unknown as string }}
+          onHide={vi.fn()}
+        />,
+      );
+    });
+    if (!renderer) throw new Error('GlobalToast did not render');
+
+    expect(renderer.root.findByType(asHost('Toast')).props.text).toBe('');
 
     act(() => {
       renderer?.unmount();

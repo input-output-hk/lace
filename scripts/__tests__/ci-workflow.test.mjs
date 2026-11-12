@@ -88,29 +88,14 @@ const GATES = [
 describe('workspace builds', () => {
   it.each([
     {
-      event: 'pull_request',
-      base: 'release/2.5.x',
-      diffStatus: 0,
+      exclusions: 'lace-sdk,lace-sdk-example-passport,lace-sdk-site',
       deferred: true,
     },
-    {
-      event: 'pull_request',
-      base: 'release/2.5.x',
-      diffStatus: 1,
-      deferred: false,
-    },
-    { event: 'pull_request', base: 'main', diffStatus: 0, deferred: false },
-    {
-      event: 'workflow_dispatch',
-      base: 'release/2.5.x',
-      diffStatus: 0,
-      deferred: false,
-    },
+    { exclusions: '', deferred: false },
   ])(
-    'scopes the SDK migration exception to unchanged release PRs: $event / $base / $diffStatus',
-    ({ event, base, diffStatus, deferred }) =>
+    'honors the guarded SDK release exclusions: $deferred',
+    ({ exclusions, deferred }) =>
       inRunner(async directory => {
-        await stub(directory, 'git', 'exit "${GIT_DIFF_STATUS:-0}"');
         await stub(
           directory,
           'npx',
@@ -120,17 +105,14 @@ describe('workspace builds', () => {
           directory,
           stepScript('build', 'build-workspace'),
           {
-            GITHUB_EVENT_NAME: event,
-            GITHUB_BASE_REF: base,
-            RELEASE_BASE_SHA: 'release-base',
-            GIT_DIFF_STATUS: String(diffStatus),
+            SDK_RELEASE_EXCLUSIONS: exclusions,
           },
         );
         expect(code).toBe(0);
         const commands = await readFile(join(directory, 'commands'), 'utf8');
         expect(commands).toContain(
-          `nx run-many --target=build --exclude=lace-sdk-site${
-            deferred ? ',lace-sdk,lace-sdk-example-passport' : ''
+          `nx run-many --target=build --exclude=${
+            deferred ? exclusions : 'lace-sdk-site'
           }`,
         );
         expect(commands).toContain(
@@ -138,6 +120,106 @@ describe('workspace builds', () => {
         );
       }),
   );
+});
+
+describe('the temporary app-release gates', () => {
+  it.each(['failure', 'skipped', 'cancelled', 'success'])(
+    'makes Code Quality follow either native workflow result: %s',
+    async result => {
+      for (const job of [
+        'mobile-release-builds',
+        'next-mobile-release-builds',
+      ]) {
+        await inRunner(async directory => {
+          const values = {
+            'needs.changes.outputs.ready_only': 'false',
+            'needs.changes.outputs.docs_only': 'false',
+            'needs.changes.outputs.sdk_exclusions': 'lace-sdk',
+            'needs.code-quality-checks.result': 'success',
+            'needs.lint.result': 'success',
+            'needs.mobile-release-builds.result': 'success',
+            'needs.next-mobile-release-builds.result': 'success',
+            [`needs.${job}.result`]: result,
+          };
+          const script = workflow.jobs['code-quality'].steps[0].run.replace(
+            /\$\{\{\s*(.*?)\s*\}\}/g,
+            (_, key) => values[key] ?? '',
+          );
+          expect((await runStep(directory, script)).code === 0).toBe(
+            result === 'success',
+          );
+        });
+      }
+    },
+  );
+
+  it('does not require the extra native workflows outside the exception', () =>
+    inRunner(async directory => {
+      const values = {
+        'needs.changes.outputs.ready_only': 'false',
+        'needs.changes.outputs.docs_only': 'false',
+        'needs.changes.outputs.sdk_exclusions': '',
+        'needs.code-quality-checks.result': 'success',
+        'needs.lint.result': 'success',
+        'needs.mobile-release-builds.result': 'skipped',
+        'needs.next-mobile-release-builds.result': 'skipped',
+      };
+      const script = workflow.jobs['code-quality'].steps[0].run.replace(
+        /\$\{\{\s*(.*?)\s*\}\}/g,
+        (_, key) => values[key] ?? '',
+      );
+      expect((await runStep(directory, script)).code).toBe(0);
+    }));
+
+  it('requires both native platforms without submitting or announcing PR builds', async () => {
+    for (const [job, file] of [
+      ['mobile-release-builds', 'mobile-build.yml'],
+      ['next-mobile-release-builds', 'lace-next-mobile.yml'],
+    ]) {
+      const caller = workflow.jobs[job];
+      expect(caller.uses).toBe(`./.github/workflows/${file}`);
+      expect(caller.with.platform).toBe('all');
+      expect(caller.if).toContain("sdk_exclusions != ''");
+      expect(caller['continue-on-error']).toBeUndefined();
+      expect(workflow.jobs['code-quality'].needs).toContain(job);
+      const native = parse(
+        await readFile(
+          fileURLToPath(
+            new URL(`../../.github/workflows/${file}`, import.meta.url),
+          ),
+          'utf8',
+        ),
+      );
+      expect(native.on.workflow_call.inputs.platform.default).toBe('all');
+      expect(native.jobs['build-ios'].if).toContain('inputs.platform');
+      expect(native.jobs['build-android'].if).toContain('inputs.platform');
+      for (const platform of ['ios', 'android']) {
+        const steps = native.jobs[`build-${platform}`].steps;
+        expect(steps.some(step => /submit/.test(step.run ?? ''))).toBe(false);
+        const browserstack = steps.find(step =>
+          step.name?.includes('to BrowserStack'),
+        );
+        if (browserstack)
+          expect(browserstack.if).toContain(
+            "github.event_name != 'pull_request'",
+          );
+      }
+    }
+    expect(workflow.jobs['mobile-release-builds'].with.notify_slack).toBe(
+      false,
+    );
+  });
+
+  it('does not convert a scope helper failure into an SDK exception', () =>
+    inRunner(async directory => {
+      await stub(directory, 'node', 'exit 37');
+      const result = await runStep(
+        directory,
+        stepScript('changes', 'sdk-scope'),
+      );
+      expect(result.code).toBe(37);
+      expect(result.output).toBe('');
+    }));
 });
 
 describe('the release vendor audit', () => {

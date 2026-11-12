@@ -1,4 +1,4 @@
-import { type SheetScreenProps } from '@lace-lib/navigation';
+import { type SheetScreenProps, useFocusEffect } from '@lace-lib/navigation';
 import {
   AccountSecurityAlertInline,
   BuySheet as BuySheetTemplate,
@@ -16,6 +16,7 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
   const { theme } = useTheme();
   const {
     accountName,
+    isBuyAvailable,
     selectedAccount,
     dropdownItems,
     actionText,
@@ -26,7 +27,17 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
   const heading = t('v2.buy-flow.heading.sheet');
   const buttonLabel = t('v2.buy-flow.button');
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!isBuyAvailable) props.navigation.goBack();
+    }, [isBuyAvailable, props.navigation]),
+  );
+
   useEffect(() => {
+    if (!isBuyAvailable) {
+      props.navigation.setOptions({ footer: <React.Fragment /> });
+      return;
+    }
     props.navigation.setOptions({
       header: <Sheet.Header title={heading} testID="buy-sheet-header" />,
       footer: (
@@ -43,6 +54,7 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
     });
   }, [
     props.navigation,
+    isBuyAvailable,
     heading,
     buttonLabel,
     handleOpenBanxaUrl,
@@ -76,6 +88,8 @@ export const BuySheet = (props: SheetScreenProps<SheetRoutes.Buy>) => {
       </React.Fragment>
     );
   }, [t, handleOpenBanxaUrl, theme.brand.ascending]);
+
+  if (!isBuyAvailable) return null;
 
   return (
     <BuySheetTemplate

@@ -72,13 +72,14 @@ it.each([undefined, '1'])('keeps webpack E2E flags opt-in (%s)', enabled => {
   expect(baseRequest.request).toBe('../src/feature-flags');
 });
 
-it('adds the five opt-in features only to the E2E fixture', () => {
+it('adds the opt-in features only to the E2E fixture', () => {
   const defaults = defaultFeatureFlags.map(flag => flag.key);
   expect(
     testFeatureFlags
       .filter(flag => !defaults.includes(flag.key))
       .map(flag => flag.key),
   ).toEqual([
+    'BUY_FLOW',
     'MIGRATE_WALLET',
     'NOTIFICATION_CENTER',
     'SWAP_CENTER',

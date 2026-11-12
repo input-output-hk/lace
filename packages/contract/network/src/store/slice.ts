@@ -3,6 +3,7 @@ import { markParameterizedSelector } from '@lace-contract/module';
 import { createSelector, createSlice } from '@reduxjs/toolkit';
 
 import { isFeatureAvailableForNetwork } from '../network-restrictions';
+import { FeatureIds } from '../value-objects';
 
 import type { NetworkSliceState, NetworkType, TestnetOption } from './types';
 import type { BlockchainNetworkId, FeatureId } from '../value-objects';
@@ -142,17 +143,24 @@ const selectNetworkKey = createSelector(
  * Check if a feature is available based on network type and feature flags.
  * Combines network restrictions with feature flag checks.
  */
+const selectFeatureFlagsForAvailability = createSelector(
+  featuresSelectors.features.selectLoadedFeatures,
+  featuresSelectors.features.selectNextFeatureFlags,
+  (_: unknown, featureId: FeatureId) => featureId,
+  (loadedFeatures, nextFeatureFlags, featureId) =>
+    // Banxa has no module to reload; remote changes can apply to open views.
+    featureId === FeatureIds.BUY_FLOW && nextFeatureFlags
+      ? nextFeatureFlags.features
+      : loadedFeatures.featureFlags,
+);
+
 const selectIsFeatureAvailable = markParameterizedSelector(
   createSelector(
     slice.selectors.selectNetworkType,
-    featuresSelectors.features.selectLoadedFeatures,
+    selectFeatureFlagsForAvailability,
     (_: unknown, featureId: FeatureId) => featureId,
-    (networkType, loadedFeatures, featureId) =>
-      isFeatureAvailableForNetwork(
-        featureId,
-        networkType,
-        loadedFeatures.featureFlags,
-      ),
+    (networkType, featureFlags, featureId) =>
+      isFeatureAvailableForNetwork(featureId, networkType, featureFlags),
   ),
 );
 

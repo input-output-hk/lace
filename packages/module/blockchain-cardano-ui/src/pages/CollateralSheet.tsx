@@ -1,4 +1,5 @@
 import { useTranslation } from '@lace-contract/i18n';
+import { FeatureIds } from '@lace-contract/network';
 import { AccountId, WalletId } from '@lace-contract/wallet-repo';
 import {
   NavigationControls,
@@ -15,12 +16,17 @@ import {
 import React, { useCallback, useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { useLaceSelector } from '../hooks';
 import { useCollateralState } from '../hooks/useCollateralState';
 
 export const CollateralSheet = (
   props: SheetScreenProps<SheetRoutes.Collateral>,
 ) => {
   const { t } = useTranslation();
+  const isBuyAvailable = useLaceSelector(
+    'network.selectIsFeatureAvailable',
+    FeatureIds.BUY_FLOW,
+  );
   const { accountId, walletId } = props.route.params;
 
   const {
@@ -45,8 +51,9 @@ export const CollateralSheet = (
   }, [handleCloseFlow]);
 
   const handleBuy = useCallback(() => {
+    if (!isBuyAvailable) return;
     NavigationControls.navigate(SheetRoutes.Buy);
-  }, []);
+  }, [isBuyAvailable]);
 
   useEffect(() => {
     if (state === 'failure') {
@@ -88,11 +95,15 @@ export const CollateralSheet = (
               onPress: handleClose,
               testID: 'collateral-not-enough-balance-status-secondary-button',
             }}
-            primaryButton={{
-              label: t('collateral.sheet.not-enough-balance.button.buy'),
-              onPress: handleBuy,
-              testID: 'collateral-not-enough-balance-status-button',
-            }}
+            primaryButton={
+              isBuyAvailable
+                ? {
+                    label: t('collateral.sheet.not-enough-balance.button.buy'),
+                    onPress: handleBuy,
+                    testID: 'collateral-not-enough-balance-status-button',
+                  }
+                : undefined
+            }
           />
         ),
       });
@@ -143,6 +154,7 @@ export const CollateralSheet = (
     handleSetCollateral,
     handleReclaimCollateral,
     isProcessing,
+    isBuyAvailable,
   ]);
 
   if (state === 'initializing') {

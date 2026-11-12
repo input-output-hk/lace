@@ -184,15 +184,33 @@ export const fromTokenSummary = (
 export const fromDexList = (dexNames: string[]): SwapDex[] =>
   dexNames.map(name => ({ id: name, name }));
 
+// SteelSwap's own errors carry `detail` as a string; its request validation
+// (FastAPI, 422) carries a list of `{ msg, loc, type, ... }` objects instead.
+const detailToMessage = (detail: unknown): string | undefined => {
+  if (typeof detail === 'string') return detail || undefined;
+  if (!Array.isArray(detail)) return undefined;
+  const messages = detail
+    .map((item: unknown) =>
+      typeof item === 'object' && item !== null && 'msg' in item
+        ? item.msg
+        : undefined,
+    )
+    .filter(
+      (message): message is string =>
+        typeof message === 'string' && message !== '',
+    );
+  return messages.length > 0 ? messages.join('; ') : undefined;
+};
+
 const extractDetailFromErrorMessage = (message: string): string => {
   // SteelSwap returns errors like: 'SteelSwap API error (406): {"detail":"..."}'
   const jsonStart = message.indexOf('{');
   if (jsonStart === -1) return message;
   try {
     const parsed = JSON.parse(message.slice(jsonStart)) as {
-      detail?: string;
+      detail?: unknown;
     };
-    return parsed.detail ?? message;
+    return detailToMessage(parsed.detail) ?? message;
   } catch {
     return message;
   }

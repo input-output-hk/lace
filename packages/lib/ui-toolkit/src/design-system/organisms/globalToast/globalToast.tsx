@@ -47,15 +47,16 @@ const HIDE_DELAY_MS = 600;
 
 export const GlobalToast = ({ toast, onHide }: GlobalToastProps) => {
   const { t } = useTranslation();
-  // Translate text/subtitle so side effects can dispatch translation keys.
-  // Uses defaultValue fallback so pre-translated strings and raw provider
-  // error messages pass through unchanged.
-  const translatedText = toast?.text
-    ? t(toast.text, { defaultValue: toast.text })
-    : toast?.text;
-  const translatedSubtitle = toast?.subtitle
-    ? t(toast.subtitle, { defaultValue: toast.subtitle })
-    : toast?.subtitle;
+  // Translate text/subtitle so side effects can dispatch translation keys;
+  // defaultValue lets pre-translated strings and provider errors pass through.
+  // Strings only: the toast is rehydrated from storage unchecked, and i18next
+  // throws on any other key, which would crash every launch until it clears.
+  const translate = (value: unknown): string | undefined =>
+    typeof value === 'string' && value !== ''
+      ? t(value, { defaultValue: value })
+      : undefined;
+  const translatedText = translate(toast?.text);
+  const translatedSubtitle = translate(toast?.subtitle);
   const duration = useMemo(() => toast?.duration || 3, [toast?.duration]);
   const position = useMemo(() => toast?.position || 'top', [toast?.position]);
   const triggerToast = useTriggerToast({ duration, position });
@@ -118,7 +119,7 @@ export const GlobalToast = ({ toast, onHide }: GlobalToastProps) => {
     <FloatingOverlay onTouchThrough={onHide}>
       <Animated.View style={triggerToast.animatedStyle} pointerEvents="none">
         <Toast
-          text={translatedText ?? toast.text}
+          text={translatedText ?? ''}
           subtitle={translatedSubtitle}
           color={toast.color}
           backgroundType={toast.backgroundType}
