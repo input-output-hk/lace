@@ -9,7 +9,7 @@ vi.mock('posthog-react-native', () => ({
       capture: vi.fn(),
       identify: vi.fn(),
       setPersonPropertiesForFlags: vi.fn(),
-      reloadFeatureFlagsAsync: vi.fn().mockResolvedValue(undefined),
+      reloadFeatureFlagsAsync: vi.fn().mockResolvedValue({}),
       getFeatureFlagsAndPayloads: vi
         .fn()
         .mockReturnValue({ flags: {}, payloads: {} }),
@@ -83,6 +83,25 @@ describe.each(['ios', 'android'] as const)('PostHog on %s', platform => {
     );
     expect(sdk.identify).not.toHaveBeenCalled();
     expect(sdk.reloadFeatureFlagsAsync).not.toHaveBeenCalled();
+  });
+
+  it('keeps an unavailable SDK refresh distinct from a successful empty flag set', async () => {
+    const { posthog } = makeInit();
+    const sdk = vi.mocked(PostHog).mock.results[0].value as PostHog;
+    vi.mocked(sdk.reloadFeatureFlagsAsync).mockResolvedValueOnce(undefined);
+    await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({});
+    await expect(posthog.getFeatureFlags('test-user')).resolves.toEqual({
+      featureFlags: {},
+      featureFlagPayloads: {},
+    });
+  });
+
+  it('propagates refresh failures so cached flags are not mistaken for a successful empty response', async () => {
+    const { posthog } = makeInit();
+    const sdk = vi.mocked(PostHog).mock.results[0].value as PostHog;
+    const error = new Error('Offline');
+    vi.mocked(sdk.reloadFeatureFlagsAsync).mockRejectedValueOnce(error);
+    await expect(posthog.getFeatureFlags('test-user')).rejects.toBe(error);
   });
 
   it('identifies the current device platform while preserving person properties', () => {

@@ -135,7 +135,7 @@ export const useReceiveSheet = () => {
   const onBuyAssetsPress = useCallback(() => {
     const banxaUrl = process.env.EXPO_PUBLIC_BANXA_URL;
 
-    if (!banxaUrl) return;
+    if (!isBuyAvailable || !banxaUrl) return;
 
     let url = banxaUrl;
 
@@ -164,7 +164,13 @@ export const useReceiveSheet = () => {
         trackEvent('receive | buy assets | url | error');
       },
     });
-  }, [selectedAccount, addressData, nativeTokenInfo, trackEvent]);
+  }, [
+    isBuyAvailable,
+    selectedAccount,
+    addressData,
+    nativeTokenInfo,
+    trackEvent,
+  ]);
 
   const getAddressInfo =
     selectedAccount &&

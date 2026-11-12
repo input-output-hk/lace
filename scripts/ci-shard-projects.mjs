@@ -34,6 +34,9 @@ const listProjects = (target, affected) =>
         '--json',
         `--withTarget=${target}`,
         ...(affected ? ['--affected'] : []),
+        ...(process.env.SDK_RELEASE_EXCLUSIONS
+          ? [`--exclude=${process.env.SDK_RELEASE_EXCLUSIONS}`]
+          : []),
       ],
       { encoding: 'utf8' },
     ),

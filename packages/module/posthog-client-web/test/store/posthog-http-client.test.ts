@@ -305,6 +305,14 @@ describe('posthog-client-web/posthog-http-client', () => {
   });
 
   describe('getFeatureFlags', () => {
+    it('keeps an incomplete response distinct from an empty flag set', async () => {
+      const { client } = createClient();
+      await expect(client.getFeatureFlags('user-1')).resolves.toEqual({
+        featureFlagPayloads: {},
+        featureFlags: undefined,
+      });
+    });
+
     it('posts the distinct id to /flags/ and reads the v2 shape', async () => {
       const { client, fetch } = createClient({
         respond: async () =>

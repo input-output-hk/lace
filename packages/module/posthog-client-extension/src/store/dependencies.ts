@@ -42,20 +42,34 @@ export const initializeSideEffectDependencies: LaceInitSync<
     featureFlagsPollingInterval: FEATURE_FLAGS_POLLING_INTERVAL_MS,
     disableGeoip: false,
     fetch: async (url, options) => {
-      const response = await globalThis.fetch(url, options as RequestInit);
+      let response: Response;
+      try {
+        response = await globalThis.fetch(url, options as RequestInit);
+      } catch (error) {
+        if (url.includes('/flags'))
+          lastFlagsResponsePartialReason = 'network request failed';
+        throw error;
+      }
       if (url.includes('/flags')) {
         try {
           const body = (await response.clone().json()) as {
             errorsWhileComputingFlags?: boolean;
             quotaLimited?: string[];
+            flags?: unknown;
+            featureFlags?: unknown;
           };
-          if (body?.errorsWhileComputingFlags) {
+          if (!response.ok) {
+            lastFlagsResponsePartialReason = `HTTP ${response.status}`;
+          } else if (!body?.flags && !body?.featureFlags) {
+            lastFlagsResponsePartialReason = 'missing flags';
+          } else if (body?.errorsWhileComputingFlags) {
             lastFlagsResponsePartialReason = 'errorsWhileComputingFlags=true';
           } else if (body?.quotaLimited?.includes('feature_flags')) {
             lastFlagsResponsePartialReason =
               'quotaLimited includes feature_flags';
           }
         } catch (error) {
+          lastFlagsResponsePartialReason = 'invalid response';
           logger.warn(
             'Failed to inspect PostHog /flags response for partial errors',
             error,

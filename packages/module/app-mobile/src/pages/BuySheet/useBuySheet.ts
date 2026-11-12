@@ -1,5 +1,6 @@
 import { useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
+import { FeatureIds } from '@lace-contract/network';
 import { openUrl } from '@lace-lib/ui-toolkit';
 import { formatAmountToLocale } from '@lace-lib/util-render';
 import { useCallback, useState, useMemo } from 'react';
@@ -11,6 +12,10 @@ import type { SheetRoutes, SheetScreenProps } from '@lace-lib/navigation';
 
 export const useBuySheet = (props?: SheetScreenProps<SheetRoutes.Buy>) => {
   const { t } = useTranslation();
+  const isBuyAvailable = useLaceSelector(
+    'network.selectIsFeatureAvailable',
+    FeatureIds.BUY_FLOW,
+  );
   const routeAccountId = props?.route?.params?.accountId;
   const accountsResult = useLaceSelector('wallets.selectActiveNetworkAccounts');
   const activeAccountContext = useLaceSelector(
@@ -123,10 +128,7 @@ export const useBuySheet = (props?: SheetScreenProps<SheetRoutes.Buy>) => {
   const handleOpenBanxaUrl = useCallback(() => {
     const banxaUrl = process.env.EXPO_PUBLIC_BANXA_URL;
 
-    if (!banxaUrl) {
-      // Don't open URL if Banxa URL is not configured
-      return;
-    }
+    if (!isBuyAvailable || !banxaUrl) return;
 
     let url = banxaUrl;
 
@@ -160,7 +162,7 @@ export const useBuySheet = (props?: SheetScreenProps<SheetRoutes.Buy>) => {
         // Error handling is done in the openUrl utility
       },
     });
-  }, [selectedAccount, address, nativeTokenInfo]);
+  }, [isBuyAvailable, selectedAccount, address, nativeTokenInfo]);
 
   const handleAccountSelection = useCallback((index: number) => {
     setSelectedAccountIndex(index);
@@ -168,6 +170,7 @@ export const useBuySheet = (props?: SheetScreenProps<SheetRoutes.Buy>) => {
 
   return {
     accounts,
+    isBuyAvailable,
     selectedAccount,
     address,
     accountName,

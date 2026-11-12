@@ -1,6 +1,11 @@
-import { deepEquals } from '@cardano-sdk/util';
-import isEqual from 'lodash/isEqual';
-import { distinctUntilChanged, filter, map, switchMap } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  map,
+  skip,
+  startWith,
+  switchMap,
+} from 'rxjs';
 
 import {
   createFeatureFlagStorage,
@@ -15,24 +20,9 @@ import type { LaceInit, LaceSideEffect, Runtime } from '@lace-contract/module';
 
 type SideEffect = LaceSideEffect<Selectors, ActionCreators>;
 
-const featureFlagEquals = (
-  f1: Readonly<FeatureFlag>,
-  f2: Readonly<FeatureFlag>,
-) => isEqual(f1, f2);
-
 const withoutExtraFeatureFlags =
   (extraFeatureFlags: FeatureFlagKey[]) => (featureFlags: FeatureFlag[]) =>
     featureFlags.filter(({ key }) => !extraFeatureFlags.includes(key));
-
-const featureFlagsChanged =
-  (loadedFeatureFlags: FeatureFlag[]) => (newFeatureFlags: FeatureFlag[]) =>
-    newFeatureFlags.length !== loadedFeatureFlags.length ||
-    newFeatureFlags.some(
-      newFeatureFlag =>
-        !loadedFeatureFlags.some(loadedFeatureFlag =>
-          featureFlagEquals(newFeatureFlag, loadedFeatureFlag),
-        ),
-    );
 
 export const updateFeatures =
   (
@@ -53,8 +43,11 @@ export const updateFeatures =
         featureFlags =>
           !featureFlagSetEquals(featureFlags, fallbackFlagsWithoutExtra),
       ),
-      filter(featureFlagsChanged(loadedFeatureFlagsWithoutExtra)),
-      distinctUntilChanged(deepEquals),
+      startWith(loadedFeatureFlagsWithoutExtra),
+      distinctUntilChanged((previous, next) =>
+        featureFlagSetEquals(previous, next),
+      ),
+      skip(1),
       switchMap(featureFlags =>
         storage.set({ featureFlags }).pipe(map(() => featureFlags)),
       ),

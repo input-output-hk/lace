@@ -12,10 +12,11 @@ import type { FeatureFlag } from '@lace-contract/feature';
 
 describe('network-restrictions', () => {
   describe('FEATURE_NETWORK_RESTRICTIONS', () => {
-    it('should have buy-flow restricted to mainnet only', () => {
+    it('requires BUY_FLOW on mainnet', () => {
       const restriction = FEATURE_NETWORK_RESTRICTIONS[FeatureIds.BUY_FLOW];
       expect(restriction).toEqual({
         allowedNetworks: ['mainnet'],
+        featureFlagKey: FeatureFlagKey('BUY_FLOW'),
       });
     });
 
@@ -42,20 +43,26 @@ describe('network-restrictions', () => {
       keys.map(key => ({ key: FeatureFlagKey(key) }));
 
     describe('buy-flow', () => {
-      it('should be available on mainnet', () => {
+      it('is available on mainnet with BUY_FLOW', () => {
         const isAvailable = isFeatureAvailableForNetwork(
           FeatureIds.BUY_FLOW,
           'mainnet',
-          [],
+          createFeatureFlags(['BUY_FLOW']),
         );
         expect(isAvailable).toBe(true);
       });
 
-      it('should be unavailable on testnet', () => {
+      it('is unavailable on mainnet when BUY_FLOW is missing', () => {
+        expect(
+          isFeatureAvailableForNetwork(FeatureIds.BUY_FLOW, 'mainnet', []),
+        ).toBe(false);
+      });
+
+      it('is unavailable on testnet even with BUY_FLOW', () => {
         const isAvailable = isFeatureAvailableForNetwork(
           FeatureIds.BUY_FLOW,
           'testnet',
-          [],
+          createFeatureFlags(['BUY_FLOW']),
         );
         expect(isAvailable).toBe(false);
       });

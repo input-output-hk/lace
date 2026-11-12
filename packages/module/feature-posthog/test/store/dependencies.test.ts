@@ -93,6 +93,51 @@ describe('feature-posthog/dependencies', () => {
       expect(getFeatureFlags).toHaveBeenCalledTimes(2);
     });
 
+    it.each([{}, { BUY_FLOW: false }])(
+      'emits disabled flags from a successful response: %j',
+      disabledFlags => {
+        createTestScheduler().run(({ cold, hot, expectObservable }) => {
+          const posthog = {
+            getFeatureFlags: vi
+              .fn()
+              .mockReturnValueOnce(
+                cold('a|', { a: { featureFlags: { BUY_FLOW: true } } }),
+              )
+              .mockReturnValueOnce(
+                cold('a|', { a: { featureFlags: disabledFlags } }),
+              ),
+          } as unknown as PostHogClient;
+          const { featureFlags$, initializePostHogFeatureDependencies } =
+            initializeDependencies(Seconds(3600));
+          initializePostHogFeatureDependencies(
+            posthog,
+            hot('-a', { a: 'user1' }),
+            hot('-----a', { a: undefined }),
+          );
+          expectObservable(featureFlags$, '^-----!').toBe('-a---b', {
+            a: [{ key: 'BUY_FLOW' }],
+            b: [],
+          });
+        });
+      },
+    );
+
+    it('ignores incomplete responses without a featureFlags field', () => {
+      createTestScheduler().run(({ cold, hot, expectObservable }) => {
+        const posthog = {
+          getFeatureFlags: vi.fn(() => cold('a|', { a: {} })),
+        } as unknown as PostHogClient;
+        const { featureFlags$, initializePostHogFeatureDependencies } =
+          initializeDependencies(Seconds(3600));
+        initializePostHogFeatureDependencies(
+          posthog,
+          hot('-a', { a: 'user1' }),
+          NEVER,
+        );
+        expectObservable(featureFlags$, '^-----!').toBe('');
+      });
+    });
+
     it('should fetch feature flags when refresh trigger emits', () => {
       const getFeatureFlags = vi.fn();
 

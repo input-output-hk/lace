@@ -14,7 +14,10 @@ export type NetworkRestriction = {
 export const FEATURE_NETWORK_RESTRICTIONS: Partial<
   Record<FeatureId, NetworkRestriction>
 > = {
-  [FeatureIds.BUY_FLOW]: { allowedNetworks: ['mainnet'] },
+  [FeatureIds.BUY_FLOW]: {
+    allowedNetworks: ['mainnet'],
+    featureFlagKey: FeatureFlagKey('BUY_FLOW'),
+  },
   [FeatureIds.DAPP_EXPLORER]: {
     allowedNetworks: ['mainnet'],
     featureFlagKey: FeatureFlagKey('DAPP_EXPLORER'),

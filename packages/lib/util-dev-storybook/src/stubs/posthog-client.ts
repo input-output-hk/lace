@@ -13,13 +13,8 @@ import type { LaceModuleMap } from '@lace-contract/module';
 
 const stubPosthogClient: PostHogClient = {
   captureEvent: () => {},
-  // `feature-posthog`'s polling loop filters out empty responses
-  // (`filter(featureFlags => featureFlags.length > 0)`), so returning
-  // an empty `featureFlags` object idles the loop with no dispatches.
-  getFeatureFlags: async () => ({
-    featureFlags: {},
-    featureFlagPayloads: {},
-  }),
+  // Stories own the flags; an incomplete response leaves their set unchanged.
+  getFeatureFlags: async () => ({}),
   identify: () => {},
 };
 

@@ -59,14 +59,9 @@ export const initializeDependencies: LaceInitSync<
             }),
           ),
         ),
+        filter(posthogResponse => !!posthogResponse.featureFlags),
         map(posthogResponse => {
-          if (!posthogResponse.featureFlags) {
-            // PostHog v5 may return a partial response (e.g. cold start/no flags yet).
-            // Treat this as "no active flags" and wait for the next polling cycle.
-            return [];
-          }
-
-          const featureFlags = posthogResponse.featureFlags;
+          const featureFlags = posthogResponse.featureFlags ?? {};
 
           return Object.entries(featureFlags)
             .filter(([_, value]) => !!value)
@@ -81,8 +76,6 @@ export const initializeDependencies: LaceInitSync<
               return { key: FeatureFlagKey(key) };
             });
         }),
-        // if posthog can't connect, it will return flags it has locally, which can be empty on initial load
-        filter(featureFlags => featureFlags.length > 0),
       ),
     ),
   );

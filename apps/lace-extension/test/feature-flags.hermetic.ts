@@ -7,6 +7,7 @@ import type { FeatureFlag } from '@lace-contract/feature';
 // Only the hermetic build:e2e commands opt into these features.
 const featureFlags: FeatureFlag[] = [
   ...defaultFeatureFlags,
+  { key: FeatureFlagKey('BUY_FLOW') },
   { key: FeatureFlagKey('MIGRATE_WALLET') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },
   { key: FeatureFlagKey('SWAP_CENTER'), payload: {} },
