@@ -28,6 +28,46 @@ module.exports = {
     ],
   },
   plugins: [
+    new DefinePlugin({
+      'process.env.MAESTRO_URL_MAINNET': JSON.stringify(
+        process.env.MAESTRO_URL_MAINNET ||
+          process.env.EXPO_PUBLIC_MAESTRO_URL_MAINNET ||
+          '',
+      ),
+      'process.env.MAESTRO_URL_TESTNET': JSON.stringify(
+        process.env.MAESTRO_URL_TESTNET ||
+          process.env.EXPO_PUBLIC_MAESTRO_URL_TESTNET ||
+          '',
+      ),
+      'process.env.MEMPOOLSPACE_URL_MAINNET': JSON.stringify(
+        process.env.MEMPOOLSPACE_URL_MAINNET ||
+          process.env.EXPO_PUBLIC_MEMPOOLSPACE_URL_MAINNET ||
+          '',
+      ),
+      'process.env.MEMPOOLSPACE_URL_TESTNET': JSON.stringify(
+        process.env.MEMPOOLSPACE_URL_TESTNET ||
+          process.env.EXPO_PUBLIC_MEMPOOLSPACE_URL_TESTNET ||
+          '',
+      ),
+      'process.env.COINGECKO_API_BASE_URL': JSON.stringify(
+        process.env.COINGECKO_API_BASE_URL ||
+          process.env.EXPO_PUBLIC_COINGECKO_API_BASE_URL ||
+          '',
+      ),
+      'process.env.STEELSWAP_API_BASE_URL': JSON.stringify(
+        process.env.STEELSWAP_API_BASE_URL ||
+          process.env.EXPO_PUBLIC_STEELSWAP_API_BASE_URL ||
+          '',
+      ),
+      'process.env.NFT_CDN_URL': JSON.stringify(
+        process.env.NFT_CDN_URL || process.env.EXPO_PUBLIC_NFT_CDN_URL || '',
+      ),
+      'process.env.CARDANO_CUBE_BASE_URL': JSON.stringify(
+        process.env.CARDANO_CUBE_BASE_URL ||
+          process.env.EXPO_PUBLIC_CARDANO_CUBE_BASE_URL ||
+          '',
+      ),
+    }),
     // MV3 forbids remotely hosted code. @sentry/browser's lazyLoadIntegration
     // embeds "https://browser.sentry-cdn.com" even when unused — tree-shaking
     // doesn't drop it. Replace it with a stub so the string never ships.

@@ -8,7 +8,7 @@
 // `export * from '@midnightntwrk/wallet-sdk-hd'`, so depending on the leaf
 // directly yields BYTE-IDENTICAL derivation. The leaf is PURE JS (deps
 // `@scure/bip32@^2.0.1` + `@scure/bip39@^2.0.1`) — it pulls NO
-// `@midnight-ntwrk/ledger-v8` or other WASM into the closure (the engine
+// `@midnightntwrk/ledger-v8` or other WASM into the closure (the engine
 // runtime stays a direct host dep, ADR 37 / ADR 47). `@scure/bip32` dedupes
 // against the 2.0.1 this package pins for the Bitcoin seam (seam-bitcoin.ts);
 // `@scure/bip39@2.0.1` arrives transitively and dedupes to the workspace's

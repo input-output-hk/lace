@@ -2,7 +2,7 @@ import { midnightContextActions } from '@lace-contract/midnight-context';
 import { midnightContextReducers } from '@lace-contract/midnight-context/src/store/slice';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { Transaction } from '@midnightntwrk/ledger-v8';
 import { expect, it, vi } from 'vitest';
 
 import { createAttestedProofServerAccess } from '../../src/store/attested-proving-service';
@@ -14,11 +14,11 @@ import {
 import { createFacadeHarness, unproven } from '../helpers/v2-facade';
 
 import type { AttestedProverProvider } from '../../src/store/attested-proving-service';
-import type * as ledger from '@midnight-ntwrk/ledger-v8';
+import type * as ledger from '@midnightntwrk/ledger-v8';
 import type { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
 
 // Payload encoding needs a real preimage; this test only asserts routing.
-vi.mock('@midnight-ntwrk/ledger-v8', async importOriginal => ({
+vi.mock('@midnightntwrk/ledger-v8', async importOriginal => ({
   ...(await importOriginal<typeof ledger>()),
   createProvingPayload: (preimage: Uint8Array) => preimage,
 }));

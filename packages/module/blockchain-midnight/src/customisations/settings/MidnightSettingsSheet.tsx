@@ -1,13 +1,15 @@
 import { useTranslation, type TranslationKey } from '@lace-contract/i18n';
 import { isSameProofServerMode } from '@lace-contract/midnight-context';
-import { NavigationControls } from '@lace-lib/navigation';
+import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import {
+  Button,
   Column,
   RadioButton,
   Row,
   Sheet,
   spacing,
   Text,
+  Toggle,
   useTheme,
   WarningAlert,
 } from '@lace-lib/ui-toolkit';
@@ -21,6 +23,7 @@ import React, {
 } from 'react';
 import { StyleSheet } from 'react-native';
 
+import { useFilteredDustSyncConsent } from '../../hooks/useFilteredDustSyncConsent';
 import { useMidnightSettings } from '../../hooks/useMidnightSettings';
 import { useProofServerConfirmation } from '../../hooks/useProofServerConfirmation';
 
@@ -112,7 +115,15 @@ export const MidnightSettingsSheet = () => {
     networksConfig,
     isSaving,
     isOpen,
+    dustResetConfirmation,
+    hasSaveFailed,
+    unreadableSnapshotAccountId,
+    unreadableSnapshotWallet,
+    unreadableSnapshotAccount,
+    confirmDustReset,
+    cancelDustReset,
     openSettings,
+    closeSettings,
     save,
     getProofServerSections,
   } = useMidnightSettings();
@@ -125,10 +136,55 @@ export const MidnightSettingsSheet = () => {
   const [selectedProofServer, setSelectedProofServer] =
     useState<ProofServerMode>(networksConfig[networkId].proofServer);
 
+  const [consentedFilteredDustIndexerUrl, setConsentedFilteredDustIndexerUrl] =
+    useState(networksConfig[networkId].filteredDustSyncIndexer);
+  const isFilteredSyncRolloutEnabled =
+    !!networksConfig[networkId].isFilteredDustSyncRolloutEnabled;
+  const isFilteredSyncSelected =
+    consentedFilteredDustIndexerUrl ===
+    networksConfig[networkId].indexerAddress;
+  const changeFilteredSync = useCallback(
+    (enabled: boolean) => {
+      setConsentedFilteredDustIndexerUrl(
+        enabled && isFilteredSyncRolloutEnabled
+          ? networksConfig[networkId].indexerAddress
+          : undefined,
+      );
+    },
+    [isFilteredSyncRolloutEnabled, networksConfig, networkId],
+  );
   const nodeAddresses = networksConfig[networkId].nodeAddress;
   const indexerAddress = networksConfig[networkId].indexerAddress;
 
+  // A confirmation is valid only for the network and endpoint the user reviewed.
+  useEffect(() => {
+    if (
+      dustResetConfirmation &&
+      (dustResetConfirmation.networkId !== networkId ||
+        dustResetConfirmation.config.indexerAddress !== indexerAddress ||
+        !isSameProofServerMode(
+          dustResetConfirmation.config.proofServer,
+          selectedProofServer,
+        ))
+    )
+      cancelDustReset();
+  }, [
+    dustResetConfirmation,
+    networkId,
+    indexerAddress,
+    selectedProofServer,
+    cancelDustReset,
+  ]);
+
   const hasSaveInitiated = useRef(false);
+  const openUnreadableAccountOptions = useCallback(() => {
+    if (!unreadableSnapshotAccount) return;
+    hasSaveInitiated.current = false;
+    NavigationControls.navigate(StackRoutes.AccountDetails, {
+      walletId: unreadableSnapshotAccount.walletId,
+      accountId: unreadableSnapshotAccount.accountId,
+    });
+  }, [unreadableSnapshotAccount]);
 
   const handleClose = useCallback(() => {
     NavigationControls.closeSheet();
@@ -136,7 +192,10 @@ export const MidnightSettingsSheet = () => {
 
   useEffect(() => {
     openSettings();
-  }, [openSettings]);
+    return () => {
+      closeSettings();
+    };
+  }, [openSettings, closeSettings]);
 
   useEffect(() => {
     if (hasSaveInitiated.current && !isOpen) {
@@ -149,20 +208,57 @@ export const MidnightSettingsSheet = () => {
     const updatedConfig = {
       ...networksConfig[networkId],
       proofServer: selectedProofServer,
+      filteredDustSyncIndexer: consentedFilteredDustIndexerUrl,
     };
     hasSaveInitiated.current = true;
     save({ config: updatedConfig, networkId });
-  }, [networksConfig, networkId, selectedProofServer, save]);
+  }, [
+    networksConfig,
+    networkId,
+    selectedProofServer,
+    consentedFilteredDustIndexerUrl,
+    save,
+  ]);
 
-  const { confirmation, requestSave, confirm, cancel } =
-    useProofServerConfirmation({
-      networkId,
-      mode: selectedProofServer,
-      availableModes: sections.flatMap(section => section.modes),
-      isOpen,
-      isSaving,
-      onSave: handleSave,
-    });
+  const hasSyncSettingChanged =
+    consentedFilteredDustIndexerUrl !==
+    networksConfig[networkId].filteredDustSyncIndexer;
+  const availableProofServerModes = useMemo(
+    () => sections.flatMap(section => section.modes),
+    [sections],
+  );
+  const {
+    isAwaitingConsent: isFilteredSyncConsentPending,
+    requestSave: requestFilteredSyncConsentOrSave,
+    confirm: confirmDustSync,
+    cancel: cancelDustSync,
+  } = useFilteredDustSyncConsent({
+    networkId,
+    indexerAddress,
+    proofServer: selectedProofServer,
+    availableProofServerModes,
+    isOpen,
+    isSaving,
+    isRolloutEnabled: isFilteredSyncRolloutEnabled,
+    isSelected: isFilteredSyncSelected,
+    hasSettingChanged: hasSyncSettingChanged,
+    onSave: handleSave,
+  });
+
+  // Prover consent runs first. Persist both settings only after Dust consent too.
+  const {
+    confirmation: proofServerConfirmation,
+    requestSave,
+    confirm,
+    cancel,
+  } = useProofServerConfirmation({
+    networkId,
+    mode: selectedProofServer,
+    availableModes: availableProofServerModes,
+    isOpen,
+    isSaving,
+    onSave: requestFilteredSyncConsentOrSave,
+  });
 
   const getLabel = useCallback(
     (mode: ProofServerMode) => {
@@ -195,45 +291,81 @@ export const MidnightSettingsSheet = () => {
     [t],
   );
 
-  // Saving needs at least two available modes to choose between.
+  // A sync preference can be saved even when only one prover is available.
   const totalModes = sections.reduce(
     (sum, section) => sum + section.modes.length,
     0,
   );
-  const isSaveDisabled = isSaving || totalModes <= 1;
+
+  const isSaveDisabled =
+    isSaving || (totalModes <= 1 && !hasSyncSettingChanged);
+
+  // One active step controls the title, actions and body together.
+  const activeStep = dustResetConfirmation
+    ? 'dust-reset'
+    : isFilteredSyncConsentPending
+    ? 'filtered-sync-consent'
+    : proofServerConfirmation
+    ? 'proof-server-consent'
+    : 'settings';
 
   useEffect(() => {
+    let title: TranslationKey = 'v2.pages.midnight-settings.title';
+    let primaryLabel: TranslationKey =
+      'settings.configure-midnight.drawer.saveBtnLabel';
+    let onPress = requestSave;
+    let secondaryButton:
+      | { label: string; onPress: () => void; testID: string }
+      | undefined;
+    switch (activeStep) {
+      case 'settings':
+        break;
+      case 'dust-reset':
+        title = 'midnight.filtered-dust-sync.label';
+        primaryLabel = 'midnight.filtered-dust-sync.reset-confirm';
+        onPress = confirmDustReset;
+        secondaryButton = {
+          label: t('app.cancel'),
+          onPress: cancelDustReset,
+          testID: 'midnight-dust-reset-cancel',
+        };
+        break;
+      case 'filtered-sync-consent':
+        title = 'midnight.filtered-dust-sync.label';
+        primaryLabel = 'midnight.proof-server.disclosure.confirm';
+        onPress = confirmDustSync;
+        secondaryButton = {
+          label: t('app.cancel'),
+          onPress: cancelDustSync,
+          testID: 'midnight-filtered-dust-sync-cancel',
+        };
+        break;
+      case 'proof-server-consent':
+        title = proofServerConfirmation?.isCustom
+          ? 'midnight.proof-server.custom.disclosure.title'
+          : 'midnight.proof-server.disclosure.title';
+        primaryLabel = 'midnight.proof-server.disclosure.confirm';
+        onPress = confirm;
+        secondaryButton = {
+          label: t('app.cancel'),
+          onPress: cancel,
+          testID: 'proof-server-disclosure-cancel',
+        };
+        break;
+    }
     navigation.setOptions({
       header: (
         <Sheet.Header
-          title={t(
-            confirmation
-              ? confirmation.isCustom
-                ? 'midnight.proof-server.custom.disclosure.title'
-                : 'midnight.proof-server.disclosure.title'
-              : 'v2.pages.midnight-settings.title',
-          )}
+          title={t(title)}
           testID="midnight-settings-sheet-header"
         />
       ),
       footer: (
         <Sheet.Footer
-          secondaryButton={
-            confirmation
-              ? {
-                  label: t('app.cancel'),
-                  onPress: cancel,
-                  testID: 'proof-server-disclosure-cancel',
-                }
-              : undefined
-          }
+          secondaryButton={secondaryButton}
           primaryButton={{
-            label: t(
-              confirmation
-                ? 'midnight.proof-server.disclosure.confirm'
-                : 'settings.configure-midnight.drawer.saveBtnLabel',
-            ),
-            onPress: confirmation ? confirm : requestSave,
+            label: t(primaryLabel),
+            onPress,
             disabled: isSaveDisabled,
             testID: 'save-configuration-button',
           }}
@@ -243,35 +375,70 @@ export const MidnightSettingsSheet = () => {
   }, [
     navigation,
     t,
-    confirmation,
+    activeStep,
+    proofServerConfirmation,
     confirm,
     cancel,
     requestSave,
     isSaveDisabled,
+    confirmDustSync,
+    cancelDustSync,
+    confirmDustReset,
+    cancelDustReset,
   ]);
 
-  if (confirmation) {
+  if (activeStep === 'dust-reset') {
+    return (
+      <Sheet.Scroll showsVerticalScrollIndicator={false}>
+        <WarningAlert
+          title={t('midnight.filtered-dust-sync.reset-title')}
+          body={t('midnight.filtered-dust-sync.reset-warning')}
+          testID="midnight-dust-reset-warning"
+        />
+      </Sheet.Scroll>
+    );
+  }
+
+  if (activeStep === 'filtered-sync-consent') {
+    return (
+      <Sheet.Scroll showsVerticalScrollIndicator={false}>
+        <Column gap={spacing.L}>
+          <WarningAlert
+            title={t('midnight.proof-server.disclosure.warning-title')}
+            body={t('midnight.filtered-dust-sync.disclosure')}
+            testID="midnight-filtered-dust-sync-disclosure"
+          />
+          <Column gap={spacing.S}>
+            <Text.S>{t('midnight.network-config.indexer-address')}</Text.S>
+            <Text.XS style={styles.secondaryText}>{indexerAddress}</Text.XS>
+          </Column>
+        </Column>
+      </Sheet.Scroll>
+    );
+  }
+
+  if (activeStep === 'proof-server-consent' && proofServerConfirmation) {
     return (
       <Sheet.Scroll showsVerticalScrollIndicator={false}>
         <Column gap={spacing.M}>
-          {confirmation.isFirstUse ? (
+          {proofServerConfirmation.isFirstUse ? (
             <WarningAlert
               title={t('midnight.proof-server.disclosure.warning-title')}
               body={t(
-                confirmation.isCustom
+                proofServerConfirmation.isCustom
                   ? 'midnight.proof-server.custom.disclosure.first-use'
                   : 'midnight.proof-server.disclosure.first-use',
-                { provider: confirmation.provider },
+                { provider: proofServerConfirmation.provider },
               )}
               testID="proof-server-disclosure-message"
             />
           ) : (
             <Text.S testID="proof-server-disclosure-message">
               {t(
-                confirmation.isCustom
+                proofServerConfirmation.isCustom
                   ? 'midnight.proof-server.custom.disclosure.reminder'
                   : 'midnight.proof-server.disclosure.reminder',
-                { provider: confirmation.provider },
+                { provider: proofServerConfirmation.provider },
               )}
             </Text.S>
           )}
@@ -287,6 +454,32 @@ export const MidnightSettingsSheet = () => {
   return (
     <Sheet.Scroll showsVerticalScrollIndicator={false}>
       <Column gap={spacing.L}>
+        {hasSaveFailed && (
+          <Column gap={spacing.S}>
+            <WarningAlert
+              title={t('midnight.filtered-dust-sync.check-failed-title')}
+              body={t(
+                unreadableSnapshotAccountId
+                  ? 'midnight.filtered-dust-sync.snapshot-unreadable'
+                  : 'midnight.filtered-dust-sync.check-failed',
+              )}
+              testID="midnight-settings-save-error"
+            />
+            {unreadableSnapshotAccount && unreadableSnapshotWallet && (
+              <Column gap={spacing.S}>
+                <Text.S>
+                  {unreadableSnapshotWallet.metadata.name} /{' '}
+                  {unreadableSnapshotAccount.metadata.name}
+                </Text.S>
+                <Button.Secondary
+                  label={t('midnight.fee-recovery.open-account-options')}
+                  onPress={openUnreadableAccountOptions}
+                  testID="midnight-settings-open-account-options"
+                />
+              </Column>
+            )}
+          </Column>
+        )}
         <Text.S>{t('midnight.proof-server.title')}</Text.S>
         {sections.map(section => (
           <ProofServerTierSection
@@ -331,7 +524,34 @@ export const MidnightSettingsSheet = () => {
                 'midnight.network-config.indexer-address',
               )}: ${indexerAddress}`}
             />
-            <Text.XS style={styles.optionContent}>{indexerAddress}</Text.XS>
+            <Column gap={spacing.M} style={styles.optionContent}>
+              <Text.XS>{indexerAddress}</Text.XS>
+              {(isFilteredSyncRolloutEnabled ||
+                networksConfig[networkId].filteredDustSyncIndexer) && (
+                <Column gap={spacing.S}>
+                  <Toggle
+                    reverse
+                    label={t('midnight.filtered-dust-sync.label')}
+                    accessibilityLabel={t('midnight.filtered-dust-sync.label')}
+                    value={isFilteredSyncSelected}
+                    aria-checked={isFilteredSyncSelected}
+                    aria-disabled={
+                      isSaving ||
+                      (!isFilteredSyncRolloutEnabled && !isFilteredSyncSelected)
+                    }
+                    onValueChange={changeFilteredSync}
+                    disabled={
+                      isSaving ||
+                      (!isFilteredSyncRolloutEnabled && !isFilteredSyncSelected)
+                    }
+                    testID="midnight-filtered-dust-sync"
+                  />
+                  <Text.XS style={styles.secondaryText}>
+                    {t('midnight.filtered-dust-sync.description')}
+                  </Text.XS>
+                </Column>
+              )}
+            </Column>
           </Row>
         </Column>
       </Column>

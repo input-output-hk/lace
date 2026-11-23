@@ -1,5 +1,5 @@
 import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
-import * as v8 from '@midnight-ntwrk/ledger-v8';
+import * as v8 from '@midnightntwrk/ledger-v8';
 import * as v9 from '@midnightntwrk/ledger-v9';
 import {
   ProtocolVersion,
@@ -28,7 +28,52 @@ const spending = (hashes: string[]) => {
   return v8.Transaction.fromParts('undeployed', undefined, undefined, intent);
 };
 
-describe('canary facade transaction contract', () => {
+describe('v2 facade transaction contract', () => {
+  it('keeps a booking during a Dust sync wait and releases it when that wait fails', async () => {
+    const h = await createFacadeHarness();
+    const booked = unproven();
+    const failure = new Error('Dust trees did not catch up');
+    let failDust!: (error: Error) => void;
+    h.unshielded.transferTransaction.mockResolvedValue(booked);
+    h.dust.balanceTransactions.mockImplementation(
+      async () =>
+        new Promise((_resolve, reject) => {
+          failDust = reject;
+        }),
+    );
+    try {
+      const transfer = h.wallet.transferTransaction(
+        [
+          {
+            type: 'unshielded',
+            outputs: [
+              {
+                amount: 5n,
+                type: v8.nativeToken().raw,
+                receiverAddress: new UnshieldedAddress(Buffer.alloc(32)),
+              },
+            ],
+          },
+        ],
+        { ttl: ttl(), payFees: true },
+      );
+      const rejected = expect(transfer).rejects.toBe(failure);
+      await vi.waitFor(() => {
+        expect(h.dust.balanceTransactions).toHaveBeenCalledOnce();
+      });
+      expect(h.unshielded.revertTransaction).not.toHaveBeenCalled();
+      expect(h.proving.prove).not.toHaveBeenCalled();
+      failDust(failure);
+      await rejected;
+      expect(h.unshielded.revertTransaction).toHaveBeenCalledExactlyOnceWith(
+        booked,
+      );
+      expect(h.lifecycle.balanced).not.toHaveBeenCalled();
+    } finally {
+      await h.wallet.stop();
+    }
+  });
+
   it('releases the unshielded booking when the following shielded balance fails', async () => {
     const h = await createFacadeHarness();
     const booked = unproven();

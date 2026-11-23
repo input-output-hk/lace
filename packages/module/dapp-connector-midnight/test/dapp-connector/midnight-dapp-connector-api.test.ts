@@ -4,8 +4,8 @@ import {
 } from '@lace-contract/midnight-context';
 import { networkId } from '@lace-contract/midnight-context/src/stub-data';
 import { createProverClient } from '@lace-lib/midnight-prover';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
 import { ErrorCodes } from '@midnightntwrk/dapp-connector-api';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import {
   NetworkId,
   ProtocolVersion,
@@ -35,8 +35,8 @@ vi.mock('@lace-lib/vendor/midnight-transaction-handle', () => ({
   readMidnightTransaction: (handle: unknown) => handle,
 }));
 
-vi.mock('@midnight-ntwrk/ledger-v8', async () => {
-  const actual = await vi.importActual('@midnight-ntwrk/ledger-v8');
+vi.mock('@midnightntwrk/ledger-v8', async () => {
+  const actual = await vi.importActual('@midnightntwrk/ledger-v8');
   return {
     ...actual,
     addressFromKey: vi.fn().mockReturnValue('own-useraddress-hex'),

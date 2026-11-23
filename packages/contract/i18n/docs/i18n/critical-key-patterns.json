@@ -28,7 +28,9 @@
     "designation-flow.*",
     "midnight.proof-server.custom.*",
     "midnight.proof-server.local-host.description",
-    "v2.portfolio.midnight-banner.description"
+    "v2.portfolio.midnight-banner.description",
+    "midnight.filtered-dust-sync.*",
+    "midnight.fee-recovery.*"
   ],
   "pendingCriticalRestore": {
     "patterns": [

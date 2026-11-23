@@ -16,6 +16,8 @@ export type SyncOperationStatus =
 export type SyncOperationBase = {
   operationId: SyncOperationId;
   description: TranslationKey;
+  /** Short diagnostic shown in the expanded account sync status. */
+  statusDetail?: TranslationKey;
   startedAt: Timestamp;
 };
 

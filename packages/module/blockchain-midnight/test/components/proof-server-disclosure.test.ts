@@ -42,6 +42,7 @@ vi.mock('@lace-lib/ui-toolkit', () => {
     createElement('div', {}, children);
   return {
     Column: container,
+    Divider: container,
     Accordion: { Root: container },
     Row: container,
     Text: { S: container, XS: container },
@@ -75,6 +76,7 @@ vi.mock('../../src/hooks/useMidnightSettings', () => ({
     isOpen: true,
     isSaving: false,
     openSettings: vi.fn(),
+    closeSettings: vi.fn(),
     save: vi.fn(),
     getProofServerSections: () => [
       { tier: 'on-device', modes: [{ kind: 'in-process' }] },

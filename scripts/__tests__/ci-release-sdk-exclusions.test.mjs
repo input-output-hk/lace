@@ -10,12 +10,20 @@ import { releaseSdkExclusions } from '../ci-release-sdk-exclusions.mjs';
 
 const release = { eventName: 'pull_request', baseRef: 'release/2.5.x' };
 const exclusions = ['lace-sdk', 'lace-sdk-example-passport', 'lace-sdk-site'];
+const addressMovementFiles = [
+  'packages/module/dapp-connector-cardano/src/common/components/sign-tx/AddressesSection.tsx',
+  'packages/module/dapp-connector-cardano/src/common/hooks/useDappTxInspection.ts',
+  'packages/module/dapp-connector-cardano/test/fixtures/lw15790-redemption.json',
+  'packages/module/dapp-connector-cardano/test/sign-tx-address-movements.test.ts',
+  'packages/module/dapp-connector-cardano/test/useDappTxInspection.test.ts',
+];
 const cli = fileURLToPath(
   new URL('../ci-release-sdk-exclusions.mjs', import.meta.url),
 );
 
 describe('temporary app-release SDK exception', () => {
   it.each([
+    ...addressMovementFiles,
     'apps/lace-mobile/app.json',
     'apps/lace-next/app.json',
     'apps/lace-extension/assets/manifest.json',
@@ -38,6 +46,46 @@ describe('temporary app-release SDK exception', () => {
     expect(releaseSdkExclusions({ ...release, changedFiles: [file] })).toEqual(
       exclusions,
     );
+  });
+
+  it('defers only the SDK projects for the complete LW-15790 backport', () => {
+    expect(
+      releaseSdkExclusions({
+        ...release,
+        changedFiles: [
+          ...addressMovementFiles,
+          '.changes/fragments/extension.Fixed.20261116-141614.644485313.yaml',
+          '.changes/fragments/mobile.Fixed.20261116-141614.833797272.yaml',
+          '.changes/fragments/next.Fixed.20261117-144916.437997604.yaml',
+          'apps/lace-mobile-storybook/stories/integration/dapp-sign-tx.stories.tsx',
+          'apps/lace-mobile-storybook/stories/integration/data/lw15790-redemption.json',
+          'apps/lace-mobile-storybook/stories/integration/data/lw15790-redemption.ts',
+          'apps/lace-next/src/dapp/cardano-review/inspection.ts',
+          'apps/lace-next/test/cardano-review-address-movements.test.ts',
+          'apps/lace-next/test/fixtures/lw15790-redemption.json',
+          'scripts/ci-release-sdk-exclusions.mjs',
+          'scripts/__tests__/ci-release-sdk-exclusions.test.mjs',
+          'docs/app-release-sdk-exception.md',
+        ],
+      }),
+    ).toEqual(exclusions);
+  });
+
+  it.each([
+    'packages/module/dapp-connector-cardano/src/common/utils/transaction-inspector.ts',
+    'packages/module/dapp-connector-cardano/src/common/hooks/useSignTxData.ts',
+    'packages/module/dapp-connector-cardano/src/common/components/sign-tx/UnknownSection.tsx',
+    'packages/module/dapp-connector-cardano/src/browser/store/side-effects.ts',
+    'packages/module/dapp-connector-cardano/src/index.ts',
+    'packages/module/dapp-connector-cardano/package.json',
+    'packages/module/dapp-connector-cardano/project.json',
+  ])('restores full checks when signing changes also touch %s', file => {
+    expect(
+      releaseSdkExclusions({
+        ...release,
+        changedFiles: [...addressMovementFiles, file],
+      }),
+    ).toEqual([]);
   });
 
   it.each([

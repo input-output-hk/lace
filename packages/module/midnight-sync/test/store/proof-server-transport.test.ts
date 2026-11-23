@@ -1,4 +1,4 @@
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { Transaction } from '@midnightntwrk/ledger-v8';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,14 +9,14 @@ import {
   createProvingServiceFromTransport,
 } from '../../src/store/proof-server-transport';
 
-import type { ProvingProvider } from '@midnight-ntwrk/ledger-v8';
+import type { ProvingProvider } from '@midnightntwrk/ledger-v8';
 
 const ledgerMocks = vi.hoisted(() => ({
   createCheckPayload: vi.fn(() => new Uint8Array([0xcc])),
   createProvingPayload: vi.fn(() => new Uint8Array([0xff])),
   parseCheckResult: vi.fn(() => [1n]),
 }));
-vi.mock('@midnight-ntwrk/ledger-v8', async importOriginal => ({
+vi.mock('@midnightntwrk/ledger-v8', async importOriginal => ({
   ...(await importOriginal<object>()),
   ...ledgerMocks,
 }));
@@ -247,7 +247,7 @@ describe('createProvingProviderFromTransport', () => {
 
 describe('circuit request encoding for server modes', () => {
   it('passes the preimage, binding input and dApp keys to the SDK encoder', async () => {
-    const ledger = await import('@midnight-ntwrk/ledger-v8');
+    const ledger = await import('@midnightntwrk/ledger-v8');
     const request = {
       serializedPreimage: new Uint8Array([1]),
       keyLocation: 'contract',

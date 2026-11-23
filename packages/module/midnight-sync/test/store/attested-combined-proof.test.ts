@@ -3,10 +3,10 @@ import { expect, it, vi } from 'vitest';
 
 import { createAttestedProofServerAccess } from '../../src/store/attested-proving-service';
 
-import type * as ledger from '@midnight-ntwrk/ledger-v8';
+import type * as ledger from '@midnightntwrk/ledger-v8';
 
 // Exercise routing and session ownership without requiring a real circuit fixture.
-vi.mock('@midnight-ntwrk/ledger-v8', async importOriginal => ({
+vi.mock('@midnightntwrk/ledger-v8', async importOriginal => ({
   ...(await importOriginal<typeof ledger>()),
   createProvingPayload: (preimage: Uint8Array) => preimage,
   createCheckPayload: (preimage: Uint8Array) => preimage,

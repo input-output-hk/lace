@@ -1,0 +1,6 @@
+kind: Changed
+body: The Veritee adapter now needs version 0.6.0 of `@input-output-hk/veritee-attestation-verifier` from the host, as earlier versions cannot read the current attestation registry.
+time: 2026-11-13T11:41:14.951418+01:00
+custom:
+  Build: canary
+  Package: sdk

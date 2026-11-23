@@ -5,6 +5,7 @@ import { authenticationPromptActions } from '@lace-contract/authentication-promp
 import { failuresActions } from '@lace-contract/failures';
 import { FeatureFlagKey } from '@lace-contract/feature';
 import {
+  DEFAULT_NETWORKS_CONFIG,
   EMPTY_PARTIAL_NETWORKS_CONFIG,
   midnightContextActions,
   MidnightNetworkId,
@@ -17,6 +18,7 @@ import { tokensActions } from '@lace-contract/tokens';
 import { viewsActions } from '@lace-contract/views';
 import { walletsActions } from '@lace-contract/wallet-repo';
 import { testSideEffect } from '@lace-lib/util-dev';
+import { of } from 'rxjs';
 import { beforeEach, describe, it, vi } from 'vitest';
 
 import {
@@ -83,6 +85,7 @@ describe('midnight-wallet/store/side-effects', () => {
               selectActiveNetworkAccounts$: cold('a', { a: [midnightAccount] }),
             },
             midnightContext: {
+              selectNetworksConfig$: of(DEFAULT_NETWORKS_CONFIG),
               selectMidnightBlockchainNetworkId$: cold('a', {
                 a: MidnightNetworkId(networkId),
               }),
@@ -136,6 +139,7 @@ describe('midnight-wallet/store/side-effects', () => {
               selectActiveNetworkAccounts$: cold('a', { a: [midnightAccount] }),
             },
             midnightContext: {
+              selectNetworksConfig$: of(DEFAULT_NETWORKS_CONFIG),
               selectMidnightBlockchainNetworkId$: cold('a', {
                 a: MidnightNetworkId('mainnet'),
               }),

@@ -1,7 +1,7 @@
 import { getDustTokenIdByNetwork } from '@lace-contract/midnight-context';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber, HexBytes } from '@lace-lib/util';
-import { nativeToken } from '@midnight-ntwrk/ledger-v8';
+import { nativeToken } from '@midnightntwrk/ledger-v8';
 import { WalletTransaction } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
   catchError,

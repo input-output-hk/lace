@@ -1,6 +1,11 @@
 import { merge } from 'rxjs';
 
 import { loadActivityDetails, updateActivities } from './activities';
+import { deferMidnightStartupUntilUnlocked } from './defer-startup';
+import {
+  createRecoverMissingFeesSideEffect,
+  clearRecoveredFeesOnReset,
+} from './fee-recovery';
 import { watchProofActivities, dismissProofActivity } from './proof-activities';
 import { migrateUnavailableProofServerSelection } from './proof-server-kill-switch';
 import {
@@ -8,7 +13,6 @@ import {
   createDeleteWalletSideEffect,
   createResetSyncStateSideEffect,
   requestResyncWallet,
-  resyncWalletOnConfigChangeFromFeatureFlags,
 } from './resync';
 import {
   autoDismissMidnightSyncFailureOnResume,
@@ -35,6 +39,7 @@ export const createInitializeSideEffects =
     loadoutSideEffects: (
       storage: CollectionStorage<SerializedMidnightWallet>,
     ) => SideEffect[],
+    prepareAccountWatch: (watch: SideEffect) => SideEffect = watch => watch,
   ): LaceInitSync<SideEffect[]> =>
   () =>
     [
@@ -57,7 +62,9 @@ export const createInitializeSideEffects =
             requestResyncWallet,
             autoDismissMidnightSyncFailureOnResume,
             autoDismissMidnightSyncFailureOnSyncSuccess,
-            watchMidnightAccounts(midnightStateStorage, watchMidnightAccount),
+            prepareAccountWatch(
+              watchMidnightAccounts(midnightStateStorage, watchMidnightAccount),
+            ),
             ...loadoutSideEffects(midnightStateStorage),
           ].map(sideEffect =>
             sideEffect(actionObservables, stateObservables, dependencies),
@@ -66,15 +73,19 @@ export const createInitializeSideEffects =
       },
     ];
 
-// The extension's reset-sync-state reloads the application; its feature-flag resync waits
-// for the app lock, the proof-server migration toasts, and attestation
+// The extension's reset-sync-state reloads the application, the proof-server
+// migration toasts, and attestation
 // progress feeds the send-flow checklist, so all of them need the app shell.
-export const initializeSideEffects = createInitializeSideEffects(storage => [
-  createResetSyncStateSideEffect(storage),
-  resyncWalletOnConfigChangeFromFeatureFlags,
-  migrateUnavailableProofServerSelection,
-  watchProofActivities,
-  dismissProofActivity,
-  watchTeeAttestationProgress,
-  clearTeeAttestationProgressOnNewTx,
-]);
+export const initializeSideEffects = createInitializeSideEffects(
+  storage => [
+    createResetSyncStateSideEffect(storage),
+    createRecoverMissingFeesSideEffect(),
+    clearRecoveredFeesOnReset,
+    migrateUnavailableProofServerSelection,
+    watchProofActivities,
+    dismissProofActivity,
+    watchTeeAttestationProgress,
+    clearTeeAttestationProgressOnNewTx,
+  ],
+  deferMidnightStartupUntilUnlocked,
+);

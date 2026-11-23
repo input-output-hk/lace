@@ -1,0 +1,6 @@
+kind: Added
+body: Local proving supports Midnight contracts using ZKIR v3 while retaining support for ZKIR v2 contracts and wallet circuits.
+time: 2026-11-10T14:47:00+01:00
+custom:
+  Package: sdk
+  Build: canary

@@ -184,3 +184,28 @@ describe('Veritee deployment migration', () => {
     });
   });
 });
+
+describe('fee recovery persistence', () => {
+  it.each(['lace-extension', 'lace-mobile'] as const)(
+    'enables requests only in the extension, and persists fees without consent/jobs (%s)',
+    async app => {
+      const initialized = await store(
+        {
+          runtime: {
+            app,
+            config: { defaultMidnightTestnetNetworkId: 'preview' },
+          },
+        } as never,
+        {} as never,
+      );
+      expect(initialized.preloadedState?.midnightFeeRecovery).toMatchObject({
+        supported: app === 'lace-extension',
+        jobs: {},
+        feesByAccount: {},
+      });
+      expect(initialized.persistConfig?.midnightFeeRecovery?.whitelist).toEqual(
+        ['feesByAccount'],
+      );
+    },
+  );
+});

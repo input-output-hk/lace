@@ -10,6 +10,7 @@ import {
   selectActiveAccountSyncProgress,
   selectActiveNetworkHasEverSynced,
   computeAccountSyncingProgress,
+  computeAccountSyncStatusDetail,
 } from '../../src/store/selectors';
 
 import type { SyncSliceState, SyncOperation } from '../../src/types';
@@ -22,6 +23,82 @@ const accountId1 = AccountId('account1');
 const accountId2 = AccountId('account2');
 
 describe('sync selectors', () => {
+  describe('computeAccountSyncStatusDetail', () => {
+    const startedAt = Timestamp(1);
+    const catchingUp: SyncOperation = {
+      operationId: 'sync',
+      description: 'sync.operation.midnight-wallet-sync',
+      status: 'InProgress',
+      type: 'Indeterminate',
+      startedAt,
+      statusDetail: 'v2.sync-status.detail.waiting-for-target',
+    };
+    const failure: SyncOperation = {
+      operationId: 'failed',
+      description: 'sync.operation.midnight-wallet-sync',
+      status: 'Failed',
+      startedAt,
+      failedAt: startedAt,
+      error: 'sync.error.midnight-sync-failed',
+      statusDetail: 'v2.sync-status.detail.chain-mismatch',
+    };
+    it('leaves never-started and successfully synced accounts without a detail', () => {
+      expect(computeAccountSyncStatusDetail(undefined)).toBeUndefined();
+      expect(
+        computeAccountSyncStatusDetail({ lastSuccessfulSync: startedAt }),
+      ).toBeUndefined();
+    });
+    it('shows the current operation detail', () => {
+      expect(
+        computeAccountSyncStatusDetail({
+          pendingSync: { startedAt, operations: { sync: catchingUp } },
+        }),
+      ).toBe('v2.sync-status.detail.waiting-for-target');
+    });
+    it('prioritizes a failure over unrelated catch-up details', () => {
+      expect(
+        computeAccountSyncStatusDetail({
+          pendingSync: {
+            startedAt,
+            operations: { sync: catchingUp, failed: failure },
+          },
+        }),
+      ).toBe('v2.sync-status.detail.chain-mismatch');
+    });
+    it('does not attribute a legacy failure to another operation', () => {
+      expect(
+        computeAccountSyncStatusDetail({
+          pendingSync: {
+            startedAt,
+            operations: {
+              sync: catchingUp,
+              failed: { ...failure, statusDetail: undefined },
+            },
+          },
+        }),
+      ).toBeUndefined();
+    });
+    it('ignores details on completed operations', () => {
+      expect(
+        computeAccountSyncStatusDetail({
+          pendingSync: {
+            startedAt,
+            operations: {
+              sync: {
+                operationId: 'sync',
+                description: catchingUp.description,
+                status: 'Completed',
+                startedAt,
+                completedAt: startedAt,
+                statusDetail: catchingUp.statusDetail,
+              },
+            },
+          },
+        }),
+      ).toBeUndefined();
+    });
+  });
+
   describe('selectGlobalSyncStatus', () => {
     it('should return "idle" when no accounts exist', () => {
       const state: SyncSliceState = {
@@ -826,8 +903,8 @@ describe('sync selectors', () => {
     });
 
     it('caps at 99 when progress is 100 but pendingSync still exists', () => {
-      // Reproduces the "connected but empty" initial state where computeConnectedSyncRatio
-      // returns Percent(1) before isStrictlyComplete is true, leaving pendingSync in place.
+      // Numeric progress can reach 1 before completion is confirmed,
+      // for example while indexer health keeps the operation pending.
       expect(
         computeAccountSyncingProgress({
           pendingSync: {

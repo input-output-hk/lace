@@ -15,13 +15,15 @@ import type { CollectionStorage } from '@lace-contract/storage';
 const spies = vi.hoisted(() => {
   const sideEffect = () => vi.fn(() => EMPTY);
   return {
+    deferStartup: vi.fn((watch: SideEffect) => watch),
+    recoverMissingFees: sideEffect(),
+    clearRecoveredFees: sideEffect(),
     updateActivities: sideEffect(),
     loadActivityDetails: sideEffect(),
     deleteWallet: sideEffect(),
     clearWalletStateOnResync: sideEffect(),
     resetSyncState: sideEffect(),
     requestResyncWallet: sideEffect(),
-    resyncWalletOnConfigChangeFromFeatureFlags: sideEffect(),
     autoDismissMidnightSyncFailureOnResume: sideEffect(),
     autoDismissMidnightSyncFailureOnSyncSuccess: sideEffect(),
     accountWalletWatcher: sideEffect(),
@@ -34,6 +36,14 @@ const spies = vi.hoisted(() => {
   };
 });
 
+vi.mock('../../../src/store/side-effects/defer-startup', () => ({
+  deferMidnightStartupUntilUnlocked: spies.deferStartup,
+}));
+
+vi.mock('../../../src/store/side-effects/fee-recovery', () => ({
+  createRecoverMissingFeesSideEffect: () => spies.recoverMissingFees,
+  clearRecoveredFeesOnReset: spies.clearRecoveredFees,
+}));
 vi.mock('../../../src/store/side-effects/activities', () => ({
   updateActivities: spies.updateActivities,
   loadActivityDetails: spies.loadActivityDetails,
@@ -44,8 +54,6 @@ vi.mock('../../../src/store/side-effects/resync', () => ({
   createResetSyncStateSideEffect: vi.fn(() => spies.resetSyncState),
   createHeadlessResetSyncStateSideEffect: vi.fn(() => spies.resetSyncState),
   requestResyncWallet: spies.requestResyncWallet,
-  resyncWalletOnConfigChangeFromFeatureFlags:
-    spies.resyncWalletOnConfigChangeFromFeatureFlags,
 }));
 vi.mock('../../../src/store/side-effects/sync-failure', () => ({
   autoDismissMidnightSyncFailureOnResume:
@@ -146,8 +154,10 @@ describe('midnight-sync side-effect composition', () => {
       resync.createHeadlessResetSyncStateSideEffect,
     ).not.toHaveBeenCalled();
     expect(spies.resetSyncState).toHaveBeenCalledOnce();
+    expect(spies.deferStartup).toHaveBeenCalledWith(spies.accountWalletWatcher);
     for (const sideEffect of [
-      spies.resyncWalletOnConfigChangeFromFeatureFlags,
+      spies.recoverMissingFees,
+      spies.clearRecoveredFees,
       spies.migrateUnavailableProofServerSelection,
       spies.watchProofActivities,
       spies.dismissProofActivity,
@@ -173,7 +183,8 @@ describe('midnight-sync side-effect composition', () => {
     );
     expect(resync.createResetSyncStateSideEffect).not.toHaveBeenCalled();
     for (const sideEffect of [
-      spies.resyncWalletOnConfigChangeFromFeatureFlags,
+      spies.recoverMissingFees,
+      spies.clearRecoveredFees,
       spies.migrateUnavailableProofServerSelection,
       spies.watchProofActivities,
       spies.dismissProofActivity,
@@ -183,5 +194,6 @@ describe('midnight-sync side-effect composition', () => {
       expect(sideEffect).not.toHaveBeenCalled();
     }
     expect(spies.accountWalletWatcher).toHaveBeenCalledOnce();
+    expect(spies.deferStartup).not.toHaveBeenCalled();
   });
 });

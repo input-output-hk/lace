@@ -11,7 +11,7 @@ module.exports = function midnightIndexerTransport(source) {
   const { version } = JSON.parse(readFileSync(manifest, 'utf8'));
   const hash = createHash('sha256').update(source).digest('hex');
   if (
-    version !== '2.0.0-rc.2' ||
+    version !== '2.0.1' ||
     hash !== '00ea9d9235cfc36ed01f72cf67befbdf6b0df0b952fac0463312c8fa6253c54d'
   ) {
     throw new Error(

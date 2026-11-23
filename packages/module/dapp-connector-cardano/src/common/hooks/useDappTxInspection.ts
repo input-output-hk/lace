@@ -6,10 +6,6 @@ import {
   tokenTransferInspector,
   transactionSummaryInspector,
 } from '@cardano-sdk/core';
-import {
-  computeNetFlows,
-  type TokenTransferValue,
-} from '@lace-contract/cardano-context';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { dummyLogger } from 'ts-log';
 
@@ -18,7 +14,11 @@ import { createDappInputResolver } from '../utils/create-dapp-input-resolver';
 
 import { useDispatchLaceAction, useLaceSelector } from './storeHooks';
 
-import type { TransactionSummaryInspection } from '@cardano-sdk/core';
+import type {
+  TokenTransferInspection,
+  TransactionSummaryInspection,
+} from '@cardano-sdk/core';
+import type { TokenTransferValue } from '@lace-contract/cardano-context';
 
 const TIMEOUT = Milliseconds(6000);
 
@@ -37,6 +37,21 @@ const EMPTY: UseDappTxInspectionResult = {
   toAddresses: new Map(),
   summary: null,
 };
+
+const mapAddressTransfers = (
+  entries: TokenTransferInspection['fromAddress'],
+): Map<Cardano.PaymentAddress, TokenTransferValue> =>
+  new Map(
+    [...entries].map(([address, { coins, assets }]) => [
+      address,
+      {
+        coins,
+        assets: new Map(
+          [...assets].map(([assetId, { amount }]) => [assetId, amount]),
+        ),
+      },
+    ]),
+  );
 
 /**
  * Mirrors v1 `DappTransactionContainer`'s inspector pipeline:
@@ -172,16 +187,12 @@ export const useDappTxInspection = ({
       try {
         const { tokenTransfer, summary } = await inspector(coreTx);
         if (isUnsubscribed) return;
-        const { from, to } = computeNetFlows(
-          tokenTransfer.fromAddress,
-          tokenTransfer.toAddress,
-          ownAddresses,
-        );
+        // Own addresses must stay distinct so assets remain beside their actual destination.
         setResult({
           isLoading: false,
           error: null,
-          fromAddresses: from,
-          toAddresses: to,
+          fromAddresses: mapAddressTransfers(tokenTransfer.fromAddress),
+          toAddresses: mapAddressTransfers(tokenTransfer.toAddress),
           summary,
         });
       } catch (error) {

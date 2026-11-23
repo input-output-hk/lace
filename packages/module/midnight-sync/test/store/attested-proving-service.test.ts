@@ -3,7 +3,7 @@ import {
   FIXTURE_CONFIG,
 } from '@input-output-hk/veritee-attestation-verifier/mocks';
 import { MidnightSDKNetworkIds } from '@lace-contract/midnight-context';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { Transaction } from '@midnightntwrk/ledger-v8';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { describe, expect, it, vi } from 'vitest';
 

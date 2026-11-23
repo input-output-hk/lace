@@ -1,4 +1,4 @@
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import {
   MidnightBech32m,
   ShieldedAddress,

@@ -61,8 +61,9 @@ export const makeSubmitTx =
             ),
       ),
       // IMPORTANT: wallet.submitTransaction() must be reached for the SDK's
-      // built-in rollback to work. The SDK's WalletFacade.submitTransaction()
-      // calls this.revert(tx) on failure, which clears pending coins.
+      // submission recovery to work. The facade releases pending coins only
+      // when failure proves the transaction was not included. Uncertain
+      // outcomes retain reservations until sync or expiry settles them.
       // If this pipeline throws before submitTransaction() (e.g. wallet lookup
       // fails), confirmTx's finalizeRecipe() will have already marked coins as
       // pending with no path to revert them.

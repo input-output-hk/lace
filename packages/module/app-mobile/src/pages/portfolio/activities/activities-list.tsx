@@ -75,13 +75,20 @@ export const ActivitiesList = ({
         SheetRoutes.ActivityDetail,
         {
           activityId: id,
+          activity: activities.find(activity => activity.activityId === id),
         },
         {
           reset: scrollEnabled,
         },
       );
     },
-    [activitiesItemUICustomisation, appConfig, address, scrollEnabled],
+    [
+      activitiesItemUICustomisation,
+      appConfig,
+      address,
+      scrollEnabled,
+      activities,
+    ],
   );
 
   const incrementDesiredLoadedActivitiesCountDebounced = useMemo(

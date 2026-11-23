@@ -4,7 +4,12 @@ import { Timestamp } from '@lace-lib/util';
 import { createSlice } from '@reduxjs/toolkit';
 import { createSelector } from 'reselect';
 
-import type { SyncSliceState, SyncOperation, SyncOperationId } from '../types';
+import type {
+  AccountSyncStatus,
+  SyncSliceState,
+  SyncOperation,
+  SyncOperationId,
+} from '../types';
 import type { Percent } from '@cardano-sdk/util';
 import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
@@ -12,13 +17,14 @@ import type {
   PayloadAction,
   StateFromReducersMapObject,
 } from '@reduxjs/toolkit';
+import type { Draft } from 'immer';
 import type * as _immer from 'immer'; // NOSONAR: required so immer's WritableDraft types are referenceable in emitted .d.ts files
 
 const initialState: SyncSliceState = {
   syncStatusByAccount: {},
 };
 
-type AddSyncOperationPayload = {
+type SyncOperationPayload = {
   accountId: AccountId;
   operation: SyncOperation;
 };
@@ -46,13 +52,28 @@ type UpdateSyncProgressPayload = {
   progress: Percent;
 };
 
+const finishSyncRoundIfTerminal = (accountStatus: Draft<AccountSyncStatus>) => {
+  const operations = Object.values(accountStatus.pendingSync?.operations ?? {});
+  if (
+    !operations.every(op => op.status === 'Completed' || op.status === 'Failed')
+  )
+    return;
+
+  if (operations.every(op => op.status === 'Completed')) {
+    accountStatus.lastSuccessfulSync = Timestamp(Date.now());
+  } else {
+    accountStatus.lastFailedSync = Timestamp(Date.now());
+  }
+  accountStatus.pendingSync = undefined;
+};
+
 const slice = createSlice({
   name: 'sync',
   initialState,
   reducers: {
     addSyncOperation: (
       state,
-      { payload }: PayloadAction<AddSyncOperationPayload>,
+      { payload }: PayloadAction<SyncOperationPayload>,
     ) => {
       const { accountId, operation } = payload;
 
@@ -74,6 +95,35 @@ const slice = createSlice({
 
       // Add operation to pendingSync
       accountStatus.pendingSync.operations[operation.operationId] = operation;
+    },
+
+    /**
+     * Applies a full operation snapshot against current reducer state. Ongoing
+     * work retains its start time. Failures stay visible until replaced, while
+     * completion settles the round when every operation is terminal.
+     */
+    applySyncOperationSnapshot: (
+      state,
+      { payload }: PayloadAction<SyncOperationPayload>,
+    ) => {
+      const { accountId, operation } = payload;
+      const accountStatus = (state.syncStatusByAccount[accountId] ??= {});
+      const pendingSync = (accountStatus.pendingSync ??= {
+        startedAt: operation.startedAt,
+        operations: {},
+      });
+      const previous = pendingSync.operations[operation.operationId];
+      pendingSync.operations[operation.operationId] = {
+        ...operation,
+        startedAt:
+          previous?.status === 'InProgress'
+            ? previous.startedAt
+            : operation.startedAt,
+      };
+      // A failed health snapshot must remain pending so prior success cannot
+      // render green. Only explicit completion may close this round.
+      if (operation.status === 'Completed')
+        finishSyncRoundIfTerminal(accountStatus);
     },
 
     updateSyncOperation: (
@@ -114,27 +164,7 @@ const slice = createSlice({
         completedAt: Timestamp(Date.now()),
       } as SyncOperation;
 
-      // Check if all operations are terminal (Completed or Failed)
-      const allOperations = Object.values(accountStatus.pendingSync.operations);
-      const isAllTerminal = allOperations.every(
-        op => op.status === 'Completed' || op.status === 'Failed',
-      );
-
-      if (isAllTerminal) {
-        // Check if all succeeded
-        const didAllSucceeded = allOperations.every(
-          op => op.status === 'Completed',
-        );
-
-        if (didAllSucceeded) {
-          accountStatus.lastSuccessfulSync = Timestamp(Date.now());
-        } else {
-          accountStatus.lastFailedSync = Timestamp(Date.now());
-        }
-
-        // Clear pendingSync
-        accountStatus.pendingSync = undefined;
-      }
+      finishSyncRoundIfTerminal(accountStatus);
     },
 
     failSyncOperation: (

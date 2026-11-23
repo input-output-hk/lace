@@ -1,9 +1,12 @@
+import type { PropsWithChildren } from 'react';
+
 import { ActivityType } from '@lace-contract/activities';
-import { useTranslation } from '@lace-contract/i18n';
+import { Trans, useTranslation } from '@lace-contract/i18n';
 import {
   DUST_TOKEN_DECIMALS,
   getDustTokenTickerByNetwork,
 } from '@lace-contract/midnight-context';
+import { NavigationControls, StackRoutes } from '@lace-lib/navigation';
 import {
   Column,
   CustomTag,
@@ -19,7 +22,7 @@ import {
   formatTime,
 } from '@lace-lib/util-render';
 import React, { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { ActivityDetailItem } from '../components/ActivityDetailItem';
 import { useLaceSelector } from '../hooks';
@@ -31,6 +34,36 @@ import type {
 import type { TFunction } from '@lace-contract/i18n';
 import type { NetworkType } from '@lace-contract/network';
 import type { ColorType, IconName } from '@lace-lib/ui-toolkit';
+
+const AccountOptionsLink = ({
+  children,
+  onPress,
+}: PropsWithChildren<{ onPress: () => void }>) => {
+  const { t } = useTranslation();
+  const webProps =
+    Platform.OS === 'web'
+      ? {
+          tabIndex: 0,
+          onKeyDown: (event: React.KeyboardEvent) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              onPress();
+            }
+          },
+        }
+      : {};
+  return (
+    <Text.S
+      {...webProps}
+      style={styles.link}
+      accessibilityRole="link"
+      accessibilityLabel={t('midnight.fee-recovery.open-account-options')}
+      onPress={onPress}
+      testID="activity-details-open-account-options">
+      {children}
+    </Text.S>
+  );
+};
 
 type ActivityStatusConfig = {
   icon: IconName;
@@ -93,6 +126,35 @@ const MidnightActivityDetailsContent = ({
 }: ActivityDetailsContentProps) => {
   const { t } = useTranslation();
   const networkType = useLaceSelector('network.selectNetworkType');
+  const recoveredFees = useLaceSelector('midnightContext.selectRecoveredFees');
+  const isFeeRecoverySupported = useLaceSelector(
+    'midnightContext.selectSupportsFeeRecovery',
+  );
+  const accounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
+  const account = accounts.find(
+    candidate => candidate.accountId === activityDetail?.accountId,
+  );
+  // SDK metadata takes precedence, including a genuine zero fee.
+  const fee =
+    activityDetail?.fee ||
+    (activityDetail &&
+      recoveredFees[activityDetail.accountId]?.[activityId.toLowerCase()]);
+
+  const isFeeMissing = !!activityDetail && (fee === undefined || fee === '');
+  const canFetchFee =
+    isFeeMissing &&
+    isFeeRecoverySupported &&
+    account !== undefined &&
+    [ActivityType.Send, ActivityType.Receive, ActivityType.Self].includes(
+      activityDetail.type,
+    );
+  const openAccountOptions = () => {
+    if (!account) return;
+    NavigationControls.navigate(StackRoutes.AccountDetails, {
+      walletId: account.walletId,
+      accountId: account.accountId,
+    });
+  };
 
   const formattedAmount =
     formatTokenBalanceChangesUtil(
@@ -173,14 +235,34 @@ const MidnightActivityDetailsContent = ({
         }
       />
       <ActivityDetailItem
-        label={t('v2.activity-details.sheet.fee')}
-        value={formatFeeValue(activityDetail?.fee, networkType)}
+        label={t('activity.activity-detail-drawer.fee')}
+        testID="activity-details-fee"
+        value={
+          isFeeMissing
+            ? t('midnight.fee-recovery.unavailable')
+            : formatFeeValue(fee, networkType)
+        }
       />
+      {canFetchFee && (
+        <Text.S variant="secondary" testID="activity-details-missing-fee-help">
+          <Trans
+            i18nKey="midnight.fee-recovery.account-options-hint"
+            components={{
+              accountOptions: (
+                <AccountOptionsLink onPress={openAccountOptions} />
+              ),
+            }}
+          />
+        </Text.S>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  link: {
+    textDecorationLine: 'underline',
+  },
   container: {
     paddingBottom: spacing.M,
     width: '100%',

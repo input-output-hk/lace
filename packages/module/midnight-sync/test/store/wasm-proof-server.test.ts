@@ -1,7 +1,7 @@
 import { wasmProofActivities } from '@lace-lib/vendor/wasm-proof-backend';
 import { createWasmCircuitProvider } from '@lace-lib/vendor/wasm-proof-compute';
 import { createWasmProofServerAccess } from '@lace-lib/vendor/wasm-proof-server';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { Transaction } from '@midnightntwrk/ledger-v8';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,7 +9,7 @@ import type { ProofActivity } from '@lace-lib/vendor/wasm-proof-backend';
 import type {
   KeyMaterialProvider,
   ProvingProvider,
-} from '@midnight-ntwrk/zkir-v2';
+} from '@midnightntwrk/zkir-v2';
 
 const mocks = vi.hoisted(() => ({
   prove: vi.fn<(...args: unknown[]) => Promise<Uint8Array>>(),
@@ -20,7 +20,7 @@ const vendorProver = await vi.hoisted(async () => {
   const { createRequire } = await import('node:module');
   return createRequire(
     new URL('../../../../lib/vendor/package.json', import.meta.url),
-  ).resolve('@midnight-ntwrk/zkir-v2');
+  ).resolve('@midnightntwrk/zkir-v2');
 });
 vi.mock(vendorProver, () => ({
   provingProvider: (keys: KeyMaterialProvider) => ({

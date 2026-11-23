@@ -195,22 +195,29 @@ const patchNxConfig = nxConfig => {
     ) {
       return { type: 'empty' };
     }
-    // Exclude midnight sdk packages
-    const midnightBlackList = [
+    // These are UI exclusions, not dependency imports. Keep both namespaces
+    // while legacy dependencies still reference @midnight-ntwrk.
+    const midnightUiExcludedImports = [
       './workaround-for-importing-midnight-ledger',
       '@midnight-ntwrk/ledger-v8',
+      '@midnightntwrk/ledger-v8',
       '@midnightntwrk/ledger-v9',
       // Local proving runs in the webpack-bundled service worker. Metro's
       // tab UI must not import the engine's WebAssembly binary.
       '@midnight-ntwrk/zkir-v2',
+      '@midnightntwrk/zkir-v2',
       '@midnightntwrk/wallet-sdk-indexer-client',
       '@midnightntwrk/wallet-sdk-node-client',
       '@midnightntwrk/wallet-sdk-runtime',
       '@midnightntwrk/wallet-sdk-shielded',
       '@midnightntwrk/wallet-sdk-utilities',
       '@midnight-ntwrk/onchain-runtime-v3',
+      // compact-runtime 0.21 (via the Veritee verifier) moved to the v4
+      // runtime under the @midnightntwrk scope. Attestation runs in the
+      // webpack-bundled service worker; the tab UI must not import its wasm.
+      '@midnightntwrk/onchain-runtime-v4',
     ];
-    if (midnightBlackList.some(name => moduleName.startsWith(name))) {
+    if (midnightUiExcludedImports.some(name => moduleName.startsWith(name))) {
       return { type: 'empty' };
     }
     // Load feature-flags.override instead if it exists
