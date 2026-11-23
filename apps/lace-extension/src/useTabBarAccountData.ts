@@ -1,4 +1,8 @@
-import { computeAccountSyncingProgress } from '@lace-contract/sync';
+import { useTranslation } from '@lace-contract/i18n';
+import {
+  computeAccountSyncingProgress,
+  computeAccountSyncStatusDetail,
+} from '@lace-contract/sync';
 import { useMemo } from 'react';
 
 import { useLaceSelector } from './util/hooks';
@@ -6,6 +10,7 @@ import { useLaceSelector } from './util/hooks';
 import type { AccountRowProps } from '@lace-lib/ui-toolkit';
 
 export const useTabBarAccountData = (): AccountRowProps[] => {
+  const { t } = useTranslation();
   const accountsResult = useLaceSelector('wallets.selectActiveNetworkAccounts');
   const walletsResult = useLaceSelector('wallets.selectAll');
   const syncStatusByAccount = useLaceSelector('sync.selectSyncStatusByAccount');
@@ -42,7 +47,9 @@ export const useTabBarAccountData = (): AccountRowProps[] => {
         syncStatus = 'synced';
       }
 
+      const statusDetail = computeAccountSyncStatusDetail(accountStatus);
       return {
+        statusDetail: statusDetail ? t(statusDetail) : undefined,
         accountName: account?.metadata?.name ?? '',
         walletName: wallet?.metadata?.name ?? '',
         status: syncStatus,
@@ -51,5 +58,5 @@ export const useTabBarAccountData = (): AccountRowProps[] => {
           '') as AccountRowProps['leftIcon'],
       };
     });
-  }, [accounts, wallets, syncStatusByAccount]);
+  }, [accounts, wallets, syncStatusByAccount, t]);
 };

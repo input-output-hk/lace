@@ -95,12 +95,36 @@ export const useMidnightSettings = () => {
     'midnight.selectSettingsDrawerState',
   );
 
+  const wallets = useLaceSelector('wallets.selectAll');
+  const unreadableSnapshotAccountId =
+    settingsDrawerState.status === 'Open'
+      ? settingsDrawerState.unreadableSnapshotAccountId
+      : undefined;
+  const unreadableSnapshotWallet = wallets.find(wallet =>
+    wallet.accounts.some(
+      account => account.accountId === unreadableSnapshotAccountId,
+    ),
+  );
+  const unreadableSnapshotAccount = unreadableSnapshotWallet?.accounts.find(
+    account => account.accountId === unreadableSnapshotAccountId,
+  );
+
   // Actions
   const openSettings = useDispatchLaceAction('midnight.openSettings', true);
   const closeSettings = useDispatchLaceAction('midnight.closeSettings', true);
   const confirmSettings = useDispatchLaceAction('midnight.confirmSettings');
+  const confirmDustReset = useDispatchLaceAction(
+    'midnight.confirmDustReset',
+    true,
+  );
+  const cancelDustReset = useDispatchLaceAction(
+    'midnight.cancelDustReset',
+    true,
+  );
   // Derived state
-  const isOpen = ['Open', 'Saving'].includes(settingsDrawerState.status);
+  const isOpen = ['Open', 'Saving', 'ConfirmDustReset'].includes(
+    settingsDrawerState.status,
+  );
   const isSaving = settingsDrawerState.status === 'Saving';
 
   /** Tier-grouped modes for the given network — drives the radio-group UI. */
@@ -116,6 +140,18 @@ export const useMidnightSettings = () => {
     supportedNetworkIds,
     isOpen,
     isSaving,
+    dustResetConfirmation:
+      settingsDrawerState.status === 'ConfirmDustReset'
+        ? settingsDrawerState
+        : undefined,
+    unreadableSnapshotAccountId,
+    unreadableSnapshotWallet,
+    unreadableSnapshotAccount,
+    hasSaveFailed:
+      settingsDrawerState.status === 'Open' &&
+      !!settingsDrawerState.hasSaveFailed,
+    confirmDustReset,
+    cancelDustReset,
 
     // Actions
     openSettings,

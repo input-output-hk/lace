@@ -84,7 +84,12 @@ export const isPartialMidnightNetworkConfig = (
     typeof item === 'object' &&
     item !== null &&
     Object.keys(item).every(key =>
-      ['nodeAddress', 'proofServer', 'indexerAddress'].includes(key),
+      [
+        'nodeAddress',
+        'proofServer',
+        'indexerAddress',
+        'filteredDustSyncIndexer',
+      ].includes(key),
     )
   );
 };

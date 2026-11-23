@@ -135,9 +135,10 @@ export const ActivitiesFlatlist = ({
 
       NavigationControls.navigate(SheetRoutes.ActivityDetail, {
         activityId: id,
+        activity: activities.find(activity => activity.activityId === id),
       });
     },
-    [activitiesItemUICustomisation, appConfig, address],
+    [activitiesItemUICustomisation, appConfig, address, activities],
   );
 
   const incrementDesiredLoadedActivitiesCountDebounced = useMemo(

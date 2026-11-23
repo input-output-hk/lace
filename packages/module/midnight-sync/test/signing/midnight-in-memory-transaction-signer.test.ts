@@ -42,7 +42,7 @@ vi.mock('@lace-lib/vendor/midnight-transaction-handle', () => ({
   readMidnightTransaction: (transaction: unknown) => transaction,
 }));
 
-vi.mock('@midnight-ntwrk/ledger-v8', () => ({
+vi.mock('@midnightntwrk/ledger-v8', () => ({
   nativeToken: () => ({ raw: 'NIGHT_RAW' }),
 }));
 

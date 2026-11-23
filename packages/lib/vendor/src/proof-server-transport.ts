@@ -1,4 +1,4 @@
-import * as ledgerV8 from '@midnight-ntwrk/ledger-v8';
+import * as ledgerV8 from '@midnightntwrk/ledger-v8';
 import * as ledgerV9 from '@midnightntwrk/ledger-v9';
 import {
   fromV8ProvingProvider,
@@ -16,7 +16,7 @@ import type {
   ProofCircuitProvider,
   ProofServerTransport,
 } from './midnight-proof-servers';
-import type * as ledger from '@midnight-ntwrk/ledger-v8';
+import type * as ledger from '@midnightntwrk/ledger-v8';
 import type {
   VersionedProvingService,
   AnyVersionUnboundTransaction,

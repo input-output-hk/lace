@@ -10,10 +10,10 @@ import {
   toUnshieldedTokenType,
 } from '@lace-contract/midnight-context';
 import { AuthenticationCancelledError } from '@lace-contract/signer';
-import { BigNumber, Milliseconds } from '@lace-lib/util';
+import { BigNumber, ByteArray, Milliseconds } from '@lace-lib/util';
 import { assertProofServerRouting } from '@lace-lib/vendor/midnight-proof-servers';
 import { createProgressSubmissionService } from '@lace-lib/vendor/midnight-submission-service';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import * as ledgerV9 from '@midnightntwrk/ledger-v9';
 import {
   InMemoryTransactionHistoryStorage,
@@ -24,7 +24,6 @@ import {
   Lifecycle,
   TransactionLifecycleServiceImpl,
 } from '@midnightntwrk/wallet-sdk/capabilities/transactionLifecycle';
-import { DustWallet } from '@midnightntwrk/wallet-sdk/dust';
 import {
   lifecycleTransactionTraits,
   WalletFacade,
@@ -58,27 +57,34 @@ import {
   Observable,
   of,
   shareReplay,
+  Subject,
   switchMap,
   take,
+  takeUntil,
   throwError,
   throttleTime,
   zip,
 } from 'rxjs';
 
 import { createAttestedProofServerAccess } from './attested-proving-service';
-import { computeConnectedSyncRatio } from './compute-sync-ratio';
+import { computeSyncRatio } from './compute-sync-ratio';
+import { createDustWallet, resolveDustRestoreMode } from './dust-sync';
+import { inspectDustSyncReset } from './inspect-dust-sync-reset';
 import {
   createHttpProofServerTransport,
   createProofServerAccess,
 } from './proof-server-transport';
 import { createScopedProofServerAccess } from './scoped-proving';
 import { teeAttestationProgress$ } from './send-proof-progress';
+import { MidnightStartupCoordinator } from './startup-coordinator';
 
 import type { AttestedProverProvider } from './attested-proving-service';
 import type { ProofServerAccess } from './proof-server-transport';
 import type { FinalizeRecipeWithProgress } from './scoped-proving';
+import type { MidnightStartup } from './startup-coordinator';
 import type {
   AccountKeyManager,
+  AccountKeys,
   CoinsByTokenType,
   MidnightSideEffectsDependencies,
   MidnightWallet,
@@ -187,21 +193,39 @@ const fingerprintOf = (parts: readonly string[]): string => {
   return `${hash}:${parts.map(part => part.length).join(':')}`;
 };
 
+type PreparedStartupKeys = {
+  walletKeys: AccountKeys['walletKeys'];
+  unshieldedPublicKey: ReturnType<typeof PublicKey.fromKeyStore>;
+};
+
 const getAccountWalletInstance = async (
   {
     account,
     config,
     getVeriteeLedgerIndexerUrl,
+    onPreparationStatusChange,
     store,
-    keyManager,
   }: MidnightAccountWalletInstanceDependencies,
-  logger: WithLogger['logger'],
+  {
+    logger,
+    startup,
+    prepareKeys,
+  }: WithLogger & {
+    startup: MidnightStartup;
+    prepareKeys: () => Promise<PreparedStartupKeys>;
+  },
   {
     createAttestedProver,
     createLocalProofServerAccess,
     batchUpdates = DEFAULT_BATCH_UPDATES,
   }: MidnightEngineOptions,
 ): Promise<AccountWalletInstanceResult> => {
+  onPreparationStatusChange?.(true);
+  // Let the extension's 16 ms state bridge publish before local work (LW-15215).
+  if (onPreparationStatusChange)
+    await new Promise<void>(resolve => setTimeout(resolve, 25));
+  // Leave the unlock dispatch before any restoration work (LW-15215).
+  await startup.enqueueLocalRestore(() => undefined);
   // Keyed read, not getAll().find(): computeDocId is the accountId, so this is
   // one adapter read of this account's own key. getAll() re-reads every
   // account's multi-MB document, making an N-account restore cost N^2 reads and
@@ -285,7 +309,13 @@ const getAccountWalletInstance = async (
     ),
   };
 
-  // Restore wallet
+  const restoreStep = async <T>(work: () => T): Promise<T> =>
+    startup.enqueueLocalRestore(work);
+  const readyForSync = async () => {
+    await prepareKeys();
+    await startup.finishPreparationAndWaitForPeers();
+    onPreparationStatusChange?.(false);
+  };
 
   if (walletState) {
     const { dust, shielded, unshielded } = walletState.serializedState;
@@ -300,32 +330,46 @@ const getAccountWalletInstance = async (
       | undefined;
     const resolvedConfiguration =
       WalletFacade.resolveConfiguration(configuration);
+    // Mode changes are not corrupt snapshots. Refuse unsafe ones before the
+    // cache-recovery catch, so pending reservations and saved history survive.
+    const dustRestoreMode = resolveDustRestoreMode(
+      SerialisedWalletState.toJSON(dust),
+      {
+        network: config,
+        authorizedPendingDustNullifiers:
+          config.dustSyncResetAuthorizations?.[account.accountId],
+      },
+    );
     const closePartialRestores: (() => Promise<void>)[] = [];
     let historyWriter: typeof resolvedConfiguration.txHistoryStorage =
       resolvedConfiguration.txHistoryStorage;
     let transactionLifecycleService: Parameters<
       typeof WalletFacade.init
     >[0]['transactionLifecycleService'];
+    let isRebuildingDust = false;
     try {
-      restoredTxHistoryStorage = InMemoryTransactionHistoryStorage.restore(
-        SerialisedWalletState.toJSON(
-          readPersistedTxHistory(walletState.serializedState),
+      restoredTxHistoryStorage = await restoreStep(() =>
+        InMemoryTransactionHistoryStorage.restore(
+          SerialisedWalletState.toJSON(
+            readPersistedTxHistory(walletState.serializedState),
+          ),
+          WalletEntrySchema,
+          mergeWalletEntries,
         ),
-        WalletEntrySchema,
-        mergeWalletEntries,
       );
-      if (walletState.serializedState.transactionLifecycle) {
+      const savedLifecycle = walletState.serializedState.transactionLifecycle;
+      if (savedLifecycle) {
         const txTraits = lifecycleTransactionTraits(
           resolvedConfiguration.forks.v9,
         );
-        const initialState = Either.getOrThrowWith(
-          Lifecycle.deserialize(
-            SerialisedWalletState.toJSON(
-              walletState.serializedState.transactionLifecycle,
+        const initialState = await restoreStep(() =>
+          Either.getOrThrowWith(
+            Lifecycle.deserialize(
+              SerialisedWalletState.toJSON(savedLifecycle),
+              txTraits,
             ),
-            txTraits,
+            error => error,
           ),
-          error => error,
         );
         transactionLifecycleService = async (configuration, { clock }) =>
           TransactionLifecycleServiceImpl.init({
@@ -356,17 +400,36 @@ const getAccountWalletInstance = async (
           ) => historyWriter.gotFinalized(...args),
         },
       };
-      const restoredShielded = ShieldedWallet(restoredConfiguration).restore(
-        SerialisedWalletState.toJSON(shielded),
+      const restoredShielded = await restoreStep(() =>
+        ShieldedWallet(restoredConfiguration).restore(
+          SerialisedWalletState.toJSON(shielded),
+        ),
       );
       closePartialRestores.push(async () => restoredShielded.stop());
-      const restoredUnshielded = UnshieldedWallet(
-        restoredConfiguration,
-      ).restore(SerialisedWalletState.toJSON(unshielded));
-      closePartialRestores.push(async () => restoredUnshielded.stop());
-      const restoredDust = DustWallet(restoredConfiguration).restore(
-        SerialisedWalletState.toJSON(dust),
+      const restoredUnshielded = await restoreStep(() =>
+        UnshieldedWallet(restoredConfiguration).restore(
+          SerialisedWalletState.toJSON(unshielded),
+        ),
       );
+      closePartialRestores.push(async () => restoredUnshielded.stop());
+      isRebuildingDust = dustRestoreMode === 'rebuild';
+      const dustFactory = createDustWallet(
+        restoredConfiguration,
+        config,
+        dustRestoreMode === 'rebuild',
+      );
+      if (dustRestoreMode === 'rebuild') await readyForSync();
+      const restoredDust =
+        dustRestoreMode === 'rebuild'
+          ? await dustFactory.startWithSeed(
+              (
+                await prepareKeys()
+              ).walletKeys.dustKeyBuffer,
+            )
+          : await restoreStep(() =>
+              dustFactory.restore(SerialisedWalletState.toJSON(dust)),
+            );
+      isRebuildingDust = false;
       closePartialRestores.push(async () => restoredDust.stop());
       restoredWallets = {
         shielded: restoredShielded,
@@ -378,6 +441,8 @@ const getAccountWalletInstance = async (
       await Promise.allSettled(
         closePartialRestores.map(async close => close()),
       );
+      // A failed fresh start is not evidence of corrupt persisted state.
+      if (isRebuildingDust || startup.cancelled) throw error;
       logger.warn(
         `Discarding unreadable persisted Midnight wallet state for account ${account.accountId}; rebuilding from seed`,
         error instanceof Error ? error.message : String(error),
@@ -407,24 +472,27 @@ const getAccountWalletInstance = async (
       configuration.txHistoryStorage = restoredTxHistoryStorage;
 
       return {
-        walletFacade: await WalletFacade.init({
-          configuration,
-          provingService: () => proofServer.provingService,
-          submissionService: createProgressSubmissionService,
-          transactionLifecycleService,
-          shielded: configuration => {
-            historyWriter = configuration.txHistoryStorage;
-            return restoredWallets.shielded;
-          },
-          unshielded: configuration => {
-            historyWriter = configuration.txHistoryStorage;
-            return restoredWallets.unshielded;
-          },
-          dust: configuration => {
-            historyWriter = configuration.txHistoryStorage;
-            return restoredWallets.dust;
-          },
-        }).catch(async error => {
+        walletFacade: await (async () => {
+          if (dustRestoreMode !== 'rebuild') await readyForSync();
+          return WalletFacade.init({
+            configuration,
+            provingService: () => proofServer.provingService,
+            submissionService: createProgressSubmissionService,
+            transactionLifecycleService,
+            shielded: configuration => {
+              historyWriter = configuration.txHistoryStorage;
+              return restoredWallets.shielded;
+            },
+            unshielded: configuration => {
+              historyWriter = configuration.txHistoryStorage;
+              return restoredWallets.unshielded;
+            },
+            dust: configuration => {
+              historyWriter = configuration.txHistoryStorage;
+              return restoredWallets.dust;
+            },
+          });
+        })().catch(async error => {
           // The cache is readable; initialization failure must close its local
           // resources without discarding persisted data or asking for seed keys.
           await Promise.allSettled(
@@ -439,12 +507,13 @@ const getAccountWalletInstance = async (
     }
   }
 
-  // Else: no persisted state for this account — start fresh
+  // Fresh probes must not compete with sibling restoration or key preparation.
+  await readyForSync();
 
   const {
     walletKeys: { dustKeyBuffer, zswapKeyBuffer },
-    unshieldedKeystore,
-  } = await firstValueFrom(keysWithAuthCancelledRecovery$(keyManager));
+    unshieldedPublicKey,
+  } = await prepareKeys();
   const txHistoryStorage = new InMemoryTransactionHistoryStorage(
     WalletEntrySchema,
     mergeWalletEntries,
@@ -453,7 +522,6 @@ const getAccountWalletInstance = async (
   // default from the config literal while we serialize this one, so a new
   // account's history persists empty however long it syncs.
   configuration.txHistoryStorage = txHistoryStorage;
-
   return {
     walletFacade: await WalletFacade.init({
       configuration,
@@ -462,10 +530,9 @@ const getAccountWalletInstance = async (
       shielded: async config =>
         ShieldedWallet(config).startWithSeed(zswapKeyBuffer),
       unshielded: async config =>
-        UnshieldedWallet(config).startWithPublicKey(
-          PublicKey.fromKeyStore(unshieldedKeystore),
-        ),
-      dust: async config => DustWallet(config).startWithSeed(dustKeyBuffer),
+        UnshieldedWallet(config).startWithPublicKey(unshieldedPublicKey),
+      dust: async resolved =>
+        createDustWallet(resolved, config, true).startWithSeed(dustKeyBuffer),
     }),
     txHistoryStorage,
     proofCircuitProvider: proofServer.circuits,
@@ -580,21 +647,32 @@ const createAccountObservableMidnightWallet = ({
 
         syncProgress$: state$.pipe(
           map(({ dust, shielded, unshielded }) => ({
-            dust: computeConnectedSyncRatio(
+            dust: computeSyncRatio(
               dust.progress.appliedIndex,
               dust.progress.highestRelevantWalletIndex,
-              dust.progress.isConnected,
+              dust.progress.isStrictlyComplete(),
             ),
-            shielded: computeConnectedSyncRatio(
+            shielded: computeSyncRatio(
               shielded.progress.appliedIndex,
               shielded.progress.highestRelevantWalletIndex,
-              shielded.progress.isConnected,
+              shielded.progress.isStrictlyComplete(),
             ),
-            unshielded: computeConnectedSyncRatio(
+            unshielded: computeSyncRatio(
               unshielded.progress.appliedId,
               unshielded.progress.highestTransactionId,
-              unshielded.progress.isConnected,
+              unshielded.progress.isStrictlyComplete(),
             ),
+            protocolVersions: {
+              dust: dust.protocolVersion,
+              shielded: shielded.protocolVersion,
+              unshielded: unshielded.protocolVersion,
+            },
+            indexerLiveness: unshielded.progress.indexerLiveness._tag,
+            isConnected: {
+              dust: dust.progress.isConnected,
+              shielded: shielded.progress.isConnected,
+              unshielded: unshielded.progress.isConnected,
+            },
             isStrictlyComplete: {
               dust: dust.progress.isStrictlyComplete(),
               shielded: shielded.progress.isStrictlyComplete(),
@@ -780,19 +858,72 @@ type ManagedWalletInstances = {
  */
 const createAndManageWallets = (
   props: StartMidnightAccountWalletParams,
-  { logger }: WithLogger,
+  {
+    logger,
+    coordinator,
+  }: WithLogger & {
+    coordinator: MidnightStartupCoordinator;
+  },
   options: MidnightEngineOptions,
 ): Observable<ManagedWalletInstances> => {
   const { keyManager, account, store } = props;
 
   return new Observable<ManagedWalletInstances>(subscriber => {
+    const startup = coordinator.register();
     let walletFacade: WalletFacade | null = null;
     const allocatedSyncKeys: { clear: () => void }[] = [];
     const ownSyncKey = <T extends { clear: () => void }>(key: T): T => {
       allocatedSyncKeys.push(key);
       return key;
     };
-    let syncStartSubscription: Subscription | null = null;
+    const destroyed$ = new Subject<void>();
+    let syncKeys: ShieldedKeysByEpoch | undefined;
+    let dustSyncKey: DustKeysByEpoch | undefined;
+    const seedCopies: ByteArray[] = [];
+    let preparedKeys: Promise<PreparedStartupKeys> | undefined;
+    const prepareKeys = async () => {
+      preparedKeys ??= (async () => {
+        if (startup.cancelled)
+          throw new Error('Midnight wallet startup cancelled');
+        const keys = await firstValueFrom(
+          keysWithAuthCancelledRecovery$(keyManager).pipe(
+            takeUntil(destroyed$),
+          ),
+        );
+        // Cache idle expiry must not invalidate seeds while siblings are preparing.
+        // Retain only sync seeds, never the signing keystore or authentication secret.
+        const copySeed = (seed: ByteArray) => {
+          const copy = ByteArray.clone(seed);
+          seedCopies.push(copy);
+          return copy;
+        };
+        const walletKeys = {
+          dustKeyBuffer: copySeed(keys.walletKeys.dustKeyBuffer),
+          zswapKeyBuffer: copySeed(keys.walletKeys.zswapKeyBuffer),
+        };
+        syncKeys = {
+          v8: ownSyncKey(
+            ledger.ZswapSecretKeys.fromSeed(keys.walletKeys.zswapKeyBuffer),
+          ),
+          v9: ownSyncKey(
+            ledgerV9.ZswapSecretKeys.fromSeed(keys.walletKeys.zswapKeyBuffer),
+          ),
+        };
+        dustSyncKey = {
+          v8: ownSyncKey(
+            ledger.DustSecretKey.fromSeed(keys.walletKeys.dustKeyBuffer),
+          ),
+          v9: ownSyncKey(
+            ledgerV9.DustSecretKey.fromSeed(keys.walletKeys.dustKeyBuffer),
+          ),
+        };
+        return {
+          walletKeys,
+          unshieldedPublicKey: PublicKey.fromKeyStore(keys.unshieldedKeystore),
+        };
+      })();
+      return preparedKeys;
+    };
     let persistSubscription: Subscription | null = null;
     let isDestroyed = false;
     // Unsubscribing cannot cancel an in-flight persist cycle (a running
@@ -807,111 +938,43 @@ const createAndManageWallets = (
         txHistoryStorage,
         proofCircuitProvider,
         finalizeRecipe,
-      } = await getAccountWalletInstance(props, logger, options);
+      } = await getAccountWalletInstance(
+        props,
+        { logger, startup, prepareKeys },
+        options,
+      );
 
       if (isDestroyed) {
         // Cleanup if unsubscribed during async init
-        void facade.stop();
+        await facade.stop().catch(() => undefined);
         return;
       }
 
       walletFacade = facade;
 
-      // 2. Start UnshieldedWallet immediately (no keys needed)
+      // No network starts until all registered wallets have prepared their keys.
+      if (!syncKeys || !dustSyncKey)
+        throw new Error('Midnight sync keys were not prepared');
       await walletFacade.unshielded.start();
       if (isDestroyed) return;
 
-      // 3. Start ShieldedWallet and DustWallet once account keys are available.
-      //
-      // shielded.start() hands the keys to the SDK sync stream, which holds
-      // them for its entire lifetime (sync never completes — the WS
-      // subscription keeps waiting for the next block at tip). The stream
-      // therefore gets its OWN ZswapSecretKeys, derived here from the seed
-      // buffer: reusing the key manager's cached object would let the idle
-      // timer zeroize it mid-sync. The manager's cache still zeroes out on
-      // idle/lock, so signing keeps requiring an unlock while sync keeps
-      // running; the sync copy is cleared on teardown.
-      //
-      // If auth is cancelled, waits for keys to become available from another
-      // source and retries (keysWithAuthCancelledRecovery$).
-      //
-      // LIMITATION: DustWallet is never stopped because SDK's stop() closes the
-      // Effect runtime scope, which releases all resources including HTTP client.
-      // After stop(), methods like calculateFee() fail. This means dustSecretKey
-      // stays in memory until account watcher stops.
-      syncStartSubscription = keysWithAuthCancelledRecovery$(keyManager)
-        .pipe(
-          switchMap(keys => {
-            if (!walletFacade) return from(Promise.resolve());
-            // Both sync streams get their OWN keys derived from the seed
-            // buffers, so the key manager's cached copies can be zeroized on
-            // idle without wedging a running stream. fromSeed copies into WASM
-            // memory, so a later fill(0) on the buffer cannot reach these.
-            const syncKeys: ShieldedKeysByEpoch = {
-              v8: ownSyncKey(
-                ledger.ZswapSecretKeys.fromSeed(keys.walletKeys.zswapKeyBuffer),
-              ),
-              v9: ownSyncKey(
-                ledgerV9.ZswapSecretKeys.fromSeed(
-                  keys.walletKeys.zswapKeyBuffer,
-                ),
-              ),
-            };
-            const dustSyncKey: DustKeysByEpoch = {
-              v8: ownSyncKey(
-                ledger.DustSecretKey.fromSeed(keys.walletKeys.dustKeyBuffer),
-              ),
-              v9: ownSyncKey(
-                ledgerV9.DustSecretKey.fromSeed(keys.walletKeys.dustKeyBuffer),
-              ),
-            };
-            const facade = walletFacade;
-            return from(
-              (async () => {
-                // Started independently. Chaining dust off shielded's promise
-                // made a shielded failure silently skip dust, so dust/cNIGHT
-                // balances stopped updating for the session with nothing but a
-                // console line to show for it. Still sequential: concurrent
-                // starts would widen the WASM memory peak the facade queue caps.
-                const failures: unknown[] = [];
-                try {
-                  await facade.shielded.start(syncKeys);
-                } catch (error) {
-                  logger.error(
-                    `Midnight shielded wallet failed to start for account ${account.accountId}:`,
-                    error,
-                  );
-                  failures.push(error);
-                }
-                try {
-                  await facade.dust.start(dustSyncKey);
-                } catch (error) {
-                  logger.error(
-                    `Midnight dust wallet failed to start for account ${account.accountId}:`,
-                    error,
-                  );
-                  failures.push(error);
-                }
-                // Each failure is logged where it happens, so the second is not
-                // lost when both fail; only the first is raised, because the
-                // watch treats any rejection the same way.
-                if (failures.length > 0) throw failures[0];
-              })(),
-            );
-          }),
-        )
-        .subscribe({
-          error: (error: unknown) => {
-            logger.error(
-              `Wallet sync start error for account ${account.accountId}:`,
-              error,
-            );
-            // Surfaced, not just logged: the account watch retries this and
-            // raises a user-visible failure once retries are exhausted (ADR 15,
-            // LW-15217). Logging alone left sync dead with no way back.
-            subscriber.error(error);
-          },
-        });
+      // Attempt both streams even if one fails. Each owns keys independently of
+      // the signing cache, and those copies are cleared after facade teardown.
+      const failures: unknown[] = [];
+      try {
+        await facade.shielded.start(syncKeys);
+      } catch (error) {
+        logger.error('Midnight shielded wallet failed to start:', error);
+        failures.push(error);
+      }
+      if (isDestroyed) return;
+      try {
+        await facade.dust.start(dustSyncKey);
+      } catch (error) {
+        logger.error('Midnight dust wallet failed to start:', error);
+        failures.push(error);
+      }
+      if (failures.length > 0) throw failures[0];
 
       if (isDestroyed) return;
 
@@ -1013,14 +1076,25 @@ const createAndManageWallets = (
       });
     };
 
-    init().catch(error => {
-      subscriber.error(error);
-    });
+    void init()
+      .catch(error => {
+        startup.cancel();
+        subscriber.error(error);
+      })
+      .finally(() => {
+        seedCopies.splice(0).forEach(seed => seed.fill(0));
+        if (!walletFacade)
+          allocatedSyncKeys.splice(0).forEach(key => {
+            key.clear();
+          });
+      });
 
     // Cleanup on unsubscribe
     return () => {
       isDestroyed = true;
-      syncStartSubscription?.unsubscribe();
+      startup.cancel();
+      destroyed$.next();
+      destroyed$.complete();
       persistSubscription?.unsubscribe();
 
       if (walletFacade) {
@@ -1049,13 +1123,17 @@ const createAndManageWallets = (
  * Creates SDK wallets, manages their start/stop lifecycle, and converts
  * to the MidnightWallet interface used by the rest of the application.
  */
-const createStartMidnightAccountWallet =
-  (
-    dependencies: WithLogger,
-    options: MidnightEngineOptions,
-  ): MidnightSideEffectsDependencies['startMidnightAccountWallet'] =>
-  props =>
-    createAndManageWallets(props, dependencies, options).pipe(
+const createStartMidnightAccountWallet = (
+  dependencies: WithLogger,
+  options: MidnightEngineOptions,
+): MidnightSideEffectsDependencies['startMidnightAccountWallet'] => {
+  const coordinator = new MidnightStartupCoordinator();
+  return props => {
+    return createAndManageWallets(
+      props,
+      { ...dependencies, coordinator },
+      options,
+    ).pipe(
       switchMap(
         ({
           walletFacade,
@@ -1073,6 +1151,8 @@ const createStartMidnightAccountWallet =
           }),
       ),
     );
+  };
+};
 
 /**
  * The engine's side-effect dependencies. The attested prover is the
@@ -1086,6 +1166,11 @@ export const createMidnightSideEffectDependencies =
   ({ runtime }, dependencies) => {
     const midnightWallets$ = midnightWalletsForRuntime(runtime);
     return {
+      inspectDustSyncReset: (networkId, accountIds, storage) =>
+        inspectDustSyncReset(networkId, accountIds, {
+          storage,
+          wallets$: midnightWallets$,
+        }),
       midnightWallets$,
 
       wasmProofActivities$: EMPTY,

@@ -1,6 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
+import { AccountId } from '@lace-contract/wallet-repo';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -53,8 +54,10 @@ describe('useMidnightSettings', () => {
       Record<string, ProofServerMode[]>
     > = defaultAllModes,
   ) => {
-    mockUseLaceSelector.mockImplementation((selector: string) => {
+    mockUseLaceSelector.mockImplementation((selector: string): unknown => {
       switch (selector) {
+        case 'wallets.selectAll':
+          return [];
         case 'midnightContext.selectNetworkId':
           return mockNetworkId;
         case 'midnightContext.selectNetworksConfig':
@@ -95,6 +98,7 @@ describe('useMidnightSettings', () => {
       setupMocks();
       renderHook(() => useMidnightSettings());
 
+      expect(mockUseLaceSelector).toHaveBeenCalledWith('wallets.selectAll');
       expect(mockUseLaceSelector).toHaveBeenCalledWith(
         'midnightContext.selectNetworkId',
       );
@@ -111,6 +115,35 @@ describe('useMidnightSettings', () => {
         'midnight.selectSettingsDrawerState',
       );
     });
+  });
+
+  it('resolves the affected account in its wallet for unreadable snapshot guidance', () => {
+    const accountId = AccountId('affected');
+    setupMocks({
+      status: 'Open',
+      hasSaveFailed: true,
+      unreadableSnapshotAccountId: accountId,
+    });
+    const account = {
+      accountId,
+      walletId: 'second-wallet',
+      metadata: { name: 'Affected account' },
+    };
+    const wallet = {
+      id: 'second-wallet',
+      accounts: [account],
+      metadata: { name: 'Second wallet' },
+    };
+    const select = mockUseLaceSelector.getMockImplementation()!;
+    mockUseLaceSelector.mockImplementation((selector: string): unknown =>
+      selector === 'wallets.selectAll'
+        ? [{ id: 'first-wallet', accounts: [{ accountId: 'sibling' }] }, wallet]
+        : select(selector),
+    );
+    const { result } = renderHook(() => useMidnightSettings());
+    expect(result.current.unreadableSnapshotWallet).toBe(wallet);
+    expect(result.current.unreadableSnapshotAccount).toBe(account);
+    expect(result.current.hasSaveFailed).toBe(true);
   });
 
   describe('isOpen derived state', () => {

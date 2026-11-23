@@ -1,5 +1,5 @@
 import { createVersionedProvingService } from '@lace-lib/vendor/proof-server-transport';
-import * as v8 from '@midnight-ntwrk/ledger-v8';
+import * as v8 from '@midnightntwrk/ledger-v8';
 import * as v9 from '@midnightntwrk/ledger-v9';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import { describe, expect, it, vi } from 'vitest';

@@ -187,7 +187,7 @@ describe('extension indexer transport', () => {
     ).toThrow('Requalify');
   });
 
-  it.each(['2.0.0-canary.20261104142910-33e5e4c', '2.0.0-rc.3'])(
+  it.each(['2.0.0-rc.2', '2.0.0', '2.0.2'])(
     'rejects SDK %s even if its source is identical',
     version => {
       writeFileSync(

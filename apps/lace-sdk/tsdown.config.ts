@@ -388,7 +388,7 @@ const FORBIDDEN_EXTERNAL = FORBIDDEN_PACKAGE_PATTERNS.map(
 // never reaches them.
 const MIDNIGHT_WASM_EXTERNAL = [
   /^@midnight-ntwrk\//,
-  /^@midnightntwrk\/(?:ledger|onchain-runtime)-v\d+/,
+  /^@midnightntwrk\/(?:ledger|onchain-runtime|zkir)-v\d+/,
   /^@polkadot\//,
 ];
 // The Midnight wallet SDK packages publish import-only export maps, so

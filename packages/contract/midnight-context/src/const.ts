@@ -27,6 +27,14 @@ export const FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER = FeatureFlagKey(
   'BLOCKCHAIN_MIDNIGHT_TEE_VERITEE_PROOF_SERVER',
 );
 
+export const FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC = FeatureFlagKey(
+  'BLOCKCHAIN_MIDNIGHT_FILTERED_DUST_SYNC',
+);
+
+export const FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES = FeatureFlagKey(
+  'BLOCKCHAIN_MIDNIGHT_FETCH_MISSING_FEES',
+);
+
 export const defaultTxTtlLength = 60 * 60 * 1000;
 
 /** The Midnight networks, keyed by name. */
@@ -49,11 +57,21 @@ export type MidnightSDKTestNetworkId = Exclude<MidnightSDKNetworkId, 'mainnet'>;
 export const MidnightSDKTestNetworkId: MidnightSDKTestNetworkId[] =
   MidnightSDKNetworkId.filter(id => id !== 'mainnet');
 
+/** Pending Dust nullifiers grouped by wallet account, used for explicit reset consent. */
+export type PendingDustNullifiersByAccount = Record<string, string[]>;
+
 /** The endpoints a Midnight network syncs and proves through. */
 export type MidnightNetworkConfig = {
   indexerAddress: string;
   nodeAddress: string;
   proofServer: ProofServerMode;
+  /** User opt-in applies only to this exact indexer, never to a replacement. */
+  filteredDustSyncIndexer?: string;
+  /** Pending Dust reservations the user explicitly accepted discarding on return to full sync.
+   * Cleared whenever filtering is enabled again. Never authorizes later reservations. */
+  dustSyncResetAuthorizations?: PendingDustNullifiersByAccount;
+  /** Derived from the rollout flag, never from a persisted user override. */
+  isFilteredDustSyncRolloutEnabled?: boolean;
 };
 
 export {

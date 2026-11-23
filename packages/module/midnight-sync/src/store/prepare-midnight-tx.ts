@@ -4,7 +4,7 @@ import {
 } from '@lace-contract/midnight-context';
 import { TokenId } from '@lace-contract/tokens';
 import { BigNumber } from '@lace-lib/util';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import * as ledgerV9 from '@midnightntwrk/ledger-v9';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
@@ -23,7 +23,7 @@ import type {
   DustRegistration,
   SignatureEnabled,
   SignatureVerifyingKey,
-} from '@midnight-ntwrk/ledger-v8';
+} from '@midnightntwrk/ledger-v8';
 import type { Signing } from '@midnightntwrk/wallet-sdk';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 

@@ -24,7 +24,8 @@
     "unlimitedStorage",
     "tabs",
     "windows",
-    "offscreen"
+    "offscreen",
+    "webRequest"
   ],
   "host_permissions": ["<all_urls>"],
   "content_security_policy": {

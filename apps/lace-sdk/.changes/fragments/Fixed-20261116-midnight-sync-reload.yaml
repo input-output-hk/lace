@@ -1,0 +1,6 @@
+kind: Fixed
+body: Preserve saved Midnight Dust state when filtered sync becomes unavailable. Temporarily disabling the filtering rollout flag no longer rebuilds full Dust history. Prepare saved state and account keys for all Midnight wallets before starting sync.
+time: 2026-11-16T16:35:00+01:00
+custom:
+  Build: canary
+  Package: sdk

@@ -1,4 +1,3 @@
-import { deepEquals } from '@cardano-sdk/util';
 import {
   hasMidnightAccount,
   isInMemoryMidnightAccount,
@@ -10,10 +9,8 @@ import {
   concat,
   defaultIfEmpty,
   defer,
-  distinctUntilChanged,
   EMPTY,
   exhaustMap,
-  filter,
   forkJoin,
   from,
   groupBy,
@@ -137,54 +134,6 @@ export const createClearWalletStateOnResync = (
           ),
         ),
   );
-
-/**
- * Side-effect that triggers a Midnight wallet resync whenever the config change
- * is made with a feature flag override and the wallet is unlocked.
- */
-export const resyncWalletOnConfigChangeFromFeatureFlags = withMidnightAccounts(
-  midnightAccounts$ =>
-    (
-      _,
-      {
-        appLock: { isUnlocked$ },
-        midnightContext: {
-          selectCurrentNetwork$,
-          selectNetworksConfigFeatureFlagsOverrides$,
-        },
-      },
-      { actions },
-    ) => {
-      const configChangesCausedByFFUpdate$ =
-        selectNetworksConfigFeatureFlagsOverrides$.pipe(
-          withLatestFrom(isUnlocked$),
-          filter(([_, isUnlocked]) => isUnlocked),
-          switchMap(() => selectCurrentNetwork$.pipe(take(1))),
-          map(({ config }) => config),
-          distinctUntilChanged(deepEquals),
-        );
-
-      return configChangesCausedByFFUpdate$.pipe(
-        withLatestFrom(midnightAccounts$),
-        switchMap(([_, midnightAccounts]) =>
-          from([
-            ...midnightAccounts.map(({ accountId }) =>
-              actions.sync.addSyncOperation({
-                accountId,
-                operation: {
-                  operationId: `${accountId}-midnight-sync`,
-                  status: 'Pending',
-                  description: 'sync.operation.midnight-resync',
-                  startedAt: Timestamp(Date.now()),
-                },
-              }),
-            ),
-            actions.midnightSync.resync(),
-          ]),
-        ),
-      );
-    },
-);
 
 export const createDeleteWalletSideEffect =
   (storage: CollectionStorage<SerializedMidnightWallet>): SideEffect =>

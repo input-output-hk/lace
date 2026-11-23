@@ -1,6 +1,8 @@
 import { deepEquals } from '@cardano-sdk/util';
 import {
+  UnreadableDustSnapshotError,
   midnightAccounts$,
+  isInMemoryMidnightAccount,
   MidnightNetworkId,
   MidnightSDKNetworkIds,
   registerMidnightBlockchainNetworks,
@@ -9,6 +11,12 @@ import { Milliseconds } from '@lace-lib/util';
 import { firstStateOfStatus } from '@lace-lib/util-store';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
+  catchError,
+  defer,
+  of,
+  timeout,
+  takeUntil,
+  take,
   distinctUntilChanged,
   filter,
   from,
@@ -32,6 +40,8 @@ import {
 import type { SideEffect } from '../..';
 import type { FeatureFlag } from '@lace-contract/feature/src';
 import type {
+  PendingDustNullifiersByAccount,
+  SerializedMidnightWallet,
   MidnightAccountProps,
   MidnightSDKNetworkId,
 } from '@lace-contract/midnight-context';
@@ -149,35 +159,118 @@ export const handleMidnightSettingsChange: SideEffect = (
   _,
   {
     midnight: { selectSettingsDrawerState$ },
-    midnightContext: { selectNetworksConfigFeatureFlagsOverrides$ },
+    midnightContext: {
+      selectNetworksConfigFeatureFlagsOverrides$,
+      selectNetworksConfig$,
+    },
+    wallets: { selectActiveNetworkAccounts$ },
   },
-  { actions },
+  { actions, inspectDustSyncReset, createCollectionStorage, logger },
 ) =>
   firstStateOfStatus(selectSettingsDrawerState$, 'Saving').pipe(
-    withLatestFrom(selectNetworksConfigFeatureFlagsOverrides$),
-    switchMap(([{ config, networkId }, featureFlagsOverrides]) => {
-      const isMainnet = networkId === NetworkId.NetworkId.MainNet;
-      const networkType = isMainnet ? 'mainnet' : 'testnet';
+    withLatestFrom(
+      selectNetworksConfigFeatureFlagsOverrides$,
+      selectNetworksConfig$,
+      selectActiveNetworkAccounts$,
+    ),
+    switchMap(
+      ([
+        { config, networkId, authorizedPendingDustNullifiers },
+        featureFlagsOverrides,
+        networksConfig,
+        accounts,
+      ]) => {
+        const isDisablingFiltering =
+          !!networksConfig[networkId].filteredDustSyncIndexer &&
+          config.filteredDustSyncIndexer !== config.indexerAddress;
+        const inspection$ = isDisablingFiltering
+          ? defer(() =>
+              inspectDustSyncReset(
+                networkId,
+                accounts
+                  .filter(isInMemoryMidnightAccount)
+                  .filter(
+                    account =>
+                      account.blockchainSpecific.networkId === networkId,
+                  )
+                  .map(account => account.accountId),
+                // Inspection only. The engine owns writes to this collection.
+                createCollectionStorage<SerializedMidnightWallet>({
+                  collectionId: 'midnightWalletState',
+                  computeDocId: wallet => String(wallet.accountId),
+                }),
+              ),
+            )
+          : of({} as PendingDustNullifiersByAccount);
+        return inspection$.pipe(
+          take(1),
+          timeout(15_000),
+          takeUntil(
+            selectSettingsDrawerState$.pipe(
+              filter(state => state.status !== 'Saving'),
+            ),
+          ),
+          withLatestFrom(selectNetworksConfig$),
+          switchMap(([pendingDust, latestNetworksConfig]) => {
+            if (
+              !deepEquals(
+                networksConfig[networkId],
+                latestNetworksConfig[networkId],
+              )
+            )
+              return of(actions.midnight.savingFailed());
+            const isConfirmationRequired = Object.entries(pendingDust).some(
+              ([accountId, reservations]) =>
+                reservations.some(
+                  reservation =>
+                    !authorizedPendingDustNullifiers?.[accountId]?.includes(
+                      reservation,
+                    ),
+                ),
+            );
+            if (isConfirmationRequired)
+              return of(
+                actions.midnight.dustResetConfirmationRequired(pendingDust),
+              );
 
-      return from([
-        actions.network.setNetworkType(networkType),
-        ...(isMainnet
-          ? []
-          : [
-              actions.network.setBlockchainNetworks({
-                blockchain: 'Midnight',
-                mainnet: MidnightNetworkId('mainnet'),
-                testnet: MidnightNetworkId(networkId),
+            const isMainnet = networkId === NetworkId.NetworkId.MainNet;
+            const networkType = isMainnet ? 'mainnet' : 'testnet';
+
+            return from([
+              actions.network.setNetworkType(networkType),
+              ...(isMainnet
+                ? []
+                : [
+                    actions.network.setBlockchainNetworks({
+                      blockchain: 'Midnight',
+                      mainnet: MidnightNetworkId('mainnet'),
+                      testnet: MidnightNetworkId(networkId),
+                    }),
+                  ]),
+              actions.midnightContext.setUserNetworkConfigOverride({
+                networkId,
+                config: isDisablingFiltering
+                  ? { ...config, dustSyncResetAuthorizations: pendingDust }
+                  : config,
+                featureFlagsOverrides: featureFlagsOverrides[networkId] ?? {},
               }),
-            ]),
-        actions.midnightContext.setUserNetworkConfigOverride({
-          networkId,
-          config,
-          featureFlagsOverrides: featureFlagsOverrides[networkId] ?? {},
-        }),
-        actions.midnight.savingCompleted(),
-      ]);
-    }),
+              actions.midnight.savingCompleted(),
+            ]);
+          }),
+          catchError((error: unknown) => {
+            logger.error(
+              'Could not check pending Dust spends before saving settings',
+              error,
+            );
+            return of(
+              error instanceof UnreadableDustSnapshotError
+                ? actions.midnight.snapshotUnreadable(error.accountId)
+                : actions.midnight.savingFailed(),
+            );
+          }),
+        );
+      },
+    ),
   );
 
 /**

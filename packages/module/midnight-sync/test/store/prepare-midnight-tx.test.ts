@@ -1,7 +1,7 @@
 import { toUnshieldedTokenType } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
 import { BigNumber } from '@lace-lib/util';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import {
   ProtocolVersion,
   WalletTransaction,

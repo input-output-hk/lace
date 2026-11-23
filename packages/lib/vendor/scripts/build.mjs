@@ -122,32 +122,32 @@ const entryPoints = {
 //     never pull the @cardano-sdk surface, the Ledger signing tree, or the
 //     Midnight engine (ADR 37).
 const LIGHT_ENTRY_EXCLUSIONS = {
-  index: ['@midnight-ntwrk/ledger-v8', '@midnightntwrk/wallet-sdk'],
+  index: ['@midnightntwrk/ledger-v8', '@midnightntwrk/wallet-sdk'],
   'ledger-cardano-app': [
     '@cardano-sdk/hardware-ledger',
-    '@midnight-ntwrk/ledger-v8',
+    '@midnightntwrk/ledger-v8',
     '@midnightntwrk/wallet-sdk',
   ],
   webhid: [
     '@cardano-sdk/hardware-ledger',
-    '@midnight-ntwrk/ledger-v8',
+    '@midnightntwrk/ledger-v8',
     '@midnightntwrk/wallet-sdk',
   ],
   'trezor-connect': [
     '@cardano-sdk/hardware-trezor',
-    '@midnight-ntwrk/ledger-v8',
+    '@midnightntwrk/ledger-v8',
     '@midnightntwrk/wallet-sdk',
   ],
   qr: [
     '@cardano-sdk/core',
     '@cardano-sdk/hardware-ledger',
-    '@midnight-ntwrk/ledger-v8',
+    '@midnightntwrk/ledger-v8',
     '@midnightntwrk/wallet-sdk',
   ],
   zxcvbn: [
     '@cardano-sdk/core',
     '@cardano-sdk/hardware-ledger',
-    '@midnight-ntwrk/ledger-v8',
+    '@midnightntwrk/ledger-v8',
     '@midnightntwrk/wallet-sdk',
   ],
 };

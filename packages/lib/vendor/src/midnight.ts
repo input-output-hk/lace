@@ -19,7 +19,7 @@
  * trees (the wallet-sdk umbrella's facade/dust/unshielded implementations, the
  * effect runtime, the onchain/zkir engines) are pinned by the workspace lockfile.
  */
-export * as ledger from '@midnight-ntwrk/ledger-v8';
+export * as ledger from '@midnightntwrk/ledger-v8';
 export {
   DustAddress,
   MidnightBech32m,

@@ -13,6 +13,8 @@ import {
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
+  FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC,
+  FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES,
   FEATURE_FLAG_MIDNIGHT_TEE_VERITEE_PROOF_SERVER,
   VERITEE_PROOF_SERVER_MODES,
   REMOTE_PROOF_SERVER_MODES,
@@ -25,6 +27,7 @@ import {
 import { getValidNetworkStringPayload } from '../utils';
 import { MidnightNetworkId } from '../value-objects';
 
+import { feeRecoverySlice } from './fee-recovery-slice';
 import { proofActivitySlice } from './proof-activity-slice';
 import { teeAttestationSlice } from './tee-attestation-slice';
 
@@ -117,6 +120,20 @@ const slice = createSlice({
         userNetworksConfigOverrides.indexerAddress = config.indexerAddress;
       } else {
         delete userNetworksConfigOverrides.indexerAddress;
+      }
+      if ('filteredDustSyncIndexer' in config) {
+        if (
+          config.filteredDustSyncIndexer &&
+          config.filteredDustSyncIndexer === config.indexerAddress
+        ) {
+          userNetworksConfigOverrides.filteredDustSyncIndexer =
+            config.indexerAddress;
+          delete userNetworksConfigOverrides.dustSyncResetAuthorizations;
+        } else {
+          delete userNetworksConfigOverrides.filteredDustSyncIndexer;
+          userNetworksConfigOverrides.dustSyncResetAuthorizations =
+            config.dustSyncResetAuthorizations;
+        }
       }
       const baseProofServer: ProofServerMode | undefined =
         baseNetworkConfig.proofServer;
@@ -550,10 +567,13 @@ const selectNetworksConfig = createSelector(
   slice.selectors.selectNetworksDefaultConfig,
   selectNetworksConfigFeatureFlagsOverrides,
   selectHonouredUserNetworksConfigOverrides,
+  featuresSelectors.features.selectLoadedFeatures,
   (
     defaultNetworkConfig,
     featureFlagsNetworksConfigOverrides,
     userNetworksConfigOverrides,
+    loadedFeatures,
+    // eslint-disable-next-line max-params -- Reselect passes one value per input selector.
   ) => {
     const result = merge(
       {},
@@ -563,6 +583,11 @@ const selectNetworksConfig = createSelector(
     );
     for (const id of Object.keys(defaultNetworkConfig)) {
       const networkId = id as MidnightSDKNetworkId;
+      // A saved user preference cannot bypass the remote rollout gate.
+      result[networkId].isFilteredDustSyncRolloutEnabled =
+        loadedFeatures.featureFlags.some(
+          flag => flag.key === FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC,
+        );
       result[networkId].proofServer =
         userNetworksConfigOverrides[networkId]?.proofServer ??
         featureFlagsNetworksConfigOverrides[networkId]?.proofServer ??
@@ -581,10 +606,21 @@ const selectCurrentNetwork = createSelector(
   }),
 );
 
+const selectSupportsFeeRecovery = createSelector(
+  feeRecoverySlice.selectors.selectSupportsFeeRecovery,
+  featuresSelectors.features.selectLoadedFeatures,
+  (supported, loadedFeatures) =>
+    supported &&
+    loadedFeatures.featureFlags.some(
+      flag => flag.key === FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES,
+    ),
+);
+
 export const midnightContextReducers = {
   [slice.name]: slice.reducer,
   [teeAttestationSlice.name]: teeAttestationSlice.reducer,
   [proofActivitySlice.name]: proofActivitySlice.reducer,
+  [feeRecoverySlice.name]: feeRecoverySlice.reducer,
 };
 
 /**
@@ -602,6 +638,7 @@ export const midnightContextActions = {
     ...slice.actions,
     ...teeAttestationSlice.actions,
     ...proofActivitySlice.actions,
+    ...feeRecoverySlice.actions,
     resetSyncState,
   },
 };
@@ -611,6 +648,8 @@ export const midnightContextSelectors = {
     ...slice.selectors,
     ...teeAttestationSlice.selectors,
     ...proofActivitySlice.selectors,
+    ...feeRecoverySlice.selectors,
+    selectSupportsFeeRecovery,
     selectMidnightBlockchainNetworkId,
     selectNetworkId,
     selectInitialNetworkId,

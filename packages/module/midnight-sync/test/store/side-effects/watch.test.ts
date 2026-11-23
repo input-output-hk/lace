@@ -12,7 +12,13 @@ import {
   midnightWalletsForRuntime,
 } from '@lace-contract/midnight-context';
 import * as stubData from '@lace-contract/midnight-context/src/stub-data';
-import { syncActions } from '@lace-contract/sync';
+import {
+  computeAccountSyncingProgress,
+  computeAccountSyncStatusDetail,
+  selectGlobalSyncStatus,
+  syncActions,
+} from '@lace-contract/sync';
+import { syncReducers } from '@lace-contract/sync/src/store/slice';
 import { TokenId, tokensActions } from '@lace-contract/tokens';
 import { BigNumber, HexBytes, Timestamp } from '@lace-lib/util';
 import { testSideEffect } from '@lace-lib/util-dev';
@@ -21,6 +27,8 @@ import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
   BehaviorSubject,
+  delay,
+  map,
   Subject,
   NEVER,
   Observable,
@@ -44,6 +52,11 @@ import {
 import { MidnightSyncFailureId } from '../../../src/value-objects/midnight-sync-failure-id.vo';
 
 import type {
+  ActionCreators,
+  Selectors,
+  SideEffect,
+} from '../../../src/context';
+import type {
   MidnightNetworkConfig,
   SerializedMidnightWallet,
 } from '@lace-contract/midnight-context';
@@ -54,13 +67,14 @@ import type {
   MidnightWalletsByAccountId,
 } from '@lace-contract/midnight-context';
 import type { CollectionStorage } from '@lace-contract/storage';
-import type { AccountSyncStatus } from '@lace-contract/sync';
+import type { AccountSyncStatus, SyncSliceState } from '@lace-contract/sync';
 import type { MetadataByTokenId } from '@lace-contract/tokens';
 import type {
   AccountId,
   InMemoryWalletAccount,
 } from '@lace-contract/wallet-repo';
 import type { FacadeState } from '@midnightntwrk/wallet-sdk/facade';
+import type { ObservedValueOf } from 'rxjs';
 import type { RunHelpers } from 'rxjs/testing';
 
 // The wallet's coinsByTokenType$ emits this structure (not exported from midnight-context)
@@ -69,17 +83,7 @@ type ObservableMidnightWalletCoinsByTokenType = {
   unshielded: CoinsByTokenType;
 };
 
-// Inline type since MidnightWalletSyncProgress is not exported
-type SyncProgress = {
-  dust: Percent;
-  shielded: Percent;
-  unshielded: Percent;
-  isStrictlyComplete: {
-    dust: boolean;
-    shielded: boolean;
-    unshielded: boolean;
-  };
-};
+type SyncProgress = ObservedValueOf<MidnightWallet['syncProgress$']>;
 
 const {
   accountId,
@@ -237,7 +241,290 @@ describe('updateSyncProgress', () => {
     midnightWallets$.next({});
   });
 
-  it('emits addSyncOperation on first emit and ignores unshielded when disabled', () => {
+  const snapshot = (ratio = 0.9, complete = false): SyncProgress => ({
+    shielded: Percent(ratio),
+    dust: Percent(ratio),
+    unshielded: Percent(ratio),
+    isStrictlyComplete: {
+      shielded: complete,
+      dust: complete,
+      unshielded: complete,
+    },
+    isConnected: { shielded: true, dust: true, unshielded: true },
+    indexerLiveness: 'InSync',
+  });
+
+  const withDelayedDispatch = (
+    exercise: (harness: {
+      progress$: Subject<SyncProgress>;
+      flush: () => void;
+      getState: () => SyncSliceState;
+      dispatched: Array<{ type: string }>;
+    }) => void,
+  ) => {
+    const progress$ = new Subject<SyncProgress>();
+    let state = syncReducers.sync(undefined, { type: 'init' });
+    const statuses$ = new BehaviorSubject(state.syncStatusByAccount);
+    const dispatched: Array<{ type: string }> = [];
+    testSideEffect<Selectors, ActionCreators>(
+      {
+        build: ({ cold }) =>
+          updateSyncProgress(
+            createMockMidnightWallet(cold, { syncProgress$: progress$ }),
+            of(true),
+            midnightWallets$,
+          ),
+      },
+      ({ flush }) => ({
+        stateObservables: { sync: { selectSyncStatusByAccount$: statuses$ } },
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          // createStore defers epic dispatch. Synchronous reducer feedback hides
+          // races between snapshots emitted before that queue drains.
+          const subscription = sideEffect$.pipe(delay(0)).subscribe(action => {
+            dispatched.push(action);
+            state = syncReducers.sync(state, action);
+            statuses$.next(state.syncStatusByAccount);
+          });
+          try {
+            exercise({ progress$, flush, getState: () => state, dispatched });
+          } finally {
+            subscription.unsubscribe();
+          }
+        },
+      }),
+    );
+  };
+
+  it.each([
+    [
+      'completion followed by progress',
+      [snapshot(1, true), snapshot()],
+      'syncing',
+    ],
+    [
+      'progress followed by completion',
+      [snapshot(0.95), snapshot(1, true)],
+      'synced',
+    ],
+    [
+      'failure followed by recovery',
+      [{ ...snapshot(), indexerLiveness: 'WrongNetwork' }, snapshot()],
+      'syncing',
+    ],
+    [
+      'recovery followed by failure',
+      [snapshot(1, true), { ...snapshot(), indexerLiveness: 'WrongNetwork' }],
+      'error',
+    ],
+    [
+      'completion followed by unknown work',
+      [snapshot(1, true), { ...snapshot(), dust: undefined }],
+      'syncing',
+    ],
+  ] as const)(
+    'applies %s in order across delayed dispatch',
+    (_, snapshots, expectedStatus) => {
+      withDelayedDispatch(({ progress$, flush, getState, dispatched }) => {
+        progress$.next(snapshot());
+        flush();
+        for (const value of snapshots) progress$.next(value);
+        flush();
+        expect(selectGlobalSyncStatus({ sync: getState() })).toBe(
+          expectedStatus,
+        );
+        expect(dispatched).toHaveLength(3);
+        progress$.next(snapshots[1]);
+        flush();
+        expect(selectGlobalSyncStatus({ sync: getState() })).toBe(
+          expectedStatus,
+        );
+        expect(dispatched).toHaveLength(3);
+        if (expectedStatus === 'syncing') {
+          expect(
+            getState().syncStatusByAccount[accountId].pendingSync?.operations[
+              `${accountId}-midnight-sync`
+            ],
+          ).toMatchObject({ status: 'InProgress' });
+        }
+      });
+    },
+  );
+
+  it('dispatches once for 10,000 snapshots within the same displayed percentage', () => {
+    withDelayedDispatch(({ progress$, flush, dispatched }) => {
+      for (let index = 0; index < 10000; index++)
+        progress$.next(snapshot(0.48 + (index % 100) / 10000));
+      flush();
+      expect(dispatched).toHaveLength(1);
+      expect(dispatched[0]).toMatchObject({
+        payload: { operation: { progress: 0.48 } },
+      });
+    });
+  });
+
+  it('coalesces a percentage burst to its first and latest displayed percentages', () => {
+    withDelayedDispatch(({ progress$, flush, dispatched }) => {
+      for (let index = 0; index < 10000; index++)
+        progress$.next(snapshot(0.1 + index / 12500));
+      flush();
+      expect(dispatched).toHaveLength(2);
+      expect(dispatched[0]).toMatchObject({
+        payload: { operation: { progress: 0.1 } },
+      });
+      expect(dispatched[1]).toMatchObject({
+        payload: { operation: { progress: 0.89 } },
+      });
+    });
+  });
+
+  it('passes health and completion immediately and cancels queued percentages', () => {
+    testSideEffect<Selectors, ActionCreators>(
+      {
+        build: ({ cold }) =>
+          updateSyncProgress(
+            createMockMidnightWallet(cold, {
+              syncProgress$: cold('a 9ms b 9ms c 9ms d', {
+                a: snapshot(0.1),
+                b: snapshot(0.2),
+                c: { ...snapshot(), indexerLiveness: 'WrongNetwork' },
+                d: snapshot(1, true),
+              }),
+            }),
+            of(true),
+            midnightWallets$,
+          ),
+      },
+      ({ expectObservable }) => ({
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          expectObservable(
+            sideEffect$.pipe(
+              delay(0),
+              map(action =>
+                actions.sync.applySyncOperationSnapshot.match(action)
+                  ? action.payload.operation.status
+                  : 'unexpected',
+              ),
+            ),
+          ).toBe('a 19ms b 9ms c', {
+            a: 'InProgress',
+            b: 'Failed',
+            c: 'Completed',
+          });
+        },
+      }),
+    );
+  });
+
+  it('renders health loss, unknown work and recovery using the real sync reducer', () => {
+    const progress$ = new Subject<SyncProgress>();
+    let state = syncReducers.sync(undefined, { type: 'init' });
+    const statuses$ = new BehaviorSubject(state.syncStatusByAccount);
+    const complete: SyncProgress = {
+      shielded: Percent(1),
+      dust: Percent(1),
+      unshielded: Percent(1),
+      isStrictlyComplete: { shielded: true, dust: true, unshielded: true },
+      isConnected: { shielded: true, dust: true, unshielded: true },
+      indexerLiveness: 'InSync',
+    };
+    testSideEffect<Selectors, ActionCreators>(
+      {
+        build: ({ cold }) =>
+          updateSyncProgress(
+            createMockMidnightWallet(cold, { syncProgress$: progress$ }),
+            of(true),
+            midnightWallets$,
+          ),
+      },
+      () => ({
+        actionObservables: {},
+        stateObservables: { sync: { selectSyncStatusByAccount$: statuses$ } },
+        dependencies: { actions },
+        assertion: sideEffect$ => {
+          const subscription = sideEffect$.subscribe(action => {
+            state = syncReducers.sync(state, action);
+            statuses$.next(state.syncStatusByAccount);
+          });
+          const globalStatus = () => selectGlobalSyncStatus({ sync: state });
+          const percentage = () =>
+            computeAccountSyncingProgress(state.syncStatusByAccount[accountId]);
+
+          progress$.next({
+            ...complete,
+            isConnected: { dust: false, shielded: false, unshielded: false },
+          });
+          expect(globalStatus()).toBe('syncing');
+          expect(percentage()).toBeUndefined();
+          expect(
+            computeAccountSyncStatusDetail(
+              state.syncStatusByAccount[accountId],
+            ),
+          ).toBe('v2.sync-status.detail.waiting-for-data');
+          expect(
+            state.syncStatusByAccount[accountId].lastSuccessfulSync,
+          ).toBeUndefined();
+
+          progress$.next(complete);
+          expect(globalStatus()).toBe('synced');
+          const previousSuccess =
+            state.syncStatusByAccount[accountId].lastSuccessfulSync;
+          expect(previousSuccess).toBeDefined();
+
+          progress$.next({ ...complete, indexerLiveness: 'Unavailable' });
+          expect(globalStatus()).toBe('syncing');
+          expect(percentage()).toBeUndefined();
+          expect(
+            computeAccountSyncStatusDetail(
+              state.syncStatusByAccount[accountId],
+            ),
+          ).toBe('v2.sync-status.detail.check-failed');
+          progress$.next({
+            ...complete,
+            isStrictlyComplete: { ...complete.isStrictlyComplete, dust: false },
+          });
+          expect(
+            computeAccountSyncStatusDetail(
+              state.syncStatusByAccount[accountId],
+            ),
+          ).toBeUndefined();
+
+          progress$.next({ ...complete, indexerLiveness: 'WrongNetwork' });
+          expect(globalStatus()).toBe('error');
+          expect(state.syncStatusByAccount[accountId].lastSuccessfulSync).toBe(
+            previousSuccess,
+          );
+          expect(percentage()).toBeUndefined();
+
+          progress$.next({
+            ...complete,
+            dust: undefined,
+            isStrictlyComplete: { ...complete.isStrictlyComplete, dust: false },
+          });
+          expect(globalStatus()).toBe('syncing');
+          expect(percentage()).toBeUndefined();
+          expect(
+            state.syncStatusByAccount[accountId].pendingSync?.operations[
+              `${accountId}-midnight-sync`
+            ],
+          ).toMatchObject({
+            status: 'InProgress',
+            type: 'Indeterminate',
+          });
+
+          progress$.next(complete);
+          expect(globalStatus()).toBe('synced');
+          expect(
+            state.syncStatusByAccount[accountId].pendingSync,
+          ).toBeUndefined();
+          subscription.unsubscribe();
+        },
+      }),
+    );
+  });
+
+  it('emits a snapshot on first emit and ignores unshielded when disabled', () => {
     const syncProgress: SyncProgress = {
       shielded: Percent(0.5),
       unshielded: Percent(0.2),
@@ -271,7 +558,7 @@ describe('updateSyncProgress', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -289,7 +576,7 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('emits completeSyncOperation when sync progress reaches 1', () => {
+  it('emits a completed snapshot when sync progress reaches 1', () => {
     // min(shielded=1, dust=1) = 1 and both are strictly complete (unshielded disabled).
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
@@ -323,22 +610,16 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            // Should emit both addSyncOperation and completeSyncOperation
-            expectObservable(sideEffect$).toBe('(ab)', {
-              a: actions.sync.addSyncOperation({
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
-                  status: 'InProgress',
-                  type: 'Determinate',
-                  progress: Percent(1),
+                  status: 'Completed',
+                  completedAt: expect.any(Number) as Timestamp,
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
-              }),
-              b: actions.sync.completeSyncOperation({
-                accountId,
-                operationId: `${accountId}-midnight-sync`,
               }),
             });
           },
@@ -393,7 +674,7 @@ describe('updateSyncProgress', () => {
             });
 
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -461,7 +742,7 @@ describe('updateSyncProgress', () => {
             });
 
             expectObservable(sideEffect$).toBe('a 499ms |', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -479,7 +760,7 @@ describe('updateSyncProgress', () => {
     );
   });
 
-  it('emits updateSyncProgress when progress changes after sync already started (uses min of shielded+dust when unshielded disabled)', () => {
+  it('emits snapshots when progress changes after sync already started (uses min of shielded+dust when unshielded disabled)', () => {
     // When unshielded is disabled: progress = min(shielded, dust)
     const syncProgressPartial: SyncProgress = {
       shielded: Percent(0.5),
@@ -550,20 +831,27 @@ describe('updateSyncProgress', () => {
             // First emission (a) passes through throttle immediately (leading).
             // Second emission (b) arrives after the 500ms throttle window and
             // passes through as the leading edge of a new throttle window.
-            expectObservable(sideEffect$).toBe('a 500ms (bc)', {
-              a: actions.sync.updateSyncProgress({
+            expectObservable(sideEffect$).toBe('a 500ms b', {
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
-                operationId,
-                progress: Percent(0.5),
+                operation: {
+                  operationId,
+                  status: 'InProgress',
+                  type: 'Determinate',
+                  progress: Percent(0.5),
+                  description: 'sync.operation.midnight-wallet-sync',
+                  startedAt: expect.any(Number) as Timestamp,
+                },
               }),
-              b: actions.sync.updateSyncProgress({
+              b: actions.sync.applySyncOperationSnapshot({
                 accountId,
-                operationId,
-                progress: Percent(1),
-              }),
-              c: actions.sync.completeSyncOperation({
-                accountId,
-                operationId,
+                operation: {
+                  operationId,
+                  status: 'Completed',
+                  completedAt: expect.any(Number) as Timestamp,
+                  description: 'sync.operation.midnight-wallet-sync',
+                  startedAt: expect.any(Number) as Timestamp,
+                },
               }),
             });
           },
@@ -606,7 +894,7 @@ describe('updateSyncProgress', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -658,7 +946,7 @@ describe('updateSyncProgress', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -712,7 +1000,7 @@ describe('updateSyncProgress', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -731,14 +1019,14 @@ describe('updateSyncProgress', () => {
   });
 
   it('does not let an empty dust wallet (reported as 1) drag down the min', () => {
-    // An empty dust wallet reports Percent(1) via computeConnectedSyncRatio, so it must
+    // An SDK-confirmed empty Dust wallet reports Percent(1), so it must
     // never lower the displayed progress below the genuinely-lagging sub-wallets.
     // shielded=0.8, unshielded=0.8, dust=1 → min = 0.8.
     const syncProgress: SyncProgress = {
       shielded: Percent(0.8),
       unshielded: Percent(0.8),
       dust: Percent(1),
-      isStrictlyComplete: { dust: false, shielded: false, unshielded: false },
+      isStrictlyComplete: { dust: true, shielded: false, unshielded: false },
     };
 
     testSideEffect(
@@ -767,7 +1055,7 @@ describe('updateSyncProgress', () => {
           },
           assertion: sideEffect$ => {
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -819,21 +1107,16 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            expectObservable(sideEffect$).toBe('(ab)', {
-              a: actions.sync.addSyncOperation({
+            expectObservable(sideEffect$).toBe('a', {
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
-                  status: 'InProgress',
-                  type: 'Determinate',
-                  progress: Percent(1), // min(shielded=1, unshielded=1, dust=1)
+                  status: 'Completed',
+                  completedAt: expect.any(Number) as Timestamp,
                   description: 'sync.operation.midnight-wallet-sync',
                   startedAt: expect.any(Number) as Timestamp,
                 },
-              }),
-              b: actions.sync.completeSyncOperation({
-                accountId,
-                operationId: `${accountId}-midnight-sync`,
               }),
             });
           },
@@ -843,8 +1126,8 @@ describe('updateSyncProgress', () => {
   });
 
   it('does not complete sync when ratio is 1 but isStrictlyComplete is false (false completion regression)', () => {
-    // computeConnectedSyncRatio returns 1 when isConnected=true and both indices are 0.
-    // Without the isStrictlyComplete guard, this would trigger premature completion.
+    // Matching numeric cursors do not independently confirm completion.
+    // The SDK can still withhold strict completion based on its other checks.
     // min(shielded=1, dust=1) = 1 but no sub-wallet is strictly complete.
     const syncProgress: SyncProgress = {
       shielded: Percent(1),
@@ -878,9 +1161,8 @@ describe('updateSyncProgress', () => {
             actions,
           },
           assertion: sideEffect$ => {
-            // Must emit only addSyncOperation, NOT completeSyncOperation
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -934,7 +1216,7 @@ describe('updateSyncProgress', () => {
           assertion: sideEffect$ => {
             // Progress is the slowest sub-wallet (0.3), not the average (0.6).
             expectObservable(sideEffect$).toBe('a', {
-              a: actions.sync.addSyncOperation({
+              a: actions.sync.applySyncOperationSnapshot({
                 accountId,
                 operation: {
                   operationId: `${accountId}-midnight-sync`,
@@ -2909,6 +3191,77 @@ describe('watchMidnightAccounts', () => {
   });
 
   describe('surfaced sync failure', () => {
+    it('recovers after approval returns without clearing saved state or dispatching resync', () => {
+      const store = createMockStore();
+      const approved = {
+        ...previewNetwork,
+        config: {
+          ...previewNetwork.config,
+          filteredDustSyncIndexer: previewNetwork.config.indexerAddress,
+          isFilteredDustSyncRolloutEnabled: true,
+        },
+      };
+      const unavailable = {
+        ...approved,
+        config: { ...approved.config, isFilteredDustSyncRolloutEnabled: false },
+      };
+      const watchAccount = vi.fn<typeof watchMidnightAccount>(
+        (_account, config) => () =>
+          config.isFilteredDustSyncRolloutEnabled
+            ? NEVER
+            : throwError(
+                () => new Error('Filtering unavailable, saved state retained'),
+              ),
+      );
+      testSideEffect(
+        watchMidnightAccounts(store, watchAccount),
+        ({ cold, flush }) => ({
+          actionObservables: {
+            midnightSync: { restartWalletWatch$: NEVER },
+          },
+          stateObservables: {
+            midnightContext: {
+              selectCurrentNetwork$: cold('a 3000ms b 3000ms a', {
+                a: approved,
+                b: unavailable,
+              }),
+            },
+            wallets: {
+              selectIsWalletRepoMigrating$: of(false),
+              selectActiveNetworkAccounts$: of([midnightAccount1]),
+            },
+          },
+          dependencies: { actions, logger, isWalletActive$: of(true) },
+          assertion: sideEffect$ => {
+            const emissions: unknown[] = [];
+            const subscription = sideEffect$.subscribe(action =>
+              emissions.push(action),
+            );
+            flush();
+            expect(
+              emissions.filter(action =>
+                actions.failures.addFailure.match(action as never),
+              ),
+            ).toHaveLength(1);
+            expect(watchAccount).toHaveBeenLastCalledWith(
+              midnightAccount1,
+              approved.config,
+              store,
+            );
+            expect(
+              watchAccount.mock.calls.filter(
+                ([, config]) => config.isFilteredDustSyncRolloutEnabled,
+              ),
+            ).toHaveLength(2);
+            expect(emissions).not.toContainEqual(actions.midnightSync.resync());
+            expect(store.clear).not.toHaveBeenCalled();
+            expect(store.removeWhere).not.toHaveBeenCalled();
+            subscription.unsubscribe();
+          },
+        }),
+      );
+    });
+
     it('raises a retryable failure and a failed sync operation once retries are exhausted', () => {
       const mockStore = createMockStore();
       const mockWatchAccount = vi.fn(account => () => {
@@ -3769,6 +4122,7 @@ describe('watchMidnightAccount instance ownership', () => {
       });
     return {
       runtime,
+      state,
       addresses$,
       engine,
       dependencies,
@@ -3780,6 +4134,140 @@ describe('watchMidnightAccount instance ownership', () => {
       active$,
     };
   };
+
+  it('marks all restoring accounts pending before entering their startup, preserving historical success', () => {
+    const fixture = setup();
+    const accounts = [1, 2, 3].map(index => ({
+      ...stubData.midnightAccount,
+      accountId:
+        `${accountId}-${index}` as typeof stubData.midnightAccount.accountId,
+    }));
+    const previousSuccess = Timestamp(123);
+    let syncState: ReturnType<typeof syncReducers.sync> = {
+      syncStatusByAccount: Object.fromEntries(
+        accounts.map(account => [
+          account.accountId,
+          { lastSuccessfulSync: previousSuccess },
+        ]),
+      ),
+    };
+    const subscriptions = [];
+    vi.mocked(
+      fixture.dependencies.startMidnightAccountWallet,
+    ).mockImplementation(({ account }) => {
+      const status = syncState.syncStatusByAccount[account.accountId];
+      expect(computeAccountSyncingProgress(status)).toBeUndefined();
+      expect(computeAccountSyncStatusDetail(status)).toBe(
+        'v2.sync-status.detail.waiting-for-data',
+      );
+      expect(selectGlobalSyncStatus({ sync: syncState })).toBe('syncing');
+      return NEVER;
+    });
+    try {
+      for (const account of accounts) {
+        subscriptions.push(
+          watchMidnightAccount(
+            account,
+            config,
+            {} as CollectionStorage<SerializedMidnightWallet>,
+          )(
+            {} as Parameters<SideEffect>[0],
+            fixture.state,
+            fixture.dependencies,
+          ).subscribe(action => {
+            syncState = syncReducers.sync(syncState, action);
+          }),
+        );
+      }
+      expect(
+        fixture.dependencies.startMidnightAccountWallet,
+      ).toHaveBeenCalledTimes(3);
+      for (const account of accounts) {
+        const status = syncState.syncStatusByAccount[account.accountId];
+        expect(status.lastSuccessfulSync).toBe(previousSuccess);
+        expect(computeAccountSyncStatusDetail(status)).toBe(
+          'v2.sync-status.detail.waiting-for-data',
+        );
+      }
+    } finally {
+      subscriptions.forEach(subscription => {
+        subscription.unsubscribe();
+      });
+    }
+  });
+
+  it('replaces startup Pending with live progress and only completes on a complete SDK snapshot', () => {
+    const fixture = setup();
+    const progress$ = new Subject<SyncProgress>();
+    fixture.engine.syncProgress$ = progress$;
+    let syncState = syncReducers.sync(undefined, { type: 'init' });
+    const syncStates$ = new BehaviorSubject(syncState.syncStatusByAccount);
+    fixture.state.sync.selectSyncStatusByAccount$ = syncStates$;
+    const subscription = watchMidnightAccount(
+      stubData.midnightAccount,
+      config,
+      {} as CollectionStorage<SerializedMidnightWallet>,
+    )(
+      {} as Parameters<SideEffect>[0],
+      fixture.state,
+      fixture.dependencies,
+    ).subscribe(action => {
+      syncState = syncReducers.sync(syncState, action);
+      syncStates$.next(syncState.syncStatusByAccount);
+    });
+    try {
+      expect(
+        computeAccountSyncStatusDetail(
+          syncState.syncStatusByAccount[accountId],
+        ),
+      ).toBe('v2.sync-status.detail.waiting-for-data');
+      const reportRestoration = vi.mocked(
+        fixture.dependencies.startMidnightAccountWallet,
+      ).mock.calls[0][0].onPreparationStatusChange!;
+      reportRestoration(true);
+      expect(
+        computeAccountSyncStatusDetail(
+          syncState.syncStatusByAccount[accountId],
+        ),
+      ).toBe('v2.sync-status.detail.preparing');
+      expect(
+        computeAccountSyncingProgress(syncState.syncStatusByAccount[accountId]),
+      ).toBeUndefined();
+      reportRestoration(false);
+      expect(
+        computeAccountSyncStatusDetail(
+          syncState.syncStatusByAccount[accountId],
+        ),
+      ).toBe('v2.sync-status.detail.waiting-for-data');
+      const snapshot = {
+        shielded: Percent(0.5),
+        unshielded: Percent(1),
+        dust: Percent(0.25),
+        isStrictlyComplete: { shielded: false, unshielded: true, dust: false },
+        isConnected: { shielded: true, unshielded: true, dust: true },
+        indexerLiveness: 'InSync',
+      } as SyncProgress;
+      progress$.next(snapshot);
+      expect(
+        computeAccountSyncingProgress(syncState.syncStatusByAccount[accountId]),
+      ).toBe(25);
+      expect(
+        computeAccountSyncStatusDetail(
+          syncState.syncStatusByAccount[accountId],
+        ),
+      ).toBeUndefined();
+      expect(selectGlobalSyncStatus({ sync: syncState })).toBe('syncing');
+      progress$.next({
+        ...snapshot,
+        shielded: Percent(1),
+        dust: Percent(1),
+        isStrictlyComplete: { shielded: true, unshielded: true, dust: true },
+      });
+      expect(selectGlobalSyncStatus({ sync: syncState })).toBe('synced');
+    } finally {
+      subscription.unsubscribe();
+    }
+  });
 
   it('unsubscribing one same-account watcher preserves the other registry and subscription', async () => {
     const a = setup();
@@ -3804,7 +4292,7 @@ describe('watchMidnightAccount instance ownership', () => {
         dust: midnightDustAddress,
       });
       await new Promise(resolve => setTimeout(resolve, 10));
-      expect(b.emissions).toHaveLength(1);
+      expect(b.emissions).toHaveLength(2);
       expect(a.engine.stop).toHaveBeenCalledOnce();
       expect(b.engine.stop).not.toHaveBeenCalled();
     } finally {
@@ -3880,7 +4368,7 @@ describe('watchMidnightAccount instance ownership', () => {
         expect(midnightWalletsForRuntime(a.runtime).value[accountId]).toBe(
           replacement.engine,
         );
-        expect(a.emissions).toHaveLength(1);
+        expect(a.emissions).toHaveLength(3);
         expect(a.engine.stop).toHaveBeenCalledOnce();
         expect(replacement.engine.stop).not.toHaveBeenCalled();
       } finally {
@@ -3902,7 +4390,10 @@ describe('watchMidnightAccount instance ownership', () => {
     const subscriptionB = b.start();
     const subscriptionA = a.start();
     try {
-      expect(a.emissions).toEqual([new Error('startup failed')]);
+      expect(a.emissions).toEqual([
+        expect.objectContaining({ type: actions.sync.addSyncOperation.type }),
+        new Error('startup failed'),
+      ]);
       expect(midnightWalletsForRuntime(a.runtime).value).toEqual({});
       expect(midnightWalletsForRuntime(b.runtime).value[accountId]).toBe(
         b.engine,

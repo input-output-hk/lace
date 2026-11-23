@@ -2,6 +2,7 @@ import { createMigrate } from 'redux-persist';
 
 import { VERITEE_PROOF_SERVER_MODES } from '../const';
 
+import { feeRecoveryInitialState } from './fee-recovery-slice';
 import { initializeSideEffects } from './side-effects';
 import { initialState, midnightContextReducers } from './slice';
 
@@ -17,6 +18,10 @@ const store: LaceInit<LaceModuleStoreInit> = async props => ({
   sideEffects: initializeSideEffects(),
   reducers: midnightContextReducers,
   preloadedState: {
+    midnightFeeRecovery: {
+      ...feeRecoveryInitialState,
+      supported: props.runtime.app === 'lace-extension',
+    },
     midnightContext: {
       ...initialState,
       supportsWasmProver: props.runtime.app === 'lace-extension',
@@ -25,6 +30,7 @@ const store: LaceInit<LaceModuleStoreInit> = async props => ({
     },
   },
   persistConfig: {
+    midnightFeeRecovery: { version: 1, whitelist: ['feesByAccount'] },
     midnightContext: {
       version: 14,
       whitelist: [

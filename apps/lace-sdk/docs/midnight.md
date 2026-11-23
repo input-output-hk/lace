@@ -193,7 +193,7 @@ const attestedModule = (
   });
 ```
 
-The Veritee adapter needs host access to the private `@input-output-hk/veritee-attestation-verifier@0.4.0`
+The Veritee adapter needs host access to the private `@input-output-hk/veritee-attestation-verifier@0.6.0`
 package, which the SDK neither installs nor imports. Supply in `verifier` its `LocalCheckFailedError` and
 `AttestationVerificationError` classes, and `createVerifier(config)` returning a **new** `AttestationVerifier` on
 each call, built from that same config: `AkxEvidenceProvider.fromConfig(config)`,

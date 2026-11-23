@@ -5,7 +5,7 @@ import {
 import { AuthenticationCancelledError } from '@lace-contract/signer';
 import { BigNumber, HexBytes } from '@lace-lib/util';
 import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
-import { nativeToken } from '@midnight-ntwrk/ledger-v8';
+import { nativeToken } from '@midnightntwrk/ledger-v8';
 import {
   DustAddress,
   MidnightBech32m,

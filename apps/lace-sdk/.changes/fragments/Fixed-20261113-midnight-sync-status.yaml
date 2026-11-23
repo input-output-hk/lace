@@ -1,0 +1,6 @@
+kind: Fixed
+body: Midnight sync avoids repeated percentage updates and responds immediately to completion and indexer health changes. Newer unfinished sync progress no longer leaves an account incorrectly marked as synced. Unknown sync targets no longer produce estimated percentages, and sync operations include brief diagnostic reasons.
+time: 2026-11-13T12:31:25+01:00
+custom:
+  Build: canary
+  Package: sdk

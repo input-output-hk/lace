@@ -180,6 +180,41 @@
         "command": "node scripts/test-prover-runtime.mjs",
         "cwd": "{projectRoot}"
       }
+    },
+    "midnight-swaps-build": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node test/manual/midnight-swaps/build.mjs",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "midnight-swaps-typecheck": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "tsc -p test/manual/midnight-swaps/tsconfig.json",
+        "cwd": "{projectRoot}"
+      }
+    },
+    "midnight-swaps-serve": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "node test/manual/midnight-swaps/serve.mjs",
+        "cwd": "{projectRoot}"
+      },
+      "continuous": true,
+      "dependsOn": ["midnight-swaps-build"]
+    },
+    "midnight-swaps-smoke": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["midnight-swaps-build"],
+      "options": {
+        "command": "node test/manual/midnight-swaps/smoke.mjs",
+        "cwd": "{projectRoot}"
+      }
     }
   }
 }

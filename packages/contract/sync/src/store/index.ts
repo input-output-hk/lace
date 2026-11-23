@@ -18,6 +18,7 @@ export {
   selectAllFailedOperations,
   selectHasEverSynced,
   computeAccountSyncingProgress,
+  computeAccountSyncStatusDetail,
 } from './selectors';
 
 export type * from './slice';

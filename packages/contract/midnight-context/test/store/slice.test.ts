@@ -3,6 +3,8 @@ import { NetworkId } from '@midnightntwrk/wallet-sdk-abstractions';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC,
+  FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES,
   FEATURE_FLAG_MIDNIGHT_INDEXER_URLS,
   FEATURE_FLAG_MIDNIGHT_NODE_URLS,
   FEATURE_FLAG_MIDNIGHT_REMOTE_PROOF_SERVER,
@@ -10,6 +12,7 @@ import {
   VERITEE_PROOF_SERVER_MODES,
 } from '../../src/const';
 import { MidnightSDKNetworkIds } from '../../src/const';
+import { feeRecoveryInitialState } from '../../src/store/fee-recovery-slice';
 import {
   initialState as sliceInitialState,
   midnightContextActions as actions,
@@ -94,6 +97,36 @@ describe('midnight slice', () => {
             indexerAddress: 'newIndexerAddress',
             proofServer: customProofServer,
           });
+        });
+
+        it('keeps consent scoped to the switch back and clears it when enabling filtering again', () => {
+          const config = initialState.defaultNetworksConfig[testNetworkId];
+          const save = (
+            state: MidnightContextSliceState,
+            filteredDustSyncIndexer: string | undefined,
+          ) =>
+            reducers.midnightContext(
+              state,
+              actions.midnightContext.setUserNetworkConfigOverride({
+                networkId: testNetworkId,
+                featureFlagsOverrides: {},
+                config: {
+                  ...config,
+                  filteredDustSyncIndexer,
+                  dustSyncResetAuthorizations: { account: ['1'] },
+                },
+              }),
+            );
+          const disabled = save(initialState, undefined);
+          expect(
+            disabled.userNetworksConfigOverrides[testNetworkId]
+              .dustSyncResetAuthorizations,
+          ).toEqual({ account: ['1'] });
+          expect(
+            save(disabled, config.indexerAddress).userNetworksConfigOverrides[
+              testNetworkId
+            ].dustSyncResetAuthorizations,
+          ).toBeUndefined();
         });
 
         it('should do nothing if networkId is not supported', () => {
@@ -740,6 +773,93 @@ describe('midnight slice', () => {
       });
     });
 
+    describe('filtered Dust sync rollout', () => {
+      const stateWithFlag = (enabled = true): WithNetworkTestState => ({
+        midnightContext: initialState,
+        network: networkState,
+        features: {
+          loaded: {
+            modules: [],
+            featureFlags: enabled
+              ? [{ key: FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC }]
+              : [],
+          },
+        },
+      });
+      it('offers filtering on every network with a boolean flag without opting the user in', () => {
+        const configs = selectors.midnightContext.selectNetworksConfig(
+          stateWithFlag(),
+        );
+        expect(Object.keys(configs)).toContain('undeployed');
+        for (const config of Object.values(configs)) {
+          expect(config.isFilteredDustSyncRolloutEnabled).toBe(true);
+          expect(config.filteredDustSyncIndexer).toBeUndefined();
+        }
+      });
+      it('defaults to off and cannot be enabled by a persisted override', () => {
+        const indexerAddress =
+          initialState.defaultNetworksConfig[testNetworkId].indexerAddress;
+        initialState = {
+          ...initialState,
+          userNetworksConfigOverrides: {
+            ...initialState.userNetworksConfigOverrides,
+            [testNetworkId]: {
+              isFilteredDustSyncRolloutEnabled: true,
+              filteredDustSyncIndexer: indexerAddress,
+            },
+          },
+        };
+        const config = selectors.midnightContext.selectNetworksConfig(
+          stateWithFlag(false),
+        )[testNetworkId];
+        expect(config.isFilteredDustSyncRolloutEnabled).toBe(false);
+        expect(config.filteredDustSyncIndexer).toBe(indexerAddress);
+      });
+      it('offers filtering on a user-configured endpoint without a provider allowlist', () => {
+        initialState = {
+          ...initialState,
+          userNetworksConfigOverrides: {
+            ...initialState.userNetworksConfigOverrides,
+            [testNetworkId]: { indexerAddress: 'https://different.example' },
+          },
+        };
+        const config = selectors.midnightContext.selectNetworksConfig(
+          stateWithFlag(),
+        )[testNetworkId];
+        expect(config.indexerAddress).toBe('https://different.example');
+        expect(config.isFilteredDustSyncRolloutEnabled).toBe(true);
+        expect(config.filteredDustSyncIndexer).toBeUndefined();
+      });
+      it('saves explicit consent separately from the flag, preserves it on unrelated saves, and clears it on opt-out', () => {
+        const config = initialState.defaultNetworksConfig[testNetworkId];
+        const save = (overrides: Partial<typeof config>) => {
+          initialState = reducers.midnightContext(
+            initialState,
+            actions.midnightContext.setUserNetworkConfigOverride({
+              networkId: testNetworkId,
+              config: { ...config, ...overrides },
+              featureFlagsOverrides: {},
+            }),
+          );
+        };
+        save({ filteredDustSyncIndexer: config.indexerAddress });
+        expect(
+          initialState.userNetworksConfigOverrides[testNetworkId]
+            .filteredDustSyncIndexer,
+        ).toBe(config.indexerAddress);
+        save({});
+        expect(
+          initialState.userNetworksConfigOverrides[testNetworkId]
+            .filteredDustSyncIndexer,
+        ).toBe(config.indexerAddress);
+        save({ filteredDustSyncIndexer: undefined });
+        expect(
+          initialState.userNetworksConfigOverrides[testNetworkId]
+            .filteredDustSyncIndexer,
+        ).toBeUndefined();
+      });
+    });
+
     describe('selectNetworksConfigFeatureFlagsOverrides', () => {
       it('should return empty overrides when no feature flags are loaded', () => {
         const state: WithNetworkTestState = {
@@ -1222,9 +1342,10 @@ describe('midnight slice', () => {
           selectors.midnightContext.selectCurrentNetwork(state);
 
         expect(networkId).toEqual(testNetworkId);
-        expect(config).toEqual(
-          initialState.defaultNetworksConfig[testNetworkId],
-        );
+        expect(config).toEqual({
+          ...initialState.defaultNetworksConfig[testNetworkId],
+          isFilteredDustSyncRolloutEnabled: false,
+        });
       });
 
       it('keeps the local default when the legacy remote flag is present', () => {
@@ -1255,6 +1376,7 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
+          isFilteredDustSyncRolloutEnabled: false,
         });
       });
 
@@ -1298,6 +1420,7 @@ describe('midnight slice', () => {
 
         expect(config).toEqual({
           ...initialState.defaultNetworksConfig[testNetworkId],
+          isFilteredDustSyncRolloutEnabled: false,
           proofServer: userProofServer,
         });
       });
@@ -1393,4 +1516,37 @@ describe('midnight slice', () => {
       });
     });
   });
+});
+
+describe('missing fee recovery rollout', () => {
+  it.each([
+    { supported: true, flags: [], expected: false },
+    {
+      supported: true,
+      flags: [FEATURE_FLAG_MIDNIGHT_FILTERED_DUST_SYNC],
+      expected: false,
+    },
+    {
+      supported: true,
+      flags: [FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES],
+      expected: true,
+    },
+    {
+      supported: false,
+      flags: [FEATURE_FLAG_MIDNIGHT_FETCH_MISSING_FEES],
+      expected: false,
+    },
+  ])(
+    'requires runtime support and its own flag: $supported / $flags',
+    ({ supported, flags, expected }) => {
+      expect(
+        selectors.midnightContext.selectSupportsFeeRecovery({
+          midnightFeeRecovery: { ...feeRecoveryInitialState, supported },
+          features: {
+            loaded: { modules: [], featureFlags: flags.map(key => ({ key })) },
+          },
+        }),
+      ).toBe(expected);
+    },
+  );
 });

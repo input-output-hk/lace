@@ -38,7 +38,7 @@ Module._load = function (request, parent, isMain) {
   ) {
     return {};
   }
-  // LW-15105: the canary HD package only exposes an import condition. Resolve
+  // LW-15105: the HD package only exposes an import condition. Resolve
   // the nearest installed copy so documentation does not accidentally load v1.
   // Remove this fallback when wallet-sdk-hd supports require(esm) via exports.
   if (request === '@midnightntwrk/wallet-sdk-hd') {

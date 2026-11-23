@@ -173,18 +173,16 @@ describe('useDappTxInspection', () => {
       );
     });
 
-    it('collapses own-address round-trip to a single net entry', async () => {
+    it('preserves the inspector net movement for an own address', async () => {
       setupSelectors({
         'addresses.selectActiveNetworkAccountAddresses': [
           { address: OWN_ADDR },
         ],
       });
-      // SDK tokenTransferInspector uses signed values: fromAddress entries carry
-      // negative coins (net outflow), toAddress entries carry positive coins (net inflow).
       mockCreateTxInspector.mockReturnValue(
         makeInspectorFunction(
-          new Map([[OWN_ADDR, sdkEntry(-2_000_000n)]]),
-          new Map([[OWN_ADDR, sdkEntry(1_800_000n)]]),
+          new Map([[OWN_ADDR, sdkEntry(-200_000n)]]),
+          new Map(),
         ),
       );
 
@@ -193,7 +191,6 @@ describe('useDappTxInspection', () => {
       );
       await act(async () => {});
 
-      // −2_000_000n spent + 1_800_000n change = −200_000n net (negative = outflow)
       expect(result.current.fromAddresses.get(OWN_ADDR)?.coins).toBe(-200_000n);
       expect(result.current.toAddresses.size).toBe(0);
     });

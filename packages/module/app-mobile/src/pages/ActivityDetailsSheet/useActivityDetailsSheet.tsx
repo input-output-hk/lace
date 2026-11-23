@@ -2,7 +2,7 @@ import { useConfig, useUICustomisation } from '@lace-contract/app';
 import { useTranslation } from '@lace-contract/i18n';
 import { AccountId } from '@lace-contract/wallet-repo';
 import { useTheme } from '@lace-lib/ui-toolkit';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useDispatchLaceAction, useLaceSelector } from '../../hooks';
 
@@ -39,11 +39,30 @@ export const useActivityDetailsSheet = ({
 
   const loadingText = t('v2.activity-details.sheet.loading');
 
+  const activityFromStore = useLaceSelector(
+    'activities.selectActivityById',
+    activityId,
+  );
+  const accountFilter = useMemo(
+    () => ({ accountId: AccountId(activityFromParams?.accountId ?? '') }),
+    [activityFromParams?.accountId],
+  );
+  const accountActivities = useLaceSelector(
+    'activities.selectByAccountId',
+    accountFilter,
+  );
+  // A transfer can appear in multiple accounts with the same transaction ID.
+  const activity = activityFromParams
+    ? accountActivities.find(item => item.activityId === activityId) ??
+      activityFromParams
+    : activityFromStore;
+
   const activityDetailsRaw = useLaceSelector(
     'activities.selectActivityDetails',
   );
   const activityDetails =
-    activityDetailsRaw?.activityId === activityId
+    activityDetailsRaw?.activityId === activityId &&
+    (!activity || activityDetailsRaw.accountId === activity.accountId)
       ? activityDetailsRaw
       : undefined;
 
@@ -56,12 +75,6 @@ export const useActivityDetailsSheet = ({
   const loadActivityDetails = useDispatchLaceAction(
     'activities.loadActivityDetails',
   );
-
-  const activityFromStore = useLaceSelector(
-    'activities.selectActivityById',
-    activityId,
-  );
-  const activity = activityFromStore ?? activityFromParams;
 
   const accountId = activity?.accountId ?? activityDetails?.accountId ?? '';
   const accounts = useLaceSelector('wallets.selectActiveNetworkAccounts');
@@ -87,6 +100,7 @@ export const useActivityDetailsSheet = ({
   }, [
     activity,
     activityDetails?.activityId,
+    activityDetails?.accountId,
     activityId,
     blockchainName,
     loadActivityDetails,

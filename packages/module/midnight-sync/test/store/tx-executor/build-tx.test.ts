@@ -4,7 +4,7 @@ import { TokenId } from '@lace-contract/tokens';
 import { genericErrorResults } from '@lace-contract/tx-executor';
 import { BigNumber } from '@lace-lib/util';
 import { readMidnightTransaction } from '@lace-lib/vendor/midnight-transaction-handle';
-import * as ledger from '@midnight-ntwrk/ledger-v8';
+import * as ledger from '@midnightntwrk/ledger-v8';
 import { ProtocolVersion } from '@midnightntwrk/wallet-sdk-abstractions';
 import {
   MidnightBech32m,

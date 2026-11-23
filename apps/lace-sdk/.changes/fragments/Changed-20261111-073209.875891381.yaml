@@ -1,0 +1,6 @@
+kind: Changed
+body: Fresh Midnight account recovery skips obsolete pre-v9 Dust replay when the indexer can locate the upgrade boundary. Saved history is preserved, but fresh recovery no longer recreates pre-v9 Dust-only history.
+time: 2026-11-11T07:32:09.875891381+01:00
+custom:
+  Build: canary
+  Package: sdk

@@ -1,5 +1,5 @@
 import { AccountId } from '@lace-contract/wallet-repo';
-import { verifySignature } from '@midnight-ntwrk/ledger-v8';
+import { verifySignature } from '@midnightntwrk/ledger-v8';
 import { createKeystore } from '@midnightntwrk/wallet-sdk/unshielded';
 import { secp256k1 } from '@noble/curves/secp256k1';
 import { defer, of } from 'rxjs';

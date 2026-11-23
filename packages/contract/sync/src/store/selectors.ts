@@ -10,6 +10,7 @@ import type {
   GlobalSyncStatus,
   SyncOperationFailed,
 } from '../types';
+import type { TranslationKey } from '@lace-contract/i18n';
 import type { AccountId } from '@lace-contract/wallet-repo';
 
 /**
@@ -144,9 +145,9 @@ export const selectAllFailedOperations = createSelector(
  * Only considers determinate InProgress operations. Returns undefined when there
  * are no such operations (e.g. account has only indeterminate ops, or no pending sync).
  *
- * Capped at 99 while pendingSync exists: when computeConnectedSyncRatio returns 1
- * in the "connected but empty" initial state, the stored operation progress reaches 1
- * before isStrictlyComplete is true. Capping prevents "Syncing (100%)" from appearing.
+ * Capped at 99 while pendingSync exists: numeric progress can reach 1 before
+ * completion is confirmed (for example, when indexer health is uncertain).
+ * Capping prevents "Syncing (100%)" from appearing.
  */
 export const computeAccountSyncingProgress = (
   accountStatus: AccountSyncStatus | undefined,
@@ -242,3 +243,17 @@ export const selectActiveAccountSyncProgress = createSelector(
     return Percent(Math.min(progress, 0.99));
   },
 );
+
+/** Prefer the failed operation's reason over unrelated catch-up details. */
+export const computeAccountSyncStatusDetail = (
+  accountStatus: AccountSyncStatus | undefined,
+): TranslationKey | undefined => {
+  const operations = Object.values(
+    accountStatus?.pendingSync?.operations ?? {},
+  );
+  const failed = operations.find(operation => operation.status === 'Failed');
+  if (failed) return failed.statusDetail;
+  return operations.find(
+    operation => operation.status === 'InProgress' && operation.statusDetail,
+  )?.statusDetail;
+};

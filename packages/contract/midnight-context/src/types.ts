@@ -1,4 +1,5 @@
 import type {
+  PendingDustNullifiersByAccount,
   MidnightNetworksConfig,
   PartialMidnightNetworksConfig,
   MidnightNetworkConfig,
@@ -30,7 +31,7 @@ import type {
 import type { Serializable } from '@lace-lib/util-store';
 import type { ProofCircuitProvider } from '@lace-lib/vendor/midnight-proof-servers';
 import type { ProofActivity } from '@lace-lib/vendor/wasm-proof-backend';
-import type { RawTokenType } from '@midnight-ntwrk/ledger-v8';
+import type { RawTokenType } from '@midnightntwrk/ledger-v8';
 import type {
   Signing,
   WalletEntry,
@@ -151,9 +152,29 @@ export type MidnightWalletAddress = {
 };
 
 type MidnightWalletSyncProgress = {
-  dust: Percent;
-  shielded: Percent;
-  unshielded: Percent;
+  dust: Percent | undefined;
+  shielded: Percent | undefined;
+  unshielded: Percent | undefined;
+  /** Component versions scope connection history across SDK protocol handovers. */
+  protocolVersions?: {
+    dust: bigint;
+    shielded: bigint;
+    unshielded: bigint;
+  };
+  isConnected?: {
+    dust: boolean;
+    shielded: boolean;
+    unshielded: boolean;
+  };
+  /** Absent for adapters that do not expose the SDK's indexer/node comparison. */
+  indexerLiveness?:
+    | 'Ahead'
+    | 'Behind'
+    | 'InSync'
+    | 'Skipped'
+    | 'Unavailable'
+    | 'Unknown'
+    | 'WrongNetwork';
   isStrictlyComplete: {
     dust: boolean;
     shielded: boolean;
@@ -351,6 +372,8 @@ export type AttestationProgressState = {
 };
 
 export type StartMidnightAccountWalletParams = {
+  /** Local restoration, key preparation and sibling barrier. False once ready for network startup. */
+  onPreparationStatusChange?: (isPreparing: boolean) => void;
   /** Reads the Veritee ledger indexer URL, resolved afresh for each attestation run. */
   getVeriteeLedgerIndexerUrl?: () => Promise<string>;
   config: MidnightNetworkConfig;
@@ -360,6 +383,11 @@ export type StartMidnightAccountWalletParams = {
 };
 
 export type MidnightSideEffectsDependencies = {
+  inspectDustSyncReset: (
+    networkId: MidnightSDKNetworkId,
+    accountIds: AccountId[],
+    storage: Pick<CollectionStorage<SerializedMidnightWallet>, 'getAll'>,
+  ) => Observable<PendingDustNullifiersByAccount>;
   midnightWallets$: Observable<MidnightWalletsByAccountId>;
   getMidnightWalletByAccountId: (
     accountId: AccountId,

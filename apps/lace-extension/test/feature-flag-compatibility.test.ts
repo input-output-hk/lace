@@ -22,6 +22,8 @@ import { allModules } from '../src/util/all-modules';
 
 it.each([
   'BLOCKCHAIN_MIDNIGHT_TEE_VERITEE_PROOF_SERVER',
+  'BLOCKCHAIN_MIDNIGHT_FILTERED_DUST_SYNC',
+  'BLOCKCHAIN_MIDNIGHT_FETCH_MISSING_FEES',
   'EARN_REWARDS',
   'MIGRATE_WALLET',
   'NOTIFICATION_CENTER',
@@ -41,6 +43,8 @@ const productionFeatureFlags = defaultFeatureFlags
   .filter(f => f.key !== FeatureFlagKey('TEST_API'));
 
 const experimentalFeatureFlags: FeatureFlag[] = [
+  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_FILTERED_DUST_SYNC') },
+  { key: FeatureFlagKey('BLOCKCHAIN_MIDNIGHT_FETCH_MISSING_FEES') },
   { key: FeatureFlagKey('MIGRATE_WALLET') },
   { key: FeatureFlagKey('BUY_FLOW') },
   { key: FeatureFlagKey('NOTIFICATION_CENTER') },

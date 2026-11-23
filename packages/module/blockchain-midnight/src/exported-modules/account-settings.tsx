@@ -4,6 +4,7 @@ import { createUICustomisation } from '@lace-lib/util-render';
 import React from 'react';
 
 import { PublicKeysSupplier } from '../components/AccountSettingsPublicKeysSupplier';
+import { FetchMissingFeesRow } from '../components/FetchMissingFeesRow';
 import { ResetSyncStateRow } from '../components/ResetSyncStateRow';
 
 import type { AccountSettingsUICustomisation } from '@lace-contract/account-management';
@@ -20,6 +21,12 @@ const accountSettings = () =>
         },
         {
           id: 'your-keys',
+        },
+        {
+          id: 'fetch-missing-fees',
+          component: () => (
+            <FetchMissingFeesRow accountId={AccountId(accountId)} />
+          ),
         },
         {
           id: 'reset-sync-state',

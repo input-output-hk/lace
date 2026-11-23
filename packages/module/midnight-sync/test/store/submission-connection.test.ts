@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 
 import { createProgressSubmissionService } from '@lace-lib/vendor/midnight-submission-service';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
+import { Transaction } from '@midnightntwrk/ledger-v8';
 import { PolkadotNodeClient } from '@midnightntwrk/wallet-sdk/node-client/effect';
 import {
   WalletTransaction,

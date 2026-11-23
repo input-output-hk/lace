@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { derivePendingActivityFromMidnightTx } from '../../../src/store/helpers/derive-pending-activity-from-midnight-tx';
 
-import type * as ledger from '@midnight-ntwrk/ledger-v8';
+import type * as ledger from '@midnightntwrk/ledger-v8';
 import type { UtxoWithMeta } from '@midnightntwrk/wallet-sdk/facade';
 
 const NETWORK_ID = NetworkId.NetworkId.Preview;

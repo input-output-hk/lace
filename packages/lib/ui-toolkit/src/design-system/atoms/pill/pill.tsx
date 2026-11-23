@@ -26,6 +26,7 @@ interface PillProps {
 interface SyncStatusProps {
   status: SyncStatus;
   syncingProgress?: number;
+  detail?: string;
   showBeacon?: boolean;
   showLabel?: boolean;
   onPress?: () => void;
@@ -72,6 +73,7 @@ const SyncStatusVariant: React.FC<SyncStatusProps> = ({
   status,
   onPress,
   syncingProgress,
+  detail,
   showBeacon = true,
   showLabel = true,
 }) => {
@@ -115,18 +117,6 @@ const SyncStatusVariant: React.FC<SyncStatusProps> = ({
     );
   }, [syncingProgress, theme, status]);
 
-  const errorLabel = useMemo(() => {
-    if (status !== 'error') return null;
-    return (
-      <Text.XS
-        variant="secondary"
-        style={styles.errorText}
-        testID="sync-status-error">
-        {t('v2.sync-status.error.subtitle')}
-      </Text.XS>
-    );
-  }, [status, t, styles.errorText]);
-
   const label = useMemo(() => {
     if (!showLabel) return null;
     switch (status) {
@@ -148,7 +138,18 @@ const SyncStatusVariant: React.FC<SyncStatusProps> = ({
       onPress={onPress}
       label={label}
       leftNode={beacon}
-      centerNode={!showLabel ? null : progressBar || errorLabel}
+      centerNode={
+        !showLabel ? null : (
+          <>
+            {progressBar}
+            {detail && status !== 'synced' && (
+              <Text.XS variant="secondary" testID="sync-status-detail">
+                {detail}
+              </Text.XS>
+            )}
+          </>
+        )
+      }
       testID="sync-status-pill"
     />
   );
@@ -219,9 +220,6 @@ const getStyles = ({ theme }: { theme: Theme }) =>
       backgroundColor: theme.background.secondary,
       borderRadius: radius.rounded,
       padding: spacing.XS,
-    },
-    errorText: {
-      top: -4,
     },
   });
 

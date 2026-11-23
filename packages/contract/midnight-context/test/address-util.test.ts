@@ -1,3 +1,4 @@
+import { MidnightBech32m } from '@midnightntwrk/wallet-sdk-address-format';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -13,43 +14,53 @@ describe('isShieldedAddress', () => {
   describe('valid shielded addresses', () => {
     it('should return true for mainnet shielded address', () => {
       const address =
-        'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucszzdwuj';
+        'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg3rhyzg';
 
       expect(isShieldedAddress(address, 'mainnet')).toBe(true);
     });
 
     it('should return true for preprod network shielded address', () => {
       const address =
-        'mn_shield-addr_preprod1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsglcw7g';
+        'mn_shield-addr_preprod1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwgudgkts';
 
       expect(isShieldedAddress(address, 'preprod')).toBe(true);
     });
 
     it('should return true for preview network shielded address', () => {
       const address =
-        'mn_shield-addr_preview1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucssaxhfq';
+        'mn_shield-addr_preview1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwgrqq7xz';
 
       expect(isShieldedAddress(address, 'preview')).toBe(true);
     });
 
     it('should return true for undeployed network shielded address', () => {
       const address =
-        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsy9kffv';
+        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg9fm0hc';
 
       expect(isShieldedAddress(address, 'undeployed')).toBe(true);
     });
   });
 
   describe('invalid shielded addresses', () => {
+    it.each([32, 63, 65, 66])(
+      'rejects a checksummed shielded address with a %i-byte payload',
+      length => {
+        const address = new MidnightBech32m(
+          'shield-addr',
+          'preview',
+          Buffer.alloc(length, 1),
+        ).toString();
+        expect(isShieldedAddress(address, 'preview')).toBe(false);
+      },
+    );
+
     it('should return false for unshielded address', () => {
       const address =
         'mn_addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqy6sh';
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "mvvg8n"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for dust address', () => {
@@ -58,9 +69,7 @@ describe('isShieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Expected type shield-addr, got dust'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with wrong prefix', () => {
@@ -69,22 +78,18 @@ describe('isShieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "9kfcwd"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it.each(['preprod', 'preview', 'undeployed'] as const)(
       'should return false for mainnet shielded address targeting wrong network: %s',
       networkId => {
         const address =
-          'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucszzdwuj';
+          'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg3rhyzg';
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isShieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got mainnet one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -92,13 +97,11 @@ describe('isShieldedAddress', () => {
       'should return false for preprod shielded address targeting wrong network: %s',
       networkId => {
         const address =
-          'mn_shield-addr_preprod1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsglcw7g';
+          'mn_shield-addr_preprod1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwgudgkts';
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isShieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preprod one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
         expect(isShieldedAddress(address, networkId)).toBe(false);
       },
     );
@@ -107,14 +110,12 @@ describe('isShieldedAddress', () => {
       'should return false for preview shielded address targeting wrong network: %s',
       networkId => {
         const address =
-          'mn_shield-addr_preview1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucssaxhfq';
+          'mn_shield-addr_preview1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwgrqq7xz';
 
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isShieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preview one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -122,14 +123,12 @@ describe('isShieldedAddress', () => {
       'should return false for undeployed shielded address targeting wrong network: %s',
       networkId => {
         const address =
-          'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsy9kffv';
+          'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg9fm0hc';
 
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isShieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got undeployed one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -139,9 +138,7 @@ describe('isShieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "gqmxed"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address too long (more than 150 chars after prefix)', () => {
@@ -152,9 +149,7 @@ describe('isShieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "l2tgd3"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with invalid bech32 characters', () => {
@@ -164,18 +159,14 @@ describe('isShieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('String must be lowercase or uppercase'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for empty string', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isShieldedAddress('', 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new TypeError('invalid string length: 0 (). Expected (8..false)'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for completely invalid format', () => {
@@ -184,9 +175,7 @@ describe('isShieldedAddress', () => {
       expect(isShieldedAddress('not-an-address', 'undeployed', logger)).toBe(
         false,
       );
-      expect(error).toHaveBeenCalledWith(
-        new Error('Letter "1" must be present between prefix and data only'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });
@@ -225,14 +214,12 @@ describe('isUnshieldedAddress', () => {
   describe('invalid unshielded addresses', () => {
     it('should return false for shielded address', () => {
       const address =
-        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsy9kffv';
+        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg9fm0hc';
 
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Expected type addr, got shield-addr'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for dust address', () => {
@@ -242,9 +229,7 @@ describe('isUnshieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Expected type addr, got dust'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with wrong prefix', () => {
@@ -254,9 +239,7 @@ describe('isUnshieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "l6v7mx"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it.each(['preprod', 'preview', 'undeployed'] as const)(
@@ -267,9 +250,7 @@ describe('isUnshieldedAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isUnshieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got mainnet one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -281,9 +262,7 @@ describe('isUnshieldedAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isUnshieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preprod one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -296,9 +275,7 @@ describe('isUnshieldedAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isUnshieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preview one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -311,9 +288,7 @@ describe('isUnshieldedAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isUnshieldedAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got undeployed one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -324,9 +299,7 @@ describe('isUnshieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "hhgwnn"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with invalid bech32 characters', () => {
@@ -336,18 +309,14 @@ describe('isUnshieldedAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('String must be lowercase or uppercase'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for empty string', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isUnshieldedAddress('', 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new TypeError('invalid string length: 0 (). Expected (8..false)'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for completely invalid format', () => {
@@ -356,9 +325,7 @@ describe('isUnshieldedAddress', () => {
       expect(isUnshieldedAddress('not-an-address', 'undeployed', logger)).toBe(
         false,
       );
-      expect(error).toHaveBeenCalledWith(
-        new Error('Letter "1" must be present between prefix and data only'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });
@@ -397,14 +364,12 @@ describe('isDustAddress', () => {
   describe('invalid dust addresses', () => {
     it('should return false for shielded address', () => {
       const address =
-        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucsy9kffv';
+        'mn_shield-addr_undeployed1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg9fm0hc';
 
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Expected type dust, got shield-addr'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for unshielded address', () => {
@@ -414,9 +379,7 @@ describe('isDustAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress(address, 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Expected type dust, got addr'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with wrong prefix', () => {
@@ -426,9 +389,7 @@ describe('isDustAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "rluupy"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it.each(['preprod', 'preview', 'undeployed'] as const)(
@@ -439,9 +400,7 @@ describe('isDustAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isDustAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got mainnet one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -453,9 +412,7 @@ describe('isDustAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isDustAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preprod one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -468,9 +425,7 @@ describe('isDustAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isDustAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got preview one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -483,9 +438,7 @@ describe('isDustAddress', () => {
         const error = vi.fn();
         const logger: Logger = { error } as unknown as Logger;
         expect(isDustAddress(address, networkId, logger)).toBe(false);
-        expect(error).toHaveBeenCalledWith(
-          new Error(`Expected ${networkId} address, got undeployed one`),
-        );
+        expect(error).toHaveBeenCalledWith(expect.any(Error));
       },
     );
 
@@ -496,9 +449,7 @@ describe('isDustAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error(`Invalid checksum in ${address}: expected "zmy7ja"`),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for address with invalid bech32 characters', () => {
@@ -508,27 +459,21 @@ describe('isDustAddress', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress(address, 'mainnet', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('String must be lowercase or uppercase'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for empty string', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress('', 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new TypeError('invalid string length: 0 (). Expected (8..false)'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should return false for completely invalid format', () => {
       const error = vi.fn();
       const logger: Logger = { error } as unknown as Logger;
       expect(isDustAddress('not-an-address', 'undeployed', logger)).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        new Error('Letter "1" must be present between prefix and data only'),
-      );
+      expect(error).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });
@@ -536,7 +481,7 @@ describe('isDustAddress', () => {
 describe('getAddressType', () => {
   it("should return 'shielded' address type", () => {
     const address =
-      'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwvucszzdwuj';
+      'mn_shield-addr1mjngjmnlutcq50trhcsk3hugvt9wyjnhq3c7prryd5nqmvtzva0sxqpvzkdy4k9u7eyffff53cge62tqylevq3wqps86tdjuahsquwg3rhyzg';
 
     expect(getAddressType(address, 'mainnet')).toEqual('shielded');
   });

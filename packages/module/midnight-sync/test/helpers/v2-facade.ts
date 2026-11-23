@@ -1,4 +1,4 @@
-import * as v8 from '@midnight-ntwrk/ledger-v8';
+import * as v8 from '@midnightntwrk/ledger-v8';
 import * as v9 from '@midnightntwrk/ledger-v9';
 import { WalletFacade } from '@midnightntwrk/wallet-sdk/facade';
 import {

@@ -604,9 +604,10 @@ export const useTokenDetail = ({
       }
       NavigationControls.navigate(SheetRoutes.ActivityDetail, {
         activityId: id,
+        activity: activities.find(activity => activity.activityId === id),
       });
     },
-    [activitiesItemUICustomisation, address, appConfig],
+    [activitiesItemUICustomisation, address, appConfig, activities],
   );
 
   const activityListSections = useMemo(

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Midnight swap test</title>
+    <style>
+      body {
+        font: 16px/1.5 Barlow, system-ui, sans-serif;
+        max-width: 1100px;
+        margin: 30px auto;
+        padding: 0 20px;
+        color: #17222d;
+        background: #ffffff;
+      }
+      section {
+        background: white;
+        border: 1px solid #ccd5dd;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 18px 0;
+      }
+      h1,
+      h2 {
+        line-height: 1.2;
+      }
+      h1 {
+        border-bottom: 3px solid #e52321;
+        padding-bottom: 12px;
+      }
+      label {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: 6px;
+      }
+      input,
+      select,
+      textarea,
+      button {
+        font: inherit;
+        padding: 8px;
+        border: 1px solid #aab8c5;
+        border-radius: 4px;
+      }
+      button {
+        background: #fff1e9;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+      textarea,
+      pre {
+        box-sizing: border-box;
+        width: 100%;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        background: #f1f4f7;
+        padding: 12px;
+        font-size: 13px;
+      }
+      textarea {
+        min-height: 120px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      td {
+        padding: 4px;
+      }
+      td input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+      th {
+        text-align: left;
+      }
+      #status {
+        position: sticky;
+        top: 0;
+        padding: 12px;
+        background: #fff1e9;
+        border: 1px solid #aab8c5;
+        z-index: 1;
+      }
+      small {
+        display: block;
+      }
+      a {
+        color: #184d8a;
+      }
+      .note {
+        border-left: 4px solid #ec641d;
+        padding-left: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Midnight swap test</h1>
+    <p>
+      Create an offer as maker, move it to the taker's browser profile, balance
+      it, then submit separately.
+    </p>
+    <p class="note">
+      Test networks only. Current Lace ignores explicit/random intent IDs. This
+      page records that behavior. Clearing this page does not revoke offers or
+      release booked coins.
+    </p>
+    <div id="status" role="status" aria-live="polite">
+      Discover a wallet to begin.
+    </div>
+    <section>
+      <h2>1. Connect and capture balances</h2>
+      <label>Wallet<select id="provider"></select></label
+      ><button id="discover">Refresh wallets</button>
+      <label
+        >Network<select id="network">
+          <option>undeployed</option>
+          <option>preview</option>
+          <option>preprod</option>
+          <option>qanet</option>
+        </select></label
+      >
+      <label
+        >Ledger epoch<select id="epoch">
+          <option>v9</option>
+          <option>v8</option>
+        </select></label
+      >
+      <label>Case ID<input id="case" value="MM-01" /></label
+      ><label
+        >Extension build / commit<input
+          id="build"
+          placeholder="Record the build under test"
+      /></label>
+      <button id="connect">Connect</button
+      ><button id="snapshot">Capture addresses and balances</button>
+      <small
+        >Epoch is selected manually and checked by transaction decoding. Balance
+        snapshots are available balances, not proof of settlement.</small
+      >
+      <pre id="account">Not connected.</pre>
+    </section>
+    <section>
+      <h2>2. Create a maker offer</h2>
+      <p>
+        Amounts are positive integer base units. Receive rows describe what the
+        maker wants back.
+      </p>
+      <h3>Give</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Kind</th>
+            <th>Token identifier (hex)</th>
+            <th>Base units</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="inputs"></tbody>
+      </table>
+      <button id="add-input">Add give row</button>
+      <h3>Receive</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Kind</th>
+            <th>Token identifier (hex)</th>
+            <th>Base units</th>
+            <th>Recipient (Bech32m)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="outputs"></tbody>
+      </table>
+      <button id="add-output">Add receive row</button>
+      <label>Intent ID<input id="intent" value="random" /></label
+      ><label
+        >Maker pays fees<select id="fees">
+          <option value="false">No, taker pays</option>
+          <option value="true">Yes</option>
+        </select></label
+      >
+      <button id="create">Create offer</button>
+    </section>
+    <section>
+      <h2>3. Move and inspect the offer</h2>
+      <p>
+        Copy the complete offer JSON between profiles, or save it as a file.
+        Imported metadata is untrusted. Compare the decoded contents below with
+        the agreed exchange.
+      </p>
+      <textarea
+        id="offer"
+        aria-label="Offer JSON"
+        spellcheck="false"
+        placeholder="Create an offer or paste the exported JSON here"></textarea>
+      <button id="load">Load and inspect offer</button
+      ><button id="export-offer">Save offer file</button
+      ><label
+        >Open offer file<input
+          id="file"
+          type="file"
+          accept=".json,application/json"
+      /></label>
+      <pre id="inspection">No transaction decoded.</pre>
+    </section>
+    <section>
+      <h2>4. Complete as taker</h2>
+      <label
+        >Taker pays fees<select id="taker-fees">
+          <option value="true">Yes</option>
+          <option value="false">No, maker already paid</option>
+        </select></label
+      >
+      <button id="balance">Balance loaded offer</button
+      ><button id="submit">Submit balanced transaction</button>
+      <p>
+        Submission does not establish confirmation. Wait for both wallets to
+        sync, verify all token deltas and check Activity. Capture balances again
+        after settlement.
+      </p>
+      <pre id="balanced">No balanced transaction.</pre>
+    </section>
+    <section>
+      <h2>Run record</h2>
+      <button id="export-report">Save report</button>
+      <pre id="report">No actions yet.</pre>
+    </section>
+    <script src="app.js"></script>
+  </body>
+</html>

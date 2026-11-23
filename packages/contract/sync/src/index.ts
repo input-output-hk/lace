@@ -8,6 +8,7 @@ export {
   selectAllFailedOperations,
   selectHasEverSynced,
   computeAccountSyncingProgress,
+  computeAccountSyncStatusDetail,
 } from './store';
 export * from './contract';
 export type * from './store';

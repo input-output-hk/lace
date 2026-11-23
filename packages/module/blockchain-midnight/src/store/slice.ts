@@ -4,20 +4,36 @@ import {
 } from '@lace-lib/util-store';
 
 import type {
+  PendingDustNullifiersByAccount,
   MidnightNetworkConfig,
   MidnightSDKNetworkId,
 } from '@lace-contract/midnight-context';
+import type { AccountId } from '@lace-contract/wallet-repo';
 import type { StateObject } from '@lace-lib/util-store';
+
+type SettingsChange = {
+  config: MidnightNetworkConfig;
+  networkId: MidnightSDKNetworkId;
+};
 
 export type MidnightSettingsDrawerState =
   | StateObject<
-      'Saving',
-      {
-        config: MidnightNetworkConfig;
-        networkId: MidnightSDKNetworkId;
+      'ConfirmDustReset',
+      SettingsChange & {
+        pendingDust: PendingDustNullifiersByAccount;
       }
     >
-  | StateObject<'Closed' | 'Open'>;
+  | StateObject<
+      'Open',
+      { hasSaveFailed?: boolean; unreadableSnapshotAccountId?: AccountId }
+    >
+  | StateObject<
+      'Saving',
+      SettingsChange & {
+        authorizedPendingDustNullifiers?: PendingDustNullifiersByAccount;
+      }
+    >
+  | StateObject<'Closed'>;
 
 export type MidnightSettingsDrawerStatus =
   MidnightSettingsDrawerState['status'];
@@ -32,6 +48,7 @@ const slice = createStateMachineSlice(
     midnightSettingsDrawerStateInitialState,
     {
       Closed: {
+        closeSettings: state => state,
         openSettings: () => ({
           status: 'Open',
         }),
@@ -52,7 +69,33 @@ const slice = createStateMachineSlice(
           status: 'Saving',
         }),
       },
+      ConfirmDustReset: {
+        cancelDustReset: () => ({ status: 'Open' }),
+        closeSettings: () => ({ status: 'Closed' }),
+        confirmDustReset: ({ config, networkId, pendingDust }) => ({
+          status: 'Saving',
+          config,
+          networkId,
+          authorizedPendingDustNullifiers: pendingDust,
+        }),
+      },
       Saving: {
+        closeSettings: () => ({ status: 'Closed' }),
+        dustResetConfirmationRequired: (
+          { config, networkId },
+          pendingDust: PendingDustNullifiersByAccount,
+        ) => ({
+          status: 'ConfirmDustReset',
+          config,
+          networkId,
+          pendingDust,
+        }),
+        snapshotUnreadable: (_, accountId: AccountId) => ({
+          status: 'Open',
+          hasSaveFailed: true,
+          unreadableSnapshotAccountId: accountId,
+        }),
+        savingFailed: () => ({ status: 'Open', hasSaveFailed: true }),
         savingCompleted: () => ({
           status: 'Closed',
         }),

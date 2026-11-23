@@ -3,8 +3,12 @@ import {
   createProgressSubmissionService,
   observeSubmission,
 } from '@lace-lib/vendor/midnight-submission-service';
-import { Transaction } from '@midnight-ntwrk/ledger-v8';
-import { PolkadotNodeClient } from '@midnightntwrk/wallet-sdk/node-client/effect';
+import { Transaction } from '@midnightntwrk/ledger-v8';
+import { classifySubmissionFailure } from '@midnightntwrk/wallet-sdk/capabilities/submission';
+import {
+  NodeClientError,
+  PolkadotNodeClient,
+} from '@midnightntwrk/wallet-sdk/node-client/effect';
 import {
   WalletTransaction,
   ProtocolVersion,
@@ -102,6 +106,54 @@ describe('observed submission', () => {
     ).rejects.toThrow();
     expect(send).toHaveBeenCalledTimes(1);
     await service.close();
+  });
+  it.each([
+    [
+      'invalid transaction',
+      new NodeClientError.TransactionInvalidError({
+        message: 'invalid',
+        txData: new Uint8Array(),
+      }),
+      'NotIncluded',
+    ],
+    [
+      'dropped transaction',
+      new NodeClientError.TransactionDroppedError({
+        message: 'dropped',
+        txData: new Uint8Array(),
+      }),
+      'Undetermined',
+    ],
+    ['network failure', new Error('node disconnected'), 'Undetermined'],
+  ] as const)(
+    'preserves the SDK reservation classification for a %s',
+    async (_description, failure, expected) => {
+      const { service, send } = setup(Stream.fail(failure));
+      try {
+        const outcome = await service.submitTransaction(tx(), 'Finalized').then(
+          () => undefined,
+          (error: unknown) => classifySubmissionFailure(error),
+        );
+        expect(outcome?._tag).toBe(expected);
+        expect(send).toHaveBeenCalledTimes(1);
+      } finally {
+        await service.close();
+      }
+    },
+  );
+  it('keeps an uncertain outcome when the stream ends after inclusion', async () => {
+    const { service } = setup(
+      Stream.make(event('Submitted'), event('InBlock')),
+    );
+    try {
+      const outcome = await service.submitTransaction(tx(), 'Finalized').then(
+        () => undefined,
+        (error: unknown) => classifySubmissionFailure(error),
+      );
+      expect(outcome?._tag).toBe('Undetermined');
+    } finally {
+      await service.close();
+    }
   });
   it('detaches observers and respects the requested target stage', async () => {
     const { service } = setup(

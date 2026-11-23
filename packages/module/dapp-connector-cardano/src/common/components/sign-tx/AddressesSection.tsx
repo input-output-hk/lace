@@ -1,5 +1,11 @@
 import { useTranslation } from '@lace-contract/i18n';
-import { Column, CustomTag, Divider, spacing } from '@lace-lib/ui-toolkit';
+import {
+  Column,
+  CustomTag,
+  Divider,
+  spacing,
+  Text,
+} from '@lace-lib/ui-toolkit';
 import React, { useMemo } from 'react';
 
 import {
@@ -93,16 +99,23 @@ const AddressContent = ({
     <>
       <InfoRow
         label={t('dapp-connector.cardano.sign-tx.address-label')}
-        value={contactName ?? truncatedAddress}
+        value={contactName || truncatedAddress}
         secondaryValue={
-          isOwn ? (
-            <CustomTag
-              size="S"
-              color="primary"
-              backgroundType="semiTransparent"
-              label={t('dapp-connector.cardano.sign-tx.address.own')}
-              testID={testID ? `${testID}-address-own-tag` : undefined}
-            />
+          contactName || isOwn ? (
+            <Column gap={spacing.XS} alignItems="flex-end">
+              {contactName && (
+                <Text.XS variant="secondary">{truncatedAddress}</Text.XS>
+              )}
+              {isOwn && (
+                <CustomTag
+                  size="S"
+                  color="primary"
+                  backgroundType="semiTransparent"
+                  label={t('dapp-connector.cardano.sign-tx.address.own')}
+                  testID={testID ? `${testID}-address-own-tag` : undefined}
+                />
+              )}
+            </Column>
           ) : undefined
         }
         testID={testID ? `${testID}-address-value` : undefined}

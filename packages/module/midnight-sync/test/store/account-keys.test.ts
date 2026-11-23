@@ -2,7 +2,7 @@ import { ByteArray } from '@lace-lib/util';
 import {
   verifySignature,
   signatureVerifyingKey,
-} from '@midnight-ntwrk/ledger-v8';
+} from '@midnightntwrk/ledger-v8';
 import { HDWallet, Roles } from '@midnightntwrk/wallet-sdk/hd';
 import { secp256k1 } from '@noble/curves/secp256k1';
 import { describe, expect, it } from 'vitest';

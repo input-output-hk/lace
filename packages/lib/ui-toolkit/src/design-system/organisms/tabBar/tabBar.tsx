@@ -102,12 +102,15 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
 
     const overallSyncingProgress = useMemo(() => {
       const syncingAccounts = accountData.filter(
-        account =>
-          account.status === 'syncing' && account.syncingProgress !== undefined,
+        account => account.status === 'syncing',
       );
       // undefined = progress cannot be calculated yet; the pill then renders
       // "Syncing" without a percentage or progress bar.
-      if (syncingAccounts.length === 0) return undefined;
+      if (
+        syncingAccounts.length === 0 ||
+        syncingAccounts.some(account => account.syncingProgress === undefined)
+      )
+        return undefined;
       const total = syncingAccounts.reduce(
         (sum, account) => sum + (account.syncingProgress ?? 0),
         0,
@@ -266,9 +269,9 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
 
     const renderAccountRow: ListRenderItem<AccountRowProps> = useCallback(
       ({ item }) => {
-        return <AccountRow {...item} />;
+        return <AccountRow {...item} isOffline={isOffline} />;
       },
-      [],
+      [isOffline],
     );
 
     const mainViewHeight = useMemo(
@@ -400,7 +403,14 @@ export const TabBar: React.FC<TabBarProps> = React.memo(
                       preIconName="CaretLeft"
                       onPress={closeAccountsStatus}
                     />
-                    <OfflineIndicator visible={isOffline} />
+                    {isOffline ? (
+                      <OfflineIndicator visible />
+                    ) : (
+                      <Pill.SyncStatus
+                        status={accountsStatus}
+                        syncingProgress={overallSyncingProgress}
+                      />
+                    )}
                   </View>
                   <FlatList
                     key={'accountDataList'}
